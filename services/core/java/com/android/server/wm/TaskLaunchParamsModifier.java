@@ -118,12 +118,14 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             root = activity;
         }
 
-        if (root == null) {
+        if (root == null && phase != PHASE_DISPLAY) {
             // There is a case that can lead us here. The caller is moving the top activity that is
             // in a task that has multiple activities to PIP mode. For that the caller is creating a
             // new task to host the activity so that we only move the top activity to PIP mode and
             // keep other activities in the previous task. There is no point to apply the launch
             // logic in this case.
+            // However, for PHASE_DISPLAY the root may be null, but we still want to get a hint of
+            // what the suggested launch display area would be.
             return RESULT_SKIP;
         }
 
@@ -303,6 +305,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
         // If launch mode matches display windowing mode, let it inherit from display.
         outParams.mWindowingMode = launchMode == suggestedDisplayArea.getWindowingMode()
+                && !shouldUpdateExistingTaskWindowingMode(task, launchMode)
                 ? WINDOWING_MODE_UNDEFINED : launchMode;
 
         if (phase == PHASE_WINDOWING_MODE) {
@@ -394,9 +397,17 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return RESULT_CONTINUE;
     }
 
+    private boolean shouldUpdateExistingTaskWindowingMode(Task task, int launchMode) {
+        return task != null
+                && task.getRequestedOverrideWindowingMode() != WINDOWING_MODE_UNDEFINED
+                && task.getRequestedOverrideWindowingMode() != WINDOWING_MODE_PINNED
+                && launchMode != task.getRequestedOverrideWindowingMode();
+    }
+
     private TaskDisplayArea getPreferredLaunchTaskDisplayArea(@Nullable Task task,
-            @Nullable ActivityOptions options, ActivityRecord source, LaunchParams currentParams,
-            @NonNull ActivityRecord activityRecord, @Nullable Request request) {
+            @Nullable ActivityOptions options, @Nullable ActivityRecord source,
+            @Nullable LaunchParams currentParams, @Nullable ActivityRecord activityRecord,
+            @Nullable Request request) {
         TaskDisplayArea taskDisplayArea = null;
 
         final WindowContainerToken optionLaunchTaskDisplayAreaToken = options != null
@@ -438,8 +449,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
         // If the source activity is a no-display activity, pass on the launch display area token
         // from source activity as currently preferred.
-        if (taskDisplayArea == null && source != null
-                && source.noDisplay) {
+        if (taskDisplayArea == null && source != null && source.noDisplay) {
             taskDisplayArea = source.mHandoverTaskDisplayArea;
             if (taskDisplayArea != null) {
                 if (DEBUG) appendLog("display-area-from-no-display-source=" + taskDisplayArea);
@@ -478,21 +488,24 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             }
         }
 
-        if (taskDisplayArea == null) {
+        if (taskDisplayArea == null && currentParams != null) {
             taskDisplayArea = currentParams.mPreferredTaskDisplayArea;
+            if (DEBUG) appendLog("display-area-from-current-params=" + taskDisplayArea);
         }
 
         // Re-route to default display if the device didn't declare support for multi-display
         if (taskDisplayArea != null && !mSupervisor.mService.mSupportsMultiDisplay
                 && taskDisplayArea.getDisplayId() != DEFAULT_DISPLAY) {
             taskDisplayArea = mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea();
+            if (DEBUG) appendLog("display-area-from-no-multidisplay=" + taskDisplayArea);
         }
 
         // Re-route to default display if the home activity doesn't support multi-display
-        if (taskDisplayArea != null && activityRecord.isActivityTypeHome()
+        if (taskDisplayArea != null && activityRecord != null && activityRecord.isActivityTypeHome()
                 && !mSupervisor.mRootWindowContainer.canStartHomeOnDisplayArea(activityRecord.info,
                         taskDisplayArea, false /* allowInstrumenting */)) {
             taskDisplayArea = mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea();
+            if (DEBUG) appendLog("display-area-from-home=" + taskDisplayArea);
         }
 
         return (taskDisplayArea != null)
@@ -516,34 +529,56 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
      * @return {@link TaskDisplayArea} to house the task
      */
     private TaskDisplayArea getFallbackDisplayAreaForActivity(
-            @NonNull ActivityRecord activityRecord, @Nullable Request request) {
+            @Nullable ActivityRecord activityRecord, @Nullable Request request) {
+        if (activityRecord != null) {
+            WindowProcessController controllerFromLaunchingRecord =
+                    mSupervisor.mService.getProcessController(
+                            activityRecord.launchedFromPid, activityRecord.launchedFromUid);
+            if (controllerFromLaunchingRecord != null) {
+                final TaskDisplayArea taskDisplayAreaForLaunchingRecord =
+                        controllerFromLaunchingRecord.getTopActivityDisplayArea();
+                if (taskDisplayAreaForLaunchingRecord != null) {
+                    if (DEBUG) {
+                        appendLog("display-area-for-launching-record="
+                                + taskDisplayAreaForLaunchingRecord);
+                    }
+                    return taskDisplayAreaForLaunchingRecord;
+                }
+            }
 
-        WindowProcessController controllerFromLaunchingRecord = mSupervisor.mService
-                .getProcessController(activityRecord.launchedFromPid,
-                        activityRecord.launchedFromUid);
-        final TaskDisplayArea displayAreaForLaunchingRecord = controllerFromLaunchingRecord == null
-                ? null : controllerFromLaunchingRecord.getTopActivityDisplayArea();
-        if (displayAreaForLaunchingRecord != null) {
-            return displayAreaForLaunchingRecord;
+            WindowProcessController controllerFromProcess =
+                    mSupervisor.mService.getProcessController(
+                            activityRecord.getProcessName(), activityRecord.getUid());
+            if (controllerFromProcess != null) {
+                final TaskDisplayArea displayAreaForRecord =
+                        controllerFromProcess.getTopActivityDisplayArea();
+                if (displayAreaForRecord != null) {
+                    if (DEBUG) appendLog("display-area-for-record=" + displayAreaForRecord);
+                    return displayAreaForRecord;
+                }
+            }
         }
 
-        WindowProcessController controllerFromProcess = mSupervisor.mService.getProcessController(
-                activityRecord.getProcessName(), activityRecord.getUid());
-        final TaskDisplayArea displayAreaForRecord = controllerFromProcess == null ? null
-                : controllerFromProcess.getTopActivityDisplayArea();
-        if (displayAreaForRecord != null) {
-            return displayAreaForRecord;
+        if (request != null) {
+            WindowProcessController controllerFromRequest =
+                    mSupervisor.mService.getProcessController(
+                            request.realCallingPid, request.realCallingUid);
+            if (controllerFromRequest != null) {
+                final TaskDisplayArea displayAreaFromSourceProcess =
+                            controllerFromRequest.getTopActivityDisplayArea();
+                if (displayAreaFromSourceProcess != null) {
+                    if (DEBUG) {
+                        appendLog("display-area-source-process=" + displayAreaFromSourceProcess);
+                    }
+                    return displayAreaFromSourceProcess;
+                }
+            }
         }
 
-        WindowProcessController controllerFromRequest = request == null ? null : mSupervisor
-                .mService.getProcessController(request.realCallingPid, request.realCallingUid);
-        final TaskDisplayArea displayAreaFromSourceProcess = controllerFromRequest == null ? null
-                : controllerFromRequest.getTopActivityDisplayArea();
-        if (displayAreaFromSourceProcess != null) {
-            return displayAreaFromSourceProcess;
-        }
-
-        return mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea();
+        final TaskDisplayArea defaultTaskDisplayArea =
+                mSupervisor.mRootWindowContainer.getDefaultTaskDisplayArea();
+        if (DEBUG) appendLog("display-area-from-default-fallback=" + defaultTaskDisplayArea);
+        return defaultTaskDisplayArea;
     }
 
     private boolean canInheritWindowingModeFromSource(@NonNull DisplayContent display,
@@ -559,7 +594,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             return false;
         }
 
-        final int sourceWindowingMode = source.getWindowingMode();
+        final int sourceWindowingMode = source.getTask().getWindowingMode();
         if (sourceWindowingMode != WINDOWING_MODE_FULLSCREEN
                 && sourceWindowingMode != WINDOWING_MODE_FREEFORM) {
             return false;
@@ -605,68 +640,16 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // stable insets, which usually are system widgets such as sysbar & navbar.
         final Rect stableBounds = mTmpStableBounds;
         displayArea.getStableRect(stableBounds);
-        final int defaultWidth = stableBounds.width();
-        final int defaultHeight = stableBounds.height();
 
-        int width;
-        int height;
-        if (!windowLayout.hasSpecifiedSize()) {
-            if (!inOutBounds.isEmpty()) {
-                // If the bounds is resolved already and WindowLayout doesn't have any opinion on
-                // its size, use the already resolved size and apply the gravity to it.
-                width = inOutBounds.width();
-                height = inOutBounds.height();
-            } else {
-                getTaskBounds(root, displayArea, windowLayout, WINDOWING_MODE_FREEFORM,
-                        /* hasInitialBounds */ false, inOutBounds);
-                width = inOutBounds.width();
-                height = inOutBounds.height();
-            }
-        } else {
-            width = defaultWidth;
-            if (windowLayout.width > 0 && windowLayout.width < defaultWidth) {
-                width = windowLayout.width;
-            } else if (windowLayout.widthFraction > 0 && windowLayout.widthFraction < 1.0f) {
-                width = (int) (width * windowLayout.widthFraction);
-            }
-
-            height = defaultHeight;
-            if (windowLayout.height > 0 && windowLayout.height < defaultHeight) {
-                height = windowLayout.height;
-            } else if (windowLayout.heightFraction > 0 && windowLayout.heightFraction < 1.0f) {
-                height = (int) (height * windowLayout.heightFraction);
-            }
+        if (windowLayout.hasSpecifiedSize()) {
+            LaunchParamsUtil.calculateLayoutBounds(stableBounds, windowLayout, inOutBounds,
+                    /* desiredBounds */ null);
+        } else if (inOutBounds.isEmpty()) {
+            getTaskBounds(root, displayArea, windowLayout, WINDOWING_MODE_FREEFORM,
+                    /* hasInitialBounds */ false, inOutBounds);
         }
-
-        final float fractionOfHorizontalOffset;
-        switch (horizontalGravity) {
-            case Gravity.LEFT:
-                fractionOfHorizontalOffset = 0f;
-                break;
-            case Gravity.RIGHT:
-                fractionOfHorizontalOffset = 1f;
-                break;
-            default:
-                fractionOfHorizontalOffset = 0.5f;
-        }
-
-        final float fractionOfVerticalOffset;
-        switch (verticalGravity) {
-            case Gravity.TOP:
-                fractionOfVerticalOffset = 0f;
-                break;
-            case Gravity.BOTTOM:
-                fractionOfVerticalOffset = 1f;
-                break;
-            default:
-                fractionOfVerticalOffset = 0.5f;
-        }
-
-        inOutBounds.set(0, 0, width, height);
-        inOutBounds.offset(stableBounds.left, stableBounds.top);
-        final int xOffset = (int) (fractionOfHorizontalOffset * (defaultWidth - width));
-        final int yOffset = (int) (fractionOfVerticalOffset * (defaultHeight - height));
-        inOutBounds.offset(xOffset, yOffset);
+        LaunchParamsUtil.applyLayoutGravity(verticalGravity, horizontalGravity, inOutBounds,
+                stableBounds);
     }
 
     private boolean shouldLaunchUnresizableAppInFreeform(ActivityRecord activity,

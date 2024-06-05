@@ -16,10 +16,10 @@
 
 package com.android.systemui.media.dialog
 
+import com.android.settingslib.flags.Flags.legacyLeAudioSharing
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.text.TextUtils
 import android.util.Log
 import com.android.settingslib.media.MediaOutputConstants
 import javax.inject.Inject
@@ -31,20 +31,21 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
  * BroadcastReceiver for handling media output intent
  */
 class MediaOutputDialogReceiver @Inject constructor(
-    private val mediaOutputDialogFactory: MediaOutputDialogFactory,
-    private val mediaOutputBroadcastDialogFactory: MediaOutputBroadcastDialogFactory
+        private val mediaOutputDialogManager: MediaOutputDialogManager,
+        private val mediaOutputBroadcastDialogManager: MediaOutputBroadcastDialogManager
 ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        when {
-            TextUtils.equals(
-                MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG, intent.action) -> {
+        when (intent.action) {
+            MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG -> {
                 val packageName: String? =
                     intent.getStringExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME)
                 launchMediaOutputDialogIfPossible(packageName)
             }
-            TextUtils.equals(
-                MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG,
-                intent.action) -> {
+            MediaOutputConstants.ACTION_LAUNCH_SYSTEM_MEDIA_OUTPUT_DIALOG -> {
+                mediaOutputDialogManager.createAndShowForSystemRouting()
+            }
+            MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG -> {
+                if (!legacyLeAudioSharing()) return
                 val packageName: String? =
                     intent.getStringExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME)
                 launchMediaOutputBroadcastDialogIfPossible(packageName)
@@ -54,7 +55,7 @@ class MediaOutputDialogReceiver @Inject constructor(
 
     private fun launchMediaOutputDialogIfPossible(packageName: String?) {
         if (!packageName.isNullOrEmpty()) {
-            mediaOutputDialogFactory.create(packageName, false)
+            mediaOutputDialogManager.createAndShow(packageName, false)
         } else if (DEBUG) {
             Log.e(TAG, "Unable to launch media output dialog. Package name is empty.")
         }
@@ -62,7 +63,7 @@ class MediaOutputDialogReceiver @Inject constructor(
 
     private fun launchMediaOutputBroadcastDialogIfPossible(packageName: String?) {
         if (!packageName.isNullOrEmpty()) {
-            mediaOutputBroadcastDialogFactory.create(
+            mediaOutputBroadcastDialogManager.createAndShow(
                     packageName, aboveStatusBar = true, view = null)
         } else if (DEBUG) {
             Log.e(TAG, "Unable to launch media output broadcast dialog. Package name is empty.")

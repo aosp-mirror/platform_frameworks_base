@@ -27,6 +27,10 @@ import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodNativeSubstitutionClass;
+import android.ravenwood.annotation.RavenwoodReplace;
+import android.ravenwood.annotation.RavenwoodThrow;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -63,6 +67,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -227,6 +232,9 @@ import java.util.function.IntFunction;
  * {@link #readMap(Map, ClassLoader, Class, Class)},
  * {@link #readSparseArray(ClassLoader, Class)}.
  */
+@RavenwoodKeepWholeClass
+@RavenwoodNativeSubstitutionClass(
+        "com.android.platform.test.ravenwood.nativesubstitution.Parcel_host")
 public final class Parcel {
 
     private static final boolean DEBUG_RECYCLE = false;
@@ -362,11 +370,29 @@ public final class Parcel {
     // see libbinder's binder/Status.h
     private static final int EX_TRANSACTION_FAILED = -129;
 
+    // Allow limit of 1 MB for allocating arrays
+    private static final int ARRAY_ALLOCATION_LIMIT = 1000000;
+
+    // Following type size are used to determine allocation size while creating arrays
+    private static final int SIZE_BYTE = 1;
+    private static final int SIZE_CHAR = 2;
+    private static final int SIZE_SHORT = 2;
+    private static final int SIZE_BOOLEAN = 4;
+    private static final int SIZE_INT = 4;
+    private static final int SIZE_FLOAT = 4;
+    private static final int SIZE_DOUBLE = 8;
+    private static final int SIZE_LONG = 8;
+
+    // Assume the least possible size for complex objects
+    private static final int SIZE_COMPLEX_TYPE = 1;
+
     @CriticalNative
     private static native void nativeMarkSensitive(long nativePtr);
     @FastNative
+    @RavenwoodThrow
     private static native void nativeMarkForBinder(long nativePtr, IBinder binder);
     @CriticalNative
+    @RavenwoodThrow
     private static native boolean nativeIsForRpc(long nativePtr);
     @CriticalNative
     private static native int nativeDataSize(long nativePtr);
@@ -398,14 +424,17 @@ public final class Parcel {
     private static native int nativeWriteFloat(long nativePtr, float val);
     @CriticalNative
     private static native int nativeWriteDouble(long nativePtr, double val);
+    @RavenwoodThrow
     private static native void nativeSignalExceptionForError(int error);
     @FastNative
     private static native void nativeWriteString8(long nativePtr, String val);
     @FastNative
     private static native void nativeWriteString16(long nativePtr, String val);
     @FastNative
+    @RavenwoodThrow
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
     @FastNative
+    @RavenwoodThrow
     private static native void nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
 
     private static native byte[] nativeCreateByteArray(long nativePtr);
@@ -424,8 +453,10 @@ public final class Parcel {
     @FastNative
     private static native String nativeReadString16(long nativePtr);
     @FastNative
+    @RavenwoodThrow
     private static native IBinder nativeReadStrongBinder(long nativePtr);
     @FastNative
+    @RavenwoodThrow
     private static native FileDescriptor nativeReadFileDescriptor(long nativePtr);
 
     private static native long nativeCreate();
@@ -444,13 +475,21 @@ public final class Parcel {
     private static native boolean nativeHasFileDescriptors(long nativePtr);
     private static native boolean nativeHasFileDescriptorsInRange(
             long nativePtr, int offset, int length);
+
+    private static native boolean nativeHasBinders(long nativePtr);
+    private static native boolean nativeHasBindersInRange(
+            long nativePtr, int offset, int length);
+    @RavenwoodThrow
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
+    @RavenwoodThrow
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
 
     @CriticalNative
+    @RavenwoodThrow
     private static native boolean nativeReplaceCallingWorkSourceUid(
             long nativePtr, int workSourceUid);
     @CriticalNative
+    @RavenwoodThrow
     private static native int nativeReadCallingWorkSourceUid(long nativePtr);
 
     /** Last time exception with a stack trace was written */
@@ -459,6 +498,7 @@ public final class Parcel {
     private static final int WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS = 1000;
 
     @CriticalNative
+    @RavenwoodThrow
     private static native long nativeGetOpenAshmemSize(long nativePtr);
 
     public final static Parcelable.Creator<String> STRING_CREATOR
@@ -537,6 +577,11 @@ public final class Parcel {
             }
             res.mReadWriteHelper = ReadWriteHelper.DEFAULT;
         }
+
+        if (res.mNativePtr == 0) {
+            Log.e(TAG, "Obtained Parcel object has null native pointer. Invalid state.");
+        }
+
         return res;
     }
 
@@ -617,10 +662,12 @@ public final class Parcel {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RavenwoodThrow
     public static native long getGlobalAllocSize();
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RavenwoodThrow
     public static native long getGlobalAllocCount();
 
     /**
@@ -816,6 +863,28 @@ public final class Parcel {
     }
 
     /** @hide */
+    public void removeClassCookie(Class clz, Object expectedCookie) {
+        if (mClassCookies != null) {
+            Object removedCookie = mClassCookies.remove(clz);
+            if (removedCookie != expectedCookie) {
+                Log.wtf(TAG, "Expected to remove " + expectedCookie + " (with key=" + clz
+                        + ") but instead removed " + removedCookie);
+            }
+        } else {
+            Log.wtf(TAG, "Expected to remove " + expectedCookie + " (with key=" + clz
+                    + ") but no cookies were present");
+        }
+    }
+
+    /**
+     * Whether {@link #setClassCookie} has been called with the specified {@code clz}.
+     * @hide
+     */
+    public boolean hasClassCookie(Class clz) {
+        return mClassCookies != null && mClassCookies.containsKey(clz);
+    }
+
+    /** @hide */
     public final void adoptClassCookies(Parcel from) {
         mClassCookies = from.mClassCookies;
     }
@@ -929,6 +998,34 @@ public final class Parcel {
             getValueType(value); // Will throw if value is not supported
         }
         return false;
+    }
+
+    /**
+     * Report whether the parcel contains any marshalled IBinder objects.
+     *
+     * @throws UnsupportedOperationException if binder kernel driver was disabled or if method was
+     *                                       invoked in case of Binder RPC protocol.
+     * @hide
+     */
+    public boolean hasBinders() {
+        return nativeHasBinders(mNativePtr);
+    }
+
+    /**
+     * Report whether the parcel contains any marshalled {@link IBinder} objects in the range
+     * defined by {@code offset} and {@code length}.
+     *
+     * @param offset The offset from which the range starts. Should be between 0 and
+     *               {@link #dataSize()}.
+     * @param length The length of the range. Should be between 0 and {@link #dataSize()} - {@code
+     *               offset}.
+     * @return whether there are binders in the range or not.
+     * @throws IllegalArgumentException if the parameters are out of the permitted ranges.
+     *
+     * @hide
+     */
+    public boolean hasBinders(int offset, int length) {
+        return nativeHasBindersInRange(mNativePtr, offset, length);
     }
 
     /**
@@ -1502,9 +1599,71 @@ public final class Parcel {
         }
     }
 
+    private static <T> int getItemTypeSize(@NonNull Class<T> arrayClass) {
+        final Class<?> componentType = arrayClass.getComponentType();
+        // typeSize has been referred from respective create*Array functions
+        if (componentType == boolean.class) {
+            return SIZE_BOOLEAN;
+        } else if (componentType == byte.class) {
+            return SIZE_BYTE;
+        } else if (componentType == char.class) {
+            return SIZE_CHAR;
+        } else if (componentType == int.class) {
+            return SIZE_INT;
+        } else if (componentType == long.class) {
+            return SIZE_LONG;
+        } else if (componentType == float.class) {
+            return SIZE_FLOAT;
+        } else if (componentType == double.class) {
+            return SIZE_DOUBLE;
+        }
+
+        return SIZE_COMPLEX_TYPE;
+    }
+
+    private void ensureWithinMemoryLimit(int typeSize, @NonNull int... dimensions) {
+        // For Multidimensional arrays, Calculate total object
+        // which will be allocated.
+        int totalObjects = 1;
+        try {
+            for (int dimension : dimensions) {
+                totalObjects = Math.multiplyExact(totalObjects, dimension);
+            }
+        } catch (ArithmeticException e) {
+            Log.e(TAG, "ArithmeticException occurred while multiplying dimensions " + e);
+            BadParcelableException badParcelableException = new BadParcelableException("Estimated "
+                    + "array length is too large. Array Dimensions:" + Arrays.toString(dimensions));
+            SneakyThrow.sneakyThrow(badParcelableException);
+        }
+        ensureWithinMemoryLimit(typeSize, totalObjects);
+    }
+
+    private void ensureWithinMemoryLimit(int typeSize, int length) {
+        int estimatedAllocationSize = 0;
+        try {
+            estimatedAllocationSize = Math.multiplyExact(typeSize, length);
+        } catch (ArithmeticException e) {
+            Log.e(TAG, "ArithmeticException occurred while multiplying values " + typeSize
+                    + " and "  + length + " Exception: " + e);
+            BadParcelableException badParcelableException = new BadParcelableException("Estimated "
+                    + "allocation size is too large. typeSize: " + typeSize + " length: " + length);
+            SneakyThrow.sneakyThrow(badParcelableException);
+        }
+
+        boolean isInBinderTransaction = Binder.isDirectlyHandlingTransaction();
+        if (isInBinderTransaction && (estimatedAllocationSize > ARRAY_ALLOCATION_LIMIT)) {
+            Log.e(TAG, "Trying to Allocate " + estimatedAllocationSize
+                    + " memory, In Binder Transaction : " + isInBinderTransaction);
+            BadParcelableException e = new BadParcelableException("Allocation of size "
+                    + estimatedAllocationSize + " is above allowed limit of 1MB");
+            SneakyThrow.sneakyThrow(e);
+        }
+    }
+
     @Nullable
     public final boolean[] createBooleanArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_BOOLEAN, N);
         // >>2 as a fast divide-by-4 works in the create*Array() functions
         // because dataAvail() will never return a negative number.  4 is
         // the size of a stored boolean in the stream.
@@ -1547,6 +1706,7 @@ public final class Parcel {
     @Nullable
     public short[] createShortArray() {
         int n = readInt();
+        ensureWithinMemoryLimit(SIZE_SHORT, n);
         if (n >= 0 && n <= (dataAvail() >> 2)) {
             short[] val = new short[n];
             for (int i = 0; i < n; i++) {
@@ -1585,6 +1745,7 @@ public final class Parcel {
     @Nullable
     public final char[] createCharArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_CHAR, N);
         if (N >= 0 && N <= (dataAvail() >> 2)) {
             char[] val = new char[N];
             for (int i=0; i<N; i++) {
@@ -1622,6 +1783,7 @@ public final class Parcel {
     @Nullable
     public final int[] createIntArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_INT, N);
         if (N >= 0 && N <= (dataAvail() >> 2)) {
             int[] val = new int[N];
             for (int i=0; i<N; i++) {
@@ -1659,6 +1821,7 @@ public final class Parcel {
     @Nullable
     public final long[] createLongArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_LONG, N);
         // >>3 because stored longs are 64 bits
         if (N >= 0 && N <= (dataAvail() >> 3)) {
             long[] val = new long[N];
@@ -1697,6 +1860,7 @@ public final class Parcel {
     @Nullable
     public final float[] createFloatArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_FLOAT, N);
         // >>2 because stored floats are 4 bytes
         if (N >= 0 && N <= (dataAvail() >> 2)) {
             float[] val = new float[N];
@@ -1735,6 +1899,7 @@ public final class Parcel {
     @Nullable
     public final double[] createDoubleArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_DOUBLE, N);
         // >>3 because stored doubles are 8 bytes
         if (N >= 0 && N <= (dataAvail() >> 3)) {
             double[] val = new double[N];
@@ -1788,6 +1953,7 @@ public final class Parcel {
     @Nullable
     public final String[] createString8Array() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         if (N >= 0) {
             String[] val = new String[N];
             for (int i=0; i<N; i++) {
@@ -1828,6 +1994,7 @@ public final class Parcel {
     @Nullable
     public final String[] createString16Array() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         if (N >= 0) {
             String[] val = new String[N];
             for (int i=0; i<N; i++) {
@@ -1920,6 +2087,7 @@ public final class Parcel {
     @Nullable
     public final IBinder[] createBinderArray() {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         if (N >= 0) {
             IBinder[] val = new IBinder[N];
             for (int i=0; i<N; i++) {
@@ -1954,6 +2122,7 @@ public final class Parcel {
     public final <T extends IInterface> T[] createInterfaceArray(
             @NonNull IntFunction<T[]> newArray, @NonNull Function<IBinder, T> asInterface) {
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         if (N >= 0) {
             T[] val = newArray.apply(N);
             for (int i=0; i<N; i++) {
@@ -2829,6 +2998,7 @@ public final class Parcel {
      * @see #writeNoException
      * @see #readException
      */
+    @RavenwoodReplace
     public final void writeException(@NonNull Exception e) {
         AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
 
@@ -2865,6 +3035,14 @@ public final class Parcel {
                 setDataPosition(payloadPosition);
                 break;
         }
+    }
+
+    /** @hide */
+    public final void writeException$ravenwood(@NonNull Exception e) {
+        // Ravenwood doesn't support IPC, no transaction headers needed
+        writeInt(getExceptionCode(e));
+        writeString(e.getMessage());
+        writeInt(0);
     }
 
     /** @hide */
@@ -2920,6 +3098,7 @@ public final class Parcel {
      * @see #writeException
      * @see #readException
      */
+    @RavenwoodReplace
     public final void writeNoException() {
         AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
 
@@ -2948,6 +3127,12 @@ public final class Parcel {
         } else {
             writeInt(0);
         }
+    }
+
+    /** @hide */
+    public final void writeNoException$ravenwood() {
+        // Ravenwood doesn't support IPC, no transaction headers needed
+        writeInt(0);
     }
 
     /**
@@ -3200,6 +3385,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         FileDescriptor[] f = new FileDescriptor[N];
         for (int i = 0; i < N; i++) {
             f[i] = readRawFileDescriptor();
@@ -3666,6 +3852,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         ArrayList<T> l = new ArrayList<T>(N);
         while (N > 0) {
             l.add(readTypedObject(c));
@@ -3717,6 +3904,7 @@ public final class Parcel {
         if (count < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, count);
         final SparseArray<T> array = new SparseArray<>(count);
         for (int i = 0; i < count; i++) {
             final int index = readInt();
@@ -3745,6 +3933,7 @@ public final class Parcel {
         if (count < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, count);
         final ArrayMap<String, T> map = new ArrayMap<>(count);
         for (int i = 0; i < count; i++) {
             final String key = readString();
@@ -3771,6 +3960,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         ArrayList<String> l = new ArrayList<String>(N);
         while (N > 0) {
             l.add(readString());
@@ -3796,6 +3986,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         ArrayList<IBinder> l = new ArrayList<IBinder>(N);
         while (N > 0) {
             l.add(readStrongBinder());
@@ -3822,6 +4013,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         ArrayList<T> l = new ArrayList<T>(N);
         while (N > 0) {
             l.add(asInterface.apply(readStrongBinder()));
@@ -3981,6 +4173,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         T[] l = c.newArray(N);
         for (int i=0; i<N; i++) {
             l[i] = readTypedObject(c);
@@ -4209,6 +4402,10 @@ public final class Parcel {
             while (innermost.isArray()) {
                 innermost = innermost.getComponentType();
             }
+
+            int typeSize = getItemTypeSize(innermost);
+            ensureWithinMemoryLimit(typeSize, dimensions);
+
             val = (T) Array.newInstance(innermost, dimensions);
             for (int i = 0; i < length; i++) {
                 readFixedArray(Array.get(val, i));
@@ -4265,6 +4462,10 @@ public final class Parcel {
             while (innermost.isArray()) {
                 innermost = innermost.getComponentType();
             }
+
+            int typeSize = getItemTypeSize(innermost);
+            ensureWithinMemoryLimit(typeSize, dimensions);
+
             val = (T) Array.newInstance(innermost, dimensions);
             for (int i = 0; i < length; i++) {
                 readFixedArray(Array.get(val, i), asInterface);
@@ -4320,6 +4521,10 @@ public final class Parcel {
             while (innermost.isArray()) {
                 innermost = innermost.getComponentType();
             }
+
+            int typeSize = getItemTypeSize(innermost);
+            ensureWithinMemoryLimit(typeSize, dimensions);
+
             val = (T) Array.newInstance(innermost, dimensions);
             for (int i = 0; i < length; i++) {
                 readFixedArray(Array.get(val, i), c);
@@ -5076,6 +5281,7 @@ public final class Parcel {
         if (n < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, n);
         T[] p = (T[]) ((clazz == null) ? new Parcelable[n] : Array.newInstance(clazz, n));
         for (int i = 0; i < n; i++) {
             p[i] = readParcelableInternal(loader, clazz);

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Context.MEDIA_PROJECTION_SERVICE;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
@@ -28,18 +29,21 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.media.projection.IMediaProjectionManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.provider.DeviceConfig;
 import android.view.ContentRecordingSession;
+import android.view.ContentRecordingSession.RecordContent;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 /**
  * Manages content recording for a particular {@link DisplayContent}.
@@ -47,9 +51,14 @@ import com.android.internal.protolog.common.ProtoLog;
 final class ContentRecorder implements WindowContainerListener {
 
     /**
-     * The key for accessing the device config that controls if task recording is supported.
+     * Maximum acceptable anisotropy for the output image.
+     *
+     * Necessary to avoid unnecessary scaling when the anisotropy is almost the same, as it is not
+     * exact anyway. For external displays, we expect an anisoptry of about 2% even if the pixels
+     * are, in fact, square due to the imprecision of the display's actual size (rounded to the
+     * nearest cm).
      */
-    @VisibleForTesting static final String KEY_RECORD_TASK_FEATURE = "record_task_content";
+    private static final float MAX_ANISOTROPY = 0.025f;
 
     /**
      * The display content this class is handling recording for.
@@ -82,19 +91,35 @@ final class ContentRecorder implements WindowContainerListener {
     @Nullable private Rect mLastRecordedBounds = null;
 
     /**
+     * The last size of the surface mirrored out to.
+     */
+    @Nullable private Point mLastConsumingSurfaceSize = new Point(0, 0);
+
+    /**
      * The last configuration orientation.
      */
+    @Configuration.Orientation
     private int mLastOrientation = ORIENTATION_UNDEFINED;
 
+    private int mLastWindowingMode = WINDOWING_MODE_UNDEFINED;
+
+    private final boolean mCorrectForAnisotropicPixels;
+
     ContentRecorder(@NonNull DisplayContent displayContent) {
-        this(displayContent, new RemoteMediaProjectionManagerWrapper());
+        this(displayContent, new RemoteMediaProjectionManagerWrapper(displayContent.mDisplayId),
+                new DisplayManagerFlags().isConnectedDisplayManagementEnabled()
+                        && !new DisplayManagerFlags()
+                                    .isPixelAnisotropyCorrectionInLogicalDisplayEnabled()
+                        && displayContent.getDisplayInfo().type == Display.TYPE_EXTERNAL);
     }
 
     @VisibleForTesting
     ContentRecorder(@NonNull DisplayContent displayContent,
-            @NonNull MediaProjectionManagerWrapper mediaProjectionManager) {
+            @NonNull MediaProjectionManagerWrapper mediaProjectionManager,
+            boolean correctForAnisotropicPixels) {
         mDisplayContent = displayContent;
         mMediaProjectionManager = mediaProjectionManager;
+        mCorrectForAnisotropicPixels = correctForAnisotropicPixels;
     }
 
     /**
@@ -133,51 +158,85 @@ final class ContentRecorder implements WindowContainerListener {
         }
     }
 
+    void onMirrorOutputSurfaceOrientationChanged() {
+        onConfigurationChanged(mLastOrientation, mLastWindowingMode);
+    }
+
     /**
      * Handle a configuration change on the display content, and resize recording if needed.
      * @param lastOrientation the prior orientation of the configuration
      */
-    void onConfigurationChanged(@Configuration.Orientation int lastOrientation) {
+    void onConfigurationChanged(
+            @Configuration.Orientation int lastOrientation, int lastWindowingMode) {
         // Update surface for MediaProjection, if this DisplayContent is being used for recording.
-        if (isCurrentlyRecording() && mLastRecordedBounds != null) {
-            // Recording has already begun, but update recording since the display is now on.
-            if (mRecordedWindowContainer == null) {
+        if (!isCurrentlyRecording() || mLastRecordedBounds == null) {
+            return;
+        }
+
+        // Recording has already begun, but update recording since the display is now on.
+        if (mRecordedWindowContainer == null) {
+            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                    "Content Recording: Unexpectedly null window container; unable to update "
+                            + "recording for display %d",
+                    mDisplayContent.getDisplayId());
+            return;
+        }
+
+        // TODO(b/297514518) Do not start capture if the app is in PIP, the bounds are
+        //  inaccurate.
+        if (mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK) {
+            final Task capturedTask = mRecordedWindowContainer.asTask();
+            if (capturedTask.inPinnedWindowingMode()) {
                 ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                        "Content Recording: Unexpectedly null window container; unable to update "
-                                + "recording for display %d",
+                        "Content Recording: Display %d was already recording, but "
+                                + "pause capture since the task is in PIP",
                         mDisplayContent.getDisplayId());
+                pauseRecording();
                 return;
             }
+        }
 
-            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Content Recording: Display %d was already recording, so apply "
-                            + "transformations if necessary",
-                    mDisplayContent.getDisplayId());
-            // Retrieve the size of the region to record, and continue with the update
-            // if the bounds or orientation has changed.
-            final Rect recordedContentBounds = mRecordedWindowContainer.getBounds();
-            int recordedContentOrientation = mRecordedWindowContainer.getOrientation();
-            if (!mLastRecordedBounds.equals(recordedContentBounds)
-                    || lastOrientation != recordedContentOrientation) {
-                Point surfaceSize = fetchSurfaceSizeIfPresent();
-                if (surfaceSize != null) {
-                    ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                            "Content Recording: Going ahead with updating recording for display "
-                                    + "%d to new bounds %s and/or orientation %d.",
-                            mDisplayContent.getDisplayId(), recordedContentBounds,
-                            recordedContentOrientation);
-                    updateMirroredSurface(mDisplayContent.mWmService.mTransactionFactory.get(),
-                            recordedContentBounds, surfaceSize);
-                } else {
-                    // If the surface removed, do nothing. We will handle this via onDisplayChanged
-                    // (the display will be off if the surface is removed).
-                    ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                            "Content Recording: Unable to update recording for display %d to new "
-                                    + "bounds %s and/or orientation %d, since the surface is not "
-                                    + "available.",
-                            mDisplayContent.getDisplayId(), recordedContentBounds,
-                            recordedContentOrientation);
-                }
+        // Record updated windowing mode, if necessary.
+        int recordedContentWindowingMode = mRecordedWindowContainer.getWindowingMode();
+        if (lastWindowingMode != recordedContentWindowingMode) {
+            mMediaProjectionManager.notifyWindowingModeChanged(
+                    mContentRecordingSession.getContentToRecord(),
+                    mContentRecordingSession.getTargetUid(),
+                    recordedContentWindowingMode
+            );
+        }
+
+        ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                "Content Recording: Display %d was already recording, so apply "
+                        + "transformations if necessary",
+                mDisplayContent.getDisplayId());
+        // Retrieve the size of the region to record, and continue with the update
+        // if the bounds or orientation has changed.
+        final Rect recordedContentBounds = mRecordedWindowContainer.getBounds();
+        @Configuration.Orientation int recordedContentOrientation =
+                mRecordedWindowContainer.getConfiguration().orientation;
+        final Point surfaceSize = fetchSurfaceSizeIfPresent();
+        if (!mLastRecordedBounds.equals(recordedContentBounds)
+                || lastOrientation != recordedContentOrientation
+                || !mLastConsumingSurfaceSize.equals(surfaceSize)) {
+            if (surfaceSize != null) {
+                ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                        "Content Recording: Going ahead with updating recording for display "
+                                + "%d to new bounds %s and/or orientation %d and/or surface "
+                                + "size %s",
+                        mDisplayContent.getDisplayId(), recordedContentBounds,
+                        recordedContentOrientation, surfaceSize);
+                updateMirroredSurface(mRecordedWindowContainer.getSyncTransaction(),
+                        recordedContentBounds, surfaceSize);
+            } else {
+                // If the surface removed, do nothing. We will handle this via onDisplayChanged
+                // (the display will be off if the surface is removed).
+                ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                        "Content Recording: Unable to update recording for display %d to new "
+                                + "bounds %s and/or orientation %d and/or surface size %s, "
+                                + "since the surface is not available.",
+                        mDisplayContent.getDisplayId(), recordedContentBounds,
+                        recordedContentOrientation, surfaceSize);
             }
         }
     }
@@ -289,6 +348,19 @@ final class ContentRecorder implements WindowContainerListener {
             return;
         }
 
+        final int contentToRecord = mContentRecordingSession.getContentToRecord();
+
+        // TODO(b/297514518) Do not start capture if the app is in PIP, the bounds are inaccurate.
+        if (contentToRecord == RECORD_CONTENT_TASK) {
+            if (mRecordedWindowContainer.asTask().inPinnedWindowingMode()) {
+                ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                        "Content Recording: Display %d should start recording, but "
+                                + "don't yet since the task is in PIP",
+                        mDisplayContent.getDisplayId());
+                return;
+            }
+        }
+
         final Point surfaceSize = fetchSurfaceSizeIfPresent();
         if (surfaceSize == null) {
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
@@ -301,9 +373,6 @@ final class ContentRecorder implements WindowContainerListener {
                 "Content Recording: Display %d has no content and is on, so start recording for "
                         + "state %d",
                 mDisplayContent.getDisplayId(), mDisplayContent.getDisplayInfo().state);
-
-        // TODO(b/274790702): Do not start recording if waiting for consent - for now,
-        //  go ahead.
 
         // Create a mirrored hierarchy for the SurfaceControl of the DisplayArea to capture.
         mRecordedSurface = SurfaceControl.mirrorSurface(
@@ -325,10 +394,11 @@ final class ContentRecorder implements WindowContainerListener {
                         .reparent(mDisplayContent.getOverlayLayer(), null);
         // Retrieve the size of the DisplayArea to mirror.
         updateMirroredSurface(transaction, mRecordedWindowContainer.getBounds(), surfaceSize);
+        transaction.apply();
 
         // Notify the client about the visibility of the mirrored region, now that we have begun
         // capture.
-        if (mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK) {
+        if (contentToRecord == RECORD_CONTENT_TASK) {
             mMediaProjectionManager.notifyActiveProjectionCapturedContentVisibilityChanged(
                     mRecordedWindowContainer.asTask().isVisibleRequested());
         } else {
@@ -337,6 +407,11 @@ final class ContentRecorder implements WindowContainerListener {
             mMediaProjectionManager.notifyActiveProjectionCapturedContentVisibilityChanged(
                     currentDisplayState != DISPLAY_STATE_OFF);
         }
+
+        // Record initial windowing mode after recording starts.
+        mMediaProjectionManager.notifyWindowingModeChanged(
+                contentToRecord, mContentRecordingSession.getTargetUid(),
+                mRecordedWindowContainer.getWindowConfiguration().getWindowingMode());
 
         // No need to clean up. In SurfaceFlinger, parents hold references to their children. The
         // mirrored SurfaceControl is alive since the parent DisplayContent SurfaceControl is
@@ -355,7 +430,7 @@ final class ContentRecorder implements WindowContainerListener {
      */
     @Nullable
     private WindowContainer retrieveRecordedWindowContainer() {
-        final int contentToRecord = mContentRecordingSession.getContentToRecord();
+        @RecordContent final int contentToRecord = mContentRecordingSession.getContentToRecord();
         final IBinder tokenToRecord = mContentRecordingSession.getTokenToRecord();
         switch (contentToRecord) {
             case RECORD_CONTENT_DISPLAY:
@@ -376,14 +451,6 @@ final class ContentRecorder implements WindowContainerListener {
                 // TODO(206461622) Migrate to using the RootDisplayArea
                 return dc;
             case RECORD_CONTENT_TASK:
-                if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                        KEY_RECORD_TASK_FEATURE, false)) {
-                    handleStartRecordingFailed();
-                    ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                            "Content Recording: Unable to record task since feature is disabled %d",
-                            mDisplayContent.getDisplayId());
-                    return null;
-                }
                 // Given the WindowToken of the region to record, retrieve the associated
                 // SurfaceControl.
                 if (tokenToRecord == null) {
@@ -439,6 +506,33 @@ final class ContentRecorder implements WindowContainerListener {
         }
     }
 
+    private void computeScaling(int inputSizeX, int inputSizeY,
+            float inputDpiX, float inputDpiY,
+            int outputSizeX, int outputSizeY,
+            float outputDpiX, float outputDpiY,
+            PointF scaleOut) {
+        float relAnisotropy = (inputDpiY / inputDpiX) / (outputDpiY / outputDpiX);
+        if (!mCorrectForAnisotropicPixels
+                || (relAnisotropy > (1 - MAX_ANISOTROPY) && relAnisotropy < (1 + MAX_ANISOTROPY))) {
+            // Calculate the scale to apply to the root mirror SurfaceControl to fit the size of the
+            // output surface.
+            float scaleX = outputSizeX / (float) inputSizeX;
+            float scaleY = outputSizeY / (float) inputSizeY;
+            float scale = Math.min(scaleX, scaleY);
+            scaleOut.x = scale;
+            scaleOut.y = scale;
+            return;
+        }
+
+        float relDpiX = outputDpiX / inputDpiX;
+        float relDpiY = outputDpiY / inputDpiY;
+
+        float scale = Math.min(outputSizeX / relDpiX / inputSizeX,
+                outputSizeY / relDpiY / inputSizeY);
+        scaleOut.x = scale * relDpiX;
+        scaleOut.y = scale * relDpiY;
+    }
+
     /**
      * Apply transformations to the mirrored surface to ensure the captured contents are scaled to
      * fit and centred in the output surface.
@@ -452,13 +546,19 @@ final class ContentRecorder implements WindowContainerListener {
      */
     @VisibleForTesting void updateMirroredSurface(SurfaceControl.Transaction transaction,
             Rect recordedContentBounds, Point surfaceSize) {
-        // Calculate the scale to apply to the root mirror SurfaceControl to fit the size of the
-        // output surface.
-        float scaleX = surfaceSize.x / (float) recordedContentBounds.width();
-        float scaleY = surfaceSize.y / (float) recordedContentBounds.height();
-        float scale = Math.min(scaleX, scaleY);
-        int scaledWidth = Math.round(scale * (float) recordedContentBounds.width());
-        int scaledHeight = Math.round(scale * (float) recordedContentBounds.height());
+
+        DisplayInfo inputDisplayInfo = mRecordedWindowContainer.mDisplayContent.getDisplayInfo();
+        DisplayInfo outputDisplayInfo = mDisplayContent.getDisplayInfo();
+
+        PointF scale = new PointF();
+        computeScaling(recordedContentBounds.width(), recordedContentBounds.height(),
+                inputDisplayInfo.physicalXDpi, inputDisplayInfo.physicalYDpi,
+                surfaceSize.x, surfaceSize.y,
+                outputDisplayInfo.physicalXDpi, outputDisplayInfo.physicalYDpi,
+                scale);
+
+        int scaledWidth = Math.round(scale.x * (float) recordedContentBounds.width());
+        int scaledHeight = Math.round(scale.y * (float) recordedContentBounds.height());
 
         // Calculate the shift to apply to the root mirror SurfaceControl to centre the mirrored
         // contents in the output surface.
@@ -471,6 +571,15 @@ final class ContentRecorder implements WindowContainerListener {
             shiftedY = (surfaceSize.y - scaledHeight) / 2;
         }
 
+        ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                "Content Recording: Apply transformations of shift %d x %d, scale %f x %f, crop "
+                        + "(aka recorded content size) %d x %d for display %d; display has size "
+                        + "%d x %d; surface has size %d x %d",
+                shiftedX, shiftedY, scale.x, scale.y, recordedContentBounds.width(),
+                recordedContentBounds.height(), mDisplayContent.getDisplayId(),
+                mDisplayContent.getConfiguration().screenWidthDp,
+                mDisplayContent.getConfiguration().screenHeightDp, surfaceSize.x, surfaceSize.y);
+
         transaction
                 // Crop the area to capture to exclude the 'extra' wallpaper that is used
                 // for parallax (b/189930234).
@@ -478,12 +587,13 @@ final class ContentRecorder implements WindowContainerListener {
                         recordedContentBounds.height())
                 // Scale the root mirror SurfaceControl, based upon the size difference between the
                 // source (DisplayArea to capture) and output (surface the app reads images from).
-                .setMatrix(mRecordedSurface, scale, 0 /* dtdx */, 0 /* dtdy */, scale)
+                .setMatrix(mRecordedSurface, scale.x, 0 /* dtdx */, 0 /* dtdy */, scale.y)
                 // Position needs to be updated when the mirrored DisplayArea has changed, since
                 // the content will no longer be centered in the output surface.
-                .setPosition(mRecordedSurface, shiftedX /* x */, shiftedY /* y */)
-                .apply();
+                .setPosition(mRecordedSurface, shiftedX /* x */, shiftedY /* y */);
         mLastRecordedBounds = new Rect(recordedContentBounds);
+        mLastConsumingSurfaceSize.x = surfaceSize.x;
+        mLastConsumingSurfaceSize.y = surfaceSize.y;
         // Request to notify the client about the resize.
         mMediaProjectionManager.notifyActiveProjectionCapturedContentResized(
                 mLastRecordedBounds.width(), mLastRecordedBounds.height());
@@ -492,6 +602,7 @@ final class ContentRecorder implements WindowContainerListener {
     /**
      * Returns a non-null {@link Point} if the surface is present, or null otherwise
      */
+    @Nullable
     private Point fetchSurfaceSizeIfPresent() {
         // Retrieve the default size of the surface the app provided to
         // MediaProjection#createVirtualDisplay. Note the app is the consumer of the surface,
@@ -534,8 +645,9 @@ final class ContentRecorder implements WindowContainerListener {
             Configuration mergedOverrideConfiguration) {
         WindowContainerListener.super.onMergedOverrideConfigurationChanged(
                 mergedOverrideConfiguration);
-        onConfigurationChanged(mLastOrientation);
+        onConfigurationChanged(mLastOrientation, mLastWindowingMode);
         mLastOrientation = mergedOverrideConfiguration.orientation;
+        mLastWindowingMode = mergedOverrideConfiguration.windowConfiguration.getWindowingMode();
     }
 
     // WindowContainerListener
@@ -545,6 +657,14 @@ final class ContentRecorder implements WindowContainerListener {
         if (isCurrentlyRecording() && mLastRecordedBounds != null) {
             mMediaProjectionManager.notifyActiveProjectionCapturedContentVisibilityChanged(
                     isVisibleRequested);
+
+            if (mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK) {
+                // If capturing a task, then the toggle visibility of the recorded surface to match
+                // visibility of the task, so we don't capture any mid-transition frames
+                mRecordedWindowContainer.getSyncTransaction()
+                        .setVisibility(mRecordedSurface, isVisibleRequested);
+                mRecordedWindowContainer.scheduleAnimation();
+            }
         }
     }
 
@@ -552,11 +672,18 @@ final class ContentRecorder implements WindowContainerListener {
         void stopActiveProjection();
         void notifyActiveProjectionCapturedContentResized(int width, int height);
         void notifyActiveProjectionCapturedContentVisibilityChanged(boolean isVisible);
+        void notifyWindowingModeChanged(int contentToRecord, int targetUid, int windowingMode);
     }
 
     private static final class RemoteMediaProjectionManagerWrapper implements
             MediaProjectionManagerWrapper {
+
+        private final int mDisplayId;
         @Nullable private IMediaProjectionManager mIMediaProjectionManager = null;
+
+        RemoteMediaProjectionManagerWrapper(int displayId) {
+            mDisplayId = displayId;
+        }
 
         @Override
         public void stopActiveProjection() {
@@ -565,12 +692,15 @@ final class ContentRecorder implements WindowContainerListener {
                 return;
             }
             try {
+                ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
+                        "Content Recording: stopping active projection for display %d",
+                        mDisplayId);
                 mIMediaProjectionManager.stopActiveProjection();
             } catch (RemoteException e) {
                 ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
                         "Content Recording: Unable to tell MediaProjectionManagerService to stop "
-                                + "the active projection: %s",
-                        e);
+                                + "the active projection for display %d: %s",
+                        mDisplayId, e);
             }
         }
 
@@ -605,6 +735,22 @@ final class ContentRecorder implements WindowContainerListener {
                         "Content Recording: Unable to tell MediaProjectionManagerService about "
                                 + "visibility change on the active projection: %s",
                         e);
+            }
+        }
+
+        @Override
+        public void notifyWindowingModeChanged(int contentToRecord, int targetUid,
+                int windowingMode) {
+            fetchMediaProjectionManager();
+            if (mIMediaProjectionManager == null) {
+                return;
+            }
+            try {
+                mIMediaProjectionManager.notifyWindowingModeChanged(
+                        contentToRecord, targetUid, windowingMode);
+            } catch (RemoteException e) {
+                ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
+                        "Content Recording: Unable to tell log windowing mode change: %s", e);
             }
         }
 

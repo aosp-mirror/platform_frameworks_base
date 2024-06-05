@@ -7,19 +7,16 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-android_app {
-    name: "CredentialManager",
-    defaults: ["platform_app_defaults"],
-    certificate: "platform",
+android_library {
+    name: "CredentialManager-handheld",
+
+    platform_apis: true,
+
     srcs: ["src/**/*.kt"],
     resource_dirs: ["res"],
 
-    dex_preopt: {
-        profile_guided: true,
-        profile: "profile.txt.prof",
-    },
-
     static_libs: [
+        "CredentialManagerShared",
         "PlatformComposeCore",
         "androidx.activity_activity-compose",
         "androidx.appcompat_appcompat",
@@ -39,6 +36,23 @@ android_app {
         "androidx.lifecycle_lifecycle-viewmodel-compose",
         "androidx.recyclerview_recyclerview",
         "kotlinx-coroutines-core",
+    ],
+}
+
+android_app {
+    name: "CredentialManager",
+    defaults: ["platform_app_defaults"],
+    certificate: "platform",
+
+    dex_preopt: {
+        profile_guided: true,
+        //TODO: b/312357299 - Update baseline profile
+        profile: "profile.txt.prof",
+    },
+
+    // Do not add new dependencies here. Add to CredentialManager-handheld instead.
+    static_libs: [
+        "CredentialManager-handheld",
     ],
 
     platform_apis: true,

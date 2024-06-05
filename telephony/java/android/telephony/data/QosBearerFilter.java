@@ -49,17 +49,13 @@ public final class QosBearerFilter implements Parcelable {
     public @interface QosProtocol {}
 
     public static final int QOS_PROTOCOL_UNSPECIFIED =
-            android.hardware.radio.V1_6.QosProtocol.UNSPECIFIED;
-    public static final int QOS_PROTOCOL_TCP = android.hardware.radio.V1_6.QosProtocol.TCP;
-    public static final int QOS_PROTOCOL_UDP = android.hardware.radio.V1_6.QosProtocol.UDP;
-    public static final int QOS_PROTOCOL_ESP = android.hardware.radio.V1_6.QosProtocol.ESP;
-    public static final int QOS_PROTOCOL_AH = android.hardware.radio.V1_6.QosProtocol.AH;
-    public static final int QOS_MIN_PORT = android.hardware.radio.V1_6.QosPortRange.MIN;
-    /**
-     * Hardcoded in place of android.hardware.radio.V1_6.QosPortRange.MAX as it
-     * returns -1 due to uint16_t to int conversion in java. (TODO: Fix the HAL)
-     */
-    public static final int QOS_MAX_PORT = 65535; // android.hardware.radio.V1_6.QosPortRange.MIN;
+            android.hardware.radio.data.QosFilter.PROTOCOL_UNSPECIFIED;
+    public static final int QOS_PROTOCOL_TCP = android.hardware.radio.data.QosFilter.PROTOCOL_TCP;
+    public static final int QOS_PROTOCOL_UDP = android.hardware.radio.data.QosFilter.PROTOCOL_UDP;
+    public static final int QOS_PROTOCOL_ESP = android.hardware.radio.data.QosFilter.PROTOCOL_ESP;
+    public static final int QOS_PROTOCOL_AH = android.hardware.radio.data.QosFilter.PROTOCOL_AH;
+    public static final int QOS_MIN_PORT = android.hardware.radio.data.PortRange.PORT_RANGE_MIN;
+    public static final int QOS_MAX_PORT = android.hardware.radio.data.PortRange.PORT_RANGE_MAX;
 
     private @QosProtocol int protocol;
 
@@ -78,11 +74,11 @@ public final class QosBearerFilter implements Parcelable {
     public @interface QosBearerFilterDirection {}
 
     public static final int QOS_FILTER_DIRECTION_DOWNLINK =
-            android.hardware.radio.V1_6.QosFilterDirection.DOWNLINK;
+            android.hardware.radio.data.QosFilter.DIRECTION_DOWNLINK;
     public static final int QOS_FILTER_DIRECTION_UPLINK =
-            android.hardware.radio.V1_6.QosFilterDirection.UPLINK;
+            android.hardware.radio.data.QosFilter.DIRECTION_UPLINK;
     public static final int QOS_FILTER_DIRECTION_BIDIRECTIONAL =
-            android.hardware.radio.V1_6.QosFilterDirection.BIDIRECTIONAL;
+            android.hardware.radio.data.QosFilter.DIRECTION_BIDIRECTIONAL;
 
     private @QosBearerFilterDirection int filterDirection;
 

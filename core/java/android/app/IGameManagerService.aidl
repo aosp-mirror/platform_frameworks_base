@@ -20,6 +20,7 @@ import android.app.GameModeConfiguration;
 import android.app.GameModeInfo;
 import android.app.GameState;
 import android.app.IGameModeListener;
+import android.app.IGameStateListener;
 
 /**
  * @hide
@@ -49,4 +50,8 @@ interface IGameManagerService {
     void addGameModeListener(IGameModeListener gameModeListener);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE)")
     void removeGameModeListener(IGameModeListener gameModeListener);
+    void addGameStateListener(IGameStateListener gameStateListener);
+    void removeGameStateListener(IGameStateListener gameStateListener);
+    @EnforcePermission("MANAGE_GAME_MODE")
+    void toggleGameDefaultFrameRate(boolean isEnabled);
 }

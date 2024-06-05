@@ -23,8 +23,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
 
-import libcore.util.EmptyArray;
-
 /**
  * Map of {@code long} to {@code long}. Unlike a normal array of longs, there
  * can be gaps in the indices. It is intended to be more memory efficient than using a
@@ -48,6 +46,7 @@ import libcore.util.EmptyArray;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class LongSparseLongArray implements Cloneable {
     @UnsupportedAppUsage(maxTargetSdk = 28) // The type isn't even public.
     private long[] mKeys;

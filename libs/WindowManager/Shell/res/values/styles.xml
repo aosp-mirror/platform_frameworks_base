@@ -14,12 +14,21 @@
      limitations under the License.
 -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <!-- Theme used for the activity that shows when the system forced an app to be resizable -->
     <style name="ForcedResizableTheme" parent="@android:style/Theme.Translucent.NoTitleBar">
         <item name="android:windowBackground">@drawable/forced_resizable_background</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowAnimationStyle">@style/Animation.ForcedResizable</item>
+    </style>
+
+    <!-- Theme used for the activity that shows below the desktop mode windows to show wallpaper -->
+    <style name="DesktopWallpaperTheme" parent="@android:style/Theme.Wallpaper.NoTitleBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
     </style>
 
     <style name="Animation.ForcedResizable" parent="@android:style/Animation">
@@ -37,7 +46,7 @@
         <item name="android:padding">16dp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textFontWeight">500</item>
-        <item name="android:textColor">@color/desktop_mode_caption_menu_text_color</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:drawablePadding">16dp</item>
         <item name="android:background">?android:selectableItemBackground</item>
     </style>
@@ -59,20 +68,9 @@
 
     <style name="DockedDividerBackground">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/split_divider_bar_width</item>
-        <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:background">@color/split_divider_background</item>
-    </style>
-
-    <style name="DockedDividerMinimizedShadow">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">8dp</item>
-    </style>
-
-    <style name="DockedDividerHandle">
+        <item name="android:layout_height">match_parent</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:layout_width">96dp</item>
-        <item name="android:layout_height">48dp</item>
+        <item name="android:background">@color/split_divider_background</item>
     </style>
 
     <style name="TvPipEduText">

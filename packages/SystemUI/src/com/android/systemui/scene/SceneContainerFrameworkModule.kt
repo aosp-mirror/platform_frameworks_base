@@ -16,17 +16,90 @@
 
 package com.android.systemui.scene
 
-import com.android.systemui.scene.data.model.SceneContainerConfigModule
-import com.android.systemui.scene.ui.composable.SceneModule
-import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModelModule
+import com.android.systemui.CoreStartable
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlagsModule
+import com.android.systemui.notifications.ui.composable.NotificationsShadeSessionModule
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
+import com.android.systemui.scene.domain.startable.SceneContainerStartable
+import com.android.systemui.scene.domain.startable.ScrimStartable
+import com.android.systemui.scene.shared.model.SceneContainerConfig
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.shared.flag.DualShade
+import dagger.Binds
 import dagger.Module
+import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 
+/** Scene framework Dagger module suitable for AOSP. */
 @Module(
     includes =
         [
-            SceneContainerConfigModule::class,
-            SceneContainerViewModelModule::class,
-            SceneModule::class,
+            BouncerSceneModule::class,
+            CommunalSceneModule::class,
+            ComposeBouncerFlagsModule::class,
+            EmptySceneModule::class,
+            GoneSceneModule::class,
+            LockscreenSceneModule::class,
+            QuickSettingsSceneModule::class,
+            ShadeSceneModule::class,
+            QuickSettingsShadeSceneModule::class,
+            NotificationsShadeSceneModule::class,
+            NotificationsShadeSessionModule::class,
         ],
 )
-object SceneContainerFrameworkModule
+interface SceneContainerFrameworkModule {
+
+    @Binds
+    @IntoMap
+    @ClassKey(SceneContainerStartable::class)
+    fun containerStartable(impl: SceneContainerStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(ScrimStartable::class)
+    fun scrimStartable(impl: ScrimStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(WindowRootViewVisibilityInteractor::class)
+    fun bindWindowRootViewVisibilityInteractor(
+        impl: WindowRootViewVisibilityInteractor
+    ): CoreStartable
+
+    companion object {
+
+        @Provides
+        fun containerConfig(): SceneContainerConfig {
+            return SceneContainerConfig(
+                // Note that this list is in z-order. The first one is the bottom-most and the last
+                // one is top-most.
+                sceneKeys =
+                    listOfNotNull(
+                        Scenes.Gone,
+                        Scenes.Communal,
+                        Scenes.Lockscreen,
+                        Scenes.Bouncer,
+                        Scenes.QuickSettings.takeUnless { DualShade.isEnabled },
+                        Scenes.QuickSettingsShade.takeIf { DualShade.isEnabled },
+                        Scenes.NotificationsShade.takeIf { DualShade.isEnabled },
+                        Scenes.Shade.takeUnless { DualShade.isEnabled },
+                    ),
+                initialSceneKey = Scenes.Lockscreen,
+                navigationDistances =
+                    mapOf(
+                            Scenes.Gone to 0,
+                            Scenes.Lockscreen to 0,
+                            Scenes.Communal to 1,
+                            Scenes.NotificationsShade to 2.takeIf { DualShade.isEnabled },
+                            Scenes.Shade to 2.takeUnless { DualShade.isEnabled },
+                            Scenes.QuickSettingsShade to 3.takeIf { DualShade.isEnabled },
+                            Scenes.QuickSettings to 3.takeUnless { DualShade.isEnabled },
+                            Scenes.Bouncer to 4,
+                        )
+                        .filterValues { it != null }
+                        .mapValues { checkNotNull(it.value) }
+            )
+        }
+    }
+}

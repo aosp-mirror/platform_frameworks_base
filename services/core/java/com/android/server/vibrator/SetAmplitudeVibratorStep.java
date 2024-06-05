@@ -37,7 +37,7 @@ final class SetAmplitudeVibratorStep extends AbstractVibratorStep {
      * The repeating waveform keeps the vibrator ON all the time. Use a minimum duration to
      * prevent short patterns from turning the vibrator ON too frequently.
      */
-    private static final int REPEATING_EFFECT_ON_DURATION = 5000; // 5s
+    static final int REPEATING_EFFECT_ON_DURATION = 5000; // 5s
 
     SetAmplitudeVibratorStep(VibrationStepConductor conductor, long startTime,
             VibratorController controller, VibrationEffect.Composed effect, int index,
@@ -179,7 +179,9 @@ final class SetAmplitudeVibratorStep extends AbstractVibratorStep {
         while (i < segmentCount) {
             VibrationEffectSegment segment = segments.get(i);
             if (!(segment instanceof StepSegment)
-                    || ((StepSegment) segment).getAmplitude() == 0) {
+                    // play() will ignore segments with zero duration, so it's important that
+                    // zero-duration segments don't affect this method.
+                    || (segment.getDuration() > 0 && ((StepSegment) segment).getAmplitude() == 0)) {
                 break;
             }
             timing += segment.getDuration();

@@ -15,6 +15,7 @@
  */
 package android.os;
 
+import static android.os.BatteryConsumer.BatteryConsumerDataLayout.POWER_MODEL_NOT_INCLUDED;
 import static android.os.BatteryConsumer.POWER_COMPONENT_ANY;
 import static android.os.BatteryConsumer.PROCESS_STATE_ANY;
 import static android.os.BatteryConsumer.PROCESS_STATE_UNSPECIFIED;
@@ -39,6 +40,7 @@ import java.io.PrintWriter;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 class PowerComponents {
     private final BatteryConsumer.BatteryConsumerData mData;
 
@@ -118,7 +120,7 @@ class PowerComponents {
 
     @BatteryConsumer.PowerModel
     int getPowerModel(BatteryConsumer.Key key) {
-        if (key.mPowerModelColumnIndex == -1) {
+        if (key.mPowerModelColumnIndex == POWER_MODEL_NOT_INCLUDED) {
             throw new IllegalStateException(
                     "Power model IDs were not requested in the BatteryUsageStatsQuery");
         }
@@ -461,12 +463,14 @@ class PowerComponents {
         private static final byte POWER_MODEL_UNINITIALIZED = -1;
 
         private final BatteryConsumer.BatteryConsumerData mData;
+        private final double mMinConsumedPowerThreshold;
 
-        Builder(BatteryConsumer.BatteryConsumerData data) {
+        Builder(BatteryConsumer.BatteryConsumerData data, double minConsumedPowerThreshold) {
             mData = data;
+            mMinConsumedPowerThreshold = minConsumedPowerThreshold;
             for (BatteryConsumer.Key[] keys : mData.layout.keys) {
                 for (BatteryConsumer.Key key : keys) {
-                    if (key.mPowerModelColumnIndex != -1) {
+                    if (key.mPowerModelColumnIndex != POWER_MODEL_NOT_INCLUDED) {
                         mData.putInt(key.mPowerModelColumnIndex, POWER_MODEL_UNINITIALIZED);
                     }
                 }
@@ -477,7 +481,18 @@ class PowerComponents {
         public Builder setConsumedPower(BatteryConsumer.Key key, double componentPower,
                 int powerModel) {
             mData.putDouble(key.mPowerColumnIndex, componentPower);
-            if (key.mPowerModelColumnIndex != -1) {
+            if (key.mPowerModelColumnIndex != POWER_MODEL_NOT_INCLUDED) {
+                mData.putInt(key.mPowerModelColumnIndex, powerModel);
+            }
+            return this;
+        }
+
+        @NonNull
+        public Builder addConsumedPower(BatteryConsumer.Key key, double componentPower,
+                int powerModel) {
+            mData.putDouble(key.mPowerColumnIndex,
+                    mData.getDouble(key.mPowerColumnIndex) + componentPower);
+            if (key.mPowerModelColumnIndex != POWER_MODEL_NOT_INCLUDED) {
                 mData.putInt(key.mPowerModelColumnIndex, powerModel);
             }
             return this;
@@ -567,12 +582,12 @@ class PowerComponents {
                             mData.getLong(key.mDurationColumnIndex)
                                     + otherData.getLong(otherKey.mDurationColumnIndex));
 
-                    if (key.mPowerModelColumnIndex == -1) {
+                    if (key.mPowerModelColumnIndex == POWER_MODEL_NOT_INCLUDED) {
                         continue;
                     }
 
                     boolean undefined = false;
-                    if (otherKey.mPowerModelColumnIndex == -1) {
+                    if (otherKey.mPowerModelColumnIndex == POWER_MODEL_NOT_INCLUDED) {
                         undefined = true;
                     } else {
                         final int powerModel = mData.getInt(key.mPowerModelColumnIndex);
@@ -633,19 +648,26 @@ class PowerComponents {
          */
         @NonNull
         public PowerComponents build() {
-            mData.putDouble(mData.layout.totalConsumedPowerColumnIndex, getTotalPower());
-
             for (BatteryConsumer.Key[] keys : mData.layout.keys) {
                 for (BatteryConsumer.Key key : keys) {
-                    if (key.mPowerModelColumnIndex != -1) {
+                    if (key.mPowerModelColumnIndex != POWER_MODEL_NOT_INCLUDED) {
                         if (mData.getInt(key.mPowerModelColumnIndex) == POWER_MODEL_UNINITIALIZED) {
                             mData.putInt(key.mPowerModelColumnIndex,
                                     BatteryConsumer.POWER_MODEL_UNDEFINED);
                         }
                     }
+
+                    if (mMinConsumedPowerThreshold != 0) {
+                        if (mData.getDouble(key.mPowerColumnIndex) < mMinConsumedPowerThreshold) {
+                            mData.putDouble(key.mPowerColumnIndex, 0);
+                        }
+                    }
                 }
             }
 
+            if (mData.getDouble(mData.layout.totalConsumedPowerColumnIndex) == 0) {
+                mData.putDouble(mData.layout.totalConsumedPowerColumnIndex, getTotalPower());
+            }
             return new PowerComponents(this);
         }
     }

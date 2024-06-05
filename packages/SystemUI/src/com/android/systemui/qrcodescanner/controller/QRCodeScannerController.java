@@ -120,6 +120,7 @@ public class QRCodeScannerController implements
         mUserTracker = userTracker;
         mConfigEnableLockScreenButton = mContext.getResources().getBoolean(
             android.R.bool.config_enableQrCodeScannerOnLockScreen);
+        mExecutor.execute(this::updateQRCodeScannerActivityDetails);
     }
 
     /**
@@ -158,18 +159,18 @@ public class QRCodeScannerController implements
      * Returns true if lock screen entry point for QR Code Scanner is to be enabled.
      */
     public boolean isEnabledForLockScreenButton() {
-        return mQRCodeScannerEnabled && isAbleToOpenCameraApp() && isAvailableOnDevice();
+        return mQRCodeScannerEnabled && isAbleToLaunchScannerActivity() && isAllowedOnLockScreen();
     }
 
-    /** Returns whether the feature is available on the device. */
-    public boolean isAvailableOnDevice() {
+    /** Returns whether the QR scanner button is allowed on lockscreen. */
+    public boolean isAllowedOnLockScreen() {
         return mConfigEnableLockScreenButton;
     }
 
     /**
-     * Returns true if the feature can open a camera app on the device.
+     * Returns true if the feature can open the configured QR scanner activity.
      */
-    public boolean isAbleToOpenCameraApp() {
+    public boolean isAbleToLaunchScannerActivity() {
         return mIntent != null && isActivityCallable(mIntent);
     }
 
@@ -340,7 +341,7 @@ public class QRCodeScannerController implements
         }
 
         mQRCodeScannerPreferenceObserver.forEach((key, value) -> {
-            mSecureSettings.unregisterContentObserver(value);
+            mSecureSettings.unregisterContentObserverSync(value);
         });
 
         // Reset cached values to default as we are no longer listening
@@ -355,9 +356,6 @@ public class QRCodeScannerController implements
 
         // Reset cached values to default as we are no longer listening
         mOnDefaultQRCodeScannerChangedListener = null;
-        mQRCodeScannerActivity = null;
-        mIntent = null;
-        mComponentName = null;
     }
 
     private void notifyQRCodeScannerActivityChanged() {
@@ -420,7 +418,7 @@ public class QRCodeScannerController implements
                 });
             }
         });
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 mSecureSettings.getUriFor(LOCK_SCREEN_SHOW_QR_CODE_SCANNER), false,
                 mQRCodeScannerPreferenceObserver.get(userId), userId);
     }

@@ -16,9 +16,13 @@
 
 package com.android.internal.os;
 
-import androidx.test.filters.Suppress;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.TestCase;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -28,11 +32,12 @@ import java.util.Collections;
 import java.util.List;
 
 // this test causes a IllegalAccessError: superclass not accessible
-@Suppress
-public class LoggingPrintStreamTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class LoggingPrintStreamTest {
 
     TestPrintStream out = new TestPrintStream();
 
+    @Test
     public void testPrintException() {
         @SuppressWarnings("ThrowableInstanceNeverThrown")
         Throwable t = new Throwable("Ignore me.");
@@ -47,6 +52,7 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Arrays.asList(lines), out.lines);
     }
 
+    @Test
     public void testPrintObject() {
         Object o = new Object();
         out.print(4);
@@ -56,6 +62,7 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Arrays.asList("4" + o + "2"), out.lines);
     }
 
+    @Test
     public void testPrintlnObject() {
         Object o = new Object();
         out.print(4);
@@ -65,6 +72,7 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Arrays.asList("4" + o, "2"), out.lines);
     }
 
+    @Test
     public void testPrintf() {
         out.printf("Name: %s\nEmployer: %s", "Bob", "Google");
         assertEquals(Arrays.asList("Name: Bob"), out.lines);
@@ -72,6 +80,7 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Arrays.asList("Name: Bob", "Employer: Google"), out.lines);
     }
 
+    @Test
     public void testPrintInt() {
         out.print(4);
         out.print(2);
@@ -80,12 +89,14 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Collections.singletonList("42"), out.lines);
     }
 
+    @Test
     public void testPrintlnInt() {
         out.println(4);
         out.println(2);
         assertEquals(Arrays.asList("4", "2"), out.lines);
     }
 
+    @Test
     public void testPrintCharArray() {
         out.print("Foo\nBar\nTee".toCharArray());
         assertEquals(Arrays.asList("Foo", "Bar"), out.lines);
@@ -93,6 +104,7 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Arrays.asList("Foo", "Bar", "Tee"), out.lines);
     }
 
+    @Test
     public void testPrintString() {
         out.print("Foo\nBar\nTee");
         assertEquals(Arrays.asList("Foo", "Bar"), out.lines);
@@ -100,22 +112,26 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Arrays.asList("Foo", "Bar", "Tee"), out.lines);
     }
 
+    @Test
     public void testPrintlnCharArray() {
         out.println("Foo\nBar\nTee".toCharArray());
         assertEquals(Arrays.asList("Foo", "Bar", "Tee"), out.lines);
     }
 
+    @Test
     public void testPrintlnString() {
         out.println("Foo\nBar\nTee");
         assertEquals(Arrays.asList("Foo", "Bar", "Tee"), out.lines);
     }
 
+    @Test
     public void testPrintlnStringWithBufferedData() {
         out.print(5);
         out.println("Foo\nBar\nTee");
         assertEquals(Arrays.asList("5Foo", "Bar", "Tee"), out.lines);
     }
 
+    @Test
     public void testAppend() {
         out.append("Foo\n")
             .append('4')
@@ -125,6 +141,7 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Arrays.asList("Foo", "4", "a"), out.lines);
     }
 
+    @Test
     public void testMultiByteCharactersSpanningBuffers() throws Exception {
         // assume 3*1000 bytes won't fit in LoggingPrintStream's internal buffer
         StringBuilder builder = new StringBuilder();
@@ -138,6 +155,7 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Arrays.asList(expected), out.lines);
     }
 
+    @Test
     public void testWriteOneByteAtATimeMultibyteCharacters() throws Exception {
         String expected = " \u20AC  \u20AC   \u20AC    \u20AC     ";
         for (byte b : expected.getBytes()) {
@@ -147,6 +165,7 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Arrays.asList(expected), out.lines);
     }
 
+    @Test
     public void testWriteByteArrayAtATimeMultibyteCharacters() throws Exception {
         String expected = " \u20AC  \u20AC   \u20AC    \u20AC     ";
         out.write(expected.getBytes());
@@ -154,6 +173,7 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Arrays.asList(expected), out.lines);
     }
 
+    @Test
     public void testWriteWithOffsetsMultibyteCharacters() throws Exception {
         String expected = " \u20AC  \u20AC   \u20AC    \u20AC     ";
         byte[] bytes = expected.getBytes();
@@ -167,6 +187,7 @@ public class LoggingPrintStreamTest extends TestCase {
         assertEquals(Arrays.asList(expected), out.lines);
     }
 
+    @Test
     public void testWriteFlushesOnNewlines() throws Exception {
         String a = " \u20AC  \u20AC ";
         String b = "  \u20AC    \u20AC  ";

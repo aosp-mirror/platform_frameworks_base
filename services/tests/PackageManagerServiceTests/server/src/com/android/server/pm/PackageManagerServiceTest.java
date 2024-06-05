@@ -20,23 +20,19 @@ import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.AppGlobals;
-import android.content.IIntentReceiver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
-import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -89,18 +85,6 @@ public class PackageManagerServiceTest {
     @Test
     public void testPackageRemoval() {
         class PackageSenderImpl implements PackageSender {
-            public void sendPackageBroadcast(final String action, final String pkg,
-                    final Bundle extras, final int flags, final String targetPkg,
-                    final IIntentReceiver finishedReceiver, final int[] userIds,
-                    int[] instantUserIds, SparseArray<int[]> broadcastAllowList,
-                    @Nullable Bundle bOptions) {
-            }
-
-            public void sendPackageAddedForNewUsers(@NonNull Computer snapshot, String packageName,
-                    boolean sendBootComplete, boolean includeStopped, int appId,
-                    int[] userIds, int[] instantUserIds, int dataLoaderType) {
-            }
-
             @Override
             public void notifyPackageAdded(String packageName, int uid) {
             }
@@ -115,16 +99,15 @@ public class PackageManagerServiceTest {
             }
         }
 
-        PackageSenderImpl sender = new PackageSenderImpl();
         PackageSetting setting = null;
-        PackageRemovedInfo pri = new PackageRemovedInfo(sender);
+        PackageRemovedInfo pri = new PackageRemovedInfo();
 
         // Initial conditions: nothing there
         Assert.assertNull(pri.mRemovedUsers);
         Assert.assertNull(pri.mBroadcastUsers);
 
         // populateUsers with nothing leaves nothing
-        pri.populateUsers(null, setting);
+        pri.populateBroadcastUsers(setting);
         Assert.assertNull(pri.mBroadcastUsers);
 
         // Create a real (non-null) PackageSetting and confirm that the removed
@@ -138,9 +121,10 @@ public class PackageManagerServiceTest {
                 .setSecondaryCpuAbiString("secondaryCpuAbiString")
                 .setCpuAbiOverrideString("cpuAbiOverrideString")
                 .build();
-        pri.populateUsers(new int[] {
+        pri.mRemovedUsers = new int[]{
                 1, 2, 3, 4, 5
-        }, setting);
+        };
+        pri.populateBroadcastUsers(setting);
         Assert.assertNotNull(pri.mBroadcastUsers);
         Assert.assertEquals(5, pri.mBroadcastUsers.length);
         Assert.assertNotNull(pri.mInstantUserIds);
@@ -150,9 +134,10 @@ public class PackageManagerServiceTest {
         pri.mBroadcastUsers = null;
         final int EXCLUDED_USER_ID = 4;
         setting.setInstantApp(true, EXCLUDED_USER_ID);
-        pri.populateUsers(new int[] {
+        pri.mRemovedUsers = new int[]{
                 1, 2, 3, EXCLUDED_USER_ID, 5
-        }, setting);
+        };
+        pri.populateBroadcastUsers(setting);
         Assert.assertNotNull(pri.mBroadcastUsers);
         Assert.assertEquals(4, pri.mBroadcastUsers.length);
         Assert.assertNotNull(pri.mInstantUserIds);
@@ -164,8 +149,8 @@ public class PackageManagerServiceTest {
 
     @Test
     public void testPartitions() {
-        String[] partitions = { "system", "vendor", "odm", "oem", "product", "system_ext" };
-        String[] appdir = { "app", "priv-app" };
+        String[] partitions = {"system", "vendor", "odm", "oem", "product", "system_ext"};
+        String[] appdir = {"app", "priv-app"};
         for (int i = 0; i < partitions.length; i++) {
             final ScanPartition scanPartition =
                     PackageManagerService.SYSTEM_PARTITIONS.get(i);
@@ -425,10 +410,10 @@ public class PackageManagerServiceTest {
     private String displayName(Method m) {
         String r = m.getName();
         String p = Arrays.toString(m.getGenericParameterTypes())
-                   .replaceAll("([a-zA-Z0-9]+\\.)+", "")
-                   .replace("class ", "")
-                   .replaceAll("^\\[", "(")
-                   .replaceAll("\\]$", ")");
+                .replaceAll("([a-zA-Z0-9]+\\.)+", "")
+                .replace("class ", "")
+                .replaceAll("^\\[", "(")
+                .replaceAll("\\]$", ")");
         return r + p;
     }
 
@@ -611,5 +596,23 @@ public class PackageManagerServiceTest {
         } finally {
             runShellCommand("pm uninstall " + TEST_PKG_NAME);
         }
+    }
+
+    @Test
+    public void testSetUserMinAspectRatio_samePackage_succeeds() throws Exception {
+        mIPackageManager.setUserMinAspectRatio(PACKAGE_NAME, UserHandle.myUserId(),
+                PackageManager.USER_MIN_ASPECT_RATIO_UNSET);
+        // Invoking setUserMinAspectRatio on the same package shouldn't get any exception.
+    }
+
+    @Test
+    public void testSetUserMinAspectRatio_differentPackage_fails() {
+        final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
+        runShellCommand("pm install " + testApk);
+        assertThrows(SecurityException.class, () -> {
+            mIPackageManager.setUserMinAspectRatio(TEST_PKG_NAME, UserHandle.myUserId(),
+                    PackageManager.USER_MIN_ASPECT_RATIO_UNSET);
+        });
+        runShellCommand("pm uninstall " + TEST_PKG_NAME);
     }
 }

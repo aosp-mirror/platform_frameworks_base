@@ -21,21 +21,24 @@ import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsSourceConsumerProto.ANIMATION_STATE;
 import static android.view.InsetsSourceConsumerProto.HAS_WINDOW_FOCUS;
-import static android.view.InsetsSourceConsumerProto.INTERNAL_INSETS_TYPE;
 import static android.view.InsetsSourceConsumerProto.IS_REQUESTED_VISIBLE;
 import static android.view.InsetsSourceConsumerProto.PENDING_FRAME;
 import static android.view.InsetsSourceConsumerProto.PENDING_VISIBLE_FRAME;
 import static android.view.InsetsSourceConsumerProto.SOURCE_CONTROL;
+import static android.view.InsetsSourceConsumerProto.TYPE_NUMBER;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -241,9 +244,15 @@ public class InsetsSourceConsumer {
         }
 
         final boolean showRequested = isShowRequested();
-        final boolean cancelledForNewAnimation = !running && showRequested
-                ? mAnimationState == ANIMATION_STATE_HIDE
-                : mAnimationState == ANIMATION_STATE_SHOW;
+        final boolean cancelledForNewAnimation;
+        if (Flags.refactorInsetsController()) {
+            cancelledForNewAnimation =
+                    (mController.getCancelledForNewAnimationTypes() & mType) != 0;
+        } else {
+            cancelledForNewAnimation = (!running && showRequested)
+                    ? mAnimationState == ANIMATION_STATE_HIDE
+                    : mAnimationState == ANIMATION_STATE_SHOW;
+        }
 
         mAnimationState = running
                 ? (showRequested ? ANIMATION_STATE_SHOW : ANIMATION_STATE_HIDE)
@@ -292,12 +301,44 @@ public class InsetsSourceConsumer {
         }
         final boolean requestedVisible = (mController.getRequestedVisibleTypes() & mType) != 0;
 
-        // If we don't have control, we are not able to change the visibility.
-        if (mSourceControl == null) {
-            if (DEBUG) Log.d(TAG, "applyLocalVisibilityOverride: No control in "
-                    + mController.getHost().getRootViewTitle()
-                    + " requestedVisible=" + requestedVisible);
-            return false;
+        if (Flags.refactorInsetsController()) {
+            // If we don't have control or the leash (in case of the IME), we enforce the
+            // visibility to be hidden, as otherwise we would let the app know too early.
+            if (mSourceControl == null) {
+                if (DEBUG) {
+                    Log.d(TAG, TextUtils.formatSimple(
+                            "applyLocalVisibilityOverride: No control in %s for type %s, "
+                                    + "requestedVisible=%s",
+                            mController.getHost().getRootViewTitle(),
+                            WindowInsets.Type.toString(mType), requestedVisible));
+                }
+                return false;
+                // TODO(b/323136120) add a flag to the control, to define whether a leash is needed
+            } else if (mId != InsetsSource.ID_IME_CAPTION_BAR
+                    && mSourceControl.getLeash() == null) {
+                if (DEBUG) {
+                    Log.d(TAG, TextUtils.formatSimple(
+                            "applyLocalVisibilityOverride: Set the source visibility to false, as"
+                                    + " there is no leash yet for type %s in %s",
+                            WindowInsets.Type.toString(mType),
+                            mController.getHost().getRootViewTitle()));
+                }
+                boolean wasVisible = source.isVisible();
+                source.setVisible(false);
+                // only if it was visible before and is now hidden, we want to notify about the
+                // changed state
+                return wasVisible;
+            }
+        } else {
+            // If we don't have control, we are not able to change the visibility.
+            if (mSourceControl == null) {
+                if (DEBUG) {
+                    Log.d(TAG, "applyLocalVisibilityOverride: No control in "
+                            + mController.getHost().getRootViewTitle()
+                            + " requestedVisible=" + requestedVisible);
+                }
+                return false;
+            }
         }
         if (source.isVisible() == requestedVisible) {
             return false;
@@ -314,7 +355,7 @@ public class InsetsSourceConsumer {
      * @param fromController {@code true} if request is coming from controller.
      *                       (e.g. in IME case, controller is
      *                       {@link android.inputmethodservice.InputMethodService}).
-     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
+     * @param statsToken the token tracking the current IME request or {@code null} otherwise.
      *
      * @implNote The {@code statsToken} is ignored here, and only handled in
      * {@link ImeInsetsSourceConsumer} for IME animations only.
@@ -338,6 +379,15 @@ public class InsetsSourceConsumer {
      * @see InsetsAnimationControlCallbacks#reportPerceptible
      */
     public void onPerceptible(boolean perceptible) {
+        if (Flags.refactorInsetsController()) {
+            if (mType == WindowInsets.Type.ime()) {
+                final IBinder window = mController.getHost().getWindowToken();
+                if (window != null) {
+                    mController.getHost().getInputMethodManager().reportPerceptible(window,
+                            perceptible);
+                }
+            }
+        }
     }
 
     /**
@@ -393,7 +443,6 @@ public class InsetsSourceConsumer {
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        proto.write(INTERNAL_INSETS_TYPE, WindowInsets.Type.toString(mType));
         proto.write(HAS_WINDOW_FOCUS, mHasWindowFocus);
         proto.write(IS_REQUESTED_VISIBLE, isShowRequested());
         if (mSourceControl != null) {
@@ -406,6 +455,7 @@ public class InsetsSourceConsumer {
             mPendingVisibleFrame.dumpDebug(proto, PENDING_VISIBLE_FRAME);
         }
         proto.write(ANIMATION_STATE, mAnimationState);
+        proto.write(TYPE_NUMBER, mType);
         proto.end(token);
     }
 }

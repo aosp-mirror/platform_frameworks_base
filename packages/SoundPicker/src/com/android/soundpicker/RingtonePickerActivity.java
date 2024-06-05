@@ -36,6 +36,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -146,32 +147,32 @@ public final class RingtonePickerActivity extends AlertActivity implements
     private DialogInterface.OnClickListener mRingtoneClickListener =
             new DialogInterface.OnClickListener() {
 
-        /*
-         * On item clicked
-         */
-        public void onClick(DialogInterface dialog, int which) {
-            if (which == mCursor.getCount() + mStaticItemCount) {
-                // The "Add new ringtone" item was clicked. Start a file picker intent to select
-                // only audio files (MIME type "audio/*")
-                final Intent chooseFile = getMediaFilePickerIntent();
-                startActivityForResult(chooseFile, ADD_FILE_REQUEST_CODE);
-                return;
-            }
+                /*
+                 * On item clicked
+                 */
+                public void onClick(DialogInterface dialog, int which) {
+                    if (which == mCursor.getCount() + mStaticItemCount) {
+                        // The "Add new ringtone" item was clicked. Start a file picker intent to select
+                        // only audio files (MIME type "audio/*")
+                        final Intent chooseFile = getMediaFilePickerIntent();
+                        startActivityForResult(chooseFile, ADD_FILE_REQUEST_CODE);
+                        return;
+                    }
 
-            // Save the position of most recently clicked item
-            setCheckedItem(which);
+                    // Save the position of most recently clicked item
+                    setCheckedItem(which);
 
-            // In the buttonless (watch-only) version, preemptively set our result since we won't
-            // have another chance to do so before the activity closes.
-            if (!mShowOkCancelButtons) {
-                setSuccessResultWithRingtone(getCurrentlySelectedRingtoneUri());
-            }
+                    // In the buttonless (watch-only) version, preemptively set our result since we won't
+                    // have another chance to do so before the activity closes.
+                    if (!mShowOkCancelButtons) {
+                        setSuccessResultWithRingtone(getCurrentlySelectedRingtoneUri());
+                    }
 
-            // Play clip
-            playRingtone(which, 0);
-        }
+                    // Play clip
+                    playRingtone(which, 0);
+                }
 
-    };
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -245,14 +246,17 @@ public final class RingtonePickerActivity extends AlertActivity implements
 
         p.mTitle = intent.getCharSequenceExtra(RingtoneManager.EXTRA_RINGTONE_TITLE);
         if (p.mTitle == null) {
-          if (mType == RingtoneManager.TYPE_ALARM) {
-              p.mTitle = getString(com.android.internal.R.string.ringtone_picker_title_alarm);
-          } else if (mType == RingtoneManager.TYPE_NOTIFICATION) {
-              p.mTitle =
-                  getString(com.android.internal.R.string.ringtone_picker_title_notification);
-          } else {
-              p.mTitle = getString(com.android.internal.R.string.ringtone_picker_title);
-          }
+            if (mType == RingtoneManager.TYPE_ALARM) {
+                p.mTitle = getString(com.android.internal.R.string.ringtone_picker_title_alarm);
+            } else if (mType == RingtoneManager.TYPE_NOTIFICATION) {
+                p.mTitle =
+                        getString(com.android.internal.R.string.ringtone_picker_title_notification);
+            } else {
+                p.mTitle = getString(com.android.internal.R.string.ringtone_picker_title);
+            }
+        } else {
+            // Make sure intents don't inject HTML elements.
+            p.mTitle = Html.escapeHtml(p.mTitle.toString());
         }
 
         setupAlert();
@@ -300,6 +304,8 @@ public final class RingtonePickerActivity extends AlertActivity implements
                 }
             };
             installTask.execute(data.getData());
+        } else if (requestCode == ADD_FILE_REQUEST_CODE && resultCode == RESULT_CANCELED) {
+            setupAlert();
         }
     }
 
@@ -545,10 +551,10 @@ public final class RingtonePickerActivity extends AlertActivity implements
             if (mDefaultRingtone == null) {
                 mDefaultRingtone = RingtoneManager.getRingtone(this, mUriForDefaultItem);
             }
-           /*
-            * Stream type of mDefaultRingtone is not set explicitly here.
-            * It should be set in accordance with mRingtoneManager of this Activity.
-            */
+            /*
+             * Stream type of mDefaultRingtone is not set explicitly here.
+             * It should be set in accordance with mRingtoneManager of this Activity.
+             */
             if (mDefaultRingtone != null) {
                 mDefaultRingtone.setStreamType(mRingtoneManager.inferStreamType());
             }
@@ -590,8 +596,8 @@ public final class RingtonePickerActivity extends AlertActivity implements
     }
 
     private void setSuccessResultWithRingtone(Uri ringtoneUri) {
-      setResult(RESULT_OK,
-          new Intent().putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, ringtoneUri));
+        setResult(RESULT_OK,
+                new Intent().putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, ringtoneUri));
     }
 
     private Uri getCurrentlySelectedRingtoneUri() {

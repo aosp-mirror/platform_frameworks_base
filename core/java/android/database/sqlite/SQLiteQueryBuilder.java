@@ -48,6 +48,15 @@ import java.util.regex.Pattern;
 /**
  * This is a convenience class that helps build SQL queries to be sent to
  * {@link SQLiteDatabase} objects.
+ * <p>
+ * This class is often used to compose a SQL query from client-supplied fragments.  Best practice
+ * to protect against invalid or illegal SQL is to set the following:
+ * <ul>
+ * <li>{@link #setStrict} true.
+ * <li>{@link #setProjectionMap} with the list of queryable columns.
+ * <li>{@link #setStrictColumns} true.
+ * <li>{@link #setStrictGrammar} true.
+ * </ul>
  */
 public class SQLiteQueryBuilder {
     private static final String TAG = "SQLiteQueryBuilder";

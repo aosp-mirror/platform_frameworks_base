@@ -24,6 +24,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.backup.BackupAgent;
 import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
@@ -32,11 +33,15 @@ import android.app.backup.RestoreSet;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
+import com.android.server.backup.Flags;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
@@ -296,12 +301,26 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         return -1;
     }
 
-    private BackupEligibilityRules getBackupEligibilityRules(RestoreSet restoreSet) {
+    @VisibleForTesting
+    BackupEligibilityRules getBackupEligibilityRules(RestoreSet restoreSet) {
         // TODO(b/182986784): Remove device name comparison once a designated field for operation
         //  type is added to RestoreSet object.
         int backupDestination = DEVICE_NAME_FOR_D2D_SET.equals(restoreSet.device)
                 ? BackupDestination.DEVICE_TRANSFER : BackupDestination.CLOUD;
-        return mBackupManagerService.getEligibilityRulesForOperation(backupDestination);
+
+        if (!Flags.enableSkippingRestoreLaunchedApps()) {
+            return mBackupManagerService.getEligibilityRulesForOperation(backupDestination);
+        }
+
+        boolean skipRestoreForLaunchedApps = (restoreSet.backupTransportFlags
+                & BackupAgent.FLAG_SKIP_RESTORE_FOR_LAUNCHED_APPS) != 0;
+
+        return new BackupEligibilityRules(mBackupManagerService.getPackageManager(),
+                LocalServices.getService(PackageManagerInternal.class),
+                mUserId,
+                mBackupManagerService.getContext(),
+                backupDestination,
+                skipRestoreForLaunchedApps);
     }
 
     public synchronized int restorePackage(String packageName, IRestoreObserver observer,

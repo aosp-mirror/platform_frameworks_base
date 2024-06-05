@@ -35,13 +35,12 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.quicksettings.Tile;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -51,6 +50,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
@@ -63,7 +63,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class DreamTileTest extends SysuiTestCase {
@@ -226,6 +226,10 @@ public class DreamTileTest extends SysuiTestCase {
         assertTrue(supportedTileOnlySystemUser.isAvailable());
         when(mUserTracker.getUserInfo()).thenReturn(nonMainUserInfo);
         assertFalse(supportedTileOnlySystemUser.isAvailable());
+
+        destroyTile(unsupportedTile);
+        destroyTile(supportedTileAllUsers);
+        destroyTile(supportedTileOnlySystemUser);
     }
 
     @Test
@@ -250,11 +254,18 @@ public class DreamTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         assertEquals(QSTileImpl.ResourceIcon.get(R.drawable.ic_qs_screen_saver_undocked),
                 dockedTile.getState().icon);
+
+        destroyTile(dockedTile);
     }
 
     private void setScreensaverEnabled(boolean enabled) {
         mSecureSettings.putIntForUser(Settings.Secure.SCREENSAVER_ENABLED, enabled ? 1 : 0,
                 DEFAULT_USER);
+    }
+
+    private void destroyTile(QSTileImpl<?> tile) {
+        tile.destroy();
+        mTestableLooper.processAllMessages();
     }
 
     private DreamTile constructTileForTest(boolean dreamSupported,

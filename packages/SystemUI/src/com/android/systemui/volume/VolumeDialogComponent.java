@@ -57,7 +57,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     public static final String VOLUME_SILENT_DO_NOT_DISTURB = "sysui_do_not_disturb";
 
     private final boolean mDefaultVolumeDownToEnterSilent;
-    public static final boolean DEFAULT_VOLUME_UP_TO_EXIT_SILENT = false;
+    public final boolean mDefaultVolumeUpToExitSilent;
     public static final boolean DEFAULT_DO_NOT_DISTURB_WHEN_SILENT = false;
 
     private static final Intent ZEN_SETTINGS =
@@ -107,10 +107,12 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
 
         mDefaultVolumeDownToEnterSilent = mContext.getResources()
                 .getBoolean(R.bool.config_volume_down_to_enter_silent);
+        mDefaultVolumeUpToExitSilent = mContext.getResources()
+                .getBoolean(R.bool.config_volume_up_to_exit_silent);
 
         mVolumePolicy = new VolumePolicy(
                 mDefaultVolumeDownToEnterSilent,  // volumeDownToEnterSilent
-                DEFAULT_VOLUME_UP_TO_EXIT_SILENT,  // volumeUpToExitSilent
+                mDefaultVolumeUpToExitSilent,  // volumeUpToExitSilent
                 DEFAULT_DO_NOT_DISTURB_WHEN_SILENT,  // doNotDisturbWhenSilent
                 400    // vibrateToSilentDebounce
         );
@@ -133,7 +135,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
                 TunerService.parseIntegerSwitch(newValue, mDefaultVolumeDownToEnterSilent);
         } else if (VOLUME_UP_SILENT.equals(key)) {
             volumeUpToExitSilent =
-                TunerService.parseIntegerSwitch(newValue, DEFAULT_VOLUME_UP_TO_EXIT_SILENT);
+                TunerService.parseIntegerSwitch(newValue, mDefaultVolumeUpToExitSilent);
         } else if (VOLUME_SILENT_DO_NOT_DISTURB.equals(key)) {
             doNotDisturbWhenSilent =
                 TunerService.parseIntegerSwitch(newValue, DEFAULT_DO_NOT_DISTURB_WHEN_SILENT);

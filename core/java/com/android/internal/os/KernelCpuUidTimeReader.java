@@ -16,9 +16,7 @@
 package com.android.internal.os;
 
 import static com.android.internal.os.KernelCpuProcStringReader.asLongs;
-import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.StrictMode;
 import android.util.IntArray;
@@ -29,11 +27,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.KernelCpuProcStringReader.ProcFileIterator;
 import com.android.internal.os.KernelCpuUidBpfMapReader.BpfMapIterator;
 
-import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.CharBuffer;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -352,7 +348,7 @@ public abstract class KernelCpuUidTimeReader<T> {
         private int mFreqCount = 0;
         private int mErrors = 0;
         private boolean mPerClusterTimesAvailable;
-        private boolean mAllUidTimesAvailable = true;
+        private boolean mAllUidTimesAvailable;
 
         public KernelCpuUidFreqTimeReader(boolean throttle) {
             this(throttle, Clock.SYSTEM_CLOCK);
@@ -376,10 +372,22 @@ public abstract class KernelCpuUidTimeReader<T> {
         }
 
         /**
+         * Initializes the reader.  Should be called during the system-ready boot phase.
+         */
+        public void onSystemReady() {
+            if (mBpfTimesAvailable && mCpuFreqs == null) {
+                readFreqsThroughBpf();
+                // By extension: if we can read CPU frequencies through eBPF, we can also
+                // read per-UID CPU time-in-state
+                mAllUidTimesAvailable = mCpuFreqs != null;
+            }
+        }
+
+        /**
          * @return Whether per-cluster times are available.
          */
         public boolean perClusterTimesAvailable() {
-            return mPerClusterTimesAvailable;
+            return mBpfTimesAvailable;
         }
 
         /**
@@ -394,59 +402,6 @@ public abstract class KernelCpuUidTimeReader<T> {
          */
         public SparseArray<long[]> getAllUidCpuFreqTimeMs() {
             return mLastTimes;
-        }
-
-        /**
-         * Reads a list of CPU frequencies from /proc/uid_time_in_state. Uses a given PowerProfile
-         * to determine if per-cluster times are available.
-         *
-         * @param powerProfile The PowerProfile to compare against.
-         * @return A long[] of CPU frequencies in Hz.
-         */
-        public long[] readFreqs(@NonNull PowerProfile powerProfile) {
-            checkNotNull(powerProfile);
-            if (mCpuFreqs != null) {
-                // No need to read cpu freqs more than once.
-                return mCpuFreqs;
-            }
-            if (!mAllUidTimesAvailable) {
-                return null;
-            }
-            if (mBpfTimesAvailable) {
-                readFreqsThroughBpf();
-            }
-            if (mCpuFreqs == null) {
-                final int oldMask = StrictMode.allowThreadDiskReadsMask();
-                try (BufferedReader reader = Files.newBufferedReader(mProcFilePath)) {
-                    if (readFreqs(reader.readLine()) == null) {
-                        return null;
-                    }
-                } catch (IOException e) {
-                    if (++mErrors >= MAX_ERROR_COUNT) {
-                        mAllUidTimesAvailable = false;
-                    }
-                    Slog.e(mTag, "Failed to read " + UID_TIMES_PROC_FILE + ": " + e);
-                    return null;
-                } finally {
-                    StrictMode.setThreadPolicyMask(oldMask);
-                }
-            }
-            // Check if the freqs in the proc file correspond to per-cluster freqs.
-            final IntArray numClusterFreqs = extractClusterInfoFromProcFileFreqs();
-            final int numClusters = powerProfile.getNumCpuClusters();
-            if (numClusterFreqs.size() == numClusters) {
-                mPerClusterTimesAvailable = true;
-                for (int i = 0; i < numClusters; ++i) {
-                    if (numClusterFreqs.get(i) != powerProfile.getNumSpeedStepsInCpuCluster(i)) {
-                        mPerClusterTimesAvailable = false;
-                        break;
-                    }
-                }
-            } else {
-                mPerClusterTimesAvailable = false;
-            }
-            Slog.i(mTag, "mPerClusterTimesAvailable=" + mPerClusterTimesAvailable);
-            return mCpuFreqs;
         }
 
         private long[] readFreqsThroughBpf() {

@@ -20,6 +20,7 @@ import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 import static android.media.AudioManager.ACTION_MICROPHONE_MUTE_CHANGED;
 
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -53,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -83,6 +85,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     private final SystemClock mClock;
 
     private H mBGHandler;
+    private final Executor mBgExecutor;
     private final List<AppOpsController.Callback> mCallbacks = new ArrayList<>();
     private final SparseArray<Set<Callback>> mCallbacksByCode = new SparseArray<>();
     private boolean mListening;
@@ -97,23 +100,62 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     private final SparseArray<ArrayList<AudioRecordingConfiguration>> mRecordingsByUid =
             new SparseArray<>();
 
-    protected static final int[] OPS = new int[] {
-            AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION,
-            AppOpsManager.OP_CAMERA,
-            AppOpsManager.OP_PHONE_CALL_CAMERA,
-            AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
+    @VisibleForTesting
+    protected static final int[] OPS_MIC = new int[] {
             AppOpsManager.OP_RECORD_AUDIO,
-            AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
-            AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO,
             AppOpsManager.OP_PHONE_CALL_MICROPHONE,
-            AppOpsManager.OP_COARSE_LOCATION,
-            AppOpsManager.OP_FINE_LOCATION
+            AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
+            AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
+            AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO
     };
+
+    protected static final int[] OPS_CAMERA = new int[] {
+            AppOpsManager.OP_CAMERA,
+            AppOpsManager.OP_PHONE_CALL_CAMERA
+    };
+
+    protected static final int[] OPS_LOC = new int[] {
+            AppOpsManager.OP_FINE_LOCATION,
+            AppOpsManager.OP_COARSE_LOCATION,
+            AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION
+    };
+
+    protected static final int[] OPS_OTHERS = new int[] {
+            AppOpsManager.OP_SYSTEM_ALERT_WINDOW
+    };
+
+    protected static final int[] OPS = concatOps(OPS_MIC, OPS_CAMERA, OPS_LOC, OPS_OTHERS);
+
+    /**
+     * @param opArrays the given op arrays.
+     * @return the concatenations of the given op arrays. Null arrays are treated as empty.
+     */
+    private static int[] concatOps(@Nullable int[]...opArrays) {
+        if (opArrays == null) {
+            return new int[0];
+        }
+        int totalLength = 0;
+        for (int[] opArray : opArrays) {
+            if (opArray == null || opArray.length == 0) {
+                continue;
+            }
+            totalLength += opArray.length;
+        }
+        final int[] concatOps = new int[totalLength];
+        int index = 0;
+        for (int[] opArray : opArrays) {
+            if (opArray == null || opArray.length == 0) continue;
+            System.arraycopy(opArray, 0, concatOps, index, opArray.length);
+            index += opArray.length;
+        }
+        return concatOps;
+    }
 
     @Inject
     public AppOpsControllerImpl(
             Context context,
             @Background Looper bgLooper,
+            @Background Executor bgExecutor,
             DumpManager dumpManager,
             AudioManager audioManager,
             IndividualSensorPrivacyController sensorPrivacyController,
@@ -123,6 +165,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
         mDispatcher = dispatcher;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mBGHandler = new H(bgLooper);
+        mBgExecutor = bgExecutor;
         final int numOps = OPS.length;
         for (int i = 0; i < numOps; i++) {
             mCallbacksByCode.put(OPS[i], new ArraySet<>());
@@ -145,45 +188,50 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     @VisibleForTesting
     protected void setListening(boolean listening) {
         mListening = listening;
-        if (listening) {
-            // System UI could be restarted while ops are active, so fetch the currently active ops
-            // once System UI starts listening again.
-            fetchCurrentActiveOps();
+        // Move IPCs to the background.
+        mBgExecutor.execute(() -> {
+            if (listening) {
+                // System UI could be restarted while ops are active, so fetch the currently active
+                // ops once System UI starts listening again -- see b/294104969.
+                fetchCurrentActiveOps();
 
-            mAppOps.startWatchingActive(OPS, this);
-            mAppOps.startWatchingNoted(OPS, this);
-            mAudioManager.registerAudioRecordingCallback(mAudioRecordingCallback, mBGHandler);
-            mSensorPrivacyController.addCallback(this);
+                mAppOps.startWatchingActive(OPS, this);
+                mAppOps.startWatchingNoted(OPS, this);
+                mAudioManager.registerAudioRecordingCallback(mAudioRecordingCallback, mBGHandler);
+                mSensorPrivacyController.addCallback(this);
 
-            mMicMuted = mAudioManager.isMicrophoneMute()
-                    || mSensorPrivacyController.isSensorBlocked(MICROPHONE);
-            mCameraDisabled = mSensorPrivacyController.isSensorBlocked(CAMERA);
+                mMicMuted = mAudioManager.isMicrophoneMute()
+                        || mSensorPrivacyController.isSensorBlocked(MICROPHONE);
+                mCameraDisabled = mSensorPrivacyController.isSensorBlocked(CAMERA);
 
-            mBGHandler.post(() -> mAudioRecordingCallback.onRecordingConfigChanged(
-                    mAudioManager.getActiveRecordingConfigurations()));
-            mDispatcher.registerReceiverWithHandler(this,
-                    new IntentFilter(ACTION_MICROPHONE_MUTE_CHANGED), mBGHandler);
+                mBGHandler.post(() -> mAudioRecordingCallback.onRecordingConfigChanged(
+                        mAudioManager.getActiveRecordingConfigurations()));
+                mDispatcher.registerReceiverWithHandler(this,
+                        new IntentFilter(ACTION_MICROPHONE_MUTE_CHANGED), mBGHandler);
+            } else {
+                mAppOps.stopWatchingActive(this);
+                mAppOps.stopWatchingNoted(this);
+                mAudioManager.unregisterAudioRecordingCallback(mAudioRecordingCallback);
+                mSensorPrivacyController.removeCallback(this);
 
-        } else {
-            mAppOps.stopWatchingActive(this);
-            mAppOps.stopWatchingNoted(this);
-            mAudioManager.unregisterAudioRecordingCallback(mAudioRecordingCallback);
-            mSensorPrivacyController.removeCallback(this);
-
-            mBGHandler.removeCallbacksAndMessages(null); // null removes all
-            mDispatcher.unregisterReceiver(this);
-            synchronized (mActiveItems) {
-                mActiveItems.clear();
-                mRecordingsByUid.clear();
+                mBGHandler.removeCallbacksAndMessages(null); // null removes all
+                mDispatcher.unregisterReceiver(this);
+                synchronized (mActiveItems) {
+                    mActiveItems.clear();
+                    mRecordingsByUid.clear();
+                }
+                synchronized (mNotedItems) {
+                    mNotedItems.clear();
+                }
             }
-            synchronized (mNotedItems) {
-                mNotedItems.clear();
-            }
-        }
+        });
     }
 
     private void fetchCurrentActiveOps() {
         List<AppOpsManager.PackageOps> packageOps = mAppOps.getPackagesForOps(OPS);
+        if (packageOps == null) {
+            return;
+        }
         for (AppOpsManager.PackageOps op : packageOps) {
             for (AppOpsManager.OpEntry entry : op.getOps()) {
                 for (Map.Entry<String, AppOpsManager.AttributedOpEntry> attributedOpEntry :
@@ -561,12 +609,17 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     }
 
     private boolean isOpCamera(int op) {
-        return op == AppOpsManager.OP_CAMERA || op == AppOpsManager.OP_PHONE_CALL_CAMERA;
+        for (int i = 0; i < OPS_CAMERA.length; i++) {
+            if (op == OPS_CAMERA[i]) return true;
+        }
+        return false;
     }
 
     private boolean isOpMicrophone(int op) {
-        return op == AppOpsManager.OP_RECORD_AUDIO || op == AppOpsManager.OP_PHONE_CALL_MICROPHONE
-                || op == AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
+        for (int i = 0; i < OPS_MIC.length; i++) {
+            if (op == OPS_MIC[i]) return true;
+        }
+        return false;
     }
 
     protected class H extends Handler {

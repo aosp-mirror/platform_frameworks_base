@@ -16,8 +16,10 @@
 
 package com.android.keyguard;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.WindowInsets.Type.ime;
 
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_ADAPTIVE_AUTH_REQUEST;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NONE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT;
@@ -27,11 +29,15 @@ import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART_FO
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
+import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_CLOSED;
+import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Trace;
@@ -39,38 +45,35 @@ import android.util.AttributeSet;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimationControlListener;
 import android.view.WindowInsetsAnimationController;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.TextViewInputDisabler;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
+import com.android.systemui.statusbar.policy.DevicePostureController;
+
 /**
  * Displays an alphanumeric (latin-1) key entry for the user to enter
  * an unlock password
  */
 public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
 
-    private final int mDisappearYTranslation;
-
-    private static final long IME_DISAPPEAR_DURATION_MS = 125;
-
-    // A delay constant to be used in a workaround for the situation where InputMethodManagerService
-    // is not switched to the new user yet.
-    // TODO: Remove this by ensuring such a race condition never happens.
-
     private TextView mPasswordEntry;
     private TextViewInputDisabler mPasswordEntryDisabler;
-
-    private Interpolator mLinearOutSlowInInterpolator;
-    private Interpolator mFastOutLinearInInterpolator;
     private DisappearAnimationListener mDisappearAnimationListener;
+    @Nullable private MotionLayout mContainerMotionLayout;
+    private boolean mAlreadyUsingSplitBouncer = false;
+    private boolean mIsLockScreenLandscapeEnabled = false;
+    @DevicePostureController.DevicePostureInt
+    private int mLastDevicePosture = DEVICE_POSTURE_UNKNOWN;
+    private static final int[] DISABLE_STATE_SET = {-android.R.attr.state_enabled};
+    private static final int[] ENABLE_STATE_SET = {android.R.attr.state_enabled};
 
     public KeyguardPasswordView(Context context) {
         this(context, null);
@@ -78,12 +81,21 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
 
     public KeyguardPasswordView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mDisappearYTranslation = getResources().getDimensionPixelSize(
-                R.dimen.disappear_y_translation);
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(
-                context, android.R.interpolator.linear_out_slow_in);
-        mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(
-                context, android.R.interpolator.fast_out_linear_in);
+    }
+
+    /**
+     * Use motion layout (new bouncer implementation) if LOCKSCREEN_ENABLE_LANDSCAPE flag is
+     * enabled
+     */
+    public void setIsLockScreenLandscapeEnabled() {
+        mIsLockScreenLandscapeEnabled = true;
+        findContainerLayout();
+    }
+
+    private void findContainerLayout() {
+        if (mIsLockScreenLandscapeEnabled) {
+            mContainerMotionLayout = findViewById(R.id.password_container);
+        }
     }
 
     @Override
@@ -109,11 +121,13 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
             case PROMPT_REASON_USER_REQUEST:
                 return R.string.kg_prompt_after_user_lockdown_password;
             case PROMPT_REASON_PREPARE_FOR_UPDATE:
-                return R.string.kg_prompt_unattended_update_password;
+                return R.string.kg_prompt_added_security_password;
             case PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT:
                 return R.string.kg_prompt_reason_timeout_password;
             case PROMPT_REASON_TRUSTAGENT_EXPIRED:
                 return R.string.kg_prompt_reason_timeout_password;
+            case PROMPT_REASON_ADAPTIVE_AUTH_REQUEST:
+                return R.string.kg_prompt_after_adaptive_auth_lock;
             case PROMPT_REASON_NONE:
                 return 0;
             default:
@@ -121,6 +135,35 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
         }
     }
 
+    void onDevicePostureChanged(@DevicePostureController.DevicePostureInt int posture) {
+        if (mLastDevicePosture == posture) return;
+        mLastDevicePosture = posture;
+
+        if (mIsLockScreenLandscapeEnabled) {
+            boolean useSplitBouncerAfterFold =
+                    mLastDevicePosture == DEVICE_POSTURE_CLOSED
+                    && getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE
+                    && getResources().getBoolean(R.bool.update_bouncer_constraints);
+
+            if (mAlreadyUsingSplitBouncer != useSplitBouncerAfterFold) {
+                updateConstraints(useSplitBouncerAfterFold);
+            }
+        }
+
+    }
+
+    @Override
+    protected void updateConstraints(boolean useSplitBouncer) {
+        mAlreadyUsingSplitBouncer = useSplitBouncer;
+        if (useSplitBouncer) {
+            mContainerMotionLayout.jumpToState(R.id.split_constraints);
+            mContainerMotionLayout.setMaxWidth(Integer.MAX_VALUE);
+        } else {
+            mContainerMotionLayout.jumpToState(R.id.single_constraints);
+            mContainerMotionLayout.setMaxWidth(getResources()
+                    .getDimensionPixelSize(R.dimen.keyguard_security_width));
+        }
+    }
 
     @Override
     protected void onFinishInflate() {
@@ -128,6 +171,11 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
 
         mPasswordEntry = findViewById(getPasswordTextViewId());
         mPasswordEntryDisabler = new TextViewInputDisabler(mPasswordEntry);
+
+        // EditText cursor can fail screenshot tests, so disable it when testing
+        if (ActivityManager.isRunningInTestHarness()) {
+            mPasswordEntry.setCursorVisible(false);
+        }
     }
 
     @Override
@@ -148,7 +196,10 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
 
     @Override
     protected void setPasswordEntryEnabled(boolean enabled) {
-        mPasswordEntry.setEnabled(enabled);
+        int color = mPasswordEntry.getTextColors().getColorForState(
+                enabled ? ENABLE_STATE_SET : DISABLE_STATE_SET, 0);
+        mPasswordEntry.setBackgroundTintList(ColorStateList.valueOf(color));
+        mPasswordEntry.setCursorVisible(enabled);
     }
 
     @Override
@@ -189,17 +240,18 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                             if (controller.isCancelled()) {
                                 return;
                             }
+                            float value = (float) animation.getAnimatedValue();
+                            float fraction = anim.getAnimatedFraction();
                             Insets shownInsets = controller.getShownStateInsets();
                             int dist = (int) (-shownInsets.bottom / 4
-                                    * anim.getAnimatedFraction());
+                                    * fraction);
                             Insets insets = Insets.add(shownInsets, Insets.of(0, 0, 0, dist));
                             if (mDisappearAnimationListener != null) {
                                 mDisappearAnimationListener.setTranslationY(-dist);
                             }
 
-                            controller.setInsetsAndAlpha(insets,
-                                    (float) animation.getAnimatedValue(),
-                                    anim.getAnimatedFraction());
+                            controller.setInsetsAndAlpha(insets, value, fraction);
+                            setAlpha(value);
                         });
                         anim.addListener(new AnimatorListenerAdapter() {
                             @Override

@@ -1,4 +1,7 @@
+# Bug template url: https://b.corp.google.com/issues/new?component=316125&template=1018199
 include /services/core/java/com/android/server/wm/OWNERS
 
 # Voice Interaction
 per-file *Assist* = file:/core/java/android/service/voice/OWNERS
+
+natanieljr@google.com

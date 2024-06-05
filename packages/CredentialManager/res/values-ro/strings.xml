@@ -1,44 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="4539824758261855508">"Manager de date de conectare"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Anulează"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuă"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"Mai multe opțiuni"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Salvează altfel"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Află mai multe"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"Afișează parola"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"Ascunde parola"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Mai în siguranță cu chei de acces"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Dacă folosești chei de acces, nu este nevoie să creezi sau să reții parole complexe"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Cheile de acces sunt chei digitale criptate pe care le creezi folosindu-ți amprenta, fața sau blocarea ecranului"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Acestea sunt salvate într-un manager de parole, ca să te poți conecta pe alte dispozitive"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Mai multe despre cheile de acces"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Tehnologie fără parole"</string>
-    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Cu ajutorul cheilor de acces, poți să te conectezi fără să te bazezi pe parole. Pentru a-ți verifica identitatea și a crea o cheie de acces, nu trebuie decât să folosești amprenta, recunoașterea facială, PIN-ul sau modelul."</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Cu ajutorul cheilor de acces, poți să te conectezi fără să te bazezi pe parole. Pentru a-ți confirma identitatea și a crea o cheie de acces, nu trebuie decât să folosești amprenta, recunoașterea facială, PIN-ul sau modelul."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Criptografia cheilor publice"</string>
     <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Conform standardelor FIDO Alliance (din care fac parte Google, Apple, Microsoft etc.) și W3C, cheile de acces folosesc perechi de chei criptografice. Spre deosebire de numele de utilizator și șirul de caractere pe care le folosim pentru parole, perechea de chei publică/privată este creată pentru o aplicație sau un site. Cheia privată este stocată în siguranță pe dispozitivul sau în managerul tău de parole și îți confirmă identitatea. Cheia publică este trimisă aplicației sau serverului site-ului. Cu ajutorul cheilor corespunzătoare, poți să te înregistrezi și să te conectezi instantaneu."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Securitate îmbunătățită a contului"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Fiecare cheie este conectată în mod exclusiv cu aplicația sau site-ul pentru care a fost creată, prin urmare nu te poți conecta niciodată din greșeală la o aplicație sau un site fraudulos. În plus, întrucât pe servere sunt stocate doar chei publice, hackingul este mult mai dificil."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Tranziție fluidă"</string>
-    <string name="seamless_transition_detail" msgid="4475509237171739843">"Ne îndreptăm spre un viitor fără parole, în care parolele vor fi disponibile pe lângă cheile de acces."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Ne îndreptăm spre un viitor fără parole, însă acestea sunt încă disponibile, alături de cheile de acces."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Alege unde dorești să salvezi <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selectează un manager de parole pentru a salva informațiile și a te conecta mai rapid data viitoare"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Creezi o cheie de acces pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Salvezi parola pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Salvezi informațiile de conectare pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="passkey" msgid="632353688396759522">"cheie de acces"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Creezi o cheie de acces pentru a te conecta la <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Salvezi parola pentru a te conecta la <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Salvezi informațiile de conectare pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="passkey" msgid="632353688396759522">"cheia de acces"</string>
     <string name="password" msgid="6738570945182936667">"parolă"</string>
     <string name="passkeys" msgid="5733880786866559847">"cheile de acces"</string>
     <string name="passwords" msgid="5419394230391253816">"parolele"</string>
     <string name="sign_ins" msgid="4710739369149469208">"date de conectare"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"informațiile de conectare"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Salvează <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> în"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Creezi cheia de acces pe alt dispozitiv?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Creezi o cheie de acces pe alt dispozitiv?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Salvezi parola pe alt dispozitiv?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Salvezi datele de conectare pe alt dispozitiv?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Folosești <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> pentru toate conectările?"</string>
-    <string name="use_provider_for_all_description" msgid="8466427781848268490">"Managerul de parole îți va stoca parolele și cheile de acces, pentru a te ajuta să te conectezi cu ușurință"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Managerul de parole pentru <xliff:g id="USERNAME">%1$s</xliff:g> îți va stoca parolele și cheile de acces, pentru a te ajuta să te conectezi cu ușurință"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Setează ca prestabilite"</string>
+    <string name="settings" msgid="6536394145760913145">"Setări"</string>
     <string name="use_once" msgid="9027366575315399714">"Folosește o dată"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> parole • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> chei de acces"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> parole"</string>
@@ -49,21 +66,33 @@
     <string name="other_password_manager" msgid="565790221427004141">"Alți manageri de parole"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Închide foaia"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Revino la pagina precedentă"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"Închide sugestia de acțiune de la Managerul de date de conectare, care apare în partea de jos a ecranului"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Folosești cheia de acces salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Folosești datele de conectare salvate pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Alege o conectare salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"Închide"</string>
+    <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Închide"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Folosește cheia de acces salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Folosește parola salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Folosește-ți contul pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Folosește blocarea ecranului ca să te conectezi la <xliff:g id="APP_NAME">%1$s</xliff:g> cu <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Deblochează opțiunile de conectare pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Alege o cheie de acces salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Alege o parolă salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Alege o conectare salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Alege un cont pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Alegi o opțiune pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Folosești aceste informații în <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Conectează-te altfel"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Afișează opțiunile"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continuă"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opțiuni de conectare"</string>
+    <string name="button_label_view_more" msgid="3429098227286495651">"Afișează mai multe"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Pentru <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Manageri de parole blocate"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
-    <skip />
-    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Gestionează acreditările"</string>
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Atinge pentru a debloca"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Fără informații de conectare"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"Nu există informații de conectare în contul <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Gestionează conectările"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"De pe alt dispozitiv"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Folosește alt dispozitiv"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Solicitare anulată de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Opțiuni de conectare"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Mai multe"</string>
 </resources>

@@ -104,6 +104,7 @@ genrule {
 
 android_app {
     name: "framework-res",
+    use_resource_processor: false,
     sdk_version: "core_platform",
     certificate: "platform",
 
@@ -151,6 +152,18 @@ android_app {
             "simulated_device_launcher",
         ],
     },
+
+    generate_product_characteristics_rro: true,
+
+    flags_packages: [
+        "android.app.contextualsearch.flags-aconfig",
+        "android.content.pm.flags-aconfig",
+        "android.provider.flags-aconfig",
+        "camera_platform_flags",
+        "android.net.platform.flags-aconfig",
+        "com.android.window.flags.window-aconfig",
+        "android.permission.flags-aconfig",
+    ],
 }
 
 java_genrule {

@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
+import android.content.pm.Flags;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -882,10 +883,11 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         }
 
         static Uri readFrom(Parcel parcel) {
+            final StringUri stringUri = new StringUri(parcel.readString8());
             return new OpaqueUri(
-                parcel.readString8(),
-                Part.readFrom(parcel),
-                Part.readFrom(parcel)
+                stringUri.parseScheme(),
+                stringUri.getSsp(),
+                stringUri.getFragmentPart()
             );
         }
 
@@ -895,9 +897,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
         public void writeToParcel(Parcel parcel, int flags) {
             parcel.writeInt(TYPE_ID);
-            parcel.writeString8(scheme);
-            ssp.writeTo(parcel);
-            fragment.writeTo(parcel);
+            parcel.writeString8(toString());
         }
 
         public boolean isHierarchical() {
@@ -1196,22 +1196,25 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                 Part query, Part fragment) {
             this.scheme = scheme;
             this.authority = Part.nonNull(authority);
-            this.path = path == null ? PathPart.NULL : path;
+            this.path = generatePath(path);
             this.query = Part.nonNull(query);
             this.fragment = Part.nonNull(fragment);
         }
 
-        static Uri readFrom(Parcel parcel) {
-            final String scheme = parcel.readString8();
-            final Part authority = Part.readFrom(parcel);
+        private PathPart generatePath(PathPart originalPath) {
             // In RFC3986 the path should be determined based on whether there is a scheme or
             // authority present (https://www.rfc-editor.org/rfc/rfc3986.html#section-3.3).
             final boolean hasSchemeOrAuthority =
                     (scheme != null && scheme.length() > 0) || !authority.isEmpty();
-            final PathPart path = PathPart.readFrom(hasSchemeOrAuthority, parcel);
-            final Part query = Part.readFrom(parcel);
-            final Part fragment = Part.readFrom(parcel);
-            return new HierarchicalUri(scheme, authority, path, query, fragment);
+            final PathPart newPath = hasSchemeOrAuthority ? PathPart.makeAbsolute(originalPath)
+                                                          : originalPath;
+            return newPath == null ? PathPart.NULL : newPath;
+        }
+
+        static Uri readFrom(Parcel parcel) {
+            final StringUri stringUri = new StringUri(parcel.readString8());
+            return new HierarchicalUri(stringUri.getScheme(), stringUri.getAuthorityPart(),
+                    stringUri.getPathPart(), stringUri.getQueryPart(), stringUri.getFragmentPart());
         }
 
         public int describeContents() {
@@ -1220,11 +1223,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
         public void writeToParcel(Parcel parcel, int flags) {
             parcel.writeInt(TYPE_ID);
-            parcel.writeString8(scheme);
-            authority.writeTo(parcel);
-            path.writeTo(parcel);
-            query.writeTo(parcel);
-            fragment.writeTo(parcel);
+            parcel.writeString8(toString());
         }
 
         public boolean isHierarchical() {
@@ -1388,7 +1387,11 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
          * @param scheme name or {@code null} if this is a relative Uri
          */
         public Builder scheme(String scheme) {
-            this.scheme = scheme;
+            if (scheme != null) {
+                this.scheme = scheme.replace("://", "");
+            } else {
+                this.scheme = null;
+            }
             return this;
         }
 
@@ -1790,8 +1793,8 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * or external sources like Bluetooth, NFC, or the Internet) should
      * be normalized before they are used to create an Intent.
      *
-     * <p class="note">This method does <em>not</em> validate bad URI's,
-     * or 'fix' poorly formatted URI's - so do not use it for input validation.
+     * <p class="note">This method does <em>not</em> validate bad URIs,
+     * or 'fix' poorly formatted URIs - so do not use it for input validation.
      * A Uri will always be returned, even if the Uri is badly formatted to
      * begin with and a scheme component cannot be found.
      *
@@ -1973,6 +1976,42 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     }
 
     /**
+     * Encodes a value it wasn't already encoded.
+     *
+     * @param value string to encode
+     * @param allow characters to allow
+     * @return encoded value
+     * @hide
+     */
+    public static String encodeIfNotEncoded(@Nullable String value, @Nullable String allow) {
+        if (value == null) return null;
+        if (!Flags.encodeAppIntent() || isEncoded(value, allow)) return value;
+        return encode(value, allow);
+    }
+
+    /**
+     * Returns true if the given string is already encoded to safe characters.
+     *
+     * @param value string to check
+     * @param allow characters to allow
+     * @return true if the string is already encoded or false if it should be encoded
+     */
+    private static boolean isEncoded(@Nullable String value, @Nullable String allow) {
+        if (value == null) return true;
+        for (int index = 0; index < value.length(); index++) {
+            char c = value.charAt(index);
+
+            // Allow % because that's the prefix for an encoded character. This method will fail
+            // for decoded strings whose onlyinvalid character is %, but it's assumed that % alone
+            // cannot cause malicious behavior in the framework.
+            if (!isAllowed(c, allow) && c != '%') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Decodes '%'-escaped octets in the given string using the UTF-8 scheme.
      * Replaces invalid octets with the unicode replacement character
      * ("\\uFFFD").
@@ -1990,25 +2029,30 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     }
 
     /**
+     * Decodes a string if it was encoded, indicated by containing a %.
+     * @param value encoded string to decode
+     * @return decoded value
+     * @hide
+     */
+    public static String decodeIfNeeded(@Nullable String value) {
+        if (value == null) return null;
+        if (Flags.encodeAppIntent() && value.contains("%")) return decode(value);
+        return value;
+    }
+
+    /**
      * Support for part implementations.
      */
     static abstract class AbstractPart {
 
-        // Possible values of mCanonicalRepresentation.
-        static final int REPRESENTATION_ENCODED = 1;
-        static final int REPRESENTATION_DECODED = 2;
-
         volatile String encoded;
         volatile String decoded;
-        private final int mCanonicalRepresentation;
 
         AbstractPart(String encoded, String decoded) {
             if (encoded != NotCachedHolder.NOT_CACHED) {
-                this.mCanonicalRepresentation = REPRESENTATION_ENCODED;
                 this.encoded = encoded;
                 this.decoded = NotCachedHolder.NOT_CACHED;
             } else if (decoded != NotCachedHolder.NOT_CACHED) {
-                this.mCanonicalRepresentation = REPRESENTATION_DECODED;
                 this.encoded = NotCachedHolder.NOT_CACHED;
                 this.decoded = decoded;
             } else {
@@ -2022,24 +2066,6 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
             @SuppressWarnings("StringEquality")
             boolean hasDecoded = decoded != NotCachedHolder.NOT_CACHED;
             return hasDecoded ? decoded : (decoded = decode(encoded));
-        }
-
-        final void writeTo(Parcel parcel) {
-            final String canonicalValue;
-            if (mCanonicalRepresentation == REPRESENTATION_ENCODED) {
-                canonicalValue = encoded;
-            } else if (mCanonicalRepresentation == REPRESENTATION_DECODED) {
-                canonicalValue = decoded;
-            } else {
-                throw new IllegalArgumentException("Unknown representation: "
-                    + mCanonicalRepresentation);
-            }
-            if (canonicalValue == NotCachedHolder.NOT_CACHED) {
-                throw new AssertionError("Canonical value not cached ("
-                    + mCanonicalRepresentation + ")");
-            }
-            parcel.writeInt(mCanonicalRepresentation);
-            parcel.writeString8(canonicalValue);
         }
     }
 
@@ -2067,20 +2093,6 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
             @SuppressWarnings("StringEquality")
             boolean hasEncoded = encoded != NotCachedHolder.NOT_CACHED;
             return hasEncoded ? encoded : (encoded = encode(decoded));
-        }
-
-        static Part readFrom(Parcel parcel) {
-            int representation = parcel.readInt();
-            String value = parcel.readString8();
-            switch (representation) {
-                case REPRESENTATION_ENCODED:
-                    return fromEncoded(value);
-                case REPRESENTATION_DECODED:
-                    return fromDecoded(value);
-                default:
-                    throw new IllegalArgumentException("Unknown representation: "
-                            + representation);
-            }
         }
 
         /**
@@ -2256,23 +2268,6 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
             // TODO: Should we reuse old PathSegments? Probably not.
             return appendEncodedSegment(oldPart, encoded);
-        }
-
-        static PathPart readFrom(Parcel parcel) {
-            int representation = parcel.readInt();
-            switch (representation) {
-                case REPRESENTATION_ENCODED:
-                    return fromEncoded(parcel.readString8());
-                case REPRESENTATION_DECODED:
-                    return fromDecoded(parcel.readString8());
-                default:
-                    throw new IllegalArgumentException("Unknown representation: " + representation);
-            }
-        }
-
-        static PathPart readFrom(boolean hasSchemeOrAuthority, Parcel parcel) {
-            final PathPart path = readFrom(parcel);
-            return hasSchemeOrAuthority ? makeAbsolute(path) : path;
         }
 
         /**

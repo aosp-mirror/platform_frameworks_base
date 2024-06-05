@@ -115,19 +115,15 @@ public class WindowOrganizer {
      * Finishes a running transition.
      * @param transitionToken The transition to finish. Can't be null.
      * @param t A set of window operations to apply before finishing.
-     * @param callback A sync callback (if provided). See {@link #applySyncTransaction}.
-     * @return An ID for the sync operation if performed. See {@link #applySyncTransaction}.
      *
      * @hide
      */
     @SuppressLint("ExecutorRegistration")
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public int finishTransition(@NonNull IBinder transitionToken,
-            @Nullable WindowContainerTransaction t,
-            @Nullable WindowContainerTransactionCallback callback) {
+    public void finishTransition(@NonNull IBinder transitionToken,
+            @Nullable WindowContainerTransaction t) {
         try {
-            return getWindowOrganizerController().finishTransition(transitionToken, t,
-                    callback != null ? callback.mInterface : null);
+            getWindowOrganizerController().finishTransition(transitionToken, t);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -159,9 +155,22 @@ public class WindowOrganizer {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public void registerTransitionPlayer(@Nullable ITransitionPlayer player) {
+    public void registerTransitionPlayer(@NonNull ITransitionPlayer player) {
         try {
             getWindowOrganizerController().registerTransitionPlayer(player);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister a previously-registered ITransitionPlayer.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public void unregisterTransitionPlayer(@NonNull ITransitionPlayer player) {
+        try {
+            getWindowOrganizerController().unregisterTransitionPlayer(player);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

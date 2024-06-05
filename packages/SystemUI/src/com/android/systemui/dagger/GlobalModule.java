@@ -24,6 +24,7 @@ import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.plugins.PluginsModule;
 import com.android.systemui.unfold.UnfoldTransitionModule;
 import com.android.systemui.util.concurrency.GlobalConcurrencyModule;
+import com.android.systemui.util.kotlin.GlobalCoroutinesModule;
 
 import dagger.Module;
 import dagger.Provides;
@@ -47,6 +48,7 @@ import dagger.Provides;
         AndroidInternalsModule.class,
         FrameworkServicesModule.class,
         GlobalConcurrencyModule.class,
+        GlobalCoroutinesModule.class,
         UnfoldTransitionModule.class,
         PluginsModule.class,
 })
@@ -64,6 +66,7 @@ public class GlobalModule {
      * @deprecated Deprecdated because {@link Display#getMetrics} is deprecated.
      */
     @Provides
+    @Deprecated
     public DisplayMetrics provideDisplayMetrics(Context context) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         context.getDisplay().getMetrics(displayMetrics);

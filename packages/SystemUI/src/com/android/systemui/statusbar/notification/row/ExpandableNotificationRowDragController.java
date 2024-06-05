@@ -48,7 +48,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.app.animation.Interpolators;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
@@ -148,7 +148,7 @@ public class ExpandableNotificationRowDragController {
     private void dismissShade() {
         // Speed up dismissing the shade since the drag needs to be handled by
         // the shell layer underneath
-        mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */,
+        mShadeController.animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */,
                 false /* delayed */, 1.1f /* speedUpFactor */);
     }
 

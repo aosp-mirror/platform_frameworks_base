@@ -588,8 +588,7 @@ public class SyncOperation {
             return wakeLockName;
         }
         return (wakeLockName = target.provider
-                + "/" + target.account.type
-                + "/" + target.account.name);
+                + "/" + target.account.type);
     }
 
     // TODO: Test this to make sure that casting to object doesn't lose the type info for EventLog.

@@ -1,0 +1,438 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.credentialmanager.ktx
+
+import android.app.slice.Slice
+import android.content.ComponentName
+import android.content.Context
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.credentials.Credential
+import android.credentials.flags.Flags
+import android.credentials.selection.AuthenticationEntry
+import android.credentials.selection.Entry
+import android.credentials.selection.GetCredentialProviderData
+import android.graphics.drawable.Drawable
+import android.os.Bundle
+import android.text.TextUtils
+import android.util.Log
+import androidx.activity.result.IntentSenderRequest
+import androidx.credentials.PasswordCredential
+import androidx.credentials.PublicKeyCredential
+import androidx.credentials.provider.Action
+import androidx.credentials.provider.AuthenticationAction
+import androidx.credentials.provider.CredentialEntry
+import androidx.credentials.provider.CustomCredentialEntry
+import androidx.credentials.provider.PasswordCredentialEntry
+import androidx.credentials.provider.PublicKeyCredentialEntry
+import androidx.credentials.provider.RemoteEntry
+import com.android.credentialmanager.IS_AUTO_SELECTED_KEY
+import com.android.credentialmanager.model.get.ActionEntryInfo
+import com.android.credentialmanager.model.get.AuthenticationEntryInfo
+import com.android.credentialmanager.model.get.CredentialEntryInfo
+import com.android.credentialmanager.model.CredentialType
+import com.android.credentialmanager.model.get.ProviderInfo
+import com.android.credentialmanager.model.get.RemoteEntryInfo
+import com.android.credentialmanager.shared.R
+import com.android.credentialmanager.TAG
+import com.android.credentialmanager.model.BiometricRequestInfo
+import com.android.credentialmanager.model.EntryInfo
+
+const val CREDENTIAL_ENTRY_PREFIX = "androidx.credentials.provider.credentialEntry."
+
+fun EntryInfo.getIntentSenderRequest(
+    isAutoSelected: Boolean = false
+): IntentSenderRequest? {
+    val entryIntent = fillInIntent?.putExtra(IS_AUTO_SELECTED_KEY, isAutoSelected)
+
+    return pendingIntent?.let{
+        IntentSenderRequest
+            .Builder(pendingIntent = it)
+            .setFillInIntent(entryIntent)
+            .build()
+    }
+}
+
+// Returns the list (potentially empty) of enabled provider.
+fun List<GetCredentialProviderData>.toProviderList(
+    context: Context,
+): List<ProviderInfo> {
+    val providerList: MutableList<ProviderInfo> = mutableListOf()
+    this.forEach {
+        val providerLabelAndIcon = getServiceLabelAndIcon(
+            context.packageManager,
+            it.providerFlattenedComponentName
+        ) ?: return@forEach
+        val (providerLabel, providerIcon) = providerLabelAndIcon
+        providerList.add(
+            ProviderInfo(
+                id = it.providerFlattenedComponentName,
+                icon = providerIcon,
+                displayName = providerLabel,
+                credentialEntryList = getCredentialOptionInfoList(
+                    providerId = it.providerFlattenedComponentName,
+                    providerLabel = providerLabel,
+                    credentialEntries = it.credentialEntries,
+                    context = context
+                ),
+                authenticationEntryList = getAuthenticationEntryList(
+                    it.providerFlattenedComponentName,
+                    providerLabel,
+                    providerIcon,
+                    it.authenticationEntries),
+                remoteEntry = getRemoteEntry(
+                    it.providerFlattenedComponentName,
+                    it.remoteEntry
+                ),
+                actionEntryList = getActionEntryList(
+                    it.providerFlattenedComponentName, it.actionChips, providerIcon
+                ),
+            )
+        )
+    }
+    return providerList
+}
+
+/**
+ * Note: caller required handle empty list due to parsing error.
+ */
+private fun getCredentialOptionInfoList(
+    providerId: String,
+    providerLabel: String,
+    credentialEntries: List<Entry>,
+    context: Context,
+): List<CredentialEntryInfo> {
+    val result: MutableList<CredentialEntryInfo> = mutableListOf()
+    credentialEntries.forEach {
+        val credentialEntry = it.slice.credentialEntry
+        when (credentialEntry) {
+            is PasswordCredentialEntry -> {
+                result.add(
+                    CredentialEntryInfo(
+                    providerId = providerId,
+                    providerDisplayName = providerLabel,
+                    entryKey = it.key,
+                    entrySubkey = it.subkey,
+                    pendingIntent = credentialEntry.pendingIntent,
+                    fillInIntent = it.frameworkExtrasIntent,
+                    credentialType = CredentialType.PASSWORD,
+                    rawCredentialType = PasswordCredential.TYPE_PASSWORD_CREDENTIAL,
+                    credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
+                    userName = credentialEntry.username.toString(),
+                    displayName = credentialEntry.displayName?.toString(),
+                    icon = credentialEntry.icon.loadDrawable(context),
+                    shouldTintIcon = credentialEntry.hasDefaultIcon,
+                    lastUsedTimeMillis = credentialEntry.lastUsedTime,
+                    isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
+                            credentialEntry.isAutoSelectAllowedFromOption,
+                    entryGroupId = credentialEntry.entryGroupId.toString(),
+                    isDefaultIconPreferredAsSingleProvider =
+                            credentialEntry.isDefaultIconPreferredAsSingleProvider,
+                    affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
+                    biometricRequest = retrieveEntryBiometricRequest(it,
+                        CREDENTIAL_ENTRY_PREFIX),
+                )
+                )
+            }
+            is PublicKeyCredentialEntry -> {
+                result.add(
+                    CredentialEntryInfo(
+                    providerId = providerId,
+                    providerDisplayName = providerLabel,
+                    entryKey = it.key,
+                    entrySubkey = it.subkey,
+                    pendingIntent = credentialEntry.pendingIntent,
+                    fillInIntent = it.frameworkExtrasIntent,
+                    credentialType = CredentialType.PASSKEY,
+                    rawCredentialType = PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL,
+                    credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
+                    userName = credentialEntry.username.toString(),
+                    displayName = credentialEntry.displayName?.toString(),
+                    icon = if (credentialEntry.hasDefaultIcon)
+                        context.getDrawable(R.drawable.ic_passkey_24)
+                    else credentialEntry.icon.loadDrawable(context),
+                    shouldTintIcon = credentialEntry.hasDefaultIcon,
+                    lastUsedTimeMillis = credentialEntry.lastUsedTime,
+                    isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
+                            credentialEntry.isAutoSelectAllowedFromOption,
+                    entryGroupId = credentialEntry.entryGroupId.toString(),
+                    isDefaultIconPreferredAsSingleProvider =
+                            credentialEntry.isDefaultIconPreferredAsSingleProvider,
+                    affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
+                    biometricRequest = retrieveEntryBiometricRequest(it,
+                        CREDENTIAL_ENTRY_PREFIX),
+                )
+                )
+            }
+            is CustomCredentialEntry -> {
+                result.add(
+                    CredentialEntryInfo(
+                    providerId = providerId,
+                    providerDisplayName = providerLabel,
+                    entryKey = it.key,
+                    entrySubkey = it.subkey,
+                    pendingIntent = credentialEntry.pendingIntent,
+                    fillInIntent = it.frameworkExtrasIntent,
+                    credentialType = CredentialType.UNKNOWN,
+                    rawCredentialType = credentialEntry.type,
+                    credentialTypeDisplayName =
+                    credentialEntry.typeDisplayName?.toString().orEmpty(),
+                    userName = credentialEntry.title.toString(),
+                    displayName = credentialEntry.subtitle?.toString(),
+                    icon = credentialEntry.icon.loadDrawable(context),
+                    shouldTintIcon = credentialEntry.hasDefaultIcon,
+                    lastUsedTimeMillis = credentialEntry.lastUsedTime,
+                    isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
+                            credentialEntry.isAutoSelectAllowedFromOption,
+                    entryGroupId = credentialEntry.entryGroupId.toString(),
+                    isDefaultIconPreferredAsSingleProvider =
+                            credentialEntry.isDefaultIconPreferredAsSingleProvider,
+                    affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
+                    biometricRequest = retrieveEntryBiometricRequest(it,
+                        CREDENTIAL_ENTRY_PREFIX),
+                )
+                )
+            }
+            else -> Log.d(
+                TAG,
+                "Encountered unrecognized credential entry ${it.slice.spec?.type}"
+            )
+        }
+    }
+    return result
+}
+
+/**
+ * This validates if the entry calling this method contains biometric info, and if so, returns a
+ * [BiometricRequestInfo]. Namely, the biometric flow must have at least the
+ * ALLOWED_AUTHENTICATORS bit passed from Jetpack.
+ * Note that the required values, such as the provider info's icon or display name, or the entries
+ * credential type or userName, and finally the display info's app name, are non-null and must
+ * exist to run through the flow.
+ *
+ * @param hintPrefix a string prefix indicating the type of entry being utilized, since both create
+ * and get flows utilize slice params; includes the final '.' before the name of the type (e.g.
+ * androidx.credentials.provider.credentialEntry.SLICE_HINT_ALLOWED_AUTHENTICATORS must have
+ * 'hintPrefix' up to "androidx.credentials.provider.credentialEntry.")
+ */
+fun retrieveEntryBiometricRequest(
+    entry: Entry,
+    hintPrefix: String
+): BiometricRequestInfo? {
+    // TODO(b/326243754) : When available, use the official jetpack structured typLo
+    val biometricPromptDataBundleKey = "SLICE_HINT_BIOMETRIC_PROMPT_DATA"
+    val biometricPromptDataBundle: Bundle = entry.slice.items.firstOrNull {
+        it.hasHint(hintPrefix + biometricPromptDataBundleKey)
+    }?.bundle ?: return null
+
+    val allowedAuthConstantKey = "androidx.credentials.provider.BUNDLE_HINT_ALLOWED_AUTHENTICATORS"
+    val cryptoOpIdKey = "androidx.credentials.provider.BUNDLE_HINT_CRYPTO_OP_ID"
+
+    if (!biometricPromptDataBundle.containsKey(allowedAuthConstantKey)) {
+        return null
+    }
+
+    val allowedAuthenticators: Int = biometricPromptDataBundle.getInt(allowedAuthConstantKey)
+
+    // This is optional and does not affect validating the biometric flow in any case
+    val opId: Long? = if (biometricPromptDataBundle.containsKey(cryptoOpIdKey))
+        biometricPromptDataBundle.getLong(cryptoOpIdKey) else null
+
+    return BiometricRequestInfo(opId = opId, allowedAuthenticators = allowedAuthenticators)
+}
+
+val Slice.credentialEntry: CredentialEntry?
+    get() =
+        try {
+            when (spec?.type) {
+                Credential.TYPE_PASSWORD_CREDENTIAL -> PasswordCredentialEntry.fromSlice(this)!!
+                PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL ->
+                    PublicKeyCredentialEntry.fromSlice(this)!!
+
+                else -> CustomCredentialEntry.fromSlice(this)!!
+            }
+        } catch (e: Exception) {
+            // Try CustomCredentialEntry.fromSlice one last time in case the cause was a failed
+            // password / passkey parsing attempt.
+            CustomCredentialEntry.fromSlice(this)
+        }
+
+/**
+ * Note: caller required handle empty list due to parsing error.
+ */
+private fun getAuthenticationEntryList(
+    providerId: String,
+    providerDisplayName: String,
+    providerIcon: Drawable,
+    authEntryList: List<AuthenticationEntry>,
+): List<AuthenticationEntryInfo> {
+    val result: MutableList<AuthenticationEntryInfo> = mutableListOf()
+    authEntryList.forEach { entry ->
+        val structuredAuthEntry =
+            AuthenticationAction.fromSlice(entry.slice) ?: return@forEach
+
+        val title: String =
+            structuredAuthEntry.title.toString().ifEmpty { providerDisplayName }
+
+        result.add(
+            AuthenticationEntryInfo(
+            providerId = providerId,
+            entryKey = entry.key,
+            entrySubkey = entry.subkey,
+            pendingIntent = structuredAuthEntry.pendingIntent,
+            fillInIntent = entry.frameworkExtrasIntent,
+            title = title,
+            providerDisplayName = providerDisplayName,
+            icon = providerIcon,
+            isUnlockedAndEmpty = entry.status != AuthenticationEntry.STATUS_LOCKED,
+            isLastUnlocked =
+            entry.status == AuthenticationEntry.STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT
+        )
+        )
+    }
+    return result
+}
+
+private fun getRemoteEntry(providerId: String, remoteEntry: Entry?): RemoteEntryInfo? {
+    if (remoteEntry == null) {
+        return null
+    }
+    val structuredRemoteEntry = RemoteEntry.fromSlice(remoteEntry.slice)
+        ?: return null
+    return RemoteEntryInfo(
+        providerId = providerId,
+        entryKey = remoteEntry.key,
+        entrySubkey = remoteEntry.subkey,
+        pendingIntent = structuredRemoteEntry.pendingIntent,
+        fillInIntent = remoteEntry.frameworkExtrasIntent,
+    )
+}
+
+/**
+ * Note: caller required handle empty list due to parsing error.
+ */
+private fun getActionEntryList(
+    providerId: String,
+    actionEntries: List<Entry>,
+    providerIcon: Drawable,
+): List<ActionEntryInfo> {
+    val result: MutableList<ActionEntryInfo> = mutableListOf()
+    actionEntries.forEach {
+        val actionEntryUi = Action.fromSlice(it.slice) ?: return@forEach
+        result.add(
+            ActionEntryInfo(
+            providerId = providerId,
+            entryKey = it.key,
+            entrySubkey = it.subkey,
+            pendingIntent = actionEntryUi.pendingIntent,
+            fillInIntent = it.frameworkExtrasIntent,
+            title = actionEntryUi.title.toString(),
+            icon = providerIcon,
+            subTitle = actionEntryUi.subtitle?.toString(),
+        )
+        )
+    }
+    return result
+}
+
+
+
+private fun getServiceLabelAndIcon(
+    pm: PackageManager,
+    providerFlattenedComponentName: String
+): Pair<String, Drawable>? {
+    var providerLabel: String? = null
+    var providerIcon: Drawable? = null
+    val component = ComponentName.unflattenFromString(providerFlattenedComponentName)
+    if (component == null) {
+        // Test data has only package name not component name.
+        // For test data usage only.
+        try {
+            val pkgInfo = if (Flags.instantAppsEnabled()) {
+                getPackageInfo(pm, providerFlattenedComponentName)
+            } else {
+                pm.getPackageInfo(
+                    providerFlattenedComponentName,
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+            }
+            val applicationInfo = checkNotNull(pkgInfo.applicationInfo)
+            providerLabel =
+                applicationInfo.loadSafeLabel(
+                    pm, 0f,
+                    TextUtils.SAFE_STRING_FLAG_FIRST_LINE or TextUtils.SAFE_STRING_FLAG_TRIM
+                ).toString()
+            providerIcon = applicationInfo.loadIcon(pm)
+        } catch (e: Exception) {
+            Log.e(TAG, "Provider package info not found", e)
+        }
+    } else {
+        try {
+            val si = pm.getServiceInfo(component, PackageManager.ComponentInfoFlags.of(0))
+            providerLabel = si.loadSafeLabel(
+                pm, 0f,
+                TextUtils.SAFE_STRING_FLAG_FIRST_LINE or TextUtils.SAFE_STRING_FLAG_TRIM
+            ).toString()
+            providerIcon = si.loadIcon(pm)
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.e(TAG, "Provider service info not found", e)
+            // Added for mdoc use case where the provider may not need to register a service and
+            // instead only relies on the registration api.
+            try {
+                val pkgInfo = if (Flags.instantAppsEnabled()) {
+                    getPackageInfo(pm, providerFlattenedComponentName)
+                } else {
+                    pm.getPackageInfo(
+                        component.packageName,
+                        PackageManager.PackageInfoFlags.of(0)
+                    )
+                }
+                val applicationInfo = checkNotNull(pkgInfo.applicationInfo)
+                providerLabel =
+                    applicationInfo.loadSafeLabel(
+                        pm, 0f,
+                        TextUtils.SAFE_STRING_FLAG_FIRST_LINE or TextUtils.SAFE_STRING_FLAG_TRIM
+                    ).toString()
+                providerIcon = applicationInfo.loadIcon(pm)
+            } catch (e: Exception) {
+                Log.e(TAG, "Provider package info not found", e)
+            }
+        }
+    }
+    return if (providerLabel == null || providerIcon == null) {
+        Log.d(
+            TAG,
+            "Failed to load provider label/icon for provider $providerFlattenedComponentName"
+        )
+        null
+    } else {
+        Pair(providerLabel, providerIcon)
+    }
+}
+
+private fun getPackageInfo(
+    pm: PackageManager,
+    packageName: String
+): PackageInfo {
+    val packageManagerFlags = PackageManager.MATCH_INSTANT
+
+    return pm.getPackageInfo(
+        packageName,
+        PackageManager.PackageInfoFlags.of(
+            (packageManagerFlags).toLong())
+    )
+}

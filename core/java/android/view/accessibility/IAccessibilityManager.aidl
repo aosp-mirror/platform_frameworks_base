@@ -21,15 +21,18 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.ComponentName;
+import android.content.pm.ParceledListSlice;
+import android.os.Bundle;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManagerClient;
 import android.view.accessibility.AccessibilityWindowAttributes;
-import android.view.accessibility.IWindowMagnificationConnection;
+import android.view.accessibility.IMagnificationConnection;
 import android.view.InputEvent;
 import android.view.IWindow;
 import android.view.MagnificationSpec;
+import android.view.SurfaceControl;
 
 /**
  * Interface implemented by the AccessibilityManagerService called by
@@ -39,97 +42,154 @@ import android.view.MagnificationSpec;
  */
 interface IAccessibilityManager {
 
+    @RequiresNoPermission
     oneway void interrupt(int userId);
 
+    @RequiresNoPermission
     oneway void sendAccessibilityEvent(in AccessibilityEvent uiEvent, int userId);
 
+    @RequiresNoPermission
     long addClient(IAccessibilityManagerClient client, int userId);
 
+    @RequiresNoPermission
     boolean removeClient(IAccessibilityManagerClient client, int userId);
 
-    List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId);
+    @RequiresNoPermission
+    ParceledListSlice<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId);
 
+    @RequiresNoPermission
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType, int userId);
 
+    @RequiresNoPermission
     int addAccessibilityInteractionConnection(IWindow windowToken, IBinder leashToken,
             in IAccessibilityInteractionConnection connection,
             String packageName, int userId);
 
+    @RequiresNoPermission
     void removeAccessibilityInteractionConnection(IWindow windowToken);
 
+    @EnforcePermission("MODIFY_ACCESSIBILITY_DATA")
     void setPictureInPictureActionReplacingConnection(
             in IAccessibilityInteractionConnection connection);
 
+    @EnforcePermission("RETRIEVE_WINDOW_CONTENT")
     void registerUiTestAutomationService(IBinder owner, IAccessibilityServiceClient client,
         in AccessibilityServiceInfo info, int userId, int flags);
 
+    @RequiresNoPermission
     void unregisterUiTestAutomationService(IAccessibilityServiceClient client);
 
     // Used by UiAutomation
+    @EnforcePermission("RETRIEVE_WINDOW_CONTENT")
     IBinder getWindowToken(int windowId, int userId);
 
+    @EnforcePermission("STATUS_BAR_SERVICE")
     void notifyAccessibilityButtonClicked(int displayId, String targetName);
 
+
+    @EnforcePermission("STATUS_BAR_SERVICE")
     void notifyAccessibilityButtonVisibilityChanged(boolean available);
 
-    // Requires Manifest.permission.MANAGE_ACCESSIBILITY
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
     void performAccessibilityShortcut(String targetName);
 
-    // Requires Manifest.permission.MANAGE_ACCESSIBILITY
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
     List<String> getAccessibilityShortcutTargets(int shortcutType);
 
     // System process only
+    @RequiresNoPermission
     boolean sendFingerprintGesture(int gestureKeyCode);
 
     // System process only
+    @RequiresNoPermission
     int getAccessibilityWindowId(IBinder windowToken);
 
+    @RequiresNoPermission
     long getRecommendedTimeoutMillis();
 
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
     oneway void registerSystemAction(in RemoteAction action, int actionId);
-    oneway void unregisterSystemAction(int actionId);
-    oneway void setWindowMagnificationConnection(in IWindowMagnificationConnection connection);
 
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
+    oneway void unregisterSystemAction(int actionId);
+
+    @EnforcePermission("STATUS_BAR_SERVICE")
+    oneway void setMagnificationConnection(in IMagnificationConnection connection);
+
+    @RequiresNoPermission
     void associateEmbeddedHierarchy(IBinder host, IBinder embedded);
 
+    @RequiresNoPermission
     void disassociateEmbeddedHierarchy(IBinder token);
 
+    @RequiresNoPermission
     int getFocusStrokeWidth();
 
+    @RequiresNoPermission
     int getFocusColor();
 
+    @RequiresNoPermission
     boolean isAudioDescriptionByDefaultEnabled();
 
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)")
+    @EnforcePermission("SET_SYSTEM_AUDIO_CAPTION")
     void setSystemAudioCaptioningEnabled(boolean isEnabled, int userId);
 
+    @RequiresNoPermission
     boolean isSystemAudioCaptioningUiEnabled(int userId);
 
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)")
+    @EnforcePermission("SET_SYSTEM_AUDIO_CAPTION")
     void setSystemAudioCaptioningUiEnabled(boolean isEnabled, int userId);
 
+    @RequiresNoPermission
     oneway void setAccessibilityWindowAttributes(int displayId, int windowId, int userId, in AccessibilityWindowAttributes attributes);
 
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
+    // Requires CREATE_VIRTUAL_DEVICE permission. Also requires either a11y permission or role.
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean registerProxyForDisplay(IAccessibilityServiceClient proxy, int displayId);
 
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
+    // Requires CREATE_VIRTUAL_DEVICE permission. Also requires either a11y permission or role.
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean unregisterProxyForDisplay(int displayId);
 
     // Used by UiAutomation for tests on the InputFilter
+    @EnforcePermission("INJECT_EVENTS")
     void injectInputEventToInputFilter(in InputEvent event);
 
+    @RequiresNoPermission
     boolean startFlashNotificationSequence(String opPkg, int reason, IBinder token);
+
+    @RequiresNoPermission
     boolean stopFlashNotificationSequence(String opPkg);
+
+    @RequiresNoPermission
     boolean startFlashNotificationEvent(String opPkg, int reason, String reasonPkg);
 
+    @RequiresNoPermission
     boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId);
+
+    @RequiresNoPermission
     boolean sendRestrictedDialogIntent(String packageName, int uid, int userId);
+
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
+    boolean isAccessibilityServiceWarningRequired(in AccessibilityServiceInfo info);
 
     parcelable WindowTransformationSpec {
         float[] transformationMatrix;
         MagnificationSpec magnificationSpec;
     }
+    @RequiresNoPermission
     WindowTransformationSpec getWindowTransformationSpec(int windowId);
+
+    @EnforcePermission("INTERNAL_SYSTEM_WINDOW")
+    void attachAccessibilityOverlayToDisplay(int displayId, in SurfaceControl surfaceControl);
+
+    @EnforcePermission(allOf={"STATUS_BAR_SERVICE","MANAGE_ACCESSIBILITY"})
+    oneway void notifyQuickSettingsTilesChanged(int userId, in List<ComponentName> tileComponentNames);
+
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
+    oneway void enableShortcutsForTargets(boolean enable, int shortcutTypes, in List<String> shortcutTargets, int userId);
+
+    @EnforcePermission("MANAGE_ACCESSIBILITY")
+    Bundle getA11yFeatureToTileMap(int userId);
 }

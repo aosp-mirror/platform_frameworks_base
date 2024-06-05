@@ -29,7 +29,6 @@ import com.android.systemui.controls.settings.FakeControlsSettingsRepository
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import dagger.Lazy
 import java.util.Optional
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -173,10 +172,9 @@ class ControlsComponentTest : SysuiTestCase() {
     private fun setupComponent(enabled: Boolean): ControlsComponent {
         return ControlsComponent(
             enabled,
-            mContext,
-            Lazy { controller },
-            Lazy { uiController },
-            Lazy { listingController },
+            { controller },
+            { uiController },
+            { listingController },
             lockPatternUtils,
             keyguardStateController,
             userTracker,

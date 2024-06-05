@@ -17,6 +17,7 @@
 package com.android.server.location;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.LOCATION_BYPASS;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.compat.CompatChanges.isChangeEnabled;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -34,6 +35,7 @@ import static android.location.provider.LocationProviderBase.ACTION_NETWORK_PROV
 
 import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
+import static com.android.server.location.LocationPermissions.PERMISSION_NONE;
 import static com.android.server.location.eventlog.LocationEventLog.EVENT_LOG;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
@@ -52,13 +54,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
-import android.location.GeocoderParams;
 import android.location.Geofence;
 import android.location.GnssAntennaInfo;
 import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementRequest;
-import android.location.IGeocodeListener;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
@@ -75,8 +75,12 @@ import android.location.LocationManagerInternal.LocationPackageTagsListener;
 import android.location.LocationProvider;
 import android.location.LocationRequest;
 import android.location.LocationTime;
+import android.location.flags.Flags;
+import android.location.provider.ForwardGeocodeRequest;
+import android.location.provider.IGeocodeCallback;
 import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
+import android.location.provider.ReverseGeocodeRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.Build;
@@ -141,6 +145,7 @@ import com.android.server.location.provider.MockLocationProvider;
 import com.android.server.location.provider.PassiveLocationProvider;
 import com.android.server.location.provider.PassiveLocationProviderManager;
 import com.android.server.location.provider.StationaryThrottlingLocationProvider;
+import com.android.server.location.provider.proxy.ProxyGeocodeProvider;
 import com.android.server.location.provider.proxy.ProxyLocationProvider;
 import com.android.server.location.settings.LocationSettings;
 import com.android.server.location.settings.LocationUserSettings;
@@ -204,8 +209,9 @@ public class LocationManagerService extends ILocationManager.Stub implements
         public void onUserStarting(TargetUser user) {
             mUserInfoHelper.onUserStarted(user.getUserIdentifier());
 
-            // log location enabled state on start to minimize coverage loss
+            // log location enabled state and emergency state on start to minimize coverage loss
             mService.logLocationEnabledState();
+            mService.logEmergencyState();
         }
 
         @Override
@@ -252,7 +258,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
 
     private final GeofenceManager mGeofenceManager;
     private volatile @Nullable GnssManagerService mGnssManagerService = null;
-    private GeocoderProxy mGeocodeProvider;
+    private ProxyGeocodeProvider mGeocodeProvider;
 
     private final Object mDeprecatedGnssBatchingLock = new Object();
     @GuardedBy("mDeprecatedGnssBatchingLock")
@@ -297,6 +303,8 @@ public class LocationManagerService extends ILocationManager.Stub implements
                 refreshAppOpsRestrictions(userId);
             }
         });
+        mInjector.getEmergencyHelper().addOnEmergencyStateChangedListener(
+                this::onEmergencyStateChanged);
 
         // set up passive provider first since it will be required for all other location providers,
         // which are loaded later once the system is ready.
@@ -361,9 +369,13 @@ public class LocationManagerService extends ILocationManager.Stub implements
             if (realProvider != null) {
                 // custom logic wrapping all non-passive providers
                 if (manager != mPassiveManager) {
+                    int defaultStationaryThrottlingSetting =
+                            mContext.getPackageManager().hasSystemFeature(
+                                PackageManager.FEATURE_WATCH) ? 0 : 1;
                     boolean enableStationaryThrottling = Settings.Global.getInt(
                             mContext.getContentResolver(),
-                            Settings.Global.LOCATION_ENABLE_STATIONARY_THROTTLE, 1) != 0;
+                            Settings.Global.LOCATION_ENABLE_STATIONARY_THROTTLE,
+                            defaultStationaryThrottlingSetting) != 0;
                     if (enableStationaryThrottling) {
                         realProvider = new StationaryThrottlingLocationProvider(manager.getName(),
                                 mInjector, realProvider);
@@ -454,11 +466,13 @@ public class LocationManagerService extends ILocationManager.Stub implements
                     com.android.internal.R.bool.config_useGnssHardwareProvider);
             AbstractLocationProvider gnssProvider = null;
             if (!useGnssHardwareProvider) {
+                // TODO: Create a separate config_enableGnssLocationOverlay config resource
+                // if we want to selectively enable a GNSS overlay but disable a fused overlay.
                 gnssProvider = ProxyLocationProvider.create(
                         mContext,
                         GPS_PROVIDER,
                         ACTION_GNSS_PROVIDER,
-                        com.android.internal.R.bool.config_useGnssHardwareProvider,
+                        com.android.internal.R.bool.config_enableFusedLocationOverlay,
                         com.android.internal.R.string.config_gnssLocationProviderPackageName);
             }
             if (gnssProvider == null) {
@@ -467,13 +481,14 @@ public class LocationManagerService extends ILocationManager.Stub implements
                 // If we have a GNSS provider override, add the hardware provider as a standalone
                 // option for use by apps with the correct permission. Note the GNSS HAL can only
                 // support a single client, so mGnssManagerService.getGnssLocationProvider() can
-                // only be installed with a single provider.
+                // only be installed with a single provider. Locations from this provider won't
+                // be reported through the passive provider.
                 LocationProviderManager gnssHardwareManager =
                         new LocationProviderManager(
                                 mContext,
                                 mInjector,
                                 GPS_HARDWARE_PROVIDER,
-                                mPassiveManager,
+                                /*passiveManager=*/ null,
                                 Collections.singletonList(Manifest.permission.LOCATION_HARDWARE));
                 addLocationProviderManager(
                         gnssHardwareManager, mGnssManagerService.getGnssLocationProvider());
@@ -485,7 +500,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
 
         // bind to geocoder provider
-        mGeocodeProvider = GeocoderProxy.createAndRegister(mContext);
+        mGeocodeProvider = ProxyGeocodeProvider.createAndRegister(mContext);
         if (mGeocodeProvider == null) {
             Log.e(TAG, "no geocoder provider found");
         }
@@ -568,6 +583,15 @@ public class LocationManagerService extends ILocationManager.Stub implements
         refreshAppOpsRestrictions(userId);
     }
 
+    private void onEmergencyStateChanged() {
+        this.logEmergencyState();
+    }
+
+    private void logEmergencyState() {
+        boolean isInEmergency = mInjector.getEmergencyHelper().isInEmergency(Long.MIN_VALUE);
+        mInjector.getLocationUsageLogger().logEmergencyStateChanged(isInEmergency);
+    }
+
     private void logLocationEnabledState() {
         boolean locationEnabled = false;
         // Location setting is considered on if it is enabled for any one user
@@ -598,10 +622,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         return mGnssManagerService == null ? 0 : mGnssManagerService.getGnssBatchSize();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public void startGnssBatch(long periodNanos, ILocationListener listener, String packageName,
             @Nullable String attributionTag, String listenerId) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        startGnssBatch_enforcePermission();
 
         if (mGnssManagerService == null) {
             return;
@@ -627,9 +652,10 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public void flushGnssBatch() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        flushGnssBatch_enforcePermission();
 
         if (mGnssManagerService == null) {
             return;
@@ -642,9 +668,10 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public void stopGnssBatch() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        stopGnssBatch_enforcePermission();
 
         if (mGnssManagerService == null) {
             return;
@@ -752,8 +779,19 @@ public class LocationManagerService extends ILocationManager.Stub implements
                 listenerId);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
                 identity.getPid());
-        LocationPermissions.enforceLocationPermission(identity.getUid(), permissionLevel,
-                PERMISSION_COARSE);
+        if (Flags.enableLocationBypass()) {
+            if (permissionLevel == PERMISSION_NONE) {
+                if (mContext.checkCallingPermission(LOCATION_BYPASS) != PERMISSION_GRANTED) {
+                    LocationPermissions.enforceLocationPermission(
+                            identity.getUid(), permissionLevel, PERMISSION_COARSE);
+                } else {
+                    permissionLevel = PERMISSION_FINE;
+                }
+            }
+        } else {
+            LocationPermissions.enforceLocationPermission(identity.getUid(), permissionLevel,
+                    PERMISSION_COARSE);
+        }
 
         // clients in the system process must have an attribution tag set
         Preconditions.checkState(identity.getPid() != Process.myPid() || attributionTag != null);
@@ -781,8 +819,19 @@ public class LocationManagerService extends ILocationManager.Stub implements
                 listenerId);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
                 identity.getPid());
-        LocationPermissions.enforceLocationPermission(identity.getUid(), permissionLevel,
-                PERMISSION_COARSE);
+        if (Flags.enableLocationBypass()) {
+            if (permissionLevel == PERMISSION_NONE) {
+                if (mContext.checkCallingPermission(LOCATION_BYPASS) != PERMISSION_GRANTED) {
+                    LocationPermissions.enforceLocationPermission(
+                            identity.getUid(), permissionLevel, PERMISSION_COARSE);
+                } else {
+                    permissionLevel = PERMISSION_FINE;
+                }
+            }
+        } else {
+            LocationPermissions.enforceLocationPermission(identity.getUid(), permissionLevel,
+                    PERMISSION_COARSE);
+        }
 
         // clients in the system process should have an attribution tag set
         if (identity.getPid() == Process.myPid() && attributionTag == null) {
@@ -806,8 +855,19 @@ public class LocationManagerService extends ILocationManager.Stub implements
                 AppOpsManager.toReceiverId(pendingIntent));
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
                 identity.getPid());
-        LocationPermissions.enforceLocationPermission(identity.getUid(), permissionLevel,
-                PERMISSION_COARSE);
+        if (Flags.enableLocationBypass()) {
+            if (permissionLevel == PERMISSION_NONE) {
+                if (mContext.checkCallingPermission(LOCATION_BYPASS) != PERMISSION_GRANTED) {
+                    LocationPermissions.enforceLocationPermission(
+                            identity.getUid(), permissionLevel, PERMISSION_COARSE);
+                } else {
+                    permissionLevel = PERMISSION_FINE;
+                }
+            }
+        } else {
+            LocationPermissions.enforceLocationPermission(identity.getUid(), permissionLevel,
+                    PERMISSION_COARSE);
+        }
 
         // clients in the system process must have an attribution tag set
         Preconditions.checkArgument(identity.getPid() != Process.myPid() || attributionTag != null);
@@ -958,8 +1018,19 @@ public class LocationManagerService extends ILocationManager.Stub implements
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
                 identity.getPid());
-        LocationPermissions.enforceLocationPermission(identity.getUid(), permissionLevel,
-                PERMISSION_COARSE);
+        if (Flags.enableLocationBypass()) {
+            if (permissionLevel == PERMISSION_NONE) {
+                if (mContext.checkCallingPermission(LOCATION_BYPASS) != PERMISSION_GRANTED) {
+                    LocationPermissions.enforceLocationPermission(
+                            identity.getUid(), permissionLevel, PERMISSION_COARSE);
+                } else {
+                    permissionLevel = PERMISSION_FINE;
+                }
+            }
+        } else {
+            LocationPermissions.enforceLocationPermission(identity.getUid(), permissionLevel,
+                    PERMISSION_COARSE);
+        }
 
         // clients in the system process must have an attribution tag set
         Preconditions.checkArgument(identity.getPid() != Process.myPid() || attributionTag != null);
@@ -1110,10 +1181,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     @Override
     @RequiresPermission(INTERACT_ACROSS_USERS)
     public void addProviderRequestListener(IProviderRequestListener listener) {
-        mContext.enforceCallingOrSelfPermission(INTERACT_ACROSS_USERS, null);
+        addProviderRequestListener_enforcePermission();
         for (LocationProviderManager manager : mProviderManagers) {
             if (manager.isVisibleToCaller()) {
                 manager.addProviderRequestListener(listener);
@@ -1194,10 +1266,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         return manager.getProperties();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.READ_DEVICE_CONFIG)
     @Override
     public boolean isProviderPackage(@Nullable String provider, String packageName,
             @Nullable String attributionTag) {
-        mContext.enforceCallingOrSelfPermission(permission.READ_DEVICE_CONFIG, null);
+        isProviderPackage_enforcePermission();
 
         for (LocationProviderManager manager : mProviderManagers) {
             if (provider != null && !provider.equals(manager.getName())) {
@@ -1216,9 +1289,10 @@ public class LocationManagerService extends ILocationManager.Stub implements
         return false;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.READ_DEVICE_CONFIG)
     @Override
     public List<String> getProviderPackages(String provider) {
-        mContext.enforceCallingOrSelfPermission(permission.READ_DEVICE_CONFIG, null);
+        getProviderPackages_enforcePermission();
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         if (manager == null) {
@@ -1321,7 +1395,9 @@ public class LocationManagerService extends ILocationManager.Stub implements
                     "setAutomotiveGnssSuspended only allowed on automotive devices");
         }
 
-        mGnssManagerService.setAutomotiveGnssSuspended(suspended);
+        if (mGnssManagerService != null) {
+              mGnssManagerService.setAutomotiveGnssSuspended(suspended);
+        }
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS)
@@ -1336,27 +1412,29 @@ public class LocationManagerService extends ILocationManager.Stub implements
                     "isAutomotiveGnssSuspended only allowed on automotive devices");
         }
 
-        return mGnssManagerService.isAutomotiveGnssSuspended();
+        if (mGnssManagerService != null) {
+              return mGnssManagerService.isAutomotiveGnssSuspended();
+        }
+        return false;
     }
 
     @Override
-    public boolean geocoderIsPresent() {
+    public boolean isGeocodeAvailable() {
         return mGeocodeProvider != null;
     }
 
     @Override
-    public void getFromLocation(double latitude, double longitude, int maxResults,
-            GeocoderParams params, IGeocodeListener listener) {
-        // validate identity
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, params.getClientPackage(),
-                params.getClientAttributionTag());
-        Preconditions.checkArgument(identity.getUid() == params.getClientUid());
+    public void reverseGeocode(ReverseGeocodeRequest request, IGeocodeCallback callback) {
+        CallerIdentity identity =
+                CallerIdentity.fromBinder(
+                        mContext, request.getCallingPackage(), request.getCallingAttributionTag());
+        Preconditions.checkArgument(identity.getUid() == request.getCallingUid());
 
         if (mGeocodeProvider != null) {
-            mGeocodeProvider.getFromLocation(latitude, longitude, maxResults, params, listener);
+            mGeocodeProvider.reverseGeocode(request, callback);
         } else {
             try {
-                listener.onResults(null, Collections.emptyList());
+                callback.onError(null);
             } catch (RemoteException e) {
                 // ignore
             }
@@ -1364,22 +1442,17 @@ public class LocationManagerService extends ILocationManager.Stub implements
     }
 
     @Override
-    public void getFromLocationName(String locationName,
-            double lowerLeftLatitude, double lowerLeftLongitude,
-            double upperRightLatitude, double upperRightLongitude, int maxResults,
-            GeocoderParams params, IGeocodeListener listener) {
-        // validate identity
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, params.getClientPackage(),
-                params.getClientAttributionTag());
-        Preconditions.checkArgument(identity.getUid() == params.getClientUid());
+    public void forwardGeocode(ForwardGeocodeRequest request, IGeocodeCallback callback) {
+        CallerIdentity identity =
+                CallerIdentity.fromBinder(
+                        mContext, request.getCallingPackage(), request.getCallingAttributionTag());
+        Preconditions.checkArgument(identity.getUid() == request.getCallingUid());
 
         if (mGeocodeProvider != null) {
-            mGeocodeProvider.getFromLocationName(locationName, lowerLeftLatitude,
-                    lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                    maxResults, params, listener);
+            mGeocodeProvider.forwardGeocode(request, callback);
         } else {
             try {
-                listener.onResults(null, Collections.emptyList());
+                callback.onError(null);
             } catch (RemoteException e) {
                 // ignore
             }
@@ -1549,6 +1622,18 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
         ipw.decreaseIndent();
 
+        ipw.println("Historical Aggregate Gnss Measurement Provider Data:");
+        ipw.increaseIndent();
+        ArrayMap<CallerIdentity, LocationEventLog.GnssMeasurementAggregateStats>
+                gnssAggregateStats = EVENT_LOG.copyGnssMeasurementAggregateStats();
+        for (int i = 0; i < gnssAggregateStats.size(); i++) {
+            ipw.print(gnssAggregateStats.keyAt(i));
+            ipw.print(": ");
+            gnssAggregateStats.valueAt(i).updateTotals();
+            ipw.println(gnssAggregateStats.valueAt(i));
+        }
+        ipw.decreaseIndent();
+
         if (mGnssManagerService != null) {
             ipw.println("GNSS Manager:");
             ipw.increaseIndent();
@@ -1713,13 +1798,6 @@ public class LocationManagerService extends ILocationManager.Stub implements
             }
 
             return false;
-        }
-
-        @Override
-        public void sendNiResponse(int notifId, int userResponse) {
-            if (mGnssManagerService != null) {
-                mGnssManagerService.sendNiResponse(notifId, userResponse);
-            }
         }
 
         @Override

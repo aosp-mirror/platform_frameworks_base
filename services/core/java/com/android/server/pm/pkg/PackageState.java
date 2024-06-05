@@ -59,11 +59,6 @@ import java.util.Set;
 public interface PackageState {
 
     /*
-     * Until immutability or read-only caching is enabled, {@link PackageSetting} cannot be
-     * returned directly, so {@link PackageStateImpl} is used to temporarily copy the data.
-     * This is a relatively expensive operation since it has to create an object for every package,
-     * but it's much lighter than the alternative of generating {@link PackageInfo} objects.
-     * <p>
      * TODO: Documentation
      * TODO: Currently missing, should be exposed as API?
      *   - keySetData
@@ -270,6 +265,14 @@ public interface PackageState {
      */
     boolean hasSharedUser();
 
+
+    /**
+     * Whether this app needs to be restore during next install/update.
+     * E.g. if an app was installed as archived and never had a chance to restore its data.
+     * @hide
+     */
+    boolean isPendingRestore();
+
     /**
      * Retrieves the shared user app ID. Note that the actual shared user data is not available here
      * and must be queried separately.
@@ -327,6 +330,14 @@ public interface PackageState {
     long[] getUsesSdkLibrariesVersionsMajor();
 
     /**
+     * @see R.styleable#AndroidManifestUsesSdkLibrary_optional
+     * @hide
+     */
+    @Immutable.Ignore
+    @NonNull
+    boolean[] getUsesSdkLibrariesOptional();
+
+    /**
      * @see R.styleable#AndroidManifestUsesStaticLibrary
      * @hide
      */
@@ -348,6 +359,12 @@ public interface PackageState {
      */
     @Nullable
     String getVolumeUuid();
+
+    /**
+     * @see AndroidPackage#isDefaultToDeviceProtectedStorage()
+     * @hide
+     */
+    boolean isDefaultToDeviceProtectedStorage();
 
     /**
      * @see AndroidPackage#isExternalStorage()
@@ -433,4 +450,34 @@ public interface PackageState {
      */
     @Nullable
     String getApexModuleName();
+
+    /**
+     * @see ApplicationInfo#FLAG_PERSISTENT
+     * @see R.styleable#AndroidManifestApplication_persistent
+     * @hide
+     */
+    boolean isPersistent();
+
+    /**
+     * @see ApplicationInfo#targetSdkVersion
+     * @see R.styleable#AndroidManifestUsesSdk_targetSdkVersion
+     * @hide
+     */
+    int getTargetSdkVersion();
+
+    /**
+     * @see R.styleable#AndroidManifestRestrictUpdate
+     * @hide
+     */
+    @Immutable.Ignore
+    @Nullable
+    byte[] getRestrictUpdateHash();
+
+    /**
+     * whether the package has been scanned as a stopped system app. A package will be
+     * scanned in the stopped state if it is a system app that has a launcher entry and is
+     * <b>not</b> exempted by {@code <initial-package-state>} tag, and is not an APEX
+     * @hide
+     */
+    boolean isScannedAsStoppedSystemApp();
 }

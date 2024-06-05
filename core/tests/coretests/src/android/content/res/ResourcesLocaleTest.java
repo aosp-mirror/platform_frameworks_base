@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.content.Context;
 import android.os.FileUtils;
 import android.os.LocaleList;
 import android.platform.test.annotations.Presubmit;
@@ -96,5 +97,25 @@ public class ResourcesLocaleTest extends AndroidTestCase {
         // therefore be chosen.
         assertEquals(Locale.forLanguageTag("pl-PL"),
                 resources.getConfiguration().getLocales().get(0));
+    }
+
+    @SmallTest
+    public void testDeprecatedISOLanguageCode() {
+        assertResGetString(Locale.US, R.string.locale_test_res_1, "Testing ID");
+        assertResGetString(Locale.forLanguageTag("id"), R.string.locale_test_res_2, "Pengujian IN");
+        assertResGetString(Locale.forLanguageTag("id"), R.string.locale_test_res_3, "Testing EN");
+        assertResGetString(new Locale("id"), R.string.locale_test_res_2, "Pengujian IN");
+        assertResGetString(new Locale("id"), R.string.locale_test_res_3, "Testing EN");
+        // The new ISO code "id" isn't supported yet, and thus the values-id are ignored.
+        assertResGetString(new Locale("id"), R.string.locale_test_res_1, "Testing ID");
+        assertResGetString(Locale.forLanguageTag("id"), R.string.locale_test_res_1, "Testing ID");
+    }
+
+    private void assertResGetString(Locale locale, int resId, String expectedString) {
+        LocaleList locales = new LocaleList(locale);
+        final Configuration config = new Configuration();
+        config.setLocales(locales);
+        Context newContext = getContext().createConfigurationContext(config);
+        assertEquals(expectedString, newContext.getResources().getString(resId));
     }
 }

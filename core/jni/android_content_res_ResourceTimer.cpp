@@ -44,9 +44,9 @@ static struct {
 
 static int NativeGetTimers(JNIEnv* env, jobject /*clazz*/, jobjectArray timer, jboolean reset) {
   size_t size = ResourceTimer::counterSize;
-  if (jsize st = env->GetArrayLength(timer); st < size) {
-    // Shrink the size to the minimum of the available counters and the available space.
-    size = st;
+  if (size_t st = env->GetArrayLength(timer); st < size) {
+      // Shrink the size to the minimum of the available counters and the available space.
+      size = st;
   }
   for (size_t i = 0; i < size; i++) {
     ResourceTimer::Timer src;

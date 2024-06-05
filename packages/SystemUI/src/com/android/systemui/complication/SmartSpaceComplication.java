@@ -71,6 +71,18 @@ public class SmartSpaceComplication implements Complication {
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final SmartSpaceComplication mComplication;
         private final FeatureFlags mFeatureFlags;
+        private final DreamOverlayStateController.Callback mStateControllerCallback =
+                new DreamOverlayStateController.Callback() {
+                    @Override
+                    public void onStateChanged() {
+                        if (mDreamOverlayStateController.isOverlayActive()) {
+                            mSmartSpaceController.addListener(mSmartspaceListener);
+                        } else {
+                            mSmartSpaceController.removeListener(mSmartspaceListener);
+                            mDreamOverlayStateController.removeComplication(mComplication);
+                        }
+                    }
+                };
 
         private final BcSmartspaceDataPlugin.SmartspaceTargetListener mSmartspaceListener =
                 new BcSmartspaceDataPlugin.SmartspaceTargetListener() {
@@ -103,17 +115,7 @@ public class SmartSpaceComplication implements Complication {
                 return;
             }
 
-            mDreamOverlayStateController.addCallback(new DreamOverlayStateController.Callback() {
-                @Override
-                public void onStateChanged() {
-                    if (mDreamOverlayStateController.isOverlayActive()) {
-                        mSmartSpaceController.addListener(mSmartspaceListener);
-                    } else {
-                        mSmartSpaceController.removeListener(mSmartspaceListener);
-                        mDreamOverlayStateController.removeComplication(mComplication);
-                    }
-                }
-            });
+            mDreamOverlayStateController.addCallback(mStateControllerCallback);
         }
     }
 

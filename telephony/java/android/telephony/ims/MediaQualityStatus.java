@@ -24,6 +24,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.TransportType;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -49,6 +51,7 @@ public final class MediaQualityStatus implements Parcelable {
                     MEDIA_SESSION_TYPE_AUDIO,
                     MEDIA_SESSION_TYPE_VIDEO,
             })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface MediaSessionType {}
 
     /**

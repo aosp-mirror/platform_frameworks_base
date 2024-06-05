@@ -39,7 +39,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
-import android.os.SystemProperties;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IUserRestrictionsListener;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -64,8 +66,6 @@ import java.util.function.Supplier;
  * A singleton implementation of {@link ServiceConfigAccessor}.
  */
 final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
-
-    private static final int SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT = 2 * 1000;
 
     /**
      * An absolute threshold at/below which the system clock confidence can be upgraded. i.e. if the
@@ -122,9 +122,8 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         mConfigOriginPrioritiesSupplier = new ConfigOriginPrioritiesSupplier(context);
         mServerFlagsOriginPrioritiesSupplier =
                 new ServerFlagsOriginPrioritiesSupplier(mServerFlags);
-        mSystemClockUpdateThresholdMillis =
-                SystemProperties.getInt("ro.sys.time_detector_update_diff",
-                        SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT);
+        mSystemClockUpdateThresholdMillis = context.getResources().getInteger(
+                R.integer.config_timeDetectorAutoUpdateDiffMillis);
 
         // Wire up the config change listeners for anything that could affect ConfigurationInternal.
         // Use the main thread for event delivery, listeners can post to their chosen thread.
@@ -140,9 +139,11 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             }
         }, filter, null, null /* main thread */);
 
+        Handler mainThreadHandler = mContext.getMainThreadHandler();
+
         // Add async callbacks for global settings being changed.
         ContentResolver contentResolver = mContext.getContentResolver();
-        ContentObserver contentObserver = new ContentObserver(mContext.getMainThreadHandler()) {
+        ContentObserver contentObserver = new ContentObserver(mainThreadHandler) {
             @Override
             public void onChange(boolean selfChange) {
                 handleConfigurationInternalChangeOnMainThread();
@@ -154,6 +155,20 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         // Watch server flags.
         mServerFlags.addListener(this::handleConfigurationInternalChangeOnMainThread,
                 SERVER_FLAGS_KEYS_TO_WATCH);
+
+        // Watch for policy changes that affect what the user is permitted to do.
+        mUserManager.addUserRestrictionsListener(
+                new IUserRestrictionsListener.Stub() {
+                    @Override
+                    public void onUserRestrictionsChanged(
+                            int userId, Bundle newRestrictions, Bundle prevRestrictions) {
+                        // This callback currently delivered on main thread, but this post() is
+                        // defensive and doesn't rely on that in case it changes.
+                        mainThreadHandler.post(
+                                () -> handleUserRestrictionsChangeOnMainThread(
+                                        userId, newRestrictions, prevRestrictions));
+                    }
+                });
     }
 
     /** Returns the singleton instance. */
@@ -176,6 +191,13 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         for (StateChangeListener changeListener : configurationInternalListeners) {
             changeListener.onChange();
         }
+    }
+
+    private void handleUserRestrictionsChangeOnMainThread(
+            int userId, Bundle newRestrictions, Bundle prevRestrictions) {
+        // No attempt at optimisation here. If the policy changes in any way for any user, just
+        // notify.
+        handleConfigurationInternalChangeOnMainThread();
     }
 
     @Override
@@ -203,7 +225,7 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             @NonNull TimeConfiguration requestedConfiguration, boolean bypassUserPolicyChecks) {
         Objects.requireNonNull(requestedConfiguration);
 
-        TimeCapabilitiesAndConfig capabilitiesAndConfig = getCurrentUserConfigurationInternal()
+        TimeCapabilitiesAndConfig capabilitiesAndConfig = getConfigurationInternal(userId)
                 .createCapabilitiesAndConfig(bypassUserPolicyChecks);
         TimeCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
         TimeConfiguration oldConfiguration = capabilitiesAndConfig.getConfiguration();

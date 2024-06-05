@@ -24,9 +24,8 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
 
-import com.android.settingslib.Utils;
-import com.android.systemui.R;
 import com.android.systemui.complication.DreamHomeControlsComplication;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.shadow.DoubleShadowIconDrawable;
 import com.android.systemui.shared.shadow.DoubleShadowTextHelper;
 
@@ -34,7 +33,6 @@ import dagger.BindsInstance;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Subcomponent;
-
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -98,7 +96,7 @@ public interface DreamHomeControlsComplicationComponent {
         @DreamHomeControlsComplicationScope
         @Named(DREAM_HOME_CONTROLS_BACKGROUND_DRAWABLE)
         static Drawable providesHomeControlsBackground(Context context, Resources resources) {
-            final Drawable background = new DoubleShadowIconDrawable(createShadowInfo(
+            return new DoubleShadowIconDrawable(createShadowInfo(
                             resources,
                             R.dimen.dream_overlay_bottom_affordance_key_text_shadow_radius,
                             R.dimen.dream_overlay_bottom_affordance_key_text_shadow_dx,
@@ -117,11 +115,6 @@ public interface DreamHomeControlsComplicationComponent {
                             R.dimen.dream_overlay_bottom_affordance_width),
                     resources.getDimensionPixelSize(R.dimen.dream_overlay_bottom_affordance_inset)
             );
-
-            background.setTintList(
-                    Utils.getColorAttr(context, com.android.internal.R.attr.colorSurface));
-
-            return background;
         }
 
         private static DoubleShadowTextHelper.ShadowInfo createShadowInfo(Resources resources,

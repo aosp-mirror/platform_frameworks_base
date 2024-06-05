@@ -17,11 +17,13 @@
 package android.tests.enforcepermission.service;
 
 import android.annotation.EnforcePermission;
+import android.annotation.RequiresNoPermission;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.PermissionEnforcer;
 import android.os.RemoteException;
 import android.tests.enforcepermission.INested;
 import android.tests.enforcepermission.IProtected;
@@ -36,9 +38,11 @@ public class TestService extends Service {
 
     private static final String TAG = "EnforcePermission.TestService";
     private volatile ServiceConnection mNestedServiceConnection;
+    private IProtected.Stub mBinder;
 
     @Override
     public void onCreate() {
+        mBinder = new Stub(this);
         mNestedServiceConnection = new ServiceConnection();
         Intent intent = new Intent(this, NestedTestService.class);
         boolean bound = bindService(intent, mNestedServiceConnection, Context.BIND_AUTO_CREATE);
@@ -78,7 +82,12 @@ public class TestService extends Service {
         return mBinder;
     }
 
-    private final IProtected.Stub mBinder = new IProtected.Stub() {
+    private class Stub extends IProtected.Stub {
+
+        Stub(Context context) {
+            super(PermissionEnforcer.fromContext(context));
+        }
+
         @Override
         @EnforcePermission(android.Manifest.permission.INTERNET)
         public void ProtectedByInternet() {
@@ -105,7 +114,6 @@ public class TestService extends Service {
             ProtectedByInternetAndAccessNetworkStateImplicitly_enforcePermission();
 
             mNestedServiceConnection.get().ProtectedByAccessNetworkState();
-
         }
 
         @Override
@@ -115,5 +123,65 @@ public class TestService extends Service {
 
             mNestedServiceConnection.get().ProtectedByReadSyncSettings();
         }
-    };
+
+        @Override
+        @EnforcePermission(android.Manifest.permission.TURN_SCREEN_ON)
+        public void ProtectedByTurnScreenOn() {
+            ProtectedByTurnScreenOn_enforcePermission();
+        }
+
+        @Override
+        @EnforcePermission(android.Manifest.permission.READ_CONTACTS)
+        public void ProtectedByReadContacts() {
+            ProtectedByReadContacts_enforcePermission();
+        }
+
+        @Override
+        @EnforcePermission(android.Manifest.permission.READ_CALENDAR)
+        public void ProtectedByReadCalendar() {
+            ProtectedByReadCalendar_enforcePermission();
+        }
+
+        @Override
+        @EnforcePermission(allOf = {
+                android.Manifest.permission.INTERNET,
+                android.Manifest.permission.VIBRATE})
+        public void ProtectedByInternetAndVibrate() {
+            ProtectedByInternetAndVibrate_enforcePermission();
+        }
+
+        @Override
+        @EnforcePermission(allOf = {
+                android.Manifest.permission.INTERNET,
+                android.Manifest.permission.READ_SYNC_SETTINGS})
+        public void ProtectedByInternetAndReadSyncSettings() {
+            ProtectedByInternetAndReadSyncSettings_enforcePermission();
+        }
+
+        @Override
+        @EnforcePermission(anyOf = {
+                  android.Manifest.permission.ACCESS_WIFI_STATE,
+                  android.Manifest.permission.VIBRATE})
+        public void ProtectedByAccessWifiStateOrVibrate() {
+            ProtectedByAccessWifiStateOrVibrate_enforcePermission();
+        }
+
+        @Override
+        @EnforcePermission(anyOf = {
+                android.Manifest.permission.INTERNET,
+                android.Manifest.permission.VIBRATE})
+        public void ProtectedByInternetOrVibrate() {
+            ProtectedByInternetOrVibrate_enforcePermission();
+        }
+
+        @Override
+        @RequiresNoPermission
+        public void NotProtected() {
+        }
+
+        @Override
+        public void ManuallyProtected() {
+            enforceCallingOrSelfPermission(android.Manifest.permission.INTERNET, "access denied");
+        }
+    }
 }

@@ -52,7 +52,7 @@ Expected interface: [NotificationSwipeActionHelper](/frameworks/base/packages/Sy
 Use: Control over swipes/input for notification views, can be used to control what happens when you swipe/long-press
 
 ### Action: com.android.systemui.action.PLUGIN_CLOCK_PROVIDER
-Expected interface: [ClockProviderPlugin](/frameworks/base/packages/SystemUI/plugin/src/com/android/systemui/plugins/ClockProviderPlugin.kt)
+Expected interface: [ClockProviderPlugin](/frameworks/base/packages/SystemUI/plugin/src/com/android/systemui/plugins/clocks/ClockProviderPlugin.kt)
 
 Use: Allows replacement of the keyguard main clock. See [additional Documentation](./clock-plugins.md).
 

@@ -36,116 +36,142 @@ constexpr char kBegin = 'B';
 constexpr char kEnd = 'E';
 
 struct TracePoint {
+  char type;
   pid_t tid;
   int64_t time;
   std::string tag;
-  char type;
 };
 
 std::vector<TracePoint> traces;
+bool enabled = true;
+constinit std::chrono::steady_clock::time_point startTime = {};
 
 int64_t GetTime() noexcept {
   auto now = std::chrono::steady_clock::now();
-  return std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
+  if (startTime == decltype(tracebuffer::startTime){}) {
+    startTime = now;
+  }
+  return std::chrono::duration_cast<std::chrono::microseconds>(now - startTime).count();
 }
 
-} // namespace anonymous
-
-void AddWithTime(const std::string& tag, char type, int64_t time) noexcept {
-  TracePoint t = {getpid(), time, tag, type};
-  traces.emplace_back(t);
+void AddWithTime(std::string tag, char type, int64_t time) noexcept {
+  TracePoint t = {type, getpid(), time, std::move(tag)};
+  traces.emplace_back(std::move(t));
 }
 
-void Add(const std::string& tag, char type) noexcept {
-  AddWithTime(tag, type, GetTime());
+void Add(std::string tag, char type) noexcept {
+  AddWithTime(std::move(tag), type, GetTime());
 }
-
-
-
 
 void Flush(const std::string& basePath) {
-  TRACE_CALL();
   if (basePath.empty()) {
     return;
   }
+  BeginTrace(__func__);  // We can't do much here, only record that it happened.
 
-  std::stringstream s;
+  std::ostringstream s;
   s << basePath << aapt::file::sDirSep << "report_aapt2_" << getpid() << ".json";
   FILE* f = android::base::utf8::fopen(s.str().c_str(), "a");
   if (f == nullptr) {
     return;
   }
 
-  for(const TracePoint& trace : traces) {
-    fprintf(f, "{\"ts\" : \"%" PRIu64 "\", \"ph\" : \"%c\", \"tid\" : \"%d\" , \"pid\" : \"%d\", "
-            "\"name\" : \"%s\" },\n", trace.time, trace.type, 0, trace.tid, trace.tag.c_str());
+  // Wrap the trace in a JSON array [] to make Chrome/Perfetto UI handle it.
+  char delimiter = '[';
+  for (const TracePoint& trace : traces) {
+    fprintf(f,
+            "%c{\"ts\" : \"%" PRIu64
+            "\", \"ph\" : \"%c\", \"tid\" : \"%d\" , \"pid\" : \"%d\", \"name\" : \"%s\" }\n",
+            delimiter, trace.time, trace.type, 0, trace.tid, trace.tag.c_str());
+    delimiter = ',';
+  }
+  if (!traces.empty()) {
+    fprintf(f, "]");
   }
   fclose(f);
   traces.clear();
 }
 
+}  // namespace
+
 } // namespace tracebuffer
 
-void BeginTrace(const std::string& tag) {
-  tracebuffer::Add(tag, tracebuffer::kBegin);
+void BeginTrace(std::string tag) {
+  if (!tracebuffer::enabled) return;
+  tracebuffer::Add(std::move(tag), tracebuffer::kBegin);
 }
 
-void EndTrace() {
-  tracebuffer::Add("", tracebuffer::kEnd);
+void EndTrace(std::string tag) {
+  if (!tracebuffer::enabled) return;
+  tracebuffer::Add(std::move(tag), tracebuffer::kEnd);
 }
 
-Trace::Trace(const std::string& tag) {
-  tracebuffer::Add(tag, tracebuffer::kBegin);
+bool Trace::enable(bool value) {
+  return tracebuffer::enabled = value;
 }
 
-Trace::Trace(const std::string& tag, const std::vector<android::StringPiece>& args) {
-  std::stringstream s;
+Trace::Trace(const char* tag) {
+  if (!tracebuffer::enabled) return;
+  tag_.assign(tag);
+  tracebuffer::Add(tag_, tracebuffer::kBegin);
+}
+
+Trace::Trace(std::string tag) : tag_(std::move(tag)) {
+  if (!tracebuffer::enabled) return;
+  tracebuffer::Add(tag_, tracebuffer::kBegin);
+}
+
+template <class SpanOfStrings>
+std::string makeTag(std::string_view tag, const SpanOfStrings& args) {
+  std::ostringstream s;
   s << tag;
-  s << " ";
-  for (auto& arg : args) {
-    s << arg;
-    s << " ";
+  if (!args.empty()) {
+    for (const auto& arg : args) {
+      s << ' ';
+      s << arg;
+    }
   }
-  tracebuffer::Add(s.str(), tracebuffer::kBegin);
+  return std::move(s).str();
+}
+
+Trace::Trace(std::string_view tag, const std::vector<android::StringPiece>& args) {
+  if (!tracebuffer::enabled) return;
+  tag_ = makeTag(tag, args);
+  tracebuffer::Add(tag_, tracebuffer::kBegin);
 }
 
 Trace::~Trace() {
-  tracebuffer::Add("", tracebuffer::kEnd);
+  if (!tracebuffer::enabled) return;
+  tracebuffer::Add(std::move(tag_), tracebuffer::kEnd);
 }
 
-FlushTrace::FlushTrace(const std::string& basepath, const std::string& tag)
-    : basepath_(basepath)  {
-  tracebuffer::Add(tag, tracebuffer::kBegin);
+FlushTrace::FlushTrace(std::string_view basepath, std::string_view tag) {
+  if (!Trace::enable(!basepath.empty())) return;
+  basepath_.assign(basepath);
+  tag_.assign(tag);
+  tracebuffer::Add(tag_, tracebuffer::kBegin);
 }
 
-FlushTrace::FlushTrace(const std::string& basepath, const std::string& tag,
-    const std::vector<android::StringPiece>& args) : basepath_(basepath) {
-  std::stringstream s;
-  s << tag;
-  s << " ";
-  for (auto& arg : args) {
-    s << arg;
-    s << " ";
-  }
-  tracebuffer::Add(s.str(), tracebuffer::kBegin);
+FlushTrace::FlushTrace(std::string_view basepath, std::string_view tag,
+                       const std::vector<android::StringPiece>& args) {
+  if (!Trace::enable(!basepath.empty())) return;
+  basepath_.assign(basepath);
+  tag_ = makeTag(tag, args);
+  tracebuffer::Add(tag_, tracebuffer::kBegin);
 }
 
-FlushTrace::FlushTrace(const std::string& basepath, const std::string& tag,
-    const std::vector<std::string>& args) : basepath_(basepath){
-  std::stringstream s;
-  s << tag;
-  s << " ";
-  for (auto& arg : args) {
-    s << arg;
-    s << " ";
-  }
-  tracebuffer::Add(s.str(), tracebuffer::kBegin);
+FlushTrace::FlushTrace(std::string_view basepath, std::string_view tag,
+                       const std::vector<std::string>& args) {
+  if (!Trace::enable(!basepath.empty())) return;
+  basepath_.assign(basepath);
+  tag_ = makeTag(tag, args);
+  tracebuffer::Add(tag_, tracebuffer::kBegin);
 }
 
 FlushTrace::~FlushTrace() {
-  tracebuffer::Add("", tracebuffer::kEnd);
+  if (!tracebuffer::enabled) return;
+  tracebuffer::Add(std::move(tag_), tracebuffer::kEnd);
   tracebuffer::Flush(basepath_);
 }
 
-} // namespace aapt
-
+}  // namespace aapt

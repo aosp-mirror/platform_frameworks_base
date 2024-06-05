@@ -19,6 +19,7 @@ package android.provider;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
@@ -55,6 +56,8 @@ import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.server.telecom.flags.Flags;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -63,6 +66,7 @@ import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -402,6 +406,7 @@ public class CallLog {
          * Builder for the add-call parameters.
          */
         public static final class AddCallParametersBuilder {
+            public static final int MAX_NUMBER_OF_CHARACTERS = 256;
             private CallerInfo mCallerInfo;
             private String mNumber;
             private String mPostDialDigits;
@@ -426,6 +431,8 @@ public class CallLog {
             private double mLongitude = Double.NaN;
             private Uri mPictureUri;
             private int mIsPhoneAccountMigrationPending;
+            private boolean mIsBusinessCall;
+            private String mAssertedDisplayName;
 
             /**
              * @param callerInfo the CallerInfo object to get the target contact from.
@@ -644,15 +651,52 @@ public class CallLog {
             }
 
             /**
+             * @param isBusinessCall should be set if the caller is a business call
+             */
+            @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+            public @NonNull AddCallParametersBuilder setIsBusinessCall(boolean isBusinessCall) {
+                mIsBusinessCall = isBusinessCall;
+                return this;
+            }
+
+            /**
+             * @param assertedDisplayName the asserted display name associated with the business
+             *                            call
+             * @throws IllegalArgumentException if the assertedDisplayName is over 256 characters
+             */
+            @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+            public @NonNull AddCallParametersBuilder setAssertedDisplayName(
+                    String assertedDisplayName) {
+                if (assertedDisplayName != null
+                        && assertedDisplayName.length() > MAX_NUMBER_OF_CHARACTERS) {
+                    throw new IllegalArgumentException("assertedDisplayName exceeds the character"
+                            + " limit of " + MAX_NUMBER_OF_CHARACTERS + ".");
+                }
+                mAssertedDisplayName = assertedDisplayName;
+                return this;
+            }
+
+            /**
              * Builds the object
              */
             public @NonNull AddCallParams build() {
-                return new AddCallParams(mCallerInfo, mNumber, mPostDialDigits, mViaNumber,
-                        mPresentation, mCallType, mFeatures, mAccountHandle, mStart, mDuration,
-                        mDataUsage, mAddForAllUsers, mUserToBeInsertedTo, mIsRead, mCallBlockReason,
-                        mCallScreeningAppName, mCallScreeningComponentName, mMissedReason,
-                        mPriority, mSubject, mLatitude, mLongitude, mPictureUri,
-                        mIsPhoneAccountMigrationPending);
+                if (Flags.businessCallComposer()) {
+                    return new AddCallParams(mCallerInfo, mNumber, mPostDialDigits, mViaNumber,
+                            mPresentation, mCallType, mFeatures, mAccountHandle, mStart, mDuration,
+                            mDataUsage, mAddForAllUsers, mUserToBeInsertedTo, mIsRead,
+                            mCallBlockReason,
+                            mCallScreeningAppName, mCallScreeningComponentName, mMissedReason,
+                            mPriority, mSubject, mLatitude, mLongitude, mPictureUri,
+                            mIsPhoneAccountMigrationPending, mIsBusinessCall, mAssertedDisplayName);
+                } else {
+                    return new AddCallParams(mCallerInfo, mNumber, mPostDialDigits, mViaNumber,
+                            mPresentation, mCallType, mFeatures, mAccountHandle, mStart, mDuration,
+                            mDataUsage, mAddForAllUsers, mUserToBeInsertedTo, mIsRead,
+                            mCallBlockReason,
+                            mCallScreeningAppName, mCallScreeningComponentName, mMissedReason,
+                            mPriority, mSubject, mLatitude, mLongitude, mPictureUri,
+                            mIsPhoneAccountMigrationPending);
+                }
             }
         }
 
@@ -680,6 +724,8 @@ public class CallLog {
         private double mLongitude = Double.NaN;
         private Uri mPictureUri;
         private int mIsPhoneAccountMigrationPending;
+        private boolean mIsBusinessCall;
+        private String mAssertedDisplayName;
 
         private AddCallParams(CallerInfo callerInfo, String number, String postDialDigits,
                 String viaNumber, int presentation, int callType, int features,
@@ -714,6 +760,44 @@ public class CallLog {
             mLongitude = longitude;
             mPictureUri = pictureUri;
             mIsPhoneAccountMigrationPending = isPhoneAccountMigrationPending;
+        }
+
+        private AddCallParams(CallerInfo callerInfo, String number, String postDialDigits,
+                String viaNumber, int presentation, int callType, int features,
+                PhoneAccountHandle accountHandle, long start, int duration, long dataUsage,
+                boolean addForAllUsers, UserHandle userToBeInsertedTo, boolean isRead,
+                int callBlockReason,
+                CharSequence callScreeningAppName, String callScreeningComponentName,
+                long missedReason,
+                int priority, String subject, double latitude, double longitude, Uri pictureUri,
+                int isPhoneAccountMigrationPending, boolean isBusinessCall,
+                String assertedDisplayName) {
+            mCallerInfo = callerInfo;
+            mNumber = number;
+            mPostDialDigits = postDialDigits;
+            mViaNumber = viaNumber;
+            mPresentation = presentation;
+            mCallType = callType;
+            mFeatures = features;
+            mAccountHandle = accountHandle;
+            mStart = start;
+            mDuration = duration;
+            mDataUsage = dataUsage;
+            mAddForAllUsers = addForAllUsers;
+            mUserToBeInsertedTo = userToBeInsertedTo;
+            mIsRead = isRead;
+            mCallBlockReason = callBlockReason;
+            mCallScreeningAppName = callScreeningAppName;
+            mCallScreeningComponentName = callScreeningComponentName;
+            mMissedReason = missedReason;
+            mPriority = priority;
+            mSubject = subject;
+            mLatitude = latitude;
+            mLongitude = longitude;
+            mPictureUri = pictureUri;
+            mIsPhoneAccountMigrationPending = isPhoneAccountMigrationPending;
+            mIsBusinessCall = isBusinessCall;
+            mAssertedDisplayName = assertedDisplayName;
         }
 
     }
@@ -913,6 +997,19 @@ public class CallLog {
          * <P>Type: TEXT</P>
          */
         public static final String NUMBER = "number";
+
+
+        /**
+         * Boolean indicating whether the call is a business call.
+         */
+        @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+        public static final String IS_BUSINESS_CALL = "is_business_call";
+
+        /**
+         * String that stores the asserted display name associated with business call.
+         */
+        @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+        public static final String ASSERTED_DISPLAY_NAME = "asserted_display_name";
 
         /**
          * The number presenting rules set by the network.
@@ -1712,7 +1809,6 @@ public class CallLog {
             }
 
             ContentValues values = new ContentValues(14);
-
             values.put(NUMBER, params.mNumber);
             values.put(POST_DIAL_DIGITS, params.mPostDialDigits);
             values.put(VIA_NUMBER, params.mViaNumber);
@@ -1745,7 +1841,10 @@ public class CallLog {
                 values.put(COMPOSER_PHOTO_URI, params.mPictureUri.toString());
             }
             values.put(IS_PHONE_ACCOUNT_MIGRATION_PENDING, params.mIsPhoneAccountMigrationPending);
-
+            if (Flags.businessCallComposer()) {
+                values.put(IS_BUSINESS_CALL, Integer.valueOf(params.mIsBusinessCall ? 1 : 0));
+                values.put(ASSERTED_DISPLAY_NAME, params.mAssertedDisplayName);
+            }
             if ((params.mCallerInfo != null) && (params.mCallerInfo.getContactId() > 0)) {
                 // Update usage information for the number associated with the contact ID.
                 // We need to use both the number and the ID for obtaining a data ID since other
@@ -1918,7 +2017,7 @@ public class CallLog {
                 return false;
             }
             final UserInfo userInfo = userManager.getUserInfo(userId);
-            return userInfo != null && !userInfo.isManagedProfile();
+            return userInfo != null && !userInfo.isProfile();
         }
 
         /**
@@ -1956,9 +2055,8 @@ public class CallLog {
                     userManager.isUserUnlocked(user) ? CONTENT_URI : SHADOW_CONTENT_URI,
                     user.getIdentifier());
 
-            if (VERBOSE_LOG) {
-                Log.v(LOG_TAG, String.format("Inserting to %s", uri));
-            }
+            Log.i(LOG_TAG, String.format(Locale.getDefault(),
+                    "addEntryAndRemoveExpiredEntries: provider uri=%s", uri));
 
             try {
                 // When cleaning up the call log, try to delete older call long entries on a per
@@ -1985,13 +2083,14 @@ public class CallLog {
                     Log.w(LOG_TAG, "Failed to insert into call log; null result uri.");
                 }
 
+                int numDeleted;
                 if (values.containsKey(PHONE_ACCOUNT_ID)
                         && !TextUtils.isEmpty(values.getAsString(PHONE_ACCOUNT_ID))
                         && values.containsKey(PHONE_ACCOUNT_COMPONENT_NAME)
                         && !TextUtils.isEmpty(values.getAsString(PHONE_ACCOUNT_COMPONENT_NAME))) {
                     // Only purge entries for the same phone account.
-                    resolver.delete(uri, "_id IN " +
-                            "(SELECT _id FROM calls"
+                    numDeleted = resolver.delete(uri, "_id IN "
+                            + "(SELECT _id FROM calls"
                             + " WHERE " + PHONE_ACCOUNT_COMPONENT_NAME + " = ?"
                             + " AND " + PHONE_ACCOUNT_ID + " = ?"
                             + " ORDER BY " + DEFAULT_SORT_ORDER
@@ -2001,14 +2100,15 @@ public class CallLog {
                     });
                 } else {
                     // No valid phone account specified, so default to the old behavior.
-                    resolver.delete(uri, "_id IN " +
-                            "(SELECT _id FROM calls ORDER BY " + DEFAULT_SORT_ORDER
+                    numDeleted = resolver.delete(uri, "_id IN "
+                            + "(SELECT _id FROM calls ORDER BY " + DEFAULT_SORT_ORDER
                             + " LIMIT -1 OFFSET 500)", null);
                 }
+                Log.i(LOG_TAG, "addEntry: cleaned up " + numDeleted + " old entries");
 
                 return result;
             } catch (IllegalArgumentException e) {
-                Log.w(LOG_TAG, "Failed to insert calllog", e);
+                Log.e(LOG_TAG, "Failed to insert calllog", e);
                 // Even though we make sure the target user is running and decrypted before calling
                 // this method, there's a chance that the user just got shut down, in which case
                 // we'll still get "IllegalArgumentException: Unknown URL content://call_log/calls".
@@ -2100,7 +2200,7 @@ public class CallLog {
                 PhoneAccountHandle accountHandle) {
             TelecomManager tm = null;
             try {
-                tm = TelecomManager.from(context);
+                tm = context.getSystemService(TelecomManager.class);
             } catch (UnsupportedOperationException e) {
                 if (VERBOSE_LOG) {
                     Log.v(LOG_TAG, "No TelecomManager found to get account address.");

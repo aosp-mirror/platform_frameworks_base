@@ -14,13 +14,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
+<!-- TODO(b/289498394) move this to the TvSystemUI target -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
     <solid android:color="@color/tv_volume_dialog_accent" />
     <size android:width="@dimen/tv_volume_seek_bar_thumb_diameter"
           android:height="@dimen/tv_volume_seek_bar_thumb_diameter" />
-    <stroke android:width="@dimen/tv_volume_seek_bar_thumb_focus_ring_width"
-            android:color="@color/tv_volume_dialog_seek_thumb_focus_ring"/>
-    <item name="android:shadowColor">@color/tv_volume_dialog_seek_thumb_shadow</item>
-    <item name="android:shadowRadius">@dimen/tv_volume_seek_bar_thumb_shadow_radius</item>
-    <item name="android:shadowDy">@dimen/tv_volume_seek_bar_thumb_shadow_dy</item>
 </shape>

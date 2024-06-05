@@ -221,9 +221,7 @@ public class UsbHostManager {
                 for (int line = 0; line < length / kDumpBytesPerLine; line++) {
                     StringBuilder sb = new StringBuilder();
                     for (int offset = 0; offset < kDumpBytesPerLine; offset++) {
-                        sb.append("0x")
-                            .append(String.format("0x%02X", mDescriptors[dataOffset++]))
-                            .append(" ");
+                        sb.append(String.format("0x%02X", mDescriptors[dataOffset++])).append(" ");
                     }
                     pw.println(sb.toString());
                 }
@@ -231,9 +229,7 @@ public class UsbHostManager {
                 // remainder
                 StringBuilder sb = new StringBuilder();
                 while (dataOffset < length) {
-                    sb.append("0x")
-                        .append(String.format("0x%02X", mDescriptors[dataOffset++]))
-                        .append(" ");
+                    sb.append(String.format("0x%02X", mDescriptors[dataOffset++])).append(" ");
                 }
                 pw.println(sb.toString());
             } else {
@@ -384,6 +380,11 @@ public class UsbHostManager {
             return false;
         }
 
+        if (descriptors == null) {
+            Slog.e(TAG, "Failed to add device as the descriptor is null");
+            return false;
+        }
+
         UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress, descriptors);
         if (deviceClass == UsbConstants.USB_CLASS_PER_INTERFACE
                 && !checkUsbInterfacesDenyListed(parser)) {
@@ -466,8 +467,7 @@ public class UsbHostManager {
                 }
 
                 // Tracking
-                addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT,
-                        parser.getRawDescriptors());
+                addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT, descriptors);
 
                 // Stats collection
                 FrameworkStatsLog.write(FrameworkStatsLog.USB_DEVICE_ATTACHED,

@@ -24,7 +24,6 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_FIRST_ORDERED_ID;
 import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_FIRST_ORDERED_ID;
@@ -39,30 +38,35 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManager.TaskDescription;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
-import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.EnterPipRequestedItem;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -76,7 +80,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,9 +95,6 @@ import java.util.function.Consumer;
 @MediumTest
 @RunWith(WindowTestRunner.class)
 public class ActivityTaskManagerServiceTests extends WindowTestsBase {
-
-    private final ArgumentCaptor<ClientTransaction> mClientTransactionCaptor =
-            ArgumentCaptor.forClass(ClientTransaction.class);
 
     private static final String DEFAULT_PACKAGE_NAME = "my.application.package";
     private static final int DEFAULT_USER_ID = 100;
@@ -126,53 +126,42 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         final ClientLifecycleManager mockLifecycleManager = mock(ClientLifecycleManager.class);
         doReturn(mockLifecycleManager).when(mAtm).getLifecycleManager();
         doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        clearInvocations(mClientLifecycleManager);
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        verify(mockLifecycleManager).scheduleTransaction(mClientTransactionCaptor.capture());
-        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
+        final ArgumentCaptor<ClientTransactionItem> clientTransactionItemCaptor =
+                ArgumentCaptor.forClass(ClientTransactionItem.class);
+        verify(mockLifecycleManager).scheduleTransactionItem(any(),
+                clientTransactionItemCaptor.capture());
+        final ClientTransactionItem transactionItem = clientTransactionItemCaptor.getValue();
         // Check that only an enter pip request item callback was scheduled.
-        assertEquals(1, transaction.getCallbacks().size());
-        assertTrue(transaction.getCallbacks().get(0) instanceof EnterPipRequestedItem);
-        // Check the activity lifecycle state remains unchanged.
-        assertNull(transaction.getLifecycleStateRequest());
+        assertTrue(transactionItem instanceof EnterPipRequestedItem);
     }
 
     @Test
     public void testOnPictureInPictureRequested_cannotEnterPip() throws RemoteException {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
         doReturn(false).when(activity).inPinnedWindowingMode();
         doReturn(false).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        clearInvocations(mClientLifecycleManager);
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        verify(lifecycleManager, atLeast(0))
-                .scheduleTransaction(mClientTransactionCaptor.capture());
-        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
-        // Check that none are enter pip request items.
-        transaction.getCallbacks().forEach(clientTransactionItem -> {
-            assertFalse(clientTransactionItem instanceof EnterPipRequestedItem);
-        });
+        verify(mClientLifecycleManager, never()).scheduleTransactionItem(any(), any());
     }
 
     @Test
     public void testOnPictureInPictureRequested_alreadyInPIPMode() throws RemoteException {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
         doReturn(true).when(activity).inPinnedWindowingMode();
+        clearInvocations(mClientLifecycleManager);
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        verify(lifecycleManager, atLeast(0))
-                .scheduleTransaction(mClientTransactionCaptor.capture());
-        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
-        // Check that none are enter pip request items.
-        transaction.getCallbacks().forEach(clientTransactionItem -> {
-            assertFalse(clientTransactionItem instanceof EnterPipRequestedItem);
-        });
+        verify(mClientLifecycleManager, never()).scheduleTransactionItem(any(), any());
     }
 
     @Test
@@ -242,26 +231,27 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.type = Display.TYPE_VIRTUAL;
         DisplayContent virtualDisplay = createNewDisplay(displayInfo);
+        final KeyguardController keyguardController = mSupervisor.getKeyguardController();
 
         // Make sure we're starting out with 2 unlocked displays
         assertEquals(2, mRootWindowContainer.getChildCount());
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertFalse(displayContent.isKeyguardLocked());
-            assertFalse(displayContent.isAodShowing());
+            assertFalse(keyguardController.isAodShowing(displayContent.mDisplayId));
         });
 
         // Check that setLockScreenShown locks both displays
         mAtm.setLockScreenShown(true, true);
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertTrue(displayContent.isKeyguardLocked());
-            assertTrue(displayContent.isAodShowing());
+            assertTrue(keyguardController.isAodShowing(displayContent.mDisplayId));
         });
 
         // Check setLockScreenShown unlocking both displays
         mAtm.setLockScreenShown(false, false);
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertFalse(displayContent.isKeyguardLocked());
-            assertFalse(displayContent.isAodShowing());
+            assertFalse(keyguardController.isAodShowing(displayContent.mDisplayId));
         });
     }
 
@@ -275,25 +265,26 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         displayInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
         displayInfo.flags = Display.FLAG_OWN_DISPLAY_GROUP | Display.FLAG_ALWAYS_UNLOCKED;
         DisplayContent newDisplay = createNewDisplay(displayInfo);
+        final KeyguardController keyguardController = mSupervisor.getKeyguardController();
 
         // Make sure we're starting out with 2 unlocked displays
         assertEquals(2, mRootWindowContainer.getChildCount());
         mRootWindowContainer.forAllDisplays(displayContent -> {
             assertFalse(displayContent.isKeyguardLocked());
-            assertFalse(displayContent.isAodShowing());
+            assertFalse(keyguardController.isAodShowing(displayContent.mDisplayId));
         });
 
         // setLockScreenShown should only lock the default display, not the virtual one
         mAtm.setLockScreenShown(true, true);
 
         assertTrue(mDefaultDisplay.isKeyguardLocked());
-        assertTrue(mDefaultDisplay.isAodShowing());
+        assertTrue(keyguardController.isAodShowing(mDefaultDisplay.mDisplayId));
 
         DisplayContent virtualDisplay = mRootWindowContainer.getDisplayContent(
                 newDisplay.getDisplayId());
         assertNotEquals(Display.DEFAULT_DISPLAY, virtualDisplay.getDisplayId());
         assertFalse(virtualDisplay.isKeyguardLocked());
-        assertFalse(virtualDisplay.isAodShowing());
+        assertFalse(keyguardController.isAodShowing(virtualDisplay.mDisplayId));
     }
 
     /*
@@ -304,18 +295,11 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
      */
     @Test
     public void testEnterPipModeWhenRecordParentChangesToNull() {
-        MockitoSession mockSession = mockitoSession()
-                .initMocks(this)
-                .mockStatic(ActivityRecord.class)
-                .startMocking();
-
-        ActivityRecord record = mock(ActivityRecord.class);
-        IBinder token = mock(IBinder.class);
+        final ActivityRecord record = new ActivityBuilder(mAtm).setCreateTask(true).build();
         PictureInPictureParams params = mock(PictureInPictureParams.class);
         record.pictureInPictureArgs = params;
 
         //mock operations in private method ensureValidPictureInPictureActivityParamsLocked()
-        when(ActivityRecord.forTokenLocked(token)).thenReturn(record);
         doReturn(true).when(record).supportsPictureInPicture();
         doReturn(false).when(params).hasSetAspectRatio();
 
@@ -323,15 +307,77 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         doReturn(true).when(record)
                 .checkEnterPictureInPictureState("enterPictureInPictureMode", false);
         doReturn(false).when(record).inPinnedWindowingMode();
-        doReturn(false).when(mAtm).isKeyguardLocked(anyInt());
+        doReturn(false).when(record).isKeyguardLocked();
 
         //to simulate NPE
         doReturn(null).when(record).getParent();
 
-        mAtm.mActivityClientController.enterPictureInPictureMode(token, params);
+        mAtm.mActivityClientController.enterPictureInPictureMode(record.token, params);
         //if record's null parent is not handled gracefully, test will fail with NPE
+    }
 
-        mockSession.finishMocking();
+    @Test
+    public void testEnterPipModeWhenResumed_autoEnterEnabled_returnTrue() {
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
+        PictureInPictureParams params = mock(PictureInPictureParams.class);
+        activity.pictureInPictureArgs = params;
+
+        doReturn(true).when(activity).isState(RESUMED);
+        doReturn(false).when(activity).inPinnedWindowingMode();
+        doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        doReturn(true).when(params).isAutoEnterEnabled();
+
+        assertTrue(mAtm.enterPictureInPictureMode(activity, params,
+                true /* fromClient */, true /* isAutoEnter */));
+    }
+
+    @Test
+    public void testEnterPipModeWhenResumed_autoEnterDisabled_returnTrue() {
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
+        PictureInPictureParams params = mock(PictureInPictureParams.class);
+        activity.pictureInPictureArgs = params;
+
+        doReturn(true).when(activity).isState(RESUMED);
+        doReturn(false).when(activity).inPinnedWindowingMode();
+        doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        doReturn(false).when(params).isAutoEnterEnabled();
+
+        assertTrue(mAtm.enterPictureInPictureMode(activity, params,
+                true /* fromClient */, false /* isAutoEnter */));
+    }
+
+    @Test
+    public void testEnterPipModeWhenPausing_autoEnterEnabled_returnFalse() {
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
+        PictureInPictureParams params = mock(PictureInPictureParams.class);
+        activity.pictureInPictureArgs = params;
+
+        doReturn(true).when(activity).isState(PAUSING);
+        doReturn(false).when(activity).inPinnedWindowingMode();
+        doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        doReturn(true).when(params).isAutoEnterEnabled();
+
+        assertFalse(mAtm.enterPictureInPictureMode(activity, params,
+                true /* fromClient */, true /* isAutoEnter */));
+    }
+
+    @Test
+    public void testEnterPipModeWhenPausing_autoEnterDisabled_returnTrue() {
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
+        PictureInPictureParams params = mock(PictureInPictureParams.class);
+        activity.pictureInPictureArgs = params;
+
+        doReturn(true).when(activity).isState(PAUSING);
+        doReturn(false).when(activity).inPinnedWindowingMode();
+        doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        doReturn(false).when(params).isAutoEnterEnabled();
+
+        assertTrue(mAtm.enterPictureInPictureMode(activity, params,
+                true /* fromClient */, false /* isAutoEnter */));
     }
 
     @Test
@@ -392,12 +438,12 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // The top app should not change while sleeping.
         assertEquals(topActivity.app, mAtm.mInternal.getTopApp());
 
-        mAtm.startLaunchPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY
+        mAtm.startPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY
                 | ActivityTaskManagerService.POWER_MODE_REASON_UNKNOWN_VISIBILITY);
         assertEquals(ActivityManager.PROCESS_STATE_TOP, mAtm.mInternal.getTopProcessState());
         // Because there is no unknown visibility record, the state will be restored if other
         // reasons are all done.
-        mAtm.endLaunchPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        mAtm.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
         assertEquals(ActivityManager.PROCESS_STATE_TOP_SLEEPING,
                 mAtm.mInternal.getTopProcessState());
 
@@ -419,6 +465,37 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         mAtm.updateSleepIfNeededLocked();
 
         assertTopNonSleeping.accept(homeActivity);
+    }
+
+    @Test
+    public void testSetPowerMode() {
+        // Depends on the mocked power manager set in SystemServicesTestRule#setUpLocalServices.
+        mAtm.onInitPowerManagement();
+
+        // Apply different power modes according to the reasons.
+        mAtm.startPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        verify(mWm.mPowerManagerInternal).setPowerMode(
+                PowerManagerInternal.MODE_LAUNCH, true);
+        mAtm.startPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY);
+        verify(mWm.mPowerManagerInternal).setPowerMode(
+                PowerManagerInternal.MODE_DISPLAY_CHANGE, true);
+
+        // If there is unknown visibility launching app, the launch power mode won't be canceled
+        // even if REASON_START_ACTIVITY is cleared.
+        mAtm.startPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_UNKNOWN_VISIBILITY);
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(mock(ActivityRecord.class));
+        mAtm.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        verify(mWm.mPowerManagerInternal, never()).setPowerMode(
+                PowerManagerInternal.MODE_LAUNCH, false);
+
+        mDisplayContent.mUnknownAppVisibilityController.clear();
+        mAtm.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        verify(mWm.mPowerManagerInternal).setPowerMode(
+                PowerManagerInternal.MODE_LAUNCH, false);
+
+        mAtm.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY);
+        verify(mWm.mPowerManagerInternal).setPowerMode(
+                PowerManagerInternal.MODE_DISPLAY_CHANGE, false);
     }
 
     @Test
@@ -490,6 +567,11 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 .build();
         final Task task = activity.getTask();
         final TaskDisplayArea tda = task.getDisplayArea();
+        // Ensure the display is not a large screen
+        if (tda.getConfiguration().smallestScreenWidthDp
+                >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP) {
+            resizeDisplay(activity.mDisplayContent, 500, 800);
+        }
 
         // Ignore the activity min width/height for determine multi window eligibility.
         mAtm.mRespectsActivityMinWidthHeightMultiWindow = -1;
@@ -1073,5 +1155,74 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         assertTrue(homeActivity.getTask().isFocused());
         assertFalse(pinnedTask.isFocused());
+    }
+
+    @Test
+    public void testContinueWindowLayout_notifyClientLifecycleManager() {
+        clearInvocations(mClientLifecycleManager);
+        mAtm.deferWindowLayout();
+
+        verify(mClientLifecycleManager, never()).onLayoutContinued();
+
+        mAtm.continueWindowLayout();
+
+        verify(mClientLifecycleManager).onLayoutContinued();
+    }
+
+    @Test
+    public void testGetTaskDescriptionIcon_matchingUid() {
+        // Ensure that we do not hold MANAGE_ACTIVITY_TASKS
+        doThrow(new SecurityException()).when(mAtm).enforceActivityTaskPermission(any());
+
+        final String filePath = "abc/def";
+        // Create an activity with a task description at the test icon filepath
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setUid(android.os.Process.myUid())
+                .setCreateTask(true)
+                .build();
+        final TaskDescription td = new TaskDescription.Builder().build();
+        td.setIconFilename(filePath);
+        activity.setTaskDescription(td);
+
+        // Verify this calls and does not throw a security exception
+        try {
+            mAtm.getTaskDescriptionIcon(filePath, activity.mUserId);
+        } catch (SecurityException e) {
+            fail("Unexpected security exception: " + e);
+        } catch (IllegalArgumentException e) {
+            // Ok, the file doesn't actually exist
+        }
+    }
+
+    @Test
+    public void testGetTaskDescriptionIcon_noMatchingActivity_expectException() {
+        // Ensure that we do not hold MANAGE_ACTIVITY_TASKS
+        doThrow(new SecurityException()).when(mAtm).enforceActivityTaskPermission(any());
+
+        final String filePath = "abc/def";
+
+        // Verify this throws a security exception due to no matching activity
+        assertThrows(SecurityException.class,
+                () -> mAtm.getTaskDescriptionIcon(filePath, UserHandle.myUserId()));
+    }
+
+    @Test
+    public void testGetTaskDescriptionIcon_noMatchingUid_expectException() {
+        // Ensure that we do not hold MANAGE_ACTIVITY_TASKS
+        doThrow(new SecurityException()).when(mAtm).enforceActivityTaskPermission(any());
+
+        final String filePath = "abc/def";
+        // Create an activity with a task description at the test icon filepath
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setUid(101010)
+                .build();
+        final TaskDescription td = new TaskDescription.Builder().build();
+        td.setIconFilename(filePath);
+        activity.setTaskDescription(td);
+
+        // Verify this throws a security exception due to no matching UID
+        assertThrows(SecurityException.class,
+                () -> mAtm.getTaskDescriptionIcon(filePath, activity.mUserId));
     }
 }

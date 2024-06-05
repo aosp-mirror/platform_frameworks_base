@@ -18,5 +18,7 @@ java_library_static {
     name: "services.midi",
     defaults: ["platform_service_defaults"],
     srcs: [":services.midi-sources"],
-    libs: ["services.core"],
+    libs: [
+        "services.core",
+    ],
 }

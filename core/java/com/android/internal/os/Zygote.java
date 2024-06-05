@@ -195,6 +195,12 @@ public final class Zygote {
      */
     public static final int PROFILEABLE = 1 << 24;
 
+    /**
+     * Enable ptrace.  This is enabled on eng, if the app is debuggable, or if
+     * the persist.debug.ptrace.enabled property is set.
+     */
+    public static final int DEBUG_ENABLE_PTRACE = 1 << 25;
+
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
     /** Default external storage should be mounted. */
@@ -229,6 +235,9 @@ public final class Zygote {
 
     /** Bind mount app storage dirs to lower fs not via fuse */
     public static final String BIND_MOUNT_APP_DATA_DIRS = "--bind-mount-data-dirs";
+
+    /** Bind the system properties to an alternate set, for appcompat reasons */
+    public static final String BIND_MOUNT_SYSPROP_OVERRIDES = "--bind-mount-sysprop-overrides";
 
     /**
      * An extraArg passed when a zygote process is forking a child-zygote, specifying a name
@@ -347,6 +356,8 @@ public final class Zygote {
      * @param allowlistedDataInfoList Like pkgDataInfoList, but it's for allowlisted apps.
      * @param bindMountAppDataDirs  True if the zygote needs to mount data dirs.
      * @param bindMountAppStorageDirs  True if the zygote needs to mount storage dirs.
+     * @param bindMountSyspropOverrides True if the zygote needs to mount the override system
+     *                                  properties
      *
      * @return 0 if this is the child, pid of the child
      * if this is the parent, or -1 on error.
@@ -355,14 +366,15 @@ public final class Zygote {
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
             int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
             boolean isTopApp, String[] pkgDataInfoList, String[] allowlistedDataInfoList,
-            boolean bindMountAppDataDirs, boolean bindMountAppStorageDirs) {
+            boolean bindMountAppDataDirs, boolean bindMountAppStorageDirs,
+            boolean bindMountSyspropOverrides) {
         ZygoteHooks.preFork();
 
         int pid = nativeForkAndSpecialize(
                 uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
                 fdsToIgnore, startChildZygote, instructionSet, appDataDir, isTopApp,
                 pkgDataInfoList, allowlistedDataInfoList, bindMountAppDataDirs,
-                bindMountAppStorageDirs);
+                bindMountAppStorageDirs, bindMountSyspropOverrides);
         if (pid == 0) {
             // Note that this event ends at the end of handleChildProc,
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
@@ -385,7 +397,7 @@ public final class Zygote {
             int[] fdsToClose, int[] fdsToIgnore, boolean startChildZygote, String instructionSet,
             String appDataDir, boolean isTopApp, String[] pkgDataInfoList,
             String[] allowlistedDataInfoList, boolean bindMountAppDataDirs,
-            boolean bindMountAppStorageDirs);
+            boolean bindMountAppStorageDirs, boolean bindMountSyspropOverrides);
 
     /**
      * Specialize an unspecialized app process.  The current VM must have been started
@@ -415,16 +427,19 @@ public final class Zygote {
      * @param allowlistedDataInfoList Like pkgDataInfoList, but it's for allowlisted apps.
      * @param bindMountAppDataDirs  True if the zygote needs to mount data dirs.
      * @param bindMountAppStorageDirs  True if the zygote needs to mount storage dirs.
+     * @param bindMountSyspropOverrides True if the zygote needs to mount the override system
+     *                                  properties
      */
     private static void specializeAppProcess(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName,
             boolean startChildZygote, String instructionSet, String appDataDir, boolean isTopApp,
             String[] pkgDataInfoList, String[] allowlistedDataInfoList,
-            boolean bindMountAppDataDirs, boolean bindMountAppStorageDirs) {
+            boolean bindMountAppDataDirs, boolean bindMountAppStorageDirs,
+            boolean bindMountSyspropOverrides) {
         nativeSpecializeAppProcess(uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo,
                 niceName, startChildZygote, instructionSet, appDataDir, isTopApp,
                 pkgDataInfoList, allowlistedDataInfoList,
-                bindMountAppDataDirs, bindMountAppStorageDirs);
+                bindMountAppDataDirs, bindMountAppStorageDirs, bindMountSyspropOverrides);
 
         // Note that this event ends at the end of handleChildProc.
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
@@ -449,7 +464,8 @@ public final class Zygote {
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
             boolean startChildZygote, String instructionSet, String appDataDir, boolean isTopApp,
             String[] pkgDataInfoList, String[] allowlistedDataInfoList,
-            boolean bindMountAppDataDirs, boolean bindMountAppStorageDirs);
+            boolean bindMountAppDataDirs, boolean bindMountAppStorageDirs,
+            boolean bindMountSyspropOverrides);
 
     /**
      * Called to do any initialization before starting an application.
@@ -860,7 +876,13 @@ public final class Zygote {
                                  args.mSeInfo, args.mNiceName, args.mStartChildZygote,
                                  args.mInstructionSet, args.mAppDataDir, args.mIsTopApp,
                                  args.mPkgDataInfoList, args.mAllowlistedDataInfoList,
-                                 args.mBindMountAppDataDirs, args.mBindMountAppStorageDirs);
+                                 args.mBindMountAppDataDirs, args.mBindMountAppStorageDirs,
+                                 args.mBindMountSyspropOverrides);
+
+            // While `specializeAppProcess` sets the thread name on the process's main thread, this
+            // is distinct from the app process name which appears in stack traces, as the latter is
+            // sourced from the argument buffer of the Process class. Set the app process name here.
+            Zygote.setAppProcessName(args, TAG);
 
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
@@ -1015,18 +1037,36 @@ public final class Zygote {
                           "persist.debug.dalvik.vm.jdwp.enabled").equals("1");
 
     /**
+     * This will enable ptrace by default for all apps. It is OK to cache this property
+     * because we expect to reboot the system whenever this property changes
+     */
+    private static final boolean ENABLE_PTRACE = SystemProperties.get(
+                          "persist.debug.ptrace.enabled").equals("1");
+
+    /**
      * Applies debugger system properties to the zygote arguments.
      *
-     * For eng builds all apps are debuggable. On userdebug and user builds
-     * if persist.debug.dalvik.vm.jdwp.enabled is 1 all apps are
-     * debuggable. Otherwise, the debugger state is specified via the
-     * "--enable-jdwp" flag in the spawn request.
+     * For eng builds all apps are debuggable with JDWP and ptrace.
+     *
+     * On userdebug builds if persist.debug.dalvik.vm.jdwp.enabled
+     * is 1 all apps are debuggable with JDWP and ptrace. Otherwise, the
+     * debugger state is specified via the "--enable-jdwp" flag in the
+     * spawn request.
+     *
+     * On userdebug builds if persist.debug.ptrace.enabled is 1 all
+     * apps are debuggable with ptrace.
      *
      * @param args non-null; zygote spawner args
      */
     static void applyDebuggerSystemProperty(ZygoteArguments args) {
-        if (Build.IS_ENG || ENABLE_JDWP) {
+        if (Build.IS_ENG || (Build.IS_USERDEBUG && ENABLE_JDWP)) {
             args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
+            // Also enable ptrace when JDWP is enabled for consistency with
+            // before persist.debug.ptrace.enabled existed.
+            args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_PTRACE;
+        }
+        if (Build.IS_ENG || (Build.IS_USERDEBUG && ENABLE_PTRACE)) {
+            args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_PTRACE;
         }
     }
 
@@ -1049,7 +1089,8 @@ public final class Zygote {
         int peerUid = peer.getUid();
 
         if (args.mInvokeWith != null && peerUid != 0
-                && (args.mRuntimeFlags & Zygote.DEBUG_ENABLE_JDWP) == 0) {
+                && (args.mRuntimeFlags
+                    & (Zygote.DEBUG_ENABLE_JDWP | Zygote.DEBUG_ENABLE_PTRACE)) == 0) {
             throw new ZygoteSecurityException("Peer is permitted to specify an "
                 + "explicit invoke-with wrapper command only for debuggable "
                 + "applications.");

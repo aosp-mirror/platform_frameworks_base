@@ -17,6 +17,7 @@
 package android.animation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.util.PollingCheck;
@@ -339,6 +340,20 @@ public class AnimatorSetCallsTest {
             // Should go to the end value
             View square = mActivity.findViewById(R.id.square1);
             assertEquals(100f, square.getTranslationX(), 0.001f);
+        });
+    }
+
+    @Test
+    public void childAnimatorCancelsDuringUpdate_animatorSetIsEnded() throws Throwable {
+        mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                animation.cancel();
+            }
+        });
+        mActivity.runOnUiThread(() -> {
+            mSet1.start();
+            assertFalse(mSet1.isRunning());
         });
     }
 

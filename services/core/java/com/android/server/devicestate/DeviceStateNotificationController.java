@@ -109,6 +109,7 @@ class DeviceStateNotificationController extends BroadcastReceiver {
                     .setPackage(mContext.getPackageName());
             final PendingIntent pendingIntent = PendingIntent.getBroadcast(
                     mContext, 0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
+
             showNotification(
                     info.name, info.activeNotificationTitle,
                     String.format(info.activeNotificationContent, requesterApplicationLabel),
@@ -175,7 +176,7 @@ class DeviceStateNotificationController extends BroadcastReceiver {
         if (getNotificationInfos().get(state) == null) {
             return;
         }
-        mNotificationManager.cancel(NOTIFICATION_TAG, NOTIFICATION_ID);
+        mHandler.post(() -> mNotificationManager.cancel(NOTIFICATION_TAG, NOTIFICATION_ID));
     }
 
     @Override
@@ -219,8 +220,10 @@ class DeviceStateNotificationController extends BroadcastReceiver {
             builder.addAction(action);
         }
 
-        mNotificationManager.createNotificationChannel(channel);
-        mNotificationManager.notify(NOTIFICATION_TAG, NOTIFICATION_ID, builder.build());
+        mHandler.post(() -> {
+            mNotificationManager.createNotificationChannel(channel);
+            mNotificationManager.notify(NOTIFICATION_TAG, NOTIFICATION_ID, builder.build());
+        });
     }
 
     private SparseArray<NotificationInfo> getNotificationInfos() {
@@ -320,7 +323,7 @@ class DeviceStateNotificationController extends BroadcastReceiver {
 
             for (int i = 0; i < stateIdentifiers.length; i++) {
                 int identifier = stateIdentifiers[i];
-                if (identifier == DeviceStateManager.INVALID_DEVICE_STATE) {
+                if (identifier == DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER) {
                     continue;
                 }
 

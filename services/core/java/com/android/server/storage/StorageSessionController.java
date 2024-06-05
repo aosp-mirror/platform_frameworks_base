@@ -29,6 +29,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.os.Binder;
 import android.os.IVold;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -126,10 +127,10 @@ public final class StorageSessionController {
                 connection = new StorageUserConnection(mContext, userId, this);
                 mConnections.put(userId, connection);
             }
-            Slog.i(TAG, "Creating and starting session with id: " + sessionId);
-            connection.startSession(sessionId, deviceFd, vol.getPath().getPath(),
-                    vol.getInternalPath().getPath());
         }
+        Slog.i(TAG, "Creating and starting session with id: " + sessionId);
+        connection.startSession(sessionId, deviceFd, vol.getPath().getPath(),
+                vol.getInternalPath().getPath());
     }
 
     /**
@@ -246,17 +247,18 @@ public final class StorageSessionController {
      * Call {@link #onVolumeRemove} to remove the connection without waiting for exit
      */
     public void onVolumeUnmount(VolumeInfo vol) {
-        StorageUserConnection connection = onVolumeRemove(vol);
-
-        Slog.i(TAG, "On volume unmount " + vol);
-        if (connection != null) {
-            String sessionId = vol.getId();
-
-            try {
-                connection.removeSessionAndWait(sessionId);
-            } catch (ExternalStorageServiceException e) {
-                Slog.e(TAG, "Failed to end session for vol with id: " + sessionId, e);
+        String sessionId = vol.getId();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            StorageUserConnection connection = onVolumeRemove(vol);
+            Slog.i(TAG, "On volume unmount " + vol);
+            if (connection != null) {
+              connection.removeSessionAndWait(sessionId);
             }
+        } catch (ExternalStorageServiceException e) {
+            Slog.e(TAG, "Failed to end session for vol with id: " + sessionId, e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 

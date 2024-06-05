@@ -18,41 +18,40 @@
 package com.android.systemui.controls.panels
 
 import android.content.SharedPreferences
+import android.content.pm.UserInfo
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
+import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
-import com.android.systemui.settings.UserTracker
+import com.android.systemui.settings.fakeUserTracker
+import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class AuthorizedPanelsRepositoryImplTest : SysuiTestCase() {
+    val kosmos = testKosmos()
+    val testScope = kosmos.testScope
 
-    @Mock private lateinit var userTracker: UserTracker
-
-    private val featureFlags = FakeFeatureFlags()
+    private lateinit var userTracker: FakeUserTracker
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
         mContext.orCreateTestableResources.addOverride(
             R.array.config_controlsPreferredPackages,
             arrayOf<String>()
         )
-        whenever(userTracker.userId).thenReturn(0)
-        featureFlags.set(Flags.APP_PANELS_REMOVE_APPS_ALLOWED, true)
+        userTracker = kosmos.fakeUserTracker.apply { set(listOf(PRIMARY_USER, SECONDARY_USER), 0) }
     }
 
     @Test
@@ -96,7 +95,7 @@ class AuthorizedPanelsRepositoryImplTest : SysuiTestCase() {
         val repository = createRepository(fileManager)
 
         assertThat(repository.getAuthorizedPanels()).containsExactly(TEST_PACKAGE)
-        whenever(userTracker.userId).thenReturn(1)
+        userTracker.set(listOf(SECONDARY_USER), 0)
         assertThat(repository.getAuthorizedPanels()).isEmpty()
     }
 
@@ -133,24 +132,52 @@ class AuthorizedPanelsRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testSetAuthorizedPackageAfterFeatureDisabled() {
-        mContext.orCreateTestableResources.addOverride(
-            R.array.config_controlsPreferredPackages,
-            arrayOf(TEST_PACKAGE)
-        )
-        val sharedPrefs = FakeSharedPreferences()
-        val fileManager = FakeUserFileManager(mapOf(0 to sharedPrefs))
-        val repository = createRepository(fileManager)
+    fun observeAuthorizedPanels() =
+        testScope.runTest {
+            val sharedPrefs = FakeSharedPreferences()
+            val fileManager = FakeUserFileManager(mapOf(0 to sharedPrefs))
+            val repository = createRepository(fileManager)
 
-        repository.removeAuthorizedPanels(setOf(TEST_PACKAGE))
+            val authorizedPanels by
+                collectLastValue(repository.observeAuthorizedPanels(PRIMARY_USER.userHandle))
+            assertThat(authorizedPanels).isEmpty()
 
-        featureFlags.set(Flags.APP_PANELS_REMOVE_APPS_ALLOWED, false)
+            repository.addAuthorizedPanels(setOf(TEST_PACKAGE))
+            assertThat(authorizedPanels).containsExactly(TEST_PACKAGE)
 
-        assertThat(repository.getAuthorizedPanels()).isEqualTo(setOf(TEST_PACKAGE))
-    }
+            repository.removeAuthorizedPanels(setOf(TEST_PACKAGE))
+            assertThat(authorizedPanels).isEmpty()
+        }
+
+    @Test
+    fun observeAuthorizedPanelsForAnotherUser() =
+        testScope.runTest {
+            val fileManager =
+                FakeUserFileManager(
+                    mapOf(
+                        0 to FakeSharedPreferences(),
+                        1 to FakeSharedPreferences(),
+                    )
+                )
+            val repository = createRepository(fileManager)
+
+            val authorizedPanels by
+                collectLastValue(repository.observeAuthorizedPanels(SECONDARY_USER.userHandle))
+            assertThat(authorizedPanels).isEmpty()
+
+            // Primary user is active, add authorized panels.
+            repository.addAuthorizedPanels(setOf(TEST_PACKAGE))
+            assertThat(authorizedPanels).isEmpty()
+
+            // Make secondary user active and add authorized panels again.
+            userTracker.set(listOf(PRIMARY_USER, SECONDARY_USER), 1)
+            assertThat(authorizedPanels).isEmpty()
+            repository.addAuthorizedPanels(setOf(TEST_PACKAGE))
+            assertThat(authorizedPanels).containsExactly(TEST_PACKAGE)
+        }
 
     private fun createRepository(userFileManager: UserFileManager): AuthorizedPanelsRepositoryImpl {
-        return AuthorizedPanelsRepositoryImpl(mContext, userFileManager, userTracker, featureFlags)
+        return AuthorizedPanelsRepositoryImpl(mContext, userFileManager, userTracker)
     }
 
     private class FakeUserFileManager(private val sharedPrefs: Map<Int, SharedPreferences>) :
@@ -175,5 +202,9 @@ class AuthorizedPanelsRepositoryImplTest : SysuiTestCase() {
         private const val FILE_NAME = "controls_prefs"
         private const val KEY = "authorized_panels"
         private const val TEST_PACKAGE = "package"
+        private val PRIMARY_USER =
+            UserInfo(/* id= */ 0, /* name= */ "primary user", /* flags= */ UserInfo.FLAG_MAIN)
+        private val SECONDARY_USER =
+            UserInfo(/* id= */ 1, /* name= */ "secondary user", /* flags= */ 0)
     }
 }

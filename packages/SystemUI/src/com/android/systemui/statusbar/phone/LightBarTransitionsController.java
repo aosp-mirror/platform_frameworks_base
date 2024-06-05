@@ -24,7 +24,10 @@ import android.os.SystemClock;
 import android.util.MathUtils;
 import android.util.TimeUtils;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.app.animation.Interpolators;
+import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.systemui.Dumpable;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -95,12 +98,14 @@ public class LightBarTransitionsController implements Dumpable {
     private final KeyguardStateController mKeyguardStateController;
     private final StatusBarStateController mStatusBarStateController;
     private final CommandQueue mCommandQueue;
+    private GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
 
     private boolean mTransitionDeferring;
     private long mTransitionDeferringStartTime;
     private long mTransitionDeferringDuration;
     private boolean mTransitionPending;
     private boolean mTintChangePending;
+    private boolean mNavigationButtonsForcedVisible;
     private float mPendingDarkIntensity;
     private ValueAnimator mTintAnimator;
     private float mDarkIntensity;
@@ -134,12 +139,17 @@ public class LightBarTransitionsController implements Dumpable {
         mDozeAmount = mStatusBarStateController.getDozeAmount();
         mContext = context;
         mDisplayId = mContext.getDisplayId();
+        mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(
+                mHandler, mContext, this::onNavigationSettingsChanged);
+        mGestureNavigationSettingsObserver.register();
+        onNavigationSettingsChanged();
     }
 
     /** Call to cleanup the LightBarTransitionsController when done with it. */
     public void destroy() {
         mCommandQueue.removeCallback(mCallback);
         mStatusBarStateController.removeCallback(mCallback);
+        mGestureNavigationSettingsObserver.unregister();
     }
 
     public void saveState(Bundle outState) {
@@ -193,6 +203,12 @@ public class LightBarTransitionsController implements Dumpable {
             mHandler.postAtTime(mTransitionDeferringDoneRunnable, startTime);
         }
         mTransitionPending = false;
+    }
+
+    @VisibleForTesting
+    void setNavigationSettingsObserver(GestureNavigationSettingsObserver observer) {
+        mGestureNavigationSettingsObserver = observer;
+        onNavigationSettingsChanged();
     }
 
     public void setIconsDark(boolean dark, boolean animate) {
@@ -249,6 +265,28 @@ public class LightBarTransitionsController implements Dumpable {
         mApplier.applyDarkIntensity(MathUtils.lerp(mDarkIntensity, 0f, mDozeAmount));
     }
 
+    public void onDozeAmountChanged(float linear, float eased) {
+        mDozeAmount = eased;
+        dispatchDark();
+    }
+
+    /**
+     * Called when the navigation settings change.
+     */
+    private void onNavigationSettingsChanged() {
+        mNavigationButtonsForcedVisible =
+                mGestureNavigationSettingsObserver.areNavigationButtonForcedVisible();
+    }
+
+    /**
+     * Return whether to use the tint calculated in this class for nav icons.
+     */
+    public boolean supportsIconTintForNavMode(int navigationMode) {
+        // In gesture mode, we already do region sampling to update tint based on content beneath.
+        return !QuickStepContract.isGesturalMode(navigationMode)
+                || mNavigationButtonsForcedVisible;
+    }
+
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.print("  mTransitionDeferring="); pw.print(mTransitionDeferring);
@@ -267,19 +305,7 @@ public class LightBarTransitionsController implements Dumpable {
         pw.print("  mPendingDarkIntensity="); pw.print(mPendingDarkIntensity);
         pw.print(" mDarkIntensity="); pw.print(mDarkIntensity);
         pw.print(" mNextDarkIntensity="); pw.println(mNextDarkIntensity);
-    }
-
-    public void onDozeAmountChanged(float linear, float eased) {
-        mDozeAmount = eased;
-        dispatchDark();
-    }
-
-    /**
-     * Return whether to use the tint calculated in this class for nav icons.
-     */
-    public boolean supportsIconTintForNavMode(int navigationMode) {
-        // In gesture mode, we already do region sampling to update tint based on content beneath.
-        return !QuickStepContract.isGesturalMode(navigationMode);
+        pw.print(" mAreNavigationButtonForcedVisible="); pw.println(mNavigationButtonsForcedVisible);
     }
 
     /**

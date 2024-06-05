@@ -18,6 +18,7 @@ package com.android.systemui.complication;
 
 import static com.android.systemui.complication.dagger.DreamHomeControlsComplicationComponent.DreamHomeControlsModule.DREAM_HOME_CONTROLS_CHIP_VIEW;
 import static com.android.systemui.complication.dagger.RegisteredComplicationsModule.DREAM_HOME_CONTROLS_CHIP_LAYOUT_PARAMS;
+import static com.android.systemui.complication.dagger.RegisteredComplicationsModule.OPEN_HUB_CHIP_REPLACE_HOME_CONTROLS;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.UNAVAILABLE;
@@ -25,15 +26,18 @@ import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.UiEvent;
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.UiEventLogger;
+import com.android.settingslib.Utils;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.Flags;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.complication.dagger.DreamHomeControlsComplicationComponent;
 import com.android.systemui.controls.ControlsServiceInfo;
 import com.android.systemui.controls.dagger.ControlsComponent;
@@ -45,6 +49,7 @@ import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.shared.condition.Monitor;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.condition.ConditionalCoreStartable;
 
@@ -86,6 +91,7 @@ public class DreamHomeControlsComplication implements Complication {
         private final DreamHomeControlsComplication mComplication;
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final ControlsComponent mControlsComponent;
+        private final boolean mReplacedByOpenHub;
 
         private boolean mOverlayActive = false;
 
@@ -113,11 +119,13 @@ public class DreamHomeControlsComplication implements Complication {
         public Registrant(DreamHomeControlsComplication complication,
                 DreamOverlayStateController dreamOverlayStateController,
                 ControlsComponent controlsComponent,
-                @SystemUser Monitor monitor) {
+                @SystemUser Monitor monitor,
+                @Named(OPEN_HUB_CHIP_REPLACE_HOME_CONTROLS) boolean replacedByOpenHub) {
             super(monitor);
             mComplication = complication;
             mControlsComponent = controlsComponent;
             mDreamOverlayStateController = dreamOverlayStateController;
+            mReplacedByOpenHub = replacedByOpenHub;
         }
 
         @Override
@@ -129,7 +137,9 @@ public class DreamHomeControlsComplication implements Complication {
 
         private void updateHomeControlsComplication() {
             mControlsComponent.getControlsListingController().ifPresent(c -> {
-                if (isHomeControlsAvailable(c.getCurrentServices())) {
+                final boolean replacedWithOpenHub =
+                        Flags.glanceableHubShortcutButton() && mReplacedByOpenHub;
+                if (isHomeControlsAvailable(c.getCurrentServices()) && !replacedWithOpenHub) {
                     mDreamOverlayStateController.addComplication(mComplication);
                 } else {
                     mDreamOverlayStateController.removeComplication(mComplication);
@@ -197,64 +207,84 @@ public class DreamHomeControlsComplication implements Complication {
 
         private final ActivityStarter mActivityStarter;
         private final Context mContext;
+        private final ConfigurationController mConfigurationController;
         private final ControlsComponent mControlsComponent;
 
         private final UiEventLogger mUiEventLogger;
 
-        @VisibleForTesting
-        public enum DreamOverlayEvent implements UiEventLogger.UiEventEnum {
-            @UiEvent(doc = "The home controls on the screensaver has been tapped.")
-            DREAM_HOME_CONTROLS_TAPPED(1212);
-
-            private final int mId;
-
-            DreamOverlayEvent(int id) {
-                mId = id;
-            }
-
-            @Override
-            public int getId() {
-                return mId;
-            }
-        }
+        private final ConfigurationController.ConfigurationListener mConfigurationListener =
+                new ConfigurationController.ConfigurationListener() {
+                    @Override
+                    public void onUiModeChanged() {
+                        reloadResources();
+                    }
+                };
 
         @Inject
         DreamHomeControlsChipViewController(
                 @Named(DREAM_HOME_CONTROLS_CHIP_VIEW) ImageView view,
                 ActivityStarter activityStarter,
                 Context context,
+                ConfigurationController configurationController,
                 ControlsComponent controlsComponent,
                 UiEventLogger uiEventLogger) {
             super(view);
 
             mActivityStarter = activityStarter;
             mContext = context;
+            mConfigurationController = configurationController;
             mControlsComponent = controlsComponent;
             mUiEventLogger = uiEventLogger;
         }
 
         @Override
         protected void onViewAttached() {
-            mView.setImageResource(mControlsComponent.getTileImageId());
-            mView.setContentDescription(mContext.getString(mControlsComponent.getTileTitleId()));
+            reloadResources();
             mView.setOnClickListener(this::onClickHomeControls);
+            mConfigurationController.addCallback(mConfigurationListener);
         }
 
         @Override
-        protected void onViewDetached() {}
+        protected void onViewDetached() {
+            mConfigurationController.removeCallback(mConfigurationListener);
+        }
+
+        private void reloadResources() {
+            final String title = getControlsTitle();
+            if (title != null) {
+                mView.setContentDescription(title);
+            }
+            mView.setImageResource(mControlsComponent.getTileImageId());
+            mView.setImageTintList(Utils.getColorAttr(mContext, android.R.attr.textColorPrimary));
+            final Drawable background = mView.getBackground();
+            if (background != null) {
+                background.setTintList(
+                        Utils.getColorAttr(mContext, com.android.internal.R.attr.colorSurface));
+            }
+        }
+
+        @Nullable
+        private String getControlsTitle() {
+            try {
+                return mContext.getString(mControlsComponent.getTileTitleId());
+            } catch (Resources.NotFoundException e) {
+                return null;
+            }
+        }
 
         private void onClickHomeControls(View v) {
             if (DEBUG) Log.d(TAG, "home controls complication tapped");
 
-            mUiEventLogger.log(DreamOverlayEvent.DREAM_HOME_CONTROLS_TAPPED);
+            mUiEventLogger.log(DreamOverlayUiEvent.DREAM_HOME_CONTROLS_TAPPED);
 
             final Intent intent = new Intent(mContext, ControlsActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK)
                     .putExtra(ControlsUiController.EXTRA_ANIMATE, true)
                     .putExtra(ControlsUiController.EXIT_TO_DREAM, true);
 
-            final ActivityLaunchAnimator.Controller controller =
-                    v != null ? ActivityLaunchAnimator.Controller.fromView(v, null /* cujType */)
+            final ActivityTransitionAnimator.Controller controller =
+                    v != null
+                            ? ActivityTransitionAnimator.Controller.fromView(v, null /* cujType */)
                             : null;
             if (mControlsComponent.getVisibility() == AVAILABLE) {
                 // Controls can be made visible.

@@ -27,6 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
 import android.app.IForegroundServiceObserver;
@@ -42,17 +43,18 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -71,7 +73,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class FgsManagerControllerTest extends SysuiTestCase {
@@ -90,11 +92,15 @@ public class FgsManagerControllerTest extends SysuiTestCase {
     @Mock
     UserTracker mUserTracker;
     @Mock
-    DialogLaunchAnimator mDialogLaunchAnimator;
+    DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock
     BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     DumpManager mDumpManager;
+    @Mock
+    SystemUIDialog.Factory mSystemUIDialogFactory;
+    @Mock
+    SystemUIDialog mSystemUIDialog;
 
     private FgsManagerController mFmc;
 
@@ -114,6 +120,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         mSystemClock = new FakeSystemClock();
         mMainExecutor = new FakeExecutor(mSystemClock);
         mBackgroundExecutor = new FakeExecutor(mSystemClock);
+        when(mSystemUIDialogFactory.create()).thenReturn(mSystemUIDialog);
 
         mUserProfiles = new ArrayList<>();
         Mockito.doReturn(mUserProfiles).when(mUserTracker).getUserProfiles();
@@ -323,9 +330,10 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 mPackageManager,
                 mUserTracker,
                 mDeviceConfigProxyFake,
-                mDialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 mBroadcastDispatcher,
-                mDumpManager
+                mDumpManager,
+                mSystemUIDialogFactory
         );
         fmc.init();
         Assert.assertTrue(fmc.getIncludesUserVisibleJobs());
@@ -349,9 +357,10 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 mPackageManager,
                 mUserTracker,
                 mDeviceConfigProxyFake,
-                mDialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 mBroadcastDispatcher,
-                mDumpManager
+                mDumpManager,
+                mSystemUIDialogFactory
         );
         fmc.init();
         Assert.assertFalse(fmc.getIncludesUserVisibleJobs());
@@ -455,9 +464,10 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 mPackageManager,
                 mUserTracker,
                 mDeviceConfigProxyFake,
-                mDialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 mBroadcastDispatcher,
-                mDumpManager
+                mDumpManager,
+                mSystemUIDialogFactory
         );
         result.init();
 

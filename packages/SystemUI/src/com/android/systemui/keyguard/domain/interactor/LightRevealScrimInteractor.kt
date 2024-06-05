@@ -16,28 +16,44 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.keyguard.logging.ScrimLogger
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.LightRevealScrimRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.util.kotlin.sample
+import dagger.Lazy
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class LightRevealScrimInteractor
 @Inject
 constructor(
-    transitionRepository: KeyguardTransitionRepository,
-    transitionInteractor: KeyguardTransitionInteractor,
-    lightRevealScrimRepository: LightRevealScrimRepository,
+    private val transitionInteractor: KeyguardTransitionInteractor,
+    private val lightRevealScrimRepository: LightRevealScrimRepository,
+    @Application private val scope: CoroutineScope,
+    private val scrimLogger: ScrimLogger,
+    private val powerInteractor: Lazy<PowerInteractor>,
 ) {
+    init {
+        listenForStartedKeyguardTransitionStep()
+    }
+
+    private fun listenForStartedKeyguardTransitionStep() {
+        scope.launch {
+            transitionInteractor.startedKeyguardTransitionStep.collect {
+                scrimLogger.d(TAG, "listenForStartedKeyguardTransitionStep", it)
+                lightRevealScrimRepository.startRevealAmountAnimator(willBeRevealedInState(it.to))
+            }
+        }
+    }
 
     /**
      * Whenever a keyguard transition starts, sample the latest reveal effect from the repository
@@ -54,44 +70,44 @@ constructor(
             lightRevealScrimRepository.revealEffect
         )
 
+    val revealAmount =
+        lightRevealScrimRepository.revealAmount.filter {
+            // When the screen is off we do not want to keep producing frames as this is causing
+            // (invisible) jank. However, we need to still pass through 1f and 0f to ensure that the
+            // correct end states are respected even if the screen turned off (or was still off)
+            // when the animation finished
+            screenIsShowingContent() || it == 1f || it == 0f
+        }
+
+    private fun screenIsShowingContent() =
+        powerInteractor.get().screenPowerState.value != ScreenPowerState.SCREEN_OFF &&
+            powerInteractor.get().screenPowerState.value != ScreenPowerState.SCREEN_TURNING_ON
+
+    val isAnimating: Boolean
+        get() = lightRevealScrimRepository.isAnimating
+
     /**
-     * The reveal amount to use for the light reveal scrim, which is derived from the keyguard
-     * transition steps.
+     * Whether the light reveal scrim will be fully revealed (revealAmount = 1.0f) in the given
+     * state after the transition is complete. If false, scrim will be fully hidden.
      */
-    val revealAmount: Flow<Float> =
-        transitionRepository.transitions
-            // Only listen to transitions that change the reveal amount.
-            .filter { willTransitionAffectRevealAmount(it) }
-            // Use the transition amount as the reveal amount, inverting it if we're transitioning
-            // to a non-revealed (hidden) state.
-            .map { step -> if (willBeRevealedInState(step.to)) step.value else 1f - step.value }
+    private fun willBeRevealedInState(state: KeyguardState): Boolean {
+        return when (state) {
+            KeyguardState.OFF -> false
+            KeyguardState.DOZING -> false
+            KeyguardState.AOD -> false
+            KeyguardState.DREAMING -> true
+            KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> true
+            KeyguardState.GLANCEABLE_HUB -> true
+            KeyguardState.ALTERNATE_BOUNCER -> true
+            KeyguardState.PRIMARY_BOUNCER -> true
+            KeyguardState.LOCKSCREEN -> true
+            KeyguardState.GONE -> true
+            KeyguardState.OCCLUDED -> true
+            KeyguardState.UNDEFINED -> true
+        }
+    }
 
     companion object {
-
-        /**
-         * Whether the transition requires a change in the reveal amount of the light reveal scrim.
-         * If not, we don't care about the transition and don't need to listen to it.
-         */
-        fun willTransitionAffectRevealAmount(transition: TransitionStep): Boolean {
-            return willBeRevealedInState(transition.from) != willBeRevealedInState(transition.to)
-        }
-
-        /**
-         * Whether the light reveal scrim will be fully revealed (revealAmount = 1.0f) in the given
-         * state after the transition is complete. If false, scrim will be fully hidden.
-         */
-        fun willBeRevealedInState(state: KeyguardState): Boolean {
-            return when (state) {
-                KeyguardState.OFF -> false
-                KeyguardState.DOZING -> false
-                KeyguardState.AOD -> false
-                KeyguardState.DREAMING -> true
-                KeyguardState.ALTERNATE_BOUNCER -> true
-                KeyguardState.PRIMARY_BOUNCER -> true
-                KeyguardState.LOCKSCREEN -> true
-                KeyguardState.GONE -> true
-                KeyguardState.OCCLUDED -> true
-            }
-        }
+        val TAG = LightRevealScrimInteractor::class.simpleName!!
     }
 }

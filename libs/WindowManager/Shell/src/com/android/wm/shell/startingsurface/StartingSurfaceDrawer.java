@@ -18,10 +18,12 @@ package com.android.wm.shell.startingsurface;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NONE;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NORMAL;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_ROTATION;
 
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.Context;
@@ -45,8 +47,8 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.annotations.ShellSplashscreenThread;
 
 /**
  * A class which able to draw splash screen or snapshot as the starting window for a task.
@@ -188,7 +190,7 @@ public class StartingSurfaceDrawer {
         final SnapshotRecord record = sRecord instanceof SnapshotRecord
                 ? (SnapshotRecord) sRecord : null;
         if (record != null && record.hasImeSurface()) {
-            records.removeWindow(taskId, true);
+            records.removeWindow(taskId);
         }
     }
 
@@ -256,29 +258,31 @@ public class StartingSurfaceDrawer {
 
         @WindowConfiguration.ActivityType protected final int mActivityType;
         protected final ShellExecutor mRemoveExecutor;
+        private final int mTaskId;
+        private final StartingWindowRecordManager mRecordManager;
 
-        SnapshotRecord(int activityType, ShellExecutor removeExecutor) {
+        SnapshotRecord(int activityType, ShellExecutor removeExecutor, int taskId,
+                StartingWindowRecordManager recordManager) {
             mActivityType = activityType;
             mRemoveExecutor = removeExecutor;
+            mTaskId = taskId;
+            mRecordManager = recordManager;
         }
 
         @Override
         public final boolean removeIfPossible(StartingWindowRemovalInfo info, boolean immediately) {
-            if (immediately) {
+            if (immediately
+                    // Show the latest content as soon as possible for unlocking to home.
+                    || mActivityType == ACTIVITY_TYPE_HOME
+                    || info.deferRemoveMode == DEFER_MODE_NONE) {
                 removeImmediately();
-            } else {
-                scheduleRemove(info.deferRemoveForImeMode);
-                return false;
+                return true;
             }
-            return true;
+            scheduleRemove(info.deferRemoveMode);
+            return false;
         }
 
         void scheduleRemove(@StartingWindowRemovalInfo.DeferMode int deferRemoveForImeMode) {
-            // Show the latest content as soon as possible for unlocking to home.
-            if (mActivityType == ACTIVITY_TYPE_HOME) {
-                removeImmediately();
-                return;
-            }
             mRemoveExecutor.removeCallbacks(mScheduledRunnable);
             final long delayRemovalTime;
             switch (deferRemoveForImeMode) {
@@ -301,6 +305,7 @@ public class StartingSurfaceDrawer {
         @CallSuper
         protected void removeImmediately() {
             mRemoveExecutor.removeCallbacks(mScheduledRunnable);
+            mRecordManager.onRecordRemoved(this, mTaskId);
         }
     }
 
@@ -316,11 +321,16 @@ public class StartingSurfaceDrawer {
                 taskIds[i] = mStartingWindowRecords.keyAt(i);
             }
             for (int i = taskSize - 1; i >= 0; --i) {
-                removeWindow(taskIds[i], true);
+                removeWindow(taskIds[i]);
             }
         }
 
         void addRecord(int taskId, StartingWindowRecord record) {
+            final StartingWindowRecord original = mStartingWindowRecords.get(taskId);
+            if (original != null) {
+                mTmpRemovalInfo.taskId = taskId;
+                original.removeIfPossible(mTmpRemovalInfo, true /* immediately */);
+            }
             mStartingWindowRecords.put(taskId, record);
         }
 
@@ -335,9 +345,16 @@ public class StartingSurfaceDrawer {
             }
         }
 
-        void removeWindow(int taskId, boolean immediately) {
+        void removeWindow(int taskId) {
             mTmpRemovalInfo.taskId = taskId;
-            removeWindow(mTmpRemovalInfo, immediately);
+            removeWindow(mTmpRemovalInfo, true/* immediately */);
+        }
+
+        void onRecordRemoved(@NonNull StartingWindowRecord record, int taskId) {
+            final StartingWindowRecord currentRecord = mStartingWindowRecords.get(taskId);
+            if (currentRecord == record) {
+                mStartingWindowRecords.remove(taskId);
+            }
         }
 
         StartingWindowRecord getRecord(int taskId) {

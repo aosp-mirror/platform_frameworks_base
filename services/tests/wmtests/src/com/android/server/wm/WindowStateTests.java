@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.permission.flags.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.Surface.ROTATION_0;
@@ -52,7 +53,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doThrow;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -91,11 +91,11 @@ import android.os.IBinder;
 import android.os.InputConfig;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.Gravity;
 import android.view.IWindow;
-import android.view.IWindowSessionCallback;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
@@ -104,6 +104,8 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowRelayoutResult;
+import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 import android.window.ITaskFragmentOrganizer;
 import android.window.TaskFragmentOrganizer;
@@ -111,7 +113,10 @@ import android.window.TaskFragmentOrganizer;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.testutils.StubTransaction;
+import com.android.server.wm.SensitiveContentPackages.PackageInfo;
+import com.android.window.flags.Flags;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -124,13 +129,18 @@ import java.util.List;
 /**
  * Tests for the {@link WindowState} class.
  *
- * Build/Install/Run:
+ * <p> Build/Install/Run:
  * atest WmTests:WindowStateTests
  */
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class WindowStateTests extends WindowTestsBase {
+
+    @After
+    public void tearDown() {
+        mWm.mSensitiveContentPackages.clearBlockedApps();
+    }
 
     @Test
     public void testIsParentWindowHidden() {
@@ -234,7 +244,7 @@ public class WindowStateTests extends WindowTestsBase {
         window.show(false /* doAnimation */, false /* requestAnim */);
         assertTrue(window.isVisibleByPolicy());
         window.getParent().startAnimation(mTransaction, mock(AnimationAdapter.class),
-                false /* hidden */, SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
+                false /* hidden */, SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFORM);
         window.mAttrs.windowAnimations = 0;
         window.hide(true /* doAnimation */, true /* requestAnim */);
         assertFalse(window.isSelfAnimating(0, SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION));
@@ -389,28 +399,26 @@ public class WindowStateTests extends WindowTestsBase {
         firstWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
         secondWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
-        final WindowState.PowerManagerWrapper powerManagerWrapper =
-                mSystemServicesTestRule.getPowerManagerWrapper();
-        reset(powerManagerWrapper);
+        final var powerManager = mWm.mPowerManager;
+        clearInvocations(powerManager);
         firstWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
 
-        reset(powerManagerWrapper);
+        clearInvocations(powerManager);
         secondWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(WindowState appWindow,
             boolean expectedWakeupCalled, boolean expectedCurrentLaunchCanTurnScreenOn) {
-        final WindowState.PowerManagerWrapper powerManagerWrapper =
-                mSystemServicesTestRule.getPowerManagerWrapper();
-        reset(powerManagerWrapper);
+        final var powerManager = mWm.mPowerManager;
+        clearInvocations(powerManager);
         appWindow.prepareWindowToDisplayDuringRelayout(false /* wasVisible */);
 
         if (expectedWakeupCalled) {
-            verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
         } else {
-            verify(powerManagerWrapper, never()).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
         }
         // If wakeup is expected to be called, the currentLaunchCanTurnScreenOn should be false
         // because the state will be consumed.
@@ -572,7 +580,7 @@ public class WindowStateTests extends WindowTestsBase {
         final SurfaceControl.Transaction[] handledT = { null };
         // The normal case that the draw transaction is applied with finishing drawing.
         win.applyWithNextDraw(t -> handledT[0] = t);
-        assertTrue(win.useBLASTSync());
+        assertTrue(win.syncNextBuffer());
         final SurfaceControl.Transaction drawT = new StubTransaction();
         final SurfaceControl.Transaction currT = win.getSyncTransaction();
         clearInvocations(currT);
@@ -581,12 +589,12 @@ public class WindowStateTests extends WindowTestsBase {
         // The draw transaction should be merged to current transaction even if the state is hidden.
         verify(currT).merge(eq(drawT));
         assertEquals(drawT, handledT[0]);
-        assertFalse(win.useBLASTSync());
+        assertFalse(win.syncNextBuffer());
 
         // If the window is gone before reporting drawn, the sync state should be cleared.
         win.applyWithNextDraw(t -> handledT[0] = t);
         win.destroySurfaceUnchecked();
-        assertFalse(win.useBLASTSync());
+        assertFalse(win.syncNextBuffer());
         assertNotEquals(drawT, handledT[0]);
     }
 
@@ -778,7 +786,6 @@ public class WindowStateTests extends WindowTestsBase {
         startingApp.getWindowFrames().setInsetsChanged(true);
         startingApp.updateResizingWindowIfNeeded();
         assertTrue(startingApp.isDrawn());
-        assertFalse(startingApp.getOrientationChanging());
     }
 
     @SetupWindows(addWindows = W_ABOVE_ACTIVITY)
@@ -799,7 +806,8 @@ public class WindowStateTests extends WindowTestsBase {
                     anyBoolean() /* reportDraw */, any() /* mergedConfig */,
                     any() /* insetsState */, anyBoolean() /* forceLayout */,
                     anyBoolean() /* alwaysConsumeSystemBars */, anyInt() /* displayId */,
-                    anyInt() /* seqId */, anyBoolean() /* dragResizing */);
+                    anyInt() /* seqId */, anyBoolean() /* dragResizing */,
+                    any() /* activityWindowInfo */);
         } catch (RemoteException ignored) {
         }
         win.reportResized();
@@ -811,17 +819,20 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(win.getOrientationChanging());
     }
 
-    @SetupWindows(addWindows = W_ABOVE_ACTIVITY)
     @Test
     public void testRequestResizeForBlastSync() {
-        final WindowState win = mChildAppWindowAbove;
-        makeWindowVisible(win, win.getParentWindow());
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "window");
+        makeWindowVisible(win);
+        makeLastConfigReportedToClient(win, true /* visible */);
         win.mLayoutSeq = win.getDisplayContent().mLayoutSeq;
         win.reportResized();
         win.updateResizingWindowIfNeeded();
         assertThat(mWm.mResizingWindows).doesNotContain(win);
 
         // Check that the window is in resizing if using blast sync.
+        final BLASTSyncEngine.SyncGroup syncGroup = mock(BLASTSyncEngine.SyncGroup.class);
+        syncGroup.mSyncMethod = BLASTSyncEngine.METHOD_BLAST;
+        win.mSyncGroup = syncGroup;
         win.reportResized();
         win.prepareSync();
         assertEquals(SYNC_STATE_WAITING_FOR_DRAW, win.mSyncState);
@@ -834,12 +845,26 @@ public class WindowStateTests extends WindowTestsBase {
         mWm.mResizingWindows.remove(win);
         win.updateResizingWindowIfNeeded();
         assertThat(mWm.mResizingWindows).doesNotContain(win);
+
+        // Non blast sync doesn't require to force resizing, because it won't use syncSeqId.
+        // And if the window is already drawn, it can report sync finish immediately so that the
+        // sync group won't be blocked.
+        win.finishSync(mTransaction, syncGroup, false /* cancel */);
+        syncGroup.mSyncMethod = BLASTSyncEngine.METHOD_NONE;
+        win.mSyncGroup = syncGroup;
+        win.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        win.prepareSync();
+        assertEquals(SYNC_STATE_WAITING_FOR_DRAW, win.mSyncState);
+        win.updateResizingWindowIfNeeded();
+        assertThat(mWm.mResizingWindows).doesNotContain(win);
+        assertTrue(win.isSyncFinished(syncGroup));
+        assertEquals(WindowContainer.SYNC_STATE_READY, win.mSyncState);
     }
 
     @Test
     public void testEmbeddedActivityResizing_clearAllDrawn() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+        registerTaskFragmentOrganizer(
                 ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
         final Task task = createTask(mDisplayContent);
         final TaskFragment embeddedTf = createTaskFragmentWithEmbeddedActivity(task, organizer);
@@ -1095,7 +1120,7 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.setImeInputTarget(app);
         app.setRequestedVisibleTypes(ime(), ime());
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        controller.getImeSourceProvider().scheduleShowImePostLayout(app, null /* statsToken */);
+        controller.getImeSourceProvider().scheduleShowImePostLayout(app, ImeTracker.Token.empty());
         controller.getImeSourceProvider().getSource().setVisible(true);
         controller.updateAboveInsetsState(false);
 
@@ -1133,7 +1158,7 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.setImeInputTarget(app);
         app.setRequestedVisibleTypes(ime(), ime());
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        controller.getImeSourceProvider().scheduleShowImePostLayout(app, null /* statsToken */);
+        controller.getImeSourceProvider().scheduleShowImePostLayout(app, ImeTracker.Token.empty());
         controller.getImeSourceProvider().getSource().setVisible(true);
         controller.updateAboveInsetsState(false);
 
@@ -1344,7 +1369,9 @@ public class WindowStateTests extends WindowTestsBase {
 
     @SetupWindows(addWindows = {W_INPUT_METHOD})
     @Test
-    public void testImeTargetChangeListener_OnImeTargetOverlayVisibilityChanged() {
+    public void testImeTargetChangeListener_OnImeTargetOverlayVisibilityChanged_legacy() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_WINDOW_SESSION_RELAYOUT_INFO);
+
         final TestImeTargetChangeListener listener = new TestImeTargetChangeListener();
         mWm.mImeTargetChangeListener = listener;
 
@@ -1352,12 +1379,7 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowToken windowToken = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
                 mDisplayContent);
         final IWindow client = new TestIWindow();
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float v) throws RemoteException {
-
-            }
-        });
+        final Session session = getTestSession();
         final ClientWindowFrames outFrames = new ClientWindowFrames();
         final MergedConfiguration outConfig = new MergedConfiguration();
         final SurfaceControl outSurfaceControl = new SurfaceControl();
@@ -1395,12 +1417,112 @@ public class WindowStateTests extends WindowTestsBase {
         assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
 
         // Scenario 3: test removeWindow to remove the Ime layering target overlay window.
-        mWm.removeWindow(session, client);
+        mWm.removeClientToken(session, client.asBinder());
         waitHandlerIdle(mWm.mH);
 
         assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
         assertThat(listener.mIsRemoved).isTrue();
         assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+    }
+
+    @SetupWindows(addWindows = {W_INPUT_METHOD})
+    @Test
+    public void testImeTargetChangeListener_OnImeTargetOverlayVisibilityChanged() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_WINDOW_SESSION_RELAYOUT_INFO);
+
+        final TestImeTargetChangeListener listener = new TestImeTargetChangeListener();
+        mWm.mImeTargetChangeListener = listener;
+
+        // Scenario 1: test addWindow/relayoutWindow to add Ime layering overlay window as visible.
+        final WindowToken windowToken = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
+                mDisplayContent);
+        final IWindow client = new TestIWindow();
+        final Session session = getTestSession();
+        final ClientWindowFrames outFrames = new ClientWindowFrames();
+        final MergedConfiguration outConfig = new MergedConfiguration();
+        final SurfaceControl outSurfaceControl = new SurfaceControl();
+        final InsetsState outInsetsState = new InsetsState();
+        final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
+        final WindowRelayoutResult outRelayoutResult = new WindowRelayoutResult(outFrames,
+                outConfig, outSurfaceControl, outInsetsState, outControls);
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                TYPE_APPLICATION_OVERLAY);
+        params.setTitle("imeLayeringTargetOverlay");
+        params.token = windowToken.token;
+        params.flags = FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM;
+
+        mWm.addWindow(session, client, params, View.VISIBLE, DEFAULT_DISPLAY,
+                0 /* userUd */, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
+                new InsetsSourceControl.Array(), new Rect(), new float[1]);
+        mWm.relayoutWindow(session, client, params, 100, 200, View.VISIBLE, 0, 0, 0,
+                outRelayoutResult);
+        waitHandlerIdle(mWm.mH);
+
+        final WindowState imeLayeringTargetOverlay = mDisplayContent.getWindow(
+                w -> w.mClient.asBinder() == client.asBinder());
+        assertThat(imeLayeringTargetOverlay.isVisible()).isTrue();
+        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
+        assertThat(listener.mIsRemoved).isFalse();
+        assertThat(listener.mIsVisibleForImeTargetOverlay).isTrue();
+
+        // Scenario 2: test relayoutWindow to let the Ime layering target overlay window invisible.
+        mWm.relayoutWindow(session, client, params, 100, 200, View.GONE, 0, 0, 0,
+                outRelayoutResult);
+        waitHandlerIdle(mWm.mH);
+
+        assertThat(imeLayeringTargetOverlay.isVisible()).isFalse();
+        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
+        assertThat(listener.mIsRemoved).isFalse();
+        assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+
+        // Scenario 3: test removeWindow to remove the Ime layering target overlay window.
+        mWm.removeClientToken(session, client.asBinder());
+        waitHandlerIdle(mWm.mH);
+
+        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
+        assertThat(listener.mIsRemoved).isTrue();
+        assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION)
+    public void testIsSecureLocked_sensitiveContentProtectionManagerEnabled() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        int ownerId2 = 21;
+        final WindowState window1 = createWindow(null, TYPE_APPLICATION, "window1", ownerId1);
+        final WindowState window2 = createWindow(null, TYPE_APPLICATION, "window2", ownerId2);
+
+        // Setting packagename for targeted feature
+        window1.mAttrs.packageName = testPackage;
+        window2.mAttrs.packageName = testPackage;
+
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+        mWm.mSensitiveContentPackages.addBlockScreenCaptureForApps(blockedPackages);
+
+        assertTrue(window1.isSecureLocked());
+        assertFalse(window2.isSecureLocked());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION)
+    public void testIsSecureLocked_sensitiveContentBlockOrClearScreenCaptureForApp() {
+        String testPackage = "test";
+        int ownerId = 20;
+        final WindowState window = createWindow(null, TYPE_APPLICATION, "window", ownerId);
+        window.mAttrs.packageName = testPackage;
+        assertFalse(window.isSecureLocked());
+
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+        mWm.mSensitiveContentPackages.addBlockScreenCaptureForApps(blockedPackages);
+        assertTrue(window.isSecureLocked());
+
+        mWm.mSensitiveContentPackages.removeBlockScreenCaptureForApps(blockedPackages);
+        assertFalse(window.isSecureLocked());
     }
 
     private static class TestImeTargetChangeListener implements ImeTargetChangeListener {

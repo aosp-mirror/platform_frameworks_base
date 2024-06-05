@@ -18,13 +18,20 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.app.SystemServiceRegistry;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.SystemProperties;
 import android.os.TelephonyServiceManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsManager;
 import android.telephony.satellite.SatelliteManager;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.util.Preconditions;
 
 
@@ -37,6 +44,16 @@ public class TelephonyFrameworkInitializer {
 
     private TelephonyFrameworkInitializer() {
     }
+
+    /**
+     * Starting with {@link VANILLA_ICE_CREAM}, Telephony feature flags
+     * (e.g. {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}) are being checked before
+     * returning managers that depend on them. If the feature is missing,
+     * {@link Context#getSystemService} will return null.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long ENABLE_CHECKING_TELEPHONY_FEATURES = 330583731;
 
     private static volatile TelephonyServiceManager sTelephonyServiceManager;
 
@@ -53,6 +70,26 @@ public class TelephonyFrameworkInitializer {
         Preconditions.checkState(sTelephonyServiceManager == null,
                 "setTelephonyServiceManager called twice!");
         sTelephonyServiceManager = Preconditions.checkNotNull(telephonyServiceManager);
+    }
+
+    // Suppressing AndroidFrameworkCompatChange because we're querying vendor
+    // partition SDK level, not application's target SDK version (which BTW we
+    // also check through Compatibility framework a few lines below).
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private static boolean hasSystemFeature(Context context, String feature) {
+        // Check release status of this change in behavior.
+        if (!Flags.minimalTelephonyManagersConditionalOnFeatures()) return true;
+
+        // Check SDK version of the vendor partition.
+        final int vendorApiLevel = SystemProperties.getInt(
+                "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
+        if (vendorApiLevel < Build.VERSION_CODES.VANILLA_ICE_CREAM) return true;
+
+        // Check SDK version of the client app.
+        if (!Compatibility.isChangeEnabled(ENABLE_CHECKING_TELEPHONY_FEATURES)) return true;
+
+        // Finally, check if the system feature is actually present.
+        return context.getPackageManager().hasSystemFeature(feature);
     }
 
     /**
@@ -76,33 +113,39 @@ public class TelephonyFrameworkInitializer {
         SystemServiceRegistry.registerContextAwareService(
                 Context.CARRIER_CONFIG_SERVICE,
                 CarrierConfigManager.class,
-                context -> new CarrierConfigManager(context)
+                context -> hasSystemFeature(context, PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+                        ? new CarrierConfigManager(context) : null
         );
         SystemServiceRegistry.registerContextAwareService(
                 Context.EUICC_SERVICE,
                 EuiccManager.class,
-                context -> new EuiccManager(context)
+                context -> hasSystemFeature(context, PackageManager.FEATURE_TELEPHONY_EUICC)
+                        ? new EuiccManager(context) : null
         );
         SystemServiceRegistry.registerContextAwareService(
                 Context.EUICC_CARD_SERVICE,
                 EuiccCardManager.class,
-                context -> new EuiccCardManager(context)
+                context -> hasSystemFeature(context, PackageManager.FEATURE_TELEPHONY_EUICC)
+                        ? new EuiccCardManager(context) : null
         );
         SystemServiceRegistry.registerContextAwareService(
                 Context.TELEPHONY_IMS_SERVICE,
                 ImsManager.class,
-                context -> new ImsManager(context)
+                context -> hasSystemFeature(context, PackageManager.FEATURE_TELEPHONY_IMS)
+                        ? new ImsManager(context) : null
         );
         SystemServiceRegistry.registerContextAwareService(
                 Context.SMS_SERVICE,
                 SmsManager.class,
-                context -> SmsManager.getSmsManagerForContextAndSubscriptionId(context,
-                        SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)
+                context -> hasSystemFeature(context, PackageManager.FEATURE_TELEPHONY_MESSAGING)
+                        ? SmsManager.getSmsManagerForContextAndSubscriptionId(context,
+                                SubscriptionManager.DEFAULT_SUBSCRIPTION_ID) : null
         );
         SystemServiceRegistry.registerContextAwareService(
                 Context.SATELLITE_SERVICE,
                 SatelliteManager.class,
-                context -> new SatelliteManager(context)
+                context -> hasSystemFeature(context, PackageManager.FEATURE_TELEPHONY_SATELLITE)
+                        ? new SatelliteManager(context) : null
         );
     }
 

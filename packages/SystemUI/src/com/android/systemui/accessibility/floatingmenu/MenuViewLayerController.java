@@ -20,7 +20,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_
 
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
@@ -38,7 +37,16 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
     MenuViewLayerController(Context context, WindowManager windowManager,
             AccessibilityManager accessibilityManager, SecureSettings secureSettings) {
         mWindowManager = windowManager;
-        mMenuViewLayer = new MenuViewLayer(context, windowManager, accessibilityManager, this,
+
+        MenuViewModel menuViewModel = new MenuViewModel(
+                context, accessibilityManager, secureSettings);
+        MenuViewAppearance menuViewAppearance = new MenuViewAppearance(context, windowManager);
+
+        mMenuViewLayer = new MenuViewLayer(context, windowManager, accessibilityManager,
+                menuViewModel,
+                menuViewAppearance,
+                new MenuView(context, menuViewModel, menuViewAppearance, secureSettings),
+                this,
                 secureSettings);
     }
 
@@ -77,8 +85,10 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
         params.receiveInsetsIgnoringZOrder = true;
         params.privateFlags |= PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
         params.windowAnimations = android.R.style.Animation_Translucent;
-        params.setFitInsetsTypes(
-                WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+        // Insets are configured to allow the menu to display over navigation and system bars.
+        params.setFitInsetsTypes(0);
+        params.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         return params;
     }
 }

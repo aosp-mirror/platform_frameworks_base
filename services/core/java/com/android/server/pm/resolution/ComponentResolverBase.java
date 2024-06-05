@@ -28,6 +28,11 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Pair;
 
+import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedIntentInfo;
+import com.android.internal.pm.pkg.component.ParsedMainComponent;
+import com.android.internal.pm.pkg.component.ParsedProvider;
+import com.android.internal.pm.pkg.component.ParsedService;
 import com.android.server.pm.Computer;
 import com.android.server.pm.DumpState;
 import com.android.server.pm.UserManagerService;
@@ -36,11 +41,6 @@ import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserStateInternal;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.utils.WatchableImpl;
 
 import java.io.PrintWriter;
@@ -68,7 +68,7 @@ public abstract class ComponentResolverBase extends WatchableImpl implements Com
     protected ArrayMap<String, ParsedProvider> mProvidersByAuthority;
 
     @NonNull
-    protected UserManagerService mUserManager;
+    protected final UserManagerService mUserManager;
 
     protected ComponentResolverBase(@NonNull UserManagerService userManager) {
         mUserManager = userManager;

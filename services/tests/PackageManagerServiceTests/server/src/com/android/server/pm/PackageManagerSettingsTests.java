@@ -36,6 +36,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -43,16 +44,24 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.PropertyInvalidatedCache;
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.PackageManager;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserPackage;
 import android.os.BaseBundle;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -62,12 +71,14 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.pm.parsing.pkg.PackageImpl;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.LocalServices;
-import com.android.server.pm.parsing.pkg.PackageImpl;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.SuspendParams;
@@ -83,6 +94,7 @@ import com.google.common.truth.Truth;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -107,11 +119,16 @@ import java.util.concurrent.CountDownLatch;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PackageManagerSettingsTests {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     private static final String PACKAGE_NAME_1 = "com.android.app1";
     private static final String PACKAGE_NAME_2 = "com.android.app2";
     private static final String PACKAGE_NAME_3 = "com.android.app3";
     private static final int TEST_RESOURCE_ID = 2131231283;
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
     @Mock
     RuntimePermissionsPersistence mRuntimePermissionsPersistence;
     @Mock
@@ -138,6 +155,7 @@ public class PackageManagerSettingsTests {
     public void setup() {
         // Disable binder caches in this process.
         PropertyInvalidatedCache.disableForTestMode();
+
     }
 
     @Before
@@ -157,6 +175,107 @@ public class PackageManagerSettingsTests {
     @After
     public void tearDown() throws Exception {
         deleteFolder(InstrumentationRegistry.getContext().getFilesDir());
+    }
+
+    @Test
+    public void testApplicationInfoForUseSdkOptionalEnabled() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_SDK_LIB_INDEPENDENCE);
+
+        // Create basic information for SDK lib
+        final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
+        ps1.setPkg(((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed())
+                .setUid(ps1.getAppId())
+                .setSystem(true)
+                .hideAsFinal());
+        ps1.setUsesSdkLibraries(new String[] { "com.example.sdk.one" });
+        ps1.setUsesSdkLibrariesVersionsMajor(new long[] { 12 });
+        ps1.setUsesSdkLibrariesOptional(new boolean[] {true});
+        ps1.addUsesLibraryInfo(new SharedLibraryInfo("path1",
+                "packageName1",
+                Collections.emptyList(),
+                "com.example.sdk.one",
+                12 /*version*/,
+                SharedLibraryInfo.TYPE_SDK_PACKAGE,
+                null /*declaringPackage*/,
+                null /*dependentPackages*/,
+                null /*dependencies*/,
+                false /*isNative*/));
+        ps1.addUsesLibraryInfo(new SharedLibraryInfo("path11",
+                "packageName11",
+                Collections.emptyList(),
+                "com.example.sdk.oneone",
+                1212 /*version*/,
+                SharedLibraryInfo.TYPE_STATIC,
+                null /*declaringPackage*/,
+                null /*dependentPackages*/,
+                null /*dependencies*/,
+                false /*isNative*/));
+        ApplicationInfo appInfo1 = PackageInfoUtils.generateApplicationInfo(ps1.getAndroidPackage(),
+                0 /*flags*/, ps1.getUserStateOrDefault(0), 0 /*userId*/,
+                ps1);
+        assertThat(appInfo1, notNullValue());
+        assertThat(appInfo1.sharedLibraryInfos, notNullValue());
+        assertThat(appInfo1.optionalSharedLibraryInfos, notNullValue());
+        assertEquals(appInfo1.sharedLibraryInfos.get(0).getName(), "com.example.sdk.one");
+        assertEquals(appInfo1.optionalSharedLibraryInfos.get(0).getName(), "com.example.sdk.one");
+
+        final PackageSetting ps2 = createPackageSetting(PACKAGE_NAME_2);
+        ps2.setPkg(((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME_2).hideAsParsed())
+                .setUid(ps2.getAppId())
+                .setSystem(true)
+                .hideAsFinal());
+        ps2.setUsesSdkLibraries(new String[] { "com.example.sdk.two" });
+        ps2.setUsesSdkLibrariesVersionsMajor(new long[] { 34 });
+        ps2.setUsesSdkLibrariesOptional(new boolean[] {false});
+        ps2.addUsesLibraryInfo(new SharedLibraryInfo("path2",
+                "packageName2",
+                Collections.emptyList(),
+                "com.example.sdk.two",
+                34 /*version*/,
+                SharedLibraryInfo.TYPE_SDK_PACKAGE,
+                null /*declaringPackage*/,
+                null /*dependentPackages*/,
+                null /*dependencies*/,
+                false /*isNative*/));
+        ApplicationInfo appInfo2 = PackageInfoUtils.generateApplicationInfo(ps2.getAndroidPackage(),
+                0 /*flags*/, ps2.getUserStateOrDefault(0), 0 /*userId*/,
+                ps2);
+        assertThat(appInfo2, notNullValue());
+        assertThat(appInfo2.sharedLibraryInfos, notNullValue());
+        assertThat(appInfo2.optionalSharedLibraryInfos, nullValue());
+        assertEquals(appInfo2.sharedLibraryInfos.get(0).getName(), "com.example.sdk.two");
+    }
+
+    @Test
+    public void testApplicationInfoForUseSdkOptionalDisabled() throws Exception {
+        mSetFlagsRule.disableFlags(Flags.FLAG_SDK_LIB_INDEPENDENCE);
+
+        // Create basic information for SDK lib
+        final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
+        ps1.setPkg(((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed())
+                .setUid(ps1.getAppId())
+                .setSystem(true)
+                .hideAsFinal());
+        ps1.setUsesSdkLibraries(new String[] { "com.example.sdk.one" });
+        ps1.setUsesSdkLibrariesVersionsMajor(new long[] { 12 });
+        ps1.setUsesSdkLibrariesOptional(new boolean[] {true});
+        ps1.addUsesLibraryInfo(new SharedLibraryInfo("path1",
+                "packageName1",
+                Collections.emptyList(),
+                "com.example.sdk.one",
+                12 /*version*/,
+                SharedLibraryInfo.TYPE_SDK_PACKAGE,
+                null /*declaringPackage*/,
+                null /*dependentPackages*/,
+                null /*dependencies*/,
+                false /*isNative*/));
+        ApplicationInfo appInfo1 = PackageInfoUtils.generateApplicationInfo(ps1.getAndroidPackage(),
+                0 /*flags*/, ps1.getUserStateOrDefault(0), 0 /*userId*/,
+                ps1);
+        assertThat(appInfo1, notNullValue());
+        assertThat(appInfo1.sharedLibraryInfos, notNullValue());
+        assertThat(appInfo1.optionalSharedLibraryInfos, nullValue());
+        assertEquals(appInfo1.sharedLibraryInfos.get(0).getName(), "com.example.sdk.one");
     }
 
     /** make sure our initialized KeySetManagerService metadata matches packages.xml */
@@ -313,7 +432,7 @@ public class PackageManagerSettingsTests {
         PackageUserStateInternal packageUserState1 = ps1.readUserState(0);
         assertThat(packageUserState1.isSuspended(), is(true));
         assertThat(packageUserState1.getSuspendParams().size(), is(1));
-        assertThat(packageUserState1.getSuspendParams().keyAt(0), is("android"));
+        assertThat(packageUserState1.getSuspendParams().keyAt(0), is(UserPackage.of(0, "android")));
         assertThat(packageUserState1.getSuspendParams().valueAt(0).getAppExtras(), is(nullValue()));
         assertThat(packageUserState1.getSuspendParams().valueAt(0).getDialogInfo(),
                 is(nullValue()));
@@ -325,7 +444,7 @@ public class PackageManagerSettingsTests {
         packageUserState1 = ps1.readUserState(0);
         assertThat(packageUserState1.isSuspended(), is(true));
         assertThat(packageUserState1.getSuspendParams().size(), is(1));
-        assertThat(packageUserState1.getSuspendParams().keyAt(0), is("android"));
+        assertThat(packageUserState1.getSuspendParams().keyAt(0), is(UserPackage.of(0, "android")));
         assertThat(packageUserState1.getSuspendParams().valueAt(0).getAppExtras(), is(nullValue()));
         assertThat(packageUserState1.getSuspendParams().valueAt(0).getDialogInfo(),
                 is(nullValue()));
@@ -360,7 +479,8 @@ public class PackageManagerSettingsTests {
         watcher.verifyNoChangeReported("readUserState");
         assertThat(packageUserState1.isSuspended(), is(true));
         assertThat(packageUserState1.getSuspendParams().size(), is(1));
-        assertThat(packageUserState1.getSuspendParams().keyAt(0), is(PACKAGE_NAME_3));
+        assertThat(packageUserState1.getSuspendParams().keyAt(0),
+                is(UserPackage.of(0, PACKAGE_NAME_3)));
         final SuspendParams params = packageUserState1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("fetch user state");
         assertThat(params, is(notNullValue()));
@@ -411,19 +531,24 @@ public class PackageManagerSettingsTests {
                 .setNeutralButtonAction(BUTTON_ACTION_UNSUSPEND)
                 .build();
 
-        ps1.modifyUserState(0).putSuspendParams("suspendingPackage1",
+        UserPackage suspender1 = UserPackage.of(0, "suspendingPackage1");
+        UserPackage suspender2 = UserPackage.of(0, "suspendingPackage2");
+        UserPackage suspender3 = UserPackage.of(0, "suspendingPackage3");
+        UserPackage irrelevantSuspender = UserPackage.of(0, "irrelevant");
+
+        ps1.modifyUserState(0).putSuspendParams(suspender1,
                 new SuspendParams(dialogInfo1, appExtras1, launcherExtras1));
-        ps1.modifyUserState(0).putSuspendParams("suspendingPackage2",
+        ps1.modifyUserState(0).putSuspendParams(suspender2,
                 new SuspendParams(dialogInfo2, appExtras2, launcherExtras2));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
         watcher.verifyChangeReported("put package 1");
 
-        ps2.modifyUserState(0).putSuspendParams("suspendingPackage3",
+        ps2.modifyUserState(0).putSuspendParams(suspender3,
                 new SuspendParams(null, appExtras1, null));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
         watcher.verifyChangeReported("put package 2");
 
-        ps3.modifyUserState(0).removeSuspension("irrelevant");
+        ps3.modifyUserState(0).removeSuspension(irrelevantSuspender);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
         watcher.verifyChangeReported("put package 3");
 
@@ -448,7 +573,7 @@ public class PackageManagerSettingsTests {
         assertThat(readPus1.getSuspendParams().size(), is(2));
         watcher.verifyNoChangeReported("read package param");
 
-        assertThat(readPus1.getSuspendParams().keyAt(0), is("suspendingPackage1"));
+        assertThat(readPus1.getSuspendParams().keyAt(0), is(suspender1));
         final SuspendParams params11 = readPus1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("read package param");
         assertThat(params11, is(notNullValue()));
@@ -458,7 +583,7 @@ public class PackageManagerSettingsTests {
                 is(true));
         watcher.verifyNoChangeReported("read package param");
 
-        assertThat(readPus1.getSuspendParams().keyAt(1), is("suspendingPackage2"));
+        assertThat(readPus1.getSuspendParams().keyAt(1), is(suspender2));
         final SuspendParams params12 = readPus1.getSuspendParams().valueAt(1);
         assertThat(params12, is(notNullValue()));
         assertThat(params12.getDialogInfo(), is(dialogInfo2));
@@ -471,7 +596,7 @@ public class PackageManagerSettingsTests {
                 .readUserState(0);
         assertThat(readPus2.isSuspended(), is(true));
         assertThat(readPus2.getSuspendParams().size(), is(1));
-        assertThat(readPus2.getSuspendParams().keyAt(0), is("suspendingPackage3"));
+        assertThat(readPus2.getSuspendParams().keyAt(0), is(suspender3));
         final SuspendParams params21 = readPus2.getSuspendParams().valueAt(0);
         assertThat(params21, is(notNullValue()));
         assertThat(params21.getDialogInfo(), is(nullValue()));
@@ -815,12 +940,14 @@ public class PackageManagerSettingsTests {
 
         ps1.setUsesSdkLibraries(new String[] { "com.example.sdk.one" });
         ps1.setUsesSdkLibrariesVersionsMajor(new long[] { 12 });
+        ps1.setUsesSdkLibrariesOptional(new boolean[] {true});
         ps1.setFlags(ps1.getFlags() | ApplicationInfo.FLAG_SYSTEM);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
         assertThat(settingsUnderTest.disableSystemPackageLPw(PACKAGE_NAME_1, false), is(true));
 
         ps2.setUsesSdkLibraries(new String[] { "com.example.sdk.two" });
         ps2.setUsesSdkLibrariesVersionsMajor(new long[] { 34 });
+        ps2.setUsesSdkLibrariesOptional(new boolean[] {false});
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
 
         settingsUnderTest.writeLPr(computer, /*sync=*/true);
@@ -836,18 +963,29 @@ public class PackageManagerSettingsTests {
         Truth.assertThat(readPs1).isNotNull();
         Truth.assertThat(readPs1.getUsesSdkLibraries()).isNotNull();
         Truth.assertThat(readPs1.getUsesSdkLibrariesVersionsMajor()).isNotNull();
+        Truth.assertThat(readPs1.getUsesSdkLibrariesOptional()).isNotNull();
         Truth.assertThat(readPs2).isNotNull();
         Truth.assertThat(readPs2.getUsesSdkLibraries()).isNotNull();
         Truth.assertThat(readPs2.getUsesSdkLibrariesVersionsMajor()).isNotNull();
+        Truth.assertThat(readPs2.getUsesSdkLibrariesOptional()).isNotNull();
 
         List<Long> ps1VersionsAsList = new ArrayList<>();
         for (long version : ps1.getUsesSdkLibrariesVersionsMajor()) {
             ps1VersionsAsList.add(version);
         }
 
+        List<Boolean> ps1RequireAsList = new ArrayList<>();
+        for (boolean optional : ps1.getUsesSdkLibrariesOptional()) {
+            ps1RequireAsList.add(optional);
+        }
+
         List<Long> ps2VersionsAsList = new ArrayList<>();
         for (long version : ps2.getUsesSdkLibrariesVersionsMajor()) {
             ps2VersionsAsList.add(version);
+        }
+        List<Boolean> ps2RequireAsList = new ArrayList<>();
+        for (boolean optional : ps2.getUsesSdkLibrariesOptional()) {
+            ps2RequireAsList.add(optional);
         }
 
         Truth.assertThat(readPs1.getUsesSdkLibraries()).asList()
@@ -856,11 +994,93 @@ public class PackageManagerSettingsTests {
         Truth.assertThat(readPs1.getUsesSdkLibrariesVersionsMajor()).asList()
                 .containsExactlyElementsIn(ps1VersionsAsList).inOrder();
 
+        Truth.assertThat(readPs1.getUsesSdkLibrariesOptional()).asList()
+                .containsExactlyElementsIn(ps1RequireAsList).inOrder();
+
         Truth.assertThat(readPs2.getUsesSdkLibraries()).asList()
                 .containsExactlyElementsIn(ps2.getUsesSdkLibraries()).inOrder();
 
         Truth.assertThat(readPs2.getUsesSdkLibrariesVersionsMajor()).asList()
                 .containsExactlyElementsIn(ps2VersionsAsList).inOrder();
+
+        Truth.assertThat(readPs2.getUsesSdkLibrariesOptional()).asList()
+                .containsExactlyElementsIn(ps2RequireAsList).inOrder();
+    }
+
+    @Test
+    public void testWriteReadPendingRestore() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        packageSetting.setPendingRestore(true);
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /*sync=*/true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        assertThat(settings.getPackageLPr(PACKAGE_NAME_1).isPendingRestore(), is(true));
+    }
+
+    @Test
+    public void testWriteReadArchiveState() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        ArchiveState archiveState =
+                new ArchiveState(
+                        List.of(
+                                new ArchiveState.ArchiveActivityInfo(
+                                        "title1",
+                                        new ComponentName("pkg1", "class1"),
+                                        Path.of("/path1"),
+                                        Path.of("/monochromePath1")),
+                                new ArchiveState.ArchiveActivityInfo(
+                                        "title2",
+                                        new ComponentName("pkg2", "class2"),
+                                        Path.of("/path2"),
+                                        Path.of("/monochromePath2"))),
+                        "installerTitle");
+        packageSetting.modifyUserState(UserHandle.SYSTEM.getIdentifier()).setArchiveState(
+                archiveState);
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /*sync=*/true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+
+        Truth.assertThat(settings.getPackageLPr(PACKAGE_NAME_1).getStateForUser(
+                UserHandle.SYSTEM).getArchiveState()).isEqualTo(archiveState);
+    }
+
+    @RequiresFlagsEnabled(Flags.FLAG_ASL_IN_APK_APP_METADATA_SOURCE)
+    @Test
+    public void testWriteReadAppMetadataSource() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        packageSetting.setAppMetadataSource(PackageManager.APP_METADATA_SOURCE_INSTALLER);
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /*sync=*/true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        assertThat(settings.getPackageLPr(PACKAGE_NAME_1).getAppMetadataSource(),
+                is(PackageManager.APP_METADATA_SOURCE_INSTALLER));
     }
 
     @Test
@@ -920,6 +1140,8 @@ public class PackageManagerSettingsTests {
             new File(InstrumentationRegistry.getContext().getFilesDir(), "com.android.bar-1");
     private static final File UPDATED_CODE_PATH =
             new File(InstrumentationRegistry.getContext().getFilesDir(), "com.android.bar-2");
+    private static final File UPDATED_CODE_PATH2 =
+            new File(InstrumentationRegistry.getContext().getFilesDir(), "com.android.bar-3");
     private static final long INITIAL_VERSION_CODE = 10023L;
     private static final long UPDATED_VERSION_CODE = 10025L;
 
@@ -929,20 +1151,12 @@ public class PackageManagerSettingsTests {
                 PACKAGE_NAME,
                 REAL_PACKAGE_NAME,
                 INITIAL_CODE_PATH /*codePath*/,
-                null /*legacyNativeLibraryPathString*/,
-                "x86_64" /*primaryCpuAbiString*/,
-                "x86" /*secondaryCpuAbiString*/,
-                null /*cpuAbiOverrideString*/,
-                INITIAL_VERSION_CODE,
                 ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_HAS_CODE,
                 ApplicationInfo.PRIVATE_FLAG_PRIVILEGED|ApplicationInfo.PRIVATE_FLAG_HIDDEN,
-                0,
-                null /*usesSdkLibraries*/,
-                null /*usesSdkLibrariesVersions*/,
-                null /*usesStaticLibraries*/,
-                null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID())
+                .setPrimaryCpuAbi("x86_64")
+                .setSecondaryCpuAbi("x86")
+                .setLongVersionCode(INITIAL_VERSION_CODE);
         origPkgSetting01.setPkg(mockAndroidPackage(origPkgSetting01));
         final PackageSetting testPkgSetting01 = new PackageSetting(origPkgSetting01);
         verifySettingCopy(origPkgSetting01, testPkgSetting01);
@@ -951,27 +1165,19 @@ public class PackageManagerSettingsTests {
     @Test
     public void testPackageStateCopy02() {
         final PackageSetting origPkgSetting01 = new PackageSetting(
-                PACKAGE_NAME /*pkgName*/,
-                REAL_PACKAGE_NAME /*realPkgName*/,
+                PACKAGE_NAME,
+                REAL_PACKAGE_NAME,
                 INITIAL_CODE_PATH /*codePath*/,
-                null /*legacyNativeLibraryPathString*/,
-                "x86_64" /*primaryCpuAbiString*/,
-                "x86" /*secondaryCpuAbiString*/,
-                null /*cpuAbiOverrideString*/,
-                INITIAL_VERSION_CODE,
                 ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_HAS_CODE,
                 ApplicationInfo.PRIVATE_FLAG_PRIVILEGED|ApplicationInfo.PRIVATE_FLAG_HIDDEN,
-                0,
-                null /*usesSdkLibraries*/,
-                null /*usesSdkLibrariesVersions*/,
-                null /*usesStaticLibraries*/,
-                null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/,
-                UUID.randomUUID());
-        origPkgSetting01.setUserState(0, 100, 1, true, false, false, false, 0, null, false,
+                UUID.randomUUID())
+                .setPrimaryCpuAbi("x86_64")
+                .setSecondaryCpuAbi("x86")
+                .setLongVersionCode(INITIAL_VERSION_CODE);
+        origPkgSetting01.setUserState(0, 100, 100, 1, true, false, false, false, 0, null, false,
                 false, "lastDisabledCaller", new ArraySet<>(new String[]{"enabledComponent1"}),
                 new ArraySet<>(new String[]{"disabledComponent1"}), 0, 0, "harmfulAppWarning",
-                "splashScreenTheme", 1000L);
+                "splashScreenTheme", 1000L, PackageManager.USER_MIN_ASPECT_RATIO_UNSET, null);
         final PersistableBundle appExtras1 = createPersistableBundle(
                 PACKAGE_NAME_1, 1L, 0.01, true, "appString1");
         final PersistableBundle launcherExtras1 = createPersistableBundle(
@@ -983,27 +1189,18 @@ public class PackageManagerSettingsTests {
                 .setNeutralButtonText(0x11220003)
                 .setNeutralButtonAction(BUTTON_ACTION_MORE_DETAILS)
                 .build();
-        origPkgSetting01.modifyUserState(0).putSuspendParams("suspendingPackage1",
+        origPkgSetting01.modifyUserState(0).putSuspendParams(
+                UserPackage.of(0, "suspendingPackage1"),
                 new SuspendParams(dialogInfo1, appExtras1, launcherExtras1));
         origPkgSetting01.setPkg(mockAndroidPackage(origPkgSetting01));
         final PackageSetting testPkgSetting01 = new PackageSetting(
                 PACKAGE_NAME /*pkgName*/,
                 REAL_PACKAGE_NAME /*realPkgName*/,
                 UPDATED_CODE_PATH /*codePath*/,
-                null /*legacyNativeLibraryPathString*/,
-                null /*primaryCpuAbiString*/,
-                null /*secondaryCpuAbiString*/,
-                null /*cpuAbiOverrideString*/,
-                UPDATED_VERSION_CODE,
                 0 /*pkgFlags*/,
                 0 /*pkgPrivateFlags*/,
-                0,
-                null /*usesSdkLibraries*/,
-                null /*usesSdkLibrariesVersions*/,
-                null /*usesStaticLibraries*/,
-                null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID())
+                .setLongVersionCode(UPDATED_VERSION_CODE);
         testPkgSetting01.copyPackageSetting(origPkgSetting01, true);
         verifySettingCopy(origPkgSetting01, testPkgSetting01);
         verifyUserStatesCopy(origPkgSetting01.readUserState(0),
@@ -1035,16 +1232,22 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/,
+                false /*isDontKill*/);
         assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
         assertThat(testPkgSetting01.getSecondaryCpuAbiLegacy(), is("armeabi"));
         assertThat(testPkgSetting01.getFlags(), is(0));
         assertThat(testPkgSetting01.getPrivateFlags(), is(0));
+        assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
+        assertNull(testPkgSetting01.getOldPaths());
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState, false /*notLaunched*/,
                 false /*stopped*/, false /*installed*/);
@@ -1073,10 +1276,14 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/,
+                false /*isDontKill*/);
         assertThat(testPkgSetting01.getPrimaryCpuAbi(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getPrimaryCpuAbiLegacy(), is("arm64-v8a"));
         assertThat(testPkgSetting01.getSecondaryCpuAbi(), is("armeabi"));
@@ -1088,6 +1295,74 @@ public class PackageManagerSettingsTests {
         final PackageUserState userState = testPkgSetting01.readUserState(0);
         verifyUserState(userState,  false /*notLaunched*/,
                 false /*stopped*/, true /*installed*/);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_IMPROVE_INSTALL_DONT_KILL)
+    public void testUpdatePackageSettings02WithOldPaths() throws PackageManagerException {
+        final PackageSetting testPkgSetting01 =
+                createPackageSetting(0 /*sharedUserId*/, 0 /*pkgFlags*/);
+        testPkgSetting01.setInstalled(false /*installed*/, 0 /*userId*/);
+        assertThat(testPkgSetting01.getFlags(), is(0));
+        assertThat(testPkgSetting01.getPrivateFlags(), is(0));
+        final PackageSetting oldPkgSetting01 = new PackageSetting(testPkgSetting01);
+        Settings.updatePackageSetting(
+                testPkgSetting01,
+                null /*disabledPkg*/,
+                null /*existingSharedUserSetting*/,
+                null /*sharedUser*/,
+                UPDATED_CODE_PATH /*codePath*/,
+                null /*legacyNativeLibraryPath*/,
+                "arm64-v8a" /*primaryCpuAbi*/,
+                "armeabi" /*secondaryCpuAbi*/,
+                ApplicationInfo.FLAG_SYSTEM /*pkgFlags*/,
+                ApplicationInfo.PRIVATE_FLAG_PRIVILEGED /*pkgPrivateFlags*/,
+                UserManagerService.getInstance(),
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/,
+                null /*mimeGroups*/,
+                UUID.randomUUID(),
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/,
+                true /*isDontKill*/);
+        assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
+        assertThat(testPkgSetting01.getOldPaths().size(), is(1));
+        assertTrue(testPkgSetting01.getOldPaths().contains(INITIAL_CODE_PATH));
+        Settings.updatePackageSetting(
+                testPkgSetting01,
+                null /*disabledPkg*/,
+                null /*existingSharedUserSetting*/,
+                null /*sharedUser*/,
+                UPDATED_CODE_PATH2 /*codePath*/,
+                null /*legacyNativeLibraryPath*/,
+                "arm64-v8a" /*primaryCpuAbi*/,
+                "armeabi" /*secondaryCpuAbi*/,
+                ApplicationInfo.FLAG_SYSTEM /*pkgFlags*/,
+                ApplicationInfo.PRIVATE_FLAG_PRIVILEGED /*pkgPrivateFlags*/,
+                UserManagerService.getInstance(),
+                null /*usesSdkLibraries*/,
+                null /*usesSdkLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/,
+                null /*mimeGroups*/,
+                UUID.randomUUID(),
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/,
+                true /*isDontKill*/);
+        assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH2));
+        assertThat(testPkgSetting01.getOldPaths().size(), is(2));
+        int index = 0;
+        for (File path : testPkgSetting01.getOldPaths()) {
+            switch (index) {
+                case 0 -> assertThat(path, is(INITIAL_CODE_PATH));
+                case 1 -> assertThat(path, is(UPDATED_CODE_PATH));
+            }
+            index++;
+        }
     }
 
     /** Update package; changing shared user throws exception */
@@ -1113,10 +1388,14 @@ public class PackageManagerSettingsTests {
                     UserManagerService.getInstance(),
                     null /*usesSdkLibraries*/,
                     null /*usesSdkLibrariesVersions*/,
+                    null /*usesSdkLibrariesOptional*/,
                     null /*usesStaticLibraries*/,
                     null /*usesStaticLibrariesVersions*/,
                     null /*mimeGroups*/,
-                    UUID.randomUUID());
+                    UUID.randomUUID(),
+                    34 /*targetSdkVersion*/,
+                    null /*restrictUpdateHash*/,
+                    false /*isDontKill*/);
             fail("Expected a PackageManagerException");
         } catch (PackageManagerException expected) {
         }
@@ -1149,10 +1428,13 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
         assertThat(testPkgSetting01.getFlags(), is(ApplicationInfo.FLAG_SYSTEM));
@@ -1194,10 +1476,13 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getAppId(), is(0));
         assertThat(testPkgSetting01.getPath(), is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
@@ -1241,8 +1526,11 @@ public class PackageManagerSettingsTests {
                 null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getAppId(), is(10064));
         assertThat(testPkgSetting01.getPath(), is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
@@ -1287,8 +1575,11 @@ public class PackageManagerSettingsTests {
                 null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getAppId(), is(10064));
         assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
@@ -1330,8 +1621,11 @@ public class PackageManagerSettingsTests {
                 null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID(),
+                34 /*targetSdkVersion*/,
+                null /*restrictUpdateHash*/);
         assertThat(testPkgSetting01.getAppId(), is(0));
         assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.getPackageName(), is(PACKAGE_NAME));
@@ -1507,6 +1801,63 @@ public class PackageManagerSettingsTests {
         assertSame(sus1, settings.getSharedUserSettingLPr(ps1));
     }
 
+    @Test
+    public void testAddRemoveOldPaths() {
+        final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
+        ps1.addOldPath(INITIAL_CODE_PATH);
+        ps1.addOldPath(UPDATED_CODE_PATH);
+        ps1.addOldPath(UPDATED_CODE_PATH2);
+        assertThat(ps1.getOldPaths().size(), is(3));
+        int index = 0;
+        for (File path : ps1.getOldPaths()) {
+            switch (index) {
+                case 0 -> assertThat(path, is(INITIAL_CODE_PATH));
+                case 1 -> assertThat(path, is(UPDATED_CODE_PATH));
+                case 2 -> assertThat(path, is(UPDATED_CODE_PATH2));
+            }
+            index++;
+        }
+
+        ps1.removeOldPath(UPDATED_CODE_PATH);
+        assertThat(ps1.getOldPaths().size(), is(2));
+        index = 0;
+        for (File path : ps1.getOldPaths()) {
+            switch (index) {
+                case 0 -> assertThat(path, is(INITIAL_CODE_PATH));
+                case 1 -> assertThat(path, is(UPDATED_CODE_PATH2));
+            }
+            index++;
+        }
+        ps1.removeOldPath(UPDATED_CODE_PATH2);
+        // assert not throws when deleting non-existing element
+        ps1.removeOldPath(UPDATED_CODE_PATH2);
+        assertThat(ps1.getOldPaths().size(), is(1));
+        assertTrue(ps1.getOldPaths().contains(INITIAL_CODE_PATH));
+        ps1.removeOldPath(INITIAL_CODE_PATH);
+        // assert not throws when deleting from an empty list
+        ps1.removeOldPath(INITIAL_CODE_PATH);
+        assertThat(ps1.getOldPaths().size(), is(0));
+    }
+
+    @Test
+    public void testOldPathsNotPreservedAfterReboot() {
+        Settings settings = makeSettings();
+        final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
+        ps1.setAppId(Process.FIRST_APPLICATION_UID);
+        ps1.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(ps1.getAppId())
+                .hideAsFinal());
+        ps1.addOldPath(INITIAL_CODE_PATH);
+        ps1.addOldPath(UPDATED_CODE_PATH);
+        settings.mPackages.put(PACKAGE_NAME_1, ps1);
+
+        settings.writeLPr(computer, /*sync=*/true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        assertNull(settings.getPackageLPr(PACKAGE_NAME_1).getOldPaths());
+    }
+
     private void verifyUserState(PackageUserState userState,
             boolean notLaunched, boolean stopped, boolean installed) {
         assertThat(userState.getEnabledState(), is(0));
@@ -1638,7 +1989,8 @@ public class PackageManagerSettingsTests {
                 : oldUserState.getSharedLibraryOverlayPaths() == null)
                 && userState.getSplashScreenTheme().equals(
                         oldUserState.getSplashScreenTheme())
-                && userState.getUninstallReason() == oldUserState.getUninstallReason();
+                && userState.getUninstallReason() == oldUserState.getUninstallReason()
+                && userState.getMinAspectRatio() == oldUserState.getMinAspectRatio();
     }
 
     private SharedUserSetting createSharedUserSetting(Settings settings, String userName,
@@ -1654,20 +2006,13 @@ public class PackageManagerSettingsTests {
                 PACKAGE_NAME,
                 REAL_PACKAGE_NAME,
                 INITIAL_CODE_PATH /*codePath*/,
-                null /*legacyNativeLibraryPathString*/,
-                "x86_64" /*primaryCpuAbiString*/,
-                "x86" /*secondaryCpuAbiString*/,
-                null /*cpuAbiOverrideString*/,
-                INITIAL_VERSION_CODE,
                 pkgFlags,
                 0 /*privateFlags*/,
-                sharedUserId,
-                null /*usesSdkLibraries*/,
-                null /*usesSdkLibrariesVersions*/,
-                null /*usesStaticLibraries*/,
-                null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID())
+                .setPrimaryCpuAbi("x86_64")
+                .setSecondaryCpuAbi("x86")
+                .setLongVersionCode(INITIAL_VERSION_CODE)
+                .setSharedUserAppId(sharedUserId);
     }
 
     private PackageSetting createPackageSetting(String packageName) {
@@ -1675,20 +2020,12 @@ public class PackageManagerSettingsTests {
                 packageName,
                 packageName,
                 INITIAL_CODE_PATH /*codePath*/,
-                null /*legacyNativeLibraryPathString*/,
-                "x86_64" /*primaryCpuAbiString*/,
-                "x86" /*secondaryCpuAbiString*/,
-                null /*cpuAbiOverrideString*/,
-                INITIAL_VERSION_CODE,
                 0,
                 0 /*privateFlags*/,
-                0,
-                null /*usesSdkLibraries*/,
-                null /*usesSdkLibrariesVersions*/,
-                null /*usesStaticLibraries*/,
-                null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/,
-                UUID.randomUUID());
+                UUID.randomUUID())
+                .setPrimaryCpuAbi("x86_64")
+                .setSecondaryCpuAbi("x86")
+                .setLongVersionCode(INITIAL_VERSION_CODE);
     }
 
     static @NonNull List<UserInfo> createFakeUsers() {

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -43,8 +44,8 @@ import android.net.NetworkRequest;
 import android.os.Handler;
 import android.os.UserManager;
 import android.security.IKeyChainService;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
@@ -63,6 +64,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -213,8 +215,31 @@ public class SecurityControllerTest extends SysuiTestCase {
     public void testNetworkRequest() {
         verify(mConnectivityManager, times(1)).registerNetworkCallback(argThat(
                 (NetworkRequest request) ->
-                        request.equals(new NetworkRequest.Builder().clearCapabilities().build())
+                        request.equals(new NetworkRequest.Builder()
+                                .clearCapabilities().addTransportType(TRANSPORT_VPN).build())
                 ), any(NetworkCallback.class));
+    }
+
+    @Test
+    public void testRemoveCallbackWhileDispatch_doesntCrash() {
+        final AtomicBoolean remove = new AtomicBoolean(false);
+        SecurityController.SecurityControllerCallback callback =
+                new SecurityController.SecurityControllerCallback() {
+                    @Override
+                    public void onStateChanged() {
+                        if (remove.get()) {
+                            mSecurityController.removeCallback(this);
+                        }
+                    }
+                };
+        mSecurityController.addCallback(callback);
+        // Add another callback so the iteration continues
+        mSecurityController.addCallback(() -> {});
+        mBgExecutor.runAllReady();
+        remove.set(true);
+
+        mSecurityController.onUserSwitched(10);
+        mBgExecutor.runAllReady();
     }
 
     /**

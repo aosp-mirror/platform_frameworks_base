@@ -48,6 +48,17 @@ public class MediaOutputConstants {
             "com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG";
 
     /**
+     * An intent action to launch a media output dialog without any app or playback metadata, which
+     * only controls system routing.
+     *
+     * <p>System routes are those provided by the system, such as built-in speakers, wired headsets,
+     * bluetooth devices, and other outputs that require the app to feed media samples to the
+     * framework.
+     */
+    public static final String ACTION_LAUNCH_SYSTEM_MEDIA_OUTPUT_DIALOG =
+            "com.android.systemui.action.LAUNCH_SYSTEM_MEDIA_OUTPUT_DIALOG";
+
+    /**
      * An intent action to launch media output broadcast dialog.
      */
     public static final String ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG =

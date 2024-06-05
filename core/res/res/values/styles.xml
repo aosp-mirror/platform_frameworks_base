@@ -1460,6 +1460,43 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- @hide -->
+    <style name="VectorPointer">
+        <item name="pointerIconArrow">@drawable/pointer_arrow_vector_icon</item>
+        <item name="pointerIconSpotHover">@drawable/pointer_spot_hover_vector_icon</item>
+        <item name="pointerIconSpotTouch">@drawable/pointer_spot_touch_vector_icon</item>
+        <item name="pointerIconSpotAnchor">@drawable/pointer_spot_anchor_vector_icon</item>
+        <item name="pointerIconHand">@drawable/pointer_hand_vector_icon</item>
+        <item name="pointerIconContextMenu">@drawable/pointer_context_menu_vector_icon</item>
+        <item name="pointerIconHelp">@drawable/pointer_help_vector_icon</item>
+        <item name="pointerIconWait">@drawable/pointer_wait_vector_icon</item>
+        <item name="pointerIconCell">@drawable/pointer_cell_vector_icon</item>
+        <item name="pointerIconCrosshair">@drawable/pointer_crosshair_vector_icon</item>
+        <item name="pointerIconText">@drawable/pointer_text_vector_icon</item>
+        <item name="pointerIconVerticalText">@drawable/pointer_vertical_text_vector_icon</item>
+        <item name="pointerIconAlias">@drawable/pointer_alias_vector_icon</item>
+        <item name="pointerIconCopy">@drawable/pointer_copy_vector_icon</item>
+        <item name="pointerIconAllScroll">@drawable/pointer_all_scroll_vector_icon</item>
+        <item name="pointerIconNodrop">@drawable/pointer_nodrop_vector_icon</item>
+        <item name="pointerIconHorizontalDoubleArrow">
+            @drawable/pointer_horizontal_double_arrow_vector_icon
+        </item>
+        <item name="pointerIconVerticalDoubleArrow">
+            @drawable/pointer_vertical_double_arrow_vector_icon
+        </item>
+        <item name="pointerIconTopRightDiagonalDoubleArrow">
+            @drawable/pointer_top_right_diagonal_double_arrow_vector_icon
+        </item>
+        <item name="pointerIconTopLeftDiagonalDoubleArrow">
+            @drawable/pointer_top_left_diagonal_double_arrow_vector_icon
+        </item>
+        <item name="pointerIconZoomIn">@drawable/pointer_zoom_in_vector_icon</item>
+        <item name="pointerIconZoomOut">@drawable/pointer_zoom_out_vector_icon</item>
+        <item name="pointerIconGrab">@drawable/pointer_grab_vector_icon</item>
+        <item name="pointerIconGrabbing">@drawable/pointer_grabbing_vector_icon</item>
+        <item name="pointerIconHandwriting">@drawable/pointer_handwriting_vector_icon</item>
+    </style>
+
+    <!-- @hide -->
     <style name="aerr_list_item" parent="Widget.Material.Light.Button.Borderless">
         <item name="minHeight">?attr/listPreferredItemHeightSmall</item>
         <item name="textAppearance">?attr/textAppearanceListItemSmall</item>
@@ -1500,12 +1537,8 @@ please see styles_device_defaults.xml.
         <item name="fontFamily">google-sans-text-medium</item>
         <item name="textStyle">normal</item>
         <item name="textAllCaps">false</item>
-        <item name="layout_marginTop">6dp</item>
-        <item name="layout_marginBottom">6dp</item>
-        <item name="paddingStart">16dp</item>
-        <item name="paddingEnd">16dp</item>
-        <item name="paddingTop">8dp</item>
-        <item name="paddingBottom">8dp</item>
+        <item name="paddingStart">24dp</item>
+        <item name="paddingEnd">24dp</item>
     </style>
     <!-- @hide Tonal button for Autofill half screen dialog -->
     <style name="AutofillHalfSheetTonalButton" parent="AutofillHalfSheetButton">
@@ -1517,6 +1550,11 @@ please see styles_device_defaults.xml.
     <style name="AutofillHalfSheetOutlinedButton" parent="AutofillHalfSheetButton">
         <item name="textColor">?attr/textColorPrimary</item>
         <item name="background">@drawable/btn_outlined</item>
+    </style>
+
+    <!-- @hide Divider for Autofill half screen dialog -->
+    <style name="AutofillHalfSheetDivider">
+        <item name="android:background">@drawable/autofill_half_sheet_divider</item>
     </style>
 
     <!-- @hide Autofill background for popup window (not for fullscreen) -->
@@ -1559,5 +1597,97 @@ please see styles_device_defaults.xml.
     <!-- The style for disabled action button on notification -->
     <style name="NotificationTombstoneAction" parent="NotificationAction">
         <item name="textColor">#555555</item>
+    </style>
+
+    <!-- The default style for input method switch dialog -->
+    <style name="InputMethodSwitchDialogStyle" parent="AlertDialog.DeviceDefault">
+    </style>
+
+    <style name="AccessibilityDialog">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:divider">@*android:drawable/list_divider_material</item>
+        <item name="android:showDividers">middle</item>
+    </style>
+
+    <style name="AccessibilityDialogServiceIcon">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">16dp</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <style name="AccessibilityDialogIcon">
+        <item name="android:layout_width">18dp</item>
+        <item name="android:layout_height">18dp</item>
+        <item name="android:layout_marginEnd">12dp</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <style name="AccessibilityDialogTitle"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+    </style>
+
+    <style name="AccessibilityDialogDescription"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">32dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="AccessibilityDialogPermissionTitle"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
+
+    <style name="AccessibilityDialogPermissionDescription"
+           parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="AccessibilityDialogButtonBarSpace">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="AccessibilityDialogButtonList">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:divider">@*android:drawable/list_divider_material</item>
+        <item name="android:showDividers">middle</item>
+    </style>
+
+    <style name="AccessibilityDialogButton"
+           parent="@*android:style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
+
+    <style name="AccessibilityButtonChooserDialog"
+           parent="@style/Theme.DeviceDefault.Resolver">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 </resources>

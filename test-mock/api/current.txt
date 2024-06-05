@@ -1,6 +1,4 @@
 // Signature format: 2.0
-// - add-additional-overrides=no
-// - migrating=Migration in progress see b/299366704
 package android.test.mock {
 
   @Deprecated public class MockAccountManager {
@@ -158,6 +156,7 @@ package android.test.mock {
     method @Deprecated public int getInt(int);
     method @Deprecated public long getLong(int);
     method @Deprecated public android.net.Uri getNotificationUri();
+    method @Deprecated public java.util.List<android.net.Uri> getNotificationUris();
     method @Deprecated public int getPosition();
     method @Deprecated public short getShort(int);
     method @Deprecated public String getString(int);
@@ -181,6 +180,7 @@ package android.test.mock {
     method @Deprecated public android.os.Bundle respond(android.os.Bundle);
     method @Deprecated public void setExtras(android.os.Bundle);
     method @Deprecated public void setNotificationUri(android.content.ContentResolver, android.net.Uri);
+    method @Deprecated public void setNotificationUris(android.content.ContentResolver, java.util.List<android.net.Uri>);
     method @Deprecated public void unregisterContentObserver(android.database.ContentObserver);
     method @Deprecated public void unregisterDataSetObserver(android.database.DataSetObserver);
   }
@@ -202,7 +202,7 @@ package android.test.mock {
     method @Deprecated public int checkPermission(String, String);
     method @Deprecated public int checkSignatures(String, String);
     method @Deprecated public int checkSignatures(int, int);
-    method public void clearInstantAppCookie();
+    method @Deprecated public void clearInstantAppCookie();
     method @Deprecated public void clearPackagePreferredActivities(String);
     method @Deprecated public String[] currentToCanonicalPackageNames(String[]);
     method @Deprecated public void extendVerificationTimeout(int, int, long);
@@ -224,15 +224,15 @@ package android.test.mock {
     method @Deprecated public CharSequence getApplicationLabel(android.content.pm.ApplicationInfo);
     method @Deprecated public android.graphics.drawable.Drawable getApplicationLogo(android.content.pm.ApplicationInfo);
     method @Deprecated public android.graphics.drawable.Drawable getApplicationLogo(String) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public android.content.pm.ChangedPackages getChangedPackages(int);
+    method @Deprecated public android.content.pm.ChangedPackages getChangedPackages(int);
     method @Deprecated public int getComponentEnabledSetting(android.content.ComponentName);
     method @Deprecated public android.graphics.drawable.Drawable getDefaultActivityIcon();
     method @Deprecated public android.graphics.drawable.Drawable getDrawable(String, int, android.content.pm.ApplicationInfo);
     method @Deprecated public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplications(int);
     method @Deprecated public java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
     method @Deprecated public String getInstallerPackageName(String);
-    method public byte[] getInstantAppCookie();
-    method public int getInstantAppCookieMaxBytes();
+    method @Deprecated public byte[] getInstantAppCookie();
+    method @Deprecated public int getInstantAppCookieMaxBytes();
     method @Deprecated public android.content.pm.InstrumentationInfo getInstrumentationInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Deprecated public android.content.Intent getLaunchIntentForPackage(String);
     method @Deprecated public android.content.Intent getLeanbackLaunchIntentForPackage(String);
@@ -241,7 +241,7 @@ package android.test.mock {
     method @Deprecated public int[] getPackageGids(String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Deprecated public android.content.pm.PackageInfo getPackageInfo(String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Deprecated public android.content.pm.PackageInfo getPackageInfo(android.content.pm.VersionedPackage, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public android.content.pm.PackageInstaller getPackageInstaller();
+    method @Deprecated public android.content.pm.PackageInstaller getPackageInstaller();
     method @Deprecated public int getPackageUid(String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Deprecated public String[] getPackagesForUid(int);
     method @Deprecated public java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(String[], int);
@@ -265,8 +265,8 @@ package android.test.mock {
     method @Deprecated public android.content.res.XmlResourceParser getXml(String, int, android.content.pm.ApplicationInfo);
     method @Deprecated public boolean hasSystemFeature(String);
     method @Deprecated public boolean hasSystemFeature(String, int);
-    method public boolean isInstantApp();
-    method public boolean isInstantApp(String);
+    method @Deprecated public boolean isInstantApp();
+    method @Deprecated public boolean isInstantApp(String);
     method @Deprecated public boolean isPermissionRevokedByPolicy(String, String);
     method @Deprecated public boolean isSafeMode();
     method @Deprecated public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
@@ -283,11 +283,12 @@ package android.test.mock {
     method @Deprecated public android.content.pm.ProviderInfo resolveContentProvider(String, int);
     method @Deprecated public android.content.pm.ResolveInfo resolveService(android.content.Intent, int);
     method @Deprecated public android.content.pm.ResolveInfo resolveServiceAsUser(android.content.Intent, int, int);
-    method public void setApplicationCategoryHint(String, int);
+    method @Deprecated public void setApplicationCategoryHint(String, int);
     method @Deprecated public void setApplicationEnabledSetting(String, int, int);
     method @Deprecated public void setComponentEnabledSetting(android.content.ComponentName, int, int);
     method @Deprecated public void setInstallerPackageName(String, String);
-    method public void updateInstantAppCookie(@NonNull byte[]);
+    method @Deprecated public boolean setInstantAppCookie(@NonNull byte[]);
+    method @Deprecated public void updateInstantAppCookie(@NonNull byte[]);
     method @Deprecated public void verifyPendingInstall(int, int);
   }
 

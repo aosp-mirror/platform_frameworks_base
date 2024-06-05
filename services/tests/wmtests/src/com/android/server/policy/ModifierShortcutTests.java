@@ -21,6 +21,7 @@ import static android.view.KeyEvent.KEYCODE_B;
 import static android.view.KeyEvent.KEYCODE_BRIGHTNESS_DOWN;
 import static android.view.KeyEvent.KEYCODE_C;
 import static android.view.KeyEvent.KEYCODE_CTRL_LEFT;
+import static android.view.KeyEvent.KEYCODE_DEL;
 import static android.view.KeyEvent.KEYCODE_E;
 import static android.view.KeyEvent.KEYCODE_ENTER;
 import static android.view.KeyEvent.KEYCODE_H;
@@ -34,31 +35,52 @@ import static android.view.KeyEvent.KEYCODE_SHIFT_LEFT;
 import static android.view.KeyEvent.KEYCODE_SLASH;
 import static android.view.KeyEvent.KEYCODE_SPACE;
 import static android.view.KeyEvent.KEYCODE_TAB;
+import static android.view.KeyEvent.KEYCODE_SCREENSHOT;
 import static android.view.KeyEvent.KEYCODE_U;
 import static android.view.KeyEvent.KEYCODE_Z;
 
+import android.app.role.RoleManager;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 @Presubmit
 @SmallTest
 public class ModifierShortcutTests extends ShortcutKeyTestBase {
-    private static final SparseArray<String> META_SHORTCUTS =  new SparseArray<>();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
+    private static final SparseArray<String> INTENT_SHORTCUTS =  new SparseArray<>();
+    private static final SparseArray<String> ROLE_SHORTCUTS =  new SparseArray<>();
     static {
-        META_SHORTCUTS.append(KEYCODE_U, Intent.CATEGORY_APP_CALCULATOR);
-        META_SHORTCUTS.append(KEYCODE_B, Intent.CATEGORY_APP_BROWSER);
-        META_SHORTCUTS.append(KEYCODE_C, Intent.CATEGORY_APP_CONTACTS);
-        META_SHORTCUTS.append(KEYCODE_E, Intent.CATEGORY_APP_EMAIL);
-        META_SHORTCUTS.append(KEYCODE_K, Intent.CATEGORY_APP_CALENDAR);
-        META_SHORTCUTS.append(KEYCODE_M, Intent.CATEGORY_APP_MAPS);
-        META_SHORTCUTS.append(KEYCODE_P, Intent.CATEGORY_APP_MUSIC);
-        META_SHORTCUTS.append(KEYCODE_S, Intent.CATEGORY_APP_MESSAGING);
+        // These shortcuts should align with those defined in bookmarks.xml
+        INTENT_SHORTCUTS.append(KEYCODE_U, Intent.CATEGORY_APP_CALCULATOR);
+        INTENT_SHORTCUTS.append(KEYCODE_C, Intent.CATEGORY_APP_CONTACTS);
+        INTENT_SHORTCUTS.append(KEYCODE_E, Intent.CATEGORY_APP_EMAIL);
+        INTENT_SHORTCUTS.append(KEYCODE_K, Intent.CATEGORY_APP_CALENDAR);
+        INTENT_SHORTCUTS.append(KEYCODE_M, Intent.CATEGORY_APP_MAPS);
+        INTENT_SHORTCUTS.append(KEYCODE_P, Intent.CATEGORY_APP_MUSIC);
+
+        ROLE_SHORTCUTS.append(KEYCODE_B, RoleManager.ROLE_BROWSER);
+        ROLE_SHORTCUTS.append(KEYCODE_S, RoleManager.ROLE_SMS);
+    }
+    private static final int ANY_DISPLAY_ID = 123;
+
+    @Before
+    public void setUp() {
+        setUpPhoneWindowManager();
     }
 
     /**
@@ -66,12 +88,20 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      */
     @Test
     public void testMetaShortcuts() {
-        for (int i = 0; i < META_SHORTCUTS.size(); i++) {
-            final int keyCode = META_SHORTCUTS.keyAt(i);
-            final String category = META_SHORTCUTS.valueAt(i);
+        for (int i = 0; i < INTENT_SHORTCUTS.size(); i++) {
+            final int keyCode = INTENT_SHORTCUTS.keyAt(i);
+            final String category = INTENT_SHORTCUTS.valueAt(i);
 
             sendKeyCombination(new int[]{KEYCODE_META_LEFT, keyCode}, 0);
             mPhoneWindowManager.assertLaunchCategory(category);
+        }
+
+        for (int i = 0; i < ROLE_SHORTCUTS.size(); i++) {
+            final int keyCode = ROLE_SHORTCUTS.keyAt(i);
+            final String role = ROLE_SHORTCUTS.valueAt(i);
+
+            sendKeyCombination(new int[]{KEYCODE_META_LEFT, keyCode}, 0);
+            mPhoneWindowManager.assertLaunchRole(role);
         }
     }
 
@@ -90,8 +120,9 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      */
     @Test
     public void testCtrlSpace() {
-        sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_SPACE}, 0);
-        mPhoneWindowManager.assertSwitchKeyboardLayout(1);
+        sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_SPACE}, /* duration= */ 0,
+                ANY_DISPLAY_ID);
+        mPhoneWindowManager.assertSwitchKeyboardLayout(/* direction= */ 1, ANY_DISPLAY_ID);
     }
 
     /**
@@ -99,26 +130,9 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      */
     @Test
     public void testCtrlShiftSpace() {
-        sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_SPACE}, 0);
-        mPhoneWindowManager.assertSwitchKeyboardLayout(-1);
-    }
-
-    /**
-     * META + SPACE to switch keyboard layout.
-     */
-    @Test
-    public void testMetaSpace() {
-        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SPACE}, 0);
-        mPhoneWindowManager.assertSwitchKeyboardLayout(1);
-    }
-
-    /**
-     * META + SHIFT + SPACE to switch keyboard layout backwards.
-     */
-    @Test
-    public void testMetaShiftSpace() {
-        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_SPACE}, 0);
-        mPhoneWindowManager.assertSwitchKeyboardLayout(-1);
+        sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_SPACE},
+                /* duration= */ 0, ANY_DISPLAY_ID);
+        mPhoneWindowManager.assertSwitchKeyboardLayout(/* direction= */ -1, ANY_DISPLAY_ID);
     }
 
     /**
@@ -202,4 +216,47 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
             mPhoneWindowManager.verifyNewBrightness(newBrightness[i]);
         }
     }
+
+    /**
+     * Sends a KEYCODE_SCREENSHOT and validates screenshot is taken if flag is enabled
+     */
+    @Test
+    public void testTakeScreenshot_flagEnabled() {
+        mSetFlagsRule.enableFlags(com.android.hardware.input.Flags
+                .FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE);
+        sendKeyCombination(new int[]{KEYCODE_SCREENSHOT}, 0);
+        mPhoneWindowManager.assertTakeScreenshotCalled();
+    }
+
+    /**
+     * Sends a KEYCODE_SCREENSHOT and validates screenshot is not taken if flag is disabled
+     */
+    @Test
+    public void testTakeScreenshot_flagDisabled() {
+        mSetFlagsRule.disableFlags(com.android.hardware.input.Flags
+                .FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE);
+        sendKeyCombination(new int[]{KEYCODE_SCREENSHOT}, 0);
+        mPhoneWindowManager.assertTakeScreenshotNotCalled();
+    }
+
+    /**
+     * META+CTRL+BACKSPACE for taking a bugreport when the flag is enabled.
+     */
+    @Test
+    @RequiresFlagsEnabled(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
+    public void testTakeBugReport_flagEnabled() throws RemoteException {
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_CTRL_LEFT, KEYCODE_DEL}, 0);
+        mPhoneWindowManager.assertTakeBugreport(true);
+    }
+
+    /**
+     * META+CTRL+BACKSPACE for taking a bugreport does nothing when the flag is disabledd.
+     */
+    @Test
+    @RequiresFlagsDisabled(com.android.server.flags.Flags.FLAG_NEW_BUGREPORT_KEYBOARD_SHORTCUT)
+    public void testTakeBugReport_flagDisabled() throws RemoteException {
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_CTRL_LEFT, KEYCODE_DEL}, 0);
+        mPhoneWindowManager.assertTakeBugreport(false);
+    }
+
 }

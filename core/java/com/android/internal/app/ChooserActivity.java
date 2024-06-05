@@ -777,9 +777,9 @@ public class ChooserActivity extends ResolverActivity implements
         return appPredictor;
     }
 
-    private AppPredictor.Callback createAppPredictorCallback(
+    private ResolverAppPredictorCallback createAppPredictorCallback(
             ChooserListAdapter chooserListAdapter) {
-        return resultList -> {
+        return new ResolverAppPredictorCallback(resultList -> {
             if (isFinishing() || isDestroyed()) {
                 return;
             }
@@ -811,7 +811,7 @@ public class ChooserActivity extends ResolverActivity implements
             }
             sendShareShortcutInfoList(shareShortcutInfos, chooserListAdapter, resultList,
                     chooserListAdapter.getUserHandle());
-        };
+        });
     }
 
     static SharedPreferences getPinnedSharedPrefs(Context context) {
@@ -1800,54 +1800,6 @@ public class ChooserActivity extends ResolverActivity implements
         return getIntent().getBooleanExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE, true);
     }
 
-    private void showTargetDetails(TargetInfo targetInfo) {
-        if (targetInfo == null) return;
-
-        ArrayList<DisplayResolveInfo> targetList;
-        ChooserTargetActionsDialogFragment fragment = new ChooserTargetActionsDialogFragment();
-        Bundle bundle = new Bundle();
-
-        if (targetInfo instanceof SelectableTargetInfo) {
-            SelectableTargetInfo selectableTargetInfo = (SelectableTargetInfo) targetInfo;
-            if (selectableTargetInfo.getDisplayResolveInfo() == null
-                    || selectableTargetInfo.getChooserTarget() == null) {
-                Log.e(TAG, "displayResolveInfo or chooserTarget in selectableTargetInfo are null");
-                return;
-            }
-            targetList = new ArrayList<>();
-            targetList.add(selectableTargetInfo.getDisplayResolveInfo());
-            bundle.putString(ChooserTargetActionsDialogFragment.SHORTCUT_ID_KEY,
-                    selectableTargetInfo.getChooserTarget().getIntentExtras().getString(
-                            Intent.EXTRA_SHORTCUT_ID));
-            bundle.putBoolean(ChooserTargetActionsDialogFragment.IS_SHORTCUT_PINNED_KEY,
-                    selectableTargetInfo.isPinned());
-            bundle.putParcelable(ChooserTargetActionsDialogFragment.INTENT_FILTER_KEY,
-                    getTargetIntentFilter());
-            if (selectableTargetInfo.getDisplayLabel() != null) {
-                bundle.putString(ChooserTargetActionsDialogFragment.SHORTCUT_TITLE_KEY,
-                        selectableTargetInfo.getDisplayLabel().toString());
-            }
-        } else if (targetInfo instanceof MultiDisplayResolveInfo) {
-            // For multiple targets, include info on all targets
-            MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) targetInfo;
-            targetList = mti.getTargets();
-        } else {
-            targetList = new ArrayList<DisplayResolveInfo>();
-            targetList.add((DisplayResolveInfo) targetInfo);
-        }
-        // Adding userHandle from ResolveInfo allows the app icon in Dialog Box to be
-        // resolved correctly.
-        bundle.putParcelable(ChooserTargetActionsDialogFragment.USER_HANDLE_KEY,
-                getResolveInfoUserHandle(
-                        targetInfo.getResolveInfo(),
-                        mChooserMultiProfilePagerAdapter.getCurrentUserHandle()));
-        bundle.putParcelableArrayList(ChooserTargetActionsDialogFragment.TARGET_INFOS_KEY,
-                targetList);
-        fragment.setArguments(bundle);
-
-        fragment.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
-    }
-
     private void modifyTargetIntent(Intent in) {
         if (isSendAction(in)) {
             in.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
@@ -2543,7 +2495,7 @@ public class ChooserActivity extends ResolverActivity implements
 
         @Override
         public boolean isComponentPinned(ComponentName name) {
-            return mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
+            return false;
         }
 
         @Override
@@ -2559,10 +2511,13 @@ public class ChooserActivity extends ResolverActivity implements
             boolean filterLastUsed, UserHandle userHandle) {
         ChooserListAdapter chooserListAdapter = createChooserListAdapter(context, payloadIntents,
                 initialIntents, rList, filterLastUsed, userHandle);
-        AppPredictor.Callback appPredictorCallback = createAppPredictorCallback(chooserListAdapter);
+        ResolverAppPredictorCallback appPredictorCallbackWrapper =
+                createAppPredictorCallback(chooserListAdapter);
+        AppPredictor.Callback appPredictorCallback = appPredictorCallbackWrapper.asCallback();
         AppPredictor appPredictor = setupAppPredictorForUser(userHandle, appPredictorCallback);
         chooserListAdapter.setAppPredictor(appPredictor);
-        chooserListAdapter.setAppPredictorCallback(appPredictorCallback);
+        chooserListAdapter.setAppPredictorCallback(
+                appPredictorCallback, appPredictorCallbackWrapper);
         return new ChooserGridAdapter(chooserListAdapter);
     }
 
@@ -2867,7 +2822,6 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     public void onListRebuilt(ResolverListAdapter listAdapter, boolean rebuildComplete) {
         setupScrollListener();
-        maybeSetupGlobalLayoutListener();
 
         ChooserListAdapter chooserListAdapter = (ChooserListAdapter) listAdapter;
         if (chooserListAdapter.getUserHandle()
@@ -2969,28 +2923,6 @@ public class ChooserActivity extends ResolverActivity implements
                 });
     }
 
-    private void maybeSetupGlobalLayoutListener() {
-        if (shouldShowTabs()) {
-            return;
-        }
-        final View recyclerView = mChooserMultiProfilePagerAdapter.getActiveAdapterView();
-        recyclerView.getViewTreeObserver()
-                .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        // Fixes an issue were the accessibility border disappears on list creation.
-                        recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        final TextView titleView = findViewById(R.id.title);
-                        if (titleView != null) {
-                            titleView.setFocusable(true);
-                            titleView.setFocusableInTouchMode(true);
-                            titleView.requestFocus();
-                            titleView.requestAccessibilityFocus();
-                        }
-                    }
-                });
-    }
-
     @Override // ChooserListCommunicator
     public boolean isSendAction(Intent targetIntent) {
         if (targetIntent == null) {
@@ -3023,26 +2955,29 @@ public class ChooserActivity extends ResolverActivity implements
         return shouldShowTabs()
                 && (mMultiProfilePagerAdapter.getListAdapterForUserHandle(
                         UserHandle.of(UserHandle.myUserId())).getCount() > 0
-                    || shouldShowContentPreviewWhenEmpty())
+                    || shouldShowStickyContentPreviewWhenEmpty())
                 && shouldShowContentPreview();
     }
 
     /**
-     * This method could be used to override the default behavior when we hide the preview area
-     * when the current tab doesn't have any items.
+     * This method could be used to override the default behavior when we hide the sticky preview
+     * area when the current tab doesn't have any items.
      *
-     * @return true if we want to show the content preview area even if the tab for the current
-     *         user is empty
+     * @return {@code true} if we want to show the sticky content preview area even if the tab for
+     *         the current user is empty
      */
-    protected boolean shouldShowContentPreviewWhenEmpty() {
+    protected boolean shouldShowStickyContentPreviewWhenEmpty() {
         return false;
     }
 
-    /**
-     * @return true if we want to show the content preview area
-     */
-    protected boolean shouldShowContentPreview() {
+    @Override
+    public boolean shouldShowContentPreview() {
         return isSendAction(getTargetIntent());
+    }
+
+    @Override
+    public boolean shouldShowServiceTargets() {
+        return shouldShowContentPreview() && !ActivityManager.isLowRamDeviceStatic();
     }
 
     private void updateStickyContentPreview() {
@@ -3148,28 +3083,8 @@ public class ChooserActivity extends ResolverActivity implements
             if (isClickable) {
                 itemView.setOnClickListener(v -> startSelected(mListPosition,
                         false/* always */, true/* filterd */));
-
-                itemView.setOnLongClickListener(v -> {
-                    final TargetInfo ti = mChooserMultiProfilePagerAdapter.getActiveListAdapter()
-                            .targetInfoForPosition(mListPosition, /* filtered */ true);
-
-                    // This should always be the case for ItemViewHolder, check for validity
-                    if (ti instanceof DisplayResolveInfo && shouldShowTargetDetails(ti)) {
-                        showTargetDetails((DisplayResolveInfo) ti);
-                    }
-                    return true;
-                });
             }
         }
-    }
-
-    private boolean shouldShowTargetDetails(TargetInfo ti) {
-        ComponentName nearbyShare = getNearbySharingComponent();
-        //  Suppress target details for nearby share to hide pin/unpin action
-        boolean isNearbyShare = nearbyShare != null && nearbyShare.equals(
-                ti.getResolvedComponentName()) && shouldNearbyShareBeFirstInRankedRow();
-        return ti instanceof SelectableTargetInfo
-                || (ti instanceof DisplayResolveInfo && !isNearbyShare);
     }
 
     /**
@@ -3406,11 +3321,7 @@ public class ChooserActivity extends ResolverActivity implements
         // There can be at most one row in the listview, that is internally
         // a ViewGroup with 2 rows
         public int getServiceTargetRowCount() {
-            if (shouldShowContentPreview()
-                    && !ActivityManager.isLowRamDeviceStatic()) {
-                return 1;
-            }
-            return 0;
+            return shouldShowServiceTargets() ? 1 : 0;
         }
 
         public int getAzLabelRowCount() {
@@ -3528,16 +3439,6 @@ public class ChooserActivity extends ResolverActivity implements
                     public void onClick(View v) {
                         startSelected(holder.getItemIndex(column), false, true);
                     }
-                });
-
-                // Show menu for both direct share and app share targets after long click.
-                v.setOnLongClickListener(v1 -> {
-                    TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
-                            holder.getItemIndex(column), true);
-                    if (shouldShowTargetDetails(ti)) {
-                        showTargetDetails(ti);
-                    }
-                    return true;
                 });
 
                 holder.addView(i, v);

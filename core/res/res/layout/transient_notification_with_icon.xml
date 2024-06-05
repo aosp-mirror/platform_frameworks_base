@@ -22,7 +22,7 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:maxWidth="@dimen/toast_width"
-    android:background="?android:attr/colorBackground"
+    android:background="@android:drawable/toast_frame"
     android:elevation="@dimen/toast_elevation"
     android:layout_marginEnd="16dp"
     android:layout_marginStart="16dp"
@@ -31,8 +31,11 @@
 
     <ImageView
         android:id="@android:id/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp" />
 
     <TextView
         android:id="@android:id/message"

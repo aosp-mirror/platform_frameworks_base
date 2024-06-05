@@ -28,7 +28,7 @@
     <integer name="device_idle_flex_time_short_ms">60000</integer>
 
     <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT -->
-    <integer name="device_idle_light_after_inactive_to_ms">240000</integer>
+    <integer name="device_idle_light_after_inactive_to_ms">60000</integer>
 
     <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_TIMEOUT -->
     <integer name="device_idle_light_idle_to_ms">300000</integer>
@@ -42,8 +42,17 @@
     <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_FACTOR -->
     <item name="device_idle_light_idle_factor" format="float" type="integer">2.0</item>
 
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_INCREASE_LINEARLY -->
+    <bool name="device_idle_light_idle_increase_linearly">true</bool>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_LINEAR_INCREASE_FACTOR_MS -->
+    <integer name="device_idle_light_idle_linear_increase_factor_ms">300000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_FLEX_LINEAR_INCREASE_FACTOR_MS -->
+    <integer name="device_idle_light_idle_flex_linear_increase_factor_ms">60000</integer>
+
     <!-- Default for DeviceIdleController.Constants.LIGHT_MAX_IDLE_TIMEOUT -->
-    <integer name="device_idle_light_max_idle_to_ms">900000</integer>
+    <integer name="device_idle_light_max_idle_to_ms">1800000</integer>
 
     <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET -->
     <integer name="device_idle_light_idle_maintenance_min_budget_ms">60000</integer>
@@ -58,13 +67,13 @@
     <integer name="device_idle_min_deep_maintenance_time_ms">30000</integer>
 
     <!-- Default for DeviceIdleController.Constants.INACTIVE_TIMEOUT -->
-    <integer name="device_idle_inactive_to_ms">1800000</integer>
+    <integer name="device_idle_inactive_to_ms">60000</integer>
 
     <!-- Default for DeviceIdleController.Constants.SENSING_TIMEOUT -->
-    <integer name="device_idle_sensing_to_ms">240000</integer>
+    <integer name="device_idle_sensing_to_ms">30000</integer>
 
     <!-- Default for DeviceIdleController.Constants.LOCATING_TIMEOUT -->
-    <integer name="device_idle_locating_to_ms">30000</integer>
+    <integer name="device_idle_locating_to_ms">15000</integer>
 
     <!-- Default for DeviceIdleController.Constants.LOCATION_ACCURACY -->
     <item name="device_idle_location_accuracy" format="float" type="integer">20.0</item>
@@ -76,7 +85,7 @@
     <integer name="device_idle_motion_inactive_to_flex_ms">60000</integer>
 
     <!-- Default for DeviceIdleController.Constants.IDLE_AFTER_INACTIVE_TIMEOUT -->
-    <integer name="device_idle_idle_after_inactive_to_ms">1800000</integer>
+    <integer name="device_idle_idle_after_inactive_to_ms">60000</integer>
 
     <!-- Default for DeviceIdleController.Constants.IDLE_PENDING_TIMEOUT -->
     <integer name="device_idle_idle_pending_to_ms">300000</integer>
@@ -91,7 +100,7 @@
     <integer name="device_idle_quick_doze_delay_to_ms">60000</integer>
 
     <!-- Default for DeviceIdleController.Constants.IDLE_TIMEOUT -->
-    <integer name="device_idle_idle_to_ms">3600000</integer>
+    <integer name="device_idle_idle_to_ms">900000</integer>
 
     <!-- Default for DeviceIdleController.Constants.MAX_IDLE_TIMEOUT -->
     <integer name="device_idle_max_idle_to_ms">21600000</integer>
@@ -117,13 +126,10 @@
     <!-- Default for DeviceIdleController.Constants.WAIT_FOR_UNLOCK -->
     <bool name="device_idle_wait_for_unlock">true</bool>
 
-    <!-- Default for DeviceIdleController.Constants.PRE_IDLE_FACTOR_LONG -->
-    <item name="device_idle_pre_idle_factor_long" format="float" type="integer">1.67</item>
-
-    <!-- Default for DeviceIdleController.Constants.PRE_IDLE_FACTOR_SHORT -->
-    <item name="device_idle_pre_idle_factor_short" format="float" type="integer">0.33</item>
-
     <!-- Default for DeviceIdleController.Constants.USE_WINDOW_ALARMS -->
     <bool name="device_idle_use_window_alarms">true</bool>
+
+    <!-- Default for DeviceIdleController.Constants.USE_MODE_MANAGER -->
+    <bool name="device_idle_use_mode_manager">false</bool>
 </resources>
 

@@ -163,6 +163,8 @@ public class PointerLocationView extends View implements InputDeviceListener,
     @UnsupportedAppUsage
     private boolean mPrintCoords = true;
 
+    private float mDensity;
+
     public PointerLocationView(Context c) {
         super(c);
         setFocusableInTouchMode(true);
@@ -365,11 +367,8 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 drawOval(canvas, ps.mCoords.x, ps.mCoords.y, ps.mCoords.toolMajor,
                         ps.mCoords.toolMinor, ps.mCoords.orientation, mPaint);
 
-                // Draw the orientation arrow.
-                float arrowSize = ps.mCoords.toolMajor * 0.7f;
-                if (arrowSize < 20) {
-                    arrowSize = 20;
-                }
+                // Draw the orientation arrow, and ensure it has a minimum size of 24dp.
+                final float arrowSize = Math.max(ps.mCoords.toolMajor * 0.7f, 24 * mDensity);
                 mPaint.setARGB(255, pressureLevel, 255, 0);
                 float orientationVectorX = (float) (Math.sin(ps.mCoords.orientation)
                         * arrowSize);
@@ -398,7 +397,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 canvas.drawCircle(
                         ps.mCoords.x + orientationVectorX * tiltScale,
                         ps.mCoords.y + orientationVectorY * tiltScale,
-                        3.0f, mPaint);
+                        3.0f * mDensity, mPaint);
 
                 // Draw the current bounding box
                 if (ps.mHasBoundingBox) {
@@ -1003,10 +1002,10 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
     // Compute size by display density.
     private void configureDensityDependentFactors() {
-        final float density = getResources().getDisplayMetrics().density;
-        mTextPaint.setTextSize(10 * density);
-        mPaint.setStrokeWidth(1 * density);
-        mCurrentPointPaint.setStrokeWidth(1 * density);
-        mPathPaint.setStrokeWidth(1 * density);
+        mDensity = getResources().getDisplayMetrics().density;
+        mTextPaint.setTextSize(10 * mDensity);
+        mPaint.setStrokeWidth(1 * mDensity);
+        mCurrentPointPaint.setStrokeWidth(1 * mDensity);
+        mPathPaint.setStrokeWidth(1 * mDensity);
     }
 }

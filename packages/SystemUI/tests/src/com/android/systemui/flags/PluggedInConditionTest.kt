@@ -15,10 +15,15 @@
  */
 package com.android.systemui.flags
 
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.statusbar.policy.BatteryController
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
@@ -35,42 +40,51 @@ class PluggedInConditionTest : SysuiTestCase() {
     private lateinit var condition: PluggedInCondition
 
     @Mock private lateinit var batteryController: BatteryController
+    private val testDispatcher: TestDispatcher = StandardTestDispatcher()
+    private val testScope: TestScope = TestScope(testDispatcher)
+    private val callbackCaptor =
+        ArgumentCaptor.forClass(BatteryController.BatteryStateChangeCallback::class.java)
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        condition = PluggedInCondition(batteryController)
+
+        condition = PluggedInCondition({ batteryController })
     }
 
     @Test
-    fun testCondition_unplugged() {
-        whenever(batteryController.isPluggedIn).thenReturn(false)
+    fun testCondition_unplugged() =
+        testScope.runTest {
+            whenever(batteryController.isPluggedIn).thenReturn(false)
 
-        assertThat(condition.canRestartNow({})).isFalse()
-    }
+            val canRestart by collectLastValue(condition.canRestartNow)
 
-    @Test
-    fun testCondition_pluggedIn() {
-        whenever(batteryController.isPluggedIn).thenReturn(true)
-
-        assertThat(condition.canRestartNow({})).isTrue()
-    }
+            assertThat(canRestart).isFalse()
+        }
 
     @Test
-    fun testCondition_invokesRetry() {
-        whenever(batteryController.isPluggedIn).thenReturn(false)
-        var retried = false
-        val retryFn = { retried = true }
+    fun testCondition_pluggedIn() =
+        testScope.runTest {
+            whenever(batteryController.isPluggedIn).thenReturn(true)
 
-        // No restart yet, but we do register a listener now.
-        assertThat(condition.canRestartNow(retryFn)).isFalse()
-        val captor =
-            ArgumentCaptor.forClass(BatteryController.BatteryStateChangeCallback::class.java)
-        verify(batteryController).addCallback(captor.capture())
+            val canRestart by collectLastValue(condition.canRestartNow)
 
-        whenever(batteryController.isPluggedIn).thenReturn(true)
+            assertThat(canRestart).isTrue()
+        }
 
-        captor.value.onBatteryLevelChanged(0, true, true)
-        assertThat(retried).isTrue()
-    }
+    @Test
+    fun testCondition_invokesRetry() =
+        testScope.runTest {
+            whenever(batteryController.isPluggedIn).thenReturn(false)
+
+            val canRestart by collectLastValue(condition.canRestartNow)
+
+            assertThat(canRestart).isFalse()
+
+            verify(batteryController).addCallback(callbackCaptor.capture())
+
+            callbackCaptor.value.onBatteryLevelChanged(0, true, false)
+
+            assertThat(canRestart).isTrue()
+        }
 }

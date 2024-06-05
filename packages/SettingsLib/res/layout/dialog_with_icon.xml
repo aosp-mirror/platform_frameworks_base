@@ -33,15 +33,16 @@
             android:importantForAccessibility="no"/>
         <TextView
             android:id="@+id/dialog_with_icon_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hyphenationFrequency="fullFast"
             android:gravity="center"
             style="@style/DialogWithIconTitle"/>
         <TextView
             android:id="@+id/dialog_with_icon_message"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
+            android:hyphenationFrequency="fullFast"
             android:gravity="center"
             style="@style/TextAppearanceSmall"/>
 
@@ -64,7 +65,6 @@
                 android:id="@+id/button_cancel"
                 style="@style/DialogButtonNegative"
                 android:layout_width="wrap_content"
-                android:buttonCornerRadius="28dp"
                 android:layout_height="wrap_content"
                 android:visibility="gone"/>
 
@@ -79,7 +79,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/DialogButtonNegative"
-                android:buttonCornerRadius="40dp"
                 android:visibility="gone"/>
 
             <Space
@@ -93,8 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/DialogButtonPositive"
-                android:visibility="gone"
-            />
+                android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

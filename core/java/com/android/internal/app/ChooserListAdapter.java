@@ -19,7 +19,6 @@ package com.android.internal.app;
 import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE;
 import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER;
 
-import android.app.ActivityManager;
 import android.app.prediction.AppPredictor;
 import android.content.ComponentName;
 import android.content.Context;
@@ -103,6 +102,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     // Sorted list of DisplayResolveInfos for the alphabetical app section.
     private List<DisplayResolveInfo> mSortedList = new ArrayList<>();
     private AppPredictor mAppPredictor;
+    private ResolverAppPredictorCallback mAppPredictorCallbackWrapper;
     private AppPredictor.Callback mAppPredictorCallback;
 
     // Represents the UserSpace in which the Initial Intents should be resolved.
@@ -425,11 +425,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
     }
 
     public int getServiceTargetCount() {
-        if (mChooserListCommunicator.isSendAction(mChooserListCommunicator.getTargetIntent())
-                && !ActivityManager.isLowRamDeviceStatic()) {
+        if (mChooserListCommunicator.shouldShowServiceTargets()) {
             return Math.min(mServiceTargets.size(), mChooserListCommunicator.getMaxRankedTargets());
         }
-
         return 0;
     }
 
@@ -747,8 +745,11 @@ public class ChooserListAdapter extends ResolverListAdapter {
         mAppPredictor = appPredictor;
     }
 
-    public void setAppPredictorCallback(AppPredictor.Callback appPredictorCallback) {
+    public void setAppPredictorCallback(
+            AppPredictor.Callback appPredictorCallback,
+            ResolverAppPredictorCallback appPredictorCallbackWrapper) {
         mAppPredictorCallback = appPredictorCallback;
+        mAppPredictorCallbackWrapper = appPredictorCallbackWrapper;
     }
 
     public void destroyAppPredictor() {
@@ -756,6 +757,10 @@ public class ChooserListAdapter extends ResolverListAdapter {
             getAppPredictor().unregisterPredictionUpdates(mAppPredictorCallback);
             getAppPredictor().destroy();
             setAppPredictor(null);
+        }
+
+        if (mAppPredictorCallbackWrapper != null) {
+            mAppPredictorCallbackWrapper.destroy();
         }
     }
 
@@ -771,6 +776,10 @@ public class ChooserListAdapter extends ResolverListAdapter {
         void sendListViewUpdateMessage(UserHandle userHandle);
 
         boolean isSendAction(Intent targetIntent);
+
+        boolean shouldShowContentPreview();
+
+        boolean shouldShowServiceTargets();
     }
 
     /**

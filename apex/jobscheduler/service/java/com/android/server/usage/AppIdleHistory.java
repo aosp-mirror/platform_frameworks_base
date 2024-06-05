@@ -61,6 +61,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -590,6 +591,16 @@ public class AppIdleHistory {
         if (idle) {
             newBucket = IDLE_BUCKET_CUTOFF;
             reason = REASON_MAIN_FORCED_BY_USER;
+            final AppUsageHistory appHistory = getAppUsageHistory(packageName, userId,
+                    elapsedRealtime);
+            // Wipe all expiry times that could raise the bucket on reevaluation.
+            if (appHistory.bucketExpiryTimesMs != null) {
+                for (int i = appHistory.bucketExpiryTimesMs.size() - 1; i >= 0; --i) {
+                    if (appHistory.bucketExpiryTimesMs.keyAt(i) < newBucket) {
+                        appHistory.bucketExpiryTimesMs.removeAt(i);
+                    }
+                }
+            }
         } else {
             newBucket = STANDBY_BUCKET_ACTIVE;
             // This is to pretend that the app was just used, don't freeze the state anymore.
@@ -777,7 +788,13 @@ public class AppIdleHistory {
                         }
                         appUsageHistory.nextEstimatedLaunchTime = getLongValue(parser,
                                 ATTR_NEXT_ESTIMATED_APP_LAUNCH_TIME, 0);
-                        appUsageHistory.lastInformedBucket = -1;
+                        if (Flags.avoidIdleCheck()) {
+                            // Set lastInformedBucket to the same value with the currentBucket
+                            // it should have already been informed.
+                            appUsageHistory.lastInformedBucket = appUsageHistory.currentBucket;
+                        } else {
+                            appUsageHistory.lastInformedBucket = -1;
+                        }
                         userHistory.put(packageName, appUsageHistory);
 
                         if (version >= XML_VERSION_ADD_BUCKET_EXPIRY_TIMES) {
@@ -802,6 +819,9 @@ public class AppIdleHistory {
                     }
                 }
             }
+        } catch (FileNotFoundException e) {
+            // Expected on first boot
+            Slog.d(TAG, "App idle file for user " + userId + " does not exist");
         } catch (IOException | XmlPullParserException e) {
             Slog.e(TAG, "Unable to read app idle file for user " + userId, e);
         } finally {

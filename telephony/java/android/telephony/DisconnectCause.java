@@ -16,8 +16,11 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
+
+import com.android.internal.telephony.flags.Flags;
 
 /**
  * Describes the cause of a disconnected call. Those disconnect causes can be converted into a more
@@ -362,8 +365,8 @@ public final class DisconnectCause {
 
     /**
      * Indicates that the call was unable to be made because the satellite modem is enabled.
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_ENABLED = 82;
 
     //*********************************************************************************************

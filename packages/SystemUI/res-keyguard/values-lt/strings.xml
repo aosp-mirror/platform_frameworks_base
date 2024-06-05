@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Įkraunama"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Greitai įkraunama"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lėtai įkraunama"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Įkrovimas optimizuotas siekiant apsaugoti akumuliatorių"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Su įkrovimo priedu susijusi problema"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Paspauskite meniu, jei norite atrakinti."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • įkrovimas pristabdytas, siekiant apsaugoti akumuliatorių"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • patikrinkite įkrovimo priedą"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Tinklas užrakintas"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Nėra SIM kortelės"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Įdėkite SIM kortelę."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Trūksta SIM kortelės arba ji neskaitoma. Įdėkite SIM kortelę."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Nenaudojama SIM kortelė."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Jūsų SIM kortelė visam laikui išjungta.\n Susisiekite su belaidžio ryšio paslaugos teikėju, kad gautumėte naują SIM kortelę."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM kortelė užrakinta."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM kortelė užrakinta PUK kodu."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Atrakinama SIM…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Po užrakinimo reikalingas PIN kodas"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Po užrakinimo reikalingas slaptažodis"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Po užrakinimo reikalingas atrakinimo piešinys"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Naujinys bus įdiegtas neaktyvumo valandomis"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Naujinys bus įdiegtas, kai įrenginys nebus naudojamas"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Reikalinga papildoma sauga. PIN kodas nebuvo naudojamas kurį laiką."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Reikalinga papildoma sauga. Slaptažodis nebuvo naudojamas kurį laiką."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Reikalinga papildoma sauga. Atrakinimo piešinys nebuvo naudojamas kurį laiką."</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Papildomai saugai užtikrinti geriau naudokite atrakinimo piešinį"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Papildomai saugai užtikrinti geriau naudokite PIN kodą"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Papildomai saugai užtikrinti geriau naudokite slaptažodį"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Norint užtikrinti papildomą saugą būtinas PIN kodas"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Norint užtikrinti papildomą saugą būtinas atrakinimo piešinys"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Norint užtikrinti papildomą saugą būtinas slaptažodis"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Įrenginį užrakino administratorius"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Įrenginys užrakintas neautomatiškai"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Neatpažinta"</string>

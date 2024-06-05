@@ -17,25 +17,48 @@
 package androidx.window.sidecar;
 
 import android.content.Context;
+import android.view.WindowManager;
+
+import androidx.annotation.Nullable;
 
 /**
  * Provider class that will instantiate the library implementation. It must be included in the
  * vendor library, and the vendor implementation must match the signature of this class.
  */
 public class SidecarProvider {
+
+    private static volatile Boolean sIsWindowExtensionsEnabled;
+
     /**
      * Provide a simple implementation of {@link SidecarInterface} that can be replaced by
      * an OEM by overriding this method.
      */
+    @Nullable
     public static SidecarInterface getSidecarImpl(Context context) {
-        return new SampleSidecarImpl(context.getApplicationContext());
+        return isWindowExtensionsEnabled()
+                ? new SampleSidecarImpl(context.getApplicationContext())
+                : null;
     }
 
     /**
      * The support library will use this method to check API version compatibility.
      * @return API version string in MAJOR.MINOR.PATCH-description format.
      */
+    @Nullable
     public static String getApiVersion() {
-        return "1.0.0-reference";
+        return isWindowExtensionsEnabled()
+                ? "1.0.0-reference"
+                : null;
+    }
+
+    private static boolean isWindowExtensionsEnabled() {
+        if (sIsWindowExtensionsEnabled == null) {
+            synchronized (SidecarProvider.class) {
+                if (sIsWindowExtensionsEnabled == null) {
+                    sIsWindowExtensionsEnabled = WindowManager.hasWindowExtensionsEnabled();
+                }
+            }
+        }
+        return sIsWindowExtensionsEnabled;
     }
 }

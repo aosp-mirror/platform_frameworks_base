@@ -22,6 +22,7 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
@@ -31,6 +32,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConn
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +42,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /**
  * A repository implementation for a carrier merged (aka VCN) network. A carrier merged network is
@@ -55,6 +58,7 @@ class CarrierMergedConnectionRepository(
     override val subId: Int,
     override val tableLogBuffer: TableLogBuffer,
     private val telephonyManager: TelephonyManager,
+    private val bgContext: CoroutineContext,
     @Application private val scope: CoroutineScope,
     val wifiRepository: WifiRepository,
 ) : MobileConnectionRepository {
@@ -108,6 +112,8 @@ class CarrierMergedConnectionRepository(
                 NetworkNameModel.SimDerived(telephonyManager.simOperatorName),
             )
 
+    override val carrierName: StateFlow<NetworkNameModel> = networkName
+
     override val numberOfLevels: StateFlow<Int> =
         wifiRepository.wifiNetwork
             .map {
@@ -159,13 +165,32 @@ class CarrierMergedConnectionRepository(
 
     override val isRoaming = MutableStateFlow(false).asStateFlow()
     override val carrierId = MutableStateFlow(INVALID_SUBSCRIPTION_ID).asStateFlow()
+    override val inflateSignalStrength = MutableStateFlow(false).asStateFlow()
     override val isEmergencyOnly = MutableStateFlow(false).asStateFlow()
     override val operatorAlphaShort = MutableStateFlow(null).asStateFlow()
     override val isInService = MutableStateFlow(true).asStateFlow()
+    override val isNonTerrestrial = MutableStateFlow(false).asStateFlow()
     override val isGsm = MutableStateFlow(false).asStateFlow()
     override val carrierNetworkChangeActive = MutableStateFlow(false).asStateFlow()
 
+    /**
+     * Carrier merged connections happen over wifi but are displayed as a mobile triangle. Because
+     * they occur over wifi, it's possible to have a valid carrier merged connection even during
+     * airplane mode. See b/291993542.
+     */
+    override val isAllowedDuringAirplaneMode = MutableStateFlow(true).asStateFlow()
+
+    /**
+     * It's not currently considered possible that a carrier merged network can have these
+     * prioritized capabilities. If we need to track them, we can add the same check as is in
+     * [MobileConnectionRepositoryImpl].
+     */
+    override val hasPrioritizedNetworkCapabilities = MutableStateFlow(false).asStateFlow()
+
     override val dataEnabled: StateFlow<Boolean> = wifiRepository.isWifiEnabled
+
+    override suspend fun isInEcmMode(): Boolean =
+        withContext(bgContext) { telephonyManager.emergencyCallbackMode }
 
     companion object {
         // Carrier merged is never roaming
@@ -177,6 +202,7 @@ class CarrierMergedConnectionRepository(
     @Inject
     constructor(
         private val telephonyManager: TelephonyManager,
+        @Background private val bgContext: CoroutineContext,
         @Application private val scope: CoroutineScope,
         private val wifiRepository: WifiRepository,
     ) {
@@ -188,6 +214,7 @@ class CarrierMergedConnectionRepository(
                 subId,
                 mobileLogger,
                 telephonyManager.createForSubscriptionId(subId),
+                bgContext,
                 scope,
                 wifiRepository,
             )

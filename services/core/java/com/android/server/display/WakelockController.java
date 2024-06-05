@@ -21,6 +21,7 @@ import android.hardware.display.DisplayManagerInternal;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.utils.DebugUtils;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -41,7 +42,11 @@ public final class WakelockController {
     @VisibleForTesting
     static final int WAKE_LOCK_MAX = WAKE_LOCK_UNFINISHED_BUSINESS;
 
-    private static final boolean DEBUG = false;
+    private static final String TAG = "WakelockController";
+
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.WakelockController DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     @IntDef(flag = true, prefix = "WAKE_LOCK_", value = {
             WAKE_LOCK_PROXIMITY_POSITIVE,
@@ -100,7 +105,7 @@ public final class WakelockController {
     public WakelockController(int displayId,
             DisplayManagerInternal.DisplayPowerCallbacks callbacks) {
         mDisplayId = displayId;
-        mTag = "WakelockController[" + mDisplayId + "]";
+        mTag = TAG + "[" + mDisplayId + "]";
         mDisplayPowerCallbacks = callbacks;
         mSuspendBlockerIdUnfinishedBusiness = "[" + displayId + "]unfinished business";
         mSuspendBlockerIdOnStateChanged = "[" + displayId + "]on state changed";

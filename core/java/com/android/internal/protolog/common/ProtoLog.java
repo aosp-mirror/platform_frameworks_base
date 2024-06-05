@@ -129,4 +129,29 @@ public class ProtoLog {
                     "ProtoLog calls MUST be processed with ProtoLogTool");
         }
     }
+
+    /**
+     * Check if ProtoLog isEnabled for a target group.
+     * @param group Group to check enable status of.
+     * @return true iff this is being logged.
+     */
+    public static boolean isEnabled(IProtoLogGroup group, LogLevel level) {
+        if (REQUIRE_PROTOLOGTOOL) {
+            throw new UnsupportedOperationException(
+                    "ProtoLog calls MUST be processed with ProtoLogTool");
+        }
+        return false;
+    }
+
+    /**
+     * Get the single ProtoLog instance.
+     * @return A singleton instance of ProtoLog.
+     */
+    public static IProtoLog getSingleInstance() {
+        if (REQUIRE_PROTOLOGTOOL) {
+            throw new UnsupportedOperationException(
+                    "ProtoLog calls MUST be processed with ProtoLogTool");
+        }
+        return null;
+    }
 }

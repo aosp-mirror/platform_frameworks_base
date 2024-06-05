@@ -16,7 +16,9 @@
 package com.android.systemui.keyguard.shared.model
 
 /** This information will flow from the [KeyguardTransitionRepository] to control the UI layer */
-data class TransitionStep(
+data class TransitionStep
+@JvmOverloads
+constructor(
     val from: KeyguardState = KeyguardState.OFF,
     val to: KeyguardState = KeyguardState.OFF,
     val value: Float = 0f, // constrained [0.0, 1.0]
@@ -28,4 +30,12 @@ data class TransitionStep(
         value: Float,
         transitionState: TransitionState,
     ) : this(info.from, info.to, value, transitionState, info.ownerName)
+
+    fun isTransitioning(from: KeyguardState? = null, to: KeyguardState? = null): Boolean {
+        return (from == null || this.from == from) && (to == null || this.to == to)
+    }
+
+    fun isFinishedIn(state: KeyguardState): Boolean {
+        return to == state && transitionState == TransitionState.FINISHED
+    }
 }

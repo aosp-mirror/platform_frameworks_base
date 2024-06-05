@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
  Copyright 2018 The Android Open Source Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,39 +13,17 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="@android:color/holo_green_light"
     android:focusableInTouchMode="true"
-    android:background="@android:color/holo_green_light">
-    <EditText android:id="@+id/plain_text_input"
-              android:layout_height="wrap_content"
-              android:layout_width="match_parent"
-	      android:imeOptions="flagNoExtractUi"
-              android:inputType="text"/>
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/plain_text_input"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-        <Button
-            android:id="@+id/finish_activity_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Finish activity" />
-        <Button
-            android:id="@+id/start_dialog_themed_activity_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Dialog themed activity" />
-        <ToggleButton
-            android:id="@+id/toggle_fixed_portrait_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textOn="Portrait (On)"
-            android:textOff="Portrait (Off)"
-        />
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:imeOptions="flagNoExtractUi"
+        android:inputType="text" />
 </LinearLayout>

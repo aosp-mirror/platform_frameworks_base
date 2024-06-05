@@ -35,19 +35,19 @@ import static org.mockito.Mockito.when;
 import android.app.WallpaperColors;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
 import androidx.core.graphics.drawable.IconCompat;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 
 import com.google.common.collect.ImmutableList;
 
@@ -62,7 +62,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MediaOutputAdapterTest extends SysuiTestCase {
 
@@ -467,7 +467,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     @Test
     public void subStatusSupported_onBindViewHolder_bindDeviceRequirePremium_verifyView() {
         String deviceStatus = (String) mContext.getText(
-                R.string.media_output_status_require_premium);
+                com.android.settingslib.R.string.media_output_status_require_premium);
         when(mMediaDevice2.hasSubtext()).thenReturn(true);
         when(mMediaDevice2.getSubtext()).thenReturn(SUBTEXT_SUBSCRIPTION_REQUIRED);
         when(mMediaDevice2.getSubtextString()).thenReturn(deviceStatus);
@@ -491,7 +491,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     @Test
     public void subStatusSupported_onBindViewHolder_bindDeviceWithAdPlaying_verifyView() {
         String deviceStatus = (String) mContext.getText(
-                R.string.media_output_status_try_after_ad);
+                com.android.settingslib.R.string.media_output_status_try_after_ad);
         when(mMediaDevice2.hasSubtext()).thenReturn(true);
         when(mMediaDevice2.getSubtext()).thenReturn(SUBTEXT_AD_ROUTING_DISALLOWED);
         when(mMediaDevice2.getSubtextString()).thenReturn(deviceStatus);

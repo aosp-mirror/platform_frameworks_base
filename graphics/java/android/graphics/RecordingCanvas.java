@@ -40,7 +40,7 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
 
     /** @hide */
     private static int getPanelFrameSize() {
-        final int DefaultSize = 100 * 1024 * 1024; // 100 MB;
+        final int DefaultSize = 150 * 1024 * 1024; // 150 MB;
         return Math.max(SystemProperties.getInt("ro.hwui.max_texture_allocation_size", DefaultSize),
                 DefaultSize);
     }
@@ -262,7 +262,7 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
     protected void throwIfCannotDraw(Bitmap bitmap) {
         super.throwIfCannotDraw(bitmap);
         int bitmapSize = bitmap.getByteCount();
-        if (bitmapSize > MAX_BITMAP_SIZE) {
+        if (bitmap.getConfig() != Bitmap.Config.HARDWARE && bitmapSize > MAX_BITMAP_SIZE) {
             throw new RuntimeException(
                     "Canvas: trying to draw too large(" + bitmapSize + "bytes) bitmap.");
         }
@@ -276,9 +276,7 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
     @CriticalNative
     private static native void nResetDisplayListCanvas(long canvas, long node,
             int width, int height);
-    @CriticalNative
     private static native int nGetMaximumTextureWidth();
-    @CriticalNative
     private static native int nGetMaximumTextureHeight();
     @CriticalNative
     private static native void nEnableZ(long renderer, boolean enableZ);

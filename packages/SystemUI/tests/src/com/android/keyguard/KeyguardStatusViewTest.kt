@@ -1,12 +1,12 @@
 package com.android.keyguard
 
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.children
 import com.google.common.truth.Truth.assertThat
@@ -21,9 +21,9 @@ class KeyguardStatusViewTest : SysuiTestCase() {
 
     private lateinit var keyguardStatusView: KeyguardStatusView
     private val mediaView: View
-        get() = keyguardStatusView.findViewById(R.id.status_view_media_container)
+        get() = keyguardStatusView.requireViewById(R.id.status_view_media_container)
     private val statusViewContainer: ViewGroup
-        get() = keyguardStatusView.findViewById(R.id.status_view_container)
+        get() = keyguardStatusView.requireViewById(R.id.status_view_container)
     private val childrenExcludingMedia
         get() = statusViewContainer.children.filter { it != mediaView }
 

@@ -16,8 +16,7 @@
 
 package com.android.systemui.keyguard;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.testing.AndroidTestingRunner;
 
@@ -52,8 +51,7 @@ public class LifecycleTest extends SysuiTestCase {
         mLifecycle.addObserver(mObj1);
 
         mLifecycle.dispatch(mDispatchedObjects::add);
-
-        assertTrue(mDispatchedObjects.contains(mObj1));
+        assertThat(mDispatchedObjects).contains(mObj1);
     }
 
     @Test
@@ -63,7 +61,7 @@ public class LifecycleTest extends SysuiTestCase {
 
         mLifecycle.dispatch(mDispatchedObjects::add);
 
-        assertFalse(mDispatchedObjects.contains(mObj1));
+        assertThat(mDispatchedObjects).isEmpty();
     }
 
     @Test
@@ -73,8 +71,7 @@ public class LifecycleTest extends SysuiTestCase {
 
         mLifecycle.dispatch(mDispatchedObjects::add);
 
-        assertTrue(mDispatchedObjects.contains(mObj1));
-        assertTrue(mDispatchedObjects.contains(mObj2));
+        assertThat(mDispatchedObjects).containsExactly(mObj1, mObj2);
     }
 
 }

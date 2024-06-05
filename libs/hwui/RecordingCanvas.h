@@ -41,11 +41,12 @@
 
 enum class SkBlendMode;
 class SkRRect;
-class Mesh;
 
 namespace android {
-namespace uirenderer {
 
+class Mesh;
+
+namespace uirenderer {
 namespace skiapipeline {
 class FunctorDrawable;
 }
@@ -67,18 +68,6 @@ struct DisplayListOp {
 };
 
 static_assert(sizeof(DisplayListOp) == 4);
-
-class DrawMeshPayload {
-public:
-    explicit DrawMeshPayload(const SkMesh* mesh) : mesh(mesh) {}
-    explicit DrawMeshPayload(const Mesh* meshWrapper) : meshWrapper(meshWrapper) {}
-
-    [[nodiscard]] const SkMesh& getSkMesh() const;
-
-private:
-    const SkMesh* mesh = nullptr;
-    const Mesh* meshWrapper = nullptr;
-};
 
 struct DrawImagePayload {
     explicit DrawImagePayload(Bitmap& bitmap)
@@ -110,7 +99,7 @@ class RecordingCanvas;
 
 class DisplayListData final {
 public:
-    DisplayListData() : mHasText(false) {}
+    DisplayListData() : mHasText(false), mHasFill(false) {}
     ~DisplayListData();
 
     void draw(SkCanvas* canvas) const;
@@ -121,13 +110,12 @@ public:
     void applyColorTransform(ColorTransform transform);
 
     bool hasText() const { return mHasText; }
+    bool hasFill() const { return mHasFill; }
     size_t usedSize() const { return fUsed; }
     size_t allocatedSize() const { return fReserved; }
 
 private:
     friend class RecordingCanvas;
-
-    void flush();
 
     void save();
     void saveLayer(const SkRect*, const SkPaint*, const SkImageFilter*, SkCanvas::SaveLayerFlags);
@@ -141,6 +129,7 @@ private:
     void translateZ(SkScalar);
 
     void clipPath(const SkPath&, SkClipOp, bool aa);
+    void clipShader(const sk_sp<SkShader>& shader, SkClipOp);
     void clipRect(const SkRect&, SkClipOp, bool aa);
     void clipRRect(const SkRRect&, SkClipOp, bool aa);
     void clipRegion(const SkRegion&, SkClipOp);
@@ -194,6 +183,7 @@ private:
     size_t fReserved = 0;
 
     bool mHasText : 1;
+    bool mHasFill : 1;
 };
 
 class RecordingCanvas final : public SkCanvasVirtualEnforcer<SkNoDrawCanvas> {
@@ -208,8 +198,6 @@ public:
     void willRestore() override;
     bool onDoSaveBehind(const SkRect*) override;
 
-    void onFlush() override;
-
     void didConcat44(const SkM44&) override;
     void didSetM44(const SkM44&) override;
     void didScale(SkScalar, SkScalar) override;
@@ -218,6 +206,7 @@ public:
     void onClipRect(const SkRect&, SkClipOp, ClipEdgeStyle) override;
     void onClipRRect(const SkRRect&, SkClipOp, ClipEdgeStyle) override;
     void onClipPath(const SkPath&, SkClipOp, ClipEdgeStyle) override;
+    void onClipShader(sk_sp<SkShader>, SkClipOp) override;
     void onClipRegion(const SkRegion&, SkClipOp) override;
     void onResetClip() override;
 

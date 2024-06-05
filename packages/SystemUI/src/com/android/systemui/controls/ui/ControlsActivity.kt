@@ -31,12 +31,11 @@ import android.view.WindowInsets
 import android.view.WindowInsets.Type
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.management.ControlsAnimations
 import com.android.systemui.controls.settings.ControlsSettingsDialogManager
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 
@@ -66,9 +65,7 @@ open class ControlsActivity @Inject constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lastConfiguration.setTo(resources.configuration)
-        if (featureFlags.isEnabled(Flags.USE_APP_PANELS)) {
-            window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
-        }
+        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
 
         setContentView(R.layout.controls_fullscreen)
 
@@ -77,7 +74,7 @@ open class ControlsActivity @Inject constructor(
                 requireViewById(R.id.control_detail_root),
                 window,
                 intent,
-                !featureFlags.isEnabled(Flags.USE_APP_PANELS)
+                false
             )
         )
 
@@ -114,7 +111,7 @@ open class ControlsActivity @Inject constructor(
 
         parent = requireViewById(R.id.control_detail_root)
         parent.alpha = 0f
-        if (featureFlags.isEnabled(Flags.USE_APP_PANELS) && !keyguardStateController.isUnlocked) {
+        if (!keyguardStateController.isUnlocked) {
             controlsSettingsDialogManager.maybeShowDialog(this) {
                 uiController.show(parent, { finishOrReturnToDream() }, this)
             }

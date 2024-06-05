@@ -5,97 +5,119 @@ import android.util.TypedValue
 import androidx.core.animation.Interpolator
 import androidx.core.animation.PathInterpolator
 import androidx.dynamicanimation.animation.SpringForce
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 data class EdgePanelParams(private var resources: Resources) {
 
     data class ArrowDimens(
-            val length: Float? = 0f,
-            val height: Float? = 0f,
-            val alpha: Float = 0f,
-            val heightSpring: SpringForce? = null,
-            val lengthSpring: SpringForce? = null,
-            var alphaSpring: Step<SpringForce>? = null,
-            var alphaInterpolator: Step<Float>? = null
+        val length: Float? = 0f,
+        val height: Float? = 0f,
+        val alpha: Float = 0f,
+        val heightSpring: SpringForce? = null,
+        val lengthSpring: SpringForce? = null,
+        var alphaSpring: Step<SpringForce>? = null,
+        var alphaInterpolator: Step<Float>? = null
     )
 
     data class BackgroundDimens(
-            val width: Float? = 0f,
-            val height: Float = 0f,
-            val edgeCornerRadius: Float = 0f,
-            val farCornerRadius: Float = 0f,
-            val alpha: Float = 0f,
-            val widthSpring: SpringForce? = null,
-            val heightSpring: SpringForce? = null,
-            val farCornerRadiusSpring: SpringForce? = null,
-            val edgeCornerRadiusSpring: SpringForce? = null,
-            val alphaSpring: SpringForce? = null,
+        val width: Float? = 0f,
+        val height: Float = 0f,
+        val edgeCornerRadius: Float = 0f,
+        val farCornerRadius: Float = 0f,
+        val alpha: Float = 0f,
+        val widthSpring: SpringForce? = null,
+        val heightSpring: SpringForce? = null,
+        val farCornerRadiusSpring: SpringForce? = null,
+        val edgeCornerRadiusSpring: SpringForce? = null,
+        val alphaSpring: SpringForce? = null,
     )
 
     data class BackIndicatorDimens(
-            val horizontalTranslation: Float? = 0f,
-            val scale: Float = 0f,
-            val scalePivotX: Float? = null,
-            val arrowDimens: ArrowDimens,
-            val backgroundDimens: BackgroundDimens,
-            val verticalTranslationSpring: SpringForce? = null,
-            val horizontalTranslationSpring: SpringForce? = null,
-            val scaleSpring: SpringForce? = null,
+        val horizontalTranslation: Float? = 0f,
+        val scale: Float = 0f,
+        val scalePivotX: Float? = null,
+        val arrowDimens: ArrowDimens,
+        val backgroundDimens: BackgroundDimens,
+        val verticalTranslationSpring: SpringForce? = null,
+        val horizontalTranslationSpring: SpringForce? = null,
+        val scaleSpring: SpringForce? = null,
     )
 
     lateinit var entryIndicator: BackIndicatorDimens
         private set
+
     lateinit var activeIndicator: BackIndicatorDimens
         private set
+
     lateinit var cancelledIndicator: BackIndicatorDimens
         private set
+
     lateinit var flungIndicator: BackIndicatorDimens
         private set
+
     lateinit var committedIndicator: BackIndicatorDimens
         private set
+
     lateinit var preThresholdIndicator: BackIndicatorDimens
         private set
+
     lateinit var fullyStretchedIndicator: BackIndicatorDimens
         private set
 
     // navigation bar edge constants
     var arrowPaddingEnd: Int = 0
         private set
+
     var arrowThickness: Float = 0f
         private set
+
     // The closest to y
     var minArrowYPosition: Int = 0
         private set
+
     var fingerOffset: Int = 0
         private set
+
     var staticTriggerThreshold: Float = 0f
         private set
+
     var reactivationTriggerThreshold: Float = 0f
         private set
+
     var deactivationTriggerThreshold: Float = 0f
         get() = -field
         private set
+
     lateinit var dynamicTriggerThresholdRange: ClosedRange<Float>
         private set
+
     var swipeProgressThreshold: Float = 0f
         private set
 
     lateinit var entryWidthInterpolator: Interpolator
         private set
+
     lateinit var entryWidthTowardsEdgeInterpolator: Interpolator
         private set
+
     lateinit var activeWidthInterpolator: Interpolator
         private set
+
     lateinit var arrowAngleInterpolator: Interpolator
         private set
+
     lateinit var horizontalTranslationInterpolator: Interpolator
         private set
+
     lateinit var verticalTranslationInterpolator: Interpolator
         private set
+
     lateinit var farCornerInterpolator: Interpolator
         private set
+
     lateinit var edgeCornerInterpolator: Interpolator
         private set
+
     lateinit var heightInterpolator: Interpolator
         private set
 
@@ -108,7 +130,10 @@ data class EdgePanelParams(private var resources: Resources) {
     }
 
     private fun getDimenFloat(id: Int): Float {
-        return TypedValue().run { resources.getValue(id, this, true); float }
+        return TypedValue().run {
+            resources.getValue(id, this, true)
+            float
+        }
     }
 
     private fun getPx(id: Int): Int {
@@ -123,11 +148,10 @@ data class EdgePanelParams(private var resources: Resources) {
         fingerOffset = getPx(R.dimen.navigation_edge_finger_offset)
         staticTriggerThreshold = getDimen(R.dimen.navigation_edge_action_drag_threshold)
         reactivationTriggerThreshold =
-                getDimen(R.dimen.navigation_edge_action_reactivation_drag_threshold)
+            getDimen(R.dimen.navigation_edge_action_reactivation_drag_threshold)
         deactivationTriggerThreshold =
-                getDimen(R.dimen.navigation_edge_action_deactivation_drag_threshold)
-        dynamicTriggerThresholdRange =
-                reactivationTriggerThreshold..deactivationTriggerThreshold
+            getDimen(R.dimen.navigation_edge_action_deactivation_drag_threshold)
+        dynamicTriggerThresholdRange = reactivationTriggerThreshold..deactivationTriggerThreshold
         swipeProgressThreshold = getDimen(R.dimen.navigation_edge_action_progress_threshold)
 
         entryWidthInterpolator = PathInterpolator(.19f, 1.27f, .71f, .86f)
@@ -149,27 +173,31 @@ data class EdgePanelParams(private var resources: Resources) {
 
         val commonArrowDimensAlphaThreshold = .165f
         val commonArrowDimensAlphaFactor = 1.05f
-        val commonArrowDimensAlphaSpring = Step(
-            threshold = commonArrowDimensAlphaThreshold,
-            factor = commonArrowDimensAlphaFactor,
-            postThreshold = createSpring(180f, 0.9f),
-            preThreshold = createSpring(2000f, 0.6f)
-        )
-        val commonArrowDimensAlphaSpringInterpolator = Step(
-            threshold = commonArrowDimensAlphaThreshold,
-            factor = commonArrowDimensAlphaFactor,
-            postThreshold = 1f,
-            preThreshold = 0f
-        )
+        val commonArrowDimensAlphaSpring =
+            Step(
+                threshold = commonArrowDimensAlphaThreshold,
+                factor = commonArrowDimensAlphaFactor,
+                postThreshold = createSpring(180f, 0.9f),
+                preThreshold = createSpring(2000f, 0.6f)
+            )
+        val commonArrowDimensAlphaSpringInterpolator =
+            Step(
+                threshold = commonArrowDimensAlphaThreshold,
+                factor = commonArrowDimensAlphaFactor,
+                postThreshold = 1f,
+                preThreshold = 0f
+            )
 
-        entryIndicator = BackIndicatorDimens(
+        entryIndicator =
+            BackIndicatorDimens(
                 horizontalTranslation = getDimen(R.dimen.navigation_edge_entry_margin),
                 scale = getDimenFloat(R.dimen.navigation_edge_entry_scale),
                 scalePivotX = getDimen(R.dimen.navigation_edge_pre_threshold_background_width),
                 horizontalTranslationSpring = createSpring(800f, 0.76f),
                 verticalTranslationSpring = createSpring(30000f, 1f),
                 scaleSpring = createSpring(120f, 0.8f),
-                arrowDimens = ArrowDimens(
+                arrowDimens =
+                    ArrowDimens(
                         length = getDimen(R.dimen.navigation_edge_entry_arrow_length),
                         height = getDimen(R.dimen.navigation_edge_entry_arrow_height),
                         alpha = 0f,
@@ -177,8 +205,9 @@ data class EdgePanelParams(private var resources: Resources) {
                         heightSpring = createSpring(600f, 0.4f),
                         alphaSpring = commonArrowDimensAlphaSpring,
                         alphaInterpolator = commonArrowDimensAlphaSpringInterpolator
-                ),
-                backgroundDimens = BackgroundDimens(
+                    ),
+                backgroundDimens =
+                    BackgroundDimens(
                         alpha = 1f,
                         width = getDimen(R.dimen.navigation_edge_entry_background_width),
                         height = getDimen(R.dimen.navigation_edge_entry_background_height),
@@ -188,16 +217,18 @@ data class EdgePanelParams(private var resources: Resources) {
                         heightSpring = createSpring(1500f, 0.45f),
                         farCornerRadiusSpring = createSpring(300f, 0.5f),
                         edgeCornerRadiusSpring = createSpring(150f, 0.5f),
-                )
-        )
+                    )
+            )
 
-        activeIndicator = BackIndicatorDimens(
+        activeIndicator =
+            BackIndicatorDimens(
                 horizontalTranslation = getDimen(R.dimen.navigation_edge_active_margin),
                 scale = getDimenFloat(R.dimen.navigation_edge_active_scale),
                 horizontalTranslationSpring = createSpring(1000f, 0.8f),
                 scaleSpring = createSpring(325f, 0.55f),
                 scalePivotX = getDimen(R.dimen.navigation_edge_active_background_width),
-                arrowDimens = ArrowDimens(
+                arrowDimens =
+                    ArrowDimens(
                         length = getDimen(R.dimen.navigation_edge_active_arrow_length),
                         height = getDimen(R.dimen.navigation_edge_active_arrow_height),
                         alpha = 1f,
@@ -205,8 +236,9 @@ data class EdgePanelParams(private var resources: Resources) {
                         heightSpring = activeCommittedArrowHeightSpring,
                         alphaSpring = commonArrowDimensAlphaSpring,
                         alphaInterpolator = commonArrowDimensAlphaSpringInterpolator
-                ),
-                backgroundDimens = BackgroundDimens(
+                    ),
+                backgroundDimens =
+                    BackgroundDimens(
                         alpha = 1f,
                         width = getDimen(R.dimen.navigation_edge_active_background_width),
                         height = getDimen(R.dimen.navigation_edge_active_background_height),
@@ -216,16 +248,18 @@ data class EdgePanelParams(private var resources: Resources) {
                         heightSpring = createSpring(10000f, 1f),
                         edgeCornerRadiusSpring = createSpring(2600f, 0.855f),
                         farCornerRadiusSpring = createSpring(1200f, 0.30f),
-                )
-        )
+                    )
+            )
 
-        preThresholdIndicator = BackIndicatorDimens(
+        preThresholdIndicator =
+            BackIndicatorDimens(
                 horizontalTranslation = getDimen(R.dimen.navigation_edge_pre_threshold_margin),
                 scale = getDimenFloat(R.dimen.navigation_edge_pre_threshold_scale),
                 scalePivotX = getDimen(R.dimen.navigation_edge_pre_threshold_background_width),
                 scaleSpring = createSpring(120f, 0.8f),
                 horizontalTranslationSpring = createSpring(6000f, 1f),
-                arrowDimens = ArrowDimens(
+                arrowDimens =
+                    ArrowDimens(
                         length = getDimen(R.dimen.navigation_edge_pre_threshold_arrow_length),
                         height = getDimen(R.dimen.navigation_edge_pre_threshold_arrow_height),
                         alpha = 1f,
@@ -233,32 +267,36 @@ data class EdgePanelParams(private var resources: Resources) {
                         heightSpring = createSpring(100f, 0.6f),
                         alphaSpring = commonArrowDimensAlphaSpring,
                         alphaInterpolator = commonArrowDimensAlphaSpringInterpolator
-                ),
-                backgroundDimens = BackgroundDimens(
+                    ),
+                backgroundDimens =
+                    BackgroundDimens(
                         alpha = 1f,
                         width = getDimen(R.dimen.navigation_edge_pre_threshold_background_width),
                         height = getDimen(R.dimen.navigation_edge_pre_threshold_background_height),
                         edgeCornerRadius =
-                                getDimen(R.dimen.navigation_edge_pre_threshold_edge_corners),
+                            getDimen(R.dimen.navigation_edge_pre_threshold_edge_corners),
                         farCornerRadius =
-                                getDimen(R.dimen.navigation_edge_pre_threshold_far_corners),
+                            getDimen(R.dimen.navigation_edge_pre_threshold_far_corners),
                         widthSpring = createSpring(650f, 1f),
                         heightSpring = createSpring(1500f, 0.45f),
                         farCornerRadiusSpring = createSpring(300f, 1f),
                         edgeCornerRadiusSpring = createSpring(250f, 0.5f),
-                )
-        )
+                    )
+            )
 
-        committedIndicator = activeIndicator.copy(
+        committedIndicator =
+            activeIndicator.copy(
                 horizontalTranslation = null,
                 scalePivotX = null,
-                arrowDimens = activeIndicator.arrowDimens.copy(
+                arrowDimens =
+                    activeIndicator.arrowDimens.copy(
                         lengthSpring = activeCommittedArrowLengthSpring,
                         heightSpring = activeCommittedArrowHeightSpring,
                         length = null,
                         height = null,
-                ),
-                backgroundDimens = activeIndicator.backgroundDimens.copy(
+                    ),
+                backgroundDimens =
+                    activeIndicator.backgroundDimens.copy(
                         alpha = 0f,
                         // explicitly set to null to preserve previous width upon state change
                         width = null,
@@ -267,49 +305,57 @@ data class EdgePanelParams(private var resources: Resources) {
                         edgeCornerRadiusSpring = flungCommittedEdgeCornerSpring,
                         farCornerRadiusSpring = flungCommittedFarCornerSpring,
                         alphaSpring = createSpring(1400f, 1f),
-                ),
+                    ),
                 scale = 0.86f,
                 scaleSpring = createSpring(5700f, 1f),
-        )
+            )
 
-        flungIndicator = committedIndicator.copy(
-                arrowDimens = committedIndicator.arrowDimens.copy(
+        flungIndicator =
+            committedIndicator.copy(
+                arrowDimens =
+                    committedIndicator.arrowDimens.copy(
                         lengthSpring = createSpring(850f, 0.46f),
                         heightSpring = createSpring(850f, 0.46f),
                         length = activeIndicator.arrowDimens.length,
                         height = activeIndicator.arrowDimens.height
-                ),
-                backgroundDimens = committedIndicator.backgroundDimens.copy(
+                    ),
+                backgroundDimens =
+                    committedIndicator.backgroundDimens.copy(
                         widthSpring = flungCommittedWidthSpring,
                         heightSpring = flungCommittedHeightSpring,
                         edgeCornerRadiusSpring = flungCommittedEdgeCornerSpring,
                         farCornerRadiusSpring = flungCommittedFarCornerSpring,
-                )
-        )
+                    )
+            )
 
-        cancelledIndicator = entryIndicator.copy(
-                backgroundDimens = entryIndicator.backgroundDimens.copy(
+        cancelledIndicator =
+            entryIndicator.copy(
+                backgroundDimens =
+                    entryIndicator.backgroundDimens.copy(
                         width = 0f,
                         alpha = 0f,
                         alphaSpring = createSpring(450f, 1f)
-                )
-        )
+                    )
+            )
 
-        fullyStretchedIndicator = BackIndicatorDimens(
+        fullyStretchedIndicator =
+            BackIndicatorDimens(
                 horizontalTranslation = getDimen(R.dimen.navigation_edge_stretch_margin),
                 scale = getDimenFloat(R.dimen.navigation_edge_stretch_scale),
                 horizontalTranslationSpring = null,
                 verticalTranslationSpring = null,
                 scaleSpring = null,
-                arrowDimens = ArrowDimens(
+                arrowDimens =
+                    ArrowDimens(
                         length = getDimen(R.dimen.navigation_edge_stretched_arrow_length),
                         height = getDimen(R.dimen.navigation_edge_stretched_arrow_height),
                         alpha = 1f,
                         alphaSpring = null,
                         heightSpring = null,
                         lengthSpring = null,
-                ),
-                backgroundDimens = BackgroundDimens(
+                    ),
+                backgroundDimens =
+                    BackgroundDimens(
                         alpha = 1f,
                         width = getDimen(R.dimen.navigation_edge_stretch_background_width),
                         height = getDimen(R.dimen.navigation_edge_stretch_background_height),
@@ -320,8 +366,8 @@ data class EdgePanelParams(private var resources: Resources) {
                         heightSpring = null,
                         edgeCornerRadiusSpring = null,
                         farCornerRadiusSpring = null,
-                )
-        )
+                    )
+            )
     }
 }
 

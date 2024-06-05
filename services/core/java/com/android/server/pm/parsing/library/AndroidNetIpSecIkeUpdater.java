@@ -16,7 +16,7 @@
 package com.android.server.pm.parsing.library;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 
 /**
  * Updates a package to remove dependency on android.net.ipsec.ike library.

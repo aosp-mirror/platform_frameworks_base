@@ -19,8 +19,33 @@ import android.os.RemoteException;
 
 /**
  * The object you are calling has died, because its hosting process
- * no longer exists.
+ * no longer exists, or there has been a low-level binder error.
+ *
+ * If you get this exception from a system service, the error is
+ * usually nonrecoverable as the framework will restart. If you
+ * receive this error from an app, at a minimum, you should
+ * recover by resetting the connection. For instance, you should
+ * drop the binder, clean up associated state, and reset your
+ * connection to the service which threw this error. In order
+ * to simplify your error recovery paths, you may also want to
+ * "simply" restart your process. However, this may not be an
+ * option if the service you are talking to is unreliable or
+ * crashes frequently.
+ *
+ * If this isn't from a service death and is instead from a
+ * low-level binder error, it will be from:
+ * <ul>
+ * <li> a one-way call queue filling up (too many one-way calls)
+ * <li> from the binder buffer being filled up, so that the transaction
+ *      is rejected.
+ * </ul>
+ *
+ * In these cases, more information about the error will be
+ * logged. However, there isn't a good way to differentiate
+ * this information at runtime. So, you should handle the
+ * error, as if the service died.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class DeadObjectException extends RemoteException {
     public DeadObjectException() {
         super();

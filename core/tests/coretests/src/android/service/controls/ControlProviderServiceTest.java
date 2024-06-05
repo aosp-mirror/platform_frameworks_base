@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +37,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.controls.actions.CommandAction;
@@ -53,6 +55,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -307,6 +310,18 @@ public class ControlProviderServiceTest {
                 intent.getParcelableExtra(ControlsProviderService.EXTRA_CONTROL)));
     }
 
+    @Test
+    public void testOnNextDoesntRethrowDeadObjectException() throws RemoteException {
+        doAnswer(invocation -> {
+            throw new DeadObjectException();
+        }).when(mSubscriber).onNext(ArgumentMatchers.any(), ArgumentMatchers.any());
+        Control control = new Control.StatelessBuilder("TEST_ID", mPendingIntent).build();
+
+        sendControlGetControl(control);
+
+        assertTrue(mControlsProviderService.mSubscription.mIsCancelled);
+    }
+
     /**
      * Sends the control through the publisher in {@code mControlsProviderService}, returning
      * the control obtained by the subscriber
@@ -359,6 +374,7 @@ public class ControlProviderServiceTest {
         }
 
         private List<Control> mControls;
+        private FakeSubscription mSubscription;
 
         public void setControls(List<Control> controls) {
             mControls = controls;
@@ -398,17 +414,35 @@ public class ControlProviderServiceTest {
         }
 
         private Subscription createSubscription(Subscriber s, List<Control> controls) {
-            return new Subscription() {
-                public void request(long n) {
-                    int i = 0;
-                    for (Control c : mControls) {
-                        if (i++ < n) s.onNext(c);
-                        else break;
-                    }
-                    s.onComplete();
-                }
-                public void cancel() {}
-            };
+            FakeSubscription subscription = new FakeSubscription(s, controls);
+            mSubscription = subscription;
+            return subscription;
+        }
+    }
+
+    private static final class FakeSubscription implements Subscription {
+
+        private final Subscriber mSubscriber;
+        private final List<Control> mControls;
+
+        private boolean mIsCancelled = false;
+
+        FakeSubscription(Subscriber s, List<Control> controls) {
+            mSubscriber = s;
+            mControls = controls;
+        }
+
+        public void request(long n) {
+            int i = 0;
+            for (Control c : mControls) {
+                if (i++ < n) mSubscriber.onNext(c);
+                else break;
+            }
+            mSubscriber.onComplete();
+        }
+
+        public void cancel() {
+            mIsCancelled = true;
         }
     }
 }

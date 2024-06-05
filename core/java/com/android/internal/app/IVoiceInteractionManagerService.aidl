@@ -35,11 +35,13 @@ import android.service.voice.VisibleActivityInfo;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceActionCheckCallback;
+import com.android.internal.app.IVoiceInteractionAccessibilitySettingsListener;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
+import com.android.internal.app.IVisualQueryRecognitionStatusListener;
 
 interface IVoiceInteractionManagerService {
     void showSession(in Bundle sessionArgs, int flags, String attributionTag);
@@ -325,6 +327,9 @@ interface IVoiceInteractionManagerService {
     void shutdownHotwordDetectionService();
 
     @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
+    void subscribeVisualQueryRecognitionStatus(in IVisualQueryRecognitionStatusListener listener);
+
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
     void enableVisualQueryDetection(in IVisualQueryDetectionAttentionListener Listener);
 
     @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
@@ -378,4 +383,21 @@ interface IVoiceInteractionManagerService {
     oneway void notifyActivityEventChanged(
             in IBinder activityToken,
             int type);
+
+    /**
+     * rely on the system server to get the secure settings
+     */
+    boolean getAccessibilityDetectionEnabled();
+
+    /**
+     * register the listener
+     */
+    oneway void registerAccessibilityDetectionSettingsListener(
+            in IVoiceInteractionAccessibilitySettingsListener listener);
+
+    /**
+     * unregister the listener
+     */
+     oneway void unregisterAccessibilityDetectionSettingsListener(
+            in IVoiceInteractionAccessibilitySettingsListener listener);
 }

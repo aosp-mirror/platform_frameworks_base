@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.Flags.predictiveBackAnimateDialogs;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -40,22 +42,28 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.StyleRes;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.util.DialogKt;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 /**
- * Base class for dialogs that should appear over panels and keyguard.
+ * Class for dialogs that should appear over panels and keyguard.
+ *
+ * DO NOT SUBCLASS THIS. See {@link DialogDelegate} for an interface that enables
+ * customizing behavior via composition instead of inheritance. Clients should implement the
+ * Delegate class and then pass their implementation into the SystemUIDialog constructor.
  *
  * Optionally provide a {@link SystemUIDialogManager} to its constructor to send signals to
  * listeners on whether this dialog is showing.
@@ -64,15 +72,16 @@ import java.util.List;
  * and dismisses itself when it receives the broadcast.
  */
 public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigChangedCallback {
-    protected static final int DEFAULT_THEME = R.style.Theme_SystemUI_Dialog;
+    public static final int DEFAULT_THEME = R.style.Theme_SystemUI_Dialog;
     // TODO(b/203389579): Remove this once the dialog width on large screens has been agreed on.
     private static final String FLAG_TABLET_DIALOG_WIDTH =
             "persist.systemui.flag_tablet_dialog_width";
-    private static final boolean DEFAULT_DISMISS_ON_DEVICE_LOCK = true;
+    public static final boolean DEFAULT_DISMISS_ON_DEVICE_LOCK = true;
 
     private final Context mContext;
-    private final FeatureFlags mFeatureFlags;
-    @Nullable private final DismissReceiver mDismissReceiver;
+    private final DialogDelegate<SystemUIDialog> mDelegate;
+    @Nullable
+    private final DismissReceiver mDismissReceiver;
     private final Handler mHandler = new Handler();
     private final SystemUIDialogManager mDialogManager;
     private final SysUiState mSysUiState;
@@ -82,8 +91,13 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     private int mLastConfigurationWidthDp = -1;
     private int mLastConfigurationHeightDp = -1;
 
-    private List<Runnable> mOnCreateRunnables = new ArrayList<>();
+    private final List<Runnable> mOnCreateRunnables = new ArrayList<>();
 
+    /**
+     * @deprecated Don't subclass SystemUIDialog. Please subclass {@link Delegate} and pass it to
+     * {@link Factory#create(Delegate)} to create a custom dialog.
+     */
+    @Deprecated
     public SystemUIDialog(Context context) {
         this(context, DEFAULT_THEME, DEFAULT_DISMISS_ON_DEVICE_LOCK);
     }
@@ -97,22 +111,137 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         // SystemUIDialogFactory and make all other dialogs create a SystemUIDialog to which we set
         // the content and attach listeners.
         this(context, theme, dismissOnDeviceLock,
-                Dependency.get(FeatureFlags.class),
                 Dependency.get(SystemUIDialogManager.class),
                 Dependency.get(SysUiState.class),
                 Dependency.get(BroadcastDispatcher.class),
-                Dependency.get(DialogLaunchAnimator.class));
+                Dependency.get(DialogTransitionAnimator.class));
     }
 
-    public SystemUIDialog(Context context, int theme, boolean dismissOnDeviceLock,
-            FeatureFlags featureFlags,
+    public static class Factory {
+        private final Context mContext;
+        private final SystemUIDialogManager mSystemUIDialogManager;
+        private final SysUiState mSysUiState;
+        private final BroadcastDispatcher mBroadcastDispatcher;
+        private final DialogTransitionAnimator mDialogTransitionAnimator;
+
+        @Inject
+        public Factory(
+                @Application Context context,
+                SystemUIDialogManager systemUIDialogManager,
+                SysUiState sysUiState,
+                BroadcastDispatcher broadcastDispatcher,
+                DialogTransitionAnimator dialogTransitionAnimator) {
+            mContext = context;
+            mSystemUIDialogManager = systemUIDialogManager;
+            mSysUiState = sysUiState;
+            mBroadcastDispatcher = broadcastDispatcher;
+            mDialogTransitionAnimator = dialogTransitionAnimator;
+        }
+
+        /**
+         * Creates a new instance of {@link SystemUIDialog} with no customized behavior.
+         *
+         * When you just need a dialog, call this.
+         */
+        public SystemUIDialog create() {
+            return create(new DialogDelegate<>() {
+            }, mContext, DEFAULT_THEME);
+        }
+
+        /**
+         * Creates a new instance of {@link SystemUIDialog} with no customized behavior.
+         *
+         * When you just need a dialog created with a specific {@link Context}, call this.
+         */
+        public SystemUIDialog create(Context context) {
+            return create(new DialogDelegate<>() {
+            }, context, DEFAULT_THEME);
+        }
+
+        /**
+         * Creates a new instance of {@link SystemUIDialog} with {@code delegate} as the {@link
+         * Delegate}.
+         *
+         * When you need to customize the dialog, pass it a delegate.
+         */
+        public SystemUIDialog create(Delegate delegate, Context context) {
+            return create(delegate, context, DEFAULT_THEME);
+        }
+
+        public SystemUIDialog create(Delegate delegate, Context context, @StyleRes int theme) {
+            return create((DialogDelegate<SystemUIDialog>) delegate, context, theme);
+        }
+
+        public SystemUIDialog create(Delegate delegate) {
+            return create(delegate, mContext);
+        }
+
+        private SystemUIDialog create(DialogDelegate<SystemUIDialog> dialogDelegate,
+                Context context, @StyleRes int theme) {
+            return new SystemUIDialog(
+                    context,
+                    theme,
+                    DEFAULT_DISMISS_ON_DEVICE_LOCK,
+                    mSystemUIDialogManager,
+                    mSysUiState,
+                    mBroadcastDispatcher,
+                    mDialogTransitionAnimator,
+                    dialogDelegate);
+        }
+    }
+
+    public SystemUIDialog(
+            Context context,
+            int theme,
+            boolean dismissOnDeviceLock,
             SystemUIDialogManager dialogManager,
             SysUiState sysUiState,
             BroadcastDispatcher broadcastDispatcher,
-            DialogLaunchAnimator dialogLaunchAnimator) {
+            DialogTransitionAnimator dialogTransitionAnimator) {
+        this(
+                context,
+                theme,
+                dismissOnDeviceLock,
+                dialogManager,
+                sysUiState,
+                broadcastDispatcher,
+                dialogTransitionAnimator,
+                new DialogDelegate<>() {
+                });
+    }
+
+    public SystemUIDialog(
+            Context context,
+            int theme,
+            boolean dismissOnDeviceLock,
+            SystemUIDialogManager dialogManager,
+            SysUiState sysUiState,
+            BroadcastDispatcher broadcastDispatcher,
+            DialogTransitionAnimator dialogTransitionAnimator,
+            Delegate delegate) {
+        this(
+                context,
+                theme,
+                dismissOnDeviceLock,
+                dialogManager,
+                sysUiState,
+                broadcastDispatcher,
+                dialogTransitionAnimator,
+                (DialogDelegate<SystemUIDialog>) delegate);
+    }
+
+    public SystemUIDialog(
+            Context context,
+            int theme,
+            boolean dismissOnDeviceLock,
+            SystemUIDialogManager dialogManager,
+            SysUiState sysUiState,
+            BroadcastDispatcher broadcastDispatcher,
+            DialogTransitionAnimator dialogTransitionAnimator,
+            DialogDelegate<SystemUIDialog> delegate) {
         super(context, theme);
         mContext = context;
-        mFeatureFlags = featureFlags;
+        mDelegate = delegate;
 
         applyFlags(this);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
@@ -120,14 +249,16 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         getWindow().setAttributes(attrs);
 
         mDismissReceiver = dismissOnDeviceLock ? new DismissReceiver(this, broadcastDispatcher,
-                dialogLaunchAnimator) : null;
+                dialogTransitionAnimator) : null;
         mDialogManager = dialogManager;
         mSysUiState = sysUiState;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mDelegate.beforeCreate(this, savedInstanceState);
         super.onCreate(savedInstanceState);
+        mDelegate.onCreate(this, savedInstanceState);
 
         Configuration config = getContext().getResources().getConfiguration();
         mLastConfigurationWidthDp = config.screenWidthDp;
@@ -137,10 +268,13 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         for (int i = 0; i < mOnCreateRunnables.size(); i++) {
             mOnCreateRunnables.get(i).run();
         }
-        if (mFeatureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM)) {
+        if (predictiveBackAnimateDialogs()) {
+            View targetView = getWindow().getDecorView();
             DialogKt.registerAnimationOnBackInvoked(
                     /* dialog = */ this,
-                    /* targetView = */ getWindow().getDecorView()
+                    /* targetView = */ targetView,
+                    /* backAnimationSpec= */mDelegate.getBackAnimationSpec(
+                            () -> targetView.getResources().getDisplayMetrics())
             );
         }
     }
@@ -172,6 +306,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
 
             updateWindowSize();
         }
+
+        mDelegate.onConfigurationChanged(this, configuration);
     }
 
     /**
@@ -179,7 +315,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
      * the device configuration changes, and the result will be used to resize this dialog window.
      */
     protected int getWidth() {
-        return getDefaultDialogWidth(this);
+        return mDelegate.getWidth(this);
     }
 
     /**
@@ -187,7 +323,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
      * the device configuration changes, and the result will be used to resize this dialog window.
      */
     protected int getHeight() {
-        return getDefaultDialogHeight();
+        return mDelegate.getHeight(this);
     }
 
     @Override
@@ -212,7 +348,9 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
      * Called when {@link #onStart} is called. Subclasses wishing to override {@link #onStart()}
      * should override this method instead.
      */
-    protected void start() {}
+    protected void start() {
+        mDelegate.onStart(this);
+    }
 
     @Override
     protected final void onStop() {
@@ -234,7 +372,15 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
      * Called when {@link #onStop} is called. Subclasses wishing to override {@link #onStop()}
      * should override this method instead.
      */
-    protected void stop() {}
+    protected void stop() {
+        mDelegate.onStop(this);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        mDelegate.onWindowFocusChanged(this, hasFocus);
+    }
 
     public void setShowForAllUsers(boolean show) {
         setShowForAllUsers(this, show);
@@ -353,7 +499,6 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         registerDismissListener(dialog, null);
     }
 
-
     /**
      * Registers a listener that dismisses the given dialog when it receives
      * the screen off / close system dialogs broadcast.
@@ -361,14 +506,14 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
      * <strong>Note:</strong> Don't call dialog.setOnDismissListener() after
      * calling this because it causes a leak of BroadcastReceiver.
      *
-     * @param dialog The dialog to be associated with the listener.
+     * @param dialog        The dialog to be associated with the listener.
      * @param dismissAction An action to run when the dialog is dismissed.
      */
     public static void registerDismissListener(Dialog dialog, @Nullable Runnable dismissAction) {
         // TODO(b/219008720): Remove those calls to Dependency.get.
         DismissReceiver dismissReceiver = new DismissReceiver(dialog,
                 Dependency.get(BroadcastDispatcher.class),
-                Dependency.get(DialogLaunchAnimator.class));
+                Dependency.get(DialogTransitionAnimator.class));
         dialog.setOnDismissListener(d -> {
             dismissReceiver.unregister();
             if (dismissAction != null) dismissAction.run();
@@ -384,7 +529,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         dialog.getWindow().setLayout(getDefaultDialogWidth(dialog), getDefaultDialogHeight());
     }
 
-    private static int getDefaultDialogWidth(Dialog dialog) {
+    static int getDefaultDialogWidth(Dialog dialog) {
         Context context = dialog.getContext();
         int flagValue = SystemProperties.getInt(FLAG_TABLET_DIALOG_WIDTH, 0);
         if (flagValue == -1) {
@@ -425,21 +570,23 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         }
 
         // We first look for the background on the dialogContentWithBackground added by
-        // DialogLaunchAnimator. If it's not there, we use the background of the DecorView.
+        // DialogTransitionAnimator. If it's not there, we use the background of the DecorView.
         View viewWithBackground = decorView.findViewByPredicate(
-                view -> view.getTag(R.id.tag_dialog_background) != null);
+                view -> view.getTag(
+                        com.android.systemui.animation.R.id.tag_dialog_background) != null);
         Drawable background = viewWithBackground != null ? viewWithBackground.getBackground()
                 : decorView.getBackground();
         Insets insets = background != null ? background.getOpticalInsets() : Insets.NONE;
         return insets.left + insets.right;
     }
 
-    private static int getDefaultDialogHeight() {
+    static int getDefaultDialogHeight() {
         return ViewGroup.LayoutParams.WRAP_CONTENT;
     }
 
     private static class DismissReceiver extends BroadcastReceiver {
         private static final IntentFilter INTENT_FILTER = new IntentFilter();
+
         static {
             INTENT_FILTER.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
             INTENT_FILTER.addAction(Intent.ACTION_SCREEN_OFF);
@@ -448,13 +595,13 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         private final Dialog mDialog;
         private boolean mRegistered;
         private final BroadcastDispatcher mBroadcastDispatcher;
-        private final DialogLaunchAnimator mDialogLaunchAnimator;
+        private final DialogTransitionAnimator mDialogTransitionAnimator;
 
         DismissReceiver(Dialog dialog, BroadcastDispatcher broadcastDispatcher,
-                DialogLaunchAnimator dialogLaunchAnimator) {
+                DialogTransitionAnimator dialogTransitionAnimator) {
             mDialog = dialog;
             mBroadcastDispatcher = broadcastDispatcher;
-            mDialogLaunchAnimator = dialogLaunchAnimator;
+            mDialogTransitionAnimator = dialogTransitionAnimator;
         }
 
         void register() {
@@ -474,9 +621,22 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             // These broadcast are usually received when locking the device, swiping up to home
             // (which collapses the shade), etc. In those cases, we usually don't want to animate
             // back into the view.
-            mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
+            mDialogTransitionAnimator.disableAllCurrentDialogsExitAnimations();
             mDialog.dismiss();
         }
     }
 
+    /**
+     * A delegate class that should be implemented in place of sublcassing {@link SystemUIDialog}.
+     *
+     * Implement this interface and then pass an instance of your implementation to
+     * {@link SystemUIDialog.Factory#create(Delegate)}.
+     */
+    public interface Delegate extends DialogDelegate<SystemUIDialog> {
+        /**
+         * Returns a new {@link SystemUIDialog} which has been passed this Delegate in its
+         * construction.
+         */
+        SystemUIDialog createDialog();
+    }
 }

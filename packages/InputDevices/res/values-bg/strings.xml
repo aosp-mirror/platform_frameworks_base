@@ -50,4 +50,8 @@
     <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"беларуски"</string>
     <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"монголски"</string>
     <string name="keyboard_layout_georgian" msgid="4596185456863747454">"грузински"</string>
+    <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"тайландски (Kedmanee)"</string>
+    <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"тайландски (Pattachote)"</string>
+    <string name="keyboard_layout_serbian_latin" msgid="3128791759390046571">"сръбски (латиница)"</string>
+    <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"черногорски (латиница)"</string>
 </resources>

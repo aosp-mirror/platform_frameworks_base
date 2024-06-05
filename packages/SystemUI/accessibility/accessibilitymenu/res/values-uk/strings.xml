@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"Меню функцій доступності"</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"За допомогою великого екранного меню функцій доступності можна блокувати пристрій, змінювати гучність і яскравість, робити знімки екрана й багато іншого."</string>
+    <string name="assistant_label" msgid="6796392082252272356">"Асистент"</string>
+    <string name="assistant_utterance" msgid="65509599221141377">"Асистент"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"Налаштування функцій доступності"</string>
+    <string name="power_label" msgid="7699720321491287839">"Живлення"</string>
+    <string name="power_utterance" msgid="7444296686402104807">"Опції живлення"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"Нещодавні додатки"</string>
+    <string name="lockscreen_label" msgid="648347953557887087">"Блокування екрана"</string>
+    <string name="quick_settings_label" msgid="2999117381487601865">"Швидкі налаштування"</string>
+    <string name="notifications_label" msgid="6829741046963013567">"Сповіщення"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"Знімок екрана"</string>
+    <string name="screenshot_utterance" msgid="1430760563401895074">"Зробити знімок екрана"</string>
+    <string name="volume_up_label" msgid="8592766918780362870">"Збільшити гучність"</string>
+    <string name="volume_down_label" msgid="8574981863656447346">"Зменшити гучність"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"Збільшити яскравість"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"Зменшити яскравість"</string>
+    <string name="previous_button_content_description" msgid="840869171117765966">"Перейти на попередній екран"</string>
+    <string name="next_button_content_description" msgid="6810058269847364406">"Перейти на наступний екран"</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"За допомогою великого екранного меню функцій доступності можна блокувати пристрій, змінювати гучність і яскравість, робити знімки екрана й багато іншого."</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Керування пристроєм за допомогою великого меню"</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Налаштування меню функцій доступності"</string>
+    <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Великі кнопки"</string>
+    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Збільшити розмір кнопок у меню функцій доступності"</string>
+    <string name="pref_help_title" msgid="6871558837025010641">"Довідка"</string>
+    <string name="brightness_percentage_label" msgid="7391554573977867369">"Яскравість: <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"Гучність музики: <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+</resources>

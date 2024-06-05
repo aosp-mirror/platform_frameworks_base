@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ProcessList.UNKNOWN_ADJ;
 
 import android.annotation.Nullable;
 import android.app.IServiceConnection;
@@ -37,7 +38,7 @@ import java.io.PrintWriter;
 /**
  * Description of a single binding to a service.
  */
-final class ConnectionRecord {
+final class ConnectionRecord implements OomAdjusterModernImpl.Connection{
     final AppBindRecord binding;    // The application/service binding.
     final ActivityServiceConnectionsHolder<ConnectionRecord> activity;  // If non-null, the owning activity.
     final IServiceConnection conn;  // The client connection.
@@ -126,6 +127,21 @@ final class ConnectionRecord {
         clientPackageName = _clientPackageName;
         aliasComponent = _aliasComponent;
     }
+
+    @Override
+    public void computeHostOomAdjLSP(OomAdjuster oomAdjuster, ProcessRecord host,
+            ProcessRecord client, long now, ProcessRecord topApp, boolean doingAll,
+            int oomAdjReason, int cachedAdj) {
+        oomAdjuster.computeServiceHostOomAdjLSP(this, host, client, now, topApp, doingAll, false,
+                false, oomAdjReason, UNKNOWN_ADJ, false, false);
+    }
+
+    @Override
+    public boolean canAffectCapabilities() {
+        return hasFlag(Context.BIND_INCLUDE_CAPABILITIES
+                | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS);
+    }
+
 
     public long getFlags() {
         return flags;

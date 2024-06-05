@@ -80,6 +80,19 @@ SkColor transformColorInverse(ColorTransform transform, SkColor color) {
 static void applyColorTransform(ColorTransform transform, SkPaint& paint) {
     if (transform == ColorTransform::None) return;
 
+    if (transform == ColorTransform::Invert) {
+        auto filter = SkHighContrastFilter::Make(
+                {/* grayscale= */ false, SkHighContrastConfig::InvertStyle::kInvertLightness,
+                 /* contrast= */ 0.0f});
+
+        if (paint.getColorFilter()) {
+            paint.setColorFilter(SkColorFilters::Compose(filter, paint.refColorFilter()));
+        } else {
+            paint.setColorFilter(filter);
+        }
+        return;
+    }
+
     SkColor newColor = transformColor(transform, paint.getColor());
     paint.setColor(newColor);
 
@@ -124,9 +137,10 @@ static BitmapPalette filterPalette(const SkPaint* paint, BitmapPalette palette) 
         return palette;
     }
 
-    SkColor color = palette == BitmapPalette::Light ? SK_ColorWHITE : SK_ColorBLACK;
-    color = paint->getColorFilter()->filterColor(color);
-    return paletteForColorHSV(color);
+    SkColor4f color = palette == BitmapPalette::Light ? SkColors::kWhite : SkColors::kBlack;
+    sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
+    color = paint->getColorFilter()->filterColor4f(color, srgb.get(), srgb.get());
+    return paletteForColorHSV(color.toSkColor());
 }
 
 bool transformPaint(ColorTransform transform, SkPaint* paint) {

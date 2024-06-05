@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.PROCESS_STATE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -32,6 +33,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -105,8 +107,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
         topActivity.getRootTask().moveToFront("testRecentsActivityVisiblility");
 
         doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
-                any() /* starting */, anyInt() /* configChanges */,
-                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
+                any() /* starting */, anyBoolean() /* notifyClients */);
 
         RecentsAnimationCallbacks recentsAnimation = startRecentsActivity(
                 mRecentsComponent, true /* getRecentsAnimation */);
@@ -148,8 +149,9 @@ public class RecentsAnimationTest extends WindowTestsBase {
                 anyInt() /* startFlags */, any() /* profilerInfo */);
 
         // Assume its process is alive because the caller should be the recents service.
-        mSystemServicesTestRule.addProcess(aInfo.packageName, aInfo.processName, 12345 /* pid */,
-                aInfo.applicationInfo.uid);
+        final WindowProcessController proc = mSystemServicesTestRule.addProcess(aInfo.packageName,
+                aInfo.processName, 12345 /* pid */, aInfo.applicationInfo.uid);
+        proc.setCurrentProcState(PROCESS_STATE_HOME);
 
         Intent recentsIntent = new Intent().setComponent(mRecentsComponent);
         // Null animation indicates to preload.
@@ -163,22 +165,19 @@ public class RecentsAnimationTest extends WindowTestsBase {
         ActivityRecord recentsActivity = recentsStack.getTopNonFinishingActivity();
         // The activity is started in background so it should be invisible and will be stopped.
         assertThat(recentsActivity).isNotNull();
-        assertThat(mSupervisor.mStoppingActivities).contains(recentsActivity);
+        assertThat(recentsActivity.getState()).isEqualTo(STOPPING);
         assertFalse(recentsActivity.isVisibleRequested());
 
         // Assume it is stopped to test next use case.
         recentsActivity.activityStopped(null /* newIcicle */, null /* newPersistentState */,
                 null /* description */);
-        mSupervisor.mStoppingActivities.remove(recentsActivity);
 
         spyOn(recentsActivity);
         // Start when the recents activity exists. It should ensure the configuration.
         mAtm.startRecentsActivity(recentsIntent, 0 /* eventTime */,
                 null /* recentsAnimationRunner */);
 
-        verify(recentsActivity).ensureActivityConfiguration(anyInt() /* globalChanges */,
-                anyBoolean() /* preserveWindow */, eq(true) /* ignoreVisibility */);
-        assertThat(mSupervisor.mStoppingActivities).contains(recentsActivity);
+        verify(recentsActivity).ensureActivityConfiguration(eq(true) /* ignoreVisibility */);
     }
 
     @Test
@@ -197,11 +196,9 @@ public class RecentsAnimationTest extends WindowTestsBase {
                 "testRestartRecentsActivity");
 
         doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
-                any() /* starting */, anyInt() /* configChanges */,
-                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
+                any() /* starting */, anyBoolean() /* notifyClients */);
         doReturn(app).when(mAtm).getProcessController(eq(recentActivity.processName), anyInt());
-        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
-        doNothing().when(lifecycleManager).scheduleTransaction(any());
+        doNothing().when(mClientLifecycleManager).scheduleTransaction(any());
 
         startRecentsActivity();
 
@@ -353,8 +350,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
 
         doReturn(TEST_USER_ID).when(mAtm).getCurrentUserId();
         doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
-                any() /* starting */, anyInt() /* configChanges */,
-                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
+                any() /* starting */, anyBoolean() /* notifyClients */);
 
         startRecentsActivity(otherUserHomeActivity.getTask().getBaseIntent().getComponent(),
                 true);

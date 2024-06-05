@@ -37,6 +37,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM_EXT;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_VENDOR;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_VIRTUAL_PRELOAD;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
+import static com.android.server.pm.PackageManagerService.SCAN_DONT_KILL_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE;
 import static com.android.server.pm.PackageManagerService.SCAN_MOVE;
 import static com.android.server.pm.PackageManagerService.SCAN_NEW_INSTALL;
@@ -73,21 +74,21 @@ import android.util.jar.StrictJarFile;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.component.ComponentMutateUtils;
+import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedMainComponent;
+import com.android.internal.pm.pkg.component.ParsedProcess;
+import com.android.internal.pm.pkg.component.ParsedProvider;
+import com.android.internal.pm.pkg.component.ParsedService;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.library.PackageBackwardCompatibility;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateUtils;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.component.ParsedProcess;
-import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.pm.pkg.component.ParsedService;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.WatchedArraySet;
 
 import dalvik.system.VMRuntime;
@@ -149,6 +150,8 @@ final class ScanPackageUtils {
         String primaryCpuAbiFromSettings = null;
         String secondaryCpuAbiFromSettings = null;
         boolean needToDeriveAbi = (scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0;
+        boolean isApex = (scanFlags & SCAN_AS_APEX) != 0;
+
         if (!needToDeriveAbi) {
             if (pkgSetting != null) {
                 // TODO(b/154610922): if it is not first boot or upgrade, we should directly use
@@ -167,6 +170,7 @@ final class ScanPackageUtils {
             }
         }
 
+        boolean isPendingRestoreBefore = false;
         if (pkgSetting != null && oldSharedUserSetting != sharedUserSetting) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
                     "Package " + parsedPackage.getPackageName() + " shared user changed from "
@@ -175,6 +179,9 @@ final class ScanPackageUtils {
                             + " to "
                             + (sharedUserSetting != null ? sharedUserSetting.name : "<nothing>")
                             + "; replacing with new");
+            // Preserve the value of isPendingRestore. We need to set it to the new PackageSetting
+            // if the value is true to restore the app
+            isPendingRestoreBefore = pkgSetting.isPendingRestore();
             pkgSetting = null;
         }
 
@@ -216,13 +223,21 @@ final class ScanPackageUtils {
                     parsedPackage.getLongVersionCode(), pkgFlags, pkgPrivateFlags, user,
                     true /*allowInstall*/, instantApp, virtualPreload, isStoppedSystemApp,
                     UserManagerService.getInstance(), usesSdkLibraries,
-                    parsedPackage.getUsesSdkLibrariesVersionsMajor(), usesStaticLibraries,
+                    parsedPackage.getUsesSdkLibrariesVersionsMajor(),
+                    parsedPackage.getUsesSdkLibrariesOptional(), usesStaticLibraries,
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),
-                    newDomainSetId);
+                    newDomainSetId,
+                    parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());
+
+            // If isPendingRestore is true before, set the value true to the PackageSetting
+            if (isPendingRestoreBefore) {
+                pkgSetting.setPendingRestore(true);
+            }
         } else {
             // make a deep copy to avoid modifying any existing system state.
             pkgSetting = new PackageSetting(pkgSetting);
             pkgSetting.setPkg(parsedPackage);
+            final boolean isDontKill = (scanFlags & SCAN_DONT_KILL_APP) != 0;
 
             // REMOVE SharedUserSetting from method; update in a separate call.
             //
@@ -237,9 +252,13 @@ final class ScanPackageUtils {
                     PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting),
                     UserManagerService.getInstance(),
                     usesSdkLibraries, parsedPackage.getUsesSdkLibrariesVersionsMajor(),
+                    parsedPackage.getUsesSdkLibrariesOptional(),
                     usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
-                    parsedPackage.getMimeGroups(), newDomainSetId);
+                    parsedPackage.getMimeGroups(), newDomainSetId,
+                    parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash(),
+                    isDontKill);
         }
+
         if (createNewPackage && originalPkgSetting != null) {
             // This is the initial transition from the original package, so,
             // fix up the new package's name now. We must do this after looking
@@ -279,77 +298,91 @@ final class ScanPackageUtils {
         final boolean isUpdatedSystemApp = pkgSetting.isUpdatedSystemApp();
 
         final File appLib32InstallDir = getAppLib32InstallDir();
-        if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
-            if (needToDeriveAbi) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
-                final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths> derivedAbi =
-                        packageAbiHelper.derivePackageAbi(parsedPackage, isSystemApp,
-                                isUpdatedSystemApp, cpuAbiOverride, appLib32InstallDir);
-                derivedAbi.first.applyTo(parsedPackage);
-                derivedAbi.second.applyTo(parsedPackage);
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        // The native libs of Apex is located in apex_payload.img, don't need to parse it from
+        // the original apex file
+        if (!isApex) {
+            if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
+                if (needToDeriveAbi) {
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
+                    try {
+                        final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
+                                derivedAbi =
+                                packageAbiHelper.derivePackageAbi(
+                                        parsedPackage,
+                                        isSystemApp,
+                                        isUpdatedSystemApp,
+                                        cpuAbiOverride,
+                                        appLib32InstallDir);
+                        derivedAbi.first.applyTo(parsedPackage);
+                        derivedAbi.second.applyTo(parsedPackage);
+                    } finally {
+                        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                    }
 
-                // Some system apps still use directory structure for native libraries
-                // in which case we might end up not detecting abi solely based on apk
-                // structure. Try to detect abi based on directory structure.
+                    // Some system apps still use directory structure for native libraries
+                    // in which case we might end up not detecting abi solely based on apk
+                    // structure. Try to detect abi based on directory structure.
 
-                String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage);
-                if (isSystemApp && !isUpdatedSystemApp && pkgRawPrimaryCpuAbi == null) {
-                    final PackageAbiHelper.Abis abis = packageAbiHelper.getBundledAppAbis(
+                    String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(
                             parsedPackage);
-                    abis.applyTo(parsedPackage);
-                    abis.applyTo(pkgSetting);
+                    if (isSystemApp && !isUpdatedSystemApp && pkgRawPrimaryCpuAbi == null) {
+                        final PackageAbiHelper.Abis abis = packageAbiHelper.getBundledAppAbis(
+                                parsedPackage);
+                        abis.applyTo(parsedPackage);
+                        abis.applyTo(pkgSetting);
+                        final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
+                                packageAbiHelper.deriveNativeLibraryPaths(parsedPackage,
+                                        isSystemApp, isUpdatedSystemApp, appLib32InstallDir);
+                        nativeLibraryPaths.applyTo(parsedPackage);
+                    }
+                } else {
+                    // This is not a first boot or an upgrade, don't bother deriving the
+                    // ABI during the scan. Instead, trust the value that was stored in the
+                    // package setting.
+                    parsedPackage.setPrimaryCpuAbi(primaryCpuAbiFromSettings)
+                            .setSecondaryCpuAbi(secondaryCpuAbiFromSettings);
+
                     final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
                             packageAbiHelper.deriveNativeLibraryPaths(parsedPackage, isSystemApp,
                                     isUpdatedSystemApp, appLib32InstallDir);
                     nativeLibraryPaths.applyTo(parsedPackage);
+
+                    if (DEBUG_ABI_SELECTION) {
+                        Slog.i(TAG, "Using ABIS and native lib paths from settings : "
+                                + parsedPackage.getPackageName() + " "
+                                + AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage)
+                                + ", "
+                                + AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage));
+                    }
                 }
             } else {
-                // This is not a first boot or an upgrade, don't bother deriving the
-                // ABI during the scan. Instead, trust the value that was stored in the
-                // package setting.
-                parsedPackage.setPrimaryCpuAbi(primaryCpuAbiFromSettings)
-                        .setSecondaryCpuAbi(secondaryCpuAbiFromSettings);
+                if ((scanFlags & SCAN_MOVE) != 0) {
+                    // We haven't run dex-opt for this move (since we've moved the compiled output
+                    // too) but we already have this packages package info in the PackageSetting.
+                    // We just use that and derive the native library path based on the new code
+                    // path.
+                    parsedPackage.setPrimaryCpuAbi(pkgSetting.getPrimaryCpuAbiLegacy())
+                            .setSecondaryCpuAbi(pkgSetting.getSecondaryCpuAbiLegacy());
+                }
 
+                // Set native library paths again. For moves, the path will be updated based on the
+                // ABIs we've determined above. For non-moves, the path will be updated based on the
+                // ABIs we determined during compilation, but the path will depend on the final
+                // package path (after the rename away from the stage path).
                 final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
                         packageAbiHelper.deriveNativeLibraryPaths(parsedPackage, isSystemApp,
                                 isUpdatedSystemApp, appLib32InstallDir);
                 nativeLibraryPaths.applyTo(parsedPackage);
-
-                if (DEBUG_ABI_SELECTION) {
-                    Slog.i(TAG, "Using ABIS and native lib paths from settings : "
-                            + parsedPackage.getPackageName() + " "
-                            + AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage)
-                            + ", "
-                            + AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage));
-                }
-            }
-        } else {
-            if ((scanFlags & SCAN_MOVE) != 0) {
-                // We haven't run dex-opt for this move (since we've moved the compiled output too)
-                // but we already have this packages package info in the PackageSetting. We just
-                // use that and derive the native library path based on the new code path.
-                parsedPackage.setPrimaryCpuAbi(pkgSetting.getPrimaryCpuAbiLegacy())
-                        .setSecondaryCpuAbi(pkgSetting.getSecondaryCpuAbiLegacy());
             }
 
-            // Set native library paths again. For moves, the path will be updated based on the
-            // ABIs we've determined above. For non-moves, the path will be updated based on the
-            // ABIs we determined during compilation, but the path will depend on the final
-            // package path (after the rename away from the stage path).
-            final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                    packageAbiHelper.deriveNativeLibraryPaths(parsedPackage, isSystemApp,
-                            isUpdatedSystemApp, appLib32InstallDir);
-            nativeLibraryPaths.applyTo(parsedPackage);
-        }
-
-        // This is a special case for the "system" package, where the ABI is
-        // dictated by the zygote configuration (and init.rc). We should keep track
-        // of this ABI so that we can deal with "normal" applications that run under
-        // the same UID correctly.
-        if (isPlatformPackage) {
-            parsedPackage.setPrimaryCpuAbi(VMRuntime.getRuntime().is64Bit()
-                    ? Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0]);
+            // This is a special case for the "system" package, where the ABI is
+            // dictated by the zygote configuration (and init.rc). We should keep track
+            // of this ABI so that we can deal with "normal" applications that run under
+            // the same UID correctly.
+            if (isPlatformPackage) {
+                parsedPackage.setPrimaryCpuAbi(VMRuntime.getRuntime().is64Bit()
+                        ? Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0]);
+            }
         }
 
         // If there's a mismatch between the abi-override in the package setting
@@ -892,8 +925,8 @@ final class ScanPackageUtils {
         parsedPackage.setSignedWithPlatformKey(
                 (PLATFORM_PACKAGE_NAME.equals(parsedPackage.getPackageName())
                         || (platformPkg != null && compareSignatures(
-                        platformPkg.getSigningDetails().getSignatures(),
-                        parsedPackage.getSigningDetails().getSignatures()
+                        platformPkg.getSigningDetails(),
+                        parsedPackage.getSigningDetails()
                 ) == PackageManager.SIGNATURE_MATCH))
         );
 

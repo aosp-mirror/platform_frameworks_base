@@ -19,42 +19,55 @@
 package com.android.systemui.statusbar.notification.shelf.domain.interactor
 
 import android.os.PowerManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
-import com.android.systemui.statusbar.phone.CentralSurfaces
-import com.android.systemui.util.mockito.any
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mockito.isNull
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class NotificationShelfInteractorTest : SysuiTestCase() {
 
     private val keyguardRepository = FakeKeyguardRepository()
     private val deviceEntryFaceAuthRepository = FakeDeviceEntryFaceAuthRepository()
-    private val centralSurfaces: CentralSurfaces = mock()
-    private val systemClock = FakeSystemClock()
+
+    private val screenOffAnimationController =
+        mock<ScreenOffAnimationController>().also {
+            whenever(it.allowWakeUpIfDozing()).thenReturn(true)
+        }
+    private val statusBarStateController: StatusBarStateController = mock()
+    private val powerRepository = FakePowerRepository()
+    private val powerInteractor =
+        PowerInteractorFactory.create(
+                repository = powerRepository,
+                screenOffAnimationController = screenOffAnimationController,
+                statusBarStateController = statusBarStateController,
+            )
+            .powerInteractor
+
     private val keyguardTransitionController: LockscreenShadeTransitionController = mock()
     private val underTest =
         NotificationShelfInteractor(
             keyguardRepository,
             deviceEntryFaceAuthRepository,
-            centralSurfaces,
-            systemClock,
+            powerInteractor,
             keyguardTransitionController,
         )
 
@@ -107,10 +120,12 @@ class NotificationShelfInteractorTest : SysuiTestCase() {
 
     @Test
     fun goToLockedShadeFromShelf_wakesUpFromDoze() {
+        whenever(statusBarStateController.isDozing).thenReturn(true)
+
         underTest.goToLockedShadeFromShelf()
 
-        verify(centralSurfaces)
-            .wakeUpIfDozing(anyLong(), any(), eq(PowerManager.WAKE_REASON_GESTURE))
+        assertThat(powerRepository.lastWakeReason).isNotNull()
+        assertThat(powerRepository.lastWakeReason).isEqualTo(PowerManager.WAKE_REASON_GESTURE)
     }
 
     @Test

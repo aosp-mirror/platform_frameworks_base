@@ -17,7 +17,7 @@
 package com.android.systemui.qs.tileimpl
 
 import android.content.ComponentName
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.qs.QSHost
@@ -50,17 +50,17 @@ import com.android.systemui.qs.tiles.RotationLockTile
 import com.android.systemui.qs.tiles.ScreenRecordTile
 import com.android.systemui.qs.tiles.UiModeNightTile
 import com.android.systemui.qs.tiles.WorkModeTile
-import com.android.systemui.util.leak.GarbageMonitor
+import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
-import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Answers
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.inOrder
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import javax.inject.Provider
+import org.mockito.Mockito.`when` as whenever
 
 private val specMap = mapOf(
         "internet" to InternetTile::class.java,
@@ -93,12 +93,12 @@ private val specMap = mapOf(
         "font_scaling" to FontScalingTile::class.java
 )
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class QSFactoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var qsHost: QSHost
-    @Mock(answer = Answers.RETURNS_SELF) private lateinit var customTileBuilder: CustomTile.Builder
+    @Mock private lateinit var customTileFactory: CustomTile.Factory
     @Mock private lateinit var customTile: CustomTile
 
     @Mock private lateinit var internetTile: InternetTile
@@ -116,7 +116,6 @@ class QSFactoryImplTest : SysuiTestCase() {
     @Mock private lateinit var dataSaverTile: DataSaverTile
     @Mock private lateinit var nightDisplayTile: NightDisplayTile
     @Mock private lateinit var nfcTile: NfcTile
-    @Mock private lateinit var memoryTile: GarbageMonitor.MemoryTile
     @Mock private lateinit var darkModeTile: UiModeNightTile
     @Mock private lateinit var screenRecordTile: ScreenRecordTile
     @Mock private lateinit var reduceBrightColorsTile: ReduceBrightColorsTile
@@ -139,7 +138,7 @@ class QSFactoryImplTest : SysuiTestCase() {
 
         whenever(qsHost.context).thenReturn(mContext)
         whenever(qsHost.userContext).thenReturn(mContext)
-        whenever(customTileBuilder.build()).thenReturn(customTile)
+        whenever(customTileFactory.create(anyString(), any())).thenReturn(customTile)
 
         val tileMap = mutableMapOf<String, Provider<QSTileImpl<*>>>(
             "internet" to Provider { internetTile },
@@ -174,7 +173,7 @@ class QSFactoryImplTest : SysuiTestCase() {
 
         factory = QSFactoryImpl(
                 { qsHost },
-                { customTileBuilder },
+                { customTileFactory },
                 tileMap,
         )
         // When adding/removing tiles, fix also [specMap] and [tileMap]

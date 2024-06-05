@@ -19,10 +19,13 @@ package com.android.internal.util;
 import static org.junit.Assert.*;
 
 import com.android.internal.util.MessageUtils;
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import android.util.SparseArray;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 
 class A {
@@ -48,6 +51,7 @@ class B {
  * Unit tests for {@link com.android.util.MessageUtils}.
  */
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class MessageUtilsTest {
 
     private static final Class[] CLASSES = { A.class, B.class };

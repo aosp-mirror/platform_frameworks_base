@@ -16,15 +16,12 @@
 
 package androidx.media.filterfw;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.renderscript.RenderScript;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -66,9 +63,9 @@ public class MffContext {
 
         /**
          * On older Android versions the Camera may need a SurfaceView to render into in order to
-         * function. You may specify a dummy SurfaceView here if you do not want the context to
+         * function. You may specify a placeholder SurfaceView here if you do not want the context to
          * create its own view. Note, that your view may or may not be used. You cannot rely on
-         * your dummy view to be used by the Camera. If you pass null, no dummy view will be used.
+         * your placeholder view to be used by the Camera. If you pass null, no placeholder view will be used.
          * In this case your application may not run correctly on older devices if you use the
          * camera. This flag has no effect if you do not require the camera.
          */
@@ -104,7 +101,7 @@ public class MffContext {
     /** The current context state. */
     private State mState = new State();
 
-    /** A dummy SurfaceView that is required for Camera operation on older devices. */
+    /** A placeholder SurfaceView that is required for Camera operation on older devices. */
     private SurfaceView mDummySurfaceView = null;
 
     /** Handler to execute code in the context's thread, such as issuing callbacks. */
@@ -116,9 +113,6 @@ public class MffContext {
     /** Flag whether camera streaming is supported in this context. */
     private boolean mCameraStreamingSupport;
 
-    /** RenderScript base master class. */
-    private RenderScript mRenderScript;
-
     /**
      * Creates a new MffContext with the default configuration.
      *
@@ -126,7 +120,7 @@ public class MffContext {
      * multiple MffContexts, however data between them cannot be shared. The context must be
      * created in a thread with a Looper (such as the main/UI thread).
      *
-     * On older versions of Android, the MffContext may create a visible dummy view for the
+     * On older versions of Android, the MffContext may create a visible placeholder view for the
      * camera to render into. This is a 1x1 SurfaceView that is placed into the top-left corner.
      *
      * @param context The application context to attach the MffContext to.
@@ -142,7 +136,7 @@ public class MffContext {
      * multiple MffContexts, however data between them cannot be shared. The context must be
      * created in a thread with a Looper (such as the main/UI thread).
      *
-     * On older versions of Android, the MffContext may create a visible dummy view for the
+     * On older versions of Android, the MffContext may create a visible placeholder view for the
      * camera to render into. This is a 1x1 SurfaceView that is placed into the top-left corner.
      * You may alternatively specify your own SurfaceView in the configuration.
      *
@@ -200,9 +194,7 @@ public class MffContext {
                     mCameraStreamer.stop();
                     mCameraStreamer.tearDown();
                 }
-                if (Build.VERSION.SDK_INT >= 11) {
-                    maybeDestroyRenderScript();
-                }
+
                 stopRunners(false);
                 waitUntilStopped();
                 tearDown();
@@ -299,14 +291,6 @@ public class MffContext {
      */
     public final boolean isCameraStreamingSupported() {
         return mCameraStreamingSupport;
-    }
-
-    @TargetApi(11)
-    public final RenderScript getRenderScript() {
-        if (mRenderScript == null) {
-            mRenderScript = RenderScript.create(mApplicationContext);
-        }
-        return mRenderScript;
     }
 
     final void assertOpenGLSupported() {
@@ -457,14 +441,6 @@ public class MffContext {
 
     private Activity findActivityForContext(Context context) {
         return (context instanceof Activity) ? (Activity) context : null;
-    }
-
-    @TargetApi(11)
-    private void maybeDestroyRenderScript() {
-        if (mRenderScript != null) {
-            mRenderScript.destroy();
-            mRenderScript = null;
-        }
     }
 
 }

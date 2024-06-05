@@ -33,6 +33,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
@@ -146,6 +147,7 @@ public class LowPowerStandbyController {
             this::onStandbyTimeoutExpired;
     private final LowPowerStandbyControllerInternal mLocalService = new LocalService();
     private final SparseIntArray mUidAllowedReasons = new SparseIntArray();
+    private final List<String> mLowPowerStandbyManagingPackages = new ArrayList<>();
     private final List<StandbyPortsLock> mStandbyPortLocks = new ArrayList<>();
 
     @GuardedBy("mLock")
@@ -322,11 +324,26 @@ public class LowPowerStandbyController {
     interface Clock {
         /** Returns milliseconds since boot, including time spent in sleep. */
         long elapsedRealtime();
+
+        /** Returns milliseconds since boot, not counting time spent in deep sleep. */
+        long uptimeMillis();
+    }
+
+    private static class RealClock implements Clock {
+        @Override
+        public long elapsedRealtime() {
+            return SystemClock.elapsedRealtime();
+        }
+
+        @Override
+        public long uptimeMillis() {
+            return SystemClock.uptimeMillis();
+        }
     }
 
     public LowPowerStandbyController(Context context, Looper looper) {
-        this(context, looper, SystemClock::elapsedRealtime,
-                new DeviceConfigWrapper(), () -> ActivityManager.getService(),
+        this(context, looper, new RealClock(), new DeviceConfigWrapper(),
+                () -> ActivityManager.getService(),
                 new File(Environment.getDataSystemDirectory(), "low_power_standby_policy.xml"));
     }
 
@@ -353,6 +370,14 @@ public class LowPowerStandbyController {
 
             if (!mSupportedConfig) {
                 return;
+            }
+
+            List<PackageInfo> manageLowPowerStandbyPackages = mContext.getPackageManager()
+                    .getPackagesHoldingPermissions(new String[]{
+                            Manifest.permission.MANAGE_LOW_POWER_STANDBY
+                    }, PackageManager.MATCH_SYSTEM_ONLY);
+            for (PackageInfo packageInfo : manageLowPowerStandbyPackages) {
+                mLowPowerStandbyManagingPackages.add(packageInfo.packageName);
             }
 
             mAlarmManager = mContext.getSystemService(AlarmManager.class);
@@ -572,9 +597,9 @@ public class LowPowerStandbyController {
 
     @GuardedBy("mLock")
     private void updateActiveLocked() {
-        final long now = mClock.elapsedRealtime();
+        final long nowElapsed = mClock.elapsedRealtime();
         final boolean standbyTimeoutExpired =
-                (now - mLastInteractiveTimeElapsed) >= mStandbyTimeoutConfig;
+                (nowElapsed - mLastInteractiveTimeElapsed) >= mStandbyTimeoutConfig;
         final boolean maintenanceMode = mIdleSinceNonInteractive && !mIsDeviceIdle;
         final boolean newActive =
                 mForceActive || (mIsEnabled && !mIsInteractive && standbyTimeoutExpired
@@ -600,11 +625,11 @@ public class LowPowerStandbyController {
         if (DEBUG) {
             Slog.d(TAG, "onNonInteractive");
         }
-        final long now = mClock.elapsedRealtime();
+        final long nowElapsed = mClock.elapsedRealtime();
         synchronized (mLock) {
             mIsInteractive = false;
             mIsDeviceIdle = false;
-            mLastInteractiveTimeElapsed = now;
+            mLastInteractiveTimeElapsed = nowElapsed;
 
             if (mStandbyTimeoutConfig > 0) {
                 scheduleStandbyTimeoutAlarmLocked();
@@ -630,7 +655,7 @@ public class LowPowerStandbyController {
 
     @GuardedBy("mLock")
     private void scheduleStandbyTimeoutAlarmLocked() {
-        final long nextAlarmTime = SystemClock.elapsedRealtime() + mStandbyTimeoutConfig;
+        final long nextAlarmTime = mClock.elapsedRealtime() + mStandbyTimeoutConfig;
         mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 nextAlarmTime, "LowPowerStandbyController.StandbyTimeout",
                 mOnStandbyTimeoutExpired, mHandler);
@@ -741,16 +766,13 @@ public class LowPowerStandbyController {
             Slog.d(TAG, "notifyEnabledChangedLocked, mIsEnabled=" + mIsEnabled);
         }
 
-        final Intent intent = new Intent(PowerManager.ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        sendExplicitBroadcast(PowerManager.ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED);
     }
 
     @GuardedBy("mLock")
     private void enqueueNotifyPolicyChangedLocked() {
-        final long now = mClock.elapsedRealtime();
         final Message msg = mHandler.obtainMessage(MSG_NOTIFY_POLICY_CHANGED, getPolicy());
-        mHandler.sendMessageAtTime(msg, now);
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
     private void notifyPolicyChanged(LowPowerStandbyPolicy policy) {
@@ -758,10 +780,7 @@ public class LowPowerStandbyController {
             Slog.d(TAG, "notifyPolicyChanged, policy=" + policy);
         }
 
-        final Intent intent = new Intent(
-                PowerManager.ACTION_LOW_POWER_STANDBY_POLICY_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        sendExplicitBroadcast(PowerManager.ACTION_LOW_POWER_STANDBY_POLICY_CHANGED);
     }
 
     private void onStandbyTimeoutExpired() {
@@ -773,11 +792,26 @@ public class LowPowerStandbyController {
         }
     }
 
+    private void sendExplicitBroadcast(String intentType) {
+        final Intent intent = new Intent(intentType);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+
+        // Send explicit broadcast to holders of MANAGE_LOW_POWER_STANDBY
+        final Intent privilegedIntent = new Intent(intentType);
+        privilegedIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        for (String packageName : mLowPowerStandbyManagingPackages) {
+            final Intent explicitIntent = new Intent(privilegedIntent);
+            explicitIntent.setPackage(packageName);
+            mContext.sendBroadcastAsUser(explicitIntent, UserHandle.ALL,
+                    Manifest.permission.MANAGE_LOW_POWER_STANDBY);
+        }
+    }
+
     @GuardedBy("mLock")
     private void enqueueNotifyActiveChangedLocked() {
-        final long now = mClock.elapsedRealtime();
         final Message msg = mHandler.obtainMessage(MSG_NOTIFY_ACTIVE_CHANGED, mIsActive);
-        mHandler.sendMessageAtTime(msg, now);
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
     /** Notify other system components about the updated Low Power Standby active state */
@@ -1308,7 +1342,6 @@ public class LowPowerStandbyController {
 
     @GuardedBy("mLock")
     private void enqueueNotifyAllowlistChangedLocked() {
-        final long now = mClock.elapsedRealtime();
         final int[] allowlistUids = getAllowlistUidsLocked();
 
         if (DEBUG) {
@@ -1317,7 +1350,7 @@ public class LowPowerStandbyController {
         }
 
         final Message msg = mHandler.obtainMessage(MSG_NOTIFY_ALLOWLIST_CHANGED, allowlistUids);
-        mHandler.sendMessageAtTime(msg, now);
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
     private void notifyAllowlistChanged(int[] allowlistUids) {
@@ -1334,14 +1367,12 @@ public class LowPowerStandbyController {
 
     @GuardedBy("mLock")
     private void enqueueNotifyStandbyPortsChangedLocked() {
-        final long now = mClock.elapsedRealtime();
-
         if (DEBUG) {
             Slog.d(TAG, "enqueueNotifyStandbyPortsChangedLocked");
         }
 
         final Message msg = mHandler.obtainMessage(MSG_NOTIFY_STANDBY_PORTS_CHANGED);
-        mHandler.sendMessageAtTime(msg, now);
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
     private void notifyStandbyPortsChanged() {
@@ -1350,7 +1381,7 @@ public class LowPowerStandbyController {
         }
 
         final Intent intent = new Intent(PowerManager.ACTION_LOW_POWER_STANDBY_PORTS_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                 Manifest.permission.MANAGE_LOW_POWER_STANDBY);
     }
@@ -1369,7 +1400,7 @@ public class LowPowerStandbyController {
          * Otherwise, returns false, and the default policy will be used.
          */
         public boolean enableCustomPolicy() {
-            return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_POLICY, false);
+            return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_POLICY, true);
         }
 
         /**
@@ -1377,7 +1408,7 @@ public class LowPowerStandbyController {
          * Otherwise, returns false, and {@link #getActiveStandbyPorts()} will always be empty.
          */
         public boolean enableStandbyPorts() {
-            return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_STANDBY_PORTS, false);
+            return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_STANDBY_PORTS, true);
         }
 
         /**
@@ -1448,12 +1479,11 @@ public class LowPowerStandbyController {
         public void onForegroundStateChanged(IBinder serviceToken, String packageName,
                 int userId, boolean isForeground) {
             try {
-                final long now = mClock.elapsedRealtime();
                 final int uid = mContext.getPackageManager()
                         .getPackageUidAsUser(packageName, userId);
                 final Message message =
                         mHandler.obtainMessage(MSG_FOREGROUND_SERVICE_STATE_CHANGED, uid, 0);
-                mHandler.sendMessageAtTime(message, now);
+                mHandler.sendMessageAtTime(message, mClock.uptimeMillis());
             } catch (PackageManager.NameNotFoundException e) {
                 if (DEBUG) {
                     Slog.d(TAG, "onForegroundStateChanged: Unknown package: " + packageName

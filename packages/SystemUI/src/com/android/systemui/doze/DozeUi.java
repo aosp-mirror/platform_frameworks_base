@@ -26,11 +26,12 @@ import android.os.SystemClock;
 import android.text.format.Formatter;
 import android.util.Log;
 
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.dagger.DozeScope;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AlarmTimeout;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.util.Calendar;
@@ -52,25 +53,35 @@ public class DozeUi implements DozeMachine.Part {
     private final boolean mCanAnimateTransition;
     private final DozeParameters mDozeParameters;
     private final DozeLog mDozeLog;
-    private final StatusBarStateController mStatusBarStateController;
-
+    private final DelayableExecutor mBgExecutor;
     private long mLastTimeTickElapsed = 0;
+    // If time tick is scheduled and there's not a pending runnable to cancel:
+    private volatile boolean mTimeTickScheduled;
+    private final Runnable mCancelTimeTickerRunnable =  new Runnable() {
+        @Override
+        public void run() {
+            mDozeLog.tracePendingUnscheduleTimeTick(false, mTimeTickScheduled);
+            if (!mTimeTickScheduled) {
+                mTimeTicker.cancel();
+            }
+        }
+    };
 
     @Inject
     public DozeUi(Context context, AlarmManager alarmManager,
             WakeLock wakeLock, DozeHost host, @Main Handler handler,
             DozeParameters params,
-            StatusBarStateController statusBarStateController,
+            @Background DelayableExecutor bgExecutor,
             DozeLog dozeLog) {
         mContext = context;
         mWakeLock = wakeLock;
         mHost = host;
         mHandler = handler;
+        mBgExecutor = bgExecutor;
         mCanAnimateTransition = !params.getDisplayNeedsBlanking();
         mDozeParameters = params;
         mTimeTicker = new AlarmTimeout(alarmManager, this::onTimeTick, "doze_time_tick", handler);
         mDozeLog = dozeLog;
-        mStatusBarStateController = statusBarStateController;
     }
 
     @Override
@@ -157,13 +168,14 @@ public class DozeUi implements DozeMachine.Part {
     }
 
     private void scheduleTimeTick() {
-        if (mTimeTicker.isScheduled()) {
+        if (mTimeTickScheduled) {
             return;
         }
+        mTimeTickScheduled = true;
 
         long time = System.currentTimeMillis();
         long delta = roundToNextMinute(time) - System.currentTimeMillis();
-        boolean scheduled = mTimeTicker.schedule(delta, AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+        boolean scheduled = mTimeTicker.schedule(delta, AlarmTimeout.MODE_RESCHEDULE_IF_SCHEDULED);
         if (scheduled) {
             mDozeLog.traceTimeTickScheduled(time, time + delta);
         }
@@ -171,11 +183,12 @@ public class DozeUi implements DozeMachine.Part {
     }
 
     private void unscheduleTimeTick() {
-        if (!mTimeTicker.isScheduled()) {
+        if (!mTimeTickScheduled) {
             return;
         }
-        verifyLastTimeTick();
-        mTimeTicker.cancel();
+        mTimeTickScheduled = false;
+        mDozeLog.tracePendingUnscheduleTimeTick(true, mTimeTickScheduled);
+        mBgExecutor.execute(mCancelTimeTickerRunnable);
     }
 
     private void verifyLastTimeTick() {
@@ -205,6 +218,7 @@ public class DozeUi implements DozeMachine.Part {
         // Keep wakelock until a frame has been pushed.
         mHandler.post(mWakeLock.wrap(() -> {}));
 
+        mTimeTickScheduled = false;
         scheduleTimeTick();
     }
 }

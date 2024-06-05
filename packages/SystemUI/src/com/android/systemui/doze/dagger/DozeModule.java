@@ -18,10 +18,7 @@ package com.android.systemui.doze.dagger;
 
 import android.content.Context;
 import android.hardware.Sensor;
-import android.os.Handler;
 
-import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.doze.DozeAuthRemover;
 import com.android.systemui.doze.DozeBrightnessHostForwarder;
@@ -40,6 +37,7 @@ import com.android.systemui.doze.DozeTransitionListener;
 import com.android.systemui.doze.DozeTriggers;
 import com.android.systemui.doze.DozeUi;
 import com.android.systemui.doze.DozeWallpaperState;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
@@ -75,9 +73,8 @@ public abstract class DozeModule {
 
     @Provides
     @DozeScope
-    static WakeLock providesDozeWakeLock(DelayedWakeLock.Builder delayedWakeLockBuilder,
-            @Main Handler handler) {
-        return delayedWakeLockBuilder.setHandler(handler).setTag("Doze").build();
+    static WakeLock providesDozeWakeLock(DelayedWakeLock.Factory delayedWakeLockFactory) {
+        return delayedWakeLockFactory.create("Doze");
     }
 
     @Provides
@@ -92,8 +89,8 @@ public abstract class DozeModule {
                 dozeFalsingManagerAdapter,
                 dozeTriggers,
                 dozeUi,
-                dozeScreenState,
                 dozeScreenBrightness,
+                dozeScreenState,
                 dozeWallpaperState,
                 dozeDockHandler,
                 dozeAuthRemover,

@@ -19,7 +19,9 @@ package com.android.server.usage;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.util.ArrayUtils.defeatNullable;
+import static com.android.server.pm.DexOptHelper.getArtManagerLocal;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.PackageManagerServiceUtils.getPackageManagerLocal;
 import static com.android.server.usage.StorageStatsManagerLocal.StorageStatsAugmenter;
 
 import android.Manifest;
@@ -28,6 +30,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.usage.ExternalStorageStats;
+import android.app.usage.Flags;
 import android.app.usage.IStorageStatsManager;
 import android.app.usage.StorageStats;
 import android.app.usage.UsageStatsManagerInternal;
@@ -75,6 +78,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.art.ArtManagerLocal;
+import com.android.server.art.model.ArtManagedFileStats;
+import com.android.server.pm.PackageManagerLocal.FilteredSnapshot;
 import com.android.server.IoThread;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
@@ -259,7 +265,24 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         // NOTE: No permissions required
 
         if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
-            return FileUtils.roundStorageSize(mStorage.getPrimaryStorageSize());
+            // As a safety measure, use the original implementation for the devices
+            // with storage size <= 512GB to prevent any potential regressions
+            final long roundedUserspaceBytes = mStorage.getPrimaryStorageSize();
+            if (roundedUserspaceBytes <= DataUnit.GIGABYTES.toBytes(512)) {
+                return roundedUserspaceBytes;
+            }
+
+            // Since 1TB devices can actually have either 1000GB or 1024GB,
+            // get the block device size and do just a small rounding if any at all
+            final long totalBytes = mStorage.getInternalStorageBlockDeviceSize();
+            final long totalBytesRounded = FileUtils.roundStorageSize(totalBytes);
+            // If the storage size is 997GB-999GB, round it to a 1000GB to show
+            // 1TB in UI instead of 0.99TB. Same for 2TB, 4TB, 8TB etc.
+            if (totalBytesRounded - totalBytes <= DataUnit.GIGABYTES.toBytes(3)) {
+                return totalBytesRounded;
+            } else {
+                return totalBytes;
+            }
         } else {
             final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
             if (vol == null) {
@@ -286,15 +309,19 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             // Free space is usable bytes plus any cached data that we're
             // willing to automatically clear. To avoid user confusion, this
             // logic should be kept in sync with getAllocatableBytes().
+            long freeBytes;
             if (isQuotaSupported(volumeUuid, PLATFORM_PACKAGE_NAME)) {
                 final long cacheTotal = getCacheBytes(volumeUuid, PLATFORM_PACKAGE_NAME);
                 final long cacheReserved = mStorage.getStorageCacheBytes(path, 0);
                 final long cacheClearable = Math.max(0, cacheTotal - cacheReserved);
 
-                return path.getUsableSpace() + cacheClearable;
+                freeBytes = path.getUsableSpace() + cacheClearable;
             } else {
-                return path.getUsableSpace();
+                freeBytes = path.getUsableSpace();
             }
+
+            Slog.d(TAG, "getFreeBytes: " + freeBytes);
+            return freeBytes;
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -356,7 +383,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             return queryStatsForUid(volumeUuid, appInfo.uid, callingPackage);
         } else {
             // Multiple packages means we need to go manual
-            final int appId = UserHandle.getUserId(appInfo.uid);
+            final int appId = UserHandle.getAppId(appInfo.uid);
             final String[] packageNames = new String[] { packageName };
             final long[] ceDataInodes = new long[1];
             String[] codePaths = new String[0];
@@ -364,8 +391,10 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             if (appInfo.isSystemApp() && !appInfo.isUpdatedSystemApp()) {
                 // We don't count code baked into system image
             } else {
-                codePaths = ArrayUtils.appendElement(String.class, codePaths,
+                if (appInfo.getCodePath() != null) {
+                    codePaths = ArrayUtils.appendElement(String.class, codePaths,
                         appInfo.getCodePath());
+                }
             }
 
             final PackageStats stats = new PackageStats(TAG);
@@ -411,6 +440,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         final long[] ceDataInodes = new long[packageNames.length];
         String[] codePaths = new String[0];
 
+        final PackageStats stats = new PackageStats(TAG);
         for (int i = 0; i < packageNames.length; i++) {
             try {
                 final ApplicationInfo appInfo = mPackage.getApplicationInfoAsUser(packageNames[i],
@@ -418,15 +448,20 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 if (appInfo.isSystemApp() && !appInfo.isUpdatedSystemApp()) {
                     // We don't count code baked into system image
                 } else {
-                    codePaths = ArrayUtils.appendElement(String.class, codePaths,
+                    if (appInfo.getCodePath() != null) {
+                        codePaths = ArrayUtils.appendElement(String.class, codePaths,
                             appInfo.getCodePath());
+                    }
+                    if (Flags.getAppBytesByDataTypeApi()) {
+                        computeAppStatsByDataTypes(
+                            stats, appInfo.sourceDir, packageNames[i]);
+                    }
                 }
             } catch (NameNotFoundException e) {
                 throw new ParcelableException(e);
             }
         }
 
-        final PackageStats stats = new PackageStats(TAG);
         try {
             mInstaller.getAppSize(volumeUuid, packageNames, userId, getDefaultFlags(),
                     appId, ceDataInodes, codePaths, stats);
@@ -562,6 +597,12 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         res.codeBytes = stats.codeSize + stats.externalCodeSize;
         res.dataBytes = stats.dataSize + stats.externalDataSize;
         res.cacheBytes = stats.cacheSize + stats.externalCacheSize;
+        res.dexoptBytes = stats.dexoptSize;
+        res.curProfBytes = stats.curProfSize;
+        res.refProfBytes = stats.refProfSize;
+        res.apkBytes = stats.apkSize;
+        res.libBytes = stats.libSize;
+        res.dmBytes = stats.dmSize;
         res.externalCacheBytes = stats.externalCacheSize;
         return res;
     }
@@ -868,5 +909,79 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 @NonNull String tag) {
             mStorageStatsAugmenters.add(Pair.create(tag, storageStatsAugmenter));
         }
+    }
+
+    private long getDirBytes(File dir) {
+        if (!dir.isDirectory()) {
+            return 0;
+        }
+
+        long size = 0;
+        try {
+            for (File file : dir.listFiles()) {
+                if (file.isFile()) {
+                    size += file.length();
+                    continue;
+                }
+                if (file.isDirectory()) {
+                    size += getDirBytes(file);
+                }
+            }
+        } catch (NullPointerException e) {
+            Slog.w(TAG, "Failed to list directory " + dir.getName());
+        }
+
+        return size;
+    }
+
+    private long getFileBytesInDir(File dir, String suffix) {
+        if (!dir.isDirectory()) {
+            return 0;
+        }
+
+        long size = 0;
+        try {
+            for (File file : dir.listFiles()) {
+                if (file.isFile() && file.getName().endsWith(suffix)) {
+                    size += file.length();
+                }
+            }
+        } catch (NullPointerException e) {
+             Slog.w(TAG, "Failed to list directory " + dir.getName());
+        }
+
+        return size;
+    }
+
+    private void computeAppStatsByDataTypes(
+        PackageStats stats, String sourceDirName, String packageName) {
+
+        // Get apk, lib, dm file sizes.
+        File srcDir = new File(sourceDirName);
+        if (srcDir.isFile()) {
+            sourceDirName = srcDir.getParent();
+            srcDir = new File(sourceDirName);
+        }
+
+        stats.apkSize += getFileBytesInDir(srcDir, ".apk");
+        stats.dmSize += getFileBytesInDir(srcDir, ".dm");
+        stats.libSize += getDirBytes(new File(sourceDirName + "/lib/"));
+
+        // Get dexopt, current profle and reference profile sizes.
+        ArtManagedFileStats artManagedFileStats;
+        try (var snapshot = getPackageManagerLocal().withFilteredSnapshot()) {
+            artManagedFileStats =
+                getArtManagerLocal().getArtManagedFileStats(snapshot, packageName);
+        }
+
+        stats.dexoptSize +=
+            artManagedFileStats
+                .getTotalSizeBytesByType(ArtManagedFileStats.TYPE_DEXOPT_ARTIFACT);
+        stats.refProfSize +=
+            artManagedFileStats
+                .getTotalSizeBytesByType(ArtManagedFileStats.TYPE_REF_PROFILE);
+        stats.curProfSize +=
+            artManagedFileStats
+                .getTotalSizeBytesByType(ArtManagedFileStats.TYPE_CUR_PROFILE);
     }
 }

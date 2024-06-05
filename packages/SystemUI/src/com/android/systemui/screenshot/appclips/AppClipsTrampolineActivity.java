@@ -22,41 +22,41 @@ import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_SUCCESS;
 import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED;
 import static android.content.Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE;
 
-import static com.android.systemui.flags.Flags.SCREENSHOT_APP_CLIPS;
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_TRIGGERED;
 
 import android.app.Activity;
-import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Intent.CaptureContentForNoteStatusCodes;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.UserInfo;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.infra.AndroidFuture;
+import com.android.internal.infra.ServiceConnector;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
+import com.android.internal.statusbar.IAppClipsService;
+import com.android.systemui.broadcast.BroadcastSender;
+import com.android.systemui.dagger.qualifiers.Application;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.notetask.NoteTaskController;
 import com.android.systemui.notetask.NoteTaskEntryPoint;
-import com.android.systemui.settings.UserTracker;
-import com.android.wm.shell.bubbles.Bubbles;
+import com.android.systemui.res.R;
 
-import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -82,39 +82,57 @@ public class AppClipsTrampolineActivity extends Activity {
     private static final String TAG = AppClipsTrampolineActivity.class.getSimpleName();
     static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
     static final String EXTRA_SCREENSHOT_URI = TAG + "SCREENSHOT_URI";
-    @VisibleForTesting
-    static final String EXTRA_USE_WP_USER = TAG + "USE_WP_USER";
     static final String ACTION_FINISH_FROM_TRAMPOLINE = TAG + "FINISH_FROM_TRAMPOLINE";
     static final String EXTRA_RESULT_RECEIVER = TAG + "RESULT_RECEIVER";
     static final String EXTRA_CALLING_PACKAGE_NAME = TAG + "CALLING_PACKAGE_NAME";
     private static final ApplicationInfoFlags APPLICATION_INFO_FLAGS = ApplicationInfoFlags.of(0);
 
-    private final DevicePolicyManager mDevicePolicyManager;
-    private final FeatureFlags mFeatureFlags;
-    private final Optional<Bubbles> mOptionalBubbles;
     private final NoteTaskController mNoteTaskController;
     private final PackageManager mPackageManager;
-    private final UserTracker mUserTracker;
     private final UiEventLogger mUiEventLogger;
-    private final UserManager mUserManager;
+    private final BroadcastSender mBroadcastSender;
+    @Background
+    private final Executor mBgExecutor;
+    @Main
+    private final Executor mMainExecutor;
     private final ResultReceiver mResultReceiver;
 
+    private final ServiceConnector<IAppClipsService> mAppClipsServiceConnector;
+
+    private UserHandle mUserHandle;
     private Intent mKillAppClipsBroadcastIntent;
-    private UserHandle mNotesAppUser;
 
     @Inject
-    public AppClipsTrampolineActivity(DevicePolicyManager devicePolicyManager, FeatureFlags flags,
-            Optional<Bubbles> optionalBubbles, NoteTaskController noteTaskController,
-            PackageManager packageManager, UserTracker userTracker, UiEventLogger uiEventLogger,
-            UserManager userManager, @Main Handler mainHandler) {
-        mDevicePolicyManager = devicePolicyManager;
-        mFeatureFlags = flags;
-        mOptionalBubbles = optionalBubbles;
+    public AppClipsTrampolineActivity(@Application Context context,
+            NoteTaskController noteTaskController, PackageManager packageManager,
+            UiEventLogger uiEventLogger, BroadcastSender broadcastSender,
+            @Background Executor bgExecutor, @Main Executor mainExecutor,
+            @Main Handler mainHandler) {
         mNoteTaskController = noteTaskController;
         mPackageManager = packageManager;
-        mUserTracker = userTracker;
         mUiEventLogger = uiEventLogger;
-        mUserManager = userManager;
+        mBroadcastSender = broadcastSender;
+        mBgExecutor = bgExecutor;
+        mMainExecutor = mainExecutor;
+
+        mResultReceiver = createResultReceiver(mainHandler);
+        mAppClipsServiceConnector = createServiceConnector(context);
+    }
+
+    /** A constructor used only for testing to verify interactions with {@link ServiceConnector}. */
+    @VisibleForTesting
+    AppClipsTrampolineActivity(ServiceConnector<IAppClipsService> appClipsServiceConnector,
+            NoteTaskController noteTaskController, PackageManager packageManager,
+            UiEventLogger uiEventLogger, BroadcastSender broadcastSender,
+            @Background Executor bgExecutor, @Main Executor mainExecutor,
+            @Main Handler mainHandler) {
+        mAppClipsServiceConnector = appClipsServiceConnector;
+        mNoteTaskController = noteTaskController;
+        mPackageManager = packageManager;
+        mUiEventLogger = uiEventLogger;
+        mBroadcastSender = broadcastSender;
+        mBgExecutor = bgExecutor;
+        mMainExecutor = mainExecutor;
 
         mResultReceiver = createResultReceiver(mainHandler);
     }
@@ -127,62 +145,62 @@ public class AppClipsTrampolineActivity extends Activity {
             return;
         }
 
-        if (mUserManager.isManagedProfile()) {
-            maybeStartActivityForWPUser();
-            finish();
+        mUserHandle = getUser();
+
+        mBgExecutor.execute(() -> {
+            AndroidFuture<Integer> statusCodeFuture = mAppClipsServiceConnector.postForResult(
+                    service -> service.canLaunchCaptureContentActivityForNoteInternal(getTaskId()));
+            statusCodeFuture.whenCompleteAsync(this::handleAppClipsStatusCode, mMainExecutor);
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (isFinishing() && mKillAppClipsBroadcastIntent != null) {
+            mBroadcastSender.sendBroadcast(mKillAppClipsBroadcastIntent, PERMISSION_SELF);
+        }
+
+        super.onDestroy();
+    }
+
+    private void handleAppClipsStatusCode(@CaptureContentForNoteStatusCodes int statusCode,
+            Throwable error) {
+        if (isFinishing()) {
+            // It's too late, trampoline activity is finishing or already finished. Return early.
             return;
         }
 
-        if (!mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)) {
-            finish();
+        if (error != null) {
+            Log.d(TAG, "Error querying app clips service", error);
+            setErrorResultAndFinish(statusCode);
             return;
         }
 
-        if (mOptionalBubbles.isEmpty()) {
-            setErrorResultAndFinish(CAPTURE_CONTENT_FOR_NOTE_FAILED);
-            return;
-        }
+        switch (statusCode) {
+            case CAPTURE_CONTENT_FOR_NOTE_SUCCESS:
+                launchAppClipsActivity();
+                break;
 
-        if (!mOptionalBubbles.get().isAppBubbleTaskId(getTaskId())) {
-            setErrorResultAndFinish(CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED);
-            return;
+            case CAPTURE_CONTENT_FOR_NOTE_FAILED:
+            case CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED:
+            case CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN:
+            default:
+                setErrorResultAndFinish(statusCode);
         }
+    }
 
-        if (mDevicePolicyManager.getScreenCaptureDisabled(null)) {
-            setErrorResultAndFinish(CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN);
-            return;
-        }
-
-        ComponentName componentName;
-        try {
-            componentName = ComponentName.unflattenFromString(
+    private void launchAppClipsActivity() {
+        ComponentName componentName = ComponentName.unflattenFromString(
                     getString(R.string.config_screenshotAppClipsActivityComponent));
-        } catch (Resources.NotFoundException e) {
-            setErrorResultAndFinish(CAPTURE_CONTENT_FOR_NOTE_FAILED);
-            return;
-        }
-
-        if (componentName == null || componentName.getPackageName().isEmpty()
-                || componentName.getClassName().isEmpty()) {
-            setErrorResultAndFinish(CAPTURE_CONTENT_FOR_NOTE_FAILED);
-            return;
-        }
-
-        mNotesAppUser = getUser();
-        if (getIntent().getBooleanExtra(EXTRA_USE_WP_USER, /* defaultValue= */ false)) {
-            // Get the work profile user internally instead of passing around via intent extras as
-            // this activity is exported apps could potentially mess around with intent extras.
-            mNotesAppUser = getWorkProfileUser().orElse(mNotesAppUser);
-        }
-
         String callingPackageName = getCallingPackage();
-        Intent intent = new Intent().setComponent(componentName)
+
+        Intent intent = new Intent()
+                .setComponent(componentName)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .putExtra(EXTRA_RESULT_RECEIVER, mResultReceiver)
                 .putExtra(EXTRA_CALLING_PACKAGE_NAME, callingPackageName);
         try {
-            // Start the App Clips activity for the user corresponding to the notes app user.
-            startActivityAsUser(intent, mNotesAppUser);
+            startActivity(intent);
 
             // Set up the broadcast intent that will inform the above App Clips activity to finish
             // when this trampoline activity is finished.
@@ -198,39 +216,6 @@ public class AppClipsTrampolineActivity extends Activity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        if (isFinishing() && mKillAppClipsBroadcastIntent != null) {
-            sendBroadcast(mKillAppClipsBroadcastIntent, PERMISSION_SELF);
-        }
-    }
-
-    private Optional<UserHandle> getWorkProfileUser() {
-        return mUserTracker.getUserProfiles().stream()
-                .filter(profile -> mUserManager.isManagedProfile(profile.id))
-                .findFirst()
-                .map(UserInfo::getUserHandle);
-    }
-
-    private void maybeStartActivityForWPUser() {
-        UserHandle mainUser = mUserManager.getMainUser();
-        if (mainUser == null) {
-            setErrorResultAndFinish(CAPTURE_CONTENT_FOR_NOTE_FAILED);
-            return;
-        }
-
-        // Start the activity as the main user with activity result forwarding. Set the intent extra
-        // so that the newly started trampoline activity starts the actual app clips activity as the
-        // work profile user. Starting the app clips activity as the work profile user is required
-        // to save the screenshot in work profile user storage and grant read permission to the URI.
-        startActivityAsUser(
-                new Intent(this, AppClipsTrampolineActivity.class)
-                        .putExtra(EXTRA_USE_WP_USER, /* value= */ true)
-                        .addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT), mainUser);
-    }
-
     private void setErrorResultAndFinish(int errorCode) {
         setResult(RESULT_OK,
                 new Intent().putExtra(EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE, errorCode));
@@ -241,7 +226,7 @@ public class AppClipsTrampolineActivity extends Activity {
         int callingPackageUid = 0;
         try {
             callingPackageUid = mPackageManager.getApplicationInfoAsUser(callingPackageName,
-                    APPLICATION_INFO_FLAGS, mNotesAppUser.getIdentifier()).uid;
+                    APPLICATION_INFO_FLAGS, mUserHandle.getIdentifier()).uid;
         } catch (NameNotFoundException e) {
             Log.d(TAG, "Couldn't find notes app UID " + e);
         }
@@ -281,7 +266,7 @@ public class AppClipsTrampolineActivity extends Activity {
             mKillAppClipsBroadcastIntent = null;
 
             // Expand the note bubble before returning the result.
-            mNoteTaskController.showNoteTaskAsUser(NoteTaskEntryPoint.APP_CLIPS, mNotesAppUser);
+            mNoteTaskController.showNoteTaskAsUser(NoteTaskEntryPoint.APP_CLIPS, mUserHandle);
             setResult(RESULT_OK, convertedData);
             finish();
         }
@@ -298,9 +283,16 @@ public class AppClipsTrampolineActivity extends Activity {
         appClipsResultReceiver.writeToParcel(parcel, 0);
         parcel.setDataPosition(0);
 
-        ResultReceiver resultReceiver  = ResultReceiver.CREATOR.createFromParcel(parcel);
+        ResultReceiver resultReceiver = ResultReceiver.CREATOR.createFromParcel(parcel);
         parcel.recycle();
         return resultReceiver;
+    }
+
+    private ServiceConnector<IAppClipsService> createServiceConnector(
+            @Application Context context) {
+        return new ServiceConnector.Impl<>(context, new Intent(context, AppClipsService.class),
+                Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY | Context.BIND_NOT_VISIBLE,
+                UserHandle.USER_SYSTEM, IAppClipsService.Stub::asInterface);
     }
 
     /** This is a test only API for mocking response from {@link AppClipsActivity}. */

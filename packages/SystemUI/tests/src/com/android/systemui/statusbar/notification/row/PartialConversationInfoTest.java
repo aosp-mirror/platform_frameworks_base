@@ -41,8 +41,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
@@ -50,10 +48,13 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
@@ -65,12 +66,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class PartialConversationInfoTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test_package";
@@ -83,8 +82,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
     private PartialConversationInfo mInfo;
     private NotificationChannel mNotificationChannel;
     private NotificationChannel mDefaultNotificationChannel;
-    private Set<NotificationChannel> mNotificationChannelSet = new HashSet<>();
-    private Set<NotificationChannel> mDefaultNotificationChannelSet = new HashSet<>();
     private StatusBarNotification mSbn;
     private NotificationEntry mEntry;
 
@@ -144,11 +141,9 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         // Some test channels.
         mNotificationChannel = new NotificationChannel(
                 TEST_CHANNEL, TEST_CHANNEL_NAME, IMPORTANCE_LOW);
-        mNotificationChannelSet.add(mNotificationChannel);
         mDefaultNotificationChannel = new NotificationChannel(
                 NotificationChannel.DEFAULT_CHANNEL_ID, TEST_CHANNEL_NAME,
                 IMPORTANCE_LOW);
-        mDefaultNotificationChannelSet.add(mDefaultNotificationChannel);
         Notification n = new Notification.Builder(mContext, mNotificationChannel.getId())
                 .setContentTitle(new SpannableString("title"))
                 .build();
@@ -166,7 +161,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 true,
@@ -185,7 +179,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 true,
@@ -202,7 +195,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 true,
@@ -228,7 +220,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 entry,
                 null,
                 true,
@@ -247,7 +238,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 (View v, NotificationChannel c, int appUid) -> {
                     assertEquals(mNotificationChannel, c);
@@ -271,7 +261,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 (View v, NotificationChannel c, int appUid) -> {
                     assertEquals(mNotificationChannel, c);
@@ -294,7 +283,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 true,
@@ -311,7 +299,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 (View v, NotificationChannel c, int appUid) -> {
                     assertEquals(mNotificationChannel, c);
@@ -330,7 +317,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 true,

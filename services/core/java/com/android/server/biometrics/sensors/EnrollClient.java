@@ -19,7 +19,8 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.BiometricRequestConstants;
+import android.hardware.face.FaceEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -45,6 +46,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
 
     private long mEnrollmentStartTimeMs;
     private final boolean mHasEnrollmentsBeforeStarting;
+    private final int mEnrollReason;
 
     /**
      * @return true if the user has already enrolled the maximum number of templates.
@@ -55,13 +57,15 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
             int timeoutSec, int sensorId, boolean shouldVibrate,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            int enrollReason) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
                 shouldVibrate, logger, biometricContext);
         mBiometricUtils = utils;
         mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
         mTimeoutSec = timeoutSec;
         mHasEnrollmentsBeforeStarting = hasEnrollments();
+        mEnrollReason = enrollReason;
     }
 
     @Override
@@ -82,9 +86,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
 
         final ClientMonitorCallbackConverter listener = getListener();
         try {
-            if (listener != null) {
-                listener.onEnrollResult(identifier, remaining);
-            }
+            listener.onEnrollResult(identifier, remaining);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
@@ -93,7 +95,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
             mBiometricUtils.addBiometricForUser(getContext(), getTargetUserId(), identifier);
             getLogger().logOnEnrolled(getTargetUserId(),
                     System.currentTimeMillis() - mEnrollmentStartTimeMs,
-                    true /* enrollSuccessful */);
+                    true /* enrollSuccessful */, mEnrollReason);
             mCallback.onClientFinished(this, true /* success */);
         }
         notifyUserActivity();
@@ -121,7 +123,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
     public void onError(int error, int vendorCode) {
         getLogger().logOnEnrolled(getTargetUserId(),
                 System.currentTimeMillis() - mEnrollmentStartTimeMs,
-                false /* enrollSuccessful */);
+                false /* enrollSuccessful */, mEnrollReason);
         super.onError(error, vendorCode);
     }
 
@@ -135,14 +137,26 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
         return true;
     }
 
-    protected int getOverlayReasonFromEnrollReason(@FingerprintManager.EnrollReason int reason) {
+    protected int getRequestReasonFromFingerprintEnrollReason(
+            @FingerprintManager.EnrollReason int reason) {
         switch (reason) {
             case FingerprintManager.ENROLL_FIND_SENSOR:
-                return BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR;
+                return BiometricRequestConstants.REASON_ENROLL_FIND_SENSOR;
             case FingerprintManager.ENROLL_ENROLL:
-                return BiometricOverlayConstants.REASON_ENROLL_ENROLLING;
+                return BiometricRequestConstants.REASON_ENROLL_ENROLLING;
             default:
-                return BiometricOverlayConstants.REASON_UNKNOWN;
+                return BiometricRequestConstants.REASON_UNKNOWN;
         }
+    }
+
+    protected int getRequestReasonFromFaceEnrollReason(
+            @FaceEnrollOptions.EnrollReason int reason) {
+        return switch (reason) {
+            case FaceEnrollOptions.ENROLL_REASON_RE_ENROLL_NOTIFICATION,
+                    FaceEnrollOptions.ENROLL_REASON_SETTINGS,
+                    FaceEnrollOptions.ENROLL_REASON_SUW ->
+                    BiometricRequestConstants.REASON_ENROLL_ENROLLING;
+            default -> BiometricRequestConstants.REASON_UNKNOWN;
+        };
     }
 }

@@ -186,11 +186,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="409235464399258501">"ବନ୍ଦ"</item>
-    <item msgid="4195153527464162486">"64K ପିଛା ଲଗ୍‌ ବଫର୍‌"</item>
-    <item msgid="7464037639415220106">"256K ଲଗ୍‌ ପ୍ରତି ବଫର୍‌"</item>
-    <item msgid="8539423820514360724">"1M ପ୍ରତି ଲଗ୍‌ ବଫର୍‌"</item>
-    <item msgid="1984761927103140651">"ଲଗ୍‌ ବଫର୍‌ ପ୍ରତି 4M"</item>
-    <item msgid="2983219471251787208">"ଲଗ୍ ବଫର୍ ପ୍ରତି 8M"</item>
+    <item msgid="4195153527464162486">"ପ୍ରତି ଲଗ ବଫର 64K"</item>
+    <item msgid="7464037639415220106">"ପ୍ରତି ଲଗ ବଫର 256K"</item>
+    <item msgid="8539423820514360724">"ପ୍ରତି ଲଗ ବଫର 1M"</item>
+    <item msgid="1984761927103140651">"ପ୍ରତି ଲଗ ବଫର 4M"</item>
+    <item msgid="2983219471251787208">"ପ୍ରତି ଲଗ ବଫର 8M"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"ବନ୍ଦ"</item>
@@ -281,5 +281,11 @@
     <item msgid="3825132913289380004">"RNDIS (USB ଏଥରନେଟ)"</item>
     <item msgid="8828567335701536560">"ଅଡିଓ ଉତ୍ସ"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
+  </string-array>
+  <string-array name="grammatical_gender_values">
+    <item msgid="4976102487934077239">"0"</item>
+    <item msgid="2646486108212979598">"1"</item>
+    <item msgid="3753634915787796632">"2"</item>
+    <item msgid="4779928470672877922">"3"</item>
   </string-array>
 </resources>

@@ -18,14 +18,13 @@ package com.android.systemui.shade
 
 import android.annotation.IntDef
 import android.os.Trace
-import android.os.Trace.TRACE_TAG_APP as TRACE_TAG
 import android.util.Log
 import androidx.annotation.FloatRange
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.shade.ShadeStateEvents.ShadeStateEventsListener
 import com.android.systemui.util.Compile
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
+import android.os.Trace.TRACE_TAG_APP as TRACE_TAG
 
 /**
  * A class responsible for managing the notification panel's current state.
@@ -33,71 +32,33 @@ import javax.inject.Inject
  * TODO(b/200063118): Make this class the one source of truth for the state of panel expansion.
  */
 @SysUISingleton
-class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
+@Deprecated("Use ShadeInteractor instead")
+class ShadeExpansionStateManager @Inject constructor() {
 
     private val expansionListeners = CopyOnWriteArrayList<ShadeExpansionListener>()
-    private val fullExpansionListeners = CopyOnWriteArrayList<ShadeFullExpansionListener>()
-    private val qsExpansionListeners = CopyOnWriteArrayList<ShadeQsExpansionListener>()
     private val stateListeners = CopyOnWriteArrayList<ShadeStateListener>()
-    private val shadeStateEventsListeners = CopyOnWriteArrayList<ShadeStateEventsListener>()
 
     @PanelState private var state: Int = STATE_CLOSED
     @FloatRange(from = 0.0, to = 1.0) private var fraction: Float = 0f
     private var expanded: Boolean = false
-    private var qsExpanded: Boolean = false
     private var tracking: Boolean = false
-    private var dragDownPxAmount: Float = 0f
 
     /**
      * Adds a listener that will be notified when the panel expansion fraction has changed and
-     * returns the current state in a ShadeExpansionChangeEvent for legacy purposes (b/23035507).
+     * returns the current state in a ShadeExpansionChangeEvent for legacy purposes (b/281038056).
      *
      * @see #addExpansionListener
      */
+    @Deprecated("Use ShadeInteractor instead")
     fun addExpansionListener(listener: ShadeExpansionListener): ShadeExpansionChangeEvent {
         expansionListeners.add(listener)
-        return ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
-    }
-
-    /** Removes an expansion listener. */
-    fun removeExpansionListener(listener: ShadeExpansionListener) {
-        expansionListeners.remove(listener)
-    }
-
-    fun addFullExpansionListener(listener: ShadeFullExpansionListener) {
-        fullExpansionListeners.add(listener)
-        listener.onShadeExpansionFullyChanged(qsExpanded)
-    }
-
-    fun removeFullExpansionListener(listener: ShadeFullExpansionListener) {
-        fullExpansionListeners.remove(listener)
-    }
-
-    fun addQsExpansionListener(listener: ShadeQsExpansionListener) {
-        qsExpansionListeners.add(listener)
-        listener.onQsExpansionChanged(qsExpanded)
-    }
-
-    fun removeQsExpansionListener(listener: ShadeQsExpansionListener) {
-        qsExpansionListeners.remove(listener)
+        return ShadeExpansionChangeEvent(fraction, expanded, tracking)
     }
 
     /** Adds a listener that will be notified when the panel state has changed. */
+    @Deprecated("Use ShadeInteractor instead")
     fun addStateListener(listener: ShadeStateListener) {
         stateListeners.add(listener)
-    }
-
-    /** Removes a state listener. */
-    fun removeStateListener(listener: ShadeStateListener) {
-        stateListeners.remove(listener)
-    }
-
-    override fun addShadeStateEventsListener(listener: ShadeStateEventsListener) {
-        shadeStateEventsListeners.addIfAbsent(listener)
-    }
-
-    override fun removeShadeStateEventsListener(listener: ShadeStateEventsListener) {
-        shadeStateEventsListeners.remove(listener)
     }
 
     /** Returns true if the panel is currently closed and false otherwise. */
@@ -114,8 +75,7 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
     fun onPanelExpansionChanged(
         @FloatRange(from = 0.0, to = 1.0) fraction: Float,
         expanded: Boolean,
-        tracking: Boolean,
-        dragDownPxAmount: Float
+        tracking: Boolean
     ) {
         require(!fraction.isNaN()) { "fraction cannot be NaN" }
         val oldState = state
@@ -123,7 +83,6 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
         this.fraction = fraction
         this.expanded = expanded
         this.tracking = tracking
-        this.dragDownPxAmount = dragDownPxAmount
 
         var fullyClosed = true
         var fullyOpened = false
@@ -149,7 +108,6 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
                 "f=$fraction " +
                 "expanded=$expanded " +
                 "tracking=$tracking " +
-                "dragDownPxAmount=$dragDownPxAmount " +
                 "${if (fullyOpened) " fullyOpened" else ""} " +
                 if (fullyClosed) " fullyClosed" else ""
         )
@@ -162,24 +120,8 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
             }
         }
 
-        val expansionChangeEvent =
-            ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
+        val expansionChangeEvent = ShadeExpansionChangeEvent(fraction, expanded, tracking)
         expansionListeners.forEach { it.onPanelExpansionChanged(expansionChangeEvent) }
-    }
-
-    /** Called when the quick settings expansion changes to fully expanded or collapsed. */
-    fun onQsExpansionChanged(qsExpanded: Boolean) {
-        this.qsExpanded = qsExpanded
-
-        debugLog("qsExpanded=$qsExpanded")
-        qsExpansionListeners.forEach { it.onQsExpansionChanged(qsExpanded) }
-    }
-
-    fun onShadeExpansionFullyChanged(isExpanded: Boolean) {
-        this.expanded = isExpanded
-
-        debugLog("expanded=$isExpanded")
-        fullExpansionListeners.forEach { it.onShadeExpansionFullyChanged(isExpanded) }
     }
 
     /** Updates the panel state if necessary. */
@@ -196,24 +138,6 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
         debugLog("go state: ${this.state.panelStateToString()} -> ${state.panelStateToString()}")
         this.state = state
         stateListeners.forEach { it.onPanelStateChanged(state) }
-    }
-
-    fun notifyLaunchingActivityChanged(isLaunchingActivity: Boolean) {
-        for (cb in shadeStateEventsListeners) {
-            cb.onLaunchingActivityChanged(isLaunchingActivity)
-        }
-    }
-
-    fun notifyPanelCollapsingChanged(isCollapsing: Boolean) {
-        for (cb in shadeStateEventsListeners) {
-            cb.onPanelCollapsingChanged(isCollapsing)
-        }
-    }
-
-    fun notifyExpandImmediateChange(expandImmediateEnabled: Boolean) {
-        for (cb in shadeStateEventsListeners) {
-            cb.onExpandImmediateChanged(expandImmediateEnabled)
-        }
     }
 
     private fun debugLog(msg: String) {

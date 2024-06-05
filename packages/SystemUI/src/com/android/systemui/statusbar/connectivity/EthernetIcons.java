@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.connectivity;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 class EthernetIcons {
     static final int[][] ETHERNET_ICONS = {

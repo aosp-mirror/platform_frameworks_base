@@ -27,37 +27,52 @@ import com.android.app.animation.InterpolatorsAndroidX
 object Easings {
 
     /** The standard interpolator that should be used on every normal animation */
-    val StandardEasing = fromInterpolator(InterpolatorsAndroidX.STANDARD)
+    val Standard = fromInterpolator(InterpolatorsAndroidX.STANDARD)
 
     /**
      * The standard accelerating interpolator that should be used on every regular movement of
      * content that is disappearing e.g. when moving off screen.
      */
-    val StandardAccelerateEasing = fromInterpolator(InterpolatorsAndroidX.STANDARD_ACCELERATE)
+    val StandardAccelerate = fromInterpolator(InterpolatorsAndroidX.STANDARD_ACCELERATE)
 
     /**
      * The standard decelerating interpolator that should be used on every regular movement of
      * content that is appearing e.g. when coming from off screen.
      */
-    val StandardDecelerateEasing = fromInterpolator(InterpolatorsAndroidX.STANDARD_DECELERATE)
+    val StandardDecelerate = fromInterpolator(InterpolatorsAndroidX.STANDARD_DECELERATE)
 
     /** The default emphasized interpolator. Used for hero / emphasized movement of content. */
-    val EmphasizedEasing = fromInterpolator(InterpolatorsAndroidX.EMPHASIZED)
+    val Emphasized = fromInterpolator(InterpolatorsAndroidX.EMPHASIZED)
 
     /**
      * The accelerated emphasized interpolator. Used for hero / emphasized movement of content that
      * is disappearing e.g. when moving off screen.
      */
-    val EmphasizedAccelerateEasing = fromInterpolator(InterpolatorsAndroidX.EMPHASIZED_ACCELERATE)
+    val EmphasizedAccelerate = fromInterpolator(InterpolatorsAndroidX.EMPHASIZED_ACCELERATE)
 
     /**
      * The decelerating emphasized interpolator. Used for hero / emphasized movement of content that
      * is appearing e.g. when coming from off screen
      */
-    val EmphasizedDecelerateEasing = fromInterpolator(InterpolatorsAndroidX.EMPHASIZED_DECELERATE)
+    val EmphasizedDecelerate = fromInterpolator(InterpolatorsAndroidX.EMPHASIZED_DECELERATE)
 
     /** The linear interpolator. */
-    val LinearEasing = fromInterpolator(InterpolatorsAndroidX.LINEAR)
+    val Linear = fromInterpolator(InterpolatorsAndroidX.LINEAR)
+
+    /** The default legacy interpolator as defined in Material 1. Also known as FAST_OUT_SLOW_IN. */
+    val Legacy = fromInterpolator(InterpolatorsAndroidX.LEGACY)
+
+    /**
+     * The default legacy accelerating interpolator as defined in Material 1. Also known as
+     * FAST_OUT_LINEAR_IN.
+     */
+    val LegacyAccelerate = fromInterpolator(InterpolatorsAndroidX.LEGACY_ACCELERATE)
+
+    /**
+     * T The default legacy decelerating interpolator as defined in Material 1. Also known as
+     * LINEAR_OUT_SLOW_IN.
+     */
+    val LegacyDecelerate = fromInterpolator(InterpolatorsAndroidX.LEGACY_DECELERATE)
 
     private fun fromInterpolator(source: Interpolator) = Easing { x -> source.getInterpolation(x) }
 }

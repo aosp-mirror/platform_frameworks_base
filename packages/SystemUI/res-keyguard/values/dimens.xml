@@ -25,6 +25,18 @@
     <!-- Maximum width of the sliding KeyguardSecurityContainer -->
     <dimen name="keyguard_security_width">420dp</dimen>
 
+    <!-- Width for the keyguard pin input field -->
+    <dimen name="keyguard_pin_field_width">292dp</dimen>
+
+    <!-- height for the keyguard pin input field -->
+    <dimen name="keyguard_pin_field_height">56dp</dimen>
+
+    <!-- height for the keyguard password input field -->
+    <dimen name="keyguard_password_field_height">56dp</dimen>
+
+    <!-- width for the keyguard password input field -->
+    <dimen name="keyguard_password_field_width">276dp</dimen>
+
     <!-- Height of the sliding KeyguardSecurityContainer
          (includes 2x keyguard_security_view_top_margin) -->
     <dimen name="keyguard_security_height">420dp</dimen>
@@ -95,9 +107,6 @@
     <dimen name="num_pad_key_margin_end">12dp</dimen>
 
     <!-- additional offset for clock switch area items -->
-    <dimen name="small_clock_height">114dp</dimen>
-    <dimen name="small_clock_padding_top">28dp</dimen>
-    <dimen name="clock_padding_start">28dp</dimen>
     <dimen name="below_clock_padding_start">32dp</dimen>
     <dimen name="below_clock_padding_end">16dp</dimen>
     <dimen name="below_clock_padding_start_icons">28dp</dimen>
@@ -107,6 +116,13 @@
          allow it to use the whole screen space, 0.6 will allow it to use just under half of the
          screen. -->
     <item name="half_opened_bouncer_height_ratio" type="dimen" format="float">0.0</item>
+
+    <!-- Proportion of the screen height to use to set the maximum height of the bouncer to when
+     the device is in the DEVICE_POSTURE_HALF_OPENED posture.
+
+     This value is only used when motion layout bouncer is used - when flag
+     landscape.enable_lockscreen (b/293252410) is on -->
+    <item name="motion_layout_half_fold_bouncer_height_ratio" type="dimen" format="float">0.55</item>
 
     <!-- The actual amount of translation that is applied to the security when it animates from one
          side of the screen to the other in one-handed or user switcher mode. Note that it will
@@ -153,4 +169,10 @@
     <dimen name="weather_clock_smartspace_translateX">0dp</dimen>
     <dimen name="weather_clock_smartspace_translateY">0dp</dimen>
 
+    <!-- Thickness of the progress bar we show for the SFPS based authentication. -->
+    <dimen name="sfps_progress_bar_thickness">6dp</dimen>
+    <!-- Padding from the edge of the screen for the progress bar -->
+    <dimen name="sfps_progress_bar_padding_from_edge">7dp</dimen>
+
+    <dimen name="keyguard_presentation_width">410dp</dimen>
 </resources>

@@ -17,16 +17,15 @@
 package com.android.internal.accessibility.dialog;
 
 import static com.android.internal.accessibility.util.ShortcutUtils.convertToKey;
-import static com.android.internal.accessibility.util.ShortcutUtils.convertToUserType;
 import static com.android.internal.accessibility.util.ShortcutUtils.isShortcutContained;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.content.Context;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
 /**
  * Base class for creating accessibility service target with various fragment types related to
@@ -34,7 +33,9 @@ import com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuM
  */
 class AccessibilityServiceTarget extends AccessibilityTarget {
 
-    AccessibilityServiceTarget(Context context, @ShortcutType int shortcutType,
+    private final AccessibilityServiceInfo mAccessibilityServiceInfo;
+
+    AccessibilityServiceTarget(Context context, @UserShortcutType int shortcutType,
             @AccessibilityFragmentType int fragmentType,
             @NonNull AccessibilityServiceInfo serviceInfo) {
         super(context,
@@ -46,7 +47,8 @@ class AccessibilityServiceTarget extends AccessibilityTarget {
                 serviceInfo.getResolveInfo().serviceInfo.applicationInfo.uid,
                 serviceInfo.getResolveInfo().loadLabel(context.getPackageManager()),
                 serviceInfo.getResolveInfo().loadIcon(context.getPackageManager()),
-                convertToKey(convertToUserType(shortcutType)));
+                convertToKey(shortcutType));
+        mAccessibilityServiceInfo = serviceInfo;
     }
 
     @Override
@@ -63,5 +65,9 @@ class AccessibilityServiceTarget extends AccessibilityTarget {
         holder.mIconView.setEnabled(enabled);
         holder.mLabelView.setEnabled(enabled);
         holder.mStatusView.setEnabled(enabled);
+    }
+
+    public AccessibilityServiceInfo getAccessibilityServiceInfo() {
+        return mAccessibilityServiceInfo;
     }
 }

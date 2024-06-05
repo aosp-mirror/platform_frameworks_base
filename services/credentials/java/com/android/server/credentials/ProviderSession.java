@@ -24,9 +24,10 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.credentials.Credential;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
-import android.credentials.ui.ProviderData;
-import android.credentials.ui.ProviderPendingIntentResponse;
+import android.credentials.selection.ProviderData;
+import android.credentials.selection.ProviderPendingIntentResponse;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -44,7 +45,7 @@ import java.util.UUID;
 public abstract class ProviderSession<T, R>
         implements RemoteCredentialService.ProviderCallbacks<R> {
 
-    private static final String TAG = "ProviderSession";
+    private static final String TAG = CredentialManager.TAG;
 
     @NonNull
     protected final Context mContext;
@@ -153,7 +154,7 @@ public abstract class ProviderSession<T, R>
         mUserId = userId;
         mComponentName = componentName;
         mRemoteCredentialService = remoteCredentialService;
-        mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName);
+        mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName, userId);
         mProviderSessionMetric = new ProviderSessionMetric(
                 ((RequestSession) mCallbacks).mRequestSessionMetric.getSessionIdTrackTwo());
     }

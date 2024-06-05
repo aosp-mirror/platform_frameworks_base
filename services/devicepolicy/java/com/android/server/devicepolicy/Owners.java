@@ -616,6 +616,59 @@ class Owners {
         }
     }
 
+    void markSecurityLoggingMigrated() {
+        synchronized (mData) {
+            mData.mSecurityLoggingMigrated = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    void markPostUpgradeMigration() {
+        synchronized (mData) {
+            mData.mPoliciesMigratedPostUpdate = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    boolean isSecurityLoggingMigrated() {
+        synchronized (mData) {
+            return mData.mSecurityLoggingMigrated;
+        }
+    }
+
+    boolean isRequiredPasswordComplexityMigrated() {
+        synchronized (mData) {
+            return mData.mRequiredPasswordComplexityMigrated;
+        }
+    }
+
+    void markRequiredPasswordComplexityMigrated() {
+        synchronized (mData) {
+            mData.mRequiredPasswordComplexityMigrated = true;
+            mData.writeDeviceOwner();
+        }
+
+    }
+
+    boolean isSuspendedPackagesMigrated() {
+        synchronized (mData) {
+            return mData.mSuspendedPackagesMigrated;
+        }
+    }
+
+    void markSuspendedPackagesMigrated() {
+        synchronized (mData) {
+            mData.mSuspendedPackagesMigrated = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    boolean isMigratedPostUpdate() {
+        synchronized (mData) {
+            return mData.mPoliciesMigratedPostUpdate;
+        }
+    }
+
     @GuardedBy("mData")
     void pushToAppOpsLocked() {
         if (!mSystemReady) {

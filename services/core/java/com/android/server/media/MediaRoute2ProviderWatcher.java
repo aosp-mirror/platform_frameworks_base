@@ -33,6 +33,8 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.media.flags.Flags;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,7 +88,9 @@ final class MediaRoute2ProviderWatcher {
             filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
             filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
             filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-            filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+            if (!Flags.enablePreventionOfKeepAliveRouteProviders()) {
+                filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+            }
             filter.addDataScheme("package");
             mContext.registerReceiverAsUser(mScanPackagesReceiver,
                     new UserHandle(mUserId), filter, null, mHandler);
@@ -138,16 +142,22 @@ final class MediaRoute2ProviderWatcher {
                     MediaRoute2ProviderServiceProxy proxy =
                             new MediaRoute2ProviderServiceProxy(
                                     mContext,
+                                    mHandler.getLooper(),
                                     new ComponentName(serviceInfo.packageName, serviceInfo.name),
                                     isSelfScanOnlyProvider,
                                     mUserId);
-                    proxy.start();
+                    Slog.i(
+                            TAG,
+                            "Enabling proxy for MediaRoute2ProviderService: "
+                                    + proxy.mComponentName);
+                    proxy.start(/* rebindIfDisconnected= */ false);
                     mProxies.add(targetIndex++, proxy);
                     mCallback.onAddProviderService(proxy);
                 } else if (sourceIndex >= targetIndex) {
                     MediaRoute2ProviderServiceProxy proxy = mProxies.get(sourceIndex);
-                    proxy.start(); // restart the proxy if needed
-                    proxy.rebindIfDisconnected();
+                    proxy.start(
+                            /* rebindIfDisconnected= */
+                                    !Flags.enablePreventionOfKeepAliveRouteProviders());
                     Collections.swap(mProxies, sourceIndex, targetIndex++);
                 }
             }
@@ -157,6 +167,9 @@ final class MediaRoute2ProviderWatcher {
         if (targetIndex < mProxies.size()) {
             for (int i = mProxies.size() - 1; i >= targetIndex; i--) {
                 MediaRoute2ProviderServiceProxy proxy = mProxies.get(i);
+                Slog.i(
+                        TAG,
+                        "Disabling proxy for MediaRoute2ProviderService: " + proxy.mComponentName);
                 mCallback.onRemoveProviderService(proxy);
                 mProxies.remove(proxy);
                 proxy.stop();

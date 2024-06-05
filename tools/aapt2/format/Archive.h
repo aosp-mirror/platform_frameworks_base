@@ -24,9 +24,9 @@
 
 #include "androidfw/BigBuffer.h"
 #include "androidfw/IDiagnostics.h"
+#include "androidfw/Streams.h"
 #include "androidfw/StringPiece.h"
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
-#include "io/Io.h"
 #include "util/Files.h"
 
 namespace aapt {
@@ -46,7 +46,7 @@ class IArchiveWriter : public ::google::protobuf::io::CopyingOutputStream {
  public:
   virtual ~IArchiveWriter() = default;
 
-  virtual bool WriteFile(android::StringPiece path, uint32_t flags, io::InputStream* in) = 0;
+  virtual bool WriteFile(android::StringPiece path, uint32_t flags, android::InputStream* in) = 0;
 
   // Starts a new entry and allows caller to write bytes to it sequentially.
   // Only use StartEntry if code you do not control needs to write to a CopyingOutputStream.

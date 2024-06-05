@@ -93,6 +93,9 @@ class ZygoteConnection {
             throw ex;
         }
 
+        if (peer.getUid() != Process.SYSTEM_UID) {
+            throw new ZygoteSecurityException("Only system UID is allowed to connect to Zygote.");
+        }
         isEof = false;
     }
 
@@ -257,7 +260,8 @@ class ZygoteConnection {
                             parsedArgs.mInstructionSet, parsedArgs.mAppDataDir,
                             parsedArgs.mIsTopApp, parsedArgs.mPkgDataInfoList,
                             parsedArgs.mAllowlistedDataInfoList, parsedArgs.mBindMountAppDataDirs,
-                            parsedArgs.mBindMountAppStorageDirs);
+                            parsedArgs.mBindMountAppStorageDirs,
+                            parsedArgs.mBindMountSyspropOverrides);
 
                     try {
                         if (pid == 0) {
@@ -296,7 +300,6 @@ class ZygoteConnection {
                     } else {
                         // child; result is a Runnable.
                         zygoteServer.setForkChild();
-                        Zygote.setAppProcessName(parsedArgs, TAG);  // ??? Necessary?
                         return result;
                     }
                 }

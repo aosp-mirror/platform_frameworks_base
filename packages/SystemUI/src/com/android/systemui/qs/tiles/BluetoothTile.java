@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.settingslib.satellite.SatelliteDialogUtils.TYPE_IS_BLUETOOTH;
 import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
 
 import android.annotation.Nullable;
@@ -31,17 +32,22 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.Switch;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
-import com.android.systemui.R;
+import com.android.settingslib.satellite.SatelliteDialogUtils;
+import com.android.systemui.animation.Expandable;
+import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogViewModel;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -50,7 +56,10 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.BluetoothController;
+
+import kotlinx.coroutines.Job;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -72,6 +81,13 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     private final Executor mExecutor;
 
+    private final BluetoothTileDialogViewModel mDialogViewModel;
+
+    private final FeatureFlags mFeatureFlags;
+    @Nullable
+    @VisibleForTesting
+    Job mClickJob;
+
     @Inject
     public BluetoothTile(
             QSHost host,
@@ -83,13 +99,17 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
-            BluetoothController bluetoothController
+            BluetoothController bluetoothController,
+            FeatureFlags featureFlags,
+            BluetoothTileDialogViewModel dialogViewModel
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = bluetoothController;
         mController.observe(getLifecycle(), mCallback);
         mExecutor = new HandlerExecutor(mainHandler);
+        mFeatureFlags = featureFlags;
+        mDialogViewModel = dialogViewModel;
     }
 
     @Override
@@ -98,12 +118,34 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
-        // Secondary clicks are header clicks, just toggle.
-        final boolean isEnabled = mState.value;
-        // Immediately enter transient enabling state when turning bluetooth on.
-        refreshState(isEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
-        mController.setBluetoothEnabled(!isEnabled);
+    protected void handleClick(@Nullable Expandable expandable) {
+        if (com.android.internal.telephony.flags.Flags.oemEnabledSatelliteFlag()) {
+            if (mClickJob != null && !mClickJob.isCompleted()) {
+                return;
+            }
+            mClickJob = SatelliteDialogUtils.mayStartSatelliteWarningDialog(
+                    mContext, this, TYPE_IS_BLUETOOTH, isAllowClick -> {
+                        if (!isAllowClick) {
+                            return null;
+                        }
+                        handleClickEvent(expandable);
+                        return null;
+                    });
+            return;
+        }
+        handleClickEvent(expandable);
+    }
+
+    private void handleClickEvent(@Nullable Expandable expandable) {
+        if (mFeatureFlags.isEnabled(Flags.BLUETOOTH_QS_TILE_DIALOG)) {
+            mDialogViewModel.showDialog(expandable);
+        } else {
+            // Secondary clicks are header clicks, just toggle.
+            final boolean isEnabled = mState.value;
+            // Immediately enter transient enabling state when turning bluetooth on.
+            refreshState(isEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
+            mController.setBluetoothEnabled(!isEnabled);
+        }
     }
 
     @Override
@@ -112,7 +154,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleSecondaryClick(@Nullable View view) {
+    protected void handleSecondaryClick(@Nullable Expandable expandable) {
         if (!mController.canConfigBluetooth()) {
             mActivityStarter.postStartActivityDismissingKeyguard(
                     new Intent(Settings.ACTION_BLUETOOTH_SETTINGS), 0);
@@ -151,10 +193,6 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         }
         state.dualTarget = true;
         state.value = enabled;
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
-        state.slash.isSlashed = !enabled;
         state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
         state.secondaryLabel = TextUtils.emptyIfNull(
                 getSecondaryLabel(enabled, connecting, connected, state.isTransient));
@@ -187,6 +225,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         }
 
         state.expandedAccessibilityClassName = Switch.class.getName();
+        state.forceExpandIcon = mFeatureFlags.isEnabled(Flags.BLUETOOTH_QS_TILE_DIALOG);
     }
 
     /**
@@ -226,7 +265,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                 listenToMetadata(device);
             } else {
                 stopListeningToStaleDeviceMetadata();
-                batteryLevel = device.getBatteryLevel();
+                batteryLevel = device.getMinBatteryLevelWithMemberDevices();
             }
 
             if (batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {

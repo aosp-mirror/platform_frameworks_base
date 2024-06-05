@@ -22,6 +22,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
 private const val USER_ID = 9
+private const val REQUEST_ID = 9L
 private const val OPERATION_ID = 10L
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -171,7 +172,7 @@ class CredentialViewModelTest : SysuiTestCase() {
     ) =
         runTest(dispatcher) {
             init()
-            promptRepository.setPrompt(promptInfo(), USER_ID, OPERATION_ID, kind)
+            promptRepository.setPrompt(promptInfo(), USER_ID, REQUEST_ID, OPERATION_ID, kind)
             block()
         }
 }

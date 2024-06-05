@@ -17,11 +17,15 @@
 package android.view;
 
 import android.app.ActivityManager;
-import android.view.IRemoteAnimationFinishedCallback;
-import android.view.SurfaceControl;
 import android.graphics.GraphicBuffer;
+import android.view.IRemoteAnimationFinishedCallback;
+import android.view.RemoteAnimationTarget;
+import android.view.SurfaceControl;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
+import android.window.WindowAnimationState;
+
+import com.android.internal.os.IResultReceiver;
 
 /**
  * Passed to the {@link IRecentsAnimationRunner} in order for the runner to control to let the
@@ -58,7 +62,7 @@ interface IRecentsAnimationController {
      *                          top resumed app, false otherwise.
      */
     @UnsupportedAppUsage
-    void finish(boolean moveHomeToTop, boolean sendUserLeaveHint);
+    void finish(boolean moveHomeToTop, boolean sendUserLeaveHint, in IResultReceiver finishCb);
 
     /**
      * Called by the handler to indicate that the recents animation input consumer should be
@@ -158,4 +162,17 @@ interface IRecentsAnimationController {
      * @param duration the duration of the app launch animation
      */
     void animateNavigationBarToApp(long duration);
+
+    /**
+     * Hand off the ongoing animation of a set of remote targets, to be run by another handler using
+     * the given starting parameters.
+     *
+     * Once the handoff is complete, operations on the old leashes for the given targets as well as
+     * callbacks will become no-ops.
+     *
+     * The number of targets MUST match the number of states, and each state MUST match the target
+     * at the same index.
+     */
+    oneway void handOffAnimation(in RemoteAnimationTarget[] targets,
+                    in WindowAnimationState[] states);
 }

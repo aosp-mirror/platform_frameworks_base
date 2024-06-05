@@ -1,0 +1,4 @@
+# Bug component: 987260
+
+include /BATTERY_STATS_OWNERS
+include /services/core/java/com/android/server/powerstats/OWNERS

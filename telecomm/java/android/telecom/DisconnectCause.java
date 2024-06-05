@@ -16,7 +16,12 @@
 
 package android.telecom;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.media.ToneGenerator;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -25,6 +30,11 @@ import android.telephony.PreciseDisconnectCause;
 import android.telephony.ims.ImsReasonInfo;
 import android.text.TextUtils;
 
+import androidx.annotation.IntDef;
+
+import com.android.server.telecom.flags.Flags;
+
+import java.lang.annotation.Retention;
 import java.util.Objects;
 
 /**
@@ -37,48 +47,69 @@ import java.util.Objects;
 public final class DisconnectCause implements Parcelable {
 
     /** Disconnected because of an unknown or unspecified reason. */
-    public static final int UNKNOWN = TelecomProtoEnums.UNKNOWN; // = 0
+    public static final int UNKNOWN = 0;
     /** Disconnected because there was an error, such as a problem with the network. */
-    public static final int ERROR = TelecomProtoEnums.ERROR; // = 1
+    public static final int ERROR = 1;
     /** Disconnected because of a local user-initiated action, such as hanging up. */
-    public static final int LOCAL = TelecomProtoEnums.LOCAL; // = 2
+    public static final int LOCAL = 2;
     /**
      * Disconnected because the remote party hung up an ongoing call, or because an outgoing call
      * was not answered by the remote party.
      */
-    public static final int REMOTE = TelecomProtoEnums.REMOTE; // = 3
+    public static final int REMOTE = 3;
     /** Disconnected because it has been canceled. */
-    public static final int CANCELED = TelecomProtoEnums.CANCELED; // = 4
+    public static final int CANCELED = 4;
     /** Disconnected because there was no response to an incoming call. */
-    public static final int MISSED = TelecomProtoEnums.MISSED; // = 5
+    public static final int MISSED = 5;
     /** Disconnected because the user rejected an incoming call. */
-    public static final int REJECTED = TelecomProtoEnums.REJECTED; // = 6
+    public static final int REJECTED = 6;
     /** Disconnected because the other party was busy. */
-    public static final int BUSY = TelecomProtoEnums.BUSY; // = 7
+    public static final int BUSY = 7;
     /**
      * Disconnected because of a restriction on placing the call, such as dialing in airplane
      * mode.
      */
-    public static final int RESTRICTED = TelecomProtoEnums.RESTRICTED; // = 8
+    public static final int RESTRICTED = 8;
     /** Disconnected for reason not described by other disconnect codes. */
-    public static final int OTHER = TelecomProtoEnums.OTHER; // = 9
+    public static final int OTHER = 9;
     /**
      * Disconnected because the connection manager did not support the call. The call will be tried
      * again without a connection manager. See {@link PhoneAccount#CAPABILITY_CONNECTION_MANAGER}.
      */
-    public static final int CONNECTION_MANAGER_NOT_SUPPORTED =
-            TelecomProtoEnums.CONNECTION_MANAGER_NOT_SUPPORTED; // = 10
+    public static final int CONNECTION_MANAGER_NOT_SUPPORTED = 10;
 
     /**
      * Disconnected because the user did not locally answer the incoming call, but it was answered
      * on another device where the call was ringing.
      */
-    public static final int ANSWERED_ELSEWHERE = TelecomProtoEnums.ANSWERED_ELSEWHERE; // = 11
+    public static final int ANSWERED_ELSEWHERE = 11;
 
     /**
      * Disconnected because the call was pulled from the current device to another device.
      */
-    public static final int CALL_PULLED = TelecomProtoEnums.CALL_PULLED; // = 12
+    public static final int CALL_PULLED = 12;
+
+    /**
+     * @hide
+     */
+    @Retention(SOURCE)
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+    @IntDef({
+            UNKNOWN,
+            ERROR,
+            LOCAL,
+            REMOTE,
+            CANCELED,
+            MISSED,
+            REJECTED,
+            BUSY,
+            RESTRICTED,
+            OTHER,
+            CONNECTION_MANAGER_NOT_SUPPORTED,
+            ANSWERED_ELSEWHERE,
+            CALL_PULLED
+    })
+    public @interface DisconnectCauseCode {}
 
     /**
      * Reason code (returned via {@link #getReason()}) which indicates that a call could not be
@@ -111,7 +142,7 @@ public final class DisconnectCause implements Parcelable {
      */
     public static final String REASON_EMERGENCY_CALL_PLACED = "REASON_EMERGENCY_CALL_PLACED";
 
-    private int mDisconnectCode;
+    private @DisconnectCauseCode int mDisconnectCode;
     private CharSequence mDisconnectLabel;
     private CharSequence mDisconnectDescription;
     private String mDisconnectReason;
@@ -125,7 +156,7 @@ public final class DisconnectCause implements Parcelable {
      *
      * @param code The code for the disconnect cause.
      */
-    public DisconnectCause(int code) {
+    public DisconnectCause(@DisconnectCauseCode int code) {
         this(code, null, null, null, ToneGenerator.TONE_UNKNOWN);
     }
 
@@ -135,7 +166,7 @@ public final class DisconnectCause implements Parcelable {
      * @param code The code for the disconnect cause.
      * @param reason The reason for the disconnect.
      */
-    public DisconnectCause(int code, String reason) {
+    public DisconnectCause(@DisconnectCauseCode int code, String reason) {
         this(code, null, null, reason, ToneGenerator.TONE_UNKNOWN);
     }
 
@@ -147,7 +178,8 @@ public final class DisconnectCause implements Parcelable {
      * @param description The localized description to show to the user to explain the disconnect.
      * @param reason The reason for the disconnect.
      */
-    public DisconnectCause(int code, CharSequence label, CharSequence description, String reason) {
+    public DisconnectCause(@DisconnectCauseCode int code, CharSequence label,
+            CharSequence description, String reason) {
         this(code, label, description, reason, ToneGenerator.TONE_UNKNOWN);
     }
 
@@ -160,16 +192,17 @@ public final class DisconnectCause implements Parcelable {
      * @param reason The reason for the disconnect.
      * @param toneToPlay The tone to play on disconnect, as defined in {@link ToneGenerator}.
      */
-    public DisconnectCause(int code, CharSequence label, CharSequence description, String reason,
-            int toneToPlay) {
+    public DisconnectCause(@DisconnectCauseCode int code, CharSequence label,
+            CharSequence description, String reason, int toneToPlay) {
         this(code, label, description, reason, toneToPlay,
                 android.telephony.DisconnectCause.ERROR_UNSPECIFIED,
-                PreciseDisconnectCause.ERROR_UNSPECIFIED,
-                null /* imsReasonInfo */);
+                PreciseDisconnectCause.ERROR_UNSPECIFIED, null /* imsReasonInfo */);
     }
 
     /**
-     * Creates a new DisconnectCause instance.
+     * Creates a new DisconnectCause instance. This is used by Telephony to pass in extra debug
+     * info to Telecom regarding the disconnect cause.
+     *
      * @param code The code for the disconnect cause.
      * @param label The localized label to show to the user to explain the disconnect.
      * @param description The localized description to show to the user to explain the disconnect.
@@ -180,7 +213,8 @@ public final class DisconnectCause implements Parcelable {
      * @param imsReasonInfo The relevant {@link ImsReasonInfo}, or {@code null} if not available.
      * @hide
      */
-    public DisconnectCause(int code, CharSequence label, CharSequence description, String reason,
+    public DisconnectCause(@DisconnectCauseCode int code, @Nullable CharSequence label,
+            @Nullable CharSequence description, @Nullable String reason,
             int toneToPlay, @Annotation.DisconnectCauses int telephonyDisconnectCause,
             @Annotation.PreciseDisconnectCauses int telephonyPreciseDisconnectCause,
             @Nullable ImsReasonInfo imsReasonInfo) {
@@ -199,7 +233,7 @@ public final class DisconnectCause implements Parcelable {
      *
      * @return The disconnect code.
      */
-    public int getCode() {
+    public @DisconnectCauseCode int getCode() {
         return mDisconnectCode;
     }
 
@@ -241,28 +275,40 @@ public final class DisconnectCause implements Parcelable {
     }
 
     /**
-     * Returns the telephony {@link android.telephony.DisconnectCause} for the call.
+     * Returns the telephony {@link android.telephony.DisconnectCause} for the call. This is only
+     * used internally by Telecom for providing extra debug information from Telephony.
+     *
      * @return The disconnect cause.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     public @Annotation.DisconnectCauses int getTelephonyDisconnectCause() {
         return mTelephonyDisconnectCause;
     }
 
     /**
-     * Returns the telephony {@link android.telephony.PreciseDisconnectCause} for the call.
+     * Returns the telephony {@link android.telephony.PreciseDisconnectCause} for the call. This is
+     * only used internally by Telecom for providing extra debug information from Telephony.
+     *
      * @return The precise disconnect cause.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     public @Annotation.PreciseDisconnectCauses int getTelephonyPreciseDisconnectCause() {
         return mTelephonyPreciseDisconnectCause;
     }
 
     /**
-     * Returns the telephony {@link ImsReasonInfo} associated with the call disconnection.
+     * Returns the telephony {@link ImsReasonInfo} associated with the call disconnection. This is
+     * only used internally by Telecom for providing extra debug information from Telephony.
+     *
      * @return The {@link ImsReasonInfo} or {@code null} if not known.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     public @Nullable ImsReasonInfo getImsReasonInfo() {
         return mImsReasonInfo;
     }
@@ -274,6 +320,119 @@ public final class DisconnectCause implements Parcelable {
      */
     public int getTone() {
         return mToneToPlay;
+    }
+
+    /**
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+    public static final class Builder {
+        private @DisconnectCauseCode int mDisconnectCode;
+        private CharSequence mDisconnectLabel;
+        private CharSequence mDisconnectDescription;
+        private String mDisconnectReason;
+        private int mToneToPlay = ToneGenerator.TONE_UNKNOWN;
+        private int mTelephonyDisconnectCause;
+        private int mTelephonyPreciseDisconnectCause;
+        private ImsReasonInfo mImsReasonInfo;
+
+        public Builder(@DisconnectCauseCode int code) {
+            mDisconnectCode = code;
+        }
+
+        /**
+         * Sets a label which explains the reason for the disconnect cause, used for display in the
+         * user interface.
+         * @param label The label to associate with the disconnect cause.
+         * @return The {@link DisconnectCause} builder instance.
+         */
+        public @NonNull DisconnectCause.Builder setLabel(@Nullable CharSequence label) {
+            mDisconnectLabel = label;
+            return this;
+        }
+
+        /**
+         * Sets a description which provides the reason for the disconnect cause, used for display
+         * in the user interface.
+         * @param description The description to associate with the disconnect cause.
+         * @return The {@link DisconnectCause} builder instance.
+         */
+        public @NonNull DisconnectCause.Builder setDescription(
+                @Nullable CharSequence description) {
+            mDisconnectDescription = description;
+            return this;
+        }
+
+        /**
+         * Sets a reason providing explanation for the disconnect (intended for logging and not for
+         * displaying in the user interface).
+         * @param reason The reason for the disconnect.
+         * @return The {@link DisconnectCause} builder instance.
+         */
+        public @NonNull DisconnectCause.Builder setReason(@NonNull String reason) {
+            mDisconnectReason = reason;
+            return this;
+        }
+
+        /**
+         * Sets the tone to play when disconnected.
+         * @param toneToPlay The tone as defined in {@link ToneGenerator} to play when disconnected.
+         * @return The {@link DisconnectCause} builder instance.
+         */
+        public @NonNull DisconnectCause.Builder setTone(int toneToPlay) {
+            mToneToPlay = toneToPlay;
+            return this;
+        }
+
+        /**
+         * Sets the telephony {@link android.telephony.DisconnectCause} for the call (used
+         * internally by Telecom for providing extra debug information from Telephony).
+         * @param telephonyDisconnectCause The disconnect cause as provided by Telephony.
+         * @return The {@link DisconnectCause} builder instance.
+         */
+        public @NonNull DisconnectCause.Builder setTelephonyDisconnectCause(
+                @Annotation.DisconnectCauses int telephonyDisconnectCause) {
+            mTelephonyDisconnectCause = telephonyDisconnectCause;
+            return this;
+        }
+
+        /**
+         * Sets the telephony {@link android.telephony.PreciseDisconnectCause} for the call (used
+         * internally by Telecom for providing extra debug information from Telephony).
+         * @param telephonyPreciseDisconnectCause The precise disconnect cause as provided by
+         *                                        Telephony.
+         * @return The {@link DisconnectCause} builder instance.
+         */
+
+        public @NonNull DisconnectCause.Builder setTelephonyPreciseDisconnectCause(
+                @Annotation.PreciseDisconnectCauses int telephonyPreciseDisconnectCause) {
+            mTelephonyPreciseDisconnectCause = telephonyPreciseDisconnectCause;
+            return this;
+        }
+
+        /**
+         * Sets the telephony {@link ImsReasonInfo} associated with the call disconnection. This
+         * is only used internally by Telecom for providing extra debug information from Telephony.
+         *
+         * @param imsReasonInfo The {@link ImsReasonInfo} or {@code null} if not known.
+         * @return The {@link DisconnectCause} builder instance.
+         */
+        public @NonNull DisconnectCause.Builder setImsReasonInfo(
+                @Nullable ImsReasonInfo imsReasonInfo) {
+            mImsReasonInfo = imsReasonInfo;
+            return this;
+        }
+
+        /**
+         * Build the {@link DisconnectCause} from the provided Builder config.
+         * @return The {@link DisconnectCause} instance from provided builder.
+         */
+        public @NonNull DisconnectCause build() {
+            return new DisconnectCause(mDisconnectCode, mDisconnectLabel, mDisconnectDescription,
+                    mDisconnectReason, mToneToPlay, mTelephonyDisconnectCause,
+                    mTelephonyPreciseDisconnectCause, mImsReasonInfo);
+        }
     }
 
     public static final @android.annotation.NonNull Creator<DisconnectCause> CREATOR

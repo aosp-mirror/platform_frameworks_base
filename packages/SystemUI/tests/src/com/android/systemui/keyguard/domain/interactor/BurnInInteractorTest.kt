@@ -20,15 +20,19 @@ package com.android.systemui.keyguard.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -42,56 +46,43 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class BurnInInteractorTest : SysuiTestCase() {
+    val kosmos = testKosmos()
+    val testScope = kosmos.testScope
+    val configurationRepository = kosmos.fakeConfigurationRepository
+    val fakeKeyguardRepository = kosmos.fakeKeyguardRepository
+
     private val burnInOffset = 7
     private var burnInProgress = 0f
 
     @Mock private lateinit var burnInHelperWrapper: BurnInHelperWrapper
 
-    private lateinit var configurationRepository: FakeConfigurationRepository
-    private lateinit var systemClock: FakeSystemClock
-    private lateinit var testScope: TestScope
     private lateinit var underTest: BurnInInteractor
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        configurationRepository = FakeConfigurationRepository()
-        systemClock = FakeSystemClock()
 
+        context
+            .getOrCreateTestableResources()
+            .addOverride(R.dimen.burn_in_prevention_offset_y, burnInOffset)
         whenever(burnInHelperWrapper.burnInOffset(anyInt(), anyBoolean())).thenReturn(burnInOffset)
         setBurnInProgress(.65f)
 
-        testScope = TestScope()
         underTest =
             BurnInInteractor(
                 context,
                 burnInHelperWrapper,
-                testScope.backgroundScope,
-                configurationRepository,
-                systemClock,
+                kosmos.applicationCoroutineScope,
+                kosmos.configurationInteractor,
+                kosmos.keyguardInteractor,
             )
     }
 
     @Test
-    fun dozeTimeTick_updatesOnDozeTimeTick() =
-        testScope.runTest {
-            // Initial state set to 0
-            val lastDozeTimeTick by collectLastValue(underTest.dozeTimeTick)
-            assertEquals(0L, lastDozeTimeTick)
-
-            // WHEN dozeTimeTick updated
-            incrementUptimeMillis()
-            underTest.dozeTimeTick()
-
-            // THEN listeners were updated to the latest uptime millis
-            assertThat(systemClock.uptimeMillis()).isEqualTo(lastDozeTimeTick)
-        }
-
-    @Test
     fun udfpsBurnInOffset_updatesOnResolutionScaleChange() =
         testScope.runTest {
-            val udfpsBurnInOffsetX by collectLastValue(underTest.udfpsBurnInXOffset)
-            val udfpsBurnInOffsetY by collectLastValue(underTest.udfpsBurnInYOffset)
+            val udfpsBurnInOffsetX by collectLastValue(underTest.deviceEntryIconXOffset)
+            val udfpsBurnInOffsetY by collectLastValue(underTest.deviceEntryIconYOffset)
             assertThat(udfpsBurnInOffsetX).isEqualTo(burnInOffset)
             assertThat(udfpsBurnInOffsetY).isEqualTo(burnInOffset)
 
@@ -107,28 +98,46 @@ class BurnInInteractorTest : SysuiTestCase() {
     @Test
     fun udfpsBurnInProgress_updatesOnDozeTimeTick() =
         testScope.runTest {
-            val udfpsBurnInProgress by collectLastValue(underTest.udfpsBurnInProgress)
+            val udfpsBurnInProgress by collectLastValue(underTest.udfpsProgress)
             assertThat(udfpsBurnInProgress).isEqualTo(burnInProgress)
 
             setBurnInProgress(.88f)
-            incrementUptimeMillis()
-            underTest.dozeTimeTick()
+            fakeKeyguardRepository.dozeTimeTick(10)
             assertThat(udfpsBurnInProgress).isEqualTo(burnInProgress)
 
             setBurnInProgress(.92f)
-            incrementUptimeMillis()
-            underTest.dozeTimeTick()
+            fakeKeyguardRepository.dozeTimeTick(20)
             assertThat(udfpsBurnInProgress).isEqualTo(burnInProgress)
 
             setBurnInProgress(.32f)
-            incrementUptimeMillis()
-            underTest.dozeTimeTick()
+            fakeKeyguardRepository.dozeTimeTick(30)
             assertThat(udfpsBurnInProgress).isEqualTo(burnInProgress)
         }
 
-    private fun incrementUptimeMillis() {
-        systemClock.setUptimeMillis(systemClock.uptimeMillis() + 5)
-    }
+    @Test
+    fun keyguardBurnIn() =
+        testScope.runTest {
+            whenever(burnInHelperWrapper.burnInScale()).thenReturn(0.5f)
+
+            val burnInModel by
+                collectLastValue(
+                    underTest.burnIn(
+                        xDimenResourceId = R.dimen.burn_in_prevention_offset_x,
+                        yDimenResourceId = R.dimen.burn_in_prevention_offset_y
+                    )
+                )
+
+            // After time tick, returns the configured values
+            fakeKeyguardRepository.dozeTimeTick(10)
+            assertThat(burnInModel)
+                .isEqualTo(
+                    BurnInModel(
+                        translationX = burnInOffset.toInt(),
+                        translationY = burnInOffset.toInt(),
+                        scale = 0.5f,
+                    )
+                )
+        }
 
     private fun setBurnInProgress(progress: Float) {
         burnInProgress = progress

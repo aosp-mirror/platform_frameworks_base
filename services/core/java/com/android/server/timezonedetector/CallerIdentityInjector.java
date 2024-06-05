@@ -17,6 +17,7 @@
 package com.android.server.timezonedetector;
 
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.os.Binder;
 import android.os.UserHandle;
 
@@ -28,6 +29,12 @@ public interface CallerIdentityInjector {
 
     /** A singleton for the real implementation of {@link CallerIdentityInjector}. */
     CallerIdentityInjector REAL = new Real();
+
+    /**
+     * A {@link ActivityManager#handleIncomingUser} call. This can be used to map the abstract
+     * user ID value USER_CURRENT to the actual user ID.
+     */
+    @UserIdInt int resolveUserId(@UserIdInt int userId, String debugInfo);
 
     /** A {@link UserHandle#getCallingUserId()} call. */
     @UserIdInt int getCallingUserId();
@@ -42,6 +49,12 @@ public interface CallerIdentityInjector {
     class Real implements CallerIdentityInjector {
 
         protected Real() {
+        }
+
+        @Override
+        public int resolveUserId(@UserIdInt int userId, String debugName) {
+            return ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, false, false, debugName, null);
         }
 
         @Override

@@ -17,11 +17,10 @@
 package com.android.wm.shell.windowdecor;
 
 import android.app.ActivityManager;
-import android.os.IBinder;
 import android.view.SurfaceControl;
-import android.window.TransitionInfo;
 
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 
 /**
  * The interface used by some {@link com.android.wm.shell.ShellTaskOrganizer.TaskListener} to help
@@ -37,6 +36,11 @@ public interface WindowDecorViewModel {
      * @param transitionStarter the transition starter that starts freeform task transitions
      */
     void setFreeformTaskTransitionStarter(FreeformTaskTransitionStarter transitionStarter);
+
+    /**
+     * Sets the {@link SplitScreenController} if available.
+     */
+    void setSplitScreenController(SplitScreenController splitScreenController);
 
     /**
      * Creates a window decoration for the given task. Can be {@code null} for Fullscreen tasks but
@@ -61,6 +65,14 @@ public interface WindowDecorViewModel {
      * @param taskInfo the new task info of the task
      */
     void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo);
+
+    /**
+     * Notifies a task has vanished, which can mean that the task changed windowing mode or was
+     * removed.
+     *
+     * @param taskInfo the task info of the task
+     */
+    void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo);
 
     /**
      * Notifies a transition is about to start about the given task to give the window decoration a
@@ -97,34 +109,4 @@ public interface WindowDecorViewModel {
      * @param taskInfo the info of the task
      */
     void destroyWindowDecoration(ActivityManager.RunningTaskInfo taskInfo);
-
-    /**
-     * Notifies that a shell transition is about to start. If the transition is of type
-     * TRANSIT_ENTER_DESKTOP, it will save that transition to unpause relayout for the transitioning
-     * task after the transition has ended.
-     *
-     * @param transition the ready transaction
-     * @param info of Transition to check if relayout needs to be paused for a task
-     * @param change a change in the given transition
-     */
-    default void onTransitionReady(IBinder transition, TransitionInfo info,
-            TransitionInfo.Change change) {}
-
-    /**
-     * Notifies that a shell transition is about to merge with another to give the window
-     * decoration a chance to prepare for this merge.
-     *
-     * @param merged the transaction being merged
-     * @param playing the transaction being merged into
-     */
-    default void onTransitionMerged(IBinder merged, IBinder playing) {}
-
-    /**
-     * Notifies that a shell transition is about to finish  to give the window decoration a chance
-     * to clean up.
-     *
-     * @param transaction
-     */
-    default void onTransitionFinished(IBinder transaction) {}
-
 }

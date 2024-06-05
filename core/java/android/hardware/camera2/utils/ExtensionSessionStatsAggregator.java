@@ -70,6 +70,23 @@ public class ExtensionSessionStatsAggregator {
     }
 
     /**
+     * Set the capture format.
+     *
+     * @param format Format of requested capture.
+     */
+    public void setCaptureFormat(int format) {
+        synchronized (mLock) {
+            if (mIsDone) {
+                return;
+            }
+            if (DEBUG) {
+                Log.v(TAG, "Setting capture format: " + format);
+            }
+            mStats.captureFormat = format;
+        }
+    }
+
+    /**
      * Set extension type.
      *
      * @param extensionType Type of extension. Must match one of
@@ -116,6 +133,16 @@ public class ExtensionSessionStatsAggregator {
                 + "  cameraId: '" + stats.cameraId + "'\n"
                 + "  clientName: '" + stats.clientName + "'\n"
                 + "  type: '" + stats.type + "'\n"
-                + "  isAdvanced: '" + stats.isAdvanced + "'\n";
+                + "  isAdvanced: '" + stats.isAdvanced + "'\n"
+                + "  captureFormat: '" + stats.captureFormat + "'\n";
+    }
+
+    /**
+     * Return the current statistics key
+     *
+     * @return the current statistics key
+     */
+    public String getStatsKey() {
+        return mStats.key;
     }
 }

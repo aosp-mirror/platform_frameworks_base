@@ -16,6 +16,8 @@
 
 package com.android.server.job.controllers;
 
+import static android.text.format.DateUtils.HOUR_IN_MILLIS;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
@@ -43,6 +45,7 @@ import static com.android.server.job.controllers.JobStatus.CONSTRAINT_WITHIN_QUO
 import static com.android.server.job.controllers.JobStatus.NO_EARLIEST_RUNTIME;
 import static com.android.server.job.controllers.JobStatus.NO_LATEST_RUNTIME;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -76,6 +79,7 @@ import org.mockito.quality.Strictness;
 
 import java.time.Clock;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
 public class JobStatusTest {
@@ -133,6 +137,35 @@ public class JobStatusTest {
             jobStatus.setStandbyBucket(effectiveBucket.keyAt(i));
             assertEquals(effectiveBucket.valueAt(i), jobStatus.getEffectiveStandbyBucket());
         }
+    }
+
+    @Test
+    public void testApplyBasicPiiFilters_email() {
+        assertEquals("[EMAIL]", JobStatus.applyBasicPiiFilters("test@email.com"));
+        assertEquals("[EMAIL]", JobStatus.applyBasicPiiFilters("test+plus@email.com"));
+        assertEquals("[EMAIL]", JobStatus.applyBasicPiiFilters("t.e_st+plus-minus@email.com"));
+
+        assertEquals("prefix:[EMAIL]", JobStatus.applyBasicPiiFilters("prefix:test@email.com"));
+
+        assertEquals("not-an-email", JobStatus.applyBasicPiiFilters("not-an-email"));
+    }
+
+    @Test
+    public void testApplyBasicPiiFilters_mixture() {
+        assertEquals("[PHONE]:[EMAIL]",
+                JobStatus.applyBasicPiiFilters("123-456-7890:test+plus@email.com"));
+        assertEquals("prefix:[PHONE]:[EMAIL]",
+                JobStatus.applyBasicPiiFilters("prefix:123-456-7890:test+plus@email.com"));
+    }
+
+    @Test
+    public void testApplyBasicPiiFilters_phone() {
+        assertEquals("[PHONE]", JobStatus.applyBasicPiiFilters("123-456-7890"));
+        assertEquals("[PHONE]", JobStatus.applyBasicPiiFilters("+1-234-567-8900"));
+
+        assertEquals("prefix:[PHONE]", JobStatus.applyBasicPiiFilters("prefix:123-456-7890"));
+
+        assertEquals("not-a-phone-number", JobStatus.applyBasicPiiFilters("not-a-phone-number"));
     }
 
     @Test
@@ -230,6 +263,55 @@ public class JobStatusTest {
     }
 
     @Test
+    public void testFlexibleConstraintCounts() {
+        JobStatus js = createJobStatus(new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setUserInitiated(false)
+                .build());
+
+        js.setNumAppliedFlexibleConstraints(3);
+        js.setNumDroppedFlexibleConstraints(2);
+        assertEquals(3, js.getNumAppliedFlexibleConstraints());
+        assertEquals(2, js.getNumDroppedFlexibleConstraints());
+        assertEquals(1, js.getNumRequiredFlexibleConstraints());
+    }
+
+    @Test
+    public void testGetFilteredDebugTags() {
+        final JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .addDebugTag("test@email.com")
+                .addDebugTag("123-456-7890")
+                .addDebugTag("random")
+                .build();
+        JobStatus job = createJobStatus(jobInfo);
+        String[] expected = new String[]{"[EMAIL]", "[PHONE]", "random"};
+        String[] result = job.getFilteredDebugTags();
+        Arrays.sort(expected);
+        Arrays.sort(result);
+        assertArrayEquals(expected, result);
+    }
+
+    @Test
+    public void testGetFilteredTraceTag() {
+        JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setTraceTag("test@email.com")
+                .build();
+        JobStatus job = createJobStatus(jobInfo);
+        assertEquals("[EMAIL]", job.getFilteredTraceTag());
+
+        jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setTraceTag("123-456-7890")
+                .build();
+        job = createJobStatus(jobInfo);
+        assertEquals("[PHONE]", job.getFilteredTraceTag());
+
+        jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setTraceTag("random")
+                .build();
+        job = createJobStatus(jobInfo);
+        assertEquals("random", job.getFilteredTraceTag());
+    }
+
+    @Test
     public void testIsUserVisibleJob() {
         JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                 .setUserInitiated(false)
@@ -261,7 +343,7 @@ public class JobStatusTest {
     public void testMediaBackupExemption_lateConstraint() {
         final JobInfo triggerContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
                 .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
-                .setOverrideDeadline(12)
+                .setOverrideDeadline(HOUR_IN_MILLIS)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
         when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
@@ -869,7 +951,7 @@ public class JobStatusTest {
     public void testWouldBeReadyWithConstraint_RequestedOverrideDeadline() {
         final JobInfo jobInfo =
                 new JobInfo.Builder(101, new ComponentName("foo", "bar"))
-                        .setOverrideDeadline(300_000)
+                        .setOverrideDeadline(HOUR_IN_MILLIS)
                         .build();
         final JobStatus job = createJobStatus(jobInfo);
 
@@ -1025,7 +1107,7 @@ public class JobStatusTest {
         final JobInfo jobInfo =
                 new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                         .setRequiresCharging(true)
-                        .setOverrideDeadline(300_000)
+                        .setOverrideDeadline(HOUR_IN_MILLIS)
                         .addTriggerContentUri(new JobInfo.TriggerContentUri(
                                 MediaStore.Images.Media.INTERNAL_CONTENT_URI,
                                 JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS))
@@ -1240,9 +1322,7 @@ public class JobStatusTest {
     @Test
     public void testReadinessStatusWithConstraint_FlexibilityConstraint() {
         final JobStatus job = createJobStatus(
-                new JobInfo.Builder(101, new ComponentName("foo", "bar"))
-                        .setPrefersCharging(true)
-                        .build());
+                new JobInfo.Builder(101, new ComponentName("foo", "bar")).build());
         job.setConstraintSatisfied(CONSTRAINT_FLEXIBLE, sElapsedRealtimeClock.millis(), false);
         markImplicitConstraintsSatisfied(job, true);
         assertTrue(job.readinessStatusWithConstraint(CONSTRAINT_FLEXIBLE, true));
@@ -1265,13 +1345,11 @@ public class JobStatusTest {
     private void markExpeditedQuotaApproved(JobStatus job, boolean isApproved) {
         if (job.isRequestedExpeditedJob()) {
             job.setExpeditedJobQuotaApproved(sElapsedRealtimeClock.millis(), isApproved);
-            job.setExpeditedJobTareApproved(sElapsedRealtimeClock.millis(), isApproved);
         }
     }
 
     private void markImplicitConstraintsSatisfied(JobStatus job, boolean isSatisfied) {
         job.setQuotaConstraintSatisfied(sElapsedRealtimeClock.millis(), isSatisfied);
-        job.setTareWealthConstraintSatisfied(sElapsedRealtimeClock.millis(), isSatisfied);
         job.setDeviceNotDozingConstraintSatisfied(
                 sElapsedRealtimeClock.millis(), isSatisfied, false);
         job.setBackgroundNotRestrictedConstraintSatisfied(

@@ -30,14 +30,15 @@ import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
-import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
+import com.android.modules.expresslog.Counter;
+import com.android.systemui.Flags;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +54,6 @@ class MenuView extends FrameLayout implements
     private final List<AccessibilityTarget> mTargetFeatures = new ArrayList<>();
     private final AccessibilityTargetAdapter mAdapter;
     private final MenuViewModel mMenuViewModel;
-    private final MenuAnimationController mMenuAnimationController;
     private final Rect mBoundsInParent = new Rect();
     private final RecyclerView mTargetFeaturesView;
     private final ViewTreeObserver.OnDrawListener mSystemGestureExcludeUpdater =
@@ -69,27 +69,23 @@ class MenuView extends FrameLayout implements
 
     private boolean mIsMoveToTucked;
 
+    private final MenuAnimationController mMenuAnimationController;
     private OnTargetFeaturesChangeListener mFeaturesChangeListener;
+    private OnMoveToTuckedListener mMoveToTuckedListener;
+    private SecureSettings mSecureSettings;
 
-    MenuView(Context context, MenuViewModel menuViewModel, MenuViewAppearance menuViewAppearance) {
+    MenuView(Context context, MenuViewModel menuViewModel, MenuViewAppearance menuViewAppearance,
+            SecureSettings secureSettings) {
         super(context);
 
         mMenuViewModel = menuViewModel;
         mMenuViewAppearance = menuViewAppearance;
-        mMenuAnimationController = new MenuAnimationController(this);
+        mSecureSettings = secureSettings;
+        mMenuAnimationController = new MenuAnimationController(this, menuViewAppearance);
         mAdapter = new AccessibilityTargetAdapter(mTargetFeatures);
         mTargetFeaturesView = new RecyclerView(context);
         mTargetFeaturesView.setAdapter(mAdapter);
         mTargetFeaturesView.setLayoutManager(new LinearLayoutManager(context));
-        mTargetFeaturesView.setAccessibilityDelegateCompat(
-                new RecyclerViewAccessibilityDelegate(mTargetFeaturesView) {
-                    @NonNull
-                    @Override
-                    public AccessibilityDelegateCompat getItemDelegate() {
-                        return new MenuItemAccessibilityDelegate(/* recyclerViewDelegate= */ this,
-                                mMenuAnimationController);
-                    }
-                });
         setLayoutParams(new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         // Avoid drawing out of bounds of the parent view
         setClipToOutline(true);
@@ -97,6 +93,10 @@ class MenuView extends FrameLayout implements
         loadLayoutResources();
 
         addView(mTargetFeaturesView);
+
+        setClickable(false);
+        setFocusable(false);
+        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
     @Override
@@ -135,6 +135,10 @@ class MenuView extends FrameLayout implements
 
     void setOnTargetFeaturesChangeListener(OnTargetFeaturesChangeListener listener) {
         mFeaturesChangeListener = listener;
+    }
+
+    void setMoveToTuckedListener(OnMoveToTuckedListener listener) {
+        mMoveToTuckedListener = listener;
     }
 
     void addOnItemTouchListenerToList(RecyclerView.OnItemTouchListener listener) {
@@ -178,9 +182,13 @@ class MenuView extends FrameLayout implements
                 insets[3]);
 
         final GradientDrawable gradientDrawable = getContainerViewGradient();
-        gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuRadii());
         gradientDrawable.setStroke(mMenuViewAppearance.getMenuStrokeWidth(),
                 mMenuViewAppearance.getMenuStrokeColor());
+        mMenuAnimationController.startRadiiAnimation(mMenuViewAppearance.getMenuRadii());
+    }
+
+    void setRadii(float[] radii) {
+        getContainerViewGradient().setCornerRadii(radii);
     }
 
     private void onMoveToTucked(boolean isMoveToTucked) {
@@ -196,11 +204,32 @@ class MenuView extends FrameLayout implements
     }
 
     void onPositionChanged() {
-        final PointF position = mMenuViewAppearance.getMenuPosition();
-        mMenuAnimationController.moveToPosition(position);
+        onPositionChanged(/* animateMovement = */ false);
+    }
+
+    void onPositionChanged(boolean animateMovement) {
+        final PointF position;
+        if (isMoveToTucked()) {
+            position = mMenuAnimationController.getTuckedMenuPosition();
+        } else {
+            position = getMenuPosition();
+        }
+
+        // We can skip animating if FAB is not visible
+        if (animateMovement && getVisibility() == VISIBLE) {
+            mMenuAnimationController.moveToPosition(position, /* animateMovement = */ true);
+            // onArrivalAtPosition() is called at the end of the animation.
+        } else {
+            mMenuAnimationController.moveToPosition(position);
+            onArrivalAtPosition(true); // no animation, so we call this immediately.
+        }
+    }
+
+    void onArrivalAtPosition(boolean moveToEdgeIfTucked) {
+        final PointF position = getMenuPosition();
         onBoundsInParentChanged((int) position.x, (int) position.y);
 
-        if (isMoveToTucked()) {
+        if (isMoveToTucked() && moveToEdgeIfTucked) {
             mMenuAnimationController.moveToEdgeAndHide();
         }
     }
@@ -242,6 +271,7 @@ class MenuView extends FrameLayout implements
         if (mFeaturesChangeListener != null) {
             mFeaturesChangeListener.onChange(newTargetFeatures);
         }
+
         mMenuAnimationController.fadeOutIfEnabled();
     }
 
@@ -270,6 +300,10 @@ class MenuView extends FrameLayout implements
         return mMenuViewAppearance.getMenuPosition();
     }
 
+    RecyclerView getTargetFeaturesView() {
+        return mTargetFeaturesView;
+    }
+
     void persistPositionAndUpdateEdge(Position percentagePosition) {
         mMenuViewModel.updateMenuSavingPosition(percentagePosition);
         mMenuViewAppearance.setPercentagePosition(percentagePosition);
@@ -284,6 +318,9 @@ class MenuView extends FrameLayout implements
     void updateMenuMoveToTucked(boolean isMoveToTucked) {
         mIsMoveToTucked = isMoveToTucked;
         mMenuViewModel.updateMenuMoveToTucked(isMoveToTucked);
+        if (mMoveToTuckedListener != null) {
+            mMoveToTuckedListener.onMoveToTuckedChanged(isMoveToTucked);
+        }
     }
 
 
@@ -344,8 +381,8 @@ class MenuView extends FrameLayout implements
         getContainerViewInsetLayer().setLayerInset(INDEX_MENU_ITEM, insets[0], insets[1], insets[2],
                 insets[3]);
 
-        final GradientDrawable gradientDrawable = getContainerViewGradient();
-        gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuMovingStateRadii());
+        mMenuAnimationController.startRadiiAnimation(
+                mMenuViewAppearance.getMenuMovingStateRadii());
     }
 
     void onBoundsInParentChanged(int newLeft, int newTop) {
@@ -362,6 +399,13 @@ class MenuView extends FrameLayout implements
         onSizeChanged();
         onEdgeChanged();
         onPositionChanged();
+    }
+
+    void incrementTexMetric(String metric) {
+        if (!Flags.floatingMenuDragToEdit()) {
+            return;
+        }
+        Counter.logIncrement(metric);
     }
 
     private InstantInsetLayerDrawable getContainerViewInsetLayer() {
@@ -388,5 +432,12 @@ class MenuView extends FrameLayout implements
          * @param newTargetFeatures the list related to the current accessibility features.
          */
         void onChange(List<AccessibilityTarget> newTargetFeatures);
+    }
+
+    /**
+     * Interface containing a callback for when MoveToTucked changes.
+     */
+    interface OnMoveToTuckedListener {
+        void onMoveToTuckedChanged(boolean moveToTucked);
     }
 }

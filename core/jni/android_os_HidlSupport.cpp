@@ -15,6 +15,7 @@
  */
 
 #include <hidl/HidlTransportSupport.h>
+#include <hidl/ServiceManagement.h>
 #include <nativehelper/JNIHelp.h>
 
 #include "core_jni_helpers.h"
@@ -24,8 +25,13 @@ static jint android_os_HidlSupport_getPidIfSharable(JNIEnv*, jclass) {
     return android::hardware::details::getPidIfSharable();
 }
 
+static jboolean android_os_HidlSupport_isHidlSupported(JNIEnv*, jclass) {
+    return android::hardware::isHidlSupported();
+}
+
 static const JNINativeMethod gHidlSupportMethods[] = {
-    {"getPidIfSharable", "()I", (void*)android_os_HidlSupport_getPidIfSharable},
+        {"getPidIfSharable", "()I", (void*)android_os_HidlSupport_getPidIfSharable},
+        {"isHidlSupported", "()Z", (void*)android_os_HidlSupport_isHidlSupported},
 };
 
 const char* const kHidlSupportPathName = "android/os/HidlSupport";

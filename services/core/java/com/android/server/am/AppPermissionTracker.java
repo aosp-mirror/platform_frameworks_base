@@ -43,6 +43,7 @@ import android.content.pm.PackageManager.OnPermissionsChangedListener;
 import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -292,8 +293,8 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
                 mPermissionGranted = true;
                 return;
             }
-            mPermissionGranted = mInjector.getPermissionManagerServiceInternal()
-                    .checkUidPermission(mUid, mPermission) == PERMISSION_GRANTED;
+            mPermissionGranted = mInjector.checkPermission(mPermission, Process.INVALID_PID, mUid)
+                    == PERMISSION_GRANTED;
         }
 
         void updateAppOps() {
@@ -392,7 +393,7 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
 
     private class MyAppOpsCallback extends IAppOpsCallback.Stub {
         @Override
-        public void opChanged(int op, int uid, String packageName) {
+        public void opChanged(int op, int uid, String packageName, String persistentDeviceId) {
             mHandler.obtainMessage(MyHandler.MSG_APPOPS_CHANGED, op, uid, packageName)
                     .sendToTarget();
         }

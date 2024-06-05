@@ -16,9 +16,10 @@
 
 package com.android.settingslib.spa.framework.util
 
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.testutils.waitUntil
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -28,7 +29,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class FlowsTest {
     @Test
@@ -86,5 +86,17 @@ class FlowsTest {
         val outputFlow = mainFlow.waitFirst(otherFlow)
 
         assertThat(outputFlow.toList()).containsExactly("A")
+    }
+
+    @Test
+    fun collectLatestWithLifecycle() {
+        val mainFlow = flowOf("A")
+        var actual: String? = null
+
+        mainFlow.collectLatestWithLifecycle(TestLifecycleOwner()) {
+            actual = it
+        }
+
+        waitUntil { actual == "A" }
     }
 }

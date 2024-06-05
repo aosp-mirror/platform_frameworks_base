@@ -17,29 +17,25 @@
 package com.android.systemui.shade;
 
 import static android.os.Trace.TRACE_TAG_APP;
-import static android.view.WindowInsets.Type.systemBars;
 
+import static com.android.systemui.Flags.enableViewCaptureTracing;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
 
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.media.permission.SafeCloseable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Trace;
 import android.util.AttributeSet;
-import android.util.Pair;
 import android.view.ActionMode;
-import android.view.DisplayCutout;
 import android.view.InputQueue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -51,23 +47,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowInsetsController;
-import android.widget.FrameLayout;
 
+import com.android.app.viewcapture.ViewCaptureFactory;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
-import com.android.systemui.R;
-import com.android.systemui.compose.ComposeFacade;
+import com.android.systemui.scene.ui.view.WindowRootView;
 
 /**
- * Combined keyguard and notification panel view. Also holding backdrop and scrims.
+ * Combined keyguard and notification panel view. Also holding backdrop and scrims. This view can
+ * serve as the root view of the main SysUI window, but because other views can also serve that
+ * purpose, users of this class cannot assume it is the root.
  */
-public class NotificationShadeWindowView extends FrameLayout {
+public class NotificationShadeWindowView extends WindowRootView {
     public static final String TAG = "NotificationShadeWindowView";
-
-    private int mRightInset = 0;
-    private int mLeftInset = 0;
 
     // Implements the floating action mode for TextView's Cut/Copy/Past menu. Normally provided by
     // DecorView, but since this is a special window we have to roll our own.
@@ -77,7 +70,8 @@ public class NotificationShadeWindowView extends FrameLayout {
     private ViewTreeObserver.OnPreDrawListener mFloatingToolbarPreDrawListener;
 
     private InteractionEventHandler mInteractionEventHandler;
-    private LayoutInsetsController mLayoutInsetProvider;
+
+    private SafeCloseable mViewCaptureCloseable;
 
     public NotificationShadeWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -85,83 +79,27 @@ public class NotificationShadeWindowView extends FrameLayout {
     }
 
     @Override
-    public WindowInsets onApplyWindowInsets(WindowInsets windowInsets) {
-        final Insets insets = windowInsets.getInsetsIgnoringVisibility(systemBars());
-        if (getFitsSystemWindows()) {
-            boolean paddingChanged = insets.top != getPaddingTop()
-                    || insets.bottom != getPaddingBottom();
-
-            // Drop top inset, and pass through bottom inset.
-            if (paddingChanged) {
-                setPadding(0, 0, 0, 0);
-            }
-        } else {
-            boolean changed = getPaddingLeft() != 0
-                    || getPaddingRight() != 0
-                    || getPaddingTop() != 0
-                    || getPaddingBottom() != 0;
-            if (changed) {
-                setPadding(0, 0, 0, 0);
-            }
-        }
-
-        mLeftInset = 0;
-        mRightInset = 0;
-        DisplayCutout displayCutout = getRootWindowInsets().getDisplayCutout();
-        Pair<Integer, Integer> pairInsets = mLayoutInsetProvider
-                .getinsets(windowInsets, displayCutout);
-        mLeftInset = pairInsets.first;
-        mRightInset = pairInsets.second;
-        applyMargins();
-        return windowInsets;
-    }
-
-    private void applyMargins() {
-        final int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            View child = getChildAt(i);
-            if (child.getLayoutParams() instanceof LayoutParams) {
-                LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                if (!lp.ignoreRightInset
-                        && (lp.rightMargin != mRightInset || lp.leftMargin != mLeftInset)) {
-                    lp.rightMargin = mRightInset;
-                    lp.leftMargin = mLeftInset;
-                    child.requestLayout();
-                }
-            }
-        }
-    }
-
-    @Override
-    public FrameLayout.LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new LayoutParams(getContext(), attrs);
-    }
-
-    @Override
-    protected FrameLayout.LayoutParams generateDefaultLayoutParams() {
-        return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-    }
-
-    @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         setWillNotDraw(!DEBUG);
-
-        if (ComposeFacade.INSTANCE.isComposeAvailable()) {
-            ComposeFacade.INSTANCE.composeInitializer().onAttachedToWindow(this);
+        if (enableViewCaptureTracing()) {
+            mViewCaptureCloseable = ViewCaptureFactory.getInstance(getContext())
+                .startCapture(getRootView(), ".NotificationShadeWindowView");
         }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (ComposeFacade.INSTANCE.isComposeAvailable()) {
-            ComposeFacade.INSTANCE.composeInitializer().onDetachedFromWindow(this);
+        if (mViewCaptureCloseable != null) {
+            mViewCaptureCloseable.close();
         }
     }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        mInteractionEventHandler.collectKeyEvent(event);
+
         if (mInteractionEventHandler.interceptMediaKey(event)) {
             return true;
         }
@@ -182,15 +120,13 @@ public class NotificationShadeWindowView extends FrameLayout {
         mInteractionEventHandler = listener;
     }
 
-    protected void setLayoutInsetsController(LayoutInsetsController provider) {
-        mLayoutInsetProvider = provider;
-    }
-
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         Boolean result = mInteractionEventHandler.handleDispatchTouchEvent(ev);
 
         result = result != null ? result : super.dispatchTouchEvent(ev);
+
+        TouchLogger.logDispatchTouch(TAG, ev, result);
 
         mInteractionEventHandler.dispatchTouchEventComplete();
 
@@ -234,24 +170,6 @@ public class NotificationShadeWindowView extends FrameLayout {
             pt.setStrokeWidth(12.0f);
             pt.setStyle(Paint.Style.STROKE);
             canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), pt);
-        }
-    }
-
-    private static class LayoutParams extends FrameLayout.LayoutParams {
-
-        public boolean ignoreRightInset;
-
-        LayoutParams(int width, int height) {
-            super(width, height);
-        }
-
-        LayoutParams(Context c, AttributeSet attrs) {
-            super(c, attrs);
-
-            TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.StatusBarWindowView_Layout);
-            ignoreRightInset = a.getBoolean(
-                    R.styleable.StatusBarWindowView_Layout_ignoreRightInset, false);
-            a.recycle();
         }
     }
 
@@ -367,18 +285,6 @@ public class NotificationShadeWindowView extends FrameLayout {
         }
     }
 
-    /**
-     * Controller responsible for calculating insets for the shade window.
-     */
-    public interface LayoutInsetsController {
-
-        /**
-         * Update the insets and calculate them accordingly.
-         */
-        Pair<Integer, Integer> getinsets(@Nullable WindowInsets windowInsets,
-                @Nullable DisplayCutout displayCutout);
-    }
-
     interface InteractionEventHandler {
         /**
          * Returns a result for {@link ViewGroup#dispatchTouchEvent(MotionEvent)} or null to defer
@@ -414,6 +320,11 @@ public class NotificationShadeWindowView extends FrameLayout {
         boolean dispatchKeyEvent(KeyEvent event);
 
         boolean dispatchKeyEventPreIme(KeyEvent event);
+
+        /**
+         * Collects the KeyEvent without intercepting it
+         */
+        void collectKeyEvent(KeyEvent event);
     }
 
     /**

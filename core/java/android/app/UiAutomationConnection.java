@@ -23,9 +23,9 @@ import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerGlobal;
@@ -51,8 +51,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
 import android.window.ScreenCapture;
 import android.window.ScreenCapture.CaptureArgs;
-import android.window.ScreenCapture.ScreenshotHardwareBuffer;
-import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 
 import libcore.io.IoUtils;
 
@@ -215,9 +213,10 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             if (rotation == UiAutomation.ROTATION_UNFREEZE) {
-                mWindowManager.thawRotation();
+                mWindowManager.thawRotation(/* caller= */ "UiAutomationConnection#setRotation");
             } else {
-                mWindowManager.freezeRotation(rotation);
+                mWindowManager.freezeRotation(rotation,
+                        /* caller= */ "UiAutomationConnection#setRotation");
             }
             return true;
         } catch (RemoteException re) {
@@ -229,56 +228,54 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
-    public Bitmap takeScreenshot(Rect crop) {
+    public boolean takeScreenshot(Rect crop, ScreenCapture.ScreenCaptureListener listener) {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
             throwIfNotConnectedLocked();
         }
+
         final long identity = Binder.clearCallingIdentity();
         try {
             final CaptureArgs captureArgs = new CaptureArgs.Builder<>()
                     .setSourceCrop(crop)
                     .build();
-            SynchronousScreenCaptureListener syncScreenCapture =
-                    ScreenCapture.createSyncCaptureListener();
-            mWindowManager.captureDisplay(DEFAULT_DISPLAY, captureArgs,
-                    syncScreenCapture);
-            final ScreenshotHardwareBuffer screenshotBuffer =
-                    syncScreenCapture.getBuffer();
-            return screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+            mWindowManager.captureDisplay(DEFAULT_DISPLAY, captureArgs, listener);
         } catch (RemoteException re) {
             re.rethrowAsRuntimeException();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        return null;
+
+        return true;
     }
 
     @Nullable
     @Override
-    public Bitmap takeSurfaceControlScreenshot(@NonNull SurfaceControl surfaceControl) {
+    public boolean takeSurfaceControlScreenshot(@NonNull SurfaceControl surfaceControl,
+            ScreenCapture.ScreenCaptureListener listener) {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
             throwIfNotConnectedLocked();
         }
 
-        ScreenCapture.ScreenshotHardwareBuffer captureBuffer;
         final long identity = Binder.clearCallingIdentity();
         try {
-            captureBuffer = ScreenCapture.captureLayers(
+            ScreenCapture.LayerCaptureArgs args =
                     new ScreenCapture.LayerCaptureArgs.Builder(surfaceControl)
-                            .setChildrenOnly(false)
-                            .build());
+                    .setChildrenOnly(false)
+                    .build();
+            int status = ScreenCapture.captureLayers(args, listener);
+
+            if (status != 0) {
+                return false;
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
 
-        if (captureBuffer == null) {
-            return null;
-        }
-        return captureBuffer.asBitmap();
+        return true;
     }
 
     @Override
@@ -353,6 +350,9 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
     }
 
+    /**
+     * Grants permission for the {@link Context#DEVICE_ID_DEFAULT default device}
+     */
     @Override
     public void grantRuntimePermission(String packageName, String permission, int userId)
             throws RemoteException {
@@ -363,12 +363,16 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mPermissionManager.grantRuntimePermission(packageName, permission, userId);
+            mPermissionManager.grantRuntimePermission(packageName, permission,
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
+    /**
+     * Revokes permission for the {@link Context#DEVICE_ID_DEFAULT default device}
+     */
     @Override
     public void revokeRuntimePermission(String packageName, String permission, int userId)
             throws RemoteException {
@@ -379,7 +383,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mPermissionManager.revokeRuntimePermission(packageName, permission, userId, null);
+            mPermissionManager.revokeRuntimePermission(packageName, permission,
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId, null);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -427,6 +432,71 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             return mActivityManager.getDelegatedShellPermissions();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void addOverridePermissionState(int uid, String permission, int result)
+            throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mActivityManager.addOverridePermissionState(callingUid, uid, permission, result);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void removeOverridePermissionState(int uid, String permission) throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mActivityManager.removeOverridePermissionState(callingUid, uid, permission);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void clearOverridePermissionStates(int uid) throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mActivityManager.clearOverridePermissionStates(callingUid, uid);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void clearAllOverridePermissionStates() throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mActivityManager.clearAllOverridePermissionStates(callingUid);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -617,11 +687,13 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             if (mInitialFrozenRotation != INITIAL_FROZEN_ROTATION_UNSPECIFIED) {
                 // Calling out with a lock held is fine since if the system
                 // process is gone the client calling in will be killed.
-                mWindowManager.freezeRotation(mInitialFrozenRotation);
+                mWindowManager.freezeRotation(mInitialFrozenRotation,
+                        /* caller= */ "UiAutomationConnection#restoreRotationStateLocked");
             } else {
                 // Calling out with a lock held is fine since if the system
                 // process is gone the client calling in will be killed.
-                mWindowManager.thawRotation();
+                mWindowManager.thawRotation(
+                        /* caller= */ "UiAutomationConnection#restoreRotationStateLocked");
             }
         } catch (RemoteException re) {
             /* ignore */

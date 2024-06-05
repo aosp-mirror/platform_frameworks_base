@@ -35,6 +35,7 @@ import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.IHwBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -43,7 +44,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.util.Log;
-import android.util.Singleton;
 
 import com.android.internal.util.FrameworkStatsLog;
 
@@ -264,71 +264,107 @@ public final class MediaCas implements AutoCloseable {
     public static final int PLUGIN_STATUS_SESSION_NUMBER_CHANGED =
             android.hardware.cas.StatusEvent.PLUGIN_SESSION_NUMBER_CHANGED;
 
-    private static final Singleton<IMediaCasService> sService =
-            new Singleton<IMediaCasService>() {
+    private static IMediaCasService sService = null;
+    private static Object sAidlLock = new Object();
+
+    /** DeathListener for AIDL service */
+    private static IBinder.DeathRecipient sDeathListener =
+            new IBinder.DeathRecipient() {
                 @Override
-                protected IMediaCasService create() {
-                    try {
-                        Log.d(TAG, "Trying to get AIDL service");
-                        IMediaCasService serviceAidl =
-                                IMediaCasService.Stub.asInterface(
-                                        ServiceManager.getService(
-                                                IMediaCasService.DESCRIPTOR + "/default"));
-                        if (serviceAidl != null) {
-                            return serviceAidl;
-                        }
-                    } catch (Exception eAidl) {
-                        Log.d(TAG, "Failed to get cas AIDL service");
+                public void binderDied() {
+                    synchronized (sAidlLock) {
+                        Log.d(TAG, "The service is dead");
+                        sService.asBinder().unlinkToDeath(sDeathListener, 0);
+                        sService = null;
                     }
-                    return null;
-                }
-            };
-
-    private static final Singleton<android.hardware.cas.V1_0.IMediaCasService> sServiceHidl =
-            new Singleton<android.hardware.cas.V1_0.IMediaCasService>() {
-                @Override
-                protected android.hardware.cas.V1_0.IMediaCasService create() {
-                    try {
-                        Log.d(TAG, "Trying to get cas@1.2 service");
-                        android.hardware.cas.V1_2.IMediaCasService serviceV12 =
-                                android.hardware.cas.V1_2.IMediaCasService.getService(
-                                        true /*wait*/);
-                        if (serviceV12 != null) {
-                            return serviceV12;
-                        }
-                    } catch (Exception eV1_2) {
-                        Log.d(TAG, "Failed to get cas@1.2 service");
-                    }
-
-                    try {
-                        Log.d(TAG, "Trying to get cas@1.1 service");
-                        android.hardware.cas.V1_1.IMediaCasService serviceV11 =
-                                android.hardware.cas.V1_1.IMediaCasService.getService(
-                                        true /*wait*/);
-                        if (serviceV11 != null) {
-                            return serviceV11;
-                        }
-                    } catch (Exception eV1_1) {
-                        Log.d(TAG, "Failed to get cas@1.1 service");
-                    }
-
-                    try {
-                        Log.d(TAG, "Trying to get cas@1.0 service");
-                        return android.hardware.cas.V1_0.IMediaCasService.getService(true /*wait*/);
-                    } catch (Exception eV1_0) {
-                        Log.d(TAG, "Failed to get cas@1.0 service");
-                    }
-
-                    return null;
                 }
             };
 
     static IMediaCasService getService() {
-        return sService.get();
+        synchronized (sAidlLock) {
+            if (sService == null || !sService.asBinder().isBinderAlive()) {
+                try {
+                    Log.d(TAG, "Trying to get AIDL service");
+                    sService =
+                            IMediaCasService.Stub.asInterface(
+                                    ServiceManager.waitForDeclaredService(
+                                            IMediaCasService.DESCRIPTOR + "/default"));
+                    if (sService != null) {
+                        sService.asBinder().linkToDeath(sDeathListener, 0);
+                    }
+                } catch (Exception eAidl) {
+                    Log.d(TAG, "Failed to get cas AIDL service");
+                }
+            }
+            return sService;
+        }
     }
 
+    private static android.hardware.cas.V1_0.IMediaCasService sServiceHidl = null;
+    private static Object sHidlLock = new Object();
+
+    /** Used to indicate the right end-point to handle the serviceDied method */
+    private static final long MEDIA_CAS_HIDL_COOKIE = 394;
+
+    /** DeathListener for HIDL service */
+    private static IHwBinder.DeathRecipient sDeathListenerHidl =
+            new IHwBinder.DeathRecipient() {
+                @Override
+                public void serviceDied(long cookie) {
+                    if (cookie == MEDIA_CAS_HIDL_COOKIE) {
+                        synchronized (sHidlLock) {
+                            sServiceHidl = null;
+                        }
+                    }
+                }
+            };
+
     static android.hardware.cas.V1_0.IMediaCasService getServiceHidl() {
-        return sServiceHidl.get();
+        synchronized (sHidlLock) {
+            if (sServiceHidl != null) {
+                return sServiceHidl;
+            } else {
+                try {
+                    Log.d(TAG, "Trying to get cas@1.2 service");
+                    android.hardware.cas.V1_2.IMediaCasService serviceV12 =
+                            android.hardware.cas.V1_2.IMediaCasService.getService(true /*wait*/);
+                    if (serviceV12 != null) {
+                        sServiceHidl = serviceV12;
+                        sServiceHidl.linkToDeath(sDeathListenerHidl, MEDIA_CAS_HIDL_COOKIE);
+                        return sServiceHidl;
+                    }
+                } catch (Exception eV1_2) {
+                    Log.d(TAG, "Failed to get cas@1.2 service");
+                }
+
+                try {
+                    Log.d(TAG, "Trying to get cas@1.1 service");
+                    android.hardware.cas.V1_1.IMediaCasService serviceV11 =
+                            android.hardware.cas.V1_1.IMediaCasService.getService(true /*wait*/);
+                    if (serviceV11 != null) {
+                        sServiceHidl = serviceV11;
+                        sServiceHidl.linkToDeath(sDeathListenerHidl, MEDIA_CAS_HIDL_COOKIE);
+                        return sServiceHidl;
+                    }
+                } catch (Exception eV1_1) {
+                    Log.d(TAG, "Failed to get cas@1.1 service");
+                }
+
+                try {
+                    Log.d(TAG, "Trying to get cas@1.0 service");
+                    sServiceHidl =
+                            android.hardware.cas.V1_0.IMediaCasService.getService(true /*wait*/);
+                    if (sServiceHidl != null) {
+                        sServiceHidl.linkToDeath(sDeathListenerHidl, MEDIA_CAS_HIDL_COOKIE);
+                    }
+                    return sServiceHidl;
+                } catch (Exception eV1_0) {
+                    Log.d(TAG, "Failed to get cas@1.0 service");
+                }
+            }
+        }
+        // Couldn't find an HIDL service, returning null.
+        return null;
     }
 
     private void validateInternalStates() {
@@ -756,7 +792,7 @@ public final class MediaCas implements AutoCloseable {
      * @return Whether the specified CA system is supported on this device.
      */
     public static boolean isSystemIdSupported(int CA_system_id) {
-        IMediaCasService service = sService.get();
+        IMediaCasService service = getService();
         if (service != null) {
             try {
                 return service.isSystemIdSupported(CA_system_id);
@@ -765,7 +801,7 @@ public final class MediaCas implements AutoCloseable {
             }
         }
 
-        android.hardware.cas.V1_0.IMediaCasService serviceHidl = sServiceHidl.get();
+        android.hardware.cas.V1_0.IMediaCasService serviceHidl = getServiceHidl();
         if (serviceHidl != null) {
             try {
                 return serviceHidl.isSystemIdSupported(CA_system_id);
@@ -781,7 +817,7 @@ public final class MediaCas implements AutoCloseable {
      * @return an array of descriptors for the available CA plugins.
      */
     public static PluginDescriptor[] enumeratePlugins() {
-        IMediaCasService service = sService.get();
+        IMediaCasService service = getService();
         if (service != null) {
             try {
                 AidlCasPluginDescriptor[] descriptors = service.enumeratePlugins();
@@ -794,10 +830,11 @@ public final class MediaCas implements AutoCloseable {
                 }
                 return results;
             } catch (RemoteException e) {
+                Log.e(TAG, "Some exception while enumerating plugins");
             }
         }
 
-        android.hardware.cas.V1_0.IMediaCasService serviceHidl = sServiceHidl.get();
+        android.hardware.cas.V1_0.IMediaCasService serviceHidl = getServiceHidl();
         if (serviceHidl != null) {
             try {
                 ArrayList<HidlCasPluginDescriptor> descriptors = serviceHidl.enumeratePlugins();

@@ -17,12 +17,11 @@
 
 package com.android.systemui.user.ui.viewmodel
 
-import com.android.systemui.R
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.drawable.CircularDrawable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
@@ -38,13 +37,17 @@ import kotlinx.coroutines.flow.map
 class UserSwitcherViewModel
 @Inject
 constructor(
-    private val userInteractor: UserInteractor,
+    private val userSwitcherInteractor: UserSwitcherInteractor,
     private val guestUserInteractor: GuestUserInteractor,
 ) {
 
+    /** The currently selected user. */
+    val selectedUser: Flow<UserViewModel> =
+        userSwitcherInteractor.selectedUser.map { user -> toViewModel(user) }
+
     /** On-device users. */
     val users: Flow<List<UserViewModel>> =
-        userInteractor.users.map { models -> models.map { user -> toViewModel(user) } }
+        userSwitcherInteractor.users.map { models -> models.map { user -> toViewModel(user) } }
 
     /** The maximum number of columns that the user selection grid should use. */
     val maximumUserColumns: Flow<Int> = users.map { getMaxUserSwitcherItemColumns(it.size) }
@@ -57,13 +60,16 @@ constructor(
     val isMenuVisible: Flow<Boolean> = _isMenuVisible
     /** The user action menu. */
     val menu: Flow<List<UserActionViewModel>> =
-        userInteractor.actions.map { actions -> actions.map { action -> toViewModel(action) } }
+        userSwitcherInteractor.actions.map { actions ->
+            actions.map { action -> toViewModel(action) }
+        }
 
     /** Whether the button to open the user action menu is visible. */
     val isOpenMenuButtonVisible: Flow<Boolean> = menu.map { it.isNotEmpty() }
 
     private val hasCancelButtonBeenClicked = MutableStateFlow(false)
     private val isFinishRequiredDueToExecutedAction = MutableStateFlow(false)
+    private val userSwitched = MutableStateFlow(false)
 
     /**
      * Whether the observer should finish the experience. Once consumed, [onFinished] must be called
@@ -85,6 +91,7 @@ constructor(
     fun onFinished() {
         hasCancelButtonBeenClicked.value = false
         isFinishRequiredDueToExecutedAction.value = false
+        userSwitched.value = false
     }
 
     /** Notifies that the user has clicked the "open menu" button. */
@@ -117,8 +124,9 @@ constructor(
             hasCancelButtonBeenClicked,
             // If an executed action told us to finish, we should finish,
             isFinishRequiredDueToExecutedAction,
-        ) { cancelButtonClicked, executedActionFinish ->
-            cancelButtonClicked || executedActionFinish
+            userSwitched,
+        ) { cancelButtonClicked, executedActionFinish, userSwitched ->
+            cancelButtonClicked || executedActionFinish || userSwitched
         }
 
     private fun toViewModel(
@@ -128,7 +136,7 @@ constructor(
             viewKey = model.id,
             name =
                 if (model.isGuest && model.isSelected) {
-                    Text.Resource(R.string.guest_exit_quick_settings_button)
+                    Text.Resource(com.android.settingslib.R.string.guest_exit_quick_settings_button)
                 } else {
                     model.name
                 },
@@ -168,7 +176,7 @@ constructor(
                     isTablet = true,
                 ),
             onClicked = {
-                userInteractor.executeAction(action = model)
+                userSwitcherInteractor.executeAction(action = model)
                 // We don't finish because we want to show a dialog over the full-screen UI and
                 // that dialog can be dismissed in case the user changes their mind and decides not
                 // to add a user.
@@ -187,7 +195,10 @@ constructor(
         return if (!model.isSelectable) {
             null
         } else {
-            { userInteractor.selectUser(model.id) }
+            {
+                userSwitcherInteractor.selectUser(model.id)
+                userSwitched.value = true
+            }
         }
     }
 }

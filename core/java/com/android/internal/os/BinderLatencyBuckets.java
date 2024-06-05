@@ -26,6 +26,7 @@ import java.util.Arrays;
  * Generates the bucket thresholds (with a custom logarithmic scale) for a histogram to store
  * latency samples in.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BinderLatencyBuckets {
     private static final String TAG = "BinderLatencyBuckets";
     private final int[] mBuckets;

@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Szybkie ładowanie"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wolne ładowanie"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie zoptymalizowane w celu ochrony baterii"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problem z akcesoriami do ładowania"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Naciśnij Menu, aby odblokować."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> – wstrzymano ładowanie, aby chronić baterię"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> – sprawdź akcesoria do ładowania"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sieć zablokowana"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Brak karty SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Dodaj kartę SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Brak karty SIM lub nie można jej odczytać. Dodaj kartę SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Nie można użyć karty SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Karta SIM została trwale wyłączona.\n Skontaktuj się z dostawcą usług bezprzewodowych, aby uzyskać inną kartę SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"Karta SIM jest zablokowana."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"Karta SIM została zablokowana kodem PUK"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Odblokowuję kartę SIM…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Po zablokowaniu wymagany jest kod PIN"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Po zablokowaniu wymagane jest hasło"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Po zablokowaniu wymagany jest wzór"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Aktualizacja zainstaluje się w czasie bezczynności"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Instalacja aktualizacji nastąpi, gdy urządzenie nie będzie w użyciu"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Wzmocnij ochronę. Od dawna nie używano kodu PIN."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Wzmocnij ochronę. Od dawna nie używano hasła."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Wzmocnij ochronę. Od dawna nie używano wzoru."</string>
@@ -87,7 +83,7 @@
     <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Zbyt wiele nieudanych prób wpisania kodu PIN"</string>
     <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Zbyt wiele nieudanych prób narysowania wzoru"</string>
     <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Zbyt wiele nieudanych prób wpisania hasła"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Spróbuj ponownie za # sekundę.}few{Spróbuj ponownie za # sekundy.}many{Spróbuj ponownie za # sekund.}other{Spróbuj ponownie za # sekundy.}}"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Spróbuj ponownie za # sekundę}few{Spróbuj ponownie za # sekundy}many{Spróbuj ponownie za # sekund}other{Spróbuj ponownie za # sekundy}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Wpisz kod PIN karty SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Wpisz kod PIN karty SIM „<xliff:g id="CARRIER">%1$s</xliff:g>”."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Wyłącz kartę eSIM, by używać urządzenia bez usługi sieci komórkowej."</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Ze względów bezpieczeństwa użyj wzoru"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Ze względów bezpieczeństwa użyj kodu PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Ze względów bezpieczeństwa użyj hasła"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Dla większego bezpieczeństwa musisz podać kod PIN"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Dla większego bezpieczeństwa musisz narysować wzór"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Dla większego bezpieczeństwa musisz podać hasło"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Urządzenie zablokowane przez administratora"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Urządzenie zostało zablokowane ręcznie"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nie rozpoznano"</string>

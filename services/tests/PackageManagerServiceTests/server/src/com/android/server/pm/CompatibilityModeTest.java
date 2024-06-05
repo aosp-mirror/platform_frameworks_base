@@ -32,11 +32,11 @@ import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 
+import com.android.internal.pm.parsing.pkg.PackageImpl;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.pkg.PackageStateUnserialized;
 import com.android.server.pm.pkg.PackageUserStateImpl;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import org.junit.After;
 import org.junit.Before;

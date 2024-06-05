@@ -16,6 +16,11 @@
 
 package android.text;
 
+import android.annotation.NonNull;
+import android.app.AppGlobals;
+
+import com.android.text.flags.Flags;
+
 /**
  * Flags in the "text" namespace.
  *
@@ -44,6 +49,46 @@ public final class TextFlags {
     /**
      * Default value for the flag {@link #ENABLE_NEW_CONTEXT_MENU}.
      */
-    public static final boolean ENABLE_NEW_CONTEXT_MENU_DEFAULT = false;
+    public static final boolean ENABLE_NEW_CONTEXT_MENU_DEFAULT = true;
 
+    /**
+     * List of text flags to be transferred to the application process.
+     */
+    public static final String[] TEXT_ACONFIGS_FLAGS = {
+            Flags.FLAG_NO_BREAK_NO_HYPHENATION_SPAN,
+            Flags.FLAG_PHRASE_STRICT_FALLBACK,
+            Flags.FLAG_USE_BOUNDS_FOR_WIDTH,
+            Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE,
+            Flags.FLAG_ICU_BIDI_MIGRATION,
+            Flags.FLAG_FIX_MISALIGNED_CONTEXT_MENU,
+    };
+
+    /**
+     * List of the default values of the text flags.
+     *
+     * The order must be the same to the TEXT_ACONFIG_FLAGS.
+     */
+    public static final boolean[] TEXT_ACONFIG_DEFAULT_VALUE = {
+            Flags.noBreakNoHyphenationSpan(),
+            Flags.phraseStrictFallback(),
+            Flags.useBoundsForWidth(),
+            Flags.fixLineHeightForLocale(),
+            Flags.icuBidiMigration(),
+            Flags.fixMisalignedContextMenu(),
+    };
+
+    /**
+     * Get a key for the feature flag.
+     */
+    public static String getKeyForFlag(@NonNull String flag) {
+        return "text__" + flag;
+    }
+
+    /**
+     * Return true if the feature flag is enabled.
+     */
+    public static boolean isFeatureEnabled(@NonNull String flag) {
+        return AppGlobals.getIntCoreSetting(
+                getKeyForFlag(flag), 0 /* aconfig is false by default */) != 0;
+    }
 }

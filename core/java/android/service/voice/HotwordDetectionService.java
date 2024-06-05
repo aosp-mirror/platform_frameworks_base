@@ -19,6 +19,7 @@ package android.service.voice;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.DurationMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -77,6 +78,16 @@ public abstract class HotwordDetectionService extends Service
     private static final boolean DBG = false;
 
     private static final long UPDATE_TIMEOUT_MILLIS = 20000;
+
+    /**
+     * The PersistableBundle options key used in {@link #onDetect(ParcelFileDescriptor, AudioFormat,
+     * PersistableBundle, Callback)} to indicate whether the system will close the audio stream
+     * after {@code Callback} is invoked.
+     */
+    @FlaggedApi(android.app.wearable.Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
+    public static final String KEY_SYSTEM_WILL_CLOSE_AUDIO_STREAM_AFTER_CALLBACK =
+            "android.service.voice.HotwordDetectionService."
+                    + "KEY_SYSTEM_WILL_CLOSE_AUDIO_STREAM_AFTER_CALLBACK";
 
     /**
      * Feature flag for Attention Service.
@@ -227,6 +238,12 @@ public abstract class HotwordDetectionService extends Service
         public void stopDetection() {
             HotwordDetectionService.this.onStopDetection();
         }
+
+        @Override
+        public void registerRemoteStorageService(IDetectorSessionStorageService
+                detectorSessionStorageService) {
+            throw new UnsupportedOperationException("Hotword cannot access files from the disk.");
+        }
     };
 
     @Override
@@ -346,9 +363,11 @@ public abstract class HotwordDetectionService extends Service
      * {@link HotwordDetector#startRecognition(ParcelFileDescriptor, AudioFormat,
      * PersistableBundle)} run} hotword recognition on audio coming from an external connected
      * microphone.
-     * <p>
-     * Upon invoking the {@code callback}, the system closes {@code audioStream} and sends the
-     * detection result to the {@link HotwordDetector.Callback hotword detector}.
+     *
+     * <p>Upon invoking the {@code callback}, the system will send the detection result to
+     * the {@link HotwordDetector}'s callback. If {@code
+     * options.getBoolean(KEY_SYSTEM_WILL_CLOSE_AUDIO_STREAM_AFTER_CALLBACK, true)} returns true,
+     * the system will also close the {@code audioStream} after {@code callback} is invoked.
      *
      * @param audioStream Stream containing audio bytes returned from a microphone
      * @param audioFormat Format of the supplied audio

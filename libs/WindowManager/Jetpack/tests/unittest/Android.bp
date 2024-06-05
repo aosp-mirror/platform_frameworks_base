@@ -23,6 +23,7 @@ package {
 
 android_test {
     name: "WMJetpackUnitTests",
+    team: "trendy_team_windowing_sdk",
     // To make the test run via TEST_MAPPING
     test_suites: ["device-tests"],
 
@@ -32,12 +33,14 @@ android_test {
 
     static_libs: [
         "androidx.window.extensions",
+        "androidx.window.extensions.core_core",
         "junit",
         "androidx.test.runner",
         "androidx.test.rules",
         "androidx.test.ext.junit",
+        "flag-junit",
         "mockito-target-extended-minus-junit4",
-        "truth-prebuilt",
+        "truth",
         "testables",
         "platform-test-annotations",
     ],

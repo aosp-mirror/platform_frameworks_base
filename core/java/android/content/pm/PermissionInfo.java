@@ -273,6 +273,10 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * to the <code>retailDemo</code> value of
      * {@link android.R.attr#protectionLevel}.
      *
+     * @deprecated This flag has been replaced by the
+     *             {@link android.R.string#config_defaultRetailDemo retail demo role} and is a
+     *             no-op since {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}.
+     *
      * @hide
      */
     @SystemApi
@@ -489,7 +493,8 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      */
     public @Nullable CharSequence nonLocalizedDescription;
 
-    private static ForStringSet sForStringSet = Parcelling.Cache.getOrCreate(ForStringSet.class);
+    private static final ForStringSet sForStringSet =
+            Parcelling.Cache.getOrCreate(ForStringSet.class);
 
     /**
      * A {@link Set} of trusted signing certificate digests. If this permission has the {@link
@@ -608,6 +613,40 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             protLevel.append(("|module"));
         }
         return protLevel.toString();
+    }
+
+    /** @hide */
+    public static @NonNull String flagsToString(@Flags int flags) {
+        StringBuilder sb = new StringBuilder("[");
+        while (flags != 0) {
+            final int flag = 1 << Integer.numberOfTrailingZeros(flags);
+            flags &= ~flag;
+            switch (flag) {
+                case PermissionInfo.FLAG_COSTS_MONEY:
+                    sb.append("costsMoney");
+                    break;
+                case PermissionInfo.FLAG_REMOVED:
+                    sb.append("removed");
+                    break;
+                case PermissionInfo.FLAG_HARD_RESTRICTED:
+                    sb.append("hardRestricted");
+                    break;
+                case PermissionInfo.FLAG_SOFT_RESTRICTED:
+                    sb.append("softRestricted");
+                    break;
+                case PermissionInfo.FLAG_IMMUTABLY_RESTRICTED:
+                    sb.append("immutablyRestricted");
+                    break;
+                case PermissionInfo.FLAG_INSTALLED:
+                    sb.append("installed");
+                    break;
+                default: sb.append(flag);
+            }
+            if (flags != 0) {
+                sb.append("|");
+            }
+        }
+        return sb.append("]").toString();
     }
 
     /**

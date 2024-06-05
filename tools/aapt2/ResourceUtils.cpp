@@ -619,7 +619,7 @@ uint32_t AndroidTypeToAttributeTypeMask(uint16_t type) {
 }
 
 std::unique_ptr<Item> TryParseItemForAttribute(
-    StringPiece value, uint32_t type_mask,
+    android::IDiagnostics* diag, StringPiece value, uint32_t type_mask,
     const std::function<bool(const ResourceName&)>& on_create_reference) {
   using android::ResTable_map;
 
@@ -670,8 +670,32 @@ std::unique_ptr<Item> TryParseItemForAttribute(
     // Try parsing this as a float.
     auto floating_point = TryParseFloat(value);
     if (floating_point) {
+      // Only check if the parsed result lost precision when the parsed item is
+      // android::Res_value::TYPE_FLOAT and there is other possible types saved in type_mask, like
+      // ResTable_map::TYPE_INTEGER.
       if (type_mask & AndroidTypeToAttributeTypeMask(floating_point->value.dataType)) {
-        return std::move(floating_point);
+        const bool mayOnlyBeFloat = (type_mask & ~float_mask) == 0;
+        const bool parsedAsFloat = floating_point->value.dataType == android::Res_value::TYPE_FLOAT;
+        if (!mayOnlyBeFloat && parsedAsFloat) {
+          float f = reinterpret_cast<float&>(floating_point->value.data);
+          std::u16string str16 = android::util::Utf8ToUtf16(util::TrimWhitespace(value));
+          double d;
+          if (android::ResTable::stringToDouble(str16.data(), str16.size(), d)) {
+            // Parse as a float only if the difference between float and double parsed from the
+            // same string is smaller than 1, otherwise return as raw string.
+            if (fabs(f - d) < 1) {
+              return std::move(floating_point);
+            } else {
+              if (diag->IsVerbose()) {
+                diag->Note(android::DiagMessage()
+                           << "precision lost greater than 1 while parsing float " << value
+                           << ", return a raw string");
+              }
+            }
+          }
+        } else {
+          return std::move(floating_point);
+        }
       }
     }
   }
@@ -683,12 +707,12 @@ std::unique_ptr<Item> TryParseItemForAttribute(
  * allows.
  */
 std::unique_ptr<Item> TryParseItemForAttribute(
-    StringPiece str, const Attribute* attr,
+    android::IDiagnostics* diag, StringPiece str, const Attribute* attr,
     const std::function<bool(const ResourceName&)>& on_create_reference) {
   using android::ResTable_map;
 
   const uint32_t type_mask = attr->type_mask;
-  auto value = TryParseItemForAttribute(str, type_mask, on_create_reference);
+  auto value = TryParseItemForAttribute(diag, str, type_mask, on_create_reference);
   if (value) {
     return value;
   }

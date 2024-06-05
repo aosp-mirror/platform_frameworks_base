@@ -86,7 +86,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Brak zasięgu sieci komórkowej"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Spróbuj zmienić preferowaną sieć. Kliknij, by zmienić."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Połączenia alarmowe są niedostępne"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Nie można nawiązywać połączeń alarmowych przez Wi‑Fi"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Połączenia alarmowe wymagają sieci komórkowej"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alerty"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Przekierowanie połączeń"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Tryb alarmowego połączenia zwrotnego"</string>
@@ -155,6 +155,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> po <xliff:g id="TIME_DELAY">{2}</xliff:g> sekundach"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nieprzekierowane"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nieprzekierowane"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Bezpieczeństwo sieci komórkowej"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Szyfrowanie, powiadomienia dotyczące niezaszyfrowanych sieci"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Uzyskano dostęp do identyfikatora urządzenia"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"O godzinie <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> pobliska sieć zarejestrowała unikalny identyfikator Twojego urządzenia (IMSI lub IMEI) podczas korzystania z karty SIM <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"O godzinie <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> pobliska sieć zarejestrowała unikalny identyfikator Twojego urządzenia (IMSI lub IMEI) podczas korzystania z karty SIM <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nOznacza to, że zarejestrowano Twoją lokalizację, aktywność lub tożsamość. Jest to powszechna praktyka, ale może stanowić problem dla osób dbających o prywatność."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Połączono z szyfrowaną siecią <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Połączenie przy użyciu karty SIM w sieci <xliff:g id="NETWORK_NAME">%1$s</xliff:g> jest teraz bezpieczniejsze"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Połączono z niezaszyfrowaną siecią"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Gdy korzystasz z karty SIM w sieci <xliff:g id="NETWORK_NAME">%1$s</xliff:g>, połączenia, wiadomości i dane są bardziej narażone na ataki"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Połączenia, wiadomości i dane są obecnie bardziej podatne na ataki podczas korzystania z karty SIM <xliff:g id="NETWORK_NAME">%1$s</xliff:g>.\n\nGdy połączenie zostanie ponownie zaszyfrowane, otrzymasz kolejne powiadomienie."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Ustawienia bezpieczeństwa sieci komórkowej"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Więcej informacji"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"OK"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Wykonano kod funkcji."</string>
     <string name="fcError" msgid="5325116502080221346">"Problem z połączeniem lub nieprawidłowy kod funkcji."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -190,6 +203,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Twój profil służbowy nie jest już dostępny na tym urządzeniu"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Zbyt wiele prób podania hasła"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator odstąpił urządzenie do użytku osobistego"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Przestrzeń prywatna została usunięta"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Twoja organizacja nie zezwala na przestrzenie prywatne na tym urządzeniu zarządzanym."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Urządzenie jest zarządzane"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Twoja organizacja zarządza tym urządzeniem i może monitorować ruch w sieci. Kliknij, by dowiedzieć się więcej."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikacje mogą mieć dostęp do Twojej lokalizacji"</string>
@@ -272,6 +287,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Asystent głosowy"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"Blokada"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"&gt;999"</string>
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Odpowiedz"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Nowe powiadomienie"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Klawiatura fizyczna"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"Bezpieczeństwo"</string>
@@ -292,6 +308,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacje zużywające baterię"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Powiększenie"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Użycie ułatwień dostępu"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Wyświetlacz"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> zużywa baterię"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Liczba aplikacji zużywających baterię: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i użycia danych"</string>
@@ -347,6 +364,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Robienie zrzutu ekranu"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Może robić zrzuty ekranu wyświetlacza."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Podgląd, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"zamknij"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"wyłączanie lub zmienianie paska stanu"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Pozwala aplikacji na wyłączanie paska stanu oraz dodawanie i usuwanie ikon systemowych."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"działanie jako pasek stanu"</string>
@@ -371,6 +389,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Zezwala aplikacji powiązać się z modułem komunikatów z sieci komórkowej, aby przekazywać je w momencie, w którym są otrzymywane. W niektórych lokalizacjach komunikaty alarmowe z sieci komórkowej są dostarczane, aby ostrzec Cię o sytuacjach zagrożenia. Złośliwe aplikacje mogą wpływać na działanie urządzenia lub zakłócać je po nadejściu komunikatu alarmowego z sieci komórkowej."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Zarządzaj połączeniami w toku"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Zezwala aplikacji zobaczyć detale dotyczące połączeń w toku na Twoim urządzeniu i na kontrolę tych połączeń."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Uzyskaj dostęp do ostatniego znanego identyfikatora komórki"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Zezwala aplikacji na dostęp do ostatniego znanego identyfikatora komórki udostępnianego przez dostawcę usług telefonicznych."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"odczyt komunikatów z sieci komórkowej"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Zezwala aplikacji na odczyt komunikatów z sieci komórkowej odebranych na urządzeniu. Komunikaty alarmowe z sieci komórkowej są dostarczane w niektórych lokalizacjach w celu ostrzeżenia Cię o sytuacjach zagrożenia. Złośliwe aplikacje mogą wpływać na wydajność lub zakłócać działanie urządzenia po odebraniu komunikatu alarmowego z sieci komórkowej."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"czytanie subskrybowanych źródeł"</string>
@@ -435,6 +455,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „systemExempted”"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"Uruchamianie usług działających na pierwszym planie typu „fileManagement”"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „fileManagement”."</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"uruchamianie usług działających na pierwszym planie typu „mediaProcessing”"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „mediaProcessing”"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"uruchamianie usług działających na pierwszym planie typu „specialUse”"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Zezwala na wykorzystywanie przez aplikację usług działających na pierwszym planie typu „specialUse”"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"mierzenie rozmiaru pamięci aplikacji"</string>
@@ -503,6 +525,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Ta aplikacja systemowa z podwyższonymi uprawnieniami może w dowolnym momencie robić zdjęcia i nagrywać filmy przy użyciu aparatu systemowego. Wymaga przyznania uprawnień android.permission.CAMERA również aplikacji."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Zezwól na dostęp aplikacji lub usługi na otrzymywanie wywoływania zwrotnego o urządzeniach z aparatem, kiedy są one uruchamiane lub zamykane."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ta aplikacja może otrzymywać wywołania zwrotne, kiedy urządzenie z aparatem jest uruchamiane (przez jaką aplikację) albo zamykane."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Zezwól na dostęp aplikacji lub usługi do aparatu jako użytkownik systemowy bez interfejsu graficznego."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Ta aplikacja może korzystać z aparatu jako użytkownik systemowy bez interfejsu graficznego."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"sterowanie wibracjami"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Pozwala aplikacji na sterowanie wibracjami."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Zezwala aplikacji na dostęp do stanu wibracji"</string>
@@ -538,6 +562,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Zezwala aplikacji na używanie nadajnika podczerwieni w telefonie."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"ustawianie tapety"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Pozwala aplikacji na ustawianie tapety systemu."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Dostęp do ukrytych profili"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Zezwala aplikacji na dostęp do ukrytych profili."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"dopasowywanie rozmiaru tapety"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Pozwala aplikacji na ustawianie wskazówek dotyczących rozmiaru tapety systemu."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"ustawianie strefy czasowej"</string>
@@ -592,6 +618,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Pozwala aplikacji uzyskiwać informacje o preferowanych usługach płatniczych NFC, np. zarejestrowanych pomocach i miejscach docelowych tras."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolowanie łączności Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Pozwala aplikacji na komunikowanie się z tagami, kartami i czytnikami NFC (Near Field Communication)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Wydarzenie transakcji w Bezpiecznym elemencie"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Zezwala na otrzymywanie przez aplikację informacji o transakcjach realizowanych w Bezpiecznym elemencie."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"wyłączanie blokady ekranu"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Pozwala aplikacji na wyłączenie blokady klawiatury i wszystkich związanych z tym haseł zabezpieczających. Na przykład telefon wyłącza blokadę klawiatury, gdy odbiera połączenie przychodzące, a następnie włącza ją ponownie po zakończeniu połączenia."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"żądaj informacji o stopniu złożoności blokady ekranu"</string>
@@ -622,16 +650,17 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Sprzęt biometryczny niedostępny"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Anulowano uwierzytelnianie"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nie rozpoznano"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"Nie rozpoznano twarzy"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Anulowano uwierzytelnianie"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nie ustawiono kodu PIN, wzoru ani hasła"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Podczas uwierzytelniania wystąpił błąd"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Używaj blokady ekranu"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Użyj blokady ekranu, aby kontynuować"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Mocno naciśnij czujnik"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Nie rozpoznaję odcisku palca. Spróbuj ponownie."</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Mocno naciśnij czytnik"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Nie rozpoznano odcisku palca. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Wyczyść czytnik linii papilarnych i spróbuj ponownie"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Wyczyść czujnik i spróbuj ponownie"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Mocno naciśnij czujnik"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Mocno naciśnij czytnik"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Palec został obrócony zbyt wolno. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Użyj odcisku innego palca"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Zbyt jasno"</string>
@@ -642,21 +671,22 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Nie rozpoznano odcisku palca"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Nie rozpoznano odcisku palca"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"Nie rozpoznano twarzy. Użyj odcisku palca."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Uwierzytelniono odciskiem palca"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Twarz rozpoznana"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Twarz rozpoznana, kliknij Potwierdź"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Czytnik linii papilarnych nie jest dostępny."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Czytnik linii papilarnych nie jest dostępny"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nie można skonfigurować odcisku palca"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Upłynął limit czasu konfiguracji odcisku palca. Spróbuj ponownie."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Odczyt odcisku palca został anulowany."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Odczyt odcisku palca został anulowany przez użytkownika."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Odczyt odcisku palca został anulowany"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Odczyt odcisku palca został anulowany przez użytkownika"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Zbyt wiele prób. Użyj blokady ekranu."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Zbyt wiele prób. Użyj blokady ekranu."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Nie zarejestrowano odcisków palców."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"To urządzenie nie jest wyposażone w czytnik linii papilarnych."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Czujnik jest tymczasowo wyłączony."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Nie można użyć czytnika linii papilarnych. Odwiedź serwis."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Nie zarejestrowano odcisków palców"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"To urządzenie nie jest wyposażone w czytnik linii papilarnych"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Czujnik tymczasowo wyłączony"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Nie można użyć czytnika linii papilarnych. Odwiedź serwis."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Naciśnięto przycisk zasilania"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Odcisk palca <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Używaj odcisku palca"</string>
@@ -667,14 +697,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Coś poszło nie tak. Spróbuj ponownie."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona odcisku palca"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Odblokowywanie urządzenia"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Wypróbuj inną metodę odblokowywania"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Jeśli odcisk palca nie jest rozpoznawany, bo przykładowo masz mokre palce, użyj funkcji rozpoznawania twarzy"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Jeśli twarz nie jest rozpoznawana, na przykład z powodu słabego oświetlenia, użyj funkcji odblokowywania odciskiem palca"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Rozpoznawanie twarzy"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem z rozpoznawaniem twarzy"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Kliknij, aby usunąć model twarzy, a następnie ponownie dodaj skan twarzy"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Skonfiguruj rozpoznawanie twarzy"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Popatrz na ekran telefonu, aby go odblokować"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Aby używać rozpoznawania twarzy, włącz "<b>"dostęp do aparatu"</b>" w Ustawieniach i prywatności"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Skonfiguruj więcej sposobów odblokowywania"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Kliknij, aby dodać odcisk palca"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Odblokowywanie odciskiem palca"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Nie można użyć czytnika linii papilarnych"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Odwiedź serwis."</string>
@@ -691,7 +721,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Nie widać twarzy – trzymaj telefon na wysokości oczu"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Telefon się porusza. Trzymaj go nieruchomo."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Zarejestruj swoją twarz ponownie."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Nie rozpoznaję twarzy. Spróbuj ponownie."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Nie rozpoznano twarzy. Spróbuj ponownie."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Lekko zmień położenie głowy"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Patrz prosto na telefon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Patrz prosto na telefon"</string>
@@ -802,10 +832,12 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Zezwala aplikacji na pobieranie próbek danych z czujnika z częstotliwością wyższą niż 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"aktualizacja aplikacji bez działania ze strony użytkownika"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Pozwala na aktualizowanie zainstalowanej wcześniej aplikacji bez działania ze strony użytkownika"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"Aktualizuj stan weryfikacji zaszyfrowanych w pełni kluczy do kontaktów należących do innych aplikacji"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Zezwala aplikacji na aktualizację stanu weryfikacji zaszyfrowanych w pełni kluczy do kontaktów należących do innych aplikacji."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Określ reguły hasła"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolowanie długości haseł blokady ekranu i kodów PIN oraz dozwolonych w nich znaków."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorowanie prób odblokowania ekranu"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Przy odblokowywaniu ekranu monitoruj, ile razy wpisano nieprawidłowe hasło i blokuj tablet lub usuń z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło i blokuje tablet lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitorowanie liczby nieudanych prób odblokowania ekranu za pomocą hasła oraz blokowanie urządzenia z Androidem TV lub kasowanie z niego wszystkich danych w razie wpisania błędnego hasła zbyt wiele razy."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitorowanie przypadków nieprawidłowego wpisania hasła podczas odblokowywania ekranu i blokowanie systemu multimedialno-rozrywkowego lub usuwanie z niego wszystkich danych przy zbyt dużej liczbie błędnych prób."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło, i blokuje telefon lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
@@ -972,7 +1004,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Poprawnie!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Spróbuj ponownie."</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Spróbuj ponownie."</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Odblokowanie wszystkich funkcji i danych"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Odblokuj, by używać wszystkich funkcji i danych"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Przekroczono maksymalną liczbę prób rozpoznania twarzy."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Brak karty SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Brak karty SIM w tablecie."</string>
@@ -1160,6 +1192,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Usuń"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Sposób wprowadzania tekstu"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Działania na tekście"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"To pole nie obsługuje pisma odręcznego"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Pola haseł nie obsługują pisma odręcznego"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Wstecz"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Przełącz metodę wprowadzania"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Kończy się miejsce"</string>
@@ -1238,7 +1272,7 @@
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"Skala"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"Zawsze pokazuj"</string>
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Włącz ponownie, wybierając Ustawienia systemu &gt; Aplikacje &gt; Pobrane."</string>
-    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje obecnie ustawionego rozmiaru wyświetlacza i może działać niestabilnie."</string>
+    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje obecnie ustawionego rozmiaru wyświetlanych elementów i może działać niestabilnie."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Zawsze pokazuj"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została skompilowana pod niezgodną wersję systemu Android i może zachowywać się niezgodnie z oczekiwaniami. Sprawdź, czy jest dostępna zaktualizowana wersja aplikacji."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Zawsze pokazuj"</string>
@@ -1395,7 +1429,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ODRZUĆ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Wybierz metodę wprowadzania"</string>
     <string name="show_ime" msgid="6406112007347443383">"Pozostaw na ekranie, gdy aktywna jest klawiatura fizyczna"</string>
-    <string name="hardware" msgid="1800597768237606953">"Pokaż klawiaturę wirtualną"</string>
+    <string name="hardware" msgid="3611039921284836033">"Używaj klawiatury ekranowej"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Skonfiguruj urządzenie <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Skonfiguruj klawiatury fizyczne"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Kliknij, aby wybrać język i układ"</string>
@@ -1705,6 +1739,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Może śledzić Twoje interakcje z aplikacjami lub czujnikiem sprzętowym, a także obsługiwać aplikacje za Ciebie."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Zezwól"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Odmów"</string>
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"Odinstaluj"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Aplikacja zasłania prośbę o uprawnienia, więc nie można zweryfikować Twojej odpowiedzi."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Wybierz funkcję, aby zacząć z niej korzystać:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Wybierz funkcje, których chcesz używać z przyciskiem ułatwień dostępu"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Wybierz funkcje, do których chcesz używać skrótu z klawiszami głośności"</string>
@@ -1734,7 +1770,7 @@
     <string name="owner_name" msgid="8713560351570795743">"Właściciel"</string>
     <string name="guest_name" msgid="8502103277839834324">"Gość"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Błąd"</string>
-    <string name="error_message_change_not_allowed" msgid="843159705042381454">"Ta zmiana nie jest dozwolona przez administratora"</string>
+    <string name="error_message_change_not_allowed" msgid="843159705042381454">"Ta zmiana nie jest dozwolona przez administratora."</string>
     <string name="app_not_found" msgid="3429506115332341800">"Nie znaleziono aplikacji do obsługi tej akcji"</string>
     <string name="revoke" msgid="5526857743819590458">"Cofnij"</string>
     <string name="mediasize_iso_a0" msgid="7039061159929977973">"ISO A0"</string>
@@ -1865,17 +1901,18 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> – praca 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> – praca 3"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Klon aplikacji <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"Prywatna aplikacja <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Podaj PIN, aby odpiąć"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Aby odpiąć, poproś o wzór odblokowania"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Aby odpiąć, poproś o hasło"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"Zainstalowany przez administratora"</string>
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"Zainstalowany przez administratora.\nOtwórz ustawienia, aby wyświetlić przyznane uprawnienia"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Oszczędzanie baterii uruchamia ciemny motyw oraz wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne, pewne funkcje oraz wybrane połączenia sieciowe."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Oszczędzanie baterii uruchamia ciemny motyw oraz wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne, pewne funkcje oraz wybrane połączenia sieciowe."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć Oszczędzanie danych?"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Włączyć oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Włącz"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Przez 1 minutę (do {formattedTime})}few{Przez # minuty (do {formattedTime})}many{Przez # minut (do {formattedTime})}other{Przez # minuty (do {formattedTime})}}"</string>
     <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Przez 1 min (do {formattedTime})}few{Przez # min (do {formattedTime})}many{Przez # min (do {formattedTime})}other{Przez # min (do {formattedTime})}}"</string>
@@ -1898,6 +1935,12 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Wydarzenie"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Sen"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Zarządzana przez aplikację <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Włączono"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Wyłączono"</string>
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Dowolny kalendarz"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> wycisza niektóre dźwięki"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"W Twoim urządzeniu wystąpił problem wewnętrzny. Może być ono niestabilne, dopóki nie przywrócisz danych fabrycznych."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"W Twoim urządzeniu wystąpił problem wewnętrzny. Skontaktuj się z jego producentem, by otrzymać szczegółowe informacje."</string>
@@ -1915,6 +1958,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Zweryfikowano"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Rozwiń"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Zwiń"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Zwinięto"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Rozwinięto"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"przełącz rozwijanie"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Port peryferyjny USB na urządzeniu z Androidem"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1955,10 +2000,13 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Cofnąć wstrzymanie aplikacji służbowych?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Cofnij wstrzymanie"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Połączenie alarmowe"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ustaw blokadę ekranu"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Ustaw blokadę ekranu"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Aby korzystać z przestrzeni prywatnej, ustaw na tym urządzeniu blokadę ekranu"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacja jest niedostępna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest obecnie niedostępna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – brak dostępu"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Wymagane są uprawnienia"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"Zablokowana prośba o uprawnienia"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Aparat niedostępny"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Kontynuuj na telefonie"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon niedostępny"</string>
@@ -1969,6 +2017,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj urządzenia z Androidem TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj tabletu."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj telefonu."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Ta aplikacja prosi o dodatkowe uprawnienia, ale nie można ich przyznać w trakcie sesji odtwarzania strumieniowego. Najpierw przyznaj te uprawnienia na urządzeniu z Androidem TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Ta aplikacja prosi o dodatkowe uprawnienia, ale nie można ich przyznać w trakcie sesji odtwarzania strumieniowego. Najpierw przyznaj te uprawnienia na tablecie."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Ta aplikacja prosi o dodatkowe uprawnienia, ale nie można ich przyznać w trakcie sesji odtwarzania strumieniowego. Najpierw przyznaj te uprawnienia na telefonie."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Ta aplikacja wymaga dodatkowych zabezpieczeń. Użyj urządzenia z Androidem TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Ta aplikacja wymaga dodatkowych zabezpieczeń. Użyj tabletu."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Ta aplikacja wymaga dodatkowych zabezpieczeń. Użyj telefonu."</string>
@@ -2026,7 +2077,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"Zaktualizować w: "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"Zaktualizować: <xliff:g id="TYPE">%1$s</xliff:g> w: "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Zaktualizować: <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> w: "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Zaktualizować w: "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" te elementy: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"Zaktualizować w "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" te elementy: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Zapisz"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Nie, dziękuję"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Nie teraz"</string>
@@ -2098,6 +2149,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Powiadomienie z informacją o trybie rutynowym"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Oszczędzanie baterii jest włączone"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Ograniczam wykorzystanie baterii, aby przedłużyć jej żywotność"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Oszczędzanie baterii jest włączone"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"Oszczędzanie baterii jest włączone, aby wydłużyć jej żywotność"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Oszczędzanie baterii"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Oszczędzanie baterii zostało wyłączone"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefon jest wystarczająco naładowany. Funkcje nie są już ograniczone."</string>
@@ -2145,7 +2198,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad – w lewo"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad – w prawo"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad – środek"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Pasek napisów w aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Umieszczono pakiet <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> w zasobniku danych RESTRICTED"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"wysłano obraz"</string>
@@ -2172,6 +2224,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Przełączyć na aplikację służbową?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"Twoja organizacja zezwala na nawiązywanie połączeń tylko z aplikacji służbowych"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Twoja organizacja zezwala na wysyłanie wiadomości tylko z aplikacji służbowych"</string>
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"Połączenia telefoniczne możesz wykonywać wyłącznie za pomocą osobistej aplikacji Telefon. Takie połączenia zostaną dodane do Twojej osobistej historii połączeń."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"Wiadomości SMS możesz wysyłać wyłącznie z osobistej aplikacji Wiadomości."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Użyj przeglądarki osobistej"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Użyj przeglądarki służbowej"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"Zadzwoń"</string>
@@ -2325,6 +2379,9 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Zezwala aplikacji towarzyszącej na uruchamianie usług działających na pierwszym planie, podczas gdy sama działa w tle."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon jest dostępny"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon jest zablokowany"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Nie można utworzyć odbicia lustrzanego na wyświetlaczu"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Użyj innego kabla i spróbuj ponownie"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Urządzenie jest zbyt ciepłe i nie może utworzyć odbicia lustrzanego zawartości ekranu, dopóki się nie ochłodzi."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Podwójny ekran"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Włączono podwójny ekran"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> korzysta z obu wyświetlaczy, aby pokazać treści"</string>
@@ -2348,4 +2405,25 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Służbowy 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Testowy"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Wspólny"</string>
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Profil służbowy"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Przestrzeń prywatna"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Wspólny"</string>
+    <string name="redacted_notification_message" msgid="1520587845842228816">"Treść poufnego powiadomienia została ukryta"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Ze względów bezpieczeństwa zawartość aplikacji jest niewidoczna podczas udostępniania ekranu"</string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Automatycznie połączono z satelitą"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Możesz wymieniać wiadomości bez dostępu do sieci komórkowej lub Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otwórz Wiadomości"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Jak to działa"</string>
+    <string name="unarchival_session_app_label" msgid="6811856981546348205">"Oczekiwanie…"</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Skonfiguruj ponownie odblokowywanie odciskiem palca"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"Odcisk palca <xliff:g id="FINGERPRINT">%s</xliff:g> nie sprawdzał się dobrze i został usunięty"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"Odciski palców <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nie sprawdzały się dobrze i zostały usunięte"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"Odcisk palca <xliff:g id="FINGERPRINT">%s</xliff:g> nie sprawdzał się dobrze i został usunięty. Skonfiguruj go ponownie, aby odblokowywać telefon odciskiem palca."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"Odciski palca <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> i <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nie sprawdzały się dobrze i zostały usunięte. Skonfiguruj je ponownie, aby odblokowywać telefon odciskiem palca."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"Skonfiguruj ponownie rozpoznawanie twarzy"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"Twój model twarzy nie sprawdzał się dobrze i został usunięty. Skonfiguruj go ponownie, aby odblokowywać telefon za pomocą skanu twarzy."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Skonfiguruj"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Nie teraz"</string>
 </resources>

@@ -46,15 +46,20 @@ cc_defaults {
 
 cc_library_shared {
     name: "libandroid",
-    defaults: ["libandroid_defaults"],
+    defaults: [
+        "libandroid_defaults",
+        "android.hardware.power-ndk_shared",
+    ],
 
     srcs: [
         "activity_manager.cpp",
         "asset_manager.cpp",
+        "surface_control_input_receiver.cpp",
         "choreographer.cpp",
         "configuration.cpp",
         "hardware_buffer_jni.cpp",
         "input.cpp",
+        "input_transfer_token.cpp",
         "looper.cpp",
         "native_activity.cpp",
         "native_window_jni.cpp",
@@ -80,6 +85,7 @@ cc_library_shared {
         "libinput",
         "libutils",
         "libbinder",
+        "libbinder_ndk",
         "libui",
         "libgui",
         "libharfbuzz_ng", // Only for including hb.h via minikin
@@ -95,8 +101,9 @@ cc_library_shared {
         "libpowermanager",
         "android.hardware.configstore@1.0",
         "android.hardware.configstore-utils",
-        "android.hardware.power-V4-ndk",
+        "android.os.flags-aconfig-cc",
         "libnativedisplay",
+        "libfmq",
     ],
 
     static_libs: [

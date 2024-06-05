@@ -17,10 +17,15 @@
 #ifndef _ANDROID_DIAGNOSTICS_H
 #define _ANDROID_DIAGNOSTICS_H
 
+// on some systems ERROR is defined as 0 so android::base::ERROR becomes android::base::0
+// which doesn't compile. We undef it here to avoid that and because we don't ever need that def.
+#undef ERROR
+
 #include <sstream>
 #include <string>
 
 #include "Source.h"
+#include "android-base/logging.h"
 #include "android-base/macros.h"
 #include "androidfw/StringPiece.h"
 
@@ -86,6 +91,17 @@ struct IDiagnostics {
     DiagMessageActual actual = message.Build();
     Log(Level::Note, actual);
   }
+
+  virtual void SetVerbose(bool val) {
+    verbose_ = val;
+  }
+
+  virtual bool IsVerbose() {
+    return verbose_;
+  }
+
+  private:
+    bool verbose_ = false;
 };
 
 class SourcePathDiagnostics : public IDiagnostics {
@@ -103,6 +119,14 @@ class SourcePathDiagnostics : public IDiagnostics {
 
   bool HadError() {
     return error;
+  }
+
+  void SetVerbose(bool val) override {
+    diag_->SetVerbose(val);
+  }
+
+  bool IsVerbose() override {
+    return diag_->IsVerbose();
   }
 
  private:
@@ -124,6 +148,36 @@ class NoOpDiagnostics : public IDiagnostics {
 
   DISALLOW_COPY_AND_ASSIGN(NoOpDiagnostics);
 };
+
+class AndroidLogDiagnostics : public IDiagnostics {
+  public:
+    AndroidLogDiagnostics() = default;
+
+    void Log(Level level, DiagMessageActual& actual_msg) override {
+      android::base::LogSeverity severity;
+      switch (level) {
+        case Level::Error:
+          severity = android::base::ERROR;
+          break;
+
+        case Level::Warn:
+          severity = android::base::WARNING;
+          break;
+
+        case Level::Note:
+          severity = android::base::INFO;
+          break;
+      }
+      if (!actual_msg.source.path.empty()) {
+        LOG(severity) << actual_msg.source << ": " + actual_msg.message;
+      } else {
+        LOG(severity) << actual_msg.message;
+      }
+    }
+
+    DISALLOW_COPY_AND_ASSIGN(AndroidLogDiagnostics);
+};
+
 
 }  // namespace android
 

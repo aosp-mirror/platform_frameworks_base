@@ -31,14 +31,16 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -55,6 +57,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ArchiveTest extends UiServiceTestCase {
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private static final int SIZE = 5;
 
     private NotificationManagerService.Archive mArchive;
@@ -243,6 +248,31 @@ public class ArchiveTest extends UiServiceTestCase {
             fail("Concurrent modification exception");
         }
 
+        List<StatusBarNotification> actual = Arrays.asList(mArchive.getArray(mUm, SIZE, true));
+        assertThat(actual).hasSize(expected.size());
+        for (StatusBarNotification sbn : actual) {
+            assertThat(expected).contains(sbn.getKey());
+        }
+    }
+
+    @Test
+    public void testRemoveNotificationsByPackage() {
+        List<String> expected = new ArrayList<>();
+
+        StatusBarNotification sbn_remove = getNotification("pkg_remove", 0,
+                UserHandle.of(USER_CURRENT));
+        mArchive.record(sbn_remove, REASON_CANCEL);
+
+        StatusBarNotification sbn_keep = getNotification("pkg_keep", 1,
+                UserHandle.of(USER_CURRENT));
+        mArchive.record(sbn_keep, REASON_CANCEL);
+        expected.add(sbn_keep.getKey());
+
+        StatusBarNotification sbn_remove2 = getNotification("pkg_remove", 2,
+                UserHandle.of(USER_CURRENT));
+        mArchive.record(sbn_remove2, REASON_CANCEL);
+
+        mArchive.removePackageNotifications("pkg_remove", USER_CURRENT);
         List<StatusBarNotification> actual = Arrays.asList(mArchive.getArray(mUm, SIZE, true));
         assertThat(actual).hasSize(expected.size());
         for (StatusBarNotification sbn : actual) {

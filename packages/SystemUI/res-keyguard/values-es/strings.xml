@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando rápidamente"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando lentamente"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Carga optimizada para proteger la batería"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problema con el accesorio de carga"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Pulsa el menú para desbloquear la pantalla."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Carga pausada para proteger la batería"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Comprueba el accesorio de carga"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Bloqueada para la red"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"No hay ninguna SIM."</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Añade una SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Falta la SIM o no se puede leer. Añade una SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"No se puede usar la SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Tu SIM se ha desactivado de forma permanente.\n Para obtener otra SIM, ponte en contacto con tu proveedor de servicios inalámbricos."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"La SIM está bloqueada."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"La SIM está bloqueada con el código PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Desbloqueando SIM…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Se necesita el PIN después del bloqueo"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Se necesita la contraseña después del bloqueo"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Se necesita el patrón después del bloqueo"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"La actualización se instalará en horas de inactividad"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"La actualización se instalará cuando el dispositivo no esté en uso"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Se debe reforzar la seguridad. PIN no usado en mucho tiempo."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Se debe reforzar la seguridad. Contraseña no usada en mucho tiempo."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Se debe reforzar la seguridad. Patrón no usado en mucho tiempo."</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Para mayor seguridad, usa el patrón"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Para mayor seguridad, usa el PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Para mayor seguridad, usa la contraseña"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Debes introducir el PIN como medida de seguridad adicional"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Debes introducir el patrón como medida de seguridad adicional"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Debes introducir la contraseña como medida de seguridad adicional"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispositivo bloqueado por el administrador"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"El dispositivo se ha bloqueado manualmente"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"No se reconoce"</string>

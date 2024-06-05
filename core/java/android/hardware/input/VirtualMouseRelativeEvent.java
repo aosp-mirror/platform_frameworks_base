@@ -61,6 +61,14 @@ public final class VirtualMouseRelativeEvent implements Parcelable {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "VirtualMouseRelativeEvent("
+                + " x=" + mRelativeX
+                + " y=" + mRelativeY
+                + " eventTime(ns)=" + mEventTimeNanos;
+    }
+
     /**
      * Returns the relative x-axis movement, in pixels.
      */

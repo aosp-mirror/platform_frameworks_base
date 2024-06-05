@@ -20,18 +20,26 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
+
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.UserTracker;
+
+import kotlinx.coroutines.CoroutineDispatcher;
 
 import javax.inject.Inject;
 
 class SystemSettingsImpl implements SystemSettings {
     private final ContentResolver mContentResolver;
     private final UserTracker mUserTracker;
+    private final CoroutineDispatcher mBgCoroutineDispatcher;
 
     @Inject
-    SystemSettingsImpl(ContentResolver contentResolver, UserTracker userTracker) {
+    SystemSettingsImpl(ContentResolver contentResolver, UserTracker userTracker,
+            @Background CoroutineDispatcher bgDispatcher) {
         mContentResolver = contentResolver;
         mUserTracker = userTracker;
+        mBgCoroutineDispatcher = bgDispatcher;
     }
 
     @Override
@@ -47,6 +55,11 @@ class SystemSettingsImpl implements SystemSettings {
     @Override
     public Uri getUriFor(String name) {
         return Settings.System.getUriFor(name);
+    }
+
+    @Override
+    public CoroutineDispatcher getBackgroundDispatcher() {
+        return mBgCoroutineDispatcher;
     }
 
     @Override
@@ -74,7 +87,7 @@ class SystemSettingsImpl implements SystemSettings {
     }
 
     @Override
-    public boolean putString(String name, String value, String tag, boolean makeDefault) {
+    public boolean putString(@NonNull String name, String value, String tag, boolean makeDefault) {
         throw new UnsupportedOperationException(
                 "This method only exists publicly for Settings.Secure and Settings.Global");
     }

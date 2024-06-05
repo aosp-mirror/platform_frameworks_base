@@ -33,7 +33,7 @@ import androidx.slice.Slice;
 import androidx.slice.SliceItem;
 import androidx.slice.widget.SliceView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.util.ArrayList;
 import java.util.List;

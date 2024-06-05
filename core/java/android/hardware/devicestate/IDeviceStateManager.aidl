@@ -118,6 +118,7 @@ interface IDeviceStateManager {
     *
     * This should only be called from the overlay itself.
     */
+    @EnforcePermission("CONTROL_DEVICE_STATE")
     @JavaPassthrough(annotation=
         "@android.annotation.RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)")
     void onStateRequestOverlayDismissed(boolean shouldCancelRequest);

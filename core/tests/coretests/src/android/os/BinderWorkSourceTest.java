@@ -19,11 +19,14 @@ package android.os;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
@@ -33,6 +36,7 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -42,11 +46,15 @@ import org.junit.runner.RunWith;
 @LargeTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = ActivityManager.class)
 public class BinderWorkSourceTest {
     private static Context sContext;
     private static final int UID = 100;
     private static final int SECOND_UID = 200;
     private static final int UID_NONE = ThreadLocalWorkSource.UID_NONE;
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private IBinderWorkSourceService mService;
     private IBinderWorkSourceNestedService mNestedService;
@@ -71,13 +79,9 @@ public class BinderWorkSourceTest {
         }
     };
 
-    @BeforeClass
-    public static void setUpOnce() throws Exception {
-        sContext = InstrumentationRegistry.getContext();
-    }
-
     @Before
     public void setUp() throws Exception {
+        sContext = InstrumentationRegistry.getContext();
         sContext.bindService(
                 new Intent(sContext, BinderWorkSourceService.class),
                 mConnection, Context.BIND_AUTO_CREATE);

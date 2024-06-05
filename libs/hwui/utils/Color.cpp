@@ -16,22 +16,18 @@
 
 #include "Color.h"
 
+#include <Properties.h>
+#include <android/hardware_buffer.h>
+#include <android/native_window.h>
 #include <ui/ColorSpace.h>
 #include <utils/Log.h>
 
-#ifdef __ANDROID__ // Layoutlib does not support hardware buffers or native windows
-#include <android/hardware_buffer.h>
-#include <android/native_window.h>
-#endif
-
 #include <algorithm>
 #include <cmath>
-#include <Properties.h>
 
 namespace android {
 namespace uirenderer {
 
-#ifdef __ANDROID__ // Layoutlib does not support hardware buffers or native windows
 static inline SkImageInfo createImageInfo(int32_t width, int32_t height, int32_t format,
                                           sk_sp<SkColorSpace> colorSpace) {
     SkColorType colorType = kUnknown_SkColorType;
@@ -121,7 +117,6 @@ SkColorType BufferFormatToColorType(uint32_t format) {
             return kUnknown_SkColorType;
     }
 }
-#endif
 
 namespace {
 static constexpr skcms_TransferFunction k2Dot6 = {2.6f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
@@ -408,7 +403,7 @@ skcms_TransferFunction GetPQSkTransferFunction(float sdr_white_level) {
 }
 
 static skcms_TransferFunction trfn_apply_gain(const skcms_TransferFunction trfn, float gain) {
-    float pow_gain_ginv = sk_float_pow(gain, 1 / trfn.g);
+    float pow_gain_ginv = std::pow(gain, 1 / trfn.g);
     skcms_TransferFunction result;
     result.g = trfn.g;
     result.a = trfn.a * pow_gain_ginv;

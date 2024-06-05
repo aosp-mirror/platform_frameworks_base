@@ -1344,6 +1344,53 @@
         <!-- A color that passes accessibility guidelines for text/iconography when drawn on top
              of tertiary. @hide -->
         <attr name="materialColorTertiary" format="color"/>
+        <!-- The error color for the app, intended to draw attention to error conditions. @hide -->
+        <attr name="materialColorError" format="color"/>
+
+        <!-- System Custom Tokens-->
+        <!-- @hide -->
+        <attr name="customColorWidgetBackground" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorClockHour" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorClockMinute" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorClockSecond" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorThemeApp" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnThemeApp" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorThemeAppRing" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnThemeAppRing" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorBrandA" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorBrandB" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorBrandC" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorBrandD" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorUnderSurface" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorShadeActive" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnShadeActive" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnShadeActiveVariant" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorShadeInactive" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnShadeInactive" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOnShadeInactiveVariant" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorShadeDisabled" format="color"/>
+        <!-- @hide -->
+        <attr name="customColorOverviewBackground" format="color"/>
+
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -2292,7 +2339,17 @@
              {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the status bar must not
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentStatus}.
-             Corresponds to {@link android.view.Window#setStatusBarColor(int)}. -->
+             Corresponds to {@link android.view.Window#setStatusBarColor(int)}.
+             <p>If the color is transparent and the window enforces the status bar contrast, the
+             system will determine whether a scrim is necessary and draw one on behalf of the app to
+             ensure that the status bar has enough contrast with the contents of this app, and set
+             an appropriate effective bar background accordingly.
+             See: {@link android.R.attr#enforceStatusBarContrast}
+             <p>If the window belongs to an app targeting
+             {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
+             this attribute is ignored.
+             @deprecated Draw proper background behind
+                         {@link android.view.WindowInsets.Type#statusBars()}} instead. -->
         <attr name="statusBarColor" format="color" />
 
         <!-- The color for the navigation bar. If the color is not opaque, consider setting
@@ -2302,7 +2359,18 @@
              {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentNavigation}.
-             Corresponds to {@link android.view.Window#setNavigationBarColor(int)}. -->
+             Corresponds to {@link android.view.Window#setNavigationBarColor(int)}.
+             <p>If the color is transparent and the window enforces the navigation bar contrast, the
+             system will determine whether a scrim is necessary and draw one on behalf of the app to
+             ensure that the navigation bar has enough contrast with the contents of this app, and
+             set an appropriate effective bar background accordingly.
+             See: {@link android.R.attr#enforceNavigationBarContrast}
+             <p>If the window belongs to an app targeting
+             {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
+             this attribute is ignored.
+             @deprecated Draw proper background behind
+                         {@link android.view.WindowInsets.Type#navigationBars()} or
+                         {@link android.view.WindowInsets.Type#tappableElement()} instead. -->
         <attr name="navigationBarColor" format="color" />
 
         <!-- Shows a thin line of the specified color between the navigation bar and the app
@@ -2311,7 +2379,13 @@
              {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentNavigation}.
-             Corresponds to {@link android.view.Window#setNavigationBarDividerColor(int)}. -->
+             Corresponds to {@link android.view.Window#setNavigationBarDividerColor(int)}.
+             <p>If the window belongs to an app targeting
+             {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
+             this attribute is ignored.
+             @deprecated Draw proper background behind
+                         {@link android.view.WindowInsets.Type#navigationBars()} or
+                         {@link android.view.WindowInsets.Type#tappableElement()} instead. -->
         <attr name="navigationBarDividerColor" format="color" />
 
         <!-- Sets whether the system should ensure that the status bar has enough
@@ -2327,7 +2401,9 @@
              <p>If the app does not target at least {@link android.os.Build.VERSION_CODES#Q Q},
              this attribute is ignored.
 
-             @see android.view.Window#setStatusBarContrastEnforced -->
+             @see android.view.Window#setStatusBarContrastEnforced
+             @deprecated Draw proper background behind
+                         {@link android.view.WindowInsets.Type#statusBars()}} instead. -->
         <attr name="enforceStatusBarContrast" format="boolean" />
 
         <!-- Sets whether the system should ensure that the navigation bar has enough
@@ -2369,7 +2445,9 @@
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentStatus}.
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_STATUS_BAR} on
-             the decor view. -->
+             the decor view and
+             {@link android.view.WindowInsetsController#APPEARANCE_LIGHT_STATUS_BARS} on the
+             {@link android.view.WindowInsetsController}. -->
         <attr name="windowLightStatusBar" format="boolean" />
 
         <!-- Reference to a drawable to be used as the splash screen content of the window. This
@@ -2391,12 +2469,16 @@
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentNavigation}.
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR} on
-             the decor view. -->
+             the decor view and
+             {@link android.view.WindowInsetsController#APPEARANCE_LIGHT_NAVIGATION_BARS} on the
+             {@link android.view.WindowInsetsController}. -->
         <attr name="windowLightNavigationBar" format="boolean" />
 
         <!-- Controls how the window is laid out if there is a {@code DisplayCutout}.
         <p>
-        Defaults to {@code default}.
+        Defaults to {@code default}. But if the window fills the screen, and it belongs to an app
+        targeting {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or
+        above, the behavior will be the same as specifying {@code always} regardless.
         <p>
         See also
         {@link android.view.WindowManager.LayoutParams#layoutInDisplayCutoutMode
@@ -2483,6 +2565,39 @@
             <!-- The icon is shown unless the launching app specified SPLASH_SCREEN_STYLE_EMPTY -->
             <enum name="icon_preferred" value="1" />
         </attr>
+        <!-- Offer Window the ability to opt out the UI Toolkit discrete variable refresh rate.
+             This feature allows device to adjust refresh rate as needed and
+             can be useful for power saving.
+             Set to false to reduce the frame rate optimizations on devices with
+             variable refresh rate screens.
+             The default is true. -->
+        <attr name="windowIsFrameRatePowerSavingsBalanced" format="boolean"/>
+
+        <!-- Flag indicating whether this window would opt-out the edge-to-edge enforcement.
+
+             <p>If this is false, the edge-to-edge enforcement will be applied to the window if it
+             belongs to an app targeting
+             {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above.
+             The affected behaviors are:
+             <ul>
+                 <li>The framework will not fit the content view to the insets and will just pass
+                 through the {@link android.view.WindowInsets} to the content view, as if calling
+                 {@link android.view.Window#setDecorFitsSystemWindows(boolean)} with false.
+                 <li>{@link android.view.WindowManager.LayoutParams#layoutInDisplayCutoutMode} of
+                 the fill-screen windows will behave as specifying {@link
+                 android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS}.
+                 <li>The framework will set {@link android.R.attr#statusBarColor},
+                 {@link android.R.attr#navigationBarColor}, and
+                 {@link android.R.attr#navigationBarDividerColor} to transparent.
+                 <li>The frameworks will send Configuration no longer considering system insets.
+                 The Configuration will be stable regardless of the system insets change.
+             </ul>
+
+             <p>If this is true, the edge-to-edge enforcement won't be applied. However, this
+             attribute will be deprecated and disabled in a future SDK level.
+
+             <p>This is false by default. -->
+        <attr name="windowOptOutEdgeToEdgeEnforcement" format="boolean"/>
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -3030,15 +3145,15 @@
              representation this attribute can be used for providing such. -->
         <attr name="contentDescription" format="string" localization="suggested" />
 
-        <!-- Sets the id of a view before which this one is visited in accessibility traversal.
-             A screen-reader must visit the content of this view before the content of the one
-             it precedes.
+        <!-- Sets the id of a view that screen readers are requested to visit after this view.
+             Requests that a screen-reader visits the content of this view before the content of the
+             one it precedes. This does nothing if either view is not important for accessibility.
              {@see android.view.View#setAccessibilityTraversalBefore(int)} -->
         <attr name="accessibilityTraversalBefore" format="integer" />
 
-        <!-- Sets the id of a view after which this one is visited in accessibility traversal.
-             A screen-reader must visit the content of the other view before the content of
-             this one.
+        <!-- Sets the id of a view that screen readers are requested to visit before this view.
+             Requests that a screen-reader visits the content of the other view before the content
+             of this one. This does nothing if either view is not important for accessibility.
              {@see android.view.View#setAccessibilityTraversalAfter(int)} -->
         <attr name="accessibilityTraversalAfter" format="integer" />
 
@@ -3587,6 +3702,18 @@
              <p> The default value is 40dp for {@link android.widget.TextView} and
              {@link android.widget.EditText}, and 0dp for all other views. -->
         <attr name="handwritingBoundsOffsetBottom" format="dimension" />
+
+        <!-- Sets whether this view renders sensitive content. -->
+        <!-- @FlaggedApi("android.view.flags.sensitive_content_app_protection_api") -->
+        <attr name="contentSensitivity">
+            <!-- Let the Android System use its heuristics to determine if the view renders
+             sensitive content. -->
+            <enum name="auto" value="0" />
+            <!-- This view renders sensitive content. -->
+            <enum name="sensitive" value="0x1" />
+            <!-- This view doesn't render sensitive content. -->
+            <enum name="notSensitive" value="0x2" />
+        </attr>
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
@@ -3839,6 +3966,10 @@
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity" format="string" />
+        <!-- Component name of an activity that allows the user to modify
+             on-screen keyboards variants (e.g. different language or layout) for this service. -->
+        <!-- @FlaggedApi("android.view.inputmethod.ime_switcher_revamp") -->
+        <attr name="languageSettingsActivity" format="string"/>
         <!-- Set to true in all of the configurations for which this input
              method should be considered an option as the default. -->
         <attr name="isDefault" format="boolean" />
@@ -3854,6 +3985,11 @@
         <!-- Specifies if an IME can only be used while a device is in VR mode or on a dedicated
              device -->
         <attr name="isVrOnly" format="boolean"/>
+        <!-- Specifies if an IME can only be used on a display created by a virtual device.
+             @see android.companion.virtual.VirtualDeviceParams.Builder#setInputMethodComponent
+             @hide @SystemApi -->
+        <!-- @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") -->
+        <attr name="isVirtualDeviceOnly" format="boolean"/>
         <attr name="__removed2" format="boolean" />
         <!-- Specifies whether the IME supports showing inline suggestions. -->
         <attr name="supportsInlineSuggestions" format="boolean" />
@@ -3903,6 +4039,26 @@
             {@link android.inputmethodservice.InputMethodService#onFinishInput()}.
         -->
         <attr name="supportsStylusHandwriting" format="boolean" />
+        <!-- Specifies whether the IME supports connectionless stylus handwriting sessions. A
+             connectionless session differs from a regular session in that the IME does not use an
+             input connection to communicate with a text editor. Instead, the IME directly returns
+             recognised handwritten text via an {@link
+             android.inputmethodservice.InputMethodService} handwriting lifecycle API.
+
+             <p>If the IME supports connectionless sessions, apps or framework may start a
+             connectionless session when a stylus motion event sequence begins. {@link
+             android.inputmethodservice.InputMethodService#onStartConnectionlessStylusHandwriting}
+             is called. If the IME is ready for stylus input, it should return {code true} to start
+             the basic mode session. As in the regular session, the IME will receive stylus motion
+             events to the stylus handwriting window and should render ink to a view in this window.
+             When the user has stopped handwriting, the IME should end the session and deliver the
+             result by calling {@link
+             android.inputmethodservice.InputMethodService#finishConnectionlessStylusHandwriting}.
+
+             The default value is {code false}. If {code true}, {@link
+             android.R.attr#supportsStylusHandwriting} should also be {code true}.
+        -->
+        <attr name="supportsConnectionlessStylusHandwriting" format="boolean" />
         <!-- Class name of an activity that allows the user to modify the stylus handwriting
             settings for this service -->
         <attr name="stylusHandwritingSettingsActivity" format="string" />
@@ -4303,6 +4459,9 @@
         <!-- Whether the device must be screen on before routing data to this service.
              The default is true.-->
         <attr name="requireDeviceScreenOn" format="boolean"/>
+        <!-- Whether the device should default to observe mode when this service is
+             default or in the foreground. -->
+        <attr name="shouldDefaultToObserveMode" format="boolean"/>
     </declare-styleable>
 
     <!-- Use <code>offhost-apdu-service</code> as the root tag of the XML resource that
@@ -4327,6 +4486,9 @@
         <!-- Whether the device must be screen on before routing data to this service.
              The default is false.-->
         <attr name="requireDeviceScreenOn"/>
+        <!-- Whether the device should default to observe mode when this service is
+             default or in the foreground. -->
+        <attr name="shouldDefaultToObserveMode"/>
     </declare-styleable>
 
     <!-- Specify one or more <code>aid-group</code> elements inside a
@@ -4359,6 +4521,34 @@
     <declare-styleable name="AidPrefixFilter">
         <!-- The ISO7816 Application ID. This attribute is mandatory. -->
         <attr name="name" />
+    </declare-styleable>
+
+    <!-- Specify one or more <code>polling-loop-filter</code> elements inside a
+         <code>host-apdu-service</code> or <code>offhost-apdu-service</code> to indicate polling
+         loop frames that your service can handle. -->
+    <!-- @FlaggedApi("android.nfc.nfc_read_polling_loop") -->
+    <declare-styleable name="PollingLoopFilter">
+        <!-- The polling loop frame. This attribute is mandatory. -->
+        <attr name="name" />
+        <!-- Whether or not the system should automatically start a transaction when this polling
+         loop filter matches. If not set, default value is false. -->
+        <!-- @FlaggedApi("android.nfc.nfc_read_polling_loop") -->
+        <attr name="autoTransact" format="boolean"/>
+    </declare-styleable>
+
+    <!-- Specify one or more <code>polling-loop-pattern-filter</code> elements inside a
+         <code>host-apdu-service</code> or <code>offhost-apdu-service</code>  to indicate polling
+         loop frames that your service can handle. -->
+    <!-- @FlaggedApi("android.nfc.nfc_read_polling_loop") -->
+    <declare-styleable name="PollingLoopPatternFilter">
+        <!-- The patter to match polling loop frames to, must to be compatible with
+         {@link java.util.regex.Pattern#compile(String)} and only contain hexadecimal numbers and
+         `.`, `?` and `*` operators. This attribute is mandatory. -->
+        <attr name="name" />
+        <!-- Whether or not the system should automatically start a transaction when this polling
+         loop filter matches. If not set, default value is false. -->
+        <!-- @FlaggedApi("android.nfc.nfc_read_polling_loop") -->
+        <attr name="autoTransact" format="boolean"/>
     </declare-styleable>
 
     <!-- Use <code>host-nfcf-service</code> as the root tag of the XML resource that
@@ -5764,7 +5954,45 @@
             <enum name="none" value="0" />
             <!-- Justification by stretching word spacing. -->
             <enum name="inter_word" value = "1" />
+            <!-- Justification by stretching letter spacing. -->
+            <!-- @FlaggedApi("com.android.text.flags.inter_character_justification") -->
+            <enum name="inter_character" value = "2" />
         </attr>
+        <!-- Whether to use width of bounding box as a source of automatic line breaking and
+          drawing.
+          If this value is false, the TextView determines the View width, drawing offset and
+          automatic line breaking based on total advances as text widths. By setting true,
+          use glyph bound's as a source of text width.  -->
+        <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
+        <attr name="useBoundsForWidth" format="boolean" />
+
+
+        <!-- Whether to shift the drawing offset for prevent clipping start drawing offset.
+          This value is ignored when the useBoundsForWidth attribute is false.
+
+          If this value is false, the TextView draws text from the zero X coordinate. This is
+          useful for aligning multiple TextViews vertically.
+          If this value is true, the TextView shift the drawing offset not to clip the
+          stroke in the region where the X coordinate is negative. -->
+        <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
+        <attr name="shiftDrawingOffsetForStartOverhang" format="boolean" />
+        <!-- Whether to use the locale preferred line height for the minimum line height.
+
+          This flag is useful for preventing jitter of entering letters into empty EditText.
+          The line height of the text is determined by the font files used for drawing text in a
+          line. However, in case of the empty text case, the line height cannot be determined and
+          the default line height: usually it is came from a font of Latin script. By making this
+          attribute to true, the TextView/EditText uses a line height that is likely used for the
+          locale associated with the widget. For example, if the system locale is Japanese, the
+          height of the EditText will be adjusted to meet the height of the Japanese font even if
+          the text is empty.
+
+          The default value for EditText is true if targetSdkVersion is
+          {@link android.os.Build.VERSION_CODE#VANILLA_ICE_CREAM} or later, otherwise false.
+          For other TextViews, the default value is false.
+        -->
+        <!-- @FlaggedApi("com.android.text.flags.fix_line_height_for_locale") -->
+        <attr name="useLocalePreferredLineHeightForMinimum" format="boolean" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->
@@ -8827,6 +9055,14 @@
         <!-- Whether to show clock and other complications such as weather in the overlay. Default
              to true. Note that the overlay on dreams is currently only supported on tablets. -->
         <attr name="showClockAndComplications" format="boolean" />
+
+        <!-- Dream Category to determine the type of dream. Default to default.
+        @hide -->
+        <attr name="dreamCategory" format="integer">
+            <flag name="none" value="0x0" />
+            <flag name="low_light" value="0x1" />
+            <flag name="home_panel" value="0x2" />
+        </attr>
     </declare-styleable>
 
     <!--  Use <code>trust-agent</code> as the root tag of the XML resource that
@@ -9094,7 +9330,10 @@
         <attr name="dotColor" format="color|reference"/>
         <!-- Color of the dot when it's activated -->
         <attr name="dotActivatedColor" format="color|reference"/>
-
+        <!-- Keep dot in activated state until segment completion -->
+        <attr name="keepDotActivated" format="boolean"/>
+        <!-- Enlarge vertex entry area for some form factors -->
+        <attr name="enlargeVertexEntryArea" format="boolean"/>
     </declare-styleable>
 
     <!-- =============================== -->
@@ -9160,10 +9399,10 @@
              {@link android.os.Build.VERSION_CODES#N} and not used in previous versions. -->
         <attr name="supportsLocalInteraction" format="boolean" />
         <!-- The service that provides {@link android.service.voice.HotwordDetectionService}.
-             @hide @SystemApi -->
+             Expect a component name to be provided. @hide @SystemApi -->
         <attr name="hotwordDetectionService" format="string" />
         <!-- The service that provides {@link android.service.voice.VisualQueryDetectionService}.
-             @hide @SystemApi -->
+             Expect a component name to be provided. @hide @SystemApi -->
         <attr name="visualQueryDetectionService" format="string" />
 
     </declare-styleable>
@@ -9788,6 +10027,17 @@
         <attr name="supportedTypes" format="reference" />
     </declare-styleable>
 
+    <!-- Use <code>tv-ad-service</code> as the root tag of the XML resource that describes a
+         android.media.tv.ad.TvAdService, which is referenced from its
+         android.media.tv.ad.TvAdService#SERVICE_META_DATA meta-data entry. Described here
+         are the attributes that can be included in that tag. -->
+    <declare-styleable name="TvAdService">
+        <!-- The advertisement types that the TV ad service supports.
+             Reference to a string array resource that describes the supported types,
+             e.g. linear, overlay. -->
+        <attr name="adServiceTypes" format="reference" />
+    </declare-styleable>
+
 
     <!-- Attributes that can be used with <code>rating-system-definition</code> tags inside of the
          XML resource that describes TV content rating of a {@link android.media.tv.TvInputService},
@@ -10087,6 +10337,15 @@
     <!-- Perceptual luminance of a color, in accessibility friendly color space. From 0 to 100. -->
     <attr name="lStar" format="float"/>
 
+    <!-- The attributes of the {@code <locale-config>} tag. -->
+    <!-- @FlaggedApi("android.content.res.default_locale") -->
+    <declare-styleable name="LocaleConfig">
+        <!-- The <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">IETF BCP47 language tag</a>
+       the strings in values/strings.xml (the default strings in the directory with no locale
+       qualifier) are in. -->
+        <attr name="defaultLocale" format="string"/>
+    </declare-styleable>
+
     <!-- The attributes of the {@code <locale>} tag within {@code <locale-config>}. -->
     <declare-styleable name="LocaleConfig_Locale">
         <!-- The <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">IETF BCP47 language tag</a>
@@ -10113,13 +10372,15 @@
     <declare-styleable name="CredentialProvider">
         <!-- A string that is displayed to the user in the Credential Manager settings
              screen that can be used to provide more information about a provider. For
-             longer strings (40 char) it will be truncated. If multiple services
-             show the subtitle then the string will be joined together. -->
+             longer strings it will be truncated. -->
         <attr name="settingsSubtitle" format="string" />
+        <!-- Fully qualified class name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" />
     </declare-styleable>
 
     <!-- A list of capabilities that indicates to the OS what kinds of credentials
-             this provider supports. This list is defined in CredentialProviderService. -->
+             this provider supports. -->
     <declare-styleable name="CredentialProvider_Capabilities" parent="CredentialProvider">
         <!-- An individual capability declared by the provider. -->
         <attr name="capability" format="string" />

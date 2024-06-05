@@ -9,17 +9,45 @@ package {
 
 android_library {
     name: "SettingsLibIllustrationPreference",
+    use_resource_processor: true,
+    defaults: [
+        "SettingsLintDefaults",
+    ],
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
 
     static_libs: [
+        "SettingsLibColor",
         "androidx.preference_preference",
         "lottie",
+        "settingslib_illustrationpreference_flags_lib",
     ],
 
     sdk_version: "system_current",
     min_sdk_version: "28",
+
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.permission",
+    ],
+}
+
+aconfig_declarations {
+    name: "settingslib_illustrationpreference_flags",
+    package: "com.android.settingslib.widget.flags",
+    container: "system",
+    srcs: [
+        "aconfig/illustrationpreference.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "settingslib_illustrationpreference_flags_lib",
+    aconfig_declarations: "settingslib_illustrationpreference_flags",
+
+    min_sdk_version: "30",
+    sdk_version: "system_current",
 
     apex_available: [
         "//apex_available:platform",

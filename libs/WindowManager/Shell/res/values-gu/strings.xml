@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"બંધ કરો"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"વિસ્તૃત કરો"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"સેટિંગ"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"વિભાજિત સ્ક્રીન મોડમાં દાખલ થાઓ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"મેનૂ"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"ચિત્રમાં ચિત્ર મેનૂ"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ચિત્રમાં-ચિત્રની અંદર છે"</string>
@@ -32,13 +31,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"કદ બદલો"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"છુપાવો"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"બતાવો"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"વિભાજિત-સ્ક્રીન સાથે ઍપ કદાચ કામ ન કરે."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ઍપ્લિકેશન સ્ક્રીન-વિભાજનનું સમર્થન કરતી નથી."</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"આ ઍપ માત્ર 1 વિન્ડોમાં ખોલી શકાય છે."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"વિભાજિત સ્ક્રીન સાથે ઍપ કદાચ કામ ન કરે"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ઍપ વિભાજિત સ્ક્રીનને સપોર્ટ કરતી નથી"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"આ ઍપ માત્ર 1 વિન્ડોમાં ખોલી શકાય છે"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ઍપ્લિકેશન ગૌણ ડિસ્પ્લે પર કદાચ કામ ન કરે."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ઍપ્લિકેશન ગૌણ ડિસ્પ્લે પર લૉન્ચનું સમર્થન કરતી નથી."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"સ્પ્લિટ-સ્ક્રીન વિભાજક"</string>
-    <string name="divider_title" msgid="5482989479865361192">"સ્ક્રીનને વિભાજિત કરતું વિભાજક"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"સ્ક્રીનને વિભાજિત કરતું વિભાજક"</string>
+    <string name="divider_title" msgid="1963391955593749442">"સ્ક્રીનને વિભાજિત કરતું વિભાજક"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"ડાબી પૂર્ણ સ્ક્રીન"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"ડાબે 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"ડાબે 50%"</string>
@@ -49,14 +48,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"શીર્ષ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"શીર્ષ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"તળિયાની પૂર્ણ સ્ક્રીન"</string>
-    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
-    <skip />
-    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
-    <skip />
-    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
-    <skip />
-    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
-    <skip />
+    <string name="accessibility_split_left" msgid="1713683765575562458">"ડાબે વિભાજિત કરો"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"જમણે વિભાજિત કરો"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"ઉપર વિભાજિત કરો"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"નીચે વિભાજિત કરો"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"એક-હાથે વાપરો મોડનો ઉપયોગ કરી રહ્યાં છીએ"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"બહાર નીકળવા માટે, સ્ક્રીનની નીચેના ભાગથી ઉપરની તરફ સ્વાઇપ કરો અથવા ઍપના આઇકન પર ગમે ત્યાં ટૅપ કરો"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"એક-હાથે વાપરો મોડ શરૂ કરો"</string>
@@ -70,6 +65,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ઉપર જમણે ખસેડો"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"નીચે ડાબે ખસેડો"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"નીચે જમણે ખસેડો"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> મોટું કરો"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> નાનું કરો"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> સેટિંગ"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"બબલને છોડી દો"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"વાતચીતને બબલ કરશો નહીં"</string>
@@ -80,15 +77,21 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"સમજાઈ ગયું"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"તાજેતરના કોઈ બબલ નથી"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"એકદમ નવા બબલ અને છોડી દીધેલા બબલ અહીં દેખાશે"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"બબલનો ઉપયોગ કરીને ચૅટ કરો"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"નવી વાતચીતો તમારી સ્ક્રીનના નીચેના ખૂણામાં આઇકન તરીકે દેખાય છે. તેમને મોટી કરવા માટે, તેમના પર ટૅપ કરો અથવા તેમને છોડી દેવા માટે, તેમને ખેંચો."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"બબલને કોઈપણ સમયે નિયંત્રિત કરે છે"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"કઈ ઍપ અને વાતચીતોને બબલ કરવા માગો છો તે મેનેજ કરવા માટે, અહીં ટૅપ કરો"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"બબલ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"મેનેજ કરો"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"બબલ છોડી દેવાયો."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"વધુ સારા વ્યૂ માટે, આ ઍપને ફરી શરૂ કરવા ટૅપ કરો."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"વધુ સારા વ્યૂ માટે, આ ઍપને ફરી શરૂ કરવા ટૅપ કરો"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"સેટિંગમાં આ ઍપનો સાપેક્ષ ગુણોત્તર બદલો"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"સાપેક્ષ ગુણોત્તર બદલો"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"કૅમેરામાં સમસ્યાઓ છે?\nફરીથી ફિટ કરવા માટે ટૅપ કરો"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"સુધારો નથી થયો?\nપહેલાંના પર પાછું ફેરવવા માટે ટૅપ કરો"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"કૅમેરામાં કોઈ સમસ્યા નથી? છોડી દેવા માટે ટૅપ કરો."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"જુઓ અને બીજું ઘણું કરો"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"સ્ક્રીન વિભાજન માટે કોઈ અન્ય ઍપમાં ખેંચો"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"વિભાજિત સ્ક્રીન માટે કોઈ અન્ય ઍપમાં ખેંચો"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"કોઈ ઍપની જગ્યા બદલવા માટે, તેની બહાર બે વાર ટૅપ કરો"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"સમજાઈ ગયું"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"વધુ માહિતી માટે મોટું કરો."</string>
@@ -97,14 +100,23 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"રદ કરો"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"ફરી શરૂ કરો"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"ફરીથી બતાવશો નહીં"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"આ ઍપને ખસેડવા માટે\nબે વાર ટૅપ કરો"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"મોટું કરો"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"નાનું કરો"</string>
     <string name="close_button_text" msgid="2913281996024033299">"બંધ કરો"</string>
     <string name="back_button_text" msgid="1469718707134137085">"પાછળ"</string>
     <string name="handle_text" msgid="1766582106752184456">"હૅન્ડલ"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"ઍપનું આઇકન"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"પૂર્ણસ્ક્રીન"</string>
     <string name="desktop_text" msgid="1077633567027630454">"ડેસ્કટૉપ મોડ"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"સ્ક્રીનને વિભાજિત કરો"</string>
     <string name="more_button_text" msgid="3655388105592893530">"વધુ"</string>
     <string name="float_button_text" msgid="9221657008391364581">"ફ્લોટિંગ વિન્ડો"</string>
+    <string name="select_text" msgid="5139083974039906583">"પસંદ કરો"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"સ્ક્રીનશૉટ"</string>
+    <string name="close_text" msgid="4986518933445178928">"બંધ કરો"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"મેનૂ બંધ કરો"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"મેનૂ ખોલો"</string>
+    <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"સ્ક્રીન કરો મોટી કરો"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"સ્ક્રીન સ્નૅપ કરો"</string>
 </resources>

@@ -1,4 +1,1630 @@
 // Baseline format: 1.0
+BroadcastBehavior: android.app.AlarmManager#ACTION_NEXT_ALARM_CLOCK_CHANGED:
+    Field 'ACTION_NEXT_ALARM_CLOCK_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.app.AlarmManager#ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED:
+    Field 'ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.app.NotificationManager#ACTION_CLOSE_NOTIFICATION_HANDLER_PANEL:
+    Field 'ACTION_CLOSE_NOTIFICATION_HANDLER_PANEL' is missing @BroadcastBehavior
+BroadcastBehavior: android.app.admin.DevicePolicyManager#ACTION_APPLICATION_DELEGATION_SCOPES_CHANGED:
+    Field 'ACTION_APPLICATION_DELEGATION_SCOPES_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.app.admin.DevicePolicyManager#ACTION_MANAGED_PROFILE_PROVISIONED:
+    Field 'ACTION_MANAGED_PROFILE_PROVISIONED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_AIRPLANE_MODE_CHANGED:
+    Field 'ACTION_AIRPLANE_MODE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_APPLICATION_LOCALE_CHANGED:
+    Field 'ACTION_APPLICATION_LOCALE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_APPLICATION_RESTRICTIONS_CHANGED:
+    Field 'ACTION_APPLICATION_RESTRICTIONS_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_BATTERY_CHANGED:
+    Field 'ACTION_BATTERY_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_BATTERY_LEVEL_CHANGED:
+    Field 'ACTION_BATTERY_LEVEL_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_BATTERY_LOW:
+    Field 'ACTION_BATTERY_LOW' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_BATTERY_OKAY:
+    Field 'ACTION_BATTERY_OKAY' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_CAMERA_BUTTON:
+    Field 'ACTION_CAMERA_BUTTON' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_CLOSE_SYSTEM_DIALOGS:
+    Field 'ACTION_CLOSE_SYSTEM_DIALOGS' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_CONFIGURATION_CHANGED:
+    Field 'ACTION_CONFIGURATION_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_DATE_CHANGED:
+    Field 'ACTION_DATE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_DEVICE_CUSTOMIZATION_READY:
+    Field 'ACTION_DEVICE_CUSTOMIZATION_READY' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_DEVICE_STORAGE_LOW:
+    Field 'ACTION_DEVICE_STORAGE_LOW' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_DEVICE_STORAGE_OK:
+    Field 'ACTION_DEVICE_STORAGE_OK' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_DOCK_EVENT:
+    Field 'ACTION_DOCK_EVENT' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_DOMAINS_NEED_VERIFICATION:
+    Field 'ACTION_DOMAINS_NEED_VERIFICATION' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_DREAMING_STARTED:
+    Field 'ACTION_DREAMING_STARTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_DREAMING_STOPPED:
+    Field 'ACTION_DREAMING_STOPPED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_AVAILABLE:
+    Field 'ACTION_EXTERNAL_APPLICATIONS_AVAILABLE' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
+    Field 'ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_GLOBAL_BUTTON:
+    Field 'ACTION_GLOBAL_BUTTON' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_GTALK_SERVICE_CONNECTED:
+    Field 'ACTION_GTALK_SERVICE_CONNECTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_GTALK_SERVICE_DISCONNECTED:
+    Field 'ACTION_GTALK_SERVICE_DISCONNECTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_HEADSET_PLUG:
+    Field 'ACTION_HEADSET_PLUG' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_INPUT_METHOD_CHANGED:
+    Field 'ACTION_INPUT_METHOD_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_INSTALL_INSTANT_APP_PACKAGE:
+    Field 'ACTION_INSTALL_INSTANT_APP_PACKAGE' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_INSTANT_APP_RESOLVER_SETTINGS:
+    Field 'ACTION_INSTANT_APP_RESOLVER_SETTINGS' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_INTENT_FILTER_NEEDS_VERIFICATION:
+    Field 'ACTION_INTENT_FILTER_NEEDS_VERIFICATION' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_LOAD_DATA:
+    Field 'ACTION_LOAD_DATA' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_LOCALE_CHANGED:
+    Field 'ACTION_LOCALE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_LOCKED_BOOT_COMPLETED:
+    Field 'ACTION_LOCKED_BOOT_COMPLETED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MANAGE_PACKAGE_STORAGE:
+    Field 'ACTION_MANAGE_PACKAGE_STORAGE' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_BAD_REMOVAL:
+    Field 'ACTION_MEDIA_BAD_REMOVAL' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_BUTTON:
+    Field 'ACTION_MEDIA_BUTTON' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_CHECKING:
+    Field 'ACTION_MEDIA_CHECKING' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_EJECT:
+    Field 'ACTION_MEDIA_EJECT' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_MOUNTED:
+    Field 'ACTION_MEDIA_MOUNTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_NOFS:
+    Field 'ACTION_MEDIA_NOFS' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_REMOVED:
+    Field 'ACTION_MEDIA_REMOVED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_SCANNER_FINISHED:
+    Field 'ACTION_MEDIA_SCANNER_FINISHED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_SCANNER_SCAN_FILE:
+    Field 'ACTION_MEDIA_SCANNER_SCAN_FILE' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_SCANNER_STARTED:
+    Field 'ACTION_MEDIA_SCANNER_STARTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_SHARED:
+    Field 'ACTION_MEDIA_SHARED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_UNMOUNTABLE:
+    Field 'ACTION_MEDIA_UNMOUNTABLE' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MEDIA_UNMOUNTED:
+    Field 'ACTION_MEDIA_UNMOUNTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MY_PACKAGE_REPLACED:
+    Field 'ACTION_MY_PACKAGE_REPLACED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MY_PACKAGE_SUSPENDED:
+    Field 'ACTION_MY_PACKAGE_SUSPENDED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_MY_PACKAGE_UNSUSPENDED:
+    Field 'ACTION_MY_PACKAGE_UNSUSPENDED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_NEW_OUTGOING_CALL:
+    Field 'ACTION_NEW_OUTGOING_CALL' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGES_SUSPENDED:
+    Field 'ACTION_PACKAGES_SUSPENDED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGES_UNSUSPENDED:
+    Field 'ACTION_PACKAGES_UNSUSPENDED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_ADDED:
+    Field 'ACTION_PACKAGE_ADDED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_CHANGED:
+    Field 'ACTION_PACKAGE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_DATA_CLEARED:
+    Field 'ACTION_PACKAGE_DATA_CLEARED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_FIRST_LAUNCH:
+    Field 'ACTION_PACKAGE_FIRST_LAUNCH' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_FULLY_REMOVED:
+    Field 'ACTION_PACKAGE_FULLY_REMOVED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_INSTALL:
+    Field 'ACTION_PACKAGE_INSTALL' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION:
+    Field 'ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_NEEDS_VERIFICATION:
+    Field 'ACTION_PACKAGE_NEEDS_VERIFICATION' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_REMOVED:
+    Field 'ACTION_PACKAGE_REMOVED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_REPLACED:
+    Field 'ACTION_PACKAGE_REPLACED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_RESTARTED:
+    Field 'ACTION_PACKAGE_RESTARTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_UNSTOPPED:
+    Field 'ACTION_PACKAGE_UNSTOPPED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_UNSUSPENDED_MANUALLY:
+    Field 'ACTION_PACKAGE_UNSUSPENDED_MANUALLY' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PACKAGE_VERIFIED:
+    Field 'ACTION_PACKAGE_VERIFIED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_POWER_CONNECTED:
+    Field 'ACTION_POWER_CONNECTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_POWER_DISCONNECTED:
+    Field 'ACTION_POWER_DISCONNECTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PRE_BOOT_COMPLETED:
+    Field 'ACTION_PRE_BOOT_COMPLETED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_PROVIDER_CHANGED:
+    Field 'ACTION_PROVIDER_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_QUERY_PACKAGE_RESTART:
+    Field 'ACTION_QUERY_PACKAGE_RESTART' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_REBOOT:
+    Field 'ACTION_REBOOT' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_RESOLVE_INSTANT_APP_PACKAGE:
+    Field 'ACTION_RESOLVE_INSTANT_APP_PACKAGE' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_ROLLBACK_COMMITTED:
+    Field 'ACTION_ROLLBACK_COMMITTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_SCREEN_OFF:
+    Field 'ACTION_SCREEN_OFF' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_SCREEN_ON:
+    Field 'ACTION_SCREEN_ON' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_SHOW_SUSPENDED_APP_DETAILS:
+    Field 'ACTION_SHOW_SUSPENDED_APP_DETAILS' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_SHUTDOWN:
+    Field 'ACTION_SHUTDOWN' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_SIM_STATE_CHANGED:
+    Field 'ACTION_SIM_STATE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_SPLIT_CONFIGURATION_CHANGED:
+    Field 'ACTION_SPLIT_CONFIGURATION_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_TIMEZONE_CHANGED:
+    Field 'ACTION_TIMEZONE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_TIME_CHANGED:
+    Field 'ACTION_TIME_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_TIME_TICK:
+    Field 'ACTION_TIME_TICK' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_UID_REMOVED:
+    Field 'ACTION_UID_REMOVED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_UMS_CONNECTED:
+    Field 'ACTION_UMS_CONNECTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_UMS_DISCONNECTED:
+    Field 'ACTION_UMS_DISCONNECTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_UNARCHIVE_PACKAGE:
+    Field 'ACTION_UNARCHIVE_PACKAGE' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_USER_PRESENT:
+    Field 'ACTION_USER_PRESENT' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_USER_UNLOCKED:
+    Field 'ACTION_USER_UNLOCKED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.Intent#ACTION_WALLPAPER_CHANGED:
+    Field 'ACTION_WALLPAPER_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.pm.PackageInstaller#ACTION_SESSION_COMMITTED:
+    Field 'ACTION_SESSION_COMMITTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.content.pm.PackageInstaller#ACTION_SESSION_UPDATED:
+    Field 'ACTION_SESSION_UPDATED' is missing @BroadcastBehavior
+BroadcastBehavior: android.hardware.Camera#ACTION_NEW_PICTURE:
+    Field 'ACTION_NEW_PICTURE' is missing @BroadcastBehavior
+BroadcastBehavior: android.hardware.Camera#ACTION_NEW_VIDEO:
+    Field 'ACTION_NEW_VIDEO' is missing @BroadcastBehavior
+BroadcastBehavior: android.hardware.hdmi.HdmiControlManager#ACTION_OSD_MESSAGE:
+    Field 'ACTION_OSD_MESSAGE' is missing @BroadcastBehavior
+BroadcastBehavior: android.hardware.input.InputManager#ACTION_QUERY_KEYBOARD_LAYOUTS:
+    Field 'ACTION_QUERY_KEYBOARD_LAYOUTS' is missing @BroadcastBehavior
+BroadcastBehavior: android.hardware.usb.UsbManager#ACTION_USB_ACCESSORY_DETACHED:
+    Field 'ACTION_USB_ACCESSORY_DETACHED' is missing @BroadcastBehavior
+BroadcastBehavior: android.hardware.usb.UsbManager#ACTION_USB_ACCESSORY_HANDSHAKE:
+    Field 'ACTION_USB_ACCESSORY_HANDSHAKE' is missing @BroadcastBehavior
+BroadcastBehavior: android.hardware.usb.UsbManager#ACTION_USB_DEVICE_DETACHED:
+    Field 'ACTION_USB_DEVICE_DETACHED' is missing @BroadcastBehavior
+BroadcastBehavior: android.hardware.usb.UsbManager#ACTION_USB_PORT_CHANGED:
+    Field 'ACTION_USB_PORT_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.hardware.usb.UsbManager#ACTION_USB_PORT_COMPLIANCE_CHANGED:
+    Field 'ACTION_USB_PORT_COMPLIANCE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.hardware.usb.UsbManager#ACTION_USB_STATE:
+    Field 'ACTION_USB_STATE' is missing @BroadcastBehavior
+BroadcastBehavior: android.media.AudioManager#ACTION_HDMI_AUDIO_PLUG:
+    Field 'ACTION_HDMI_AUDIO_PLUG' is missing @BroadcastBehavior
+BroadcastBehavior: android.media.AudioManager#ACTION_HEADSET_PLUG:
+    Field 'ACTION_HEADSET_PLUG' is missing @BroadcastBehavior
+BroadcastBehavior: android.media.AudioManager#ACTION_MICROPHONE_MUTE_CHANGED:
+    Field 'ACTION_MICROPHONE_MUTE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.media.AudioManager#ACTION_SPEAKERPHONE_STATE_CHANGED:
+    Field 'ACTION_SPEAKERPHONE_STATE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.media.tv.TvContract#ACTION_CHANNEL_BROWSABLE_REQUESTED:
+    Field 'ACTION_CHANNEL_BROWSABLE_REQUESTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.media.tv.TvContract#ACTION_INITIALIZE_PROGRAMS:
+    Field 'ACTION_INITIALIZE_PROGRAMS' is missing @BroadcastBehavior
+BroadcastBehavior: android.media.tv.TvContract#ACTION_PREVIEW_PROGRAM_ADDED_TO_WATCH_NEXT:
+    Field 'ACTION_PREVIEW_PROGRAM_ADDED_TO_WATCH_NEXT' is missing @BroadcastBehavior
+BroadcastBehavior: android.media.tv.TvContract#ACTION_PREVIEW_PROGRAM_BROWSABLE_DISABLED:
+    Field 'ACTION_PREVIEW_PROGRAM_BROWSABLE_DISABLED' is missing @BroadcastBehavior
+BroadcastBehavior: android.media.tv.TvContract#ACTION_WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED:
+    Field 'ACTION_WATCH_NEXT_PROGRAM_BROWSABLE_DISABLED' is missing @BroadcastBehavior
+BroadcastBehavior: android.net.NetworkScoreManager#ACTION_SCORER_CHANGED:
+    Field 'ACTION_SCORER_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.net.NetworkScoreManager#ACTION_SCORE_NETWORKS:
+    Field 'ACTION_SCORE_NETWORKS' is missing @BroadcastBehavior
+BroadcastBehavior: android.net.Proxy#PROXY_CHANGE_ACTION:
+    Field 'PROXY_CHANGE_ACTION' is missing @BroadcastBehavior
+BroadcastBehavior: android.os.DropBoxManager#ACTION_DROPBOX_ENTRY_ADDED:
+    Field 'ACTION_DROPBOX_ENTRY_ADDED' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.CalendarContract#ACTION_EVENT_REMINDER:
+    Field 'ACTION_EVENT_REMINDER' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.ContactsContract.SimContacts#ACTION_SIM_ACCOUNTS_CHANGED:
+    Field 'ACTION_SIM_ACCOUNTS_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#ACTION_SMS_EMERGENCY_CB_RECEIVED:
+    Field 'ACTION_SMS_EMERGENCY_CB_RECEIVED' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#DATA_SMS_RECEIVED_ACTION:
+    Field 'DATA_SMS_RECEIVED_ACTION' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SECRET_CODE_ACTION:
+    Field 'SECRET_CODE_ACTION' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SIM_FULL_ACTION:
+    Field 'SIM_FULL_ACTION' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SMS_CB_RECEIVED_ACTION:
+    Field 'SMS_CB_RECEIVED_ACTION' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SMS_DELIVER_ACTION:
+    Field 'SMS_DELIVER_ACTION' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SMS_RECEIVED_ACTION:
+    Field 'SMS_RECEIVED_ACTION' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SMS_REJECTED_ACTION:
+    Field 'SMS_REJECTED_ACTION' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED_ACTION:
+    Field 'SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED_ACTION' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#WAP_PUSH_DELIVER_ACTION:
+    Field 'WAP_PUSH_DELIVER_ACTION' is missing @BroadcastBehavior
+BroadcastBehavior: android.provider.Telephony.Sms.Intents#WAP_PUSH_RECEIVED_ACTION:
+    Field 'WAP_PUSH_RECEIVED_ACTION' is missing @BroadcastBehavior
+BroadcastBehavior: android.security.KeyChain#ACTION_KEYCHAIN_CHANGED:
+    Field 'ACTION_KEYCHAIN_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.security.KeyChain#ACTION_KEY_ACCESS_CHANGED:
+    Field 'ACTION_KEY_ACCESS_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.security.KeyChain#ACTION_STORAGE_CHANGED:
+    Field 'ACTION_STORAGE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.security.KeyChain#ACTION_TRUST_STORE_CHANGED:
+    Field 'ACTION_TRUST_STORE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.service.euicc.EuiccService#ACTION_DELETE_SUBSCRIPTION_PRIVILEGED:
+    Field 'ACTION_DELETE_SUBSCRIPTION_PRIVILEGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.service.euicc.EuiccService#ACTION_RENAME_SUBSCRIPTION_PRIVILEGED:
+    Field 'ACTION_RENAME_SUBSCRIPTION_PRIVILEGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.service.euicc.EuiccService#ACTION_START_EUICC_ACTIVATION:
+    Field 'ACTION_START_EUICC_ACTIVATION' is missing @BroadcastBehavior
+BroadcastBehavior: android.service.euicc.EuiccService#ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED:
+    Field 'ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.speech.tts.TextToSpeech#ACTION_TTS_QUEUE_PROCESSING_COMPLETED:
+    Field 'ACTION_TTS_QUEUE_PROCESSING_COMPLETED' is missing @BroadcastBehavior
+BroadcastBehavior: android.speech.tts.TextToSpeech.Engine#ACTION_TTS_DATA_INSTALLED:
+    Field 'ACTION_TTS_DATA_INSTALLED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.SubscriptionManager#ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED:
+    Field 'ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.SubscriptionManager#ACTION_DEFAULT_SUBSCRIPTION_CHANGED:
+    Field 'ACTION_DEFAULT_SUBSCRIPTION_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.SubscriptionManager#ACTION_REFRESH_SUBSCRIPTION_PLANS:
+    Field 'ACTION_REFRESH_SUBSCRIPTION_PLANS' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.SubscriptionManager#ACTION_SUBSCRIPTION_PLANS_CHANGED:
+    Field 'ACTION_SUBSCRIPTION_PLANS_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE:
+    Field 'ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_CARRIER_SIGNAL_PCO_VALUE:
+    Field 'ACTION_CARRIER_SIGNAL_PCO_VALUE' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_CARRIER_SIGNAL_REDIRECTED:
+    Field 'ACTION_CARRIER_SIGNAL_REDIRECTED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED:
+    Field 'ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_CARRIER_SIGNAL_RESET:
+    Field 'ACTION_CARRIER_SIGNAL_RESET' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED:
+    Field 'ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED:
+    Field 'ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_EMERGENCY_CALLBACK_MODE_CHANGED:
+    Field 'ACTION_EMERGENCY_CALLBACK_MODE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_EMERGENCY_CALL_STATE_CHANGED:
+    Field 'ACTION_EMERGENCY_CALL_STATE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE:
+    Field 'ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_SECRET_CODE:
+    Field 'ACTION_SECRET_CODE' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS:
+    Field 'ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_SIM_APPLICATION_STATE_CHANGED:
+    Field 'ACTION_SIM_APPLICATION_STATE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED:
+    Field 'ACTION_SIM_CARD_STATE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_SIM_SLOT_STATUS_CHANGED:
+    Field 'ACTION_SIM_SLOT_STATUS_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED:
+    Field 'ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.TelephonyManager#ACTION_SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED:
+    Field 'ACTION_SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.euicc.EuiccManager#ACTION_NOTIFY_CARRIER_SETUP_INCOMPLETE:
+    Field 'ACTION_NOTIFY_CARRIER_SETUP_INCOMPLETE' is missing @BroadcastBehavior
+BroadcastBehavior: android.telephony.euicc.EuiccManager#ACTION_OTA_STATUS_CHANGED:
+    Field 'ACTION_OTA_STATUS_CHANGED' is missing @BroadcastBehavior
+
+
+DeprecationMismatch: android.accounts.AccountManager#newChooseAccountIntent(android.accounts.Account, java.util.ArrayList<android.accounts.Account>, String[], boolean, String, String, String[], android.os.Bundle):
+    Method android.accounts.AccountManager.newChooseAccountIntent(android.accounts.Account, java.util.ArrayList<android.accounts.Account>, String[], boolean, String, String, String[], android.os.Bundle): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Activity#enterPictureInPictureMode():
+    Method android.app.Activity.enterPictureInPictureMode(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Instrumentation#startAllocCounting():
+    Method android.app.Instrumentation.startAllocCounting(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Instrumentation#stopAllocCounting():
+    Method android.app.Instrumentation.stopAllocCounting(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification#bigContentView:
+    Field Notification.bigContentView: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification#contentView:
+    Field Notification.contentView: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification#headsUpContentView:
+    Field Notification.headsUpContentView: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification#tickerView:
+    Field Notification.tickerView: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.Action.Builder#Builder(int, CharSequence, android.app.PendingIntent):
+    Constructor android.app.Notification.Action.Builder.Builder(int, CharSequence, android.app.PendingIntent): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.Action.WearableExtender#getCancelLabel():
+    Method android.app.Notification.Action.WearableExtender.getCancelLabel(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.Action.WearableExtender#getConfirmLabel():
+    Method android.app.Notification.Action.WearableExtender.getConfirmLabel(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.Action.WearableExtender#getInProgressLabel():
+    Method android.app.Notification.Action.WearableExtender.getInProgressLabel(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.Action.WearableExtender#setCancelLabel(CharSequence):
+    Method android.app.Notification.Action.WearableExtender.setCancelLabel(CharSequence): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.Action.WearableExtender#setConfirmLabel(CharSequence):
+    Method android.app.Notification.Action.WearableExtender.setConfirmLabel(CharSequence): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.Action.WearableExtender#setInProgressLabel(CharSequence):
+    Method android.app.Notification.Action.WearableExtender.setInProgressLabel(CharSequence): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.Builder#setContent(android.widget.RemoteViews):
+    Method android.app.Notification.Builder.setContent(android.widget.RemoteViews): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.Builder#setTicker(CharSequence, android.widget.RemoteViews):
+    Method android.app.Notification.Builder.setTicker(CharSequence, android.widget.RemoteViews): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#getContentIcon():
+    Method android.app.Notification.WearableExtender.getContentIcon(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#getContentIconGravity():
+    Method android.app.Notification.WearableExtender.getContentIconGravity(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#getCustomContentHeight():
+    Method android.app.Notification.WearableExtender.getCustomContentHeight(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#getCustomSizePreset():
+    Method android.app.Notification.WearableExtender.getCustomSizePreset(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#getGravity():
+    Method android.app.Notification.WearableExtender.getGravity(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#getHintAvoidBackgroundClipping():
+    Method android.app.Notification.WearableExtender.getHintAvoidBackgroundClipping(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#getHintHideIcon():
+    Method android.app.Notification.WearableExtender.getHintHideIcon(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#getHintScreenTimeout():
+    Method android.app.Notification.WearableExtender.getHintScreenTimeout(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#getHintShowBackgroundOnly():
+    Method android.app.Notification.WearableExtender.getHintShowBackgroundOnly(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#setContentIcon(int):
+    Method android.app.Notification.WearableExtender.setContentIcon(int): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#setContentIconGravity(int):
+    Method android.app.Notification.WearableExtender.setContentIconGravity(int): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#setCustomContentHeight(int):
+    Method android.app.Notification.WearableExtender.setCustomContentHeight(int): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#setCustomSizePreset(int):
+    Method android.app.Notification.WearableExtender.setCustomSizePreset(int): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#setGravity(int):
+    Method android.app.Notification.WearableExtender.setGravity(int): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#setHintAvoidBackgroundClipping(boolean):
+    Method android.app.Notification.WearableExtender.setHintAvoidBackgroundClipping(boolean): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#setHintHideIcon(boolean):
+    Method android.app.Notification.WearableExtender.setHintHideIcon(boolean): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#setHintScreenTimeout(int):
+    Method android.app.Notification.WearableExtender.setHintScreenTimeout(int): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.Notification.WearableExtender#setHintShowBackgroundOnly(boolean):
+    Method android.app.Notification.WearableExtender.setHintShowBackgroundOnly(boolean): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.app.backup.BackupManager#selectBackupTransport(String):
+    Method android.app.backup.BackupManager.selectBackupTransport(String): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.content.Context#BIND_ALLOW_FOREGROUND_SERVICE_STARTS_FROM_BACKGROUND:
+    Field Context.BIND_ALLOW_FOREGROUND_SERVICE_STARTS_FROM_BACKGROUND: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.content.Context#WIFI_RTT_SERVICE:
+    Field Context.WIFI_RTT_SERVICE: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.graphics.ComposeShader#ComposeShader(android.graphics.Shader, android.graphics.Shader, android.graphics.Xfermode):
+    Constructor android.graphics.ComposeShader.ComposeShader(android.graphics.Shader, android.graphics.Shader, android.graphics.Xfermode): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.graphics.PixelFormat#A_8:
+    Field PixelFormat.A_8: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.graphics.PixelFormat#LA_88:
+    Field PixelFormat.LA_88: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.graphics.PixelFormat#L_8:
+    Field PixelFormat.L_8: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.graphics.PixelFormat#RGBA_4444:
+    Field PixelFormat.RGBA_4444: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.graphics.PixelFormat#RGBA_5551:
+    Field PixelFormat.RGBA_5551: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.graphics.PixelFormat#RGB_332:
+    Field PixelFormat.RGB_332: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.hardware.hdmi.HdmiControlManager#RESULT_ALREADY_IN_PROGRESS:
+    Field HdmiControlManager.RESULT_ALREADY_IN_PROGRESS: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder#setCodeRate(int):
+    Method android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder.setCodeRate(int): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder#setModulation(int):
+    Method android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder.setModulation(int): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.opengl.EGL14#eglCreatePixmapSurface(android.opengl.EGLDisplay, android.opengl.EGLConfig, int, int[], int):
+    Method android.opengl.EGL14.eglCreatePixmapSurface(android.opengl.EGLDisplay, android.opengl.EGLConfig, int, int[], int): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.opengl.GLES20#GL_STENCIL_INDEX:
+    Field GLES20.GL_STENCIL_INDEX: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.opengl.GLSurfaceView#surfaceRedrawNeeded(android.view.SurfaceHolder):
+    Method android.opengl.GLSurfaceView.surfaceRedrawNeeded(android.view.SurfaceHolder): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.os.UserManager#setUserRestrictions(android.os.Bundle):
+    Method android.os.UserManager.setUserRestrictions(android.os.Bundle): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.os.UserManager#setUserRestrictions(android.os.Bundle, android.os.UserHandle):
+    Method android.os.UserManager.setUserRestrictions(android.os.Bundle, android.os.UserHandle): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.provider.Contacts.People#markAsContacted(android.content.ContentResolver, long):
+    Method android.provider.Contacts.People.markAsContacted(android.content.ContentResolver, long): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.renderscript.Type.CubemapFace#POSITVE_X:
+    Field Type.CubemapFace.POSITVE_X: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.renderscript.Type.CubemapFace#POSITVE_Y:
+    Field Type.CubemapFace.POSITVE_Y: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.renderscript.Type.CubemapFace#POSITVE_Z:
+    Field Type.CubemapFace.POSITVE_Z: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.speech.tts.TextToSpeech#areDefaultsEnforced():
+    Method android.speech.tts.TextToSpeech.areDefaultsEnforced(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.telecom.StatusHints#StatusHints(android.content.ComponentName, CharSequence, int, android.os.Bundle):
+    Constructor android.telecom.StatusHints.StatusHints(android.content.ComponentName, CharSequence, int, android.os.Bundle): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.telecom.StatusHints#getIcon(android.content.Context):
+    Method android.telecom.StatusHints.getIcon(android.content.Context): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.telecom.StatusHints#getIconResId():
+    Method android.telecom.StatusHints.getIconResId(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.telecom.StatusHints#getPackageName():
+    Method android.telecom.StatusHints.getPackageName(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.telephony.PhoneStateListener#PhoneStateListener(java.util.concurrent.Executor):
+    Constructor android.telephony.PhoneStateListener.PhoneStateListener(java.util.concurrent.Executor): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.telephony.SubscriptionManager#PROFILE_CLASS_DEFAULT:
+    Field SubscriptionManager.PROFILE_CLASS_DEFAULT: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.telephony.SubscriptionPlan.Builder#createRecurringDaily(java.time.ZonedDateTime):
+    Method android.telephony.SubscriptionPlan.Builder.createRecurringDaily(java.time.ZonedDateTime): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.telephony.SubscriptionPlan.Builder#createRecurringMonthly(java.time.ZonedDateTime):
+    Method android.telephony.SubscriptionPlan.Builder.createRecurringMonthly(java.time.ZonedDateTime): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.telephony.SubscriptionPlan.Builder#createRecurringWeekly(java.time.ZonedDateTime):
+    Method android.telephony.SubscriptionPlan.Builder.createRecurringWeekly(java.time.ZonedDateTime): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_12HOUR:
+    Field DateUtils.FORMAT_12HOUR: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_24HOUR:
+    Field DateUtils.FORMAT_24HOUR: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_CAP_AMPM:
+    Field DateUtils.FORMAT_CAP_AMPM: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_CAP_MIDNIGHT:
+    Field DateUtils.FORMAT_CAP_MIDNIGHT: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_CAP_NOON:
+    Field DateUtils.FORMAT_CAP_NOON: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_CAP_NOON_MIDNIGHT:
+    Field DateUtils.FORMAT_CAP_NOON_MIDNIGHT: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.text.format.DateUtils#FORMAT_NO_NOON_MIDNIGHT:
+    Field DateUtils.FORMAT_NO_NOON_MIDNIGHT: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.view.ViewGroup.LayoutParams#FILL_PARENT:
+    Field ViewGroup.LayoutParams.FILL_PARENT: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.view.Window#setTitleColor(int):
+    Method android.view.Window.setTitleColor(int): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.view.accessibility.AccessibilityEvent#MAX_TEXT_LENGTH:
+    Field AccessibilityEvent.MAX_TEXT_LENGTH: @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.webkit.WebSettings#getSaveFormData():
+    Method android.webkit.WebSettings.getSaveFormData(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.webkit.WebView#shouldDelayChildPressedState():
+    Method android.webkit.WebView.shouldDelayChildPressedState(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.webkit.WebViewDatabase#clearFormData():
+    Method android.webkit.WebViewDatabase.clearFormData(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: android.webkit.WebViewDatabase#hasFormData():
+    Method android.webkit.WebViewDatabase.hasFormData(): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+DeprecationMismatch: javax.microedition.khronos.egl.EGL10#eglCreatePixmapSurface(javax.microedition.khronos.egl.EGLDisplay, javax.microedition.khronos.egl.EGLConfig, Object, int[]):
+    Method javax.microedition.khronos.egl.EGL10.eglCreatePixmapSurface(javax.microedition.khronos.egl.EGLDisplay, javax.microedition.khronos.egl.EGLConfig, Object, int[]): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
+
+
+RequiresPermission: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
+    Method 'getAccountsByTypeAndFeatures' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.accounts.AccountManager#hasFeatures(android.accounts.Account, String[], android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
+    Method 'hasFeatures' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.ActivityManager#addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int):
+    Method 'addOnUidImportanceListener' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.ActivityManager#getHistoricalProcessExitReasons(String, int, int):
+    Method 'getHistoricalProcessExitReasons' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.ActivityManager#getProcessesInErrorState():
+    Method 'getProcessesInErrorState' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.ActivityManager#killProcessesWhenImperceptible(int[], String):
+    Method 'killProcessesWhenImperceptible' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.ActivityManager#setDeviceLocales(android.os.LocaleList):
+    Method 'setDeviceLocales' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.AlarmManager#setAlarmClock(android.app.AlarmManager.AlarmClockInfo, android.app.PendingIntent):
+    Method 'setAlarmClock' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.AlarmManager#setExact(int, long, android.app.PendingIntent):
+    Method 'setExact' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.AlarmManager#setExactAndAllowWhileIdle(int, long, android.app.PendingIntent):
+    Method 'setExactAndAllowWhileIdle' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.AlarmManager#setTime(long):
+    Method 'setTime' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.AppOpsManager#isOpActive(String, int, String):
+    Method 'isOpActive' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.AppOpsManager#startWatchingActive(String[], java.util.concurrent.Executor, android.app.AppOpsManager.OnOpActiveChangedListener):
+    Method 'startWatchingActive' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.AppOpsManager#startWatchingNoted(String[], java.util.concurrent.Executor, android.app.AppOpsManager.OnOpNotedListener):
+    Method 'startWatchingNoted' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.DownloadManager.Request#setDestinationInExternalPublicDir(String, String):
+    Method 'setDestinationInExternalPublicDir' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.DownloadManager.Request#setDestinationUri(android.net.Uri):
+    Method 'setDestinationUri' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.DownloadManager.Request#setNotificationVisibility(int):
+    Method 'setNotificationVisibility' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.DownloadManager.Request#setShowRunningNotification(boolean):
+    Method 'setShowRunningNotification' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.GameManager#setGameMode(String, int):
+    Method 'setGameMode' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.GameManager#updateCustomGameModeConfiguration(String, android.app.GameModeConfiguration):
+    Method 'updateCustomGameModeConfiguration' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.LocaleManager#getApplicationLocales(String):
+    Method 'getApplicationLocales' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.Notification.Builder#setFullScreenIntent(android.app.PendingIntent, boolean):
+    Method 'setFullScreenIntent' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.NotificationManager#canUseFullScreenIntent():
+    Method 'canUseFullScreenIntent' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.Service#startForeground(int, android.app.Notification):
+    Method 'startForeground' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.StatusBarManager#canLaunchCaptureContentActivityForNote(android.app.Activity):
+    Method 'canLaunchCaptureContentActivityForNote' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.UiModeManager#releaseProjection(int):
+    Method 'releaseProjection' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.UiModeManager#requestProjection(int):
+    Method 'requestProjection' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperInfo#getSettingsSliceUri():
+    Method 'getSettingsSliceUri' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#clear():
+    Method 'clear' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#clearWallpaper(int, int):
+    Method 'clearWallpaper' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#getDrawable():
+    Method 'getDrawable' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#getDrawable(int):
+    Method 'getDrawable' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#getFastDrawable():
+    Method 'getFastDrawable' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#getFastDrawable(int):
+    Method 'getFastDrawable' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#getWallpaperFile(int):
+    Method 'getWallpaperFile' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#getWallpaperInfo(int):
+    Method 'getWallpaperInfo' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#peekDrawable():
+    Method 'peekDrawable' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#peekDrawable(int):
+    Method 'peekDrawable' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#peekFastDrawable():
+    Method 'peekFastDrawable' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#peekFastDrawable(int):
+    Method 'peekFastDrawable' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#setBitmap(android.graphics.Bitmap):
+    Method 'setBitmap' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#setBitmap(android.graphics.Bitmap, android.graphics.Rect, boolean):
+    Method 'setBitmap' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#setDisplayPadding(android.graphics.Rect):
+    Method 'setDisplayPadding' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#setResource(int):
+    Method 'setResource' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#setStream(java.io.InputStream):
+    Method 'setStream' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#setStream(java.io.InputStream, android.graphics.Rect, boolean):
+    Method 'setStream' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#setWallpaperComponentWithFlags(android.content.ComponentName, int):
+    Method 'setWallpaperComponentWithFlags' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.WallpaperManager#suggestDesiredDimensions(int, int):
+    Method 'suggestDesiredDimensions' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#addCrossProfileWidgetProvider(android.content.ComponentName, String):
+    Method 'addCrossProfileWidgetProvider' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#addPersistentPreferredActivity(android.content.ComponentName, android.content.IntentFilter, android.content.ComponentName):
+    Method 'addPersistentPreferredActivity' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#bindDeviceAdminServiceAsUser(android.content.ComponentName, android.content.Intent, android.content.ServiceConnection, int, android.os.UserHandle):
+    Method 'bindDeviceAdminServiceAsUser' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#clearPackagePersistentPreferredActivities(android.content.ComponentName, String):
+    Method 'clearPackagePersistentPreferredActivities' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#clearResetPasswordToken(android.content.ComponentName):
+    Method 'clearResetPasswordToken' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#createAndProvisionManagedProfile(android.app.admin.ManagedProfileProvisioningParams):
+    Method 'createAndProvisionManagedProfile' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#finalizeWorkProfileProvisioning(android.os.UserHandle, android.accounts.Account):
+    Method 'finalizeWorkProfileProvisioning' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#generateKeyPair(android.content.ComponentName, String, android.security.keystore.KeyGenParameterSpec, int):
+    Method 'generateKeyPair' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getApplicationExemptions(String):
+    Method 'getApplicationExemptions' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getContentProtectionPolicy(android.content.ComponentName):
+    Method 'getContentProtectionPolicy' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getCrossProfileWidgetProviders(android.content.ComponentName):
+    Method 'getCrossProfileWidgetProviders' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getLockTaskFeatures(android.content.ComponentName):
+    Method 'getLockTaskFeatures' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getLockTaskPackages(android.content.ComponentName):
+    Method 'getLockTaskPackages' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getNearbyAppStreamingPolicy():
+    Method 'getNearbyAppStreamingPolicy' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getNearbyNotificationStreamingPolicy():
+    Method 'getNearbyNotificationStreamingPolicy' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getOrganizationName(android.content.ComponentName):
+    Method 'getOrganizationName' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getPasswordComplexity():
+    Method 'getPasswordComplexity' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getShortSupportMessage(android.content.ComponentName):
+    Method 'getShortSupportMessage' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#getUserControlDisabledPackages(android.content.ComponentName):
+    Method 'getUserControlDisabledPackages' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#hasKeyPair(String):
+    Method 'hasKeyPair' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#installKeyPair(android.content.ComponentName, java.security.PrivateKey, java.security.cert.Certificate, String):
+    Method 'installKeyPair' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#installKeyPair(android.content.ComponentName, java.security.PrivateKey, java.security.cert.Certificate[], String, boolean):
+    Method 'installKeyPair' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#installKeyPair(android.content.ComponentName, java.security.PrivateKey, java.security.cert.Certificate[], String, int):
+    Method 'installKeyPair' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#isDeviceProvisioningConfigApplied():
+    Method 'isDeviceProvisioningConfigApplied' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#isPackageSuspended(android.content.ComponentName, String):
+    Method 'isPackageSuspended' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#isResetPasswordTokenActive(android.content.ComponentName):
+    Method 'isResetPasswordTokenActive' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#lockNow(int):
+    Method 'lockNow' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#provisionFullyManagedDevice(android.app.admin.FullyManagedDeviceProvisioningParams):
+    Method 'provisionFullyManagedDevice' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#removeCrossProfileWidgetProvider(android.content.ComponentName, String):
+    Method 'removeCrossProfileWidgetProvider' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#sendLostModeLocationUpdate(java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Boolean>):
+    Method 'sendLostModeLocationUpdate' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setActiveProfileOwner(android.content.ComponentName, String):
+    Method 'setActiveProfileOwner' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setAlwaysOnVpnPackage(android.content.ComponentName, String, boolean):
+    Method 'setAlwaysOnVpnPackage' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setApplicationExemptions(String, java.util.Set<java.lang.Integer>):
+    Method 'setApplicationExemptions' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setContentProtectionPolicy(android.content.ComponentName, int):
+    Method 'setContentProtectionPolicy' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setDeviceProvisioningConfigApplied():
+    Method 'setDeviceProvisioningConfigApplied' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setLockTaskFeatures(android.content.ComponentName, int):
+    Method 'setLockTaskFeatures' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setLockTaskPackages(android.content.ComponentName, String[]):
+    Method 'setLockTaskPackages' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setPermittedInputMethods(android.content.ComponentName, java.util.List<java.lang.String>):
+    Method 'setPermittedInputMethods' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setUninstallBlocked(android.content.ComponentName, String, boolean):
+    Method 'setUninstallBlocked' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#setUserControlDisabledPackages(android.content.ComponentName, java.util.List<java.lang.String>):
+    Method 'setUserControlDisabledPackages' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#wipeData(int):
+    Method 'wipeData' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#wipeData(int, CharSequence):
+    Method 'wipeData' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.DevicePolicyManager#wipeDevice(int):
+    Method 'wipeDevice' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.admin.PolicyUpdateReceiver#onPolicyChanged(android.content.Context, String, android.os.Bundle, android.app.admin.TargetUser, android.app.admin.PolicyUpdateResult):
+    Method 'onPolicyChanged' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.admin.PolicyUpdateReceiver#onPolicySetResult(android.content.Context, String, android.os.Bundle, android.app.admin.TargetUser, android.app.admin.PolicyUpdateResult):
+    Method 'onPolicySetResult' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.backup.BackupManager#dataChanged(String):
+    Method 'dataChanged' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.backup.BackupManager#requestBackup(String[], android.app.backup.BackupObserver, android.app.backup.BackupManagerMonitor, int):
+    Method 'requestBackup' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.backup.BackupManager#setFrameworkSchedulingEnabled(boolean):
+    Method 'setFrameworkSchedulingEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.backup.BackupManager#updateTransportAttributes(android.content.ComponentName, String, android.content.Intent, String, android.content.Intent, CharSequence):
+    Method 'updateTransportAttributes' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.backup.BackupManager#updateTransportAttributes(android.content.ComponentName, String, android.content.Intent, String, android.content.Intent, String):
+    Method 'updateTransportAttributes' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.backup.RestoreSession#restoreAll(long, android.app.backup.RestoreObserver):
+    Method 'restoreAll' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.backup.RestoreSession#restoreAll(long, android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor):
+    Method 'restoreAll' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.backup.RestoreSession#restorePackage(String, android.app.backup.RestoreObserver):
+    Method 'restorePackage' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.backup.RestoreSession#restorePackage(String, android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor):
+    Method 'restorePackage' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.backup.RestoreSession#restorePackages(long, android.app.backup.RestoreObserver, java.util.Set<java.lang.String>):
+    Method 'restorePackages' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.backup.RestoreSession#restorePackages(long, android.app.backup.RestoreObserver, java.util.Set<java.lang.String>, android.app.backup.BackupManagerMonitor):
+    Method 'restorePackages' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.job.JobInfo.Builder#setRequiredNetwork(android.net.NetworkRequest):
+    Method 'setRequiredNetwork' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.job.JobInfo.Builder#setRequiredNetworkType(int):
+    Method 'setRequiredNetworkType' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.job.JobInfo.Builder#setUserInitiated(boolean):
+    Method 'setUserInitiated' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.job.JobParameters#isUserInitiatedJob():
+    Method 'isUserInitiatedJob' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.job.JobScheduler#canRunUserInitiatedJobs():
+    Method 'canRunUserInitiatedJobs' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.people.PeopleManager#isConversation(String, String):
+    Method 'isConversation' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.usage.StorageStatsManager#queryExternalStatsForUser(java.util.UUID, android.os.UserHandle):
+    Method 'queryExternalStatsForUser' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.StorageStatsManager#queryStatsForPackage(java.util.UUID, String, android.os.UserHandle):
+    Method 'queryStatsForPackage' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.StorageStatsManager#queryStatsForUid(java.util.UUID, int):
+    Method 'queryStatsForUid' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.StorageStatsManager#queryStatsForUser(java.util.UUID, android.os.UserHandle):
+    Method 'queryStatsForUser' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.UsageEvents.Event#getTaskRootClassName():
+    Method 'getTaskRootClassName' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.UsageEvents.Event#getTaskRootPackageName():
+    Method 'getTaskRootPackageName' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#getAppStandbyBucket(String):
+    Method 'getAppStandbyBucket' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#getAppStandbyBuckets():
+    Method 'getAppStandbyBuckets' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#isAppInactive(String):
+    Method 'isAppInactive' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#onCarrierPrivilegedAppsChanged():
+    Method 'onCarrierPrivilegedAppsChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#queryAndAggregateUsageStats(long, long):
+    Method 'queryAndAggregateUsageStats' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#queryConfigurations(int, long, long):
+    Method 'queryConfigurations' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#queryEventStats(int, long, long):
+    Method 'queryEventStats' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#queryEvents(long, long):
+    Method 'queryEvents' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#queryUsageStats(int, long, long):
+    Method 'queryUsageStats' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#registerAppUsageLimitObserver(int, String[], java.time.Duration, java.time.Duration, android.app.PendingIntent):
+    Method 'registerAppUsageLimitObserver' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#registerAppUsageObserver(int, String[], long, java.util.concurrent.TimeUnit, android.app.PendingIntent):
+    Method 'registerAppUsageObserver' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#registerUsageSessionObserver(int, String[], java.time.Duration, java.time.Duration, android.app.PendingIntent, android.app.PendingIntent):
+    Method 'registerUsageSessionObserver' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#reportUsageStart(android.app.Activity, String):
+    Method 'reportUsageStart' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#reportUsageStart(android.app.Activity, String, long):
+    Method 'reportUsageStart' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#unregisterAppUsageLimitObserver(int):
+    Method 'unregisterAppUsageLimitObserver' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#unregisterAppUsageObserver(int):
+    Method 'unregisterAppUsageObserver' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.app.usage.UsageStatsManager#unregisterUsageSessionObserver(int):
+    Method 'unregisterUsageSessionObserver' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.appwidget.AppWidgetManager#bindAppWidgetIdIfAllowed(int, android.os.UserHandle, android.content.ComponentName, android.os.Bundle):
+    Method 'bindAppWidgetIdIfAllowed' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.companion.CompanionDeviceManager#isDeviceAssociatedForWifiConnection(String, android.net.MacAddress, android.os.UserHandle):
+    Method 'isDeviceAssociatedForWifiConnection' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.companion.CompanionDeviceManager#startObservingDevicePresence(String):
+    Method 'startObservingDevicePresence' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.companion.CompanionDeviceManager#stopObservingDevicePresence(String):
+    Method 'stopObservingDevicePresence' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.companion.virtual.VirtualDeviceManager#createVirtualDevice(int, android.companion.virtual.VirtualDeviceParams):
+    Method 'createVirtualDevice' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.companion.virtual.VirtualDeviceParams.Builder#setLockState(int):
+    Method 'setLockState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.ContentResolver#addPeriodicSync(android.accounts.Account, String, android.os.Bundle, long):
+    Method 'addPeriodicSync' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#cancelSync(android.content.SyncRequest):
+    Method 'cancelSync' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#getCurrentSync():
+    Method 'getCurrentSync' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#getCurrentSyncs():
+    Method 'getCurrentSyncs' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#getIsSyncable(android.accounts.Account, String):
+    Method 'getIsSyncable' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#getMasterSyncAutomatically():
+    Method 'getMasterSyncAutomatically' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#getPeriodicSyncs(android.accounts.Account, String):
+    Method 'getPeriodicSyncs' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#getSyncAutomatically(android.accounts.Account, String):
+    Method 'getSyncAutomatically' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#isSyncActive(android.accounts.Account, String):
+    Method 'isSyncActive' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#isSyncPending(android.accounts.Account, String):
+    Method 'isSyncPending' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#registerContentObserverAsUser(android.net.Uri, boolean, android.database.ContentObserver, android.os.UserHandle):
+    Method 'registerContentObserverAsUser' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.ContentResolver#removePeriodicSync(android.accounts.Account, String, android.os.Bundle):
+    Method 'removePeriodicSync' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#setIsSyncable(android.accounts.Account, String, int):
+    Method 'setIsSyncable' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#setMasterSyncAutomatically(boolean):
+    Method 'setMasterSyncAutomatically' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.ContentResolver#setSyncAutomatically(android.accounts.Account, String, boolean):
+    Method 'setSyncAutomatically' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.Context#bindServiceAsUser(android.content.Intent, android.content.ServiceConnection, int, android.os.UserHandle):
+    Method 'bindServiceAsUser' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.Context#clearWallpaper():
+    Method 'clearWallpaper' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.Context#getExternalCacheDir():
+    Method 'getExternalCacheDir' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.Context#getExternalCacheDirs():
+    Method 'getExternalCacheDirs' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.Context#getExternalFilesDir(String):
+    Method 'getExternalFilesDir' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.Context#getExternalFilesDirs(String):
+    Method 'getExternalFilesDirs' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.Context#getExternalMediaDirs():
+    Method 'getExternalMediaDirs' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.Context#getObbDir():
+    Method 'getObbDir' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.Context#getObbDirs():
+    Method 'getObbDirs' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.Context#removeStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle):
+    Method 'removeStickyBroadcastAsUser' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.Context#setWallpaper(android.graphics.Bitmap):
+    Method 'setWallpaper' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.Context#setWallpaper(java.io.InputStream):
+    Method 'setWallpaper' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.CrossProfileApps#canRequestInteractAcrossProfiles():
+    Method 'canRequestInteractAcrossProfiles' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.CrossProfileApps#startActivity(android.content.ComponentName, android.os.UserHandle):
+    Method 'startActivity' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.CrossProfileApps#startActivity(android.content.ComponentName, android.os.UserHandle, android.app.Activity, android.os.Bundle):
+    Method 'startActivity' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.CrossProfileApps#startActivity(android.content.Intent, android.os.UserHandle, android.app.Activity):
+    Method 'startActivity' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.CrossProfileApps#startActivity(android.content.Intent, android.os.UserHandle, android.app.Activity, android.os.Bundle):
+    Method 'startActivity' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.LauncherApps#getAllPackageInstallerSessions():
+    Method 'getAllPackageInstallerSessions' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.LauncherApps#registerPackageInstallerSessionCallback(java.util.concurrent.Executor, android.content.pm.PackageInstaller.SessionCallback):
+    Method 'registerPackageInstallerSessionCallback' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.LauncherApps.Callback#onPackagesSuspended(String[], android.os.UserHandle, android.os.Bundle):
+    Method 'onPackagesSuspended' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.PackageInstaller#getAllSessions():
+    Method 'getAllSessions' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.PackageInstaller#getSessionInfo(int):
+    Method 'getSessionInfo' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.PackageInstaller#getStagedSessions():
+    Method 'getStagedSessions' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.PackageInstaller#registerSessionCallback(android.content.pm.PackageInstaller.SessionCallback):
+    Method 'registerSessionCallback' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.PackageInstaller.Session#requestUserPreapproval(android.content.pm.PackageInstaller.PreapprovalDetails, android.content.IntentSender):
+    Method 'requestUserPreapproval' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.PackageInstaller.SessionParams#setInstallerPackageName(String):
+    Method 'setInstallerPackageName' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.PackageInstaller.SessionParams#setPermissionState(String, int):
+    Method 'setPermissionState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.PackageInstaller.SessionParams#setRequestUpdateOwnership(boolean):
+    Method 'setRequestUpdateOwnership' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.PackageInstaller.SessionParams#setRequireUserAction(int):
+    Method 'setRequireUserAction' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#canRequestPackageInstalls():
+    Method 'canRequestPackageInstalls' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#getSuspendedPackageAppExtras():
+    Method 'getSuspendedPackageAppExtras' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#getUnsuspendablePackages(String[]):
+    Method 'getUnsuspendablePackages' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#grantRuntimePermission(String, String, android.os.UserHandle):
+    Method 'grantRuntimePermission' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#isAutoRevokeWhitelisted(String):
+    Method 'isAutoRevokeWhitelisted' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#isPackageSuspended():
+    Method 'isPackageSuspended' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#revokeRuntimePermission(String, String, android.os.UserHandle):
+    Method 'revokeRuntimePermission' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#revokeRuntimePermission(String, String, android.os.UserHandle, String):
+    Method 'revokeRuntimePermission' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#setDistractingPackageRestrictions(String[], int):
+    Method 'setDistractingPackageRestrictions' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#setPackagesSuspended(String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, String):
+    Method 'setPackagesSuspended' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#setPackagesSuspended(String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, android.content.pm.SuspendDialogInfo):
+    Method 'setPackagesSuspended' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#setPackagesSuspended(String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, android.content.pm.SuspendDialogInfo, int):
+    Method 'setPackagesSuspended' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.content.pm.PackageManager#verifyIntentFilter(int, int, java.util.List<java.lang.String>):
+    Method 'verifyIntentFilter' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.hardware.Sensor#getHighestDirectReportRateLevel():
+    Method 'getHighestDirectReportRateLevel' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.hardware.Sensor#getMinDelay():
+    Method 'getMinDelay' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.hardware.camera2.CameraCharacteristics#getKeysNeedingPermission():
+    Method 'getKeysNeedingPermission' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.hardware.camera2.CameraManager.AvailabilityCallback#onCameraClosed(String):
+    Method 'onCameraClosed' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.hardware.camera2.CameraManager.AvailabilityCallback#onCameraOpened(String, String):
+    Method 'onCameraOpened' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.hardware.hdmi.HdmiControlManager#getHdmiCecVersion():
+    Method 'getHdmiCecVersion' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.hardware.hdmi.HdmiControlManager#setHdmiCecVersion(int):
+    Method 'setHdmiCecVersion' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.hardware.location.GeofenceHardware#addGeofence(int, int, android.hardware.location.GeofenceHardwareRequest, android.hardware.location.GeofenceHardwareCallback):
+    Method 'addGeofence' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.hardware.location.GeofenceHardware#getMonitoringTypes():
+    Method 'getMonitoringTypes' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.hardware.location.GeofenceHardware#pauseGeofence(int, int):
+    Method 'pauseGeofence' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.hardware.location.GeofenceHardware#registerForMonitorStateChangeCallback(int, android.hardware.location.GeofenceHardwareMonitorCallback):
+    Method 'registerForMonitorStateChangeCallback' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.hardware.location.GeofenceHardware#removeGeofence(int, int):
+    Method 'removeGeofence' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.hardware.location.GeofenceHardware#resumeGeofence(int, int, int):
+    Method 'resumeGeofence' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.hardware.location.GeofenceHardware#unregisterForMonitorStateChangeCallback(int, android.hardware.location.GeofenceHardwareMonitorCallback):
+    Method 'unregisterForMonitorStateChangeCallback' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.hardware.usb.UsbManager#grantPermission(android.hardware.usb.UsbDevice, String):
+    Method 'grantPermission' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.hardware.usb.UsbManager#hasPermission(android.hardware.usb.UsbDevice):
+    Method 'hasPermission' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.hardware.usb.UsbManager#requestPermission(android.hardware.usb.UsbDevice, android.app.PendingIntent):
+    Method 'requestPermission' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.AudioAttributes.Builder#setHapticChannelsMuted(boolean):
+    Method 'setHapticChannelsMuted' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.AudioManager#getCallDownlinkExtractionAudioRecord(android.media.AudioFormat):
+    Method 'getCallDownlinkExtractionAudioRecord' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.media.AudioManager#getCallUplinkInjectionAudioTrack(android.media.AudioFormat):
+    Method 'getCallUplinkInjectionAudioTrack' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.media.AudioManager#registerAudioPolicy(android.media.audiopolicy.AudioPolicy):
+    Method 'registerAudioPolicy' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.media.AudioRecord#shareAudioHistory(String, long):
+    Method 'shareAudioHistory' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.media.AudioRecordingConfiguration#getClientUid():
+    Method 'getClientUid' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.media.MediaCodec#createByCodecNameForClient(String, int, int):
+    Method 'createByCodecNameForClient' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.media.MediaExtractor#setDataSource(String):
+    Method 'setDataSource' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.MediaExtractor#setDataSource(String, java.util.Map<java.lang.String,java.lang.String>):
+    Method 'setDataSource' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.MediaExtractor#setDataSource(android.content.Context, android.net.Uri, java.util.Map<java.lang.String,java.lang.String>):
+    Method 'setDataSource' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.MediaPlayer#setWakeMode(android.content.Context, int):
+    Method 'setWakeMode' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.MediaRouter2#getInstance(android.content.Context, String):
+    Method 'getInstance' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.media.RingtoneManager#getCursor():
+    Method 'getCursor' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.RingtoneManager#getValidRingtoneUri(android.content.Context):
+    Method 'getValidRingtoneUri' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.audiofx.HapticGenerator#setEnabled(boolean):
+    Method 'setEnabled' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.projection.MediaProjection#createVirtualDisplay(String, int, int, int, int, android.view.Surface, android.hardware.display.VirtualDisplay.Callback, android.os.Handler):
+    Method 'createVirtualDisplay' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.projection.MediaProjectionManager#getMediaProjection(int, android.content.Intent):
+    Method 'getMediaProjection' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.session.MediaSessionManager#addOnActiveSessionsChangedListener(android.content.ComponentName, android.os.UserHandle, java.util.concurrent.Executor, android.media.session.MediaSessionManager.OnActiveSessionsChangedListener):
+    Method 'addOnActiveSessionsChangedListener' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.session.MediaSessionManager#addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, android.content.ComponentName):
+    Method 'addOnActiveSessionsChangedListener' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.session.MediaSessionManager#addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, android.content.ComponentName, android.os.Handler):
+    Method 'addOnActiveSessionsChangedListener' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.session.MediaSessionManager#addOnMediaKeyEventSessionChangedListener(java.util.concurrent.Executor, android.media.session.MediaSessionManager.OnMediaKeyEventSessionChangedListener):
+    Method 'addOnMediaKeyEventSessionChangedListener' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.session.MediaSessionManager#getActiveSessions(android.content.ComponentName):
+    Method 'getActiveSessions' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.session.MediaSessionManager#getActiveSessionsForUser(android.content.ComponentName, android.os.UserHandle):
+    Method 'getActiveSessionsForUser' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.session.MediaSessionManager#getMediaKeyEventSession():
+    Method 'getMediaKeyEventSession' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.session.MediaSessionManager#getMediaKeyEventSessionPackageName():
+    Method 'getMediaKeyEventSessionPackageName' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.session.MediaSessionManager#isTrustedForMediaControl(android.media.session.MediaSessionManager.RemoteUserInfo):
+    Method 'isTrustedForMediaControl' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.media.voice.KeyphraseModelManager#deleteKeyphraseSoundModel(int, java.util.Locale):
+    Method 'deleteKeyphraseSoundModel' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.media.voice.KeyphraseModelManager#getKeyphraseSoundModel(int, java.util.Locale):
+    Method 'getKeyphraseSoundModel' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.media.voice.KeyphraseModelManager#updateKeyphraseSoundModel(android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel):
+    Method 'updateKeyphraseSoundModel' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.net.NetworkScoreManager#clearScores():
+    Method 'clearScores' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.net.NetworkScoreManager#disableScoring():
+    Method 'disableScoring' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.net.NetworkScoreManager#getActiveScorerPackage():
+    Method 'getActiveScorerPackage' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.net.NetworkScoreManager#registerNetworkScoreCallback(int, int, java.util.concurrent.Executor, android.net.NetworkScoreManager.NetworkScoreCallback):
+    Method 'registerNetworkScoreCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.net.NetworkScoreManager#requestScores(java.util.Collection<android.net.NetworkKey>):
+    Method 'requestScores' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.net.NetworkScoreManager#setActiveScorer(String):
+    Method 'setActiveScorer' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.net.VpnService#prepareAndAuthorize(android.content.Context):
+    Method 'prepareAndAuthorize' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.net.sip.SipAudioCall#setSpeakerMode(boolean):
+    Method 'setSpeakerMode' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.net.sip.SipAudioCall#startAudio():
+    Method 'startAudio' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.net.vcn.VcnManager#addVcnNetworkPolicyChangeListener(java.util.concurrent.Executor, android.net.vcn.VcnManager.VcnNetworkPolicyChangeListener):
+    Method 'addVcnNetworkPolicyChangeListener' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.net.vcn.VcnManager#applyVcnNetworkPolicy(android.net.NetworkCapabilities, android.net.LinkProperties):
+    Method 'applyVcnNetworkPolicy' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.net.vcn.VcnManager#removeVcnNetworkPolicyChangeListener(android.net.vcn.VcnManager.VcnNetworkPolicyChangeListener):
+    Method 'removeVcnNetworkPolicyChangeListener' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.BugreportManager#cancelBugreport():
+    Method 'cancelBugreport' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.BugreportManager#preDumpUiData():
+    Method 'preDumpUiData' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.Build#getSerial():
+    Method 'getSerial' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.Debug#dumpService(String, java.io.FileDescriptor, String[]):
+    Method 'dumpService' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.DropBoxManager#getNextEntry(String, long):
+    Method 'getNextEntry' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.Environment#getExternalStorageDirectory():
+    Method 'getExternalStorageDirectory' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.Environment#isExternalStorageManager():
+    Method 'isExternalStorageManager' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.Environment#isExternalStorageManager(java.io.File):
+    Method 'isExternalStorageManager' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.PowerManager#dream(long):
+    Method 'dream' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.PowerManager#forceSuspend():
+    Method 'forceSuspend' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.PowerManager#getPowerSaveModeTrigger():
+    Method 'getPowerSaveModeTrigger' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.PowerManager#newWakeLock(int, String):
+    Method 'newWakeLock' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.PowerManager#reboot(String):
+    Method 'reboot' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.PowerManager#setBatteryDischargePrediction(java.time.Duration, boolean):
+    Method 'setBatteryDischargePrediction' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.PowerManager#setDynamicPowerSaveHint(boolean, int):
+    Method 'setDynamicPowerSaveHint' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.PowerManager#userActivity(long, int, int):
+    Method 'userActivity' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.RecoverySystem#rebootWipeUserData(android.content.Context):
+    Method 'rebootWipeUserData' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.StrictMode.VmPolicy.Builder#detectFileUriExposure():
+    Method 'detectFileUriExposure' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.SystemUpdateManager#retrieveSystemUpdateInfo():
+    Method 'retrieveSystemUpdateInfo' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.SystemUpdateManager#updateSystemUpdateInfo(android.os.PersistableBundle):
+    Method 'updateSystemUpdateInfo' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.UserManager#getUserProperties(android.os.UserHandle):
+    Method 'getUserProperties' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.UserManager#getUserRestrictions(android.os.UserHandle):
+    Method 'getUserRestrictions' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.UserManager#hasUserRestrictionForUser(String, android.os.UserHandle):
+    Method 'hasUserRestrictionForUser' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.UserManager#isManagedProfile(int):
+    Method 'isManagedProfile' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.UserManager#isRestrictedProfile():
+    Method 'isRestrictedProfile' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.UserManager#isRestrictedProfile(android.os.UserHandle):
+    Method 'isRestrictedProfile' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.UserManager#isUserUnlocked(android.os.UserHandle):
+    Method 'isUserUnlocked' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.UserManager#isUserUnlockingOrUnlocked(android.os.UserHandle):
+    Method 'isUserUnlockingOrUnlocked' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.UserManager#requestQuietModeEnabled(boolean, android.os.UserHandle):
+    Method 'requestQuietModeEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.UserManager#setUserRestriction(String, boolean):
+    Method 'setUserRestriction' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.health.SystemHealthManager#takeUidSnapshot(int):
+    Method 'takeUidSnapshot' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.health.SystemHealthManager#takeUidSnapshots(int[]):
+    Method 'takeUidSnapshots' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.storage.StorageManager#getCloudMediaProvider():
+    Method 'getCloudMediaProvider' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.storage.StorageManager#getManageSpaceActivityIntent(String, int):
+    Method 'getManageSpaceActivityIntent' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.os.storage.StorageManager#notifyAppIoBlocked(java.util.UUID, int, int, int):
+    Method 'notifyAppIoBlocked' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.storage.StorageManager#notifyAppIoResumed(java.util.UUID, int, int, int):
+    Method 'notifyAppIoResumed' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.storage.StorageManager#setCloudMediaProvider(String):
+    Method 'setCloudMediaProvider' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.os.storage.StorageVolume#createAccessIntent(String):
+    Method 'createAccessIntent' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.permission.PermissionManager#checkPermissionForDataDelivery(String, android.content.AttributionSource, String):
+    Method 'checkPermissionForDataDelivery' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.permission.PermissionManager#checkPermissionForDataDeliveryFromDataSource(String, android.content.AttributionSource, String):
+    Method 'checkPermissionForDataDeliveryFromDataSource' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.permission.PermissionManager#checkPermissionForStartDataDelivery(String, android.content.AttributionSource, String):
+    Method 'checkPermissionForStartDataDelivery' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.provider.Settings#canDrawOverlays(android.content.Context):
+    Method 'canDrawOverlays' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.provider.Settings.System#canWrite(android.content.Context):
+    Method 'canWrite' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.security.KeyChain#removeCredentialManagementApp(android.content.Context):
+    Method 'removeCredentialManagementApp' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.service.credentials.BeginCreateCredentialResponse.Builder#setRemoteCreateEntry(android.service.credentials.RemoteEntry):
+    Method 'setRemoteCreateEntry' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.service.credentials.BeginGetCredentialResponse.Builder#setRemoteCredentialEntry(android.service.credentials.RemoteEntry):
+    Method 'setRemoteCredentialEntry' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.service.credentials.CallingAppInfo#getOrigin():
+    Method 'getOrigin' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telecom.Call.Details#getContactDisplayName():
+    Method 'getContactDisplayName' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telecom.Call.Details#getContactPhotoUri():
+    Method 'getContactPhotoUri' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telecom.TelecomManager#acceptHandover(android.net.Uri, int, android.telecom.PhoneAccountHandle):
+    Method 'acceptHandover' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telecom.TelecomManager#addNewIncomingCall(android.telecom.PhoneAccountHandle, android.os.Bundle):
+    Method 'addNewIncomingCall' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telecom.TelecomManager#addNewIncomingConference(android.telecom.PhoneAccountHandle, android.os.Bundle):
+    Method 'addNewIncomingConference' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telecom.TelecomManager#getCallState():
+    Method 'getCallState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telecom.TelecomManager#getLine1Number(android.telecom.PhoneAccountHandle):
+    Method 'getLine1Number' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telecom.TelecomManager#getOwnSelfManagedPhoneAccounts():
+    Method 'getOwnSelfManagedPhoneAccounts' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telecom.TelecomManager#getPhoneAccount(android.telecom.PhoneAccountHandle):
+    Method 'getPhoneAccount' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telecom.TelecomManager#getSelfManagedPhoneAccounts():
+    Method 'getSelfManagedPhoneAccounts' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telecom.TelecomManager#hasManageOngoingCallsPermission():
+    Method 'hasManageOngoingCallsPermission' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telecom.TelecomManager#placeCall(android.net.Uri, android.os.Bundle):
+    Method 'placeCall' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telecom.TelecomManager#showInCallScreen(boolean):
+    Method 'showInCallScreen' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telecom.TelecomManager#silenceRinger():
+    Method 'silenceRinger' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.CarrierConfigManager#getConfig():
+    Method 'getConfig' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.CarrierConfigManager#getConfig(java.lang.String...):
+    Method 'getConfig' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.CarrierConfigManager#getConfigByComponentForSubId(String, int):
+    Method 'getConfigByComponentForSubId' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.CarrierConfigManager#getConfigForSubId(int):
+    Method 'getConfigForSubId' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.CarrierConfigManager#getConfigForSubId(int, java.lang.String...):
+    Method 'getConfigForSubId' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.CarrierConfigManager#notifyConfigChangedForSubId(int):
+    Method 'notifyConfigChangedForSubId' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.CellLocation#requestLocationUpdate():
+    Method 'requestLocationUpdate' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.NetworkRegistrationInfo#getCellIdentity():
+    Method 'getCellIdentity' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.PhoneStateListener#onActiveDataSubscriptionIdChanged(int):
+    Method 'onActiveDataSubscriptionIdChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.PhoneStateListener#onCallAttributesChanged(android.telephony.CallAttributes):
+    Method 'onCallAttributesChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.PhoneStateListener#onCallStateChanged(int, String):
+    Method 'onCallStateChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.PhoneStateListener#onDisplayInfoChanged(android.telephony.TelephonyDisplayInfo):
+    Method 'onDisplayInfoChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.PhoneStateListener#onPreciseDataConnectionStateChanged(android.telephony.PreciseDataConnectionState):
+    Method 'onPreciseDataConnectionStateChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.PhoneStateListener#onRadioPowerStateChanged(int):
+    Method 'onRadioPowerStateChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.PhoneStateListener#onServiceStateChanged(android.telephony.ServiceState):
+    Method 'onServiceStateChanged' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.ServiceState#getCdmaNetworkId():
+    Method 'getCdmaNetworkId' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ServiceState#getCdmaSystemId():
+    Method 'getCdmaSystemId' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ServiceState#getOperatorAlphaLong():
+    Method 'getOperatorAlphaLong' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ServiceState#getOperatorAlphaShort():
+    Method 'getOperatorAlphaShort' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ServiceState#getOperatorNumeric():
+    Method 'getOperatorNumeric' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SignalStrengthUpdateRequest.Builder#setSystemThresholdReportingRequestedWhileIdle(boolean):
+    Method 'setSystemThresholdReportingRequestedWhileIdle' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SmsManager#disableCellBroadcastRange(int, int, int):
+    Method 'disableCellBroadcastRange' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.SmsManager#enableCellBroadcastRange(int, int, int):
+    Method 'enableCellBroadcastRange' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.SmsManager#getSmscAddress():
+    Method 'getSmscAddress' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SmsManager#injectSmsPdu(byte[], String, android.app.PendingIntent):
+    Method 'injectSmsPdu' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.SmsManager#sendDataMessage(String, String, short, byte[], android.app.PendingIntent, android.app.PendingIntent):
+    Method 'sendDataMessage' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.SmsManager#sendMultipartTextMessage(String, String, java.util.ArrayList<java.lang.String>, java.util.ArrayList<android.app.PendingIntent>, java.util.ArrayList<android.app.PendingIntent>):
+    Method 'sendMultipartTextMessage' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.SmsManager#sendMultipartTextMessageWithoutPersisting(String, String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>):
+    Method 'sendMultipartTextMessageWithoutPersisting' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SmsManager#sendTextMessage(String, String, String, android.app.PendingIntent, android.app.PendingIntent):
+    Method 'sendTextMessage' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.SmsManager#sendTextMessageWithoutPersisting(String, String, String, android.app.PendingIntent, android.app.PendingIntent):
+    Method 'sendTextMessageWithoutPersisting' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SmsManager#setSmscAddress(String):
+    Method 'setSmscAddress' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#addSubscriptionsIntoGroup(java.util.List<java.lang.Integer>, android.os.ParcelUuid):
+    Method 'addSubscriptionsIntoGroup' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#createSubscriptionGroup(java.util.List<java.lang.Integer>):
+    Method 'createSubscriptionGroup' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#getActiveSubscriptionInfo(int):
+    Method 'getActiveSubscriptionInfo' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#getActiveSubscriptionInfoForSimSlotIndex(int):
+    Method 'getActiveSubscriptionInfoForSimSlotIndex' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#getActiveSubscriptionInfoList():
+    Method 'getActiveSubscriptionInfoList' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#getAvailableSubscriptionInfoList():
+    Method 'getAvailableSubscriptionInfoList' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#getCompleteActiveSubscriptionInfoList():
+    Method 'getCompleteActiveSubscriptionInfoList' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#getOpportunisticSubscriptions():
+    Method 'getOpportunisticSubscriptions' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#getResourcesForSubId(android.content.Context, int):
+    Method 'getResourcesForSubId' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#getSubscriptionsInGroup(android.os.ParcelUuid):
+    Method 'getSubscriptionsInGroup' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#removeSubscriptionsFromGroup(java.util.List<java.lang.Integer>, android.os.ParcelUuid):
+    Method 'removeSubscriptionsFromGroup' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#requestEmbeddedSubscriptionInfoListRefresh():
+    Method 'requestEmbeddedSubscriptionInfoListRefresh' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#requestEmbeddedSubscriptionInfoListRefresh(int):
+    Method 'requestEmbeddedSubscriptionInfoListRefresh' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#setOpportunistic(boolean, int):
+    Method 'setOpportunistic' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.SubscriptionManager#setPreferredDataSubscriptionId(int, boolean, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    Method 'setPreferredDataSubscriptionId' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener#onActiveDataSubscriptionIdChanged(int):
+    Method 'onActiveDataSubscriptionIdChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.BarringInfoListener#onBarringInfoChanged(android.telephony.BarringInfo):
+    Method 'onBarringInfoChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.CallAttributesListener#onCallAttributesChanged(android.telephony.CallAttributes):
+    Method 'onCallAttributesChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.CallAttributesListener#onCallStatesChanged(java.util.List<android.telephony.CallState>):
+    Method 'onCallStatesChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.CallForwardingIndicatorListener#onCallForwardingIndicatorChanged(boolean):
+    Method 'onCallForwardingIndicatorChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.DataEnabledListener#onDataEnabledChanged(boolean, int):
+    Method 'onDataEnabledChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.EmergencyNumberListListener#onEmergencyNumberListChanged(java.util.Map<java.lang.Integer,java.util.List<android.telephony.emergency.EmergencyNumber>>):
+    Method 'onEmergencyNumberListChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.ImsCallDisconnectCauseListener#onImsCallDisconnectCauseChanged(android.telephony.ims.ImsReasonInfo):
+    Method 'onImsCallDisconnectCauseChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.MessageWaitingIndicatorListener#onMessageWaitingIndicatorChanged(boolean):
+    Method 'onMessageWaitingIndicatorChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.PhysicalChannelConfigListener#onPhysicalChannelConfigChanged(java.util.List<android.telephony.PhysicalChannelConfig>):
+    Method 'onPhysicalChannelConfigChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.PreciseCallStateListener#onPreciseCallStateChanged(android.telephony.PreciseCallState):
+    Method 'onPreciseCallStateChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.PreciseDataConnectionStateListener#onPreciseDataConnectionStateChanged(android.telephony.PreciseDataConnectionState):
+    Method 'onPreciseDataConnectionStateChanged' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.RegistrationFailedListener#onRegistrationFailed(android.telephony.CellIdentity, String, int, int, int):
+    Method 'onRegistrationFailed' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyCallback.ServiceStateListener#onServiceStateChanged(android.telephony.ServiceState):
+    Method 'onServiceStateChanged' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#bootstrapAuthenticationRequest(int, android.net.Uri, android.telephony.gba.UaSecurityProtocolIdentifier, boolean, java.util.concurrent.Executor, android.telephony.TelephonyManager.BootstrapAuthenticationCallback):
+    Method 'bootstrapAuthenticationRequest' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#changeIccLockPin(String, String):
+    Method 'changeIccLockPin' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#clearRadioPowerOffForReason(int):
+    Method 'clearRadioPowerOffForReason' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#clearSignalStrengthUpdateRequest(android.telephony.SignalStrengthUpdateRequest):
+    Method 'clearSignalStrengthUpdateRequest' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#doesSwitchMultiSimConfigTriggerReboot():
+    Method 'doesSwitchMultiSimConfigTriggerReboot' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#enableModemForSlot(int, boolean):
+    Method 'enableModemForSlot' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getAidForAppType(int):
+    Method 'getAidForAppType' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getAllowedNetworkTypes():
+    Method 'getAllowedNetworkTypes' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getAllowedNetworkTypesBitmask():
+    Method 'getAllowedNetworkTypesBitmask' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getAllowedNetworkTypesForReason(int):
+    Method 'getAllowedNetworkTypesForReason' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getCallState():
+    Method 'getCallState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getCallStateForSubscription():
+    Method 'getCallStateForSubscription' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getCarrierConfig():
+    Method 'getCarrierConfig' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getCarrierInfoForImsiEncryption(int):
+    Method 'getCarrierInfoForImsiEncryption' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getCarrierRestrictionStatus(java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    Method 'getCarrierRestrictionStatus' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getCdmaRoamingMode():
+    Method 'getCdmaRoamingMode' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getCdmaSubscriptionMode():
+    Method 'getCdmaSubscriptionMode' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getDataActivationState():
+    Method 'getDataActivationState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getDataNetworkType():
+    Method 'getDataNetworkType' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getDeviceId():
+    Method 'getDeviceId' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getDeviceId(int):
+    Method 'getDeviceId' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getDeviceSoftwareVersion(int):
+    Method 'getDeviceSoftwareVersion' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getEmergencyNumberDbVersion():
+    Method 'getEmergencyNumberDbVersion' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getEmergencyNumberList():
+    Method 'getEmergencyNumberList' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getEmergencyNumberList(int):
+    Method 'getEmergencyNumberList' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getEquivalentHomePlmns():
+    Method 'getEquivalentHomePlmns' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getForbiddenPlmns():
+    Method 'getForbiddenPlmns' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getGroupIdLevel1():
+    Method 'getGroupIdLevel1' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getImei(int):
+    Method 'getImei' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getIsimDomain():
+    Method 'getIsimDomain' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getLine1Number():
+    Method 'getLine1Number' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getManualNetworkSelectionPlmn():
+    Method 'getManualNetworkSelectionPlmn' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getMeid():
+    Method 'getMeid' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getMeid(int):
+    Method 'getMeid' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getNai():
+    Method 'getNai' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getNetworkSelectionMode():
+    Method 'getNetworkSelectionMode' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getNetworkSlicingConfiguration(java.util.concurrent.Executor, android.os.OutcomeReceiver<android.telephony.data.NetworkSlicingConfig,android.telephony.TelephonyManager.NetworkSlicingException>):
+    Method 'getNetworkSlicingConfiguration' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getPhoneAccountHandle():
+    Method 'getPhoneAccountHandle' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getPreferredNetworkTypeBitmask():
+    Method 'getPreferredNetworkTypeBitmask' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getPreferredOpportunisticDataSubscription():
+    Method 'getPreferredOpportunisticDataSubscription' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getRadioPowerOffReasons():
+    Method 'getRadioPowerOffReasons' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getRadioPowerState():
+    Method 'getRadioPowerState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getServiceState():
+    Method 'getServiceState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getServiceState(int):
+    Method 'getServiceState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getSimLocale():
+    Method 'getSimLocale' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getSimSerialNumber():
+    Method 'getSimSerialNumber' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getSubscriberId():
+    Method 'getSubscriberId' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getSupportedRadioAccessFamily():
+    Method 'getSupportedRadioAccessFamily' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getSystemSelectionChannels():
+    Method 'getSystemSelectionChannels' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getTelephonyHistograms():
+    Method 'getTelephonyHistograms' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getVisualVoicemailPackageName():
+    Method 'getVisualVoicemailPackageName' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getVoiceActivationState():
+    Method 'getVoiceActivationState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getVoiceMailAlphaTag():
+    Method 'getVoiceMailAlphaTag' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getVoiceMailNumber():
+    Method 'getVoiceMailNumber' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#getVoiceNetworkType():
+    Method 'getVoiceNetworkType' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#iccCloseLogicalChannel(int):
+    Method 'iccCloseLogicalChannel' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#iccCloseLogicalChannelBySlot(int, int):
+    Method 'iccCloseLogicalChannelBySlot' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#iccExchangeSimIO(int, int, int, int, int, String):
+    Method 'iccExchangeSimIO' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#iccOpenLogicalChannel(String):
+    Method 'iccOpenLogicalChannel' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#iccOpenLogicalChannel(String, int):
+    Method 'iccOpenLogicalChannel' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#iccOpenLogicalChannelBySlot(int, String, int):
+    Method 'iccOpenLogicalChannelBySlot' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#iccTransmitApduBasicChannel(int, int, int, int, int, String):
+    Method 'iccTransmitApduBasicChannel' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#iccTransmitApduBasicChannelBySlot(int, int, int, int, int, int, String):
+    Method 'iccTransmitApduBasicChannelBySlot' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#iccTransmitApduLogicalChannel(int, int, int, int, int, int, String):
+    Method 'iccTransmitApduLogicalChannel' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#iccTransmitApduLogicalChannelBySlot(int, int, int, int, int, int, int, String):
+    Method 'iccTransmitApduLogicalChannelBySlot' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isApplicationOnUicc(int):
+    Method 'isApplicationOnUicc' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isDataEnabled():
+    Method 'isDataEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isDataEnabledForReason(int):
+    Method 'isDataEnabledForReason' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isDataRoamingEnabled():
+    Method 'isDataRoamingEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isEmergencyAssistanceEnabled():
+    Method 'isEmergencyAssistanceEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isIccLockEnabled():
+    Method 'isIccLockEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isManualNetworkSelectionAllowed():
+    Method 'isManualNetworkSelectionAllowed' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isModemEnabledForSlot(int):
+    Method 'isModemEnabledForSlot' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isMultiSimSupported():
+    Method 'isMultiSimSupported' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isOpportunisticNetworkEnabled():
+    Method 'isOpportunisticNetworkEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isPotentialEmergencyNumber(String):
+    Method 'isPotentialEmergencyNumber' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isPremiumCapabilityAvailableForPurchase(int):
+    Method 'isPremiumCapabilityAvailableForPurchase' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#isTetheringApnRequired():
+    Method 'isTetheringApnRequired' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#notifyOtaEmergencyNumberDbInstalled():
+    Method 'notifyOtaEmergencyNumberDbInstalled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#prepareForUnattendedReboot():
+    Method 'prepareForUnattendedReboot' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#purchasePremiumCapability(int, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    Method 'purchasePremiumCapability' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#rebootModem():
+    Method 'rebootModem' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#rebootRadio():
+    Method 'rebootRadio' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#reportDefaultNetworkStatus(boolean):
+    Method 'reportDefaultNetworkStatus' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#requestNetworkScan(android.telephony.NetworkScanRequest, java.util.concurrent.Executor, android.telephony.TelephonyScanManager.NetworkScanCallback):
+    Method 'requestNetworkScan' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#requestNetworkScan(int, android.telephony.NetworkScanRequest, java.util.concurrent.Executor, android.telephony.TelephonyScanManager.NetworkScanCallback):
+    Method 'requestNetworkScan' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#requestNumberVerification(android.telephony.PhoneNumberRange, long, java.util.concurrent.Executor, android.telephony.NumberVerificationCallback):
+    Method 'requestNumberVerification' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#requestRadioPowerOffForReason(int):
+    Method 'requestRadioPowerOffForReason' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#resetAllCarrierActions():
+    Method 'resetAllCarrierActions' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#resetCarrierKeysForImsiEncryption():
+    Method 'resetCarrierKeysForImsiEncryption' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#resetOtaEmergencyNumberDbFilePath():
+    Method 'resetOtaEmergencyNumberDbFilePath' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#resetRadioConfig():
+    Method 'resetRadioConfig' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#sendEnvelopeWithStatus(String):
+    Method 'sendEnvelopeWithStatus' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#sendThermalMitigationRequest(android.telephony.ThermalMitigationRequest):
+    Method 'sendThermalMitigationRequest' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#sendUssdRequest(String, android.telephony.TelephonyManager.UssdResponseCallback, android.os.Handler):
+    Method 'sendUssdRequest' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#sendVisualVoicemailSms(String, int, String, android.app.PendingIntent):
+    Method 'sendVisualVoicemailSms' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>):
+    Method 'setAllowedCarriers' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setAllowedNetworkTypesForReason(int, long):
+    Method 'setAllowedNetworkTypesForReason' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setCarrierDataEnabled(boolean):
+    Method 'setCarrierDataEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setCarrierRestrictionRules(android.telephony.CarrierRestrictionRules):
+    Method 'setCarrierRestrictionRules' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setCdmaRoamingMode(int):
+    Method 'setCdmaRoamingMode' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setCdmaSubscriptionMode(int):
+    Method 'setCdmaSubscriptionMode' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setDataActivationState(int):
+    Method 'setDataActivationState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setDataEnabled(boolean):
+    Method 'setDataEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setDataEnabledForReason(int, boolean):
+    Method 'setDataEnabledForReason' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setDataRoamingEnabled(boolean):
+    Method 'setDataRoamingEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setForbiddenPlmns(java.util.List<java.lang.String>):
+    Method 'setForbiddenPlmns' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setIccLockEnabled(boolean, String):
+    Method 'setIccLockEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setNetworkSelectionModeAutomatic():
+    Method 'setNetworkSelectionModeAutomatic' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setNetworkSelectionModeManual(String, boolean):
+    Method 'setNetworkSelectionModeManual' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setNetworkSelectionModeManual(String, boolean, int):
+    Method 'setNetworkSelectionModeManual' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setOpportunisticNetworkState(boolean):
+    Method 'setOpportunisticNetworkState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setPreferredNetworkTypeBitmask(long):
+    Method 'setPreferredNetworkTypeBitmask' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setPreferredOpportunisticDataSubscription(int, boolean, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    Method 'setPreferredOpportunisticDataSubscription' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setRadioEnabled(boolean):
+    Method 'setRadioEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setSignalStrengthUpdateRequest(android.telephony.SignalStrengthUpdateRequest):
+    Method 'setSignalStrengthUpdateRequest' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setSimPowerState(int):
+    Method 'setSimPowerState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setSimPowerState(int, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    Method 'setSimPowerState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setSimPowerStateForSlot(int, int):
+    Method 'setSimPowerStateForSlot' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setSimPowerStateForSlot(int, int, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    Method 'setSimPowerStateForSlot' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setVoiceActivationState(int):
+    Method 'setVoiceActivationState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setVoicemailRingtoneUri(android.telecom.PhoneAccountHandle, android.net.Uri):
+    Method 'setVoicemailRingtoneUri' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#setVoicemailVibrationEnabled(android.telecom.PhoneAccountHandle, boolean):
+    Method 'setVoicemailVibrationEnabled' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#supplyIccLockPin(String):
+    Method 'supplyIccLockPin' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#supplyIccLockPuk(String, String):
+    Method 'supplyIccLockPuk' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#switchMultiSimConfig(int):
+    Method 'switchMultiSimConfig' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#updateAvailableNetworks(java.util.List<android.telephony.AvailableNetworkInfo>, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    Method 'updateAvailableNetworks' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.TelephonyManager#updateOtaEmergencyNumberDbFilePath(android.os.ParcelFileDescriptor):
+    Method 'updateOtaEmergencyNumberDbFilePath' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.VisualVoicemailService#sendVisualVoicemailSms(android.content.Context, android.telecom.PhoneAccountHandle, String, short, String, android.app.PendingIntent):
+    Method 'sendVisualVoicemailSms' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.VisualVoicemailService#setSmsFilterSettings(android.content.Context, android.telecom.PhoneAccountHandle, android.telephony.VisualVoicemailSmsFilterSettings):
+    Method 'setSmsFilterSettings' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#continueOperation(android.content.Intent, android.os.Bundle):
+    Method 'continueOperation' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#deleteSubscription(int, android.app.PendingIntent):
+    Method 'deleteSubscription' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#downloadSubscription(android.telephony.euicc.DownloadableSubscription, boolean, android.app.PendingIntent):
+    Method 'downloadSubscription' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#eraseSubscriptions(android.app.PendingIntent):
+    Method 'eraseSubscriptions' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#eraseSubscriptions(int, android.app.PendingIntent):
+    Method 'eraseSubscriptions' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#getDefaultDownloadableSubscriptionList(android.app.PendingIntent):
+    Method 'getDefaultDownloadableSubscriptionList' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#getDownloadableSubscriptionMetadata(android.telephony.euicc.DownloadableSubscription, android.app.PendingIntent):
+    Method 'getDownloadableSubscriptionMetadata' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#getOtaStatus():
+    Method 'getOtaStatus' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#getSupportedCountries():
+    Method 'getSupportedCountries' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#getUnsupportedCountries():
+    Method 'getUnsupportedCountries' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#setSupportedCountries(java.util.List<java.lang.String>):
+    Method 'setSupportedCountries' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#setUnsupportedCountries(java.util.List<java.lang.String>):
+    Method 'setUnsupportedCountries' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#switchToSubscription(int, android.app.PendingIntent):
+    Method 'switchToSubscription' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#switchToSubscription(int, int, android.app.PendingIntent):
+    Method 'switchToSubscription' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.euicc.EuiccManager#updateSubscriptionNickname(int, String, android.app.PendingIntent):
+    Method 'updateSubscriptionNickname' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#createForSubscriptionId(int):
+    Method 'createForSubscriptionId' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#getRegistrationTransportType(java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    Method 'getRegistrationTransportType' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#getVoWiFiModeSetting():
+    Method 'getVoWiFiModeSetting' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#isAdvancedCallingSettingEnabled():
+    Method 'isAdvancedCallingSettingEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#isCrossSimCallingEnabled():
+    Method 'isCrossSimCallingEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#isTtyOverVolteEnabled():
+    Method 'isTtyOverVolteEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#isVoWiFiRoamingSettingEnabled():
+    Method 'isVoWiFiRoamingSettingEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#isVoWiFiSettingEnabled():
+    Method 'isVoWiFiSettingEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#isVtSettingEnabled():
+    Method 'isVtSettingEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#registerImsRegistrationCallback(java.util.concurrent.Executor, android.telephony.ims.RegistrationManager.RegistrationCallback):
+    Method 'registerImsRegistrationCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#registerImsStateCallback(java.util.concurrent.Executor, android.telephony.ims.ImsStateCallback):
+    Method 'registerImsStateCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#registerMmTelCapabilityCallback(java.util.concurrent.Executor, android.telephony.ims.ImsMmTelManager.CapabilityCallback):
+    Method 'registerMmTelCapabilityCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#unregisterImsRegistrationCallback(android.telephony.ims.RegistrationManager.RegistrationCallback):
+    Method 'unregisterImsRegistrationCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsMmTelManager#unregisterMmTelCapabilityCallback(android.telephony.ims.ImsMmTelManager.CapabilityCallback):
+    Method 'unregisterMmTelCapabilityCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsRcsManager#getRegistrationState(java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    Method 'getRegistrationState' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsRcsManager#getRegistrationTransportType(java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
+    Method 'getRegistrationTransportType' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsRcsManager#registerImsRegistrationCallback(java.util.concurrent.Executor, android.telephony.ims.RegistrationManager.RegistrationCallback):
+    Method 'registerImsRegistrationCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsRcsManager#registerImsStateCallback(java.util.concurrent.Executor, android.telephony.ims.ImsStateCallback):
+    Method 'registerImsStateCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ImsRcsManager#unregisterImsRegistrationCallback(android.telephony.ims.RegistrationManager.RegistrationCallback):
+    Method 'unregisterImsRegistrationCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#getProvisioningStatusForCapability(int, int):
+    Method 'getProvisioningStatusForCapability' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#getRcsProvisioningStatusForCapability(int, int):
+    Method 'getRcsProvisioningStatusForCapability' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#isProvisioningRequiredForCapability(int, int):
+    Method 'isProvisioningRequiredForCapability' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#isRcsProvisioningRequiredForCapability(int, int):
+    Method 'isRcsProvisioningRequiredForCapability' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#isRcsVolteSingleRegistrationCapable():
+    Method 'isRcsVolteSingleRegistrationCapable' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#notifyRcsAutoConfigurationReceived(byte[], boolean):
+    Method 'notifyRcsAutoConfigurationReceived' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#registerFeatureProvisioningChangedCallback(java.util.concurrent.Executor, android.telephony.ims.ProvisioningManager.FeatureProvisioningCallback):
+    Method 'registerFeatureProvisioningChangedCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#registerProvisioningChangedCallback(java.util.concurrent.Executor, android.telephony.ims.ProvisioningManager.Callback):
+    Method 'registerProvisioningChangedCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#registerRcsProvisioningCallback(java.util.concurrent.Executor, android.telephony.ims.ProvisioningManager.RcsProvisioningCallback):
+    Method 'registerRcsProvisioningCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#setProvisioningStatusForCapability(int, int, boolean):
+    Method 'setProvisioningStatusForCapability' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#setRcsProvisioningStatusForCapability(int, boolean):
+    Method 'setRcsProvisioningStatusForCapability' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#setRcsProvisioningStatusForCapability(int, int, boolean):
+    Method 'setRcsProvisioningStatusForCapability' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#unregisterProvisioningChangedCallback(android.telephony.ims.ProvisioningManager.Callback):
+    Method 'unregisterProvisioningChangedCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.ProvisioningManager#unregisterRcsProvisioningCallback(android.telephony.ims.ProvisioningManager.RcsProvisioningCallback):
+    Method 'unregisterRcsProvisioningCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.SipDelegateManager#registerSipDialogStateCallback(java.util.concurrent.Executor, android.telephony.ims.SipDialogStateCallback):
+    Method 'registerSipDialogStateCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.telephony.ims.SipDelegateManager#unregisterSipDialogStateCallback(android.telephony.ims.SipDialogStateCallback):
+    Method 'unregisterSipDialogStateCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.view.WindowManager.LayoutParams#isSystemApplicationOverlay():
+    Method 'isSystemApplicationOverlay' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.view.accessibility.AccessibilityManager#registerDisplayProxy(android.view.accessibility.AccessibilityDisplayProxy):
+    Method 'registerDisplayProxy' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.view.accessibility.AccessibilityManager#unregisterDisplayProxy(android.view.accessibility.AccessibilityDisplayProxy):
+    Method 'unregisterDisplayProxy' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.view.accessibility.CaptioningManager#setSystemAudioCaptioningEnabled(boolean):
+    Method 'setSystemAudioCaptioningEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.view.accessibility.CaptioningManager#setSystemAudioCaptioningUiEnabled(boolean):
+    Method 'setSystemAudioCaptioningUiEnabled' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.view.inputmethod.InputMethodManager#setCurrentInputMethodSubtype(android.view.inputmethod.InputMethodSubtype):
+    Method 'setCurrentInputMethodSubtype' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.webkit.WebSettings#setBlockNetworkLoads(boolean):
+    Method 'setBlockNetworkLoads' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.webkit.WebSettings#setGeolocationEnabled(boolean):
+    Method 'setGeolocationEnabled' documentation mentions permissions without declaring @RequiresPermission
+
+
 SamShouldBeLast: android.app.Activity#convertToTranslucent(android.app.Activity.TranslucentConversionListener, android.app.ActivityOptions):
     SAM-compatible parameters (such as parameter 1, "callback", in android.app.Activity.convertToTranslucent) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.app.ActivityManager#addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int):
@@ -17,18 +1643,6 @@ SamShouldBeLast: android.content.pm.PackageItemInfo#dumpBack(android.util.Printe
     SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.PackageItemInfo.dumpBack) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.content.pm.PackageItemInfo#dumpFront(android.util.Printer, String):
     SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.PackageItemInfo.dumpFront) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener, android.os.Handler):
-    SAM-compatible parameters (such as parameter 1, "listener", in android.location.LocationManager.addNmeaListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(String, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioManager#abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes):
     SAM-compatible parameters (such as parameter 1, "l", in android.media.AudioManager.abandonAudioFocus) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int):
@@ -47,13 +1661,119 @@ SamShouldBeLast: android.media.session.MediaSessionManager#setOnMediaKeyListener
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.session.MediaSessionManager.setOnMediaKeyListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.session.MediaSessionManager#setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.session.MediaSessionManager.setOnVolumeKeyLongPressListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.Binder#attachInterface(android.os.IInterface, String):
-    SAM-compatible parameters (such as parameter 1, "owner", in android.os.Binder.attachInterface) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.Binder#linkToDeath(android.os.IBinder.DeathRecipient, int):
-    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.Binder.linkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.Binder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
-    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.Binder.unlinkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.IBinder#linkToDeath(android.os.IBinder.DeathRecipient, int):
-    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.IBinder.linkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.os.IBinder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
-    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.IBinder.unlinkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.accessibility.AccessibilityManager#addAccessibilityStateChangeListener(android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.view.accessibility.AccessibilityManager.addAccessibilityStateChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.accessibility.AccessibilityManager#addTouchExplorationStateChangeListener(android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.view.accessibility.AccessibilityManager.addTouchExplorationStateChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+
+
+SdkConstant: android.content.Intent#ACTION_BATTERY_LEVEL_CHANGED:
+    Field 'ACTION_BATTERY_LEVEL_CHANGED' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.content.Intent#ACTION_DEVICE_CUSTOMIZATION_READY:
+    Field 'ACTION_DEVICE_CUSTOMIZATION_READY' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.content.Intent#ACTION_GLOBAL_BUTTON:
+    Field 'ACTION_GLOBAL_BUTTON' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.content.Intent#ACTION_PRE_BOOT_COMPLETED:
+    Field 'ACTION_PRE_BOOT_COMPLETED' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.content.Intent#ACTION_UNARCHIVE_PACKAGE:
+    Field 'ACTION_UNARCHIVE_PACKAGE' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.content.pm.PackageInstaller#ACTION_CONFIRM_PRE_APPROVAL:
+    Field 'ACTION_CONFIRM_PRE_APPROVAL' is missing @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+SdkConstant: android.hardware.usb.UsbManager#ACTION_USB_PORT_CHANGED:
+    Field 'ACTION_USB_PORT_CHANGED' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.hardware.usb.UsbManager#ACTION_USB_PORT_COMPLIANCE_CHANGED:
+    Field 'ACTION_USB_PORT_COMPLIANCE_CHANGED' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.hardware.usb.UsbManager#ACTION_USB_STATE:
+    Field 'ACTION_USB_STATE' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.service.euicc.EuiccService#ACTION_DELETE_SUBSCRIPTION_PRIVILEGED:
+    Field 'ACTION_DELETE_SUBSCRIPTION_PRIVILEGED' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.service.euicc.EuiccService#ACTION_RENAME_SUBSCRIPTION_PRIVILEGED:
+    Field 'ACTION_RENAME_SUBSCRIPTION_PRIVILEGED' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.service.euicc.EuiccService#ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED:
+    Field 'ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.telephony.TelephonyManager#ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED:
+    Field 'ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.telephony.TelephonyManager#ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED:
+    Field 'ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.telephony.TelephonyManager#ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE:
+    Field 'ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+SdkConstant: android.telephony.TelephonyManager#ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS:
+    Field 'ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+
+
+Todo: android.Manifest.permission#DOMAIN_VERIFICATION_AGENT:
+    Documentation mentions 'TODO'
+Todo: android.Manifest.permission#INSTALL_EXISTING_PACKAGES:
+    Documentation mentions 'TODO'
+Todo: android.Manifest.permission#READ_PEOPLE_DATA:
+    Documentation mentions 'TODO'
+Todo: android.app.NotificationManager#isNotificationAssistantAccessGranted(android.content.ComponentName):
+    Documentation mentions 'TODO'
+Todo: android.hardware.camera2.params.StreamConfigurationMap:
+    Documentation mentions 'TODO'
+Todo: android.hardware.location.ContextHubManager#getNanoAppInstanceInfo(int):
+    Documentation mentions 'TODO'
+Todo: android.hardware.location.ContextHubManager#loadNanoApp(int, android.hardware.location.NanoApp):
+    Documentation mentions 'TODO'
+Todo: android.hardware.location.ContextHubManager#unloadNanoApp(int):
+    Documentation mentions 'TODO'
+Todo: android.hardware.location.NanoAppInstanceInfo:
+    Documentation mentions 'TODO'
+Todo: android.media.tv.TvContentRatingSystemInfo#getXmlUri():
+    Documentation mentions 'TODO'
+Todo: android.media.tv.TvInputInfo#isConnectedToHdmiSwitch():
+    Documentation mentions 'TODO'
+Todo: android.os.RecoverySystem#prepareForUnattendedUpdate(android.content.Context, String, android.content.IntentSender):
+    Documentation mentions 'TODO'
+Todo: android.os.RecoverySystem#rebootAndApply(android.content.Context, String, String):
+    Documentation mentions 'TODO'
+Todo: android.os.SystemConfigManager:
+    Documentation mentions 'TODO'
+Todo: android.os.UpdateEngineCallback#onStatusUpdate(int, float):
+    Documentation mentions 'TODO'
+Todo: android.provider.ContactsContract.RawContacts#newEntityIterator(android.database.Cursor):
+    Documentation mentions 'TODO'
+Todo: android.service.voice.AlwaysOnHotwordDetector:
+    Documentation mentions 'TODO'
+Todo: android.telephony.TelephonyManager#getCurrentPhoneType():
+    Documentation mentions 'TODO'
+
+
+UnflaggedApi: android.Manifest.permission#MANAGE_REMOTE_AUTH:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.MANAGE_REMOTE_AUTH
+UnflaggedApi: android.Manifest.permission#USE_COMPANION_TRANSPORTS:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.USE_COMPANION_TRANSPORTS
+UnflaggedApi: android.Manifest.permission#USE_REMOTE_AUTH:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.USE_REMOTE_AUTH
+UnflaggedApi: android.app.Activity#isResumed():
+    New API must be flagged with @FlaggedApi: method android.app.Activity.isResumed()
+UnflaggedApi: android.companion.CompanionDeviceManager#MESSAGE_REQUEST_CONTEXT_SYNC:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_SYNC
+UnflaggedApi: android.companion.CompanionDeviceManager#MESSAGE_REQUEST_PERMISSION_RESTORE:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PERMISSION_RESTORE
+UnflaggedApi: android.companion.CompanionDeviceManager#MESSAGE_REQUEST_REMOTE_AUTHENTICATION:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceManager.MESSAGE_REQUEST_REMOTE_AUTHENTICATION
+UnflaggedApi: android.companion.CompanionDeviceManager#addOnMessageReceivedListener(java.util.concurrent.Executor, int, android.companion.CompanionDeviceManager.OnMessageReceivedListener):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.addOnMessageReceivedListener(java.util.concurrent.Executor,int,android.companion.CompanionDeviceManager.OnMessageReceivedListener)
+UnflaggedApi: android.companion.CompanionDeviceManager#addOnTransportsChangedListener(java.util.concurrent.Executor, android.companion.CompanionDeviceManager.OnTransportsChangedListener):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.addOnTransportsChangedListener(java.util.concurrent.Executor,android.companion.CompanionDeviceManager.OnTransportsChangedListener)
+UnflaggedApi: android.companion.CompanionDeviceManager#removeOnMessageReceivedListener(int, android.companion.CompanionDeviceManager.OnMessageReceivedListener):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.removeOnMessageReceivedListener(int,android.companion.CompanionDeviceManager.OnMessageReceivedListener)
+UnflaggedApi: android.companion.CompanionDeviceManager#removeOnTransportsChangedListener(android.companion.CompanionDeviceManager.OnTransportsChangedListener):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.removeOnTransportsChangedListener(android.companion.CompanionDeviceManager.OnTransportsChangedListener)
+UnflaggedApi: android.companion.CompanionDeviceManager#sendMessage(int, byte[], int[]):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.sendMessage(int,byte[],int[])
+UnflaggedApi: android.companion.CompanionDeviceManager.OnMessageReceivedListener:
+    New API must be flagged with @FlaggedApi: class android.companion.CompanionDeviceManager.OnMessageReceivedListener
+UnflaggedApi: android.companion.CompanionDeviceManager.OnMessageReceivedListener#onMessageReceived(int, byte[]):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.OnMessageReceivedListener.onMessageReceived(int,byte[])
+UnflaggedApi: android.companion.CompanionDeviceManager.OnTransportsChangedListener:
+    New API must be flagged with @FlaggedApi: class android.companion.CompanionDeviceManager.OnTransportsChangedListener
+UnflaggedApi: android.companion.CompanionDeviceManager.OnTransportsChangedListener#onTransportsChanged(java.util.List<android.companion.AssociationInfo>):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.OnTransportsChangedListener.onTransportsChanged(java.util.List<android.companion.AssociationInfo>)
+UnflaggedApi: android.content.Context#REMOTE_AUTH_SERVICE:
+    New API must be flagged with @FlaggedApi: field android.content.Context.REMOTE_AUTH_SERVICE
+UnflaggedApi: android.os.IpcDataCache#MODULE_TELEPHONY:
+    New API must be flagged with @FlaggedApi: field android.os.IpcDataCache.MODULE_TELEPHONY
+UnflaggedApi: android.provider.Settings.Config#getAllStrings():
+    New API must be flagged with @FlaggedApi: method android.provider.Settings.Config.getAllStrings()

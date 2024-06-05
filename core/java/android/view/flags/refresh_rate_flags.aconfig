@@ -1,0 +1,114 @@
+package: "android.view.flags"
+container: "system"
+
+flag {
+    name: "view_velocity_api"
+    is_exported: true
+    namespace: "toolkit"
+    description: "Feature flag for view content velocity api"
+    bug: "293513816"
+}
+
+flag {
+    name: "toolkit_set_frame_rate"
+    namespace: "toolkit"
+    description: "Feature flag for toolkit to set frame rate"
+    bug: "293512962"
+}
+
+flag {
+    name: "toolkit_set_frame_rate_read_only"
+    is_exported: true
+    namespace: "toolkit"
+    description: "Feature flag for toolkit to set frame rate"
+    bug: "293512962"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "expected_presentation_time_api"
+    is_exported: true
+    namespace: "toolkit"
+    description: "Feature flag for using expected presentation time of the Choreographer"
+    bug: "278730197"
+}
+
+flag {
+    name: "expected_presentation_time_read_only"
+    is_exported: true
+    namespace: "toolkit"
+    description: "Feature flag for using expected presentation time of the Choreographer"
+    bug: "278730197"
+    is_fixed_read_only: true
+}
+
+flag {
+  name: "set_frame_rate_callback"
+  namespace: "core_graphics"
+  description: "Enable the `setFrameRate` callback"
+  bug: "299946220"
+}
+
+flag {
+    name: "toolkit_metrics_for_frame_rate_decision"
+    namespace: "toolkit"
+    description: "Feature flag for toolkit metrics collecting for frame rate decision"
+    bug: "301343249"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_default_normal_read_only"
+    namespace: "toolkit"
+    description: "Feature flag for setting frame rate category as NORMAL for default"
+    bug: "335874198"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_by_size_read_only"
+    namespace: "toolkit"
+    description: "Feature flag for setting frame rate category based on size"
+    bug: "335874198"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_velocity_mapping_read_only"
+    namespace: "toolkit"
+    description: "Feature flag for setting frame rate based on velocity"
+    bug: "335874198"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_small_uses_percent_read_only"
+    namespace: "toolkit"
+    description: "VRR uses percent of size to consider a view to be small"
+    bug: "335874198"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_typing_read_only"
+    namespace: "toolkit"
+    description: "Feature flag for suppressing boost on typing"
+    bug: "335874198"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_function_enabling_read_only"
+    namespace: "toolkit"
+    description: "Feature flag to enable the functionality of the dVRR feature"
+    bug: "335874198"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "toolkit_frame_rate_view_enabling_read_only"
+    namespace: "toolkit"
+    description: "Feature flag to enable the functionality on views for the dVRR feature"
+    bug: "335874198"
+    is_fixed_read_only: true
+}

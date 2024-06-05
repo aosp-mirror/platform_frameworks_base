@@ -28,12 +28,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.hardware.vibrator.IVibrator;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
 import android.os.CombinedVibration;
 import android.os.ExternalVibration;
+import android.os.ExternalVibrationScale;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IExternalVibratorService;
@@ -52,13 +54,17 @@ import android.os.Trace;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.os.vibrator.VibratorInfoFactory;
+import android.os.vibrator.persistence.ParsedVibration;
+import android.os.vibrator.persistence.VibrationXmlParser;
 import android.text.TextUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -70,13 +76,16 @@ import com.android.server.SystemService;
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -84,12 +93,15 @@ import java.util.function.Function;
 public class VibratorManagerService extends IVibratorManagerService.Stub {
     private static final String TAG = "VibratorManagerService";
     private static final String EXTERNAL_VIBRATOR_SERVICE = "external_vibrator_service";
+    private static final String VIBRATOR_CONTROL_SERVICE =
+            "android.frameworks.vibrator.IVibratorControlService/default";
     private static final boolean DEBUG = false;
     private static final VibrationAttributes DEFAULT_ATTRIBUTES =
             new VibrationAttributes.Builder().build();
     private static final int ATTRIBUTES_ALL_BYPASS_FLAGS =
             VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY
-                    | VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
+                    | VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF
+                    | VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE;
 
     /** Fixed large duration used to note repeating vibrations to {@link IBatteryStats}. */
     private static final long BATTERY_STATS_REPEATING_VIBRATION_DURATION = 5_000;
@@ -124,6 +136,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     private final Object mLock = new Object();
     private final Context mContext;
+    private final Injector mInjector;
     private final PowerManager.WakeLock mWakeLock;
     private final IBatteryStats mBatteryStatsService;
     private final VibratorFrameworkStatsLogger mFrameworkStatsLogger;
@@ -150,8 +163,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     private final VibrationSettings mVibrationSettings;
     private final VibrationScaler mVibrationScaler;
+    private final VibratorControlService mVibratorControlService;
     private final InputDeviceDelegate mInputDeviceDelegate;
-    private final DeviceVibrationEffectAdapter mDeviceVibrationEffectAdapter;
+    private final DeviceAdapter mDeviceAdapter;
+
+    @GuardedBy("mLock")
+    @Nullable private VibratorInfo mCombinedVibratorInfo;
+    @GuardedBy("mLock")
+    @Nullable private HapticFeedbackVibrationProvider mHapticFeedbackVibrationProvider;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -191,23 +210,32 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @VisibleForTesting
     VibratorManagerService(Context context, Injector injector) {
         mContext = context;
+        mInjector = injector;
         mHandler = injector.createHandler(Looper.myLooper());
+        mFrameworkStatsLogger = injector.getFrameworkStatsLogger(mHandler);
 
         mVibrationSettings = new VibrationSettings(mContext, mHandler);
         mVibrationScaler = new VibrationScaler(mContext, mVibrationSettings);
+        mVibratorControlService = new VibratorControlService(mContext,
+                injector.createVibratorControllerHolder(), mVibrationScaler, mVibrationSettings,
+                mFrameworkStatsLogger, mLock);
         mInputDeviceDelegate = new InputDeviceDelegate(mContext, mHandler);
-        mDeviceVibrationEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
 
         VibrationCompleteListener listener = new VibrationCompleteListener(this);
         mNativeWrapper = injector.getNativeWrapper();
         mNativeWrapper.init(listener);
 
-        int dumpLimit = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_previousVibrationsDumpLimit);
-        mVibratorManagerRecords = new VibratorManagerRecords(dumpLimit);
+        int recentDumpSizeLimit = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_recentVibrationsDumpSizeLimit);
+        int dumpSizeLimit = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_previousVibrationsDumpSizeLimit);
+        int dumpAggregationTimeLimit = mContext.getResources().getInteger(
+                com.android.internal.R.integer
+                        .config_previousVibrationsDumpAggregationTimeMillisLimit);
+        mVibratorManagerRecords = new VibratorManagerRecords(
+                recentDumpSizeLimit, dumpSizeLimit, dumpAggregationTimeLimit);
 
         mBatteryStatsService = injector.getBatteryStatsService();
-        mFrameworkStatsLogger = injector.getFrameworkStatsLogger(mHandler);
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
 
@@ -234,6 +262,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             }
         }
 
+        // Load vibrator adapter, that depends on hardware info.
+        mDeviceAdapter = new DeviceAdapter(mVibrationSettings, mVibrators);
+
         // Reset the hardware to a default state, in case this is a runtime restart instead of a
         // fresh boot.
         mNativeWrapper.cancelSynced();
@@ -246,6 +277,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         context.registerReceiver(mIntentReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
         injector.addService(EXTERNAL_VIBRATOR_SERVICE, new ExternalVibratorService());
+        if (injector.isServiceDeclared(VIBRATOR_CONTROL_SERVICE)) {
+            injector.addService(VIBRATOR_CONTROL_SERVICE, mVibratorControlService);
+        }
+
     }
 
     /** Finish initialization at boot phase {@link SystemService#PHASE_SYSTEM_SERVICES_READY}. */
@@ -298,20 +333,18 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         return controller.isVibratorInfoLoadSuccessful() ? info : null;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
     @Override // Binder call
     public boolean isVibrating(int vibratorId) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_VIBRATOR_STATE,
-                "isVibrating");
+        isVibrating_enforcePermission();
         VibratorController controller = mVibrators.get(vibratorId);
         return controller != null && controller.isVibrating();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
     @Override // Binder call
     public boolean registerVibratorStateListener(int vibratorId, IVibratorStateListener listener) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_VIBRATOR_STATE,
-                "registerVibratorStateListener");
+        registerVibratorStateListener_enforcePermission();
         VibratorController controller = mVibrators.get(vibratorId);
         if (controller == null) {
             return false;
@@ -319,12 +352,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         return controller.registerVibratorStateListener(listener);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
     @Override // Binder call
     public boolean unregisterVibratorStateListener(int vibratorId,
             IVibratorStateListener listener) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_VIBRATOR_STATE,
-                "unregisterVibratorStateListener");
+        unregisterVibratorStateListener_enforcePermission();
         VibratorController controller = mVibrators.get(vibratorId);
         if (controller == null) {
             return false;
@@ -364,7 +396,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     return false;
                 }
                 AlwaysOnVibration alwaysOnVibration = new AlwaysOnVibration(alwaysOnId,
-                        new Vibration.CallerInfo(attrs, uid, Display.DEFAULT_DISPLAY, opPkg,
+                        new Vibration.CallerInfo(attrs, uid, Context.DEVICE_ID_DEFAULT, opPkg,
                                 null), effects);
                 mAlwaysOnEffects.put(alwaysOnId, alwaysOnVibration);
                 updateAlwaysOnLocked(alwaysOnVibration);
@@ -376,9 +408,54 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     @Override // Binder call
-    public void vibrate(int uid, int displayId, String opPkg, @NonNull CombinedVibration effect,
+    public void vibrate(int uid, int deviceId, String opPkg, @NonNull CombinedVibration effect,
             @Nullable VibrationAttributes attrs, String reason, IBinder token) {
-        vibrateInternal(uid, displayId, opPkg, effect, attrs, reason, token);
+        vibrateWithPermissionCheck(uid, deviceId, opPkg, effect, attrs, reason, token);
+    }
+
+    @Override // Binder call
+    public void performHapticFeedback(int uid, int deviceId, String opPkg, int constant,
+            boolean always, String reason, boolean fromIme) {
+        // Note that the `performHapticFeedback` method does not take a token argument from the
+        // caller, and instead, uses this service as the token. This is to mitigate performance
+        // impact that would otherwise be caused due to marshal latency. Haptic feedback effects are
+        // short-lived, so we don't need to cancel when the process dies.
+        performHapticFeedbackInternal(
+                uid, deviceId, opPkg, constant, always, reason, /* token= */ this, fromIme);
+    }
+
+    /**
+     * An internal-only version of performHapticFeedback that allows the caller access to the
+     * {@link HalVibration}.
+     * The Vibration is only returned if it is ongoing after this method returns.
+     */
+    @VisibleForTesting
+    @Nullable
+    HalVibration performHapticFeedbackInternal(
+            int uid, int deviceId, String opPkg, int constant, boolean always, String reason,
+            IBinder token, boolean fromIme) {
+        HapticFeedbackVibrationProvider hapticVibrationProvider = getHapticVibrationProvider();
+        if (hapticVibrationProvider == null) {
+            Slog.e(TAG, "performHapticFeedback; haptic vibration provider not ready.");
+            return null;
+        }
+        if (hapticVibrationProvider.isRestrictedHapticFeedback(constant)
+                && !hasPermission(android.Manifest.permission.VIBRATE_SYSTEM_CONSTANTS)) {
+            Slog.w(TAG, "performHapticFeedback; no permission for system constant " + constant);
+            return null;
+        }
+        VibrationEffect effect = hapticVibrationProvider.getVibrationForHapticFeedback(constant);
+        if (effect == null) {
+            Slog.w(TAG, "performHapticFeedback; vibration absent for constant " + constant);
+            return null;
+        }
+        CombinedVibration vib = CombinedVibration.createParallel(effect);
+        VibrationAttributes attrs =
+                hapticVibrationProvider.getVibrationAttributesForHapticFeedback(
+                        constant, /* bypassVibrationIntensitySetting= */ always, fromIme);
+        reason = "performHapticFeedback(constant=" + constant + "): " + reason;
+        VibratorFrameworkStatsLogger.logPerformHapticsFeedbackIfKeyboard(uid, constant);
+        return vibrateWithoutPermissionCheck(uid, deviceId, opPkg, vib, attrs, reason, token);
     }
 
     /**
@@ -388,90 +465,107 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      */
     @VisibleForTesting
     @Nullable
-    HalVibration vibrateInternal(int uid, int displayId, String opPkg,
+    HalVibration vibrateWithPermissionCheck(int uid, int deviceId, String opPkg,
             @NonNull CombinedVibration effect, @Nullable VibrationAttributes attrs,
             String reason, IBinder token) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate, reason = " + reason);
         try {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.VIBRATE, "vibrate");
-
-            if (token == null) {
-                Slog.e(TAG, "token must not be null");
-                return null;
-            }
-            enforceUpdateAppOpsStatsPermission(uid);
-            if (!isEffectValid(effect)) {
-                return null;
-            }
             attrs = fixupVibrationAttributes(attrs, effect);
-            // Create Vibration.Stats as close to the received request as possible, for tracking.
-            HalVibration vib = new HalVibration(token, effect,
-                    new Vibration.CallerInfo(attrs, uid, displayId, opPkg, reason));
-            fillVibrationFallbacks(vib, effect);
-
-            if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
-                // Force update of user settings before checking if this vibration effect should
-                // be ignored or scaled.
-                mVibrationSettings.mSettingObserver.onChange(false);
-            }
-
-            synchronized (mLock) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Starting vibrate for vibration " + vib.id);
-                }
-
-                // Check if user settings or DnD is set to ignore this vibration.
-                Vibration.EndInfo vibrationEndInfo = shouldIgnoreVibrationLocked(vib.callerInfo);
-
-                // Check if ongoing vibration is more important than this vibration.
-                if (vibrationEndInfo == null) {
-                    vibrationEndInfo = shouldIgnoreVibrationForOngoingLocked(vib);
-                }
-
-                // If not ignored so far then try to start this vibration.
-                if (vibrationEndInfo == null) {
-                    final long ident = Binder.clearCallingIdentity();
-                    try {
-                        if (mCurrentExternalVibration != null) {
-                            mCurrentExternalVibration.mute();
-                            vib.stats.reportInterruptedAnotherVibration(
-                                    mCurrentExternalVibration.callerInfo);
-                            endExternalVibrateLocked(
-                                    new Vibration.EndInfo(Vibration.Status.CANCELLED_SUPERSEDED,
-                                            vib.callerInfo),
-                                    /* continueExternalControl= */ false);
-                        } else if (mCurrentVibration != null) {
-                            if (mCurrentVibration.getVibration().canPipelineWith(vib)) {
-                                // Don't cancel the current vibration if it's pipeline-able.
-                                // Note that if there is a pending next vibration that can't be
-                                // pipelined, it will have already cancelled the current one, so we
-                                // don't need to consider it here as well.
-                                if (DEBUG) {
-                                    Slog.d(TAG, "Pipelining vibration " + vib.id);
-                                }
-                            } else {
-                                vib.stats.reportInterruptedAnotherVibration(
-                                        mCurrentVibration.getVibration().callerInfo);
-                                mCurrentVibration.notifyCancelled(
-                                        new Vibration.EndInfo(Vibration.Status.CANCELLED_SUPERSEDED,
-                                                vib.callerInfo),
-                                        /* immediate= */ false);
-                            }
-                        }
-                        vibrationEndInfo = startVibrationLocked(vib);
-                    } finally {
-                        Binder.restoreCallingIdentity(ident);
-                    }
-                }
-
-                // Ignored or failed to start the vibration, end it and report metrics right away.
-                if (vibrationEndInfo != null) {
-                    endVibrationLocked(vib, vibrationEndInfo, /* shouldWriteStats= */ true);
-                }
-                return vib;
-            }
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.VIBRATE, "vibrate");
+            return vibrateInternal(uid, deviceId, opPkg, effect, attrs, reason, token);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+        }
+    }
+
+    HalVibration vibrateWithoutPermissionCheck(int uid, int deviceId, String opPkg,
+            @NonNull CombinedVibration effect, @NonNull VibrationAttributes attrs,
+            String reason, IBinder token) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate no perm check, reason = " + reason);
+        try {
+            return vibrateInternal(uid, deviceId, opPkg, effect, attrs, reason, token);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+        }
+    }
+
+    private HalVibration vibrateInternal(int uid, int deviceId, String opPkg,
+            @NonNull CombinedVibration effect, @NonNull VibrationAttributes attrs,
+            String reason, IBinder token) {
+        if (token == null) {
+            Slog.e(TAG, "token must not be null");
+            return null;
+        }
+        enforceUpdateAppOpsStatsPermission(uid);
+        if (!isEffectValid(effect)) {
+            return null;
+        }
+        // Create Vibration.Stats as close to the received request as possible, for tracking.
+        HalVibration vib = new HalVibration(token, effect,
+                new Vibration.CallerInfo(attrs, uid, deviceId, opPkg, reason));
+        fillVibrationFallbacks(vib, effect);
+
+        if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
+            // Force update of user settings before checking if this vibration effect should
+            // be ignored or scaled.
+            mVibrationSettings.update();
+        }
+
+        synchronized (mLock) {
+            if (DEBUG) {
+                Slog.d(TAG, "Starting vibrate for vibration " + vib.id);
+            }
+
+            // Check if user settings or DnD is set to ignore this vibration.
+            Vibration.EndInfo vibrationEndInfo = shouldIgnoreVibrationLocked(vib.callerInfo);
+
+            // Check if ongoing vibration is more important than this vibration.
+            if (vibrationEndInfo == null) {
+                vibrationEndInfo = shouldIgnoreVibrationForOngoingLocked(vib);
+            }
+
+            // If not ignored so far then try to start this vibration.
+            if (vibrationEndInfo == null) {
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    if (mCurrentExternalVibration != null) {
+                        mCurrentExternalVibration.mute();
+                        vib.stats.reportInterruptedAnotherVibration(
+                                mCurrentExternalVibration.callerInfo);
+                        endExternalVibrateLocked(
+                                new Vibration.EndInfo(Vibration.Status.CANCELLED_SUPERSEDED,
+                                        vib.callerInfo),
+                                /* continueExternalControl= */ false);
+                    } else if (mCurrentVibration != null) {
+                        if (mCurrentVibration.getVibration().canPipelineWith(vib)) {
+                            // Don't cancel the current vibration if it's pipeline-able.
+                            // Note that if there is a pending next vibration that can't be
+                            // pipelined, it will have already cancelled the current one, so we
+                            // don't need to consider it here as well.
+                            if (DEBUG) {
+                                Slog.d(TAG, "Pipelining vibration " + vib.id);
+                            }
+                        } else {
+                            vib.stats.reportInterruptedAnotherVibration(
+                                    mCurrentVibration.getVibration().callerInfo);
+                            mCurrentVibration.notifyCancelled(
+                                    new Vibration.EndInfo(Vibration.Status.CANCELLED_SUPERSEDED,
+                                            vib.callerInfo),
+                                    /* immediate= */ false);
+                        }
+                    }
+                    vibrationEndInfo = startVibrationLocked(vib);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            }
+
+            // Ignored or failed to start the vibration, end it and report metrics right away.
+            if (vibrationEndInfo != null) {
+                endVibrationLocked(vib, vibrationEndInfo, /* shouldWriteStats= */ true);
+            }
+            return vib;
         }
     }
 
@@ -542,49 +636,82 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
     }
 
-    private void dumpText(PrintWriter pw) {
+    private void dumpText(PrintWriter w) {
         if (DEBUG) {
             Slog.d(TAG, "Dumping vibrator manager service to text...");
         }
+        IndentingPrintWriter pw = new IndentingPrintWriter(w, /* singleIndent= */ "  ");
         synchronized (mLock) {
-            pw.println("Vibrator Manager Service:");
-            pw.println("  mVibrationSettings:");
-            pw.println("    " + mVibrationSettings);
+            pw.println("VibratorManagerService:");
+            pw.increaseIndent();
+
+            mVibrationSettings.dump(pw);
             pw.println();
-            pw.println("  mVibratorControllers:");
+
+            mVibrationScaler.dump(pw);
+            pw.println();
+
+            pw.println("Vibrators:");
+            pw.increaseIndent();
             for (int i = 0; i < mVibrators.size(); i++) {
-                pw.println("    " + mVibrators.valueAt(i));
+                mVibrators.valueAt(i).dump(pw);
             }
+            pw.decreaseIndent();
             pw.println();
-            pw.println("  mCurrentVibration:");
-            pw.println("    " + (mCurrentVibration == null
-                    ? null : mCurrentVibration.getVibration().getDebugInfo()));
+
+            pw.println("CurrentVibration:");
+            pw.increaseIndent();
+            if (mCurrentVibration != null) {
+                mCurrentVibration.getVibration().getDebugInfo().dump(pw);
+            } else {
+                pw.println("null");
+            }
+            pw.decreaseIndent();
             pw.println();
-            pw.println("  mNextVibration:");
-            pw.println("    " + (mNextVibration == null
-                    ? null : mNextVibration.getVibration().getDebugInfo()));
+
+            pw.println("NextVibration:");
+            pw.increaseIndent();
+            if (mNextVibration != null) {
+                mNextVibration.getVibration().getDebugInfo().dump(pw);
+            } else {
+                pw.println("null");
+            }
+            pw.decreaseIndent();
             pw.println();
-            pw.println("  mCurrentExternalVibration:");
-            pw.println("    " + (mCurrentExternalVibration == null
-                    ? null : mCurrentExternalVibration.getDebugInfo()));
-            pw.println();
+
+            pw.println("CurrentExternalVibration:");
+            pw.increaseIndent();
+            if (mCurrentExternalVibration != null) {
+                mCurrentExternalVibration.getDebugInfo().dump(pw);
+            } else {
+                pw.println("null");
+            }
+            pw.decreaseIndent();
         }
-        mVibratorManagerRecords.dumpText(pw);
+
+        pw.println();
+        pw.println();
+        mVibratorManagerRecords.dump(pw);
+
+        pw.println();
+        pw.println();
+        mVibratorControlService.dump(pw);
     }
 
-    synchronized void dumpProto(FileDescriptor fd) {
+    private void dumpProto(FileDescriptor fd) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
         if (DEBUG) {
             Slog.d(TAG, "Dumping vibrator manager service to proto...");
         }
         synchronized (mLock) {
-            mVibrationSettings.dumpProto(proto);
+            mVibrationSettings.dump(proto);
+            mVibrationScaler.dump(proto);
             if (mCurrentVibration != null) {
-                mCurrentVibration.getVibration().getDebugInfo().dumpProto(proto,
+                mCurrentVibration.getVibration().getDebugInfo().dump(proto,
                         VibratorManagerServiceDumpProto.CURRENT_VIBRATION);
             }
             if (mCurrentExternalVibration != null) {
-                mCurrentExternalVibration.getDebugInfo().dumpProto(proto,
+                mCurrentExternalVibration.getDebugInfo().dump(proto,
                         VibratorManagerServiceDumpProto.CURRENT_EXTERNAL_VIBRATION);
             }
 
@@ -599,7 +726,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             proto.write(VibratorManagerServiceDumpProto.VIBRATOR_UNDER_EXTERNAL_CONTROL,
                     isUnderExternalControl);
         }
-        mVibratorManagerRecords.dumpProto(proto);
+        mVibratorManagerRecords.dump(proto);
+        mVibratorControlService.dump(proto);
         proto.flush();
     }
 
@@ -674,16 +802,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private Vibration.EndInfo startVibrationLocked(HalVibration vib) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "startVibrationLocked");
         try {
-            vib.updateEffects(
-                    effect -> mVibrationScaler.scale(effect, vib.callerInfo.attrs.getUsage()));
-            boolean inputDevicesAvailable = mInputDeviceDelegate.vibrateIfAvailable(
-                    vib.callerInfo, vib.getEffect());
-            if (inputDevicesAvailable) {
-                return new Vibration.EndInfo(Vibration.Status.FORWARDED_TO_INPUT_DEVICES);
+            if (mInputDeviceDelegate.isAvailable()) {
+                return startVibrationOnInputDevicesLocked(vib);
             }
 
-            VibrationStepConductor conductor = new VibrationStepConductor(vib, mVibrationSettings,
-                    mDeviceVibrationEffectAdapter, mVibrators, mVibrationThreadCallbacks);
+            VibrationStepConductor conductor = createVibrationStepConductor(vib);
+
             if (mCurrentVibration == null) {
                 return startVibrationOnThreadLocked(conductor);
             }
@@ -734,9 +858,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private void endVibrationLocked(HalVibration vib, Vibration.EndInfo vibrationEndInfo,
             boolean shouldWriteStats) {
         vib.end(vibrationEndInfo);
-        logVibrationStatus(vib.callerInfo.uid, vib.callerInfo.attrs,
-                vibrationEndInfo.status);
-        mVibratorManagerRecords.record(vib);
+        logAndRecordVibration(vib.getDebugInfo());
         if (shouldWriteStats) {
             mFrameworkStatsLogger.writeVibrationReportedAsync(
                     vib.getStatsInfo(/* completionUptimeMillis= */ SystemClock.uptimeMillis()));
@@ -747,11 +869,45 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private void endVibrationAndWriteStatsLocked(ExternalVibrationHolder vib,
             Vibration.EndInfo vibrationEndInfo) {
         vib.end(vibrationEndInfo);
-        logVibrationStatus(vib.externalVibration.getUid(),
-                vib.externalVibration.getVibrationAttributes(), vibrationEndInfo.status);
-        mVibratorManagerRecords.record(vib);
+        logAndRecordVibration(vib.getDebugInfo());
         mFrameworkStatsLogger.writeVibrationReportedAsync(
                 vib.getStatsInfo(/* completionUptimeMillis= */ SystemClock.uptimeMillis()));
+    }
+
+    private VibrationStepConductor createVibrationStepConductor(HalVibration vib) {
+        CompletableFuture<Void> requestVibrationParamsFuture = null;
+
+        if (Flags.adaptiveHapticsEnabled() && !vib.callerInfo.attrs.isFlagSet(
+                VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)
+                && mVibratorControlService.shouldRequestVibrationParams(
+                vib.callerInfo.attrs.getUsage())) {
+            requestVibrationParamsFuture =
+                    mVibratorControlService.triggerVibrationParamsRequest(
+                            vib.callerInfo.uid, vib.callerInfo.attrs.getUsage(),
+                            mVibrationSettings.getRequestVibrationParamsTimeoutMs());
+        }
+
+        return new VibrationStepConductor(vib, mVibrationSettings, mDeviceAdapter, mVibrationScaler,
+                mFrameworkStatsLogger, requestVibrationParamsFuture, mVibrationThreadCallbacks);
+    }
+
+    private Vibration.EndInfo startVibrationOnInputDevicesLocked(HalVibration vib) {
+        if (!vib.callerInfo.attrs.isFlagSet(
+                VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)) {
+            // Scale resolves the default amplitudes from the effect before scaling them.
+            vib.scaleEffects(mVibrationScaler);
+        } else {
+            vib.resolveEffects(mVibrationScaler.getDefaultVibrationAmplitude());
+        }
+        mInputDeviceDelegate.vibrateIfAvailable(vib.callerInfo, vib.getEffectToPlay());
+
+        return new Vibration.EndInfo(Vibration.Status.FORWARDED_TO_INPUT_DEVICES);
+    }
+
+    private void logAndRecordVibration(Vibration.DebugInfo info) {
+        info.logMetrics(mFrameworkStatsLogger);
+        logVibrationStatus(info.mCallerInfo.uid, info.mCallerInfo.attrs, info.mStatus);
+        mVibratorManagerRecords.record(info);
     }
 
     private void logVibrationStatus(int uid, VibrationAttributes attrs,
@@ -1275,8 +1431,21 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             return new VibratorController(vibratorId, listener);
         }
 
+        HapticFeedbackVibrationProvider createHapticFeedbackVibrationProvider(
+                Resources resources, VibratorInfo vibratorInfo) {
+            return new HapticFeedbackVibrationProvider(resources, vibratorInfo);
+        }
+
         void addService(String name, IBinder service) {
             ServiceManager.addService(name, service);
+        }
+
+        VibratorControllerHolder createVibratorControllerHolder() {
+            return new VibratorControllerHolder();
+        }
+
+        boolean isServiceDeclared(String name) {
+            return ServiceManager.isDeclared(name);
         }
     }
 
@@ -1445,20 +1614,24 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             IBinder.DeathRecipient {
 
         public final ExternalVibration externalVibration;
-        public int scale;
+        public ExternalVibrationScale scale = new ExternalVibrationScale();
 
         private Vibration.Status mStatus;
 
         private ExternalVibrationHolder(ExternalVibration externalVibration) {
             super(externalVibration.getToken(), new Vibration.CallerInfo(
                     externalVibration.getVibrationAttributes(), externalVibration.getUid(),
-                    // TODO(b/243604888): propagating displayID from IExternalVibration instead of
-                    //  using INVALID_DISPLAY for all external vibrations.
-                    Display.INVALID_DISPLAY,
-                    externalVibration.getPackage(), null));
+                    // TODO(b/249785241): Find a way to link ExternalVibration to a VirtualDevice
+                    // instead of using DEVICE_ID_INVALID here and relying on the UID checks.
+                    Context.DEVICE_ID_INVALID, externalVibration.getPackage(), null));
             this.externalVibration = externalVibration;
-            this.scale = IExternalVibratorService.SCALE_NONE;
             mStatus = Vibration.Status.RUNNING;
+        }
+
+        public void scale(VibrationScaler scaler, int usage) {
+            scale.scaleLevel = scaler.getScaleLevel(usage);
+            scale.adaptiveHapticsScale = scaler.getAdaptiveHapticsScale(usage);
+            stats.reportAdaptiveScale(scale.adaptiveHapticsScale);
         }
 
         public void mute() {
@@ -1509,8 +1682,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         public Vibration.DebugInfo getDebugInfo() {
-            return new Vibration.DebugInfo(mStatus, stats, /* effect= */ null,
-                    /* originalEffect= */ null, scale, callerInfo);
+            return new Vibration.DebugInfo(mStatus, stats, /* playedEffect= */ null,
+                    /* originalEffect= */ null, scale.scaleLevel, scale.adaptiveHapticsScale,
+                    callerInfo);
         }
 
         public VibrationStats.StatsInfo getStatsInfo(long completionUptimeMillis) {
@@ -1579,80 +1753,116 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     /** Keep records of vibrations played and provide debug information for this service. */
     private static final class VibratorManagerRecords {
-        private final SparseArray<LinkedList<Vibration.DebugInfo>> mPreviousVibrations =
-                new SparseArray<>();
-        private final LinkedList<Vibration.DebugInfo> mPreviousExternalVibrations =
-                new LinkedList<>();
-        private final int mPreviousVibrationsLimit;
+        private final VibrationRecords mAggregatedVibrationHistory;
+        private final VibrationRecords mRecentVibrations;
 
-        VibratorManagerRecords(int limit) {
-            mPreviousVibrationsLimit = limit;
+        VibratorManagerRecords(int recentVibrationSizeLimit, int aggregationSizeLimit,
+                int aggregationTimeLimit) {
+            mAggregatedVibrationHistory =
+                    new VibrationRecords(aggregationSizeLimit, aggregationTimeLimit);
+            // Recent vibrations are not aggregated, to help debugging issues that just happened.
+            mRecentVibrations =
+                    new VibrationRecords(recentVibrationSizeLimit, /* aggregationTimeLimit= */ 0);
         }
 
-        synchronized void record(HalVibration vib) {
-            int usage = vib.callerInfo.attrs.getUsage();
-            if (!mPreviousVibrations.contains(usage)) {
-                mPreviousVibrations.put(usage, new LinkedList<>());
+        synchronized void record(Vibration.DebugInfo info) {
+            GroupedAggregatedLogRecords.AggregatedLogRecord<VibrationRecord> droppedRecord =
+                    mRecentVibrations.add(new VibrationRecord(info));
+            if (droppedRecord != null) {
+                // Move dropped record from recent list to aggregated history list.
+                mAggregatedVibrationHistory.add(droppedRecord.getLatest());
             }
-            record(mPreviousVibrations.get(usage), vib.getDebugInfo());
         }
 
-        synchronized void record(ExternalVibrationHolder vib) {
-            record(mPreviousExternalVibrations, vib.getDebugInfo());
-        }
-
-        synchronized void record(LinkedList<Vibration.DebugInfo> records,
-                Vibration.DebugInfo info) {
-            if (records.size() > mPreviousVibrationsLimit) {
-                records.removeFirst();
-            }
-            records.addLast(info);
-        }
-
-        synchronized void dumpText(PrintWriter pw) {
-            for (int i = 0; i < mPreviousVibrations.size(); i++) {
-                pw.println();
-                pw.print("  Previous vibrations for usage ");
-                pw.print(VibrationAttributes.usageToString(mPreviousVibrations.keyAt(i)));
-                pw.println(":");
-                for (Vibration.DebugInfo info : mPreviousVibrations.valueAt(i)) {
-                    pw.println("    " + info);
-                }
-            }
+        synchronized void dump(IndentingPrintWriter pw) {
+            pw.println("Recent vibrations:");
+            pw.increaseIndent();
+            mRecentVibrations.dump(pw);
+            pw.decreaseIndent();
 
             pw.println();
-            pw.println("  Previous external vibrations:");
-            for (Vibration.DebugInfo info : mPreviousExternalVibrations) {
-                pw.println("    " + info);
-            }
+            pw.println();
+            pw.println("Aggregated vibration history:");
+            pw.increaseIndent();
+            mAggregatedVibrationHistory.dump(pw);
+            pw.decreaseIndent();
         }
 
-        synchronized void dumpProto(ProtoOutputStream proto) {
-            for (int i = 0; i < mPreviousVibrations.size(); i++) {
-                long fieldId;
-                switch (mPreviousVibrations.keyAt(i)) {
-                    case VibrationAttributes.USAGE_RINGTONE:
-                        fieldId = VibratorManagerServiceDumpProto.PREVIOUS_RING_VIBRATIONS;
-                        break;
-                    case VibrationAttributes.USAGE_NOTIFICATION:
-                        fieldId = VibratorManagerServiceDumpProto
-                                .PREVIOUS_NOTIFICATION_VIBRATIONS;
-                        break;
-                    case VibrationAttributes.USAGE_ALARM:
-                        fieldId = VibratorManagerServiceDumpProto.PREVIOUS_ALARM_VIBRATIONS;
-                        break;
-                    default:
-                        fieldId = VibratorManagerServiceDumpProto.PREVIOUS_VIBRATIONS;
-                }
-                for (Vibration.DebugInfo info : mPreviousVibrations.valueAt(i)) {
-                    info.dumpProto(proto, fieldId);
-                }
-            }
+        synchronized void dump(ProtoOutputStream proto) {
+            mRecentVibrations.dump(proto);
+        }
+    }
 
-            for (Vibration.DebugInfo info : mPreviousExternalVibrations) {
-                info.dumpProto(proto,
-                        VibratorManagerServiceDumpProto.PREVIOUS_EXTERNAL_VIBRATIONS);
+    /** Keep records of vibrations played and provide debug information for this service. */
+    private static final class VibrationRecords
+            extends GroupedAggregatedLogRecords<VibrationRecord> {
+
+        VibrationRecords(int sizeLimit, int aggregationTimeLimit) {
+            super(sizeLimit, aggregationTimeLimit);
+        }
+
+        @Override
+        void dumpGroupHeader(IndentingPrintWriter pw, int usage) {
+            pw.println(VibrationAttributes.usageToString(usage) + ":");
+        }
+
+        @Override
+        long findGroupKeyProtoFieldId(int usage) {
+            return switch (usage) {
+                case VibrationAttributes.USAGE_RINGTONE ->
+                    VibratorManagerServiceDumpProto.PREVIOUS_RING_VIBRATIONS;
+                case VibrationAttributes.USAGE_NOTIFICATION ->
+                    VibratorManagerServiceDumpProto.PREVIOUS_NOTIFICATION_VIBRATIONS;
+                case VibrationAttributes.USAGE_ALARM ->
+                    VibratorManagerServiceDumpProto.PREVIOUS_ALARM_VIBRATIONS;
+                default ->
+                    VibratorManagerServiceDumpProto.PREVIOUS_VIBRATIONS;
+            };
+        }
+    }
+
+    /**
+     * Record for a single {@link Vibration.DebugInfo}, that can be grouped by usage and aggregated
+     * by UID, {@link VibrationAttributes} and {@link VibrationEffect}.
+     */
+    private static final class VibrationRecord
+            implements GroupedAggregatedLogRecords.SingleLogRecord {
+        private final Vibration.DebugInfo mInfo;
+
+        VibrationRecord(Vibration.DebugInfo info) {
+            mInfo = info;
+        }
+
+        @Override
+        public int getGroupKey() {
+            return mInfo.mCallerInfo.attrs.getUsage();
+        }
+
+        @Override
+        public long getCreateUptimeMs() {
+            return mInfo.mCreateTime;
+        }
+
+        @Override
+        public boolean mayAggregate(GroupedAggregatedLogRecords.SingleLogRecord record) {
+            if (!(record instanceof VibrationRecord)) {
+                return false;
             }
+            Vibration.DebugInfo info = ((VibrationRecord) record).mInfo;
+            return mInfo.mCallerInfo.uid == info.mCallerInfo.uid
+                    && Objects.equals(mInfo.mCallerInfo.attrs, info.mCallerInfo.attrs)
+                    && Objects.equals(mInfo.mPlayedEffect, info.mPlayedEffect);
+        }
+
+        @Override
+        public void dump(IndentingPrintWriter pw) {
+            // Prints a compact version of each vibration request for dumpsys.
+            mInfo.dumpCompact(pw);
+        }
+
+        @Override
+        public void dump(ProtoOutputStream proto, long fieldId) {
+            mInfo.dump(proto, fieldId);
         }
     }
 
@@ -1674,7 +1884,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     /**
      * Ends the external vibration, and clears related service state.
      *
-     * @param vibrationEndInfo the status and related info to end the associated Vibration with
+     * @param vibrationEndInfo        the status and related info to end the associated Vibration
      * @param continueExternalControl indicates whether external control will continue. If not, the
      *                                HAL will have external control turned off.
      */
@@ -1698,39 +1908,83 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
     }
 
+    private HapticFeedbackVibrationProvider getHapticVibrationProvider() {
+        synchronized (mLock) {
+            // Used a cached haptic vibration provider if one exists.
+            if (mHapticFeedbackVibrationProvider != null) {
+                return mHapticFeedbackVibrationProvider;
+            }
+            VibratorInfo combinedVibratorInfo = getCombinedVibratorInfo();
+            if (combinedVibratorInfo == null) {
+                return null;
+            }
+            return mHapticFeedbackVibrationProvider =
+                    mInjector.createHapticFeedbackVibrationProvider(
+                            mContext.getResources(), combinedVibratorInfo);
+        }
+    }
+
+    private VibratorInfo getCombinedVibratorInfo() {
+        synchronized (mLock) {
+            // Used a cached resolving vibrator if one exists.
+            if (mCombinedVibratorInfo != null) {
+                return mCombinedVibratorInfo;
+            }
+
+            // Return an empty resolving vibrator if the service has no vibrator.
+            if (mVibratorIds.length == 0) {
+                return mCombinedVibratorInfo = VibratorInfo.EMPTY_VIBRATOR_INFO;
+            }
+
+            // Combine the vibrator infos of all the service's vibrator to create a single resolving
+            // vibrator that is based on the combined info.
+            VibratorInfo[] infos = new VibratorInfo[mVibratorIds.length];
+            for (int i = 0; i < mVibratorIds.length; i++) {
+                VibratorInfo info = getVibratorInfo(mVibratorIds[i]);
+                // If any one of the service's vibrator does not have a valid vibrator info, stop
+                // trying to create and cache a combined resolving vibrator. Combine the infos only
+                // when infos for all vibrators are available.
+                if (info == null) {
+                    return null;
+                }
+                infos[i] = info;
+            }
+
+            return mCombinedVibratorInfo = VibratorInfoFactory.create(/* id= */ -1, infos);
+        }
+    }
+
     /** Implementation of {@link IExternalVibratorService} to be triggered on external control. */
     @VisibleForTesting
     final class ExternalVibratorService extends IExternalVibratorService.Stub {
 
         @Override
-        public int onExternalVibrationStart(ExternalVibration vib) {
-            if (!hasExternalControlCapability()) {
-                return IExternalVibratorService.SCALE_MUTE;
-            }
-            if (ActivityManager.checkComponentPermission(android.Manifest.permission.VIBRATE,
-                    vib.getUid(), -1 /*owningUid*/, true /*exported*/)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Slog.w(TAG, "pkg=" + vib.getPackage() + ", uid=" + vib.getUid()
-                        + " tried to play externally controlled vibration"
-                        + " without VIBRATE permission, ignoring.");
-                return IExternalVibratorService.SCALE_MUTE;
-            }
-
+        public ExternalVibrationScale onExternalVibrationStart(ExternalVibration vib) {
             // Create Vibration.Stats as close to the received request as possible, for tracking.
             ExternalVibrationHolder vibHolder = new ExternalVibrationHolder(vib);
-            VibrationAttributes attrs = fixupVibrationAttributes(vib.getVibrationAttributes(),
-                    /* effect= */ null);
-            if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
-                // Force update of user settings before checking if this vibration effect should
-                // be ignored or scaled.
-                mVibrationSettings.update();
-            }
-
+            // Mute the request until we run all the checks and accept the vibration.
+            vibHolder.scale.scaleLevel = ExternalVibrationScale.ScaleLevel.SCALE_MUTE;
             boolean alreadyUnderExternalControl = false;
             boolean waitForCompletion = false;
+
             synchronized (mLock) {
-                // TODO(b/243604888): propagating displayID from IExternalVibration instead of
-                // using INVALID_DISPLAY for all external vibrations.
+                if (!hasExternalControlCapability()) {
+                    endVibrationAndWriteStatsLocked(vibHolder,
+                            new Vibration.EndInfo(Vibration.Status.IGNORED_UNSUPPORTED));
+                    return vibHolder.scale;
+                }
+
+                if (ActivityManager.checkComponentPermission(android.Manifest.permission.VIBRATE,
+                        vib.getUid(), -1 /*owningUid*/, true /*exported*/)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    Slog.w(TAG, "pkg=" + vib.getPackage() + ", uid=" + vib.getUid()
+                            + " tried to play externally controlled vibration"
+                            + " without VIBRATE permission, ignoring.");
+                    endVibrationAndWriteStatsLocked(vibHolder,
+                            new Vibration.EndInfo(Vibration.Status.IGNORED_MISSING_PERMISSION));
+                    return vibHolder.scale;
+                }
+
                 Vibration.EndInfo vibrationEndInfo = shouldIgnoreVibrationLocked(
                         vibHolder.callerInfo);
 
@@ -1748,8 +2002,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 }
 
                 if (vibrationEndInfo != null) {
-                    vibHolder.scale = IExternalVibratorService.SCALE_MUTE;
-                    // Failed to start the vibration, end it and report metrics right away.
                     endVibrationAndWriteStatsLocked(vibHolder, vibrationEndInfo);
                     return vibHolder.scale;
                 }
@@ -1787,9 +2039,18 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                                     vibHolder.callerInfo),
                             /* continueExternalControl= */ true);
                 }
+
+                VibrationAttributes attrs = fixupVibrationAttributes(vib.getVibrationAttributes(),
+                        /* effect= */ null);
+                if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
+                    // Force update of user settings before checking if this vibration effect should
+                    // be ignored or scaled.
+                    mVibrationSettings.update();
+                }
+
                 mCurrentExternalVibration = vibHolder;
                 vibHolder.linkToDeath();
-                vibHolder.scale = mVibrationScaler.getExternalVibrationScale(attrs.getUsage());
+                vibHolder.scale(mVibrationScaler, attrs.getUsage());
             }
 
             if (waitForCompletion) {
@@ -1800,8 +2061,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                         endExternalVibrateLocked(
                                 new Vibration.EndInfo(Vibration.Status.IGNORED_ERROR_CANCELLING),
                                 /* continueExternalControl= */ false);
+                        // Mute the request, vibration will be ignored.
+                        vibHolder.scale.scaleLevel = ExternalVibrationScale.ScaleLevel.SCALE_MUTE;
                     }
-                    return IExternalVibratorService.SCALE_MUTE;
+                    return vibHolder.scale;
                 }
             }
             if (!alreadyUnderExternalControl) {
@@ -1847,6 +2110,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     /** Provide limited functionality from {@link VibratorManagerService} as shell commands. */
     private final class VibratorManagerShellCommand extends ShellCommand {
         public static final String SHELL_PACKAGE_NAME = "com.android.shell";
+        public static final long VIBRATION_END_TIMEOUT_MS = 500; // Clean up shouldn't be too long.
 
         private final class CommonOptions {
             public boolean force = false;
@@ -1899,8 +2163,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 if ("sequential".equals(cmd)) {
                     return runSequential();
                 }
+                if ("xml".equals(cmd)) {
+                    return runXml();
+                }
                 if ("cancel".equals(cmd)) {
                     return runCancel();
+                }
+                if ("feedback".equals(cmd)) {
+                    return runHapticFeedback();
                 }
                 return handleDefaultCommands(cmd);
             } finally {
@@ -1932,16 +2202,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             // only cancel background vibrations.
             IBinder deathBinder = commonOptions.background ? VibratorManagerService.this
                     : mShellCallbacksToken;
-            HalVibration vib = vibrateInternal(Binder.getCallingUid(), Display.DEFAULT_DISPLAY,
-                    SHELL_PACKAGE_NAME, combined, attrs, commonOptions.description, deathBinder);
-            if (vib != null && !commonOptions.background) {
-                try {
-                    // Waits for the client vibration to finish, but the VibrationThread may still
-                    // do cleanup after this.
-                    vib.waitForEnd();
-                } catch (InterruptedException e) {
-                }
-            }
+            int uid = Binder.getCallingUid();
+            // Resolve the package name for the client based on the process UID, to cover cases like
+            // rooted shell clients using ROOT_UID.
+            String resolvedPackageName = AppOpsManager.resolvePackageName(uid, SHELL_PACKAGE_NAME);
+            HalVibration vib = vibrateWithPermissionCheck(uid, Context.DEVICE_ID_DEFAULT,
+                    resolvedPackageName, combined, attrs, commonOptions.description, deathBinder);
+            maybeWaitOnVibration(vib, commonOptions);
         }
 
         private int runMono() {
@@ -1973,11 +2240,34 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             return 0;
         }
 
+        private int runXml() {
+            CommonOptions commonOptions = new CommonOptions();
+            String xml = getNextArgRequired();
+            CombinedVibration vibration = parseXml(xml);
+            runVibrate(commonOptions, vibration);
+            return 0;
+        }
+
         private int runCancel() {
             // Cancel is only needed if the vibration was run in the background, otherwise it's
             // terminated by the shell command ending. In these cases, the token was that of the
             // service rather than the client.
             cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, VibratorManagerService.this);
+            return 0;
+        }
+
+        private int runHapticFeedback() {
+            CommonOptions commonOptions = new CommonOptions();
+            int constant = Integer.parseInt(getNextArgRequired());
+
+            IBinder deathBinder = commonOptions.background ? VibratorManagerService.this
+                    : mShellCallbacksToken;
+            HalVibration vib = performHapticFeedbackInternal(Binder.getCallingUid(),
+                    Context.DEVICE_ID_DEFAULT, SHELL_PACKAGE_NAME, constant,
+                    /* always= */ commonOptions.force, /* reason= */ commonOptions.description,
+                    deathBinder, false /* fromIme */);
+            maybeWaitOnVibration(vib, commonOptions);
+
             return 0;
         }
 
@@ -2157,13 +2447,51 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         private VibrationAttributes createVibrationAttributes(CommonOptions commonOptions) {
-            final int flags =
-                    commonOptions.force ? VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY : 0;
+            // This will bypass user settings, Do Not Disturb and other interruption policies.
+            final int flags = commonOptions.force ? ATTRIBUTES_ALL_BYPASS_FLAGS : 0;
             return new VibrationAttributes.Builder()
                     .setFlags(flags)
-                    // Used to apply Settings.System.HAPTIC_FEEDBACK_INTENSITY to scale effects.
-                    .setUsage(VibrationAttributes.USAGE_TOUCH)
+                    // Used to allow vibrations when the adb shell process is running in background.
+                    // This will apply the NOTIFICATION_VIBRATION_INTENSITY setting.
+                    .setUsage(VibrationAttributes.USAGE_COMMUNICATION_REQUEST)
                     .build();
+        }
+
+        private CombinedVibration parseXml(String xml) {
+            try {
+                ParsedVibration parsedVibration =
+                        VibrationXmlParser.parseDocument(new StringReader(xml));
+                if (parsedVibration == null) {
+                    throw new IllegalArgumentException("Error parsing vibration XML " + xml);
+                }
+                VibratorInfo combinedVibratorInfo = getCombinedVibratorInfo();
+                if (combinedVibratorInfo == null) {
+                    throw new IllegalStateException(
+                            "No combined vibrator info to parse vibration XML " + xml);
+                }
+                VibrationEffect effect = parsedVibration.resolve(combinedVibratorInfo);
+                if (effect == null) {
+                    throw new IllegalArgumentException(
+                            "Parsed vibration cannot be resolved for vibration XML " + xml);
+                }
+                return CombinedVibration.createParallel(effect);
+            } catch (IOException e) {
+                throw new RuntimeException("Error parsing vibration XML " + xml, e);
+            }
+        }
+
+        private void maybeWaitOnVibration(HalVibration vib, CommonOptions commonOptions) {
+            if (vib != null && !commonOptions.background) {
+                try {
+                    // Waits for the client vibration to finish, but the VibrationThread may still
+                    // do cleanup after this.
+                    vib.waitForEnd();
+                    // Wait for vibration clean up and possible ramp down before ending.
+                    mVibrationThread.waitForThreadIdle(
+                            mVibrationSettings.getRampDownDuration() + VIBRATION_END_TIMEOUT_MS);
+                } catch (InterruptedException e) {
+                }
+            }
         }
 
         @Override
@@ -2182,8 +2510,19 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 pw.println("    Vibrates different effects on each vibrator in sync.");
                 pw.println("  sequential [options] (-v <vibrator-id> <effect>...)...");
                 pw.println("    Vibrates different effects on each vibrator in sequence.");
+                pw.println("  xml [options] <xml>");
+                pw.println("    Vibrates using combined vibration described in given XML string");
+                pw.println("    on all vibrators in sync. The XML could be:");
+                pw.println("        XML containing a single effect, or");
+                pw.println("        A vibration select XML containing multiple effects.");
+                pw.println("    Vibrates using combined vibration described in given XML string.");
+                pw.println("    XML containing a single effect it runs on all vibrators in sync.");
                 pw.println("  cancel");
                 pw.println("    Cancels any active vibration");
+                pw.println("  feedback [-f] [-d <description>] <constant>");
+                pw.println("    Performs a haptic feedback with the given constant.");
+                pw.println("    The force (-f) option enables the `always` configuration, which");
+                pw.println("    plays the haptic irrespective of the vibration intensity settings");
                 pw.println("");
                 pw.println("Effect commands:");
                 pw.println("  oneshot [-w delay] [-a] <duration> [<amplitude>]");

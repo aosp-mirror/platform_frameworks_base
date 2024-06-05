@@ -95,6 +95,7 @@ public final class AutoFillUI {
         void requestShowFillUi(AutofillId id, int width, int height,
                 IAutofillWindowPresenter presenter);
         void requestHideFillUi(AutofillId id);
+        void requestHideFillUiWhenDestroyed(AutofillId id);
         void startIntentSenderAndFinishSession(IntentSender intentSender);
         void startIntentSender(IntentSender intentSender, Intent intent);
         void dispatchUnhandledKey(AutofillId id, KeyEvent keyEvent);
@@ -203,12 +204,14 @@ public final class AutoFillUI {
      * @param context context with the proper state (like display id) to show the UI
      * @param sessionId id of the autofill session
      * @param compatMode whether the app is being autofilled in compatibility mode.
+     * @param maxInputLengthForAutofill max user input to provide suggestion
      */
     public void showFillUi(@NonNull AutofillId focusedId, @NonNull FillResponse response,
             @Nullable String filterText, @Nullable String servicePackageName,
             @NonNull ComponentName componentName, @NonNull CharSequence serviceLabel,
             @NonNull Drawable serviceIcon, @NonNull AutoFillUiCallback callback,
-            @NonNull Context context, int sessionId, boolean compatMode) {
+            @NonNull Context context, int sessionId, boolean compatMode,
+            int maxInputLengthForAutofill) {
         if (sDebug) {
             final int size = filterText == null ? 0 : filterText.length();
             Slogf.d(TAG, "showFillUi(): id=%s, filter=%d chars, displayId=%d", focusedId, size,
@@ -228,7 +231,8 @@ public final class AutoFillUI {
             }
             hideAllUiThread(callback);
             mFillUi = new FillUi(context, response, focusedId, filterText, mOverlayControl,
-                    serviceLabel, serviceIcon, mUiModeMgr.isNightMode(), new FillUi.Callback() {
+                    serviceLabel, serviceIcon, mUiModeMgr.isNightMode(), maxInputLengthForAutofill,
+                    new FillUi.Callback() {
                 @Override
                 public void onResponsePicked(FillResponse response) {
                     log.setType(MetricsEvent.TYPE_DETAIL);
@@ -285,6 +289,13 @@ public final class AutoFillUI {
                 public void requestHideFillUi() {
                     if (mCallback != null) {
                         mCallback.requestHideFillUi(focusedId);
+                    }
+                }
+
+                @Override
+                public void requestHideFillUiWhenDestroyed() {
+                    if (mCallback != null) {
+                        mCallback.requestHideFillUiWhenDestroyed(focusedId);
                     }
                 }
 
@@ -402,6 +413,8 @@ public final class AutoFillUI {
                     callback.startIntentSender(intentSender, intent);
                 }
             }, mUiModeMgr.isNightMode(), isUpdate, compatMode, showServiceIcon);
+
+            mSaveEventLogger.maybeSetLatencySaveUiDisplayMillis();
         });
     }
 

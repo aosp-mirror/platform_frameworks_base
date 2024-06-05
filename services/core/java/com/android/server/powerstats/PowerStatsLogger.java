@@ -30,6 +30,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.AtomicFile;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
@@ -354,4 +355,23 @@ public final class PowerStatsLogger extends Handler {
             updateCacheFile(residencyCacheFilename, powerEntityBytes);
         }
     }
+
+    /**
+     * Dump stats about stored data.
+     */
+    public void dump(IndentingPrintWriter ipw) {
+        ipw.println("PowerStats Meter Data:");
+        ipw.increaseIndent();
+        mPowerStatsMeterStorage.dump(ipw);
+        ipw.decreaseIndent();
+        ipw.println("PowerStats Model Data:");
+        ipw.increaseIndent();
+        mPowerStatsModelStorage.dump(ipw);
+        ipw.decreaseIndent();
+        ipw.println("PowerStats State Residency Data:");
+        ipw.increaseIndent();
+        mPowerStatsResidencyStorage.dump(ipw);
+        ipw.decreaseIndent();
+    }
+
 }

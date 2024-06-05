@@ -34,6 +34,8 @@ import com.android.internal.widget.ConversationLayout;
 import com.android.internal.widget.ImageFloatingTextView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationContentView;
+import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -253,7 +255,8 @@ public class NotificationGroupingUtil {
         }
 
         public void init() {
-            View header = mParentRow.getNotificationViewWrapper().getNotificationHeader();
+            NotificationViewWrapper wrapper = mParentRow.getNotificationViewWrapper();
+            View header = wrapper == null ? null : wrapper.getNotificationHeader();
             mParentView = header == null ? null : header.findViewById(mId);
             mParentData = mExtractor == null ? null : mExtractor.extractData(mParentRow);
             mApply = !mComparator.isEmpty(mParentView);
@@ -326,6 +329,9 @@ public class NotificationGroupingUtil {
 
         @Override
         public boolean isEmpty(View view) {
+            if (AsyncGroupHeaderViewInflation.isEnabled() && view == null) {
+                return true;
+            }
             if (view instanceof ImageView) {
                 return ((ImageView) view).getDrawable() == null;
             }
@@ -356,18 +362,32 @@ public class NotificationGroupingUtil {
         }
 
         protected boolean hasSameIcon(Object parentData, Object childData) {
-            Icon parentIcon = ((Notification) parentData).getSmallIcon();
-            Icon childIcon = ((Notification) childData).getSmallIcon();
+            Icon parentIcon = getIcon((Notification) parentData);
+            Icon childIcon = getIcon((Notification) childData);
             return parentIcon.sameAs(childIcon);
+        }
+
+        private static Icon getIcon(Notification notification) {
+            if (notification.shouldUseAppIcon()) {
+                return notification.getAppIcon();
+            }
+            return notification.getSmallIcon();
         }
 
         /**
          * @return whether two ImageViews have the same colorFilterSet or none at all
          */
         protected boolean hasSameColor(Object parentData, Object childData) {
-            int parentColor = ((Notification) parentData).color;
-            int childColor = ((Notification) childData).color;
+            int parentColor = getColor((Notification) parentData);
+            int childColor = getColor((Notification) childData);
             return parentColor == childColor;
+        }
+
+        private static int getColor(Notification notification) {
+            if (notification.shouldUseAppIcon()) {
+                return 0;  // the color filter isn't applied if using the app icon
+            }
+            return notification.color;
         }
 
         @Override

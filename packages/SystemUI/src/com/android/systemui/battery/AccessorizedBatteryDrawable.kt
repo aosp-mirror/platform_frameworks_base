@@ -28,7 +28,7 @@ import android.graphics.Rect
 import android.graphics.drawable.DrawableWrapper
 import android.util.PathParser
 import com.android.settingslib.graph.ThemedBatteryDrawable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.battery.BatterySpecs.BATTERY_HEIGHT
 import com.android.systemui.battery.BatterySpecs.BATTERY_HEIGHT_WITH_SHIELD
 import com.android.systemui.battery.BatterySpecs.BATTERY_WIDTH
@@ -87,6 +87,10 @@ class AccessorizedBatteryDrawable(
     }
 
     var displayShield: Boolean = false
+        set(value) {
+            field = value
+            postInvalidate()
+        }
 
     private fun updateSizes() {
         val b = bounds
@@ -174,6 +178,11 @@ class AccessorizedBatteryDrawable(
         mainBatteryDrawable.charging = charging
     }
 
+    /** Returns whether the battery is currently charging. */
+    fun getCharging(): Boolean {
+        return mainBatteryDrawable.charging
+    }
+
     /** Sets the current level (out of 100) of the battery. */
     fun setBatteryLevel(level: Int) {
         mainBatteryDrawable.setBatteryLevel(level)
@@ -203,5 +212,12 @@ class AccessorizedBatteryDrawable(
     private fun loadPaths() {
         val shieldPathString = context.resources.getString(R.string.config_batterymeterShieldPath)
         shieldPath.set(PathParser.createPathFromPathData(shieldPathString))
+    }
+
+    private val invalidateRunnable: () -> Unit = { invalidateSelf() }
+
+    private fun postInvalidate() {
+        unscheduleSelf(invalidateRunnable)
+        scheduleSelf(invalidateRunnable, 0)
     }
 }

@@ -18,7 +18,7 @@ package android.widget.gridview;
 
 import android.test.ActivityInstrumentationTestCase;
 import android.test.ViewAsserts;
-import android.util.GridScenario;
+import android.widget.GridScenario;
 import android.widget.GridView;
 
 import androidx.test.filters.MediumTest;

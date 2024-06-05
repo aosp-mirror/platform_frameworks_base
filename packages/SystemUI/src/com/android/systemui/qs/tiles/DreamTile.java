@@ -32,13 +32,12 @@ import android.service.dreams.IDreamManager;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -49,9 +48,10 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -69,8 +69,8 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
     private final Icon mIconUndocked = ResourceIcon.get(R.drawable.ic_qs_screen_saver_undocked);
     private final IDreamManager mDreamManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final SettingObserver mEnabledSettingObserver;
-    private final SettingObserver mDreamSettingObserver;
+    private final UserSettingObserver mEnabledSettingObserver;
+    private final UserSettingObserver mDreamSettingObserver;
     private final UserTracker mUserTracker;
     private final boolean mDreamSupported;
     private final boolean mDreamOnlyEnabledForDockUser;
@@ -111,14 +111,14 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
                 statusBarStateController, activityStarter, qsLogger);
         mDreamManager = dreamManager;
         mBroadcastDispatcher = broadcastDispatcher;
-        mEnabledSettingObserver = new SettingObserver(secureSettings, mHandler,
+        mEnabledSettingObserver = new UserSettingObserver(secureSettings, mHandler,
                 Settings.Secure.SCREENSAVER_ENABLED, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
                 refreshState();
             }
         };
-        mDreamSettingObserver = new SettingObserver(secureSettings, mHandler,
+        mDreamSettingObserver = new UserSettingObserver(secureSettings, mHandler,
                 Settings.Secure.SCREENSAVER_COMPONENTS, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
@@ -153,7 +153,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         try {
             if (mDreamManager.isDreaming()) {
                 mDreamManager.awaken();
@@ -163,17 +163,6 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Can't dream", e);
         }
-    }
-
-    @Override
-    protected void handleLongClick(@Nullable View view) {
-        try {
-            // Need to wake on long click so bouncer->settings works.
-            mDreamManager.awaken();
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Can't awaken", e);
-        }
-        super.handleLongClick(view);
     }
 
     @Override

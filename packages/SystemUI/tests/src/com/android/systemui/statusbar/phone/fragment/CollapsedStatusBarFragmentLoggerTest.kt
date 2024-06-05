@@ -50,7 +50,6 @@ class CollapsedStatusBarFragmentLoggerTest : SysuiTestCase() {
         val actualString = stringWriter.toString()
         val expectedLogString =
             disableFlagsLogger.getDisableFlagsString(
-                old = null,
                 new = state,
                 newAfterLocalModification = null,
             )
@@ -64,7 +63,7 @@ class CollapsedStatusBarFragmentLoggerTest : SysuiTestCase() {
             StatusBarVisibilityModel(
                 showClock = false,
                 showNotificationIcons = true,
-                showOngoingCallChip = false,
+                showOngoingActivityChip = false,
                 showSystemInfo = true,
             )
         )
@@ -75,7 +74,7 @@ class CollapsedStatusBarFragmentLoggerTest : SysuiTestCase() {
 
         assertThat(actualString).contains("showClock=false")
         assertThat(actualString).contains("showNotificationIcons=true")
-        assertThat(actualString).contains("showOngoingCallChip=false")
+        assertThat(actualString).contains("showOngoingActivityChip=false")
         assertThat(actualString).contains("showSystemInfo=true")
     }
 }

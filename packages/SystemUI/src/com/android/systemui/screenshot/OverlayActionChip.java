@@ -18,6 +18,7 @@ package com.android.systemui.screenshot;
 
 import static java.util.Objects.requireNonNull;
 
+import android.app.ActivityOptions;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -29,8 +30,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.systemui.R;
-
+import com.android.systemui.res.R;
 
 /**
  * View for a chip with an icon and text.
@@ -99,6 +99,8 @@ public class OverlayActionChip extends FrameLayout {
             try {
                 BroadcastOptions options = BroadcastOptions.makeBasic();
                 options.setInteractive(true);
+                options.setPendingIntentBackgroundActivityStartMode(
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
                 intent.send(options.toBundle());
                 finisher.run();
             } catch (PendingIntent.CanceledException e) {

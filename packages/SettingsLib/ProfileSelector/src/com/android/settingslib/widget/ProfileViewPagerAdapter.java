@@ -33,11 +33,11 @@ public class ProfileViewPagerAdapter extends FragmentStateAdapter {
 
     @Override
     public Fragment createFragment(int position) {
-        return mParentFragments.createFragment(position);
+        return mParentFragments.createFragment(mParentFragments.getUserIdForPosition(position));
     }
 
     @Override
     public int getItemCount() {
-        return 2;
+        return mParentFragments.getTabCount();
     }
 }

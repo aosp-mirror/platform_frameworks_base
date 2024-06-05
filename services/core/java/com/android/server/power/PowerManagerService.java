@@ -18,7 +18,6 @@ package com.android.server.power;
 
 import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.policyToString;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT;
 import static android.os.PowerManager.GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF;
 import static android.os.PowerManager.GO_TO_SLEEP_REASON_DISPLAY_GROUP_REMOVED;
 import static android.os.PowerManager.WAKE_REASON_DISPLAY_GROUP_ADDED;
@@ -33,6 +32,7 @@ import static android.os.PowerManagerInternal.isInteractive;
 import static android.os.PowerManagerInternal.wakefulnessToString;
 
 import static com.android.internal.util.LatencyTracker.ACTION_TURN_ON_SCREEN;
+import static com.android.server.deviceidle.Flags.disableWakelocksInLightIdle;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -56,6 +56,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.SensorManager;
 import android.hardware.SystemSensorManager;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerInternal;
@@ -115,6 +116,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.display.BrightnessSynchronizer;
+import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -138,6 +140,7 @@ import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySaverStateMachine;
 import com.android.server.power.batterysaver.BatterySavingStats;
+import com.android.server.power.feature.PowerManagerFlags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -175,6 +178,9 @@ public final class PowerManagerService extends SystemService
     private static final int MSG_CHECK_FOR_LONG_WAKELOCKS = 4;
     // Message: Sent when an attentive timeout occurs to update the power state.
     private static final int MSG_ATTENTIVE_TIMEOUT = 5;
+
+    // Message: Sent when the policy want to release all timeout override wake locks.
+    private static final int MSG_RELEASE_ALL_OVERRIDE_WAKE_LOCKS = 6;
 
     // Dirty bit: mWakeLocks changed
     private static final int DIRTY_WAKE_LOCKS = 1 << 0;
@@ -216,6 +222,7 @@ public final class PowerManagerService extends SystemService
     static final int WAKE_LOCK_STAY_AWAKE = 1 << 5; // only set if already awake
     static final int WAKE_LOCK_DOZE = 1 << 6;
     static final int WAKE_LOCK_DRAW = 1 << 7;
+    static final int WAKE_LOCK_SCREEN_TIMEOUT_OVERRIDE = 1 << 8;
 
     // Summarizes the user activity state.
     static final int USER_ACTIVITY_SCREEN_BRIGHT = 1 << 0;
@@ -224,7 +231,7 @@ public final class PowerManagerService extends SystemService
 
     // Default timeout in milliseconds.  This is only used until the settings
     // provider populates the actual default value (R.integer.def_screen_off_timeout).
-    private static final int DEFAULT_SCREEN_OFF_TIMEOUT = 15 * 1000;
+    static final int DEFAULT_SCREEN_OFF_TIMEOUT = 15 * 1000;
     private static final int DEFAULT_SLEEP_TIMEOUT = -1;
 
     // Screen brightness boost timeout.
@@ -308,11 +315,10 @@ public final class PowerManagerService extends SystemService
     private final Context mContext;
     private final ServiceThread mHandlerThread;
     private final Handler mHandler;
+    private final FoldGracePeriodProvider mFoldGracePeriodProvider;
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
-    private final BatterySaverController mBatterySaverController;
-    private final BatterySaverPolicy mBatterySaverPolicy;
+    @Nullable
     private final BatterySaverStateMachine mBatterySaverStateMachine;
-    private final BatterySavingStats mBatterySavingStats;
     private final LowPowerStandbyController mLowPowerStandbyController;
     private final AttentionDetector mAttentionDetector;
     private final FaceDownDetector mFaceDownDetector;
@@ -326,6 +332,10 @@ public final class PowerManagerService extends SystemService
     private final PermissionCheckerWrapper mPermissionCheckerWrapper;
     private final PowerPropertiesWrapper mPowerPropertiesWrapper;
     private final DeviceConfigParameterProvider mDeviceConfigProvider;
+    // True if battery saver is supported on this device.
+    private final boolean mBatterySaverSupported;
+
+    private final PowerManagerFlags mFeatureFlags;
 
     private boolean mDisableScreenWakeLocksWhileCached;
 
@@ -433,6 +443,9 @@ public final class PowerManagerService extends SystemService
     // True if auto-suspend mode is enabled.
     // Refer to autosuspend.h.
     private boolean mHalAutoSuspendModeEnabled;
+
+    // True if the device uses auto-suspend mode.
+    private final boolean mUseAutoSuspend;
 
     // True if interactive mode is enabled.
     // Refer to power.h.
@@ -546,6 +559,10 @@ public final class PowerManagerService extends SystemService
     // True if doze should not be started until after the screen off transition.
     private boolean mDozeAfterScreenOff;
 
+    // True if bright policy should be applied when we have entered dozing wakefulness but haven't
+    // started doze component.
+    private boolean mBrightWhenDozingConfig;
+
     // The minimum screen off timeout, in milliseconds.
     private long mMinimumScreenOffTimeoutConfig;
 
@@ -606,7 +623,8 @@ public final class PowerManagerService extends SystemService
     public final float mScreenBrightnessDim;
 
     // Value we store for tracking face down behavior.
-    private boolean mIsFaceDown = false;
+    @VisibleForTesting
+    boolean mIsFaceDown = false;
     private long mLastFlipTime = 0L;
 
     // The screen brightness setting override from the window manager
@@ -630,6 +648,8 @@ public final class PowerManagerService extends SystemService
     // The screen state to use while dozing.
     private int mDozeScreenStateOverrideFromDreamManager = Display.STATE_UNKNOWN;
 
+    private int mDozeScreenStateOverrideReasonFromDreamManager = Display.STATE_REASON_UNKNOWN;
+
     // The screen brightness to use while dozing.
     private int mDozeScreenBrightnessOverrideFromDreamManager = PowerManager.BRIGHTNESS_DEFAULT;
 
@@ -645,9 +665,11 @@ public final class PowerManagerService extends SystemService
     private boolean mBatteryLevelLow;
 
     // True if we are currently in device idle mode.
+    @GuardedBy("mLock")
     private boolean mDeviceIdleMode;
 
     // True if we are currently in light device idle mode.
+    @GuardedBy("mLock")
     private boolean mLightDeviceIdleMode;
 
     // Set of app ids that we will respect the wake locks for while in device idle mode.
@@ -693,6 +715,9 @@ public final class PowerManagerService extends SystemService
     // Whether to keep dreaming when the device is unplugging.
     private boolean mKeepDreamingWhenUnplugging;
 
+    @GuardedBy("mLock")
+    private ScreenTimeoutOverridePolicy mScreenTimeoutOverridePolicy;
+
     private final class DreamManagerStateListener implements
             DreamManagerInternal.DreamManagerStateListener {
         @Override
@@ -720,6 +745,12 @@ public final class PowerManagerService extends SystemService
                 userActivityNoUpdateLocked(mPowerGroups.get(groupId), eventTime,
                         PowerManager.USER_ACTIVITY_EVENT_OTHER, flags, uid);
             }
+
+            // Release wake lock when default display is not interactive.
+            if (mScreenTimeoutOverridePolicy != null && groupId == Display.DEFAULT_DISPLAY_GROUP) {
+                mScreenTimeoutOverridePolicy.onWakefulnessChange(mWakeLockSummary, wakefulness);
+            }
+
             mDirty |= DIRTY_DISPLAY_GROUP_WAKEFULNESS;
             mNotifier.onGroupWakefulnessChangeStarted(groupId, wakefulness, reason, eventTime);
             updateGlobalWakefulnessLocked(eventTime, reason, uid, opUid, opPackageName, details);
@@ -957,10 +988,10 @@ public final class PowerManagerService extends SystemService
         Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
                 SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
                 FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector,
-                Executor backgroundExecutor) {
+                Executor backgroundExecutor, PowerManagerFlags powerManagerFlags) {
             return new Notifier(
                     looper, context, batteryStats, suspendBlocker, policy, faceDownDetector,
-                    screenUndimDetector, backgroundExecutor);
+                    screenUndimDetector, backgroundExecutor, powerManagerFlags, /*injector=*/ null);
         }
 
         SuspendBlocker createSuspendBlocker(PowerManagerService service, String name) {
@@ -969,20 +1000,13 @@ public final class PowerManagerService extends SystemService
             return suspendBlocker;
         }
 
-        BatterySaverPolicy createBatterySaverPolicy(
-                Object lock, Context context, BatterySavingStats batterySavingStats) {
-            return new BatterySaverPolicy(lock, context, batterySavingStats);
-        }
-
-        BatterySaverController createBatterySaverController(
-                Object lock, Context context, BatterySaverPolicy batterySaverPolicy,
-                BatterySavingStats batterySavingStats) {
-            return new BatterySaverController(lock, context, BackgroundThread.get().getLooper(),
+        BatterySaverStateMachine createBatterySaverStateMachine(Object lock, Context context) {
+            BatterySavingStats batterySavingStats = new BatterySavingStats(lock);
+            BatterySaverPolicy batterySaverPolicy = new BatterySaverPolicy(lock, context,
+                    batterySavingStats);
+            BatterySaverController batterySaverController = new BatterySaverController(lock,
+                    context, BackgroundThread.get().getLooper(),
                     batterySaverPolicy, batterySavingStats);
-        }
-
-        BatterySaverStateMachine createBatterySaverStateMachine(Object lock, Context context,
-                BatterySaverController batterySaverController) {
             return new BatterySaverStateMachine(lock, context, batterySaverController);
         }
 
@@ -1006,6 +1030,10 @@ public final class PowerManagerService extends SystemService
 
         InattentiveSleepWarningController createInattentiveSleepWarningController() {
             return new InattentiveSleepWarningController();
+        }
+
+        FoldGracePeriodProvider createFoldGracePeriodProvider() {
+            return new FoldGracePeriodProvider();
         }
 
         public SystemPropertiesWrapper createSystemPropertiesWrapper() {
@@ -1074,6 +1102,10 @@ public final class PowerManagerService extends SystemService
         DeviceConfigParameterProvider createDeviceConfigParameterProvider() {
             return new DeviceConfigParameterProvider(DeviceConfigInterface.REAL);
         }
+
+        PowerManagerFlags getFlags() {
+            return new PowerManagerFlags();
+        }
     }
 
     /** Interface for checking an app op permission */
@@ -1140,6 +1172,7 @@ public final class PowerManagerService extends SystemService
         mNativeWrapper = injector.createNativeWrapper();
         mSystemProperties = injector.createSystemPropertiesWrapper();
         mClock = injector.createClock();
+        mFeatureFlags = injector.getFlags();
         mInjector = injector;
 
         mHandlerThread = new ServiceThread(TAG,
@@ -1148,6 +1181,7 @@ public final class PowerManagerService extends SystemService
         mHandler = injector.createHandler(mHandlerThread.getLooper(),
                 new PowerManagerHandlerCallback());
         mConstants = new Constants(mHandler);
+        mFoldGracePeriodProvider = injector.createFoldGracePeriodProvider();
         mAmbientDisplayConfiguration = mInjector.createAmbientDisplayConfiguration(context);
         mAmbientDisplaySuppressionController =
                 mInjector.createAmbientDisplaySuppressionController(
@@ -1156,13 +1190,11 @@ public final class PowerManagerService extends SystemService
         mFaceDownDetector = new FaceDownDetector(this::onFlip);
         mScreenUndimDetector = new ScreenUndimDetector();
 
-        mBatterySavingStats = new BatterySavingStats(mLock);
-        mBatterySaverPolicy =
-                mInjector.createBatterySaverPolicy(mLock, mContext, mBatterySavingStats);
-        mBatterySaverController = mInjector.createBatterySaverController(mLock, mContext,
-                mBatterySaverPolicy, mBatterySavingStats);
-        mBatterySaverStateMachine = mInjector.createBatterySaverStateMachine(mLock, mContext,
-                mBatterySaverController);
+        mBatterySaverSupported = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_batterySaverSupported);
+        mBatterySaverStateMachine =
+                mBatterySaverSupported ? mInjector.createBatterySaverStateMachine(mLock, mContext)
+                        : null;
 
         mLowPowerStandbyController = mInjector.createLowPowerStandbyController(mContext,
                 Looper.getMainLooper());
@@ -1173,6 +1205,9 @@ public final class PowerManagerService extends SystemService
         mDeviceConfigProvider = mInjector.createDeviceConfigParameterProvider();
 
         mPowerGroupWakefulnessChangeListener = new PowerGroupWakefulnessChangeListener();
+
+        mUseAutoSuspend = mContext.getResources().getBoolean(com.android.internal.R.bool
+                .config_useAutoSuspend);
 
         // Save brightness values:
         // Get float values from config.
@@ -1280,7 +1315,7 @@ public final class PowerManagerService extends SystemService
     @Override
     public void onStart() {
         publishBinderService(Context.POWER_SERVICE, mBinderService, /* allowIsolated= */ false,
-                DUMP_FLAG_PRIORITY_DEFAULT | DUMP_FLAG_PRIORITY_CRITICAL);
+                DUMP_FLAG_PRIORITY_CRITICAL);
         publishLocalService(PowerManagerInternal.class, mLocalService);
 
         Watchdog.getInstance().addMonitor(this);
@@ -1301,7 +1336,9 @@ public final class PowerManagerService extends SystemService
                 mBootCompleted = true;
                 mDirty |= DIRTY_BOOT_COMPLETED;
 
-                mBatterySaverStateMachine.onBootCompleted();
+                if (mBatterySaverSupported) {
+                    mBatterySaverStateMachine.onBootCompleted();
+                }
                 userActivityNoUpdateLocked(
                         now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
 
@@ -1336,7 +1373,7 @@ public final class PowerManagerService extends SystemService
             mNotifier = mInjector.createNotifier(Looper.getMainLooper(), mContext, mBatteryStats,
                     mInjector.createSuspendBlocker(this, "PowerManagerService.Broadcasts"),
                     mPolicy, mFaceDownDetector, mScreenUndimDetector,
-                    BackgroundThread.getExecutor());
+                    BackgroundThread.getExecutor(), mFeatureFlags);
 
             mPowerGroups.append(Display.DEFAULT_DISPLAY_GROUP,
                     new PowerGroup(WAKEFULNESS_AWAKE, mPowerGroupWakefulnessChangeListener,
@@ -1384,6 +1421,14 @@ public final class PowerManagerService extends SystemService
             // Go.
             readConfigurationLocked();
             updateSettingsLocked();
+            if (mFeatureFlags.isEarlyScreenTimeoutDetectorEnabled()) {
+                mScreenTimeoutOverridePolicy = new ScreenTimeoutOverridePolicy(mContext,
+                        mMinimumScreenOffTimeoutConfig, (releaseReason) -> {
+                    Message msg = mHandler.obtainMessage(MSG_RELEASE_ALL_OVERRIDE_WAKE_LOCKS);
+                    msg.arg1 = releaseReason;
+                    mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
+                });
+            }
             mDirty |= DIRTY_BATTERY_STATE;
             updatePowerStateLocked();
         }
@@ -1391,8 +1436,9 @@ public final class PowerManagerService extends SystemService
         final ContentResolver resolver = mContext.getContentResolver();
         mConstants.start(resolver);
 
-        mBatterySaverController.systemReady();
-        mBatterySaverPolicy.systemReady();
+        if (mBatterySaverSupported) {
+            mBatterySaverStateMachine.systemReady();
+        }
         mFaceDownDetector.systemReady(mContext);
         mScreenUndimDetector.systemReady(mContext);
 
@@ -1496,6 +1542,8 @@ public final class PowerManagerService extends SystemService
                 com.android.internal.R.bool.config_dreamsDisabledByAmbientModeSuppressionConfig);
         mDozeAfterScreenOff = resources.getBoolean(
                 com.android.internal.R.bool.config_dozeAfterScreenOffByDefault);
+        mBrightWhenDozingConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_brightWhenDozing);
         mMinimumScreenOffTimeoutConfig = resources.getInteger(
                 com.android.internal.R.integer.config_minimumScreenOffTimeout);
         mMaximumScreenDimDurationConfig = resources.getInteger(
@@ -1785,7 +1833,13 @@ public final class PowerManagerService extends SystemService
     }
 
     @GuardedBy("mLock")
-    private void removeWakeLockLocked(WakeLock wakeLock, int index) {
+    private void removeWakeLockNoUpdateLocked(WakeLock wakeLock, int index) {
+        removeWakeLockNoUpdateLocked(wakeLock, index,
+                ScreenTimeoutOverridePolicy.RELEASE_REASON_UNKNOWN);
+    }
+
+    @GuardedBy("mLock")
+    private void removeWakeLockNoUpdateLocked(WakeLock wakeLock, int index, int releaseReason) {
         mWakeLocks.remove(index);
         UidState state = wakeLock.mUidState;
         state.mNumWakeLocks--;
@@ -1793,10 +1847,15 @@ public final class PowerManagerService extends SystemService
                 state.mProcState == ActivityManager.PROCESS_STATE_NONEXISTENT) {
             mUidState.remove(state.mUid);
         }
-        notifyWakeLockReleasedLocked(wakeLock);
 
+        notifyWakeLockReleasedLocked(wakeLock, releaseReason);
         applyWakeLockFlagsOnReleaseLocked(wakeLock);
         mDirty |= DIRTY_WAKE_LOCKS;
+    }
+
+    @GuardedBy("mLock")
+    private void removeWakeLockLocked(WakeLock wakeLock, int index) {
+        removeWakeLockNoUpdateLocked(wakeLock, index);
         updatePowerStateLocked();
     }
 
@@ -1955,12 +2014,17 @@ public final class PowerManagerService extends SystemService
 
     @GuardedBy("mLock")
     private void notifyWakeLockReleasedLocked(WakeLock wakeLock) {
+        notifyWakeLockReleasedLocked(wakeLock, ScreenTimeoutOverridePolicy.RELEASE_REASON_UNKNOWN);
+    }
+
+    @GuardedBy("mLock")
+    private void notifyWakeLockReleasedLocked(WakeLock wakeLock, int releaseReason) {
         if (mSystemReady && wakeLock.mNotifiedAcquired) {
             wakeLock.mNotifiedAcquired = false;
             wakeLock.mAcquireTime = 0;
             mNotifier.onWakeLockReleased(wakeLock.mFlags, wakeLock.mTag,
                     wakeLock.mPackageName, wakeLock.mOwnerUid, wakeLock.mOwnerPid,
-                    wakeLock.mWorkSource, wakeLock.mHistoryTag, wakeLock.mCallback);
+                    wakeLock.mWorkSource, wakeLock.mHistoryTag, wakeLock.mCallback, releaseReason);
             notifyWakeLockLongFinishedLocked(wakeLock);
         }
     }
@@ -1979,7 +2043,9 @@ public final class PowerManagerService extends SystemService
 
                 case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
                     return mSystemReady && mDisplayManagerInternal.isProximitySensorAvailable();
-
+                case PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK:
+                    return mSystemReady && mFeatureFlags.isEarlyScreenTimeoutDetectorEnabled()
+                            && mScreenTimeoutOverridePolicy != null;
                 default:
                     return false;
             }
@@ -2075,6 +2141,10 @@ public final class PowerManagerService extends SystemService
 
             mNotifier.onUserActivity(powerGroup.getGroupId(), event, uid);
             mAttentionDetector.onUserActivity(eventTime, event);
+
+            if (mScreenTimeoutOverridePolicy != null) {
+                mScreenTimeoutOverridePolicy.onUserActivity(mWakeLockSummary, event);
+            }
 
             if (mUserInactiveOverrideFromWindowManager) {
                 mUserInactiveOverrideFromWindowManager = false;
@@ -2602,7 +2672,10 @@ public final class PowerManagerService extends SystemService
                 }
             }
 
-            mBatterySaverStateMachine.setBatteryStatus(mIsPowered, mBatteryLevel, mBatteryLevelLow);
+            if (mBatterySaverSupported) {
+                mBatterySaverStateMachine.setBatteryStatus(mIsPowered, mBatteryLevel,
+                        mBatteryLevelLow);
+            }
         }
     }
 
@@ -2728,6 +2801,11 @@ public final class PowerManagerService extends SystemService
                 }
             }
 
+            // Screen wake lock or non-interactive will release all override wake locks.
+            if (mScreenTimeoutOverridePolicy != null) {
+                mScreenTimeoutOverridePolicy.checkScreenWakeLock(mWakeLockSummary);
+            }
+
             for (int idx = 0; idx < mPowerGroups.size(); idx++) {
                 final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
                 final int wakeLockSummary = adjustWakeLockSummary(powerGroup.getWakefulnessLocked(),
@@ -2803,6 +2881,8 @@ public final class PowerManagerService extends SystemService
                 return WAKE_LOCK_DOZE;
             case PowerManager.DRAW_WAKE_LOCK:
                 return WAKE_LOCK_DRAW;
+            case PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK:
+                return WAKE_LOCK_SCREEN_TIMEOUT_OVERRIDE;
         }
         return 0;
     }
@@ -2883,11 +2963,10 @@ public final class PowerManagerService extends SystemService
 
         final long attentiveTimeout = getAttentiveTimeoutLocked();
         final long sleepTimeout = getSleepTimeoutLocked(attentiveTimeout);
-        long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout,
+        final long defaultScreenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout,
                 attentiveTimeout);
-        final long screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
-        screenOffTimeout =
-                getScreenOffTimeoutWithFaceDownLocked(screenOffTimeout, screenDimDuration);
+        final long defaultScreenDimDuration = getScreenDimDurationLocked(defaultScreenOffTimeout);
+
         final boolean userInactiveOverride = mUserInactiveOverrideFromWindowManager;
         long nextTimeout = -1;
         boolean hasUserActivitySummary = false;
@@ -2896,6 +2975,16 @@ public final class PowerManagerService extends SystemService
             long groupNextTimeout = 0;
             final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
             final int wakefulness = powerGroup.getWakefulnessLocked();
+
+            // The default display screen timeout could be overridden by policy.
+            long screenOffTimeout = defaultScreenOffTimeout;
+            long screenDimDuration = defaultScreenDimDuration;
+            if (powerGroup.getGroupId() == Display.DEFAULT_DISPLAY_GROUP) {
+                screenOffTimeout =
+                        getScreenOffTimeoutOverrideLocked(screenOffTimeout, screenDimDuration);
+                screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
+            }
+
             if (wakefulness != WAKEFULNESS_ASLEEP) {
                 final long lastUserActivityTime = powerGroup.getLastUserActivityTimeLocked();
                 final long lastUserActivityTimeNoChangeLights =
@@ -3173,15 +3262,20 @@ public final class PowerManagerService extends SystemService
                 (long)(screenOffTimeout * mMaximumScreenDimRatioConfig));
     }
 
+    @VisibleForTesting
     @GuardedBy("mLock")
-    private long getScreenOffTimeoutWithFaceDownLocked(
-            long screenOffTimeout, long screenDimDuration) {
-        // If face down, we decrease the timeout to equal the dim duration so that the
-        // device will go into a dim state.
-        if (mIsFaceDown) {
-            return Math.min(screenDimDuration, screenOffTimeout);
+    long getScreenOffTimeoutOverrideLocked(long screenOffTimeout, long screenDimDuration) {
+        long shortestScreenOffTimeout = screenOffTimeout;
+        if (mScreenTimeoutOverridePolicy != null) {
+            shortestScreenOffTimeout =
+                    mScreenTimeoutOverridePolicy.getScreenTimeoutOverrideLocked(
+                            mWakeLockSummary, screenOffTimeout);
         }
-        return screenOffTimeout;
+        if (mIsFaceDown) {
+            shortestScreenOffTimeout = Math.min(screenDimDuration, shortestScreenOffTimeout);
+        }
+
+        return shortestScreenOffTimeout;
     }
 
     /**
@@ -3553,11 +3647,17 @@ public final class PowerManagerService extends SystemService
                 boolean ready = powerGroup.updateLocked(screenBrightnessOverride,
                         shouldUseProximitySensorLocked(), shouldBoostScreenBrightness(),
                         mDozeScreenStateOverrideFromDreamManager,
+                        mDozeScreenStateOverrideReasonFromDreamManager,
                         mDozeScreenBrightnessOverrideFromDreamManagerFloat,
                         mDrawWakeLockOverrideFromSidekick,
-                        mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.SCREEN_BRIGHTNESS),
+                        mBatterySaverSupported
+                                ?
+                                mBatterySaverStateMachine.getBatterySaverPolicy()
+                                        .getBatterySaverPolicy(ServiceType.SCREEN_BRIGHTNESS)
+                                : new PowerSaveState.Builder().build(),
                         sQuiescent, mDozeAfterScreenOff, mBootCompleted,
-                        mScreenBrightnessBoostInProgress, mRequestWaitForNegativeProximity);
+                        mScreenBrightnessBoostInProgress, mRequestWaitForNegativeProximity,
+                        mBrightWhenDozingConfig);
                 int wakefulness = powerGroup.getWakefulnessLocked();
                 if (DEBUG_SPEW) {
                     Slog.d(TAG, "updateDisplayPowerStateLocked: displayReady=" + ready
@@ -3632,7 +3732,7 @@ public final class PowerManagerService extends SystemService
     int getDesiredScreenPolicyLocked(int groupId) {
         return mPowerGroups.get(groupId).getDesiredScreenPolicyLocked(sQuiescent,
                 mDozeAfterScreenOff, mBootCompleted,
-                mScreenBrightnessBoostInProgress);
+                mScreenBrightnessBoostInProgress, mBrightWhenDozingConfig);
     }
 
     @VisibleForTesting
@@ -3824,6 +3924,9 @@ public final class PowerManagerService extends SystemService
 
     @GuardedBy("mLock")
     private void setHalAutoSuspendModeLocked(boolean enable) {
+        if (!mUseAutoSuspend) {
+            return;
+        }
         if (enable != mHalAutoSuspendModeEnabled) {
             if (DEBUG) {
                 Slog.d(TAG, "Setting HAL auto-suspend mode to " + enable);
@@ -3885,7 +3988,7 @@ public final class PowerManagerService extends SystemService
             if (DEBUG) {
                 Slog.d(TAG, "setLowPowerModeInternal " + enabled + " mIsPowered=" + mIsPowered);
             }
-            if (mIsPowered) {
+            if (mIsPowered || !mBatterySaverSupported) {
                 return false;
             }
 
@@ -3923,7 +4026,7 @@ public final class PowerManagerService extends SystemService
             UserspaceRebootLogger.noteUserspaceRebootWasRequested();
         }
         if (mHandler == null || !mSystemReady) {
-            if (RescueParty.isAttemptingFactoryReset()) {
+            if (RescueParty.isRecoveryTriggeredReboot()) {
                 // If we're stuck in a really low-level reboot loop, and a
                 // rescue party is trying to prompt the user for a factory data
                 // reset, we must GET TO DA CHOPPA!
@@ -4035,6 +4138,9 @@ public final class PowerManagerService extends SystemService
         synchronized (mLock) {
             if (mLightDeviceIdleMode != enabled) {
                 mLightDeviceIdleMode = enabled;
+                if (!mDeviceIdleMode && disableWakelocksInLightIdle()) {
+                    updateWakeLockDisabledStatesLocked();
+                }
                 setPowerModeInternal(MODE_DEVICE_IDLE, mDeviceIdleMode || mLightDeviceIdleMode);
                 return true;
             }
@@ -4045,7 +4151,7 @@ public final class PowerManagerService extends SystemService
     void setDeviceIdleWhitelistInternal(int[] appids) {
         synchronized (mLock) {
             mDeviceIdleWhitelist = appids;
-            if (mDeviceIdleMode) {
+            if (doesIdleStateBlockWakeLocksLocked()) {
                 updateWakeLockDisabledStatesLocked();
             }
         }
@@ -4054,7 +4160,7 @@ public final class PowerManagerService extends SystemService
     void setDeviceIdleTempWhitelistInternal(int[] appids) {
         synchronized (mLock) {
             mDeviceIdleTempWhitelist = appids;
-            if (mDeviceIdleMode) {
+            if (doesIdleStateBlockWakeLocksLocked()) {
                 updateWakeLockDisabledStatesLocked();
             }
         }
@@ -4114,7 +4220,7 @@ public final class PowerManagerService extends SystemService
                     <= ActivityManager.PROCESS_STATE_RECEIVER;
             state.mProcState = procState;
             if (state.mNumWakeLocks > 0) {
-                if (mDeviceIdleMode || mLowPowerStandbyActive) {
+                if (doesIdleStateBlockWakeLocksLocked() || mLowPowerStandbyActive) {
                     handleUidStateChangeLocked();
                 } else if (!state.mActive && oldShouldAllow !=
                         (procState <= ActivityManager.PROCESS_STATE_RECEIVER)) {
@@ -4134,7 +4240,8 @@ public final class PowerManagerService extends SystemService
                 state.mProcState = ActivityManager.PROCESS_STATE_NONEXISTENT;
                 state.mActive = false;
                 mUidState.removeAt(index);
-                if ((mDeviceIdleMode || mLowPowerStandbyActive) && state.mNumWakeLocks > 0) {
+                if ((doesIdleStateBlockWakeLocksLocked() || mLowPowerStandbyActive)
+                        && state.mNumWakeLocks > 0) {
                     handleUidStateChangeLocked();
                 }
             }
@@ -4166,6 +4273,11 @@ public final class PowerManagerService extends SystemService
                 }
             }
         }
+    }
+
+    @GuardedBy("mLock")
+    private boolean doesIdleStateBlockWakeLocksLocked() {
+        return mDeviceIdleMode || (mLightDeviceIdleMode && disableWakelocksInLightIdle());
     }
 
     @GuardedBy("mLock")
@@ -4207,7 +4319,7 @@ public final class PowerManagerService extends SystemService
                                     != ActivityManager.PROCESS_STATE_NONEXISTENT &&
                             wakeLock.mUidState.mProcState > ActivityManager.PROCESS_STATE_RECEIVER);
                 }
-                if (mDeviceIdleMode) {
+                if (doesIdleStateBlockWakeLocksLocked()) {
                     // If we are in idle mode, we will also ignore all partial wake locks that are
                     // for application uids that are not allowlisted.
                     final UidState state = wakeLock.mUidState;
@@ -4348,11 +4460,12 @@ public final class PowerManagerService extends SystemService
     }
 
     private void setDozeOverrideFromDreamManagerInternal(
-            int screenState, int screenBrightness) {
+            int screenState, @Display.StateReason int reason, int screenBrightness) {
         synchronized (mLock) {
             if (mDozeScreenStateOverrideFromDreamManager != screenState
                     || mDozeScreenBrightnessOverrideFromDreamManager != screenBrightness) {
                 mDozeScreenStateOverrideFromDreamManager = screenState;
+                mDozeScreenStateOverrideReasonFromDreamManager = reason;
                 mDozeScreenBrightnessOverrideFromDreamManager = screenBrightness;
                 mDozeScreenBrightnessOverrideFromDreamManagerFloat =
                         BrightnessSynchronizer.brightnessIntToFloat(mDozeScreenBrightnessOverrideFromDreamManager);
@@ -4379,7 +4492,8 @@ public final class PowerManagerService extends SystemService
 
     private boolean setPowerModeInternal(int mode, boolean enabled) {
         // Maybe filter the event.
-        if (mode == Mode.LAUNCH && enabled && mBatterySaverController.isLaunchBoostDisabled()) {
+        if (mode == Mode.LAUNCH && enabled && mBatterySaverStateMachine != null
+                && mBatterySaverStateMachine.getBatterySaverController().isLaunchBoostDisabled()) {
             return false;
         }
         return mNativeWrapper.nativeSetPowerMode(mode, enabled);
@@ -4556,6 +4670,7 @@ public final class PowerManagerService extends SystemService
                 pw.println("  mEnhancedDischargePredictionIsPersonalized="
                         + mEnhancedDischargePredictionIsPersonalized);
             }
+            pw.println("  mUseAutoSuspend=" + mUseAutoSuspend);
             pw.println("  mHalAutoSuspendModeEnabled=" + mHalAutoSuspendModeEnabled);
             pw.println("  mHalInteractiveModeEnabled=" + mHalInteractiveModeEnabled);
             pw.println("  mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary));
@@ -4642,6 +4757,7 @@ public final class PowerManagerService extends SystemService
             pw.println("  mDreamsActivateOnSleepSetting=" + mDreamsActivateOnSleepSetting);
             pw.println("  mDreamsActivateOnDockSetting=" + mDreamsActivateOnDockSetting);
             pw.println("  mDozeAfterScreenOff=" + mDozeAfterScreenOff);
+            pw.println("  mBrightWhenDozingConfig=" + mBrightWhenDozingConfig);
             pw.println("  mMinimumScreenOffTimeoutConfig=" + mMinimumScreenOffTimeoutConfig);
             pw.println("  mMaximumScreenDimDurationConfig=" + mMaximumScreenDimDurationConfig);
             pw.println("  mMaximumScreenDimRatioConfig=" + mMaximumScreenDimRatioConfig);
@@ -4719,8 +4835,12 @@ public final class PowerManagerService extends SystemService
             pw.println();
             pw.println("Display Power: " + mDisplayPowerCallbacks);
 
-            mBatterySaverPolicy.dump(pw);
-            mBatterySaverStateMachine.dump(pw);
+            if (mBatterySaverSupported) {
+                mBatterySaverStateMachine.getBatterySaverPolicy().dump(pw);
+                mBatterySaverStateMachine.dump(pw);
+            } else {
+                pw.println("Battery Saver: DISABLED");
+            }
             mAttentionDetector.dump(pw);
 
             pw.println();
@@ -4770,6 +4890,14 @@ public final class PowerManagerService extends SystemService
         mAmbientDisplaySuppressionController.dump(pw);
 
         mLowPowerStandbyController.dump(pw);
+
+        synchronized (mLock) {
+            if (mScreenTimeoutOverridePolicy != null) {
+                mScreenTimeoutOverridePolicy.dump(pw);
+            }
+        }
+
+        mFeatureFlags.dump(pw);
     }
 
     private void dumpProto(FileDescriptor fd) {
@@ -5102,8 +5230,10 @@ public final class PowerManagerService extends SystemService
                 proto.end(uIDToken);
             }
 
-            mBatterySaverStateMachine.dumpProto(proto,
-                    PowerManagerServiceDumpProto.BATTERY_SAVER_STATE_MACHINE);
+            if (mBatterySaverSupported) {
+                mBatterySaverStateMachine.dumpProto(proto,
+                        PowerManagerServiceDumpProto.BATTERY_SAVER_STATE_MACHINE);
+            }
 
             mHandler.getLooper().dumpDebug(proto, PowerManagerServiceDumpProto.LOOPER);
 
@@ -5235,6 +5365,9 @@ public final class PowerManagerService extends SystemService
                     break;
                 case MSG_ATTENTIVE_TIMEOUT:
                     handleAttentiveTimeout();
+                    break;
+                case MSG_RELEASE_ALL_OVERRIDE_WAKE_LOCKS:
+                    releaseAllOverrideWakeLocks(msg.arg1);
                     break;
             }
 
@@ -5427,21 +5560,23 @@ public final class PowerManagerService extends SystemService
         private String getLockLevelString() {
             switch (mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
                 case PowerManager.FULL_WAKE_LOCK:
-                    return "FULL_WAKE_LOCK                ";
+                    return "FULL_WAKE_LOCK                   ";
                 case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
-                    return "SCREEN_BRIGHT_WAKE_LOCK       ";
+                    return "SCREEN_BRIGHT_WAKE_LOCK          ";
                 case PowerManager.SCREEN_DIM_WAKE_LOCK:
-                    return "SCREEN_DIM_WAKE_LOCK          ";
+                    return "SCREEN_DIM_WAKE_LOCK             ";
                 case PowerManager.PARTIAL_WAKE_LOCK:
-                    return "PARTIAL_WAKE_LOCK             ";
+                    return "PARTIAL_WAKE_LOCK                ";
                 case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
-                    return "PROXIMITY_SCREEN_OFF_WAKE_LOCK";
+                    return "PROXIMITY_SCREEN_OFF_WAKE_LOCK   ";
                 case PowerManager.DOZE_WAKE_LOCK:
-                    return "DOZE_WAKE_LOCK                ";
+                    return "DOZE_WAKE_LOCK                   ";
                 case PowerManager.DRAW_WAKE_LOCK:
-                    return "DRAW_WAKE_LOCK                ";
+                    return "DRAW_WAKE_LOCK                   ";
+                case PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK:
+                    return "SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK";
                 default:
-                    return "???                           ";
+                    return "???                              ";
             }
         }
 
@@ -5583,7 +5718,7 @@ public final class PowerManagerService extends SystemService
         private void recordReferenceLocked(String id) {
             LongArray times = mOpenReferenceTimes.get(id);
             if (times == null) {
-                times = new LongArray();
+                times = new LongArray(2);
                 mOpenReferenceTimes.put(id, times);
             }
             times.add(System.currentTimeMillis());
@@ -5593,6 +5728,9 @@ public final class PowerManagerService extends SystemService
             LongArray times = mOpenReferenceTimes.get(id);
             if (times != null && times.size() > 0) {
                 times.remove(times.size() - 1);
+                if (times.size() == 0) {
+                    mOpenReferenceTimes.remove(id);
+                }
             }
         }
     }
@@ -5681,6 +5819,17 @@ public final class PowerManagerService extends SystemService
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
             }
+
+            if ((flags & PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK) != 0) {
+                if (!mFeatureFlags.isEarlyScreenTimeoutDetectorEnabled()) {
+                    throw new IllegalArgumentException("Acquiring an unsupported wake lock:"
+                            + " flags=" + flags + ", tag=" + tag);
+                }
+
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.SCREEN_TIMEOUT_OVERRIDE, null);
+            }
+
             if (ws != null && !ws.isEmpty()) {
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.UPDATE_DEVICE_STATS, null);
@@ -5984,7 +6133,8 @@ public final class PowerManagerService extends SystemService
         public boolean isPowerSaveMode() {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverController.isEnabled();
+                return mBatterySaverSupported
+                        && mBatterySaverStateMachine.getBatterySaverController().isEnabled();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -5994,7 +6144,12 @@ public final class PowerManagerService extends SystemService
         public PowerSaveState getPowerSaveState(@ServiceType int serviceType) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverPolicy.getBatterySaverPolicy(serviceType);
+                // Return default PowerSaveState if battery saver is not supported.
+                return mBatterySaverSupported
+                        ?
+                        mBatterySaverStateMachine.getBatterySaverPolicy().getBatterySaverPolicy(
+                                serviceType)
+                        : new PowerSaveState.Builder().build();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6015,11 +6170,24 @@ public final class PowerManagerService extends SystemService
             }
         }
 
-        @Override // Binder call
-        public BatterySaverPolicyConfig getFullPowerSavePolicy() {
+        @Override
+        public boolean isBatterySaverSupported() {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverStateMachine.getFullBatterySaverPolicy();
+                return mBatterySaverSupported;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public BatterySaverPolicyConfig getFullPowerSavePolicy() {
+            // Return default BatterySaverPolicyConfig if battery saver is not supported.
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mBatterySaverSupported
+                        ? mBatterySaverStateMachine.getFullBatterySaverPolicy()
+                        : new BatterySaverPolicyConfig.Builder().build();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6034,7 +6202,8 @@ public final class PowerManagerService extends SystemService
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverStateMachine.setFullBatterySaverPolicy(config);
+                return mBatterySaverSupported
+                        && mBatterySaverStateMachine.setFullBatterySaverPolicy(config);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6071,7 +6240,8 @@ public final class PowerManagerService extends SystemService
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverStateMachine.setAdaptiveBatterySaverPolicy(config);
+                return mBatterySaverSupported
+                        && mBatterySaverStateMachine.setAdaptiveBatterySaverPolicy(config);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6086,7 +6256,8 @@ public final class PowerManagerService extends SystemService
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverStateMachine.setAdaptiveBatterySaverEnabled(enabled);
+                return mBatterySaverSupported
+                        && mBatterySaverStateMachine.setAdaptiveBatterySaverEnabled(enabled);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6772,6 +6943,16 @@ public final class PowerManagerService extends SystemService
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        public void setUseFaceDownDetector(boolean enable) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mFaceDownDetector.setEnabledOverride(enable);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
     }
 
     @VisibleForTesting
@@ -6802,6 +6983,13 @@ public final class PowerManagerService extends SystemService
                 return PowerManager.SHUTDOWN_REASON_BATTERY_THERMAL;
             default:
                 return PowerManager.SHUTDOWN_REASON_UNKNOWN;
+        }
+    }
+
+    @VisibleForTesting
+    int getPowerGroupSize() {
+        synchronized (mLock) {
+            return mPowerGroups.size();
         }
     }
 
@@ -6874,8 +7062,15 @@ public final class PowerManagerService extends SystemService
                                 + ") doesn't exist");
                     }
                     if ((flags & PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP) != 0) {
-                        if (powerGroup.hasWakeLockKeepingScreenOnLocked()) {
-                            continue;
+                        if (mFoldGracePeriodProvider.isEnabled()) {
+                            if (!powerGroup.hasWakeLockKeepingScreenOnLocked()) {
+                                mNotifier.showDismissibleKeyguard();
+                            }
+                            continue; // never actually goes to sleep for SOFT_SLEEP
+                        } else {
+                            if (powerGroup.hasWakeLockKeepingScreenOnLocked()) {
+                                continue;
+                            }
                         }
                     }
                     if (isNoDoze) {
@@ -6902,7 +7097,8 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override
-        public void setDozeOverrideFromDreamManager(int screenState, int screenBrightness) {
+        public void setDozeOverrideFromDreamManager(
+                int screenState, int reason, int screenBrightness) {
             switch (screenState) {
                 case Display.STATE_UNKNOWN:
                 case Display.STATE_OFF:
@@ -6919,7 +7115,7 @@ public final class PowerManagerService extends SystemService
                     || screenBrightness > PowerManager.BRIGHTNESS_ON) {
                 screenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
             }
-            setDozeOverrideFromDreamManagerInternal(screenState, screenBrightness);
+            setDozeOverrideFromDreamManagerInternal(screenState, reason, screenBrightness);
         }
 
         @Override
@@ -6944,12 +7140,21 @@ public final class PowerManagerService extends SystemService
 
         @Override
         public PowerSaveState getLowPowerState(@ServiceType int serviceType) {
-            return mBatterySaverPolicy.getBatterySaverPolicy(serviceType);
+            // Return default PowerSaveState if battery saver is not supported.
+            return mBatterySaverSupported
+                    ?
+                    mBatterySaverStateMachine.getBatterySaverPolicy().getBatterySaverPolicy(
+                            serviceType) : new PowerSaveState.Builder().build();
         }
 
         @Override
         public void registerLowPowerModeObserver(LowPowerModeListener listener) {
-            mBatterySaverController.addListener(listener);
+            if (mBatterySaverSupported) {
+                mBatterySaverStateMachine.getBatterySaverController().addListener(listener);
+            } else {
+                Slog.w(TAG,
+                        "Battery saver is not supported, no low power mode observer registered");
+            }
         }
 
         @Override
@@ -7058,12 +7263,13 @@ public final class PowerManagerService extends SystemService
      * Any changes to the device state are treated as user interactions.
      */
     class DeviceStateListener implements DeviceStateManager.DeviceStateCallback {
-        private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
+        private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 
         @Override
-        public void onStateChanged(int deviceState) {
-            if (mDeviceState != deviceState) {
-                mDeviceState = deviceState;
+        public void onDeviceStateChanged(@NonNull DeviceState deviceState) {
+            int stateIdentifier = deviceState.getIdentifier();
+            if (mDeviceState != stateIdentifier) {
+                mDeviceState = stateIdentifier;
                 // Device-state interactions are applied to the default display so that they
                 // are reflected only with the default power group.
                 userActivityInternal(Display.DEFAULT_DISPLAY, mClock.uptimeMillis(),
@@ -7083,5 +7289,24 @@ public final class PowerManagerService extends SystemService
             return true;
         }
         return false;
+    }
+
+    private void releaseAllOverrideWakeLocks(int releaseReason) {
+        synchronized (mLock) {
+            final int size = mWakeLocks.size();
+            boolean change = false;
+            for (int i = size - 1; i >= 0; i--) {
+                final WakeLock wakeLock = mWakeLocks.get(i);
+                if ((wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK)
+                        == PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK) {
+                    removeWakeLockNoUpdateLocked(wakeLock, i, releaseReason);
+                    change = true;
+                }
+            }
+
+            if (change) {
+                updatePowerStateLocked();
+            }
+        }
     }
 }

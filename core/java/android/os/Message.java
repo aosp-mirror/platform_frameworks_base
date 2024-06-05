@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -33,6 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * {@link Handler#obtainMessage Handler.obtainMessage()} methods, which will pull
  * them from a pool of recycled objects.</p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Message implements Parcelable {
     /**
      * User-defined message code so that the recipient can identify
@@ -436,6 +438,7 @@ public final class Message implements Parcelable {
      * @see #getData()
      * @see #setData(Bundle)
      */
+    @Nullable
     public Bundle peekData() {
         return data;
     }

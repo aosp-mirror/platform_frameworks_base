@@ -20,9 +20,9 @@ import android.util.Log
 
 import com.android.systemui.log.dagger.NotificationInterruptLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.INFO
-import com.android.systemui.log.LogLevel.WARNING
+import com.android.systemui.log.core.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.INFO
+import com.android.systemui.log.core.LogLevel.WARNING
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.util.Compile
@@ -54,6 +54,14 @@ class NotificationInterruptLogger @Inject constructor(
                 "No bubble up: not allowed to bubble: $str1"
             })
         }
+    }
+
+    fun logNoAlertingAppSuspended(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+        }, {
+            "No alerting: app is suspended: $str1"
+        })
     }
 
     fun logNoBubbleNoMetadata(entry: NotificationEntry) {
@@ -239,11 +247,11 @@ class NotificationInterruptLogger @Inject constructor(
         })
     }
 
-    fun logNoPulsingNotificationHidden(entry: NotificationEntry) {
+    fun logNoPulsingNotificationHiddenOverride(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
         }, {
-            "No pulsing: notification hidden on lock screen: $str1"
+            "No pulsing: notification hidden on lock screen by override: $str1"
         })
     }
 
@@ -290,11 +298,11 @@ class NotificationInterruptLogger @Inject constructor(
         })
     }
 
-    fun keyguardHideNotification(entry: NotificationEntry) {
+    fun logNoAlertingNotificationHidden(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
         }, {
-            "Keyguard Hide Notification: $str1"
+            "No alerting: notification hidden on lock screen: $str1"
         })
     }
 }

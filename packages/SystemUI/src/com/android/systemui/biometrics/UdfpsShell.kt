@@ -18,13 +18,13 @@ package com.android.systemui.biometrics
 
 import android.content.Context
 import android.graphics.Rect
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_OTHER
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_UNKNOWN
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_BP
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_KEYGUARD
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_OTHER
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_SETTINGS
+import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_ENROLLING
+import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_FIND_SENSOR
+import android.hardware.biometrics.BiometricRequestConstants.REASON_UNKNOWN
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.util.Log
 import android.view.LayoutInflater
@@ -45,16 +45,13 @@ private const val SENSOR_ID = 0
 private const val MINOR = 10F
 private const val MAJOR = 10F
 
-/**
- * Used to show and hide the UDFPS overlay with statusbar commands.
- */
+/** Used to show and hide the UDFPS overlay with statusbar commands. */
 @SysUISingleton
-class UdfpsShell @Inject constructor(
-    commandRegistry: CommandRegistry
-) : Command {
+class UdfpsShell @Inject constructor(commandRegistry: CommandRegistry) : Command {
 
     /**
      * Set in [UdfpsController.java] constructor, used to show and hide the UDFPS overlay.
+     *
      * TODO: inject after b/229290039 is resolved
      */
     var udfpsOverlayController: UdfpsController.UdfpsOverlayController? = null
@@ -76,6 +73,8 @@ class UdfpsShell @Inject constructor(
             simFingerDown()
         } else if (args.size == 1 && args[0] == "simFingerUp") {
             simFingerUp()
+        } else if (args.size == 1 && args[0] == "biometricPrompt") {
+            launchBiometricPrompt()
         } else {
             invalidCommand(pw)
         }
@@ -85,8 +84,10 @@ class UdfpsShell @Inject constructor(
         pw.println("Usage: adb shell cmd statusbar udfps <cmd>")
         pw.println("Supported commands:")
         pw.println("  - show <reason>")
-        pw.println("    -> supported reasons: [enroll-find-sensor, enroll-enrolling, auth-bp, " +
-                            "auth-keyguard, auth-other, auth-settings]")
+        pw.println(
+            "    -> supported reasons: [enroll-find-sensor, enroll-enrolling, auth-bp, " +
+                "auth-keyguard, auth-other, auth-settings]"
+        )
         pw.println("    -> reason otherwise defaults to unknown")
         pw.println("  - hide")
         pw.println("  - onUiReady")
@@ -94,6 +95,8 @@ class UdfpsShell @Inject constructor(
         pw.println("    -> Simulates onFingerDown on sensor")
         pw.println("  - simFingerUp")
         pw.println("    -> Simulates onFingerUp on sensor")
+        pw.println("  - biometricPrompt")
+        pw.println("    -> Shows Biometric Prompt")
     }
 
     private fun invalidCommand(pw: PrintWriter) {
@@ -115,14 +118,14 @@ class UdfpsShell @Inject constructor(
 
     private fun showOverlay(reason: Int) {
         udfpsOverlayController?.showUdfpsOverlay(
-                REQUEST_ID,
-                SENSOR_ID,
-                reason,
-                object : IUdfpsOverlayControllerCallback.Stub() {
-                    override fun onUserCanceled() {
-                        Log.e(TAG, "User cancelled")
-                    }
+            REQUEST_ID,
+            SENSOR_ID,
+            reason,
+            object : IUdfpsOverlayControllerCallback.Stub() {
+                override fun onUserCanceled() {
+                    Log.e(TAG, "User cancelled")
                 }
+            }
         )
     }
 
@@ -130,6 +133,9 @@ class UdfpsShell @Inject constructor(
         udfpsOverlayController?.hideUdfpsOverlay(SENSOR_ID)
     }
 
+    private fun launchBiometricPrompt() {
+        udfpsOverlayController?.debugBiometricPrompt()
+    }
 
     @VisibleForTesting
     fun onUiReady() {
@@ -140,12 +146,24 @@ class UdfpsShell @Inject constructor(
     fun simFingerDown() {
         val sensorBounds: Rect = udfpsOverlayController!!.sensorBounds
 
-        val downEvent: MotionEvent? = obtainMotionEvent(ACTION_DOWN, sensorBounds.exactCenterX(),
-                sensorBounds.exactCenterY(), MINOR, MAJOR)
+        val downEvent: MotionEvent? =
+            obtainMotionEvent(
+                ACTION_DOWN,
+                sensorBounds.exactCenterX(),
+                sensorBounds.exactCenterY(),
+                MINOR,
+                MAJOR
+            )
         udfpsOverlayController?.debugOnTouch(downEvent)
 
-        val moveEvent: MotionEvent? = obtainMotionEvent(ACTION_MOVE, sensorBounds.exactCenterX(),
-                sensorBounds.exactCenterY(), MINOR, MAJOR)
+        val moveEvent: MotionEvent? =
+            obtainMotionEvent(
+                ACTION_MOVE,
+                sensorBounds.exactCenterX(),
+                sensorBounds.exactCenterY(),
+                MINOR,
+                MAJOR
+            )
         udfpsOverlayController?.debugOnTouch(moveEvent)
 
         downEvent?.recycle()
@@ -156,18 +174,24 @@ class UdfpsShell @Inject constructor(
     fun simFingerUp() {
         val sensorBounds: Rect = udfpsOverlayController!!.sensorBounds
 
-        val upEvent: MotionEvent? = obtainMotionEvent(ACTION_UP, sensorBounds.exactCenterX(),
-                sensorBounds.exactCenterY(), MINOR, MAJOR)
+        val upEvent: MotionEvent? =
+            obtainMotionEvent(
+                ACTION_UP,
+                sensorBounds.exactCenterX(),
+                sensorBounds.exactCenterY(),
+                MINOR,
+                MAJOR
+            )
         udfpsOverlayController?.debugOnTouch(upEvent)
         upEvent?.recycle()
     }
 
     private fun obtainMotionEvent(
-            action: Int,
-            x: Float,
-            y: Float,
-            minor: Float,
-            major: Float
+        action: Int,
+        x: Float,
+        y: Float,
+        minor: Float,
+        major: Float
     ): MotionEvent? {
         val pp = MotionEvent.PointerProperties()
         pp.id = 1
@@ -176,7 +200,21 @@ class UdfpsShell @Inject constructor(
         pc.y = y
         pc.touchMinor = minor
         pc.touchMajor = major
-        return MotionEvent.obtain(0, 0, action, 1, arrayOf(pp), arrayOf(pc),
-                0, 0, 1f, 1f, 0, 0, 0, 0)
+        return MotionEvent.obtain(
+            0,
+            0,
+            action,
+            1,
+            arrayOf(pp),
+            arrayOf(pc),
+            0,
+            0,
+            1f,
+            1f,
+            0,
+            0,
+            0,
+            0
+        )
     }
 }

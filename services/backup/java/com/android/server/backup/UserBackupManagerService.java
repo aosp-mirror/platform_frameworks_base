@@ -36,6 +36,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RUN_CLEAR;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 import static com.android.server.backup.internal.BackupHandler.MSG_SCHEDULE_BACKUP_PACKAGE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -132,7 +133,8 @@ import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.backup.utils.BackupEligibilityRules;
-import com.android.server.backup.utils.BackupManagerMonitorUtils;
+import com.android.server.backup.utils.BackupManagerMonitorDumpsysUtils;
+import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 import com.android.server.backup.utils.BackupObserverUtils;
 import com.android.server.backup.utils.SparseArrayUtils;
 
@@ -141,6 +143,7 @@ import dalvik.annotation.optimization.NeverCompile;
 import com.google.android.collect.Sets;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -149,6 +152,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
@@ -483,6 +487,13 @@ public class UserBackupManagerService {
             File baseStateDir,
             File dataDir,
             TransportManager transportManager) {
+        // check if we are past the retention period for BMM Events,
+        // if so delete expired events and do not print them to dumpsys
+        BackupManagerMonitorDumpsysUtils backupManagerMonitorDumpsysUtils =
+                new BackupManagerMonitorDumpsysUtils();
+        if (backupManagerMonitorDumpsysUtils.deleteExpiredBMMEvents() && DEBUG){
+            Slog.d(TAG, "BMM Events recorded for dumpsys have expired");
+        }
         return new UserBackupManagerService(
                 userId,
                 context,
@@ -508,7 +519,8 @@ public class UserBackupManagerService {
 
     @VisibleForTesting
     UserBackupManagerService(Context context, PackageManager packageManager,
-            LifecycleOperationStorage operationStorage, TransportManager transportManager) {
+            LifecycleOperationStorage operationStorage, TransportManager transportManager,
+            BackupHandler backupHandler, BackupManagerConstants backupManagerConstants) {
         mContext = context;
 
         mUserId = 0;
@@ -516,6 +528,9 @@ public class UserBackupManagerService {
         mPackageManager = packageManager;
         mOperationStorage = operationStorage;
         mTransportManager = transportManager;
+        mFullBackupQueue = new ArrayList<>();
+        mBackupHandler = backupHandler;
+        mConstants = backupManagerConstants;
 
         mBaseStateDir = null;
         mDataDir = null;
@@ -527,9 +542,7 @@ public class UserBackupManagerService {
         mAgentTimeoutParameters = null;
         mActivityManagerInternal = null;
         mAlarmManager = null;
-        mConstants = null;
         mWakelock = null;
-        mBackupHandler = null;
         mBackupPreferences = null;
         mBackupPasswordManager = null;
         mPackageManagerBinder = null;
@@ -650,6 +663,13 @@ public class UserBackupManagerService {
         // Now that we know about valid backup participants, parse any leftover journal files into
         // the pending backup set
         mBackupHandler.postDelayed(this::parseLeftoverJournals, INITIALIZATION_DELAY_MILLIS);
+
+        // check if we are past the retention period for BMM Events,
+        // if so delete expired events and do not print them to dumpsys
+        BackupManagerMonitorDumpsysUtils backupManagerMonitorDumpsysUtils =
+                new BackupManagerMonitorDumpsysUtils();
+        mBackupHandler.postDelayed(backupManagerMonitorDumpsysUtils::deleteExpiredBMMEvents,
+                INITIALIZATION_DELAY_MILLIS);
 
         mBackupPreferences = new UserBackupPreferences(mContext, mBaseStateDir);
 
@@ -974,6 +994,7 @@ public class UserBackupManagerService {
                 /* scheduler */ null);
     }
 
+    @NonNull
     private ArrayList<FullBackupEntry> readFullBackupSchedule() {
         boolean changed = false;
         ArrayList<FullBackupEntry> schedule = null;
@@ -987,11 +1008,11 @@ public class UserBackupManagerService {
                  DataInputStream in = new DataInputStream(bufStream)) {
                 int version = in.readInt();
                 if (version != SCHEDULE_FILE_VERSION) {
-                    Slog.e(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "Unknown backup schedule version " + version));
-                    return null;
+                    // The file version doesn't match the expected value.
+                    // Since this is within a "try" block, this exception will be treated like
+                    // any other exception, and caught below.
+                    throw new IllegalArgumentException("Unknown backup schedule version "
+                            + version);
                 }
 
                 final int numPackages = in.readInt();
@@ -1743,12 +1764,8 @@ public class UserBackupManagerService {
 
         synchronized (mClearDataLock) {
             mClearingData = true;
-            try {
-                mActivityManager.clearApplicationUserData(packageName, keepSystemState, observer,
-                        mUserId);
-            } catch (RemoteException e) {
-                // can't happen because the activity manager is in this process
-            }
+            mActivityManagerInternal.clearApplicationUserData(packageName, keepSystemState,
+                    /*isRestore=*/ true, observer, mUserId);
 
             // Only wait 30 seconds for the clear data to happen.
             long timeoutMark = System.currentTimeMillis() + CLEAR_DATA_TIMEOUT_INTERVAL;
@@ -1830,12 +1847,14 @@ public class UserBackupManagerService {
      */
     public int requestBackup(String[] packages, IBackupObserver observer,
             IBackupManagerMonitor monitor, int flags) {
+        BackupManagerMonitorEventSender  mBackupManagerMonitorEventSender =
+                getBMMEventSender(monitor);
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "requestBackup");
 
         if (packages == null || packages.length < 1) {
             Slog.e(TAG, addUserIdToLogMessage(mUserId, "No packages named for backup request"));
             BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
-            monitor = BackupManagerMonitorUtils.monitorEvent(monitor,
+            mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_NO_PACKAGES,
                     null, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
             throw new IllegalArgumentException("No packages are provided for backup");
@@ -1853,7 +1872,7 @@ public class UserBackupManagerService {
             final int logTag = mSetupComplete
                     ? BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED
                     : BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
-            monitor = BackupManagerMonitorUtils.monitorEvent(monitor, logTag, null,
+            mBackupManagerMonitorEventSender.monitorEvent(logTag, null,
                     BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY, null);
             return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
         }
@@ -1871,7 +1890,7 @@ public class UserBackupManagerService {
         } catch (TransportNotRegisteredException | TransportNotAvailableException
                 | RemoteException e) {
             BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
-            monitor = BackupManagerMonitorUtils.monitorEvent(monitor,
+            mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL,
                     null, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
             return BackupManager.ERROR_TRANSPORT_ABORTED;
@@ -2859,8 +2878,7 @@ public class UserBackupManagerService {
             if (DEBUG) {
                 Slog.d(
                         TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Starting backup confirmation UI, token=" + token));
+                        addUserIdToLogMessage(mUserId, "Starting backup confirmation UI"));
             }
             if (!startConfirmationUi(token, FullBackup.FULL_BACKUP_INTENT_ACTION)) {
                 Slog.e(
@@ -3067,7 +3085,9 @@ public class UserBackupManagerService {
                     /* caller */ "BMS.reportDelayedRestoreResult");
 
             IBackupManagerMonitor monitor = transportClient.getBackupManagerMonitor();
-            BackupManagerMonitorUtils.sendAgentLoggingResults(monitor, packageInfo, results,
+            BackupManagerMonitorEventSender  mBackupManagerMonitorEventSender =
+                    getBMMEventSender(monitor);
+            mBackupManagerMonitorEventSender.sendAgentLoggingResults(packageInfo, results,
                     BackupAnnotations.OperationType.RESTORE);
         } catch (NameNotFoundException | TransportNotAvailableException
                 | TransportNotRegisteredException | RemoteException e) {
@@ -3189,6 +3209,11 @@ public class UserBackupManagerService {
         } finally {
             Binder.restoreCallingIdentity(oldId);
         }
+    }
+
+    @VisibleForTesting
+    BackupManagerMonitorEventSender getBMMEventSender(IBackupManagerMonitor monitor) {
+        return new BackupManagerMonitorEventSender(monitor);
     }
 
     /** User-configurable enabling/disabling of backups. */
@@ -3878,11 +3903,33 @@ public class UserBackupManagerService {
             skip = true;
         }
 
+        BackupManagerMonitorEventSender  mBMMEventSender =
+                getBMMEventSender(/*monitor=*/ null);
+        PackageInfo packageInfo = getPackageInfoForBMMLogging(packageName);
         TransportConnection transportConnection =
                 mTransportManager.getCurrentTransportClient("BMS.restoreAtInstall()");
         if (transportConnection == null) {
             if (DEBUG) Slog.w(TAG, addUserIdToLogMessage(mUserId, "No transport client"));
             skip = true;
+        } else if (Flags.enableIncreasedBmmLoggingForRestoreAtInstall()) {
+            try {
+                BackupTransportClient transportClient = transportConnection.connectOrThrow(
+                        "BMS.restoreAtInstall");
+                mBMMEventSender.setMonitor(transportClient.getBackupManagerMonitor());
+            } catch (TransportNotAvailableException | RemoteException e) {
+                mBMMEventSender.monitorEvent(
+                        BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL, packageInfo,
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
+            }
+        }
+
+        if (Flags.enableIncreasedBmmLoggingForRestoreAtInstall()) {
+            mBMMEventSender.monitorEvent(
+                    BackupManagerMonitor.LOG_EVENT_ID_RESTORE_AT_INSTALL_INVOKED, packageInfo,
+                    BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                    mBMMEventSender.putMonitoringExtra(/*extras=*/null,
+                            BackupManagerMonitor.EXTRA_LOG_OPERATION_TYPE,
+                            BackupAnnotations.OperationType.RESTORE));
         }
 
         if (!mAutoRestore) {
@@ -3918,7 +3965,7 @@ public class UserBackupManagerService {
                         RestoreParams.createForRestoreAtInstall(
                                 transportConnection,
                                 /* observer */ null,
-                                /* monitor */ null,
+                                mBMMEventSender.getMonitor(),
                                 restoreSet,
                                 packageName,
                                 token,
@@ -3938,6 +3985,15 @@ public class UserBackupManagerService {
         if (skip) {
             // Auto-restore disabled or no way to attempt a restore
 
+            if (Flags.enableIncreasedBmmLoggingForRestoreAtInstall()) {
+                mBMMEventSender.monitorEvent(
+                        BackupManagerMonitor.LOG_EVENT_ID_SKIP_RESTORE_AT_INSTALL, packageInfo,
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                        mBMMEventSender.putMonitoringExtra(/*extras=*/null,
+                                BackupManagerMonitor.EXTRA_LOG_OPERATION_TYPE,
+                                BackupAnnotations.OperationType.RESTORE));
+            }
+
             if (transportConnection != null) {
                 mTransportManager.disposeOfTransportClient(
                         transportConnection, "BMS.restoreAtInstall()");
@@ -3949,6 +4005,13 @@ public class UserBackupManagerService {
                 mPackageManagerBinder.finishPackageInstall(token, false);
             } catch (RemoteException e) { /* can't happen */ }
         }
+    }
+
+    private PackageInfo getPackageInfoForBMMLogging(String packageName) {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = packageName;
+
+        return packageInfo;
     }
 
     /** Hand off a restore session. */
@@ -4149,6 +4212,7 @@ public class UserBackupManagerService {
                 }
             }
             dumpInternal(pw);
+            dumpBMMEvents(pw);
         } finally {
             Binder.restoreCallingIdentity(identityToken);
         }
@@ -4164,6 +4228,35 @@ public class UserBackupManagerService {
             pw.print("      ");
             pw.println(pkg.applicationInfo.backupAgentName);
         }
+    }
+
+    private void dumpBMMEvents(PrintWriter pw) {
+        BackupManagerMonitorDumpsysUtils bm =
+                new BackupManagerMonitorDumpsysUtils();
+        if (bm.deleteExpiredBMMEvents()) {
+            pw.println("BACKUP MANAGER MONITOR EVENTS HAVE EXPIRED");
+            return;
+        }
+        File events = bm.getBMMEventsFile();
+        if (events.length() == 0){
+            // We have not recorded BMMEvents yet.
+            pw.println("NO BACKUP MANAGER MONITOR EVENTS");
+            return;
+        } else if (bm.isFileLargerThanSizeLimit(events)){
+            pw.println("BACKUP MANAGER MONITOR EVENTS FILE OVER SIZE LIMIT - "
+                    + "future events will not be recorded");
+        }
+        pw.println("START OF BACKUP MANAGER MONITOR EVENTS");
+        try (BufferedReader reader = new BufferedReader(new FileReader(events))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                pw.println(line);
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "IO Exception when reading BMM events from file: " + e);
+            pw.println("IO Exception when reading BMM events from file");
+        }
+        pw.println("END OF BACKUP MANAGER MONITOR EVENTS");
     }
 
     @NeverCompile // Avoid size overhead of debugging code.

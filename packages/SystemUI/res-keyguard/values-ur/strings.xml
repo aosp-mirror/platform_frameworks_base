@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • چارج ہو رہا ہے"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • تیزی سے چارج ہو رہا ہے"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • آہستہ چارج ہو رہا ہے"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • بیٹری کی حفاظت کے لیے چارجنگ کو بہتر بنایا گیا"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • چارجنگ ایکسیسری کے ساتھ مسئلہ"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"غیر مقفل کرنے کیلئے مینیو دبائیں۔"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • بیٹری کی حفاظت کرنے کے لیے چارجنگ ہولڈ پر ہے"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • چارجنگ ایکسیسری چیک کریں"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"نیٹ ورک مقفل ہو گیا"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"‏کوئی SIM نہیں ہے"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"‏ایک SIM شامل کریں۔"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"‏SIM غائب ہے یا پڑھنے لائق نہیں ہے۔ ایک SIM شامل کریں۔"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"‏ناقابل استعمال SIM۔"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"‏آپ کے SIM کو مستقل طور پر غیر فعال کر دیا گیا ہے۔\n کسی دوسرے SIM کیلئے اپنے وائرلیس سروس فراہم کنندہ سے رابطہ کریں۔"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"‏SIM مقفل ہے۔"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"‏آپ کا SIM ‏PUK مقفل ہے۔"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"‏SIM کو غیر مقفل کیا جا رہا ہے…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"‏لاک ڈاؤن کے بعد PIN کی ضرورت ہوتی ہے"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"لاک ڈاؤن کے بعد پاس ورڈ کی ضرورت ہوتی ہے"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"لاک ڈاؤن کے بعد پیٹرن کی ضرورت ہوتی ہے"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"اپ ڈیٹ غیر فعال اوقات کے دوران انسٹال ہوگی"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"آلہ استعمال میں نہ ہونے پر اپ ڈیٹ انسٹال ہو جائے گی"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"‏مزید سیکیورٹی چاہیے۔ PIN کچھ عرصے اسے استعمال نہیں ہوا ہے۔"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"مزید سیکیورٹی چاہیے۔ پاس ورڈ کچھ عرصے سے استعمال نہیں ہوا ہے۔"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"مزید سیکیورٹی چاہیے۔ پیٹرن کچھ عرصے سے استعمال نہیں ہوا ہے۔"</string>
@@ -115,9 +111,12 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"اضافی سیکیورٹی کے لئے، اس کے بجائے پیٹرن استعمال کریں"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"‏اضافی سیکیورٹی کے لئے، اس کے بجائے PIN استعمال کریں"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"اضافی سیکیورٹی کے لئے، اس کے بجائے پاس ورڈ استعمال کریں"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"‏اضافی سیکیورٹی کیلئے PIN درکار ہے"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"اضافی سیکیورٹی کیلئے پیٹرن درکار ہے"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"اضافی سیکیورٹی کیلئے پاس ورڈ درکار ہے"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"آلہ منتظم کی جانب سے مقفل ہے"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"آلہ کو دستی طور پر مقفل کیا گیا تھا"</string>
-    <string name="kg_face_not_recognized" msgid="7903950626744419160">"تسلیم شدہ نہیں ہے"</string>
+    <string name="kg_face_not_recognized" msgid="7903950626744419160">"شناخت نہیں ہو سکی"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"فیس اَنلاک استعمال کرنے کیلئے، ترتیبات میں کیمرا تک رسائی کو آن کریں"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{‏SIM کا PIN درج کریں۔ اس سے پہلے کہ آپ اپنا آلہ غیر مقفل کرنے کیلئے لازمی طور پر اپنے کیریئر سے رابطہ کریں آپ کے پاس # کوشش بچی ہے۔}other{‏SIM کا PIN درج کریں۔ آپ کے پاس # کوششیں بچی ہیں۔}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{‏SIM اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ SIM کے مستقل طور پر ناقابل استعمال ہونے سے پہلے آپ کے پاس # کوشش بچی ہے۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔}other{‏SIM اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ SIM کے مستقل طور پر ناقابل استعمال ہونے سے پہلے آپ کے پاس # کوششیں بچی ہیں۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔}}"</string>

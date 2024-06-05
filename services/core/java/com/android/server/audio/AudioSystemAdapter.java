@@ -26,6 +26,8 @@ import android.media.IDevicesForAttributesCallback;
 import android.media.ISoundDose;
 import android.media.ISoundDoseCallback;
 import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule;
+import android.media.audiopolicy.Flags;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -41,6 +43,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -548,6 +551,11 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
         return AudioSystem.setStreamVolumeIndexAS(stream, index, device);
     }
 
+    /** Same as {@link AudioSystem#setVolumeIndexForAttributes(AudioAttributes, int, int)} */
+    public int setVolumeIndexForAttributes(AudioAttributes attributes, int index, int device) {
+        return AudioSystem.setVolumeIndexForAttributes(attributes, index, device);
+    }
+
     /**
      * Same as {@link AudioSystem#setPhoneState(int, int)}
      * @param state
@@ -590,6 +598,21 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     }
 
     /**
+     * Same as {@link AudioSystem#setDeviceAbsoluteVolumeEnabled(int, String, boolean, int)}
+     * @param nativeDeviceType the internal device type for which absolute volume is
+     *                         enabled/disabled
+     * @param address the address of the device for which absolute volume is enabled/disabled
+     * @param enabled whether the absolute volume is enabled/disabled
+     * @param streamToDriveAbs the stream that is controlling the absolute volume
+     * @return status of indicating the success of this operation
+     */
+    public int setDeviceAbsoluteVolumeEnabled(int nativeDeviceType, @NonNull String address,
+            boolean enabled, int streamToDriveAbs) {
+        return AudioSystem.setDeviceAbsoluteVolumeEnabled(nativeDeviceType, address, enabled,
+                streamToDriveAbs);
+    }
+
+    /**
      * Same as {@link AudioSystem#registerPolicyMixes(ArrayList, boolean)}
      * @param mixes
      * @param register
@@ -598,6 +621,38 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     public int registerPolicyMixes(ArrayList<AudioMix> mixes, boolean register) {
         invalidateRoutingCache();
         return AudioSystem.registerPolicyMixes(mixes, register);
+    }
+
+    /**
+     * @return a list of AudioMixes that are registered in the audio policy manager.
+     */
+    public List<AudioMix> getRegisteredPolicyMixes() {
+        if (!Flags.audioMixTestApi()) {
+            return Collections.emptyList();
+        }
+
+        List<AudioMix> audioMixes = new ArrayList<>();
+        int result = AudioSystem.getRegisteredPolicyMixes(audioMixes);
+        if (result != AudioSystem.SUCCESS) {
+            throw new IllegalStateException(
+                    "Cannot fetch registered policy mixes. Result: " + result);
+        }
+        return Collections.unmodifiableList(audioMixes);
+    }
+
+    /**
+     * Update already {@link AudioMixingRule}-s for already registered {@link AudioMix}-es.
+     *
+     * @param mixes              - array of registered {@link AudioMix}-es to update.
+     * @param updatedMixingRules - array of {@link AudioMixingRule}-s corresponding to
+     *                           {@code mixesToUpdate} mixes. The array must be same size as
+     *                           {@code mixesToUpdate} and i-th {@link AudioMixingRule} must
+     *                           correspond to i-th {@link AudioMix} from mixesToUpdate array.
+     */
+    public int updateMixingRules(@NonNull AudioMix[] mixes,
+            @NonNull AudioMixingRule[] updatedMixingRules) {
+        invalidateRoutingCache();
+        return AudioSystem.updatePolicyMixes(mixes, updatedMixingRules);
     }
 
     /**
@@ -682,6 +737,15 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     public int clearPreferredMixerAttributes(
             @NonNull AudioAttributes attributes, int portId, int uid) {
         return AudioSystem.clearPreferredMixerAttributes(attributes, portId, uid);
+    }
+
+    /**
+     * Sets master mute state in audio flinger
+     * @param mute the mute state to set
+     * @return operation status
+     */
+    public int setMasterMute(boolean mute) {
+        return AudioSystem.setMasterMute(mute);
     }
 
     /**

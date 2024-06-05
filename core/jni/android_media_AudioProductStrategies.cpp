@@ -88,12 +88,12 @@ static jint convertAudioProductStrategiesFromNative(
     int attrGroupIndex = 0;
     std::map<int /**attributesGroupIndex*/, std::vector<VolumeGroupAttributes> > groups;
     for (const auto &attr : strategy.getVolumeGroupAttributes()) {
-        int groupId = attr.getGroupId();
+        auto groupId = attr.getGroupId();
         int streamType = attr.getStreamType();
         const auto &iter = std::find_if(begin(groups), end(groups),
                                         [groupId, streamType](const auto &iter) {
             const auto &frontAttr = iter.second.front();
-            return frontAttr.getGroupId() == groupId && frontAttr.getStreamType() == streamType;
+            return (frontAttr.getGroupId() == groupId && frontAttr.getStreamType() == streamType);
         });
         // Same Volume Group Id and same stream type
         if (iter != end(groups)) {

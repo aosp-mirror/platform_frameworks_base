@@ -16,10 +16,23 @@
 
 package com.android.systemui.biometrics;
 
+import android.hardware.biometrics.BiometricFingerprintConstants;
+
 /**
  * Checks if the fingerprint HAL has sent a re-enrollment request.
  */
 public interface FingerprintReEnrollNotification {
-    /** Returns true if msgId corresponds to FINGERPRINT_ACQUIRED_RE_ENROLL. */
-    boolean isFingerprintReEnrollRequired(int msgId);
+    //TODO: Remove this class and add a constant in the HAL API instead (b/281841852)
+    /**
+     * Returns true if msgId corresponds to FINGERPRINT_ACQUIRED_RE_ENROLL_OPTIONAL or
+     * FINGERPRINT_ACQUIRED_RE_ENROLL_FORCED.
+     */
+    boolean isFingerprintReEnrollRequested(
+            @BiometricFingerprintConstants.FingerprintAcquired int msgId);
+
+    /**
+     * Returns true if msgId corresponds to FINGERPRINT_ACQUIRED_RE_ENROLL_FORCED.
+     */
+    boolean isFingerprintReEnrollForced(
+            @BiometricFingerprintConstants.FingerprintAcquired int msgId);
 }

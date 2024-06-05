@@ -24,8 +24,6 @@ import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.LongObjPredicate;
 
-import libcore.util.EmptyArray;
-
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -57,6 +55,7 @@ import java.util.Objects;
  * keys in ascending order, or the values corresponding to the keys in ascending
  * order in the case of <code>valueAt(int)</code>.</p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class LongSparseArray<E> implements Cloneable {
     private static final Object DELETED = new Object();
     private boolean mGarbage = false;
@@ -206,6 +205,39 @@ public class LongSparseArray<E> implements Cloneable {
         mSize = o;
 
         // Log.e("SparseArray", "gc end with " + mSize);
+    }
+
+    /**
+     * Returns the index of the first element whose key is greater than or equal to the given key.
+     *
+     * @param key The key for which to search the array.
+     * @return The smallest {@code index} for which {@code (keyAt(index) >= key)} is
+     * {@code true}, or {@link #size() size} if no such {@code index} exists.
+     * @hide
+     */
+    public int firstIndexOnOrAfter(long key) {
+        if (mGarbage) {
+            gc();
+        }
+        final int index = Arrays.binarySearch(mKeys, 0, size(), key);
+        return (index >= 0) ? index : -index - 1;
+    }
+
+    /**
+     * Returns the index of the last element whose key is less than or equal to the given key.
+     *
+     * @param key The key for which to search the array.
+     * @return The largest {@code index} for which {@code (keyAt(index) <= key)} is
+     * {@code true}, or {@code -1} if no such {@code index} exists.
+     * @hide
+     */
+    public int lastIndexOnOrBefore(long key) {
+        final int index = firstIndexOnOrAfter(key);
+
+        if (index < size() && keyAt(index) == key) {
+            return index;
+        }
+        return index - 1;
     }
 
     /**

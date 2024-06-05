@@ -18,6 +18,7 @@ package com.android.wm.shell;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 
+import android.annotation.SuppressLint;
 import android.annotation.UiContext;
 import android.app.ResourcesManager;
 import android.content.Context;
@@ -32,11 +33,13 @@ import android.view.SurfaceControl;
 import android.window.DisplayAreaAppearedInfo;
 import android.window.DisplayAreaInfo;
 import android.window.DisplayAreaOrganizer;
+import android.window.SystemPerformanceHinter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -58,12 +61,27 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
     /** {@link DisplayAreaContext} list, which is mapped by display IDs. */
     private final SparseArray<DisplayAreaContext> mDisplayAreaContexts = new SparseArray<>();
 
+    private final SystemPerformanceHinter.DisplayRootProvider mPerfRootProvider =
+            new SystemPerformanceHinter.DisplayRootProvider() {
+                @Override
+                public SurfaceControl getRootForDisplay(int displayId) {
+                    return mLeashes.get(displayId);
+                }
+            };
+
     private final Context mContext;
 
-    public RootTaskDisplayAreaOrganizer(Executor executor, Context context) {
+    public RootTaskDisplayAreaOrganizer(@NonNull Executor executor, @NonNull Context context,
+            @NonNull ShellInit shellInit) {
         super(executor);
         mContext = context;
-        List<DisplayAreaAppearedInfo> infos = registerOrganizer(FEATURE_DEFAULT_TASK_CONTAINER);
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    @SuppressLint("MissingPermission") // Only called by SysUI.
+    private void onInit() {
+        final List<DisplayAreaAppearedInfo> infos =
+                registerOrganizer(FEATURE_DEFAULT_TASK_CONTAINER);
         for (int i = infos.size() - 1; i >= 0; --i) {
             onDisplayAreaAppeared(infos.get(i).getDisplayAreaInfo(), infos.get(i).getLeash());
         }
@@ -95,6 +113,19 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
     public void attachToDisplayArea(int displayId, SurfaceControl.Builder b) {
         final SurfaceControl sc = mLeashes.get(displayId);
         b.setParent(sc);
+    }
+
+    /**
+     * Re-parents the provided surface to the leash of the provided display.
+     *
+     * @param displayId the display area to reparent to.
+     * @param sc the surface to be reparented.
+     * @param t a {@link SurfaceControl.Transaction} in which to reparent.
+     */
+    public void reparentToDisplayArea(int displayId, SurfaceControl sc,
+                                      SurfaceControl.Transaction t) {
+        final SurfaceControl displayAreaLeash = mLeashes.get(displayId);
+        t.reparent(sc, displayAreaLeash);
     }
 
     public void setPosition(@NonNull SurfaceControl.Transaction tx, int displayId, int x, int y) {
@@ -227,6 +258,11 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
     @UiContext
     public Context getContext(int displayId) {
         return mDisplayAreaContexts.get(displayId);
+    }
+
+    @NonNull
+    public SystemPerformanceHinter.DisplayRootProvider getPerformanceRootProvider() {
+        return mPerfRootProvider;
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {

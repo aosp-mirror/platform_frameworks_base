@@ -70,7 +70,11 @@ int enableFsverity(JNIEnv *env, jobject clazz, jstring filePath) {
 int statxForFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath) {
     ScopedUtfChars path(env, filePath);
 
-    // Call statx and check STATX_ATTR_VERITY.
+    // There are two ways to check whether a file has fs-verity enabled: statx() and FS_IOC_GETFLAGS
+    // (See https://www.kernel.org/doc/html/latest/filesystems/fsverity.html#statx and
+    // https://www.kernel.org/doc/html/latest/filesystems/fsverity.html#fs-ioc-getflags.)
+    // We try statx() first, since it doesn't require opening the file.
+
     struct statx out = {};
     if (statx(AT_FDCWD, path.c_str(), 0 /* flags */, STATX_ALL, &out) != 0) {
         return -errno;
@@ -80,8 +84,12 @@ int statxForFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath) {
         return (out.stx_attributes & STATX_ATTR_VERITY) != 0;
     }
 
-    // STATX_ATTR_VERITY is not supported for the file path.
-    // In this case, call ioctl(FS_IOC_GETFLAGS) and check FS_VERITY_FL.
+    // The filesystem doesn't support STATX_ATTR_VERITY.  This normally means that it doesn't
+    // support fs-verity, in which case we should simply return 0.  Unfortunately, virtio-fs is an
+    // exception, since it doesn't support STATX_ATTR_VERITY but does support querying FS_VERITY_FL
+    // via FS_IOC_GETFLAGS.  So we have to fall back to FS_IOC_GETFLAGS.  Note: despite being an
+    // ioctl, FS_IOC_GETFLAGS doesn't require the "ioctl" SELinux permission but rather "getattr".
+
     ::android::base::unique_fd rfd(open(path.c_str(), O_RDONLY | O_CLOEXEC));
     if (rfd.get() < 0) {
         ALOGE("open failed at %s", path.c_str());
@@ -90,6 +98,11 @@ int statxForFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath) {
 
     unsigned int flags;
     if (ioctl(rfd.get(), FS_IOC_GETFLAGS, &flags) < 0) {
+        if (errno == ENOTTY) {
+            // If the filesystem supports neither STATX_ATTR_VERITY nor FS_IOC_GETFLAGS, then assume
+            // that it doesn't support fs-verity.
+            return 0;
+        }
         ALOGE("ioctl(FS_IOC_GETFLAGS) failed at %s", path.c_str());
         return -errno;
     }

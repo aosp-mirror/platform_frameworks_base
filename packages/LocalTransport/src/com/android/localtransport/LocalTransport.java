@@ -38,6 +38,9 @@ import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.Log;
 
+import com.android.tools.r8.keepanno.annotations.KeepTarget;
+import com.android.tools.r8.keepanno.annotations.UsesReflection;
+
 import libcore.io.IoUtils;
 
 import java.io.BufferedOutputStream;
@@ -127,6 +130,12 @@ public class LocalTransport extends BackupTransport {
         return mParameters;
     }
 
+
+    @UsesReflection({
+            // As the runtime class name is used to generate the returned name, and the returned
+            // name may be used used with reflection, generate the necessary keep rules.
+            @KeepTarget(instanceOfClassConstant = LocalTransport.class)
+    })
     @Override
     public String name() {
         return new ComponentName(mContext, this.getClass()).flattenToShortString();

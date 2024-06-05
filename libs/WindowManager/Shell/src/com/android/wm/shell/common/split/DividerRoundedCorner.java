@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.common.split;
 
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.RoundedCorner.POSITION_BOTTOM_LEFT;
 import static android.view.RoundedCorner.POSITION_BOTTOM_RIGHT;
 import static android.view.RoundedCorner.POSITION_TOP_LEFT;
@@ -47,6 +46,7 @@ public class DividerRoundedCorner extends View {
     private InvertedRoundedCornerDrawInfo mTopRightCorner;
     private InvertedRoundedCornerDrawInfo mBottomLeftCorner;
     private InvertedRoundedCornerDrawInfo mBottomRightCorner;
+    private boolean mIsLeftRightSplit;
 
     public DividerRoundedCorner(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -98,8 +98,8 @@ public class DividerRoundedCorner extends View {
         return false;
     }
 
-    private boolean isLandscape() {
-        return getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE;
+    void setIsLeftRightSplit(boolean isLeftRightSplit) {
+        mIsLeftRightSplit = isLeftRightSplit;
     }
 
     /**
@@ -134,7 +134,7 @@ public class DividerRoundedCorner extends View {
         }
 
         private void calculateStartPos(Point outPos) {
-            if (isLandscape()) {
+            if (mIsLeftRightSplit) {
                 // Place left corner at the right side of the divider bar.
                 outPos.x = isLeftCorner()
                         ? getWidth() / 2 + mDividerWidth / 2

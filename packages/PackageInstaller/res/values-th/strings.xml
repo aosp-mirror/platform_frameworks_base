@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"ติดตั้งแอปแล้ว"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"คุณต้องการติดตั้งแอปนี้ไหม"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"คุณต้องการอัปเดตแอปนี้ไหม"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"อัปเดตแอปนี้จาก <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> ไหม\n\nโดยปกติแล้ว แอปนี้จะได้รับการอัปเดตจาก <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> การอัปเดตจากแหล่งที่มาอื่นอาจทำให้โทรศัพท์ของคุณได้รับการอัปเดตจากแหล่งที่มาใดก็ได้ในอนาคต ฟังก์ชันการทำงานของแอปอาจมีการเปลี่ยนแปลง"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;อัปเดตแอปนี้จาก &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ไหม&lt;/p&gt;&lt;p&gt;โดยปกติแล้ว แอปนี้จะได้รับการอัปเดตจาก &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; การอัปเดตจากแหล่งที่มาอื่นอาจทำให้แท็บเล็ตของคุณได้รับการอัปเดตจากแหล่งที่มานั้นในอนาคต ซึ่งอาจทำให้ฟังก์ชันการทำงานของแอปเปลี่ยนแปลงไป&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;อัปเดตแอปนี้จาก &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ไหม&lt;/p&gt;&lt;p&gt;โดยปกติแล้ว แอปนี้จะได้รับการอัปเดตจาก &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; การอัปเดตจากแหล่งที่มาอื่นอาจทำให้ทีวีของคุณได้รับการอัปเดตจากแหล่งที่มานั้นในอนาคต ซึ่งอาจทำให้ฟังก์ชันการทำงานของแอปเปลี่ยนแปลงไป&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;อัปเดตแอปนี้จาก &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ไหม&lt;/p&gt;&lt;p&gt;โดยปกติแล้ว แอปนี้จะได้รับการอัปเดตจาก &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; การอัปเดตจากแหล่งที่มาอื่นอาจทำให้โทรศัพท์ของคุณได้รับการอัปเดตจากแหล่งที่มานั้นในอนาคต ซึ่งอาจทำให้ฟังก์ชันการทำงานของแอปเปลี่ยนแปลงไป&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"ไม่ได้ติดตั้งแอป"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"มีการบล็อกแพ็กเกจไม่ให้ติดตั้ง"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ไม่ได้ติดตั้งแอปเพราะแพ็กเกจขัดแย้งกับแพ็กเกจที่มีอยู่"</string>
@@ -42,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ผู้ใช้รายนี้ไม่สามารถติดตั้งแอปที่ไม่รู้จัก"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ผู้ใช้รายนี้ไม่ได้รับอนุญาตให้ติดตั้งแอป"</string>
     <string name="ok" msgid="7871959885003339302">"ตกลง"</string>
+    <string name="archive" msgid="4447791830199354721">"เก็บ"</string>
     <string name="update_anyway" msgid="8792432341346261969">"อัปเดตเลย"</string>
     <string name="manage_applications" msgid="5400164782453975580">"จัดการแอป"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ไม่มีพื้นที่"</string>
@@ -56,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"ถอนการติดตั้งการอัปเดต"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> เป็นส่วนหนึ่งของแอปต่อไปนี้"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"ต้องการถอนการติดตั้งแอปนี้ไหม"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"ระบบจะบันทึกข้อมูลส่วนตัวของคุณไว้"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"เก็บแอปนี้สำหรับผู้ใช้ทุกคนไหม ระบบจะบันทึกข้อมูลส่วนตัวของคุณไว้"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"เก็บแอปนี้ในโปรไฟล์งานไหม ระบบจะบันทึกข้อมูลส่วนตัวของคุณไว้"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"เก็บแอปนี้ไปสำหรับ <xliff:g id="USERNAME">%1$s</xliff:g> ไหม ระบบจะบันทึกข้อมูลส่วนตัวของคุณไว้"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"คุณต้องการเก็บแอปนี้ไปจากพื้นที่ส่วนตัวไหม ระบบจะบันทึกข้อมูลส่วนตัวของคุณไว้"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ต้องการถอนการติดตั้งแอปนี้สำหรับผู้ใช้"<b>"ทั้งหมด"</b>"ไหม ระบบจะนำแอปและข้อมูลในแอปออกจากผู้ใช้"<b>"ทั้งหมด"</b>"ที่อยู่ในอุปกรณ์"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"ต้องการถอนการติดตั้งแอปนี้สำหรับผู้ใช้ <xliff:g id="USERNAME">%1$s</xliff:g> ไหม"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"คุณต้องการถอนการติดตั้งแอปนี้จากโปรไฟล์งานใช่ไหม"</string>
@@ -64,6 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"เก็บข้อมูลแอปไว้ <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ต้องการลบแอปนี้ไหม"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ต้องการถอนการติดตั้งแอปนี้ไหม ระบบจะลบโคลนของ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ด้วย"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"คุณต้องการถอนการติดตั้งแอปนี้จากพื้นที่ส่วนตัวไหม"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"กำลังเรียกใช้การถอนการติดตั้ง"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ถอนการติดตั้งไม่สำเร็จ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"กำลังถอนการติดตั้ง…"</string>
@@ -83,22 +92,40 @@
     <string name="manage_users" msgid="1243995386982560813">"จัดการผู้ใช้"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"ถอนการติดตั้ง <xliff:g id="APP_NAME">%1$s</xliff:g> ไม่ได้"</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"พบปัญหาในการแยกวิเคราะห์แพ็กเกจ"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"ติดตั้ง/ถอนการติดตั้งใน Wear ไม่ได้"</string>
     <string name="message_staging" msgid="8032722385658438567">"กำลังปรับสภาพแวดล้อมของแอป…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"ไม่ทราบ"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"เพื่อความปลอดภัย ปัจจุบันไม่อนุญาตให้ติดตั้งแอปที่ไม่รู้จักจากแหล่งที่มานี้ในแท็บเล็ต คุณเปลี่ยนแปลงได้ในการตั้งค่า"</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"เพื่อความปลอดภัย ปัจจุบันไม่อนุญาตให้ติดตั้งแอปที่ไม่รู้จักจากแหล่งที่มานี้ในทีวี คุณเปลี่ยนแปลงได้ในการตั้งค่า"</string>
-    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"ปัจจุบันนาฬิกาไม่อนุญาตให้ติดตั้งแอปที่ไม่รู้จักจากแหล่งที่มานี้เพื่อความปลอดภัยของคุณ คุณเปลี่ยนค่านี้ได้ในการตั้งค่า"</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"เพื่อความปลอดภัย ปัจจุบันไม่อนุญาตให้ติดตั้งแอปที่ไม่รู้จักจากแหล่งที่มานี้ในโทรศัพท์ ซึ่งคุณเปลี่ยนเป็นอนุญาตได้ในการตั้งค่า"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"เพื่อความปลอดภัย โทรศัพท์ของคุณไม่ได้รับอนุญาตให้ติดตั้งแอปที่ไม่รู้จักจากแหล่งที่มานี้ คุณสามารถเปลี่ยนแปลงได้ที่ \"การตั้งค่า\""</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"เพื่อความปลอดภัย โทรศัพท์ของคุณไม่ได้รับอนุญาตให้ติดตั้งแอปที่ไม่รู้จักจากแหล่งที่มานี้ คุณสามารถเปลี่ยนแปลงได้ที่ \"การตั้งค่า\""</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"เพื่อความปลอดภัย นาฬิกาของคุณไม่ได้รับอนุญาตให้ติดตั้งแอปที่ไม่รู้จักจากแหล่งที่มานี้ คุณสามารถเปลี่ยนแปลงได้ที่ \"การตั้งค่า\""</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"เพื่อความปลอดภัย โทรศัพท์ของคุณไม่ได้รับอนุญาตให้ติดตั้งแอปที่ไม่รู้จักจากแหล่งที่มานี้ คุณสามารถเปลี่ยนแปลงได้ที่ \"การตั้งค่า\""</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"โทรศัพท์และข้อมูลส่วนตัวของคุณมีความเสี่ยงมากขึ้นที่จะถูกโจมตีจากแอปที่ไม่รู้จัก การติดตั้งแอปนี้แสดงว่าคุณยอมรับว่าจะรับผิดชอบต่อความเสียหายใดๆ ที่จะเกิดขึ้นกับโทรศัพท์หรือการสูญเสียข้อมูลที่อาจเกิดจากการใช้งานแอปดังกล่าว"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"แท็บเล็ตและข้อมูลส่วนตัวของคุณมีความเสี่ยงมากขึ้นที่จะถูกโจมตีจากแอปที่ไม่รู้จัก การติดตั้งแอปนี้แสดงว่าคุณยอมรับว่าจะรับผิดชอบต่อความเสียหายใดๆ ที่จะเกิดขึ้นกับแท็บเล็ตหรือการสูญเสียข้อมูลที่อาจเกิดจากการใช้งานแอปดังกล่าว"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ทีวีและข้อมูลส่วนตัวของคุณมีความเสี่ยงมากขึ้นที่จะถูกโจมตีจากแอปที่ไม่รู้จัก การติดตั้งแอปนี้แสดงว่าคุณยอมรับว่าจะรับผิดชอบต่อความเสียหายใดๆ ที่จะเกิดขึ้นกับทีวีหรือการสูญเสียข้อมูลที่อาจเกิดจากการใช้งานแอปดังกล่าว"</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"โคลนของ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"เก็บ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ไหม"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ดำเนินการต่อ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"การตั้งค่า"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"กำลังติดตั้ง/ถอนการติดตั้งแอป Wear"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"การแจ้งเตือนว่าติดตั้งแอปแล้ว"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"ติดตั้งเรียบร้อยแล้ว"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"ติดตั้ง “<xliff:g id="APPNAME">%1$s</xliff:g>” สำเร็จแล้ว"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"กู้คืน <xliff:g id="APPNAME">%1$s</xliff:g> จาก <xliff:g id="INSTALLERNAME">%2$s</xliff:g> ใช่ไหม"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"แอปนี้จะเริ่มดาวน์โหลดในเบื้องหลัง"</string>
+    <string name="restore" msgid="8460854736328970444">"กู้คืน"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"คุณออฟไลน์อยู่"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"หากต้องการกู้คืนแอปนี้ ให้ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"เกิดข้อผิดพลาด"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"เกิดปัญหาขณะพยายามคืนค่าแอปนี้"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"พื้นที่เก็บข้อมูลไม่เพียงพอ"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"หากต้องการคืนค่าแอปนี้ คุณสามารถเพิ่มพื้นที่ว่างในอุปกรณ์ โดยจะต้องใช้พื้นที่เก็บข้อมูล <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"ขอให้ดำเนินการ"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"ทำตามขั้นตอนถัดไปเพื่อคืนค่าแอปนี้"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ถูกปิดใช้"</string>
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"หากต้องการคืนค่าแอปนี้ ให้เปิดใช้ <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ในการตั้งค่า"</string>
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ถูกถอนการติดตั้ง"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"หากต้องการคืนค่าแอปนี้ คุณจะต้องติดตั้ง <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"ต่อไป"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"ล้างพื้นที่เก็บข้อมูล"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"การตั้งค่า"</string>
+    <string name="close" msgid="5214897374055647996">"ปิด"</string>
 </resources>

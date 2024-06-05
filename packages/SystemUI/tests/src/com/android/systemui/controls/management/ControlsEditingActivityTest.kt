@@ -11,13 +11,11 @@ import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import androidx.test.runner.intercepting.SingleActivityFactory
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.activity.SingleActivityFactory
 import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsControllerImpl
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -46,7 +44,6 @@ class ControlsEditingActivityTest : SysuiTestCase() {
     }
 
     private val uiExecutor = FakeExecutor(FakeSystemClock())
-    private val featureFlags = FakeFeatureFlags()
 
     @Mock lateinit var controller: ControlsControllerImpl
 
@@ -63,31 +60,23 @@ class ControlsEditingActivityTest : SysuiTestCase() {
     @JvmField
     var activityRule =
         ActivityTestRule(
-            object :
-                SingleActivityFactory<TestableControlsEditingActivity>(
-                    TestableControlsEditingActivity::class.java
-                ) {
-                override fun create(intent: Intent?): TestableControlsEditingActivity {
-                    return TestableControlsEditingActivity(
-                        featureFlags,
-                        uiExecutor,
-                        controller,
-                        userTracker,
-                        customIconCache,
-                        mockDispatcher,
-                        latch
-                    )
-                }
+            /* activityFactory= */ SingleActivityFactory {
+                TestableControlsEditingActivity(
+                    uiExecutor,
+                    controller,
+                    userTracker,
+                    customIconCache,
+                    mockDispatcher,
+                    latch
+                )
             },
-            false,
-            false
+            /* initialTouchMode= */ false,
+            /* launchActivity= */ false,
         )
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        featureFlags.set(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS, false)
     }
 
     @Test
@@ -106,16 +95,7 @@ class ControlsEditingActivityTest : SysuiTestCase() {
     }
 
     @Test
-    fun testNewFlowDisabled_addControlsButton_gone() {
-        with(launchActivity()) {
-            val addControlsButton = requireViewById<Button>(R.id.addControls)
-            assertThat(addControlsButton.visibility).isEqualTo(View.GONE)
-        }
-    }
-
-    @Test
-    fun testNewFlowEnabled_addControlsButton_visible() {
-        featureFlags.set(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS, true)
+    fun testAddControlsButton_visible() {
         with(launchActivity()) {
             val addControlsButton = requireViewById<Button>(R.id.addControls)
             assertThat(addControlsButton.visibility).isEqualTo(View.VISIBLE)
@@ -125,7 +105,6 @@ class ControlsEditingActivityTest : SysuiTestCase() {
 
     @Test
     fun testNotLaunchFromFavoriting_saveButton_disabled() {
-        featureFlags.set(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS, true)
         with(launchActivity(isFromFavoriting = false)) {
             val saveButton = requireViewById<Button>(R.id.done)
             assertThat(saveButton.isEnabled).isFalse()
@@ -134,7 +113,6 @@ class ControlsEditingActivityTest : SysuiTestCase() {
 
     @Test
     fun testLaunchFromFavoriting_saveButton_enabled() {
-        featureFlags.set(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS, true)
         with(launchActivity(isFromFavoriting = true)) {
             val saveButton = requireViewById<Button>(R.id.done)
             assertThat(saveButton.isEnabled).isTrue()
@@ -143,7 +121,6 @@ class ControlsEditingActivityTest : SysuiTestCase() {
 
     @Test
     fun testNotFromFavoriting_addControlsPressed_launchesFavouriting() {
-        featureFlags.set(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS, true)
         with(launchActivity(isFromFavoriting = false)) {
             val addControls = requireViewById<Button>(R.id.addControls)
 
@@ -182,7 +159,6 @@ class ControlsEditingActivityTest : SysuiTestCase() {
         )
 
     class TestableControlsEditingActivity(
-        featureFlags: FakeFeatureFlags,
         executor: FakeExecutor,
         controller: ControlsControllerImpl,
         userTracker: UserTracker,
@@ -191,7 +167,6 @@ class ControlsEditingActivityTest : SysuiTestCase() {
         private val latch: CountDownLatch
     ) :
         ControlsEditingActivity(
-            featureFlags,
             executor,
             controller,
             userTracker,

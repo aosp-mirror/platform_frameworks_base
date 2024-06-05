@@ -45,12 +45,14 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -84,7 +86,9 @@ public class DragAndDropControllerTest extends ShellTestCase {
     @Mock
     private ShellExecutor mMainExecutor;
     @Mock
-    private WindowManager mWindowManager;
+    private Transitions mTransitions;
+    @Mock
+    private GlobalDragListener mGlobalDragListener;
 
     private DragAndDropController mController;
 
@@ -93,7 +97,7 @@ public class DragAndDropControllerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mController = new DragAndDropController(mContext, mShellInit, mShellController,
                 mShellCommandHandler, mDisplayController, mUiEventLogger, mIconProvider,
-                mMainExecutor);
+                mGlobalDragListener, mTransitions, mMainExecutor);
         mController.onInit();
     }
 

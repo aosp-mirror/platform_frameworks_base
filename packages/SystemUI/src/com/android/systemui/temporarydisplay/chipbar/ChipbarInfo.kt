@@ -20,9 +20,9 @@ import android.os.VibrationEffect
 import android.view.View
 import androidx.annotation.AttrRes
 import com.android.internal.logging.InstanceId
-import com.android.systemui.R
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
+import com.android.systemui.res.R
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.temporarydisplay.ViewPriority
 

@@ -20,10 +20,13 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import android.content.pm.SigningDetails;
 import android.os.Binder;
 import android.os.UserHandle;
 
 import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.SharedUserApi;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -123,6 +126,48 @@ public interface PackageManagerLocal {
     FilteredSnapshot withFilteredSnapshot(int callingUid, @NonNull UserHandle user);
 
     /**
+     * Add a pair of signing details so that packages signed with {@code oldSigningDetails} will
+     * behave as if they are signed by the {@code newSigningDetails}.
+     * <p>
+     * This is only available on {@link android.os.Build#isDebuggable debuggable} builds.
+     *
+     * @param oldSigningDetails the original signing detail of the package
+     * @param newSigningDetails the new signing detail that will replace the original one
+     * @throws SecurityException if the build is not debuggable
+     *
+     * @hide
+     */
+    @TestApi
+    void addOverrideSigningDetails(@NonNull SigningDetails oldSigningDetails,
+            @NonNull SigningDetails newSigningDetails);
+
+    /**
+     * Remove a pair of signing details previously added via {@link #addOverrideSigningDetails} by
+     * the old signing details.
+     * <p>
+     * This is only available on {@link android.os.Build#isDebuggable debuggable} builds.
+     *
+     * @param oldSigningDetails the original signing detail of the package
+     * @throws SecurityException if the build is not debuggable
+     *
+     * @hide
+     */
+    @TestApi
+    void removeOverrideSigningDetails(@NonNull SigningDetails oldSigningDetails);
+
+    /**
+     * Clear all pairs of signing details previously added via {@link #addOverrideSigningDetails}.
+     * <p>
+     * This is only available on {@link android.os.Build#isDebuggable debuggable} builds.
+     *
+     * @throws SecurityException if the build is not debuggable
+     *
+     * @hide
+     */
+    @TestApi
+    void clearOverrideSigningDetails();
+
+    /**
      * @hide
      */
     @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
@@ -148,6 +193,16 @@ public interface PackageManagerLocal {
          */
         @NonNull
         Map<String, PackageState> getPackageStates();
+
+        /**
+         * Returns a map of all {@link SharedUserApi SharedUsers} on the device.
+         *
+         * @return Mapping of shared user name to {@link SharedUserApi}.
+         *
+         * @hide Pending API
+         */
+        @NonNull
+        Map<String, SharedUserApi> getSharedUsers();
 
         /**
          * Returns a map of all disabled system {@link PackageState PackageStates} on the device.

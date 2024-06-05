@@ -1203,7 +1203,11 @@ public abstract class WebSettings {
      * changes to this setting after that point.
      *
      * @param flag {@code true} if the WebView should use the database storage API
+     * @deprecated WebSQL is deprecated and this method will become a no-op on all
+     * Android versions once support is removed in Chromium. See
+     * https://developer.chrome.com/blog/deprecating-web-sql for more information.
      */
+    @Deprecated
     public abstract void setDatabaseEnabled(boolean flag);
 
     /**
@@ -1236,7 +1240,11 @@ public abstract class WebSettings {
      *
      * @return {@code true} if the database storage API is enabled
      * @see #setDatabaseEnabled
+     * @deprecated WebSQL is deprecated and this method will become a no-op on all
+     * Android versions once support is removed in Chromium. See
+     * https://developer.chrome.com/blog/deprecating-web-sql for more information.
      */
+    @Deprecated
     public abstract boolean getDatabaseEnabled();
 
     /**
@@ -1367,7 +1375,10 @@ public abstract class WebSettings {
      * the system default value will be used.
      *
      * <p>If the user-agent is overridden in this way, the values of the User-Agent Client Hints
-     * headers and {@code navigator.userAgentData} for this WebView will be empty.
+     * headers and {@code navigator.userAgentData} for this WebView could be changed.
+     * <p> See <a href="{@docRoot}reference/androidx/webkit/WebSettingsCompat
+     * #setUserAgentMetadata(WebSettings,UserAgentMetadata)">androidx.webkit.WebSettingsCompat
+     * #setUserAgentMetadata(WebSettings,UserAgentMetadata)</a> for details.
      *
      * <p>Note that starting from {@link android.os.Build.VERSION_CODES#KITKAT} Android
      * version, changing the user-agent while loading a web page causes WebView

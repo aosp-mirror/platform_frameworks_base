@@ -43,6 +43,7 @@ import java.util.function.BiFunction;
  * should work directly with either the {@link Bundle} or
  * {@link PersistableBundle} subclass.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BaseBundle {
     /** @hide */
     protected static final String TAG = "Bundle";
@@ -428,10 +429,9 @@ public class BaseBundle {
                         "Lazy values ref count below 0");
                 // No more lazy values in mMap, so we can recycle the parcel early rather than
                 // waiting for the next GC run
-                if (mLazyValues == 0) {
-                    Preconditions.checkState(mWeakParcelledData.get() != null,
-                            "Parcel recycled earlier than expected");
-                    recycleParcel(mWeakParcelledData.get());
+                Parcel parcel = mWeakParcelledData.get();
+                if (mLazyValues == 0 && parcel != null) {
+                    recycleParcel(parcel);
                     mWeakParcelledData = null;
                 }
             }

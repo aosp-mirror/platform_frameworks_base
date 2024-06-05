@@ -25,7 +25,6 @@ import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.content.Context;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -34,11 +33,14 @@ import android.view.WindowManager;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.DirectBootAwareness;
+import com.android.internal.inputmethod.IBooleanListener;
+import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.inputmethod.InputMethodInfoSafeList;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
@@ -65,6 +67,7 @@ final class IInputMethodManagerGlobalInvoker {
 
     @Nullable
     private static volatile IImeTracker sTrackerServiceCache = null;
+    private static int sCurStartInputSeq = 0;
 
     /**
      * @return {@code true} if {@link IInputMethodManager} is available.
@@ -240,7 +243,12 @@ final class IInputMethodManagerGlobalInvoker {
             return new ArrayList<>();
         }
         try {
-            return service.getInputMethodList(userId, directBootAwareness);
+            if (Flags.useInputMethodInfoSafeList()) {
+                return InputMethodInfoSafeList.extractFrom(
+                        service.getInputMethodList(userId, directBootAwareness));
+            } else {
+                return service.getInputMethodListLegacy(userId, directBootAwareness);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -255,7 +263,12 @@ final class IInputMethodManagerGlobalInvoker {
             return new ArrayList<>();
         }
         try {
-            return service.getEnabledInputMethodList(userId);
+            if (Flags.useInputMethodInfoSafeList()) {
+                return InputMethodInfoSafeList.extractFrom(
+                        service.getEnabledInputMethodList(userId));
+            } else {
+                return service.getEnabledInputMethodListLegacy(userId);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -295,8 +308,8 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     static boolean showSoftInput(@NonNull IInputMethodClient client, @Nullable IBinder windowToken,
-            @Nullable ImeTracker.Token statsToken, int flags, int lastClickToolType,
-            @Nullable ResultReceiver resultReceiver,
+            @NonNull ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
+            int lastClickToolType, @Nullable ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -312,7 +325,7 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     static boolean hideSoftInput(@NonNull IInputMethodClient client, @Nullable IBinder windowToken,
-            @Nullable ImeTracker.Token statsToken, int flags,
+            @NonNull ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
             @Nullable ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -321,6 +334,21 @@ final class IInputMethodManagerGlobalInvoker {
         try {
             return service.hideSoftInput(client, windowToken, statsToken, flags, resultReceiver,
                     reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    // TODO(b/293640003): Remove method once Flags.useZeroJankProxy() is enabled.
+    @AnyThread
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
+    static void hideSoftInputFromServerForTest() {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.hideSoftInputFromServerForTest();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -351,6 +379,41 @@ final class IInputMethodManagerGlobalInvoker {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Returns a sequence number for startInput.
+     */
+    @AnyThread
+    @NonNull
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
+    static int startInputOrWindowGainedFocusAsync(@StartInputReason int startInputReason,
+            @NonNull IInputMethodClient client, @Nullable IBinder windowToken,
+            @StartInputFlags int startInputFlags,
+            @WindowManager.LayoutParams.SoftInputModeFlags int softInputMode,
+            @WindowManager.LayoutParams.Flags int windowFlags, @Nullable EditorInfo editorInfo,
+            @Nullable IRemoteInputConnection remoteInputConnection,
+            @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
+            int unverifiedTargetSdkVersion, @UserIdInt int userId,
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return -1;
+        }
+        try {
+            service.startInputOrWindowGainedFocusAsync(startInputReason, client, windowToken,
+                    startInputFlags, softInputMode, windowFlags, editorInfo, remoteInputConnection,
+                    remoteAccessibilityInputConnection, unverifiedTargetSdkVersion, userId,
+                    imeDispatcher, advanceAngGetStartInputSequenceNumber());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return sCurStartInputSeq;
+    }
+
+    private static int advanceAngGetStartInputSequenceNumber() {
+        return ++sCurStartInputSeq;
+    }
+
 
     @AnyThread
     static void showInputMethodPickerFromClient(@NonNull IInputMethodClient client,
@@ -453,20 +516,6 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
-    static void reportVirtualDisplayGeometryAsync(@NonNull IInputMethodClient client,
-            int childDisplayId, @Nullable float[] matrixValues) {
-        final IInputMethodManager service = getService();
-        if (service == null) {
-            return;
-        }
-        try {
-            service.reportVirtualDisplayGeometryAsync(client, childDisplayId, matrixValues);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    @AnyThread
     static void reportPerceptibleAsync(@NonNull IBinder windowToken, boolean perceptible) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -506,6 +555,27 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    static boolean startConnectionlessStylusHandwriting(
+            @NonNull IInputMethodClient client,
+            @UserIdInt int userId,
+            @Nullable CursorAnchorInfo cursorAnchorInfo,
+            @Nullable String delegatePackageName,
+            @Nullable String delegatorPackageName,
+            @NonNull IConnectionlessHandwritingCallback callback) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return false;
+        }
+        try {
+            service.startConnectionlessStylusHandwriting(client, userId, cursorAnchorInfo,
+                    delegatePackageName, delegatorPackageName, callback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return true;
+    }
+
+    @AnyThread
     static void prepareStylusHandwritingDelegation(
             @NonNull IInputMethodClient client,
             @UserIdInt int userId,
@@ -528,28 +598,52 @@ final class IInputMethodManagerGlobalInvoker {
             @NonNull IInputMethodClient client,
             @UserIdInt int userId,
             @NonNull String delegatePackageName,
-            @NonNull String delegatorPackageName) {
+            @NonNull String delegatorPackageName,
+            @InputMethodManager.HandwritingDelegateFlags int flags) {
         final IInputMethodManager service = getService();
         if (service == null) {
             return false;
         }
         try {
             return service.acceptStylusHandwritingDelegation(
-                    client, userId, delegatePackageName, delegatorPackageName);
+                    client, userId, delegatePackageName, delegatorPackageName, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
+    /** Returns {@code true} if method is invoked */
     @AnyThread
-    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
-    static boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
+    static boolean acceptStylusHandwritingDelegationAsync(
+            @NonNull IInputMethodClient client,
+            @UserIdInt int userId,
+            @NonNull String delegatePackageName,
+            @NonNull String delegatorPackageName,
+            @InputMethodManager.HandwritingDelegateFlags int flags,
+            @NonNull IBooleanListener callback) {
         final IInputMethodManager service = getService();
         if (service == null) {
             return false;
         }
         try {
-            return service.isStylusHandwritingAvailableAsUser(userId);
+            service.acceptStylusHandwritingDelegationAsync(
+                    client, userId, delegatePackageName, delegatorPackageName, flags, callback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return true;
+    }
+
+    @AnyThread
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
+    static boolean isStylusHandwritingAvailableAsUser(
+            @UserIdInt int userId, boolean connectionless) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return false;
+        }
+        try {
+            return service.isStylusHandwritingAvailableAsUser(userId, connectionless);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -584,35 +678,18 @@ final class IInputMethodManagerGlobalInvoker {
         }
     }
 
-    /** @see com.android.server.inputmethod.ImeTrackerService#onRequestShow */
+    /** @see com.android.server.inputmethod.ImeTrackerService#onStart */
     @AnyThread
     @NonNull
-    static ImeTracker.Token onRequestShow(@NonNull String tag, int uid,
-            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
-        final IImeTracker service = getImeTrackerService();
+    static ImeTracker.Token onStart(@NonNull String tag, int uid, @ImeTracker.Type int type,
+            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason, boolean fromUser) {
+        final var service = getImeTrackerService();
         if (service == null) {
-            // Create token with "fake" binder if the service was not found.
-            return new ImeTracker.Token(new Binder(), tag);
+            // Create token with "empty" binder if the service was not found.
+            return ImeTracker.Token.empty(tag);
         }
         try {
-            return service.onRequestShow(tag, uid, origin, reason);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** @see com.android.server.inputmethod.ImeTrackerService#onRequestHide */
-    @AnyThread
-    @NonNull
-    static ImeTracker.Token onRequestHide(@NonNull String tag, int uid,
-            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
-        final IImeTracker service = getImeTrackerService();
-        if (service == null) {
-            // Create token with "fake" binder if the service was not found.
-            return new ImeTracker.Token(new Binder(), tag);
-        }
-        try {
-            return service.onRequestHide(tag, uid, origin, reason);
+            return service.onStart(tag, uid, type, origin, reason, fromUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -688,6 +765,19 @@ final class IInputMethodManagerGlobalInvoker {
         }
     }
 
+    /** @see com.android.server.inputmethod.ImeTrackerService#onDispatched */
+    static void onDispatched(@NonNull ImeTracker.Token statsToken) {
+        final IImeTracker service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.onDispatched(statsToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @see com.android.server.inputmethod.ImeTrackerService#hasPendingImeVisibilityRequests */
     @AnyThread
     @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
@@ -698,6 +788,20 @@ final class IInputMethodManagerGlobalInvoker {
         }
         try {
             return service.hasPendingImeVisibilityRequests();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
+    static void finishTrackingPendingImeVisibilityRequests() {
+        final var service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.finishTrackingPendingImeVisibilityRequests();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

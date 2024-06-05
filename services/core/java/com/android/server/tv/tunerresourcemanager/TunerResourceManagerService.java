@@ -1047,6 +1047,16 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                     // in use frontends when no available frontend has been found.
                     int priority = getFrontendHighestClientPriority(fr.getOwnerClientId());
                     if (currentLowestPriority > priority) {
+                        // we need to check the max used num if the target frontend type is not
+                        // currently in primary use (and simply blocked due to exclusive group)
+                        ClientProfile targetOwnerProfile = getClientProfile(fr.getOwnerClientId());
+                        int primaryFeId = targetOwnerProfile.getPrimaryFrontend();
+                        FrontendResource primaryFe = getFrontendResource(primaryFeId);
+                        if (fr.getType() != primaryFe.getType()
+                                && isFrontendMaxNumUseReached(fr.getType())) {
+                            continue;
+                        }
+                        // update the target frontend
                         inUseLowestPriorityFrHandle = fr.getHandle();
                         currentLowestPriority = priority;
                         isRequestFromSameProcess = (requestClient.getProcessId()
@@ -1087,9 +1097,15 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         if (DEBUG) {
             Slog.d(TAG, "shareFrontend from " + selfClientId + " with " + targetClientId);
         }
+        Integer shareeFeClientId = getClientProfile(selfClientId).getShareeFeClientId();
+        if (shareeFeClientId != ClientProfile.INVALID_RESOURCE_ID) {
+            getClientProfile(shareeFeClientId).stopSharingFrontend(selfClientId);
+            getClientProfile(selfClientId).releaseFrontend();
+        }
         for (int feId : getClientProfile(targetClientId).getInUseFrontendHandles()) {
             getClientProfile(selfClientId).useFrontend(feId);
         }
+        getClientProfile(selfClientId).setShareeFeClientId(targetClientId);
         getClientProfile(targetClientId).shareFrontend(selfClientId);
     }
 
@@ -1099,6 +1115,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         // change the owner of all the inUse frontend
         newOwnerProfile.shareFrontend(currentOwnerId);
         currentOwnerProfile.stopSharingFrontend(newOwnerId);
+        newOwnerProfile.setShareeFeClientId(ClientProfile.INVALID_RESOURCE_ID);
+        currentOwnerProfile.setShareeFeClientId(newOwnerId);
         for (int inUseHandle : newOwnerProfile.getInUseFrontendHandles()) {
             getFrontendResource(inUseHandle).setOwner(newOwnerId);
         }
@@ -1446,6 +1464,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         boolean hasDesiredDemuxCap = request.desiredFilterTypes
                 != DemuxFilterMainType.UNDEFINED;
         int smallestNumOfSupportedCaps = Integer.SIZE + 1;
+        int smallestNumOfSupportedCapsInUse = Integer.SIZE + 1;
         for (DemuxResource dr : getDemuxResources().values()) {
             if (!hasDesiredDemuxCap || dr.hasSufficientCaps(request.desiredFilterTypes)) {
                 if (!dr.isInUse()) {
@@ -1468,12 +1487,18 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                             currentLowestPriority = priority;
                             isRequestFromSameProcess = (requestClient.getProcessId()
                                 == (getClientProfile(dr.getOwnerClientId())).getProcessId());
+
+                            // reset the smallest caps when lower priority resource is found
+                            smallestNumOfSupportedCapsInUse = numOfSupportedCaps;
+
                             shouldUpdate = true;
-                        }
-                        // update smallest caps
-                        if (smallestNumOfSupportedCaps > numOfSupportedCaps) {
-                            smallestNumOfSupportedCaps = numOfSupportedCaps;
-                            shouldUpdate = true;
+                        } else {
+                            // This is the case when the priority is the same as previously found
+                            // one. Update smallest caps when priority.
+                            if (smallestNumOfSupportedCapsInUse > numOfSupportedCaps) {
+                                smallestNumOfSupportedCapsInUse = numOfSupportedCaps;
+                                shouldUpdate = true;
+                            }
                         }
                         if (shouldUpdate) {
                             inUseLowestPriorityDrHandle = dr.getHandle();
@@ -1899,11 +1924,13 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         ownerProfile.useCiCam(grantingId);
     }
 
-    private void updateCasClientMappingOnRelease(
-            @NonNull CasResource releasingCas, int ownerClientId) {
-        ClientProfile ownerProfile = getClientProfile(ownerClientId);
-        releasingCas.removeOwner(ownerClientId);
-        ownerProfile.releaseCas();
+    private void updateCasClientMappingOnRelease(@NonNull CasResource cas, int ownerClientId) {
+        cas.removeSession(ownerClientId);
+        if (!cas.hasOpenSessions(ownerClientId)) {
+            ClientProfile ownerProfile = getClientProfile(ownerClientId);
+            cas.removeOwner(ownerClientId);
+            ownerProfile.releaseCas();
+        }
     }
 
     private void updateCiCamClientMappingOnRelease(

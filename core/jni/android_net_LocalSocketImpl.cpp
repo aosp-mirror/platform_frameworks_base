@@ -221,7 +221,7 @@ static int socket_write_all(JNIEnv *env, jobject object, int fd,
 
     ssize_t rc = SendFileDescriptorVector(fd, buffer, len, fds);
 
-    while (rc != len) {
+    while (rc != static_cast<ssize_t>(len)) {
         if (rc == -1) {
             jniThrowIOException(env, errno);
             return -1;

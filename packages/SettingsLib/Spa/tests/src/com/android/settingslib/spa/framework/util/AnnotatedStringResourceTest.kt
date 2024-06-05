@@ -16,14 +16,15 @@
 
 package com.android.settingslib.spa.framework.util
 
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.util.URLSPAN_TAG
-import com.android.settingslib.spa.framework.util.annotatedStringResource
 import com.android.settingslib.spa.test.R
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -36,26 +37,33 @@ class AnnotatedStringResourceTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun testAnnotatedStringResource() {
+    fun annotatedStringResource() {
         composeTestRule.setContent {
-            val annotatedString = annotatedStringResource(R.string.test_annotated_string_resource, Color.Blue)
+            val annotatedString =
+                annotatedStringResource(R.string.test_annotated_string_resource)
 
-            val annotations = annotatedString.getStringAnnotations(0, annotatedString.length)
-            assertThat(annotations).hasSize(1)
-            assertThat(annotations[0].start).isEqualTo(31)
-            assertThat(annotations[0].end).isEqualTo(35)
-            assertThat(annotations[0].tag).isEqualTo(URLSPAN_TAG)
-            assertThat(annotations[0].item).isEqualTo("https://www.google.com/")
+            val annotations = annotatedString.getLinkAnnotations(0, annotatedString.length)
+            assertThat(annotations).containsExactly(
+                AnnotatedString.Range(
+                    item = LinkAnnotation.Url(
+                        url = "https://www.android.com/",
+                        style = SpanStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            textDecoration = TextDecoration.Underline,
+                        ),
+                    ),
+                    start = 31,
+                    end = 35,
+                )
+            )
 
-            assertThat(annotatedString.spanStyles).hasSize(2)
-            assertThat(annotatedString.spanStyles[0].start).isEqualTo(22)
-            assertThat(annotatedString.spanStyles[0].end).isEqualTo(26)
-            assertThat(annotatedString.spanStyles[0].item).isEqualTo(
-                    SpanStyle(fontWeight = FontWeight.Bold, fontStyle = FontStyle.Normal))
-
-            assertThat(annotatedString.spanStyles[1].start).isEqualTo(31)
-            assertThat(annotatedString.spanStyles[1].end).isEqualTo(35)
-            assertThat(annotatedString.spanStyles[1].item).isEqualTo(SpanStyle(color = Color.Blue))
+            assertThat(annotatedString.spanStyles).containsExactly(
+                AnnotatedString.Range(
+                    item = SpanStyle(fontWeight = FontWeight.Bold, fontStyle = FontStyle.Normal),
+                    start = 22,
+                    end = 26,
+                ),
+            )
         }
     }
 }

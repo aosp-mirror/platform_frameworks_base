@@ -32,12 +32,12 @@ namespace android {
 
 PointerControllerContext::PointerControllerContext(
         const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-        const sp<SpriteController>& spriteController, PointerController& controller)
+        SpriteController& spriteController, PointerController& controller)
       : mPolicy(policy),
         mLooper(looper),
         mSpriteController(spriteController),
-        mHandler(new MessageHandler()),
-        mCallback(new LooperCallback()),
+        mHandler(sp<MessageHandler>::make()),
+        mCallback(sp<LooperCallback>::make()),
         mController(controller),
         mAnimator(*this) {
     std::scoped_lock lock(mLock);
@@ -93,7 +93,7 @@ sp<PointerControllerPolicyInterface> PointerControllerContext::getPolicy() {
     return mPolicy;
 }
 
-sp<SpriteController> PointerControllerContext::getSpriteController() {
+SpriteController& PointerControllerContext::getSpriteController() {
     return mSpriteController;
 }
 
@@ -138,12 +138,12 @@ int PointerControllerContext::LooperCallback::handleEvent(int /* fd */, int even
     return 1; // keep the callback
 }
 
-void PointerControllerContext::addAnimationCallback(int32_t displayId,
+void PointerControllerContext::addAnimationCallback(ui::LogicalDisplayId displayId,
                                                     std::function<bool(nsecs_t)> callback) {
     mAnimator.addCallback(displayId, callback);
 }
 
-void PointerControllerContext::removeAnimationCallback(int32_t displayId) {
+void PointerControllerContext::removeAnimationCallback(ui::LogicalDisplayId displayId) {
     mAnimator.removeCallback(displayId);
 }
 
@@ -161,14 +161,14 @@ void PointerControllerContext::PointerAnimator::initializeDisplayEventReceiver()
     }
 }
 
-void PointerControllerContext::PointerAnimator::addCallback(int32_t displayId,
+void PointerControllerContext::PointerAnimator::addCallback(ui::LogicalDisplayId displayId,
                                                             std::function<bool(nsecs_t)> callback) {
     std::scoped_lock lock(mLock);
     mLocked.callbacks[displayId] = callback;
     startAnimationLocked();
 }
 
-void PointerControllerContext::PointerAnimator::removeCallback(int32_t displayId) {
+void PointerControllerContext::PointerAnimator::removeCallback(ui::LogicalDisplayId displayId) {
     std::scoped_lock lock(mLock);
     auto it = mLocked.callbacks.find(displayId);
     if (it == mLocked.callbacks.end()) {

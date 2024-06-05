@@ -19,7 +19,6 @@ package com.android.systemui.temporarydisplay.chipbar
 import android.os.PowerManager
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.MotionEvent
 import android.view.View
@@ -29,10 +28,10 @@ import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.animation.doOnCancel
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.testing.UiEventLoggerFake
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.ContentDescription
@@ -42,6 +41,7 @@ import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewUiEvent
@@ -68,7 +68,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class ChipbarCoordinatorTest : SysuiTestCase() {
     private lateinit var underTest: ChipbarCoordinator

@@ -21,6 +21,7 @@ package android.database;
  * that are observed are {@link Cursor}s or {@link android.widget.Adapter}s.
  * DataSetObserver must be implemented by objects which are added to a DataSetObservable.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class DataSetObserver {
     /**
      * This method is called when the entire data set has changed,

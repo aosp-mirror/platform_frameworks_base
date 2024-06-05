@@ -6,8 +6,8 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.updates.FoldProvider
-import com.android.systemui.unfold.updates.FoldProvider.FoldCallback
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -18,6 +18,7 @@ class UnfoldHapticsPlayer
 constructor(
     unfoldTransitionProgressProvider: UnfoldTransitionProgressProvider,
     foldProvider: FoldProvider,
+    transitionConfig: UnfoldTransitionConfig,
     @Main private val mainExecutor: Executor,
     private val vibrator: Vibrator?
 ) : TransitionProgressListener {
@@ -27,22 +28,17 @@ constructor(
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK)
 
     init {
-        if (vibrator != null) {
+        if (vibrator != null && transitionConfig.isHapticsEnabled) {
             // We don't need to remove the callback because we should listen to it
             // the whole time when SystemUI process is alive
             unfoldTransitionProgressProvider.addCallback(this)
-        }
 
-        foldProvider.registerCallback(
-            object : FoldCallback {
-                override fun onFoldUpdated(isFolded: Boolean) {
-                    if (isFolded) {
-                        isFirstAnimationAfterUnfold = true
-                    }
+            foldProvider.registerCallback({ isFolded ->
+                if (isFolded) {
+                    isFirstAnimationAfterUnfold = true
                 }
-            },
-            mainExecutor
-        )
+            }, mainExecutor)
+        }
     }
 
     private var lastTransitionProgress = TRANSITION_PROGRESS_FULL_OPEN
@@ -79,15 +75,15 @@ constructor(
 
     private val hapticsScale: Float
         get() {
-            val intensityString = SystemProperties.get("persist.unfold.haptics_scale", "0.1")
-            return intensityString.toFloatOrNull() ?: 0.1f
+            val intensityString = SystemProperties.get("persist.unfold.haptics_scale", "0.5")
+            return intensityString.toFloatOrNull() ?: 0.5f
         }
 
     private val hapticsScaleTick: Float
         get() {
             val intensityString =
-                SystemProperties.get("persist.unfold.haptics_scale_end_tick", "0.6")
-            return intensityString.toFloatOrNull() ?: 0.6f
+                SystemProperties.get("persist.unfold.haptics_scale_end_tick", "1.0")
+            return intensityString.toFloatOrNull() ?: 1.0f
         }
 
     private val primitivesCount: Int

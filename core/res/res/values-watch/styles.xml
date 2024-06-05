@@ -19,4 +19,61 @@
         <item name="fontFamily">sans-serif-regular</item>
         <item name="textSize">13sp</item>
     </style>
+
+    <!-- @hide -->
+    <style name="TextAppearance.Watch"/>
+
+    <!-- @hide -->
+    <style name="TextAppearance.Watch.BaseErrorDialog">
+        <item name="fontFamily">google-sans-text-medium</item>
+        <item name="textColor">@android:color/white</item>
+        <item name="textAllCaps">false</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="TextAppearance.Watch.BaseErrorDialog.Title">
+        <item name="textSize">16sp</item>
+        <item name="letterSpacing">0.024</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="TextAppearance.Watch.AppErrorDialog"
+           parent="TextAppearance.Watch.BaseErrorDialog"/>
+
+    <!-- @hide -->
+    <style name="TextAppearance.Watch.AppErrorDialog.Item">
+        <item name="textSize">15sp</item>
+        <item name="letterSpacing">0.01</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="aerr_list_item">
+        <item name="minHeight">@dimen/aerr_list_item_height</item>
+        <item name="textAppearance">@style/TextAppearance.Watch.AppErrorDialog.Item</item>
+        <item name="gravity">center_vertical</item>
+        <item name="paddingStart">@dimen/base_error_dialog_contents_padding</item>
+        <item name="paddingEnd">@dimen/base_error_dialog_contents_padding</item>
+        <item name="background">@drawable/global_actions_item_grey_background</item>
+        <item name="drawablePadding">6dp</item>
+        <item name="drawableTint">@android:color/white</item>
+        <item name="drawableTintMode">src_atop</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="InputMethodSwitchHardKeyboardText">
+        <item name="paddingStart">?attr/listPreferredItemPaddingStart</item>
+        <item name="paddingEnd">16dp</item>
+        <item name="paddingTop">16dp</item>
+        <item name="paddingBottom">5dp</item>
+        <item name="minHeight">?attr/listPreferredItemHeightSmall</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="InputMethodSwitchHardKeyboardSwitch">
+        <item name="layout_marginEnd">?attr/listPreferredItemPaddingEnd</item>
+    </style>
+
+    <style name="InputMethodSwitchDialogStyle" parent="AlertDialog.DeviceDefault">
+        <item name="android:listLayout">@layout/input_method_switcher_list_layout</item>
+    </style>
 </resources>

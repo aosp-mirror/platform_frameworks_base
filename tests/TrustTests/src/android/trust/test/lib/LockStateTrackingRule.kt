@@ -16,6 +16,7 @@
 
 package android.trust.test.lib
 
+import android.app.KeyguardManager
 import android.app.trust.TrustManager
 import android.content.Context
 import android.util.Log
@@ -26,18 +27,24 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
 /**
- * Rule for tracking the lock state of the device based on events emitted to [TrustListener].
+ * Rule for tracking the trusted state of the device based on events emitted to
+ * [TrustListener].  Provides helper methods for verifying that the trusted
+ * state has a particular value and is consistent with (a) the keyguard "locked"
+ * (i.e. showing) value when applicable, and (b) the device locked value that is
+ * tracked by TrustManagerService and is queryable via KeyguardManager.
  */
 class LockStateTrackingRule : TestRule {
     private val context: Context = getApplicationContext()
-    private val windowManager = WindowManagerGlobal.getWindowManagerService()
+    private val windowManager = checkNotNull(WindowManagerGlobal.getWindowManagerService())
+    private val keyguardManager =
+            context.getSystemService(KeyguardManager::class.java) as KeyguardManager
 
-    @Volatile lateinit var lockState: LockState
+    @Volatile lateinit var trustState: TrustState
         private set
 
     override fun apply(base: Statement, description: Description) = object : Statement() {
         override fun evaluate() {
-            lockState = LockState(locked = windowManager.isKeyguardLocked)
+            trustState = TrustState()
             val trustManager = context.getSystemService(TrustManager::class.java) as TrustManager
             val listener = Listener()
 
@@ -51,12 +58,25 @@ class LockStateTrackingRule : TestRule {
     }
 
     fun assertLocked() {
-        wait("un-locked per TrustListener") { lockState.locked == true }
-        wait("keyguard lock") { windowManager.isKeyguardLocked }
+        wait("device locked") { keyguardManager.isDeviceLocked }
+        // isDeviceLocked implies isKeyguardLocked && !trusted.
+        wait("keyguard locked") { windowManager.isKeyguardLocked }
+        wait("not trusted") { trustState.trusted == false }
     }
 
-    fun assertUnlocked() {
-        wait("locked per TrustListener") { lockState.locked == false }
+    // TODO(b/299298338) remove this when removing FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2
+    fun assertUnlockedButNotReally() {
+        wait("device unlocked") { !keyguardManager.isDeviceLocked }
+        wait("not trusted") { trustState.trusted == false }
+        wait("keyguard locked") { windowManager.isKeyguardLocked }
+    }
+
+    fun assertUnlockedAndTrusted() {
+        wait("device unlocked") { !keyguardManager.isDeviceLocked }
+        wait("trusted") { trustState.trusted == true }
+        // Can't check for !isKeyguardLocked here, since isKeyguardLocked
+        // returns true in the case where the keyguard is dismissible with
+        // swipe, which is considered "device unlocked"!
     }
 
     inner class Listener : TestTrustListener() {
@@ -68,12 +88,12 @@ class LockStateTrackingRule : TestRule {
             trustGrantedMessages: MutableList<String>
         ) {
             Log.d(TAG, "Device became trusted=$enabled")
-            lockState = lockState.copy(locked = !enabled)
+            trustState = trustState.copy(trusted = enabled)
         }
     }
 
-    data class LockState(
-        val locked: Boolean? = null
+    data class TrustState(
+        val trusted: Boolean? = null
     )
 
     companion object {

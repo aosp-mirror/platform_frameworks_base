@@ -16,10 +16,12 @@
 
 package android.content.om;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.res.AssetFileDescriptor;
 import android.os.FabricatedOverlayInternal;
 import android.os.FabricatedOverlayInternalEntry;
 import android.os.ParcelFileDescriptor;
@@ -269,7 +271,7 @@ public class FabricatedOverlay {
          * @param configuration The string representation of the config this overlay is enabled for
          * @return the builder itself
          * @deprecated Framework should use {@link FabricatedOverlay#setResourceValue(String,
-                       ParcelFileDescriptor, String)} instead.
+                ParcelFileDescriptor, String)} instead.
          * @hide
          */
         @Deprecated(since = "Please use FabricatedOverlay#setResourceValue instead")
@@ -277,6 +279,30 @@ public class FabricatedOverlay {
         public Builder setResourceValue(
                 @NonNull String resourceName,
                 @NonNull ParcelFileDescriptor value,
+                @Nullable String configuration) {
+            ensureValidResourceName(resourceName);
+            mEntries.add(generateFabricatedOverlayInternalEntry(
+                    resourceName, value, configuration, false));
+            return this;
+        }
+
+        /**
+         * Sets the value of the fabricated overlay for the file descriptor type.
+         *
+         * @param resourceName name of the target resource to overlay (in the form
+         *     [package]:type/entry)
+         * @param value the file descriptor whose contents are the value of the frro
+         * @param configuration The string representation of the config this overlay is enabled for
+         * @return the builder itself
+         * @deprecated Framework should use {@link FabricatedOverlay#setResourceValue(String,
+                ParcelFileDescriptor, String)} instead.
+         * @hide
+         */
+        @Deprecated(since = "Please use FabricatedOverlay#setResourceValue instead")
+        @NonNull
+        public Builder setResourceValue(
+                @NonNull String resourceName,
+                @NonNull AssetFileDescriptor value,
                 @Nullable String configuration) {
             ensureValidResourceName(resourceName);
             mEntries.add(
@@ -332,6 +358,16 @@ public class FabricatedOverlay {
                         "'targetPackage' must not be empty nor null"),
                 null /* targetOverlayable */,
                 new ArrayList<>()));
+    }
+
+    /**
+     * Set the package that owns the overlay
+     *
+     * @param owningPackage the package that should own the overlay.
+     * @hide
+     */
+    public void setOwningPackage(@NonNull String owningPackage) {
+        mOverlay.packageName = owningPackage;
     }
 
     /**
@@ -416,10 +452,26 @@ public class FabricatedOverlay {
     @NonNull
     private static FabricatedOverlayInternalEntry generateFabricatedOverlayInternalEntry(
             @NonNull String resourceName, @NonNull ParcelFileDescriptor parcelFileDescriptor,
-            @Nullable String configuration) {
+            @Nullable String configuration, boolean isNinePatch) {
         final FabricatedOverlayInternalEntry entry = new FabricatedOverlayInternalEntry();
         entry.resourceName = resourceName;
         entry.binaryData = Objects.requireNonNull(parcelFileDescriptor);
+        entry.configuration = configuration;
+        entry.binaryDataOffset = 0;
+        entry.binaryDataSize = parcelFileDescriptor.getStatSize();
+        entry.isNinePatch = isNinePatch;
+        return entry;
+    }
+
+    @NonNull
+    private static FabricatedOverlayInternalEntry generateFabricatedOverlayInternalEntry(
+            @NonNull String resourceName, @NonNull AssetFileDescriptor assetFileDescriptor,
+            @Nullable String configuration) {
+        final FabricatedOverlayInternalEntry entry = new FabricatedOverlayInternalEntry();
+        entry.resourceName = resourceName;
+        entry.binaryData = Objects.requireNonNull(assetFileDescriptor.getParcelFileDescriptor());
+        entry.binaryDataOffset = assetFileDescriptor.getStartOffset();
+        entry.binaryDataSize = assetFileDescriptor.getLength();
         entry.configuration = configuration;
         return entry;
     }
@@ -490,6 +542,45 @@ public class FabricatedOverlay {
     public void setResourceValue(
             @NonNull String resourceName,
             @NonNull ParcelFileDescriptor value,
+            @Nullable String configuration) {
+        ensureValidResourceName(resourceName);
+        mOverlay.entries.add(
+                generateFabricatedOverlayInternalEntry(resourceName, value, configuration, false));
+    }
+
+    /**
+     * Sets the resource value in the fabricated overlay from a nine patch.
+     *
+     * @param resourceName name of the target resource to overlay (in the form
+     *     [package]:type/entry)
+     * @param value the file descriptor whose contents are the value of the frro
+     * @param configuration The string representation of the config this overlay is enabled for
+     */
+    @NonNull
+    @FlaggedApi(android.content.res.Flags.FLAG_NINE_PATCH_FRRO)
+    public void setNinePatchResourceValue(
+            @NonNull String resourceName,
+            @NonNull ParcelFileDescriptor value,
+            @Nullable String configuration) {
+        ensureValidResourceName(resourceName);
+        mOverlay.entries.add(
+                generateFabricatedOverlayInternalEntry(resourceName, value, configuration, true));
+    }
+
+    /**
+     * Sets the resource value in the fabricated overlay for the file descriptor type with the
+     * configuration.
+     *
+     * @param resourceName name of the target resource to overlay (in the form
+     *     [package]:type/entry)
+     * @param value the file descriptor whose contents are the value of the frro
+     * @param configuration The string representation of the config this overlay is enabled for
+     */
+    @NonNull
+    @FlaggedApi(android.content.res.Flags.FLAG_ASSET_FILE_DESCRIPTOR_FRRO)
+    public void setResourceValue(
+            @NonNull String resourceName,
+            @NonNull AssetFileDescriptor value,
             @Nullable String configuration) {
         ensureValidResourceName(resourceName);
         mOverlay.entries.add(

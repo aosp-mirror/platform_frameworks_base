@@ -15,7 +15,7 @@
 -->
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
-           xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
 
     <style name="TextAppearance.StatusBar.Clock" parent="@*android:style/TextAppearance.StatusBar.Icon">
         <item name="android:textSize">@dimen/status_bar_clock_size</item>
@@ -54,10 +54,10 @@
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
-           parent="TextAppearance.StatusBar.Expanded.AboveDateTime" />
+        parent="TextAppearance.StatusBar.Expanded.AboveDateTime" />
 
     <style name="TextAppearance.StatusBar.Expanded.ChargingInfo"
-            parent="TextAppearance.StatusBar.Expanded.AboveDateTime" />
+        parent="TextAppearance.StatusBar.Expanded.AboveDateTime" />
 
     <style name="TextAppearance.StatusBar.Expanded.UserSwitcher">
         <item name="android:textSize">@dimen/kg_user_switcher_text_size</item>
@@ -83,7 +83,7 @@
 
     <style name="TextAppearance.QS">
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?attr/onShadeInactive</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
@@ -93,7 +93,7 @@
 
     <style name="TextAppearance.QS.DetailItemSecondary">
         <item name="android:textSize">@dimen/qs_tile_text_size</item>
-        <item name="android:textColor">?android:attr/colorAccent</item>
+        <item name="android:textColor">?attr/shadeActive</item>
     </style>
 
     <style name="TextAppearance.QS.Introduction">
@@ -117,11 +117,11 @@
 
     <style name="TextAppearance.QS.DataUsage.Usage">
         <item name="android:textSize">@dimen/qs_data_usage_usage_text_size</item>
-        <item name="android:textColor">?android:attr/colorAccent</item>
+        <item name="android:textColor">?attr/shadeActive</item>
     </style>
 
     <style name="TextAppearance.QS.DataUsage.Secondary">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?attr/onShadeInactiveVariant</item>
     </style>
 
     <style name="TextAppearance.QS.TileLabel">
@@ -137,31 +137,26 @@
 
     <style name="TextAppearance.QS.UserSwitcher">
         <item name="android:textSize">@dimen/qs_tile_text_size</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
     </style>
 
     <!-- This is hard coded to be sans-serif-condensed to match the icons -->
 
     <style name="TextAppearance.QS.Status">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?attr/onSurface</item>
         <item name="android:textSize">14sp</item>
         <item name="android:letterSpacing">0.01</item>
-    </style>
-
-    <style name="TextAppearance.QS.SecurityFooter" parent="@style/TextAppearance.QS.Status">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.QS.Status.Carriers" />
 
     <style name="TextAppearance.QS.Status.Carriers.NoCarrierText">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?attr/onSurfaceVariant</item>
     </style>
 
     <style name="TextAppearance.QS.Status.Build">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?attr/onSurfaceVariant</item>
     </style>
 
     <style name="TextAppearance.DeviceManagementDialog.Title" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle"/>
@@ -174,25 +169,71 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="TextAppearance.AuthCredential.Title">
-        <item name="android:fontFamily">google-sans</item>
+    <style name="TextAppearance.AuthCredential.OldTitle">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:paddingTop">12dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">24sp</item>
     </style>
 
-    <style name="TextAppearance.AuthCredential.Subtitle">
-        <item name="android:fontFamily">google-sans</item>
+    <style name="TextAppearance.AuthCredential.OldSubtitle">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="TextAppearance.AuthCredential.Description">
-        <item name="android:fontFamily">google-sans</item>
+    <style name="TextAppearance.AuthCredential.OldDescription">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.LogoDescription" parent="TextAppearance.Material3.LabelLarge" >
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:gravity">@integer/biometric_dialog_text_gravity</item>
+        <item name="android:marqueeRepeatLimit">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.Title" parent="TextAppearance.Material3.HeadlineSmall" >
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.Subtitle" parent="TextAppearance.Material3.BodyMedium" >
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.Description" parent="TextAppearance.Material3.BodyMedium" >
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.VerticalListContentViewDescription" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.ContentViewWithButtonDescription" parent="TextAppearance.AuthCredential.Description" />
+
+    <style name="TextAppearance.AuthCredential.ContentViewListItem" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
+        <item name="android:paddingTop">@dimen/biometric_prompt_content_list_item_padding_top</item>
+        <item name="android:breakStrategy">high_quality</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.Indicator" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:marqueeRepeatLimit">marquee_forever</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">marquee</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Error">
@@ -211,22 +252,25 @@
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Title">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:layout_marginTop">24dp</item>
         <item name="android:textSize">36dp</item>
         <item name="android:focusable">true</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Subtitle">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:layout_marginTop">20dp</item>
         <item name="android:textSize">18sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Description">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:layout_marginTop">20dp</item>
         <item name="android:textSize">18sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Error">
@@ -236,7 +280,14 @@
         <item name="android:gravity">center</item>
     </style>
 
-    <style name="TextAppearance.AuthCredential.PasswordEntry" parent="@android:style/TextAppearance.DeviceDefault">
+    <style name="TextAppearance.AuthNonBioCredential.ErrorLand">
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/colorError</item>
+        <item name="android:gravity">start</item>
+    </style>
+
+    <style name="TextAppearance.AuthNonBioCredential.PasswordEntry" parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:gravity">center</item>
         <item name="android:paddingTop">28dp</item>
         <item name="android:singleLine">true</item>
@@ -245,7 +296,7 @@
         <item name="android:background">@drawable/edit_text_filled</item>
     </style>
 
-    <style name="AuthCredentialHeaderStyle">
+    <style name="AuthNonBioCredentialHeaderStyle">
         <item name="android:paddingStart">48dp</item>
         <item name="android:paddingEnd">48dp</item>
         <item name="android:paddingTop">48dp</item>
@@ -253,12 +304,12 @@
         <item name="android:layout_gravity">top</item>
     </style>
 
-    <style name="AuthCredentialIconStyle">
+    <style name="AuthNonBioCredentialIconStyle">
         <item name="android:layout_width">@dimen/biometric_auth_icon_size</item>
         <item name="android:layout_height">@dimen/biometric_auth_icon_size</item>
     </style>
 
-    <style name="AuthCredentialPatternContainerStyle">
+    <style name="AuthNonBioCredentialPatternContainerStyle">
         <item name="android:gravity">center</item>
         <item name="android:maxHeight">@dimen/biometric_auth_pattern_view_max_size</item>
         <item name="android:maxWidth">@dimen/biometric_auth_pattern_view_max_size</item>
@@ -268,7 +319,7 @@
         <item name="android:paddingVertical">20dp</item>
     </style>
 
-    <style name="AuthCredentialPinPasswordContainerStyle">
+    <style name="AuthNonBioCredentialPinPasswordContainerStyle">
         <item name="android:gravity">center</item>
         <item name="android:maxHeight">48dp</item>
         <item name="android:maxWidth">600dp</item>
@@ -276,16 +327,80 @@
         <item name="android:minWidth">200dp</item>
     </style>
 
-    <style name="DeviceManagementDialogTitle">
-        <item name="android:gravity">center</item>
-        <item name="android:textAppearance">@style/TextAppearance.DeviceManagementDialog.Title</item>
+    <style name="AuthNonBioCredentialEmergencyButtonStyle">
+        <item name="android:background">@drawable/auth_credential_emergency_button_background</item>
+        <item name="android:textColor">@android:color/system_accent3_900</item>
+        <item name="android:outlineProvider">none</item>
+        <item name="android:paddingTop">15dp</item>
+        <item name="android:paddingBottom">15dp</item>
+        <item name="android:paddingLeft">30dp</item>
+        <item name="android:paddingRight">30dp</item>
+        <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="TextAppearance.DeviceManagementDialog.Content" parent="@*android:style/TextAppearance.DeviceDefault.Subhead"/>
+    <style name="AuthCredentialPanelStyle">
+        <item name="android:background">?androidprv:attr/materialColorSurfaceBright</item>
+        <item name="android:clickable">true</item>
+        <item name="android:clipToOutline">true</item>
+        <item name="android:importantForAccessibility">no</item>
+        <item name="android:visibility">visible</item>
+    </style>
+
+    <style name="AuthCredentialContentViewStyle">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="AuthCredentialVerticalListContentViewStyle" parent="AuthCredentialContentViewStyle">
+        <item name="android:background">@drawable/biometric_prompt_vertical_list_content_view_background</item>
+        <item name="android:paddingHorizontal">@dimen/biometric_prompt_content_padding_horizontal</item>
+        <item name="android:paddingVertical">@dimen/biometric_prompt_content_padding_vertical</item>
+    </style>
+
+    <style name="AuthCredentialContentViewMoreOptionsButtonStyle" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:gravity">start</item>
+        <item name="enforceTextAppearance">false</item>
+        <item name="android:height">40dp</item>
+        <item name="android:maxWidth">@dimen/m3_btn_max_width</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">12dp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorPrimary</item>
+    </style>
+
+    <style name="AuthCredentialNegativeButtonStyle" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:textColor">?androidprv:attr/materialColorPrimary</item>
+    </style>
+
+    <style name="DeviceManagementDialogTitle">
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.Dialog.Title</item>
+    </style>
+
+    <style name="TextAppearance.DeviceManagementDialog.Content" parent="@style/TextAppearance.Dialog.Body.Message"/>
 
     <style name="BaseBrightnessDialogContainer" parent="@style/Theme.SystemUI">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="KeyboardShortcutHelper" parent="@android:style/Theme.DeviceDefault.Settings">
+        <!-- Needed to be able to use BottomSheetDragHandleView -->
+        <item name="android:windowActionBar">false</item>
+        <item name="bottomSheetDragHandleStyle">@style/KeyboardShortcutHelper.BottomSheet.DragHandle</item>
+    </style>
+
+    <style name="KeyboardShortcutHelper.BottomSheet.DragHandle" parent="Widget.Material3.BottomSheet.DragHandle">
+        <item name="tint">?androidprv:attr/materialColorOutlineVariant</item>
+    </style>
+
+    <style name="KeyboardShortcutHelper.BottomSheetDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_down</item>
     </style>
 
     <style name="BrightnessDialogContainer" parent="@style/BaseBrightnessDialogContainer" />
@@ -341,18 +456,19 @@
         <item name="android:textColor">?attr/wallpaperTextColor</item>
     </style>
 
-    <style name="AuthCredentialStyle">
+    <style name="AuthNonBioCredentialStyle">
         <item name="*android:regularColor">?android:attr/colorForeground</item>
         <item name="*android:successColor">?android:attr/colorForeground</item>
         <item name="*android:errorColor">?android:attr/colorError</item>
         <item name="*android:dotColor">?android:attr/textColorSecondary</item>
-        <item name="headerStyle">@style/AuthCredentialHeaderStyle</item>
-        <item name="headerIconStyle">@style/AuthCredentialIconStyle</item>
+        <item name="headerStyle">@style/AuthNonBioCredentialHeaderStyle</item>
+        <item name="headerIconStyle">@style/AuthNonBioCredentialIconStyle</item>
         <item name="titleTextAppearance">@style/TextAppearance.AuthNonBioCredential.Title</item>
         <item name="subTitleTextAppearance">@style/TextAppearance.AuthNonBioCredential.Subtitle</item>
         <item name="descriptionTextAppearance">@style/TextAppearance.AuthNonBioCredential.Description</item>
-        <item name="passwordTextAppearance">@style/TextAppearance.AuthCredential.PasswordEntry</item>
+        <item name="passwordTextAppearance">@style/TextAppearance.AuthNonBioCredential.PasswordEntry</item>
         <item name="errorTextAppearance">@style/TextAppearance.AuthNonBioCredential.Error</item>
+        <item name="errorTextAppearanceLand">@style/TextAppearance.AuthNonBioCredential.ErrorLand</item>
     </style>
 
     <style name="LockPatternViewStyle" >
@@ -362,36 +478,61 @@
         <item name="*android:dotColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="LockPatternContainerStyle" parent="@style/AuthCredentialStyle">
-        <item name="containerStyle">@style/AuthCredentialPatternContainerStyle</item>
+    <style name="LockPatternContainerStyle" parent="@style/AuthNonBioCredentialStyle">
+        <item name="containerStyle">@style/AuthNonBioCredentialPatternContainerStyle</item>
     </style>
 
-    <style name="LockPinPasswordContainerStyle" parent="@style/AuthCredentialStyle">
-        <item name="containerStyle">@style/AuthCredentialPinPasswordContainerStyle</item>
+    <style name="LockPinPasswordContainerStyle" parent="@style/AuthNonBioCredentialStyle">
+        <item name="containerStyle">@style/AuthNonBioCredentialPinPasswordContainerStyle</item>
     </style>
 
     <style name="Theme.SystemUI.QuickSettings" parent="@*android:style/Theme.DeviceDefault">
+        <item name="isQsTheme">true</item>
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
-        <item name="offStateColor">@color/material_dynamic_neutral20</item>
-        <item name="underSurfaceColor">@color/material_dynamic_neutral0</item>
-        <item name="android:colorBackground">@color/material_dynamic_neutral10</item>
+
+        <item name="surfaceBright">?androidprv:attr/materialColorSurfaceBright</item>
+        <item name="android:colorBackground">?attr/surfaceBright</item>
+        <item name="scHigh">?androidprv:attr/materialColorSurfaceContainerHigh</item>
+        <item name="primary">?androidprv:attr/materialColorPrimary</item>
+        <item name="tertiary">?androidprv:attr/materialColorTertiary</item>
+        <item name="onSurface">?androidprv:attr/materialColorOnSurface</item>
+        <item name="onSurfaceVariant">?androidprv:attr/materialColorOnSurfaceVariant</item>
+        <item name="outline">?androidprv:attr/materialColorOutline</item>
+
+        <item name="shadeActive">@color/material_dynamic_primary90</item>
+        <item name="onShadeActive">@color/material_dynamic_primary10</item>
+        <item name="onShadeActiveVariant">@color/material_dynamic_primary30</item>
+        <item name="shadeInactive">@color/material_dynamic_neutral20</item>
+        <item name="onShadeInactive">@color/material_dynamic_neutral90</item>
+        <item name="onShadeInactiveVariant">@color/material_dynamic_neutral_variant80</item>
+        <item name="shadeDisabled">@color/shade_disabled</item>
+        <item name="underSurface">@color/material_dynamic_neutral0</item>
         <item name="android:itemTextAppearance">@style/Control.MenuItem</item>
     </style>
 
-    <style name="Theme.SystemUI.QuickSettings.BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
+    <!-- Cannot double inherit. Use Theme.SystemUI.QuickSettings in code to match -->
+    <style name="BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/Animation.BrightnessDialog</item>
     </style>
 
-    <style name="Theme.SystemUI.ContrastDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
-        <item name="android:windowBackground">@android:color/transparent</item>
+    <style name="Animation.BrightnessDialog">
+        <item name="android:windowExitAnimation">@anim/instant_fade_out</item>
     </style>
 
-    <style name="Theme.SystemUI.QuickSettings.Dialog" parent="@android:style/Theme.DeviceDefault.Dialog">
+    <style name="Theme.SystemUI.QuickSettings.Dialog" parent="@style/Theme.SystemUI.Dialog.QuickSettings">
+    </style>
+
+    <!-- Parent style overrides style in the dot inheritance -->
+    <style name="Theme.SystemUI.Dialog.QuickSettings" parent="@style/Theme.SystemUI.QuickSettings">
         <item name="android:dialogCornerRadius">@dimen/notification_corner_radius</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/Widget.Dialog.Button.QuickSettings</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/Widget.Dialog.Button.QuickSettings</item>
+        <item name="android:buttonBarNeutralButtonStyle">@style/Widget.Dialog.Button.QuickSettings</item>
     </style>
 
     <!-- Overridden by values-television/styles.xml with tv-specific settings -->
@@ -406,10 +547,16 @@
         <item name="android:buttonBarPositiveButtonStyle">@style/Widget.Dialog.Button</item>
         <item name="android:buttonBarNegativeButtonStyle">@style/Widget.Dialog.Button.BorderButton</item>
         <item name="android:buttonBarNeutralButtonStyle">@style/Widget.Dialog.Button.BorderButton</item>
-        <item name="android:colorBackground">?androidprv:attr/colorSurface</item>
+        <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceBright</item>
         <item name="android:alertDialogStyle">@style/ScrollableAlertDialogStyle</item>
         <item name="android:buttonBarStyle">@style/ButtonBarStyle</item>
         <item name="android:buttonBarButtonStyle">@style/Widget.Dialog.Button.Large</item>
+    </style>
+
+    <style name="Theme.SystemUI.BottomSheet" parent="Theme.SystemUI.Dialog">
+        <!-- default dialog background has insets -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Design.BottomSheetDialog</item>
     </style>
 
     <style name="AlertDialogStyle" parent="@androidprv:style/AlertDialog.DeviceDefault">
@@ -426,6 +573,11 @@
     </style>
 
     <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
+
+    <style name="Theme.SystemUI.Dialog.Alert.SensorPrivacy" parent="Theme.SystemUI.Dialog.Alert">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
 
     <style name="Theme.SystemUI.Dialog.GlobalActions" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen">
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
@@ -549,34 +701,34 @@
     <style name="TextAppearance.NotificationImportanceChannel">
         <item name="android:textSize">@dimen/notification_importance_channel_text</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
-        <item name="android:textColor">@color/notification_guts_header_text_color</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:textSize">@dimen/notification_importance_channel_text</item>
     </style>
 
     <style name="TextAppearance.NotificationImportanceChannelGroup">
         <item name="android:textSize">@dimen/notification_importance_channel_group_text</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">@color/notification_guts_header_text_color</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:textSize">@dimen/notification_importance_channel_group_text</item>
     </style>
 
     <style name="TextAppearance.NotificationImportanceApp">
         <item name="android:textSize">@dimen/notification_importance_channel_group_text</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">@color/notification_guts_sub_text_color</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
         <item name="android:textSize">@dimen/notification_importance_channel_group_text</item>
     </style>
 
     <style name="TextAppearance.NotificationImportanceHeader">
         <item name="android:textSize">@dimen/notification_importance_header_text</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">@color/notification_guts_header_text_color</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.NotificationImportanceDetail">
         <item name="android:textSize">@dimen/notification_importance_description_text</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
-        <item name="android:textColor">@color/notification_guts_sub_text_color</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
         <item name="android:gravity">center</item>
     </style>
 
@@ -588,16 +740,34 @@
     </style>
 
     <style
+        name="TextAppearance.NotificationSectionHeaderLabel"
+        parent="@android:style/Widget.DeviceDefault.Button.Borderless">
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
+    <style
         name="TextAppearance.NotificationSectionHeaderButton"
         parent="@android:style/Widget.DeviceDefault.Button.Borderless">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
+    <style
+        name="TextAppearance.NotificationFooterButton"
+        parent="@android:style/Widget.DeviceDefault.Button.Borderless">
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">14sp</item>
         <item name="android:minWidth">0dp</item>
     </style>
 
     <style name="TextAppearance.HeadsUpStatusBarText"
-           parent="@*android:style/TextAppearance.DeviceDefault.Notification.Info">
+        parent="@*android:style/TextAppearance.DeviceDefault.Notification.Info">
     </style>
 
     <style name="TextAppearance.QSEdit" >
@@ -605,11 +775,11 @@
         <item name="android:letterSpacing">0.01</item>
         <item name="android:lineHeight">20sp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?attr/onSurfaceVariant</item>
     </style>
 
     <style name="QSCustomizeToolbar" parent="@*android:style/Widget.DeviceDefault.Toolbar">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?attr/onSurface</item>
         <item name="android:elevation">10dp</item>
     </style>
 
@@ -625,7 +795,6 @@
         <item name="android:progressDrawable">@drawable/media_squiggly_progress</item>
         <item name="android:progressTint">?android:attr/textColorPrimary</item>
         <item name="android:progressBackgroundTint">?android:attr/textColorTertiary</item>
-        <item name="android:clickable">true</item>
         <item name="android:splitTrack">false</item>
     </style>
 
@@ -651,7 +820,7 @@
     </style>
 
     <style name="MediaPlayer.SessionAction"
-           parent="@android:style/Widget.Material.Button.Borderless.Small">
+        parent="@android:style/Widget.Material.Button.Borderless.Small">
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:tint">?android:attr/textColorPrimary</item>
         <item name="android:paddingTop">12dp</item>
@@ -850,13 +1019,28 @@
     <style name="Theme.ControlsActivity" parent="@android:style/Theme.DeviceDefault.NoActionBar">
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:windowContentTransitions">false</item>
-        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:statusBarColor">@android:color/black</item>
         <!-- Setting a placeholder will avoid using the SystemUI icon on the splash screen -->
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_blank</item>
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
+
+        <!--
+            TODO(b/309578419): Make the activity handle insets properly and then remove this.
+        -->
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
+
+    <style name="Widget.SliceView.VolumePanel">
+        <item name="hideHeaderRow">true</item>
+    </style>
+
+    <style name="Theme.VolumePanel.Popup" parent="@style/Theme.SystemUI.Dialog">
+        <item name="android:dialogCornerRadius">44dp</item>
+        <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainerHigh
+        </item>
     </style>
 
     <style name="Theme.UserSwitcherFullscreenDialog" parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
@@ -875,18 +1059,29 @@
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">true</item>
+
+        <!--
+            TODO(b/309578419): Make activities handle insets properly and then remove this.
+        -->
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
+
+    <style name="Theme.EditWidgetsActivity"
+        parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/white</item>
     </style>
 
     <style name="TextAppearance.Control">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
-     <style name="Theme.SystemUI.Dialog.Control.DetailPanel" parent="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
-      <item name="android:windowFullscreen">false</item>
-      <item name="android:windowIsFloating">false</item>
-      <item name="android:windowBackground">@color/controls_task_view_bg</item>
-      <item name="android:backgroundDimEnabled">false</item>
-      <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    <style name="Theme.SystemUI.Dialog.Control.DetailPanel"
+           parent="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@color/controls_task_view_bg</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
     </style>
 
     <style name="Control" />
@@ -986,17 +1181,17 @@
     <style name="Wallet" />
 
     <style name="Wallet.TextAppearance">
-      <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-      <item name="android:textColor">?android:attr/textColorPrimary</item>
-      <item name="android:singleLine">true</item>
-      <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="Wallet.Theme" parent="@android:style/Theme.DeviceDefault">
-      <item name="android:colorBackground">@color/material_dynamic_neutral10</item>
-      <item name="android:itemBackground">@color/material_dynamic_neutral20</item>
-      <!-- Setting a placeholder will avoid using the SystemUI icon on the splash screen.  -->
-      <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_blank</item>
+        <item name="android:colorBackground">@color/material_dynamic_neutral10</item>
+        <item name="android:itemBackground">@color/material_dynamic_neutral20</item>
+        <!-- Setting a placeholder will avoid using the SystemUI icon on the splash screen.  -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_blank</item>
     </style>
 
     <style name="Animation.InternetDialog" parent="@android:style/Animation.InputMethod">
@@ -1055,16 +1250,17 @@
     </style>
 
     <style name="TextAppearance.Dialog.Title" parent="@android:style/TextAppearance.DeviceDefault.Large">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:textSize">@dimen/dialog_title_text_size</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:lineHeight">32sp</item>
         <item name="android:gravity">center</item>
         <item name="android:textAlignment">center</item>
+        <item name="android:hyphenationFrequency">full</item>
     </style>
 
     <style name="TextAppearance.Dialog.Body" parent="@android:style/TextAppearance.DeviceDefault.Medium">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:lineHeight">20sp</item>
@@ -1092,7 +1288,7 @@
     <style name="Widget.Dialog.Button">
         <item name="android:buttonCornerRadius">28dp</item>
         <item name="android:background">@drawable/qs_dialog_btn_filled</item>
-        <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
+        <item name="android:textColor">@color/qs_dialog_btn_filled_text_color</item>
         <item name="android:textSize">14sp</item>
         <item name="android:lineHeight">20sp</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
@@ -1102,12 +1298,18 @@
 
     <style name="Widget.Dialog.Button.BorderButton">
         <item name="android:background">@drawable/qs_dialog_btn_outline</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">@color/qs_dialog_btn_outline_text</item>
     </style>
 
     <style name="Widget.Dialog.Button.Large">
         <item name="android:background">@drawable/qs_dialog_btn_filled_large</item>
         <item name="android:minHeight">56dp</item>
+        <item name="android:textColor">@color/qs_dialog_btn_filled_large_text</item>
+    </style>
+
+    <style name="Widget.Dialog.Button.QuickSettings">
+        <item name="android:textColor">?attr/primary</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="MainSwitch.Settingslib" parent="@android:style/Theme.DeviceDefault">
@@ -1115,7 +1317,7 @@
     </style>
 
     <style name="TrimmedHorizontalProgressBar"
-           parent="android:Widget.Material.ProgressBar.Horizontal">
+        parent="android:Widget.Material.ProgressBar.Horizontal">
         <item name="android:indeterminateDrawable">
             @drawable/progress_indeterminate_horizontal_material_trimmed
         </item>
@@ -1198,6 +1400,36 @@
         <item name="android:textDirection">locale</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="BluetoothTileDialog">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical|start</item>
+    </style>
+
+    <style name="BluetoothTileDialog.Device">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">88dp</item>
+        <item name="android:layout_gravity">center_vertical|start</item>
+        <item name="android:layout_marginStart">@dimen/bluetooth_dialog_layout_margin</item>
+        <item name="android:layout_marginEnd">@dimen/bluetooth_dialog_layout_margin</item>
+        <item name="android:paddingStart">22dp</item>
+        <item name="android:paddingEnd">22dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+    <style name="BluetoothTileDialog.DeviceName">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Dialog.Title</item>
+    </style>
+
+    <style name="BluetoothTileDialog.DeviceSummary">
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:textAppearance">@style/TextAppearance.Dialog.Body.Message</item>
     </style>
 
     <style name="BroadcastDialog">
@@ -1343,7 +1575,7 @@
     </style>
 
     <style name="PermissionGrantButtonTop"
-           parent="@android:style/Widget.DeviceDefault.Button.Borderless.Colored">
+        parent="@android:style/Widget.DeviceDefault.Button.Borderless.Colored">
         <item name="android:layout_width">332dp</item>
         <item name="android:layout_height">56dp</item>
         <item name="android:layout_marginTop">2dp</item>
@@ -1352,7 +1584,7 @@
     </style>
 
     <style name="PermissionGrantButtonBottom"
-           parent="@android:style/Widget.DeviceDefault.Button.Borderless.Colored">
+        parent="@android:style/Widget.DeviceDefault.Button.Borderless.Colored">
         <item name="android:layout_width">332dp</item>
         <item name="android:layout_height">56dp</item>
         <item name="android:layout_marginTop">2dp</item>
@@ -1388,25 +1620,76 @@
 
     <style name="ShortCutButton" parent="@android:style/Widget.Material.Button">
         <item name="android:background">@drawable/shortcut_button_colored</item>
-        <item name="android:stateListAnimator">@null</item>
         <item name="android:textSize">16sp</item>
-        <item name="android:padding">4dp</item>
-        <item name="android:textColor">?androidprv:attr/textColorSecondary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:layout_marginEnd">12dp</item>
+        <item name="android:paddingLeft">24dp</item>
+        <item name="android:paddingRight">24dp</item>
+        <item name="android:minHeight">36dp</item>
+        <item name="android:minWidth">120dp</item>
+        <item name="android:stateListAnimator">@*android:anim/flat_button_state_list_anim_material</item>
+        <item name="android:pointerIcon">arrow</item>
     </style>
 
     <style name="ShortcutHorizontalDivider">
-        <item name="android:layout_width">120dp</item>
-        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_width">132dp</item>
+        <item name="android:layout_height">2dp</item>
         <item name="android:layout_gravity">center_horizontal</item>
         <item name="android:background">?android:attr/dividerHorizontal</item>
-    </style>
-
-    <style name="ShortcutItemBackground">
-        <item name="android:background">@color/ksh_key_item_new_background</item>
     </style>
 
     <style name="LongPressLockScreenAnimation">
         <item name="android:windowEnterAnimation">@anim/long_press_lock_screen_popup_enter</item>
         <item name="android:windowExitAnimation">@anim/long_press_lock_screen_popup_exit</item>
+    </style>
+
+    <style name="TextAppearance.PrivacyDialog.Item.Title"
+        parent="@android:style/TextAppearance.DeviceDefault.Medium">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.PrivacyDialog.Item.Summary"
+        parent="@android:style/TextAppearance.DeviceDefault.Small">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
+    </style>
+
+    <style name="Theme.PrivacyDialog" parent="@style/Theme.SystemUI.Dialog">
+        <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainer</item>
+    </style>
+
+    <style name="Theme.SystemUI.Dialog.StickyKeys" parent="@style/Theme.SystemUI.Dialog">
+        <item name="android:colorBackground">@color/transparent</item>
+    </style>
+
+    <style name="ShortcutHelperBottomSheet" parent="@style/Widget.Material3.BottomSheet">
+        <item name="backgroundTint">?colorSurfaceContainer</item>
+    </style>
+
+    <style name="ShortcutHelperAnimation" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/shortcut_helper_launch_anim</item>
+        <item name="android:taskOpenEnterAnimation">@anim/shortcut_helper_launch_anim</item>
+        <item name="android:activityOpenExitAnimation">@anim/shortcut_helper_close_anim</item>
+        <item name="android:taskOpenExitAnimation">@anim/shortcut_helper_close_anim</item>
+    </style>
+
+    <style name="ShortcutHelperThemeCommon" parent="@style/Theme.Material3.DynamicColors.DayNight">
+        <item name="android:windowAnimationStyle">@style/ShortcutHelperAnimation</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
+        <item name="enableEdgeToEdge">true</item>
+    </style>
+
+    <style name="ShortcutHelperTheme" parent="@style/ShortcutHelperThemeCommon">
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 </resources>

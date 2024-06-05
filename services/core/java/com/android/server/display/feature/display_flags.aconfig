@@ -1,0 +1,301 @@
+package: "com.android.server.display.feature.flags"
+container: "system"
+
+# Important: Flags must be accessed through DisplayManagerFlags.
+
+flag {
+    name: "enable_port_in_display_layout"
+    namespace: "display_manager"
+    description: "Allows refering to displays by port in display layout"
+    bug: "303058435"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "resolution_backup_restore"
+    namespace: "display_manager"
+    description: "Backup/Restore support for High Resolution setting"
+    bug: "321821289"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_connected_display_management"
+    namespace: "display_manager"
+    description: "Feature flag for Connected Display management"
+    bug: "280739508"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_nbm_controller"
+    namespace: "display_manager"
+    description: "Feature flag for Normal Brightness Mode Controller"
+    bug: "299527549"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_hdr_clamper"
+    namespace: "display_manager"
+    description: "Feature flag for HDR Clamper"
+    bug: "295100043"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_power_throttling_clamper"
+    namespace: "display_manager"
+    description: "Feature flag for Power Throttling Clamper"
+    bug: "294777007"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_adaptive_tone_improvements_1"
+    namespace: "display_manager"
+    description: "Feature flag for Adaptive Tone Improvements"
+    bug: "299550755"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_adaptive_tone_improvements_2"
+    namespace: "display_manager"
+    description: "Feature flag for Further Adaptive Tone Improvements"
+    bug: "294762632"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_display_resolution_range_voting"
+    namespace: "display_manager"
+    description: "Feature flag to enable voting for ranges of resolutions"
+    bug: "299297058"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_user_preferred_mode_vote"
+    namespace: "display_manager"
+    description: "Feature flag to use voting for UserPreferredMode for display"
+    bug: "297018612"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_mode_limit_for_external_display"
+    namespace: "display_manager"
+    description: "Feature limiting external display resolution and refresh rate"
+    bug: "242093547"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_displays_refresh_rates_synchronization"
+    namespace: "display_manager"
+    description: "Enables synchronization of refresh rates across displays"
+    bug: "294015845"
+}
+
+flag {
+    name: "enable_display_offload"
+    namespace: "display_manager"
+    description: "Feature flag for DisplayOffload"
+    bug: "299521647"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_connected_display_error_handling"
+    namespace: "display_manager"
+    description: "Feature flag for connected display error handling"
+    bug: "283461472"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "back_up_smooth_display_and_force_peak_refresh_rate"
+    namespace: "display_manager"
+    description: "Feature flag for backing up Smooth Display and Force Peak Refresh Rate"
+    bug: "299552529"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "even_dimmer"
+    namespace: "display_manager"
+    description: "Feature flag for extending the brightness below traditional range"
+    bug: "294760970"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "brightness_int_range_user_perception"
+    namespace: "display_manager"
+    description: "Feature flag for converting the brightness integer range to the user perception scale"
+    bug: "319236956"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_restrict_display_modes"
+    namespace: "display_manager"
+    description: "Feature flag for restriction display modes api"
+    bug: "284866750"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_vsync_low_power_vote"
+    namespace: "display_manager"
+    description: "Feature flag for vsync low power vote"
+    bug: "314920284"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_vsync_low_light_vote"
+    namespace: "display_manager"
+    description: "Feature flag for vsync low light vote"
+    bug: "314921657"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "brightness_wear_bedtime_mode_clamper"
+    namespace: "display_manager"
+    description: "Feature flag for the Wear Bedtime mode brightness clamper"
+    bug: "293613040"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "auto_brightness_modes"
+    namespace: "display_manager"
+    description: "Feature flag for generic auto-brightness modes"
+    bug: "293613040"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "fast_hdr_transitions"
+    namespace: "display_manager"
+    description: "Feature flag for fast transitions into/out of HDR"
+    bug: "292124102"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "always_rotate_display_device"
+    namespace: "display_manager"
+    description: "Use rotation from WindowManager no matter whether FLAG_ROTATES_WITH_CONTENT is set or not"
+    bug: "302326003"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "refresh_rate_voting_telemetry"
+    namespace: "display_manager"
+    description: "Feature flag for enabling telemetry for refresh rate voting in DisplayManager"
+    bug: "310029108"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_pixel_anisotropy_correction"
+    namespace: "display_manager"
+    description: "Feature flag for enabling display anisotropy correction through LogicalDisplay upscaling"
+    bug: "317363416"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "sensor_based_brightness_throttling"
+    namespace: "display_manager"
+    description: "Feature flag for enabling brightness throttling using sensor from config."
+    bug: "294900859"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "refactor_display_power_controller"
+    namespace: "display_manager"
+    description: "Feature flag for refactoring   the DisplayPowerController and associated components"
+    bug: "294444204"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "idle_screen_refresh_rate_timeout"
+    namespace: "display_manager"
+    description: "Feature flag for reducing the refresh rate when the screen is idle after a timeout"
+    bug: "310026579"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "use_fusion_prox_sensor"
+    namespace: "display_manager"
+    description: "Feature flag to control usage of a Fusion Proximity sensor if configued."
+    bug: "306203895"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "offload_controls_doze_auto_brightness"
+    namespace: "display_manager"
+    description: "Allows the registered DisplayOffloader to control if auto-brightness is used in doze"
+    bug: "327392714"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_peak_refresh_rate_physical_limit"
+    namespace: "display_manager"
+    description: "Flag for adding physical refresh rate limit if smooth display setting is on "
+    bug: "332413475"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "ignore_app_preferred_refresh_rate_request"
+    namespace: "display_manager"
+    description: "Feature flag for DisplayManager to ignore preferred refresh rate app request. It will be handled by SF only."
+    bug: "330810426"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_synthetic_60hz_modes"
+    namespace: "display_manager"
+    description: "Feature flag for DisplayManager to enable synthetic 60Hz modes for vrr displays"
+    bug: "338183249"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "offload_doze_override_holds_wakelock"
+    namespace: "display_manager"
+    description: "DisplayPowerController holds a suspend-blocker while changing the display state on behalf of offload doze override."
+    bug: "338403827"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

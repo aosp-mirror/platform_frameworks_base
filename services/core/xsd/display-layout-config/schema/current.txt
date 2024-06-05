@@ -3,20 +3,26 @@ package com.android.server.display.config.layout {
 
   public class Display {
     ctor public Display();
-    method public java.math.BigInteger getAddress();
+    method public java.math.BigInteger getAddress_optional();
     method public String getBrightnessThrottlingMapId();
     method public String getDisplayGroup();
+    method public java.math.BigInteger getLeadDisplayAddress();
+    method public java.math.BigInteger getPort_optional();
     method public String getPosition();
+    method public String getPowerThrottlingMapId();
     method public String getRefreshRateThermalThrottlingMapId();
     method public String getRefreshRateZoneId();
     method public boolean isDefaultDisplay();
     method public boolean isEnabled();
-    method public void setAddress(java.math.BigInteger);
+    method public void setAddress_optional(java.math.BigInteger);
     method public void setBrightnessThrottlingMapId(String);
     method public void setDefaultDisplay(boolean);
     method public void setDisplayGroup(String);
     method public void setEnabled(boolean);
+    method public void setLeadDisplayAddress(java.math.BigInteger);
+    method public void setPort_optional(java.math.BigInteger);
     method public void setPosition(String);
+    method public void setPowerThrottlingMapId(String);
     method public void setRefreshRateThermalThrottlingMapId(String);
     method public void setRefreshRateZoneId(String);
   }

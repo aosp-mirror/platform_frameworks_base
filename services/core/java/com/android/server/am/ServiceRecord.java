@@ -21,20 +21,27 @@ import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BOUND_SERVICE;
 import static android.os.PowerExemptionManager.REASON_DENIED;
+import static android.os.PowerExemptionManager.reasonCodeToString;
 import static android.os.Process.INVALID_UID;
 
 import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.server.am.ActiveServices.TAG_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteServiceException.CannotPostForegroundServiceNotificationException;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -44,6 +51,7 @@ import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
 import android.os.PowerExemptionManager;
 import android.os.SystemClock;
@@ -78,6 +86,34 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     // Maximum number of times it can fail during execution before giving up.
     static final int MAX_DONE_EXECUTING_COUNT = 6;
+
+
+    // Compat IDs for the new FGS logic. For now, we just disable all of them.
+    // TODO: Enable them at some point, but only for V+ builds.
+
+    /**
+     * Compat ID to enable the new FGS start logic, for permission calculation used for
+     * per-FGS-type eligibility calculation.
+     * (See also android.app.ForegroundServiceTypePolicy)
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long USE_NEW_WIU_LOGIC_FOR_START = 311208629L;
+
+    /**
+     * Compat ID to enable the new FGS start logic, for capability calculation.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long USE_NEW_WIU_LOGIC_FOR_CAPABILITIES = 313677553L;
+
+    /**
+     * Compat ID to enable the new FGS start logic, for deciding whether to allow FGS start from
+     * the background.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long USE_NEW_BFSL_LOGIC = 311208749L;
 
     final ActivityManagerService ams;
     final ComponentName name; // service component.
@@ -172,11 +208,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     private BackgroundStartPrivileges mBackgroundStartPrivilegesByStartMerged =
             BackgroundStartPrivileges.NONE;
 
-    // allow while-in-use permissions in foreground service or not.
+    // Reason code for allow while-in-use permissions in foreground service.
+    // If it's not DENIED, while-in-use permissions are allowed.
     // while-in-use permissions in FGS started from background might be restricted.
-    boolean mAllowWhileInUsePermissionInFgs;
     @PowerExemptionManager.ReasonCode
-    int mAllowWhileInUsePermissionInFgsReason = REASON_DENIED;
+    int mAllowWiu_noBinding = REASON_DENIED;
 
     // A copy of mAllowWhileInUsePermissionInFgs's value when the service is entering FGS state.
     boolean mAllowWhileInUsePermissionInFgsAtEntering;
@@ -205,15 +241,230 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     // allow the service becomes foreground service? Service started from background may not be
     // allowed to become a foreground service.
-    @PowerExemptionManager.ReasonCode int mAllowStartForeground = REASON_DENIED;
+    @PowerExemptionManager.ReasonCode
+    int mAllowStart_noBinding = REASON_DENIED;
     // A copy of mAllowStartForeground's value when the service is entering FGS state.
-    @PowerExemptionManager.ReasonCode int mAllowStartForegroundAtEntering = REASON_DENIED;
+    @PowerExemptionManager.ReasonCode
+    int mAllowStartForegroundAtEntering = REASON_DENIED;
     // Debug info why mAllowStartForeground is allowed or denied.
     String mInfoAllowStartForeground;
     // Debug info if mAllowStartForeground is allowed because of a temp-allowlist.
     ActivityManagerService.FgsTempAllowListItem mInfoTempFgsAllowListReason;
     // Is the same mInfoAllowStartForeground string has been logged before? Used for dedup.
     boolean mLoggedInfoAllowStartForeground;
+
+    @PowerExemptionManager.ReasonCode
+    int mAllowWiu_inBindService = REASON_DENIED;
+
+    @PowerExemptionManager.ReasonCode
+    int mAllowWiu_byBindings = REASON_DENIED;
+
+    @PowerExemptionManager.ReasonCode
+    int mAllowStart_inBindService = REASON_DENIED;
+
+    @PowerExemptionManager.ReasonCode
+    int mAllowStart_byBindings = REASON_DENIED;
+
+    /**
+     * The oom adj seq number snapshot of the host process. We're taking a snapshot
+     * before executing the service. Since we may or may not bump the host process's
+     * proc state / oom adj value before that, at the end of the execution, we could
+     * compare this seq against the current seq of the host process to see if we could
+     * skip the oom adj update from there too.
+     */
+    int mAdjSeq;
+
+    /**
+     * Whether to use the new "while-in-use permission" logic for FGS start
+     */
+    private boolean useNewWiuLogic_forStart() {
+        return Flags.newFgsRestrictionLogic() // This flag should only be set on V+
+                && CompatChanges.isChangeEnabled(USE_NEW_WIU_LOGIC_FOR_START, appInfo.uid);
+    }
+
+    /**
+     * Whether to use the new "while-in-use permission" logic for capabilities
+     */
+    private boolean useNewWiuLogic_forCapabilities() {
+        return Flags.newFgsRestrictionLogic() // This flag should only be set on V+
+                && CompatChanges.isChangeEnabled(USE_NEW_WIU_LOGIC_FOR_CAPABILITIES, appInfo.uid);
+    }
+
+    /**
+     * Whether to use the new "FGS BG start exemption" logic.
+     */
+    private boolean useNewBfslLogic() {
+        return Flags.newFgsRestrictionLogic() // This flag should only be set on V+
+                && CompatChanges.isChangeEnabled(USE_NEW_BFSL_LOGIC, appInfo.uid);
+    }
+
+
+    @PowerExemptionManager.ReasonCode
+    private int getFgsAllowWiu_legacy() {
+        // In the legacy mode (U-), we use mAllowWiu_inBindService and mAllowWiu_noBinding.
+        return reasonOr(
+                mAllowWiu_noBinding,
+                mAllowWiu_inBindService
+        );
+    }
+
+    @PowerExemptionManager.ReasonCode
+    private int getFgsAllowWiu_new() {
+        // In the new mode, use by-bindings instead of in-bind-service
+        return reasonOr(
+                mAllowWiu_noBinding,
+                mAllowWiu_byBindings
+        );
+    }
+
+    /**
+     * We use this logic for ForegroundServiceTypePolicy and UIDT eligibility check.
+     */
+    @PowerExemptionManager.ReasonCode
+    int getFgsAllowWiu_forStart() {
+        if (useNewWiuLogic_forStart()) {
+            return getFgsAllowWiu_new();
+        } else {
+            return getFgsAllowWiu_legacy();
+        }
+    }
+
+    /**
+     * We use this logic for the capability calculation in oom-adjuster.
+     */
+    @PowerExemptionManager.ReasonCode
+    int getFgsAllowWiu_forCapabilities() {
+        if (useNewWiuLogic_forCapabilities()) {
+            return getFgsAllowWiu_new();
+        } else {
+            // If alwaysUseNewLogicForWiuCapabilities() isn't set, just use the same logic as
+            // getFgsAllowWiu_forStart().
+            return getFgsAllowWiu_forStart();
+        }
+    }
+
+    /**
+     * We use this logic for ForegroundServiceTypePolicy and UIDT eligibility check.
+     */
+    boolean isFgsAllowedWiu_forStart() {
+        return getFgsAllowWiu_forStart() != REASON_DENIED;
+    }
+
+    /**
+     * We use this logic for the capability calculation in oom-adjuster.
+     */
+    boolean isFgsAllowedWiu_forCapabilities() {
+        return getFgsAllowWiu_forCapabilities() != REASON_DENIED;
+    }
+
+    @PowerExemptionManager.ReasonCode
+    private int getFgsAllowStart_legacy() {
+        // This is used for BFSL (background FGS launch) exemption.
+        // Originally -- on U-QPR1 and before -- we only used [in-bind-service] + [no-binding].
+        // This would exclude certain "valid" situations, so in U-QPR2, we started
+        // using [by-bindings] too.
+        return reasonOr(
+                mAllowStart_noBinding,
+                mAllowStart_inBindService,
+                mAllowStart_byBindings
+        );
+    }
+
+    @PowerExemptionManager.ReasonCode
+    private int getFgsAllowStart_new() {
+        // In the new mode, we don't use [in-bind-service].
+        return reasonOr(
+                mAllowStart_noBinding,
+                mAllowStart_byBindings
+        );
+    }
+
+    /**
+     * Calculate a BFSL exemption code.
+     */
+    @PowerExemptionManager.ReasonCode
+    int getFgsAllowStart() {
+        if (useNewBfslLogic()) {
+            return getFgsAllowStart_new();
+        } else {
+            return getFgsAllowStart_legacy();
+        }
+    }
+
+    /**
+     * Return whether BFSL is allowed or not.
+     */
+    boolean isFgsAllowedStart() {
+        return getFgsAllowStart() != REASON_DENIED;
+    }
+
+    void clearFgsAllowWiu() {
+        mAllowWiu_noBinding = REASON_DENIED;
+        mAllowWiu_inBindService = REASON_DENIED;
+        mAllowWiu_byBindings = REASON_DENIED;
+    }
+
+    void clearFgsAllowStart() {
+        mAllowStart_noBinding = REASON_DENIED;
+        mAllowStart_inBindService = REASON_DENIED;
+        mAllowStart_byBindings = REASON_DENIED;
+    }
+
+    @PowerExemptionManager.ReasonCode
+    static int reasonOr(
+            @PowerExemptionManager.ReasonCode int first,
+            @PowerExemptionManager.ReasonCode int second) {
+        return first != REASON_DENIED ? first : second;
+    }
+
+    @PowerExemptionManager.ReasonCode
+    static int reasonOr(
+            @PowerExemptionManager.ReasonCode int first,
+            @PowerExemptionManager.ReasonCode int second,
+            @PowerExemptionManager.ReasonCode int third) {
+        return first != REASON_DENIED ? first : reasonOr(second, third);
+    }
+
+    boolean allowedChanged(
+            @PowerExemptionManager.ReasonCode int legacyCode,
+            @PowerExemptionManager.ReasonCode int newCode) {
+        return (legacyCode == REASON_DENIED) != (newCode == REASON_DENIED);
+    }
+
+    private String getFgsInfoForWtf() {
+        return " cmp: " + this.getComponentName().toShortString()
+                + " sdk: " + this.appInfo.targetSdkVersion
+                ;
+    }
+
+    void maybeLogFgsLogicChange() {
+        final int wiuLegacy = getFgsAllowWiu_legacy();
+        final int wiuNew = getFgsAllowWiu_new();
+
+        final int startLegacy = getFgsAllowStart_legacy();
+        final int startNew = getFgsAllowStart_new();
+
+        final boolean wiuChanged = allowedChanged(wiuLegacy, wiuNew);
+        final boolean startChanged = allowedChanged(startLegacy, startNew);
+
+        if (!wiuChanged && !startChanged) {
+            return;
+        }
+        final String message = "FGS logic changed:"
+                + (wiuChanged ? " [WIU changed]" : "")
+                + (startChanged ? " [BFSL changed]" : "")
+                + " Orig WIU:"
+                + reasonCodeToString(wiuLegacy)
+                + " New WIU:"
+                + reasonCodeToString(wiuNew)
+                + " Orig BFSL:"
+                + reasonCodeToString(startLegacy)
+                + " New BFSL:"
+                + reasonCodeToString(startNew)
+                + getFgsInfoForWtf();
+        Slog.wtf(TAG_SERVICE, message);
+    }
+
     // The number of times Service.startForeground() is called, after this service record is
     // created. (i.e. due to "bound" or "start".) It never decreases, even when stopForeground()
     // is called.
@@ -423,6 +674,86 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      */
     private ShortFgsInfo mShortFgsInfo;
 
+    /**
+     * Data container class to help track certain fgs info for time-restricted types.
+     */
+    static class TimeLimitedFgsInfo {
+        @UptimeMillisLong
+        private long mFirstFgsStartUptime;
+        // The first fgs start time is maintained here separately in realtime-base
+        // for the 24-hour window reset logic.
+        @ElapsedRealtimeLong
+        private long mFirstFgsStartRealtime;
+        @UptimeMillisLong
+        private long mLastFgsStartTime;
+        @UptimeMillisLong
+        private long mTimeLimitExceededAt = Long.MIN_VALUE;
+        @UptimeMillisLong
+        private long mTotalRuntime = 0;
+        private int mNumParallelServices = 0;
+
+        public void noteFgsFgsStart(@UptimeMillisLong long startTime) {
+            mNumParallelServices++;
+            if (mNumParallelServices == 1) {
+                mFirstFgsStartUptime = startTime;
+                mFirstFgsStartRealtime = SystemClock.elapsedRealtime();
+            }
+            mLastFgsStartTime = startTime;
+        }
+
+        @UptimeMillisLong
+        public long getFirstFgsStartUptime() {
+            return mFirstFgsStartUptime;
+        }
+
+        @ElapsedRealtimeLong
+        public long getFirstFgsStartRealtime() {
+            return mFirstFgsStartRealtime;
+        }
+
+        @UptimeMillisLong
+        public long getLastFgsStartTime() {
+            return mLastFgsStartTime;
+        }
+
+        public void decNumParallelServices() {
+            if (mNumParallelServices > 0) {
+                mNumParallelServices--;
+            }
+            if (mNumParallelServices == 0) {
+                mLastFgsStartTime = 0;
+            }
+        }
+
+        public void updateTotalRuntime(@UptimeMillisLong long nowUptime) {
+            mTotalRuntime += nowUptime - mLastFgsStartTime;
+            mLastFgsStartTime = nowUptime;
+        }
+
+        @UptimeMillisLong
+        public long getTotalRuntime() {
+            return mTotalRuntime;
+        }
+
+        public void setTimeLimitExceededAt(@UptimeMillisLong long timeLimitExceededAt) {
+            mTimeLimitExceededAt = timeLimitExceededAt;
+        }
+
+        @UptimeMillisLong
+        public long getTimeLimitExceededAt() {
+            return mTimeLimitExceededAt;
+        }
+
+        public void reset() {
+            mNumParallelServices = 0;
+            mFirstFgsStartUptime = 0;
+            mFirstFgsStartRealtime = 0;
+            mLastFgsStartTime = 0;
+            mTotalRuntime = 0;
+            mTimeLimitExceededAt = Long.MIN_VALUE;
+        }
+    }
+
     void dumpStartList(PrintWriter pw, String prefix, List<StartItem> list, long now) {
         final int N = list.size();
         for (int i=0; i<N; i++) {
@@ -477,6 +808,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 proto.write(ServiceRecordProto.AppInfo.RES_DIR, appInfo.publicSourceDir);
             }
             proto.write(ServiceRecordProto.AppInfo.DATA_DIR, appInfo.dataDir);
+            proto.write(ServiceRecordProto.AppInfo.TARGET_SDK_VERSION, appInfo.targetSdkVersion);
             proto.end(appInfoToken);
         }
         if (app != null) {
@@ -501,8 +833,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         ProtoUtils.toDuration(proto, ServiceRecordProto.LAST_ACTIVITY_TIME, lastActivity, now);
         ProtoUtils.toDuration(proto, ServiceRecordProto.RESTART_TIME, restartTime, now);
         proto.write(ServiceRecordProto.CREATED_FROM_FG, createdFromFg);
+
+        // TODO: Log "forStart" too.
         proto.write(ServiceRecordProto.ALLOW_WHILE_IN_USE_PERMISSION_IN_FGS,
-                mAllowWhileInUsePermissionInFgs);
+                isFgsAllowedWiu_forCapabilities());
 
         if (startRequested || delayedStop || lastStartId != 0) {
             long startToken = proto.start(ServiceRecordProto.START);
@@ -581,7 +915,16 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             proto.end(shortFgsToken);
         }
 
+        // TODO: Dump all the mAllowWiu* and mAllowStart* fields as needed.
+
         proto.end(token);
+    }
+
+    void dumpReasonCode(PrintWriter pw, String prefix, String fieldName, int code) {
+        pw.print(prefix);
+        pw.print(fieldName);
+        pw.print("=");
+        pw.println(PowerExemptionManager.reasonCodeToString(code));
     }
 
     void dump(PrintWriter pw, String prefix) {
@@ -590,6 +933,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 pw.println('}');
         pw.print(prefix); pw.print("packageName="); pw.println(packageName);
         pw.print(prefix); pw.print("processName="); pw.println(processName);
+        pw.print(prefix); pw.print("targetSdkVersion="); pw.println(appInfo.targetSdkVersion);
         if (permission != null) {
             pw.print(prefix); pw.print("permission="); pw.println(permission);
         }
@@ -617,16 +961,39 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             pw.print(prefix); pw.print("mIsAllowedBgActivityStartsByStart=");
             pw.println(mBackgroundStartPrivilegesByStartMerged);
         }
-        pw.print(prefix); pw.print("mAllowWhileInUsePermissionInFgsReason=");
-        pw.println(PowerExemptionManager.reasonCodeToString(mAllowWhileInUsePermissionInFgsReason));
+
+        pw.print(prefix); pw.print("useNewWiuLogic_forCapabilities()=");
+        pw.println(useNewWiuLogic_forCapabilities());
+        pw.print(prefix); pw.print("useNewWiuLogic_forStart()=");
+        pw.println(useNewWiuLogic_forStart());
+        pw.print(prefix); pw.print("useNewBfslLogic()=");
+        pw.println(useNewBfslLogic());
+
+        dumpReasonCode(pw, prefix, "mAllowWiu_noBinding", mAllowWiu_noBinding);
+        dumpReasonCode(pw, prefix, "mAllowWiu_inBindService", mAllowWiu_inBindService);
+        dumpReasonCode(pw, prefix, "mAllowWiu_byBindings", mAllowWiu_byBindings);
+
+        dumpReasonCode(pw, prefix, "getFgsAllowWiu_legacy", getFgsAllowWiu_legacy());
+        dumpReasonCode(pw, prefix, "getFgsAllowWiu_new", getFgsAllowWiu_new());
+
+        dumpReasonCode(pw, prefix, "getFgsAllowWiu_forStart", getFgsAllowWiu_forStart());
+        dumpReasonCode(pw, prefix, "getFgsAllowWiu_forCapabilities",
+                getFgsAllowWiu_forCapabilities());
 
         pw.print(prefix); pw.print("allowUiJobScheduling="); pw.println(mAllowUiJobScheduling);
         pw.print(prefix); pw.print("recentCallingPackage=");
                 pw.println(mRecentCallingPackage);
         pw.print(prefix); pw.print("recentCallingUid=");
         pw.println(mRecentCallingUid);
-        pw.print(prefix); pw.print("allowStartForeground=");
-        pw.println(PowerExemptionManager.reasonCodeToString(mAllowStartForeground));
+
+        dumpReasonCode(pw, prefix, "mAllowStart_noBinding", mAllowStart_noBinding);
+        dumpReasonCode(pw, prefix, "mAllowStart_inBindService", mAllowStart_inBindService);
+        dumpReasonCode(pw, prefix, "mAllowStart_byBindings", mAllowStart_byBindings);
+
+        dumpReasonCode(pw, prefix, "getFgsAllowStart_legacy", getFgsAllowStart_legacy());
+        dumpReasonCode(pw, prefix, "getFgsAllowStart_new", getFgsAllowStart_new());
+        dumpReasonCode(pw, prefix, "getFgsAllowStart", getFgsAllowStart());
+
         pw.print(prefix); pw.print("startForegroundCount=");
         pw.println(mStartForegroundCount);
         pw.print(prefix); pw.print("infoAllowStartForeground=");
@@ -638,7 +1005,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (isForeground || foregroundId != 0) {
             pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
             pw.print(" foregroundId="); pw.print(foregroundId);
-            pw.printf(" types=%08X", foregroundServiceType);
+            pw.printf(" types=0x%08X", foregroundServiceType);
             pw.print(" foregroundNoti="); pw.println(foregroundNoti);
 
             if (isShortFgs() && mShortFgsInfo != null) {
@@ -1412,7 +1779,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         sb.append("ServiceRecord{")
             .append(Integer.toHexString(System.identityHashCode(this)))
             .append(" u").append(userId)
-            .append(' ').append(shortInstanceName).append('}');
+            .append(' ').append(shortInstanceName);
+        if (mRecentCallingPackage != null) {
+            sb.append(" c:").append(mRecentCallingPackage);
+        }
+        sb.append('}');
         return stringName = sb.toString();
     }
 
@@ -1509,6 +1880,23 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 + " " + (mShortFgsInfo == null ? "" : mShortFgsInfo.getDescription());
     }
 
+    /**
+     * Called when a time-limited FGS starts.
+     */
+    public TimeLimitedFgsInfo createTimeLimitedFgsInfo() {
+        return new TimeLimitedFgsInfo();
+    }
+
+    /**
+     * @return true if one of the types of this FGS has a time limit.
+     */
+    public boolean isFgsTimeLimited() {
+        return startRequested
+                && isForeground
+                && ams.mServices.getTimeLimitedFgsType(foregroundServiceType)
+                        != ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
+    }
+
     private boolean isAppAlive() {
         if (app == null) {
             return false;
@@ -1517,5 +1905,18 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             return false;
         }
         return true;
+    }
+
+    /**
+     * @return {@code true} if the host process has updated its oom adj scores.
+     */
+    boolean wasOomAdjUpdated() {
+        return app != null && app.mState.getAdjSeq() > mAdjSeq;
+    }
+
+    void updateOomAdjSeq() {
+        if (app != null) {
+            mAdjSeq = app.mState.getAdjSeq();
+        }
     }
 }

@@ -59,10 +59,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.service.notification.StatusBarNotification;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject;
-import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -71,6 +67,10 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ServiceTestRule;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject;
+import androidx.test.uiautomator.UiObject2;
+import androidx.test.uiautomator.UiObjectNotFoundException;
 
 import com.android.shell.ActionSendMultipleConsumerActivity.CustomActionSendMultipleListener;
 
@@ -200,7 +200,7 @@ public class BugreportReceiverTest {
             mBugreportFd = ParcelFileDescriptor.dup(invocation.getArgument(2));
             return null;
         }).when(mMockIDumpstate).startBugreport(anyInt(), any(), any(), any(), anyInt(), anyInt(),
-                any(), anyBoolean());
+                any(), anyBoolean(), anyBoolean());
 
         setWarningState(mContext, STATE_HIDE);
 
@@ -543,7 +543,7 @@ public class BugreportReceiverTest {
         getInstrumentation().waitForIdleSync();
 
         verify(mMockIDumpstate, times(1)).startBugreport(anyInt(), any(), any(), any(),
-                anyInt(), anyInt(), any(), anyBoolean());
+                anyInt(), anyInt(), any(), anyBoolean(), anyBoolean());
         sendBugreportFinished();
     }
 
@@ -608,7 +608,7 @@ public class BugreportReceiverTest {
         ArgumentCaptor<IDumpstateListener> listenerCap = ArgumentCaptor.forClass(
                 IDumpstateListener.class);
         verify(mMockIDumpstate, timeout(TIMEOUT)).startBugreport(anyInt(), any(), any(), any(),
-                anyInt(), anyInt(), listenerCap.capture(), anyBoolean());
+                anyInt(), anyInt(), listenerCap.capture(), anyBoolean(), anyBoolean());
         mIDumpstateListener = listenerCap.getValue();
         assertNotNull("Dumpstate listener should not be null", mIDumpstateListener);
         mIDumpstateListener.onProgress(0);

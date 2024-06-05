@@ -126,6 +126,11 @@
     <item msgid="8259411607272330225">"Kimezimwa"</item>
     <item msgid="578444932039713369">"Kimewashwa"</item>
   </string-array>
+  <string-array name="tile_states_record_issue">
+    <item msgid="1727196795383575383">"Haipatikani"</item>
+    <item msgid="9061144428113385092">"Imezimwa"</item>
+    <item msgid="2984256114867200368">"Imewashwa"</item>
+  </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"Hakipatikani"</item>
     <item msgid="8707481475312432575">"Kimezimwa"</item>
@@ -180,5 +185,10 @@
     <item msgid="3173069902082305985">"Haipatikani"</item>
     <item msgid="2478289035899842865">"Umezima"</item>
     <item msgid="5137565285664080143">"Umewasha"</item>
+  </string-array>
+  <string-array name="tile_states_hearing_devices">
+    <item msgid="1235334096484287173">"Havipatikani"</item>
+    <item msgid="3079622119444911877">"Vimezimwa"</item>
+    <item msgid="3028994095749238254">"Vimewashwa"</item>
   </string-array>
 </resources>

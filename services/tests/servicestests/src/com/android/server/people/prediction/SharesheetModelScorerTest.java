@@ -57,6 +57,7 @@ public final class SharesheetModelScorerTest {
     private static final String PACKAGE_3 = "pkg3";
     private static final String CLASS_1 = "cls1";
     private static final String CLASS_2 = "cls2";
+    private static final String CHOOSER_ACTIVITY = "ChooserActivity";
     private static final double DELTA = 1e-6;
     private static final long NOW = System.currentTimeMillis();
     private static final Range<Long> WITHIN_ONE_DAY = new Range(
@@ -246,7 +247,7 @@ public final class SharesheetModelScorerTest {
         SharesheetModelScorer.computeScoreForAppShare(
                 List.of(mShareTarget1, mShareTarget2, mShareTarget3, mShareTarget4, mShareTarget5,
                         mShareTarget6),
-                Event.TYPE_SHARE_TEXT, 20, NOW, mDataManager, USER_ID);
+                Event.TYPE_SHARE_TEXT, 20, NOW, mDataManager, USER_ID, CHOOSER_ACTIVITY);
 
         // Verification
         assertEquals(0.514f, mShareTarget1.getScore(), DELTA);
@@ -278,7 +279,7 @@ public final class SharesheetModelScorerTest {
         SharesheetModelScorer.computeScoreForAppShare(
                 List.of(mShareTarget1, mShareTarget2, mShareTarget3, mShareTarget4, mShareTarget5,
                         mShareTarget6),
-                Event.TYPE_SHARE_TEXT, 20, NOW, mDataManager, USER_ID);
+                Event.TYPE_SHARE_TEXT, 20, NOW, mDataManager, USER_ID, CHOOSER_ACTIVITY);
 
         verify(mDataManager, times(1)).queryAppUsageStats(anyInt(), anyLong(), anyLong(),
                 anySet());
@@ -311,7 +312,7 @@ public final class SharesheetModelScorerTest {
         SharesheetModelScorer.computeScoreForAppShare(
                 List.of(mShareTarget1, mShareTarget2, mShareTarget3, mShareTarget4, mShareTarget5,
                         mShareTarget6),
-                Event.TYPE_SHARE_TEXT, 20, NOW, mDataManager, USER_ID);
+                Event.TYPE_SHARE_TEXT, 20, NOW, mDataManager, USER_ID, CHOOSER_ACTIVITY);
 
         verify(mDataManager, times(1)).queryAppUsageStats(anyInt(), anyLong(), anyLong(),
                 anySet());
@@ -349,7 +350,7 @@ public final class SharesheetModelScorerTest {
         SharesheetModelScorer.computeScoreForAppShare(
                 List.of(mShareTarget1, mShareTarget2, mShareTarget3, mShareTarget4, mShareTarget5,
                         mShareTarget6),
-                Event.TYPE_SHARE_TEXT, 4, NOW, mDataManager, USER_ID);
+                Event.TYPE_SHARE_TEXT, 4, NOW, mDataManager, USER_ID, CHOOSER_ACTIVITY);
 
         verify(mDataManager, never()).queryAppUsageStats(anyInt(), anyLong(), anyLong(),
                 anySet());
@@ -377,7 +378,7 @@ public final class SharesheetModelScorerTest {
                 anyLong())).thenReturn(
                 List.of(createUsageEvent(PACKAGE_2),
                         createUsageEvent(PACKAGE_3),
-                        createUsageEvent(SharesheetModelScorer.CHOOSER_ACTIVITY),
+                        createUsageEvent(CHOOSER_ACTIVITY),
                         createUsageEvent(PACKAGE_3),
                         createUsageEvent(PACKAGE_3))
         );
@@ -385,7 +386,7 @@ public final class SharesheetModelScorerTest {
         SharesheetModelScorer.computeScoreForAppShare(
                 List.of(mShareTarget1, mShareTarget2, mShareTarget3, mShareTarget4, mShareTarget5,
                         mShareTarget6),
-                Event.TYPE_SHARE_TEXT, 20, NOW, mDataManager, USER_ID);
+                Event.TYPE_SHARE_TEXT, 20, NOW, mDataManager, USER_ID, CHOOSER_ACTIVITY);
 
         verify(mDataManager, times(1)).queryAppMovingToForegroundEvents(anyInt(), anyLong(),
                 anyLong());
@@ -413,7 +414,7 @@ public final class SharesheetModelScorerTest {
                 anyLong())).thenReturn(
                 List.of(createUsageEvent(PACKAGE_3),
                         createUsageEvent(PACKAGE_3),
-                        createUsageEvent(SharesheetModelScorer.CHOOSER_ACTIVITY),
+                        createUsageEvent(CHOOSER_ACTIVITY),
                         createUsageEvent(PACKAGE_3),
                         createUsageEvent(PACKAGE_3))
         );
@@ -421,7 +422,7 @@ public final class SharesheetModelScorerTest {
         SharesheetModelScorer.computeScoreForAppShare(
                 List.of(mShareTarget1, mShareTarget2, mShareTarget3, mShareTarget4, mShareTarget5,
                         mShareTarget6),
-                Event.TYPE_SHARE_TEXT, 20, NOW, mDataManager, USER_ID);
+                Event.TYPE_SHARE_TEXT, 20, NOW, mDataManager, USER_ID, CHOOSER_ACTIVITY);
 
         verify(mDataManager, times(1)).queryAppMovingToForegroundEvents(anyInt(), anyLong(),
                 anyLong());

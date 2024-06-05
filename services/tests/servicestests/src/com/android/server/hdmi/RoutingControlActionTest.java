@@ -29,7 +29,9 @@ import static com.android.server.hdmi.RoutingControlAction.STATE_WAIT_FOR_ROUTIN
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -169,13 +171,24 @@ public class RoutingControlActionTest {
                     }
 
                     @Override
+                    boolean isPowerStandby() {
+                        return false;
+                    }
+
+                    @Override
                     protected HdmiCecConfig getHdmiCecConfig() {
                         return hdmiCecConfig;
+                    }
+
+                    @Override
+                    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                        // do nothing
                     }
                 };
 
         mHdmiControlService.setIoLooper(mMyLooper);
         mNativeWrapper = new FakeNativeWrapper();
+        mNativeWrapper.setPhysicalAddress(0x0000);
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
@@ -193,7 +206,6 @@ public class RoutingControlActionTest {
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mNativeWrapper.setPhysicalAddress(0x0000);
         mTestLooper.dispatchAll();
         mHdmiCecLocalDeviceTv = mHdmiControlService.tv();
         mNativeWrapper.clearResultMessages();

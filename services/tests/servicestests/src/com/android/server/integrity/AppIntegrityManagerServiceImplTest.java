@@ -67,10 +67,10 @@ import android.provider.Settings;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
+import com.android.internal.pm.parsing.PackageParser2;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.TestPackageParser2;
 import com.android.server.testutils.TestUtils;
 
@@ -218,7 +218,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void updateRuleSet_notSystemApp() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp(false);
         Rule rule =
                 new Rule(
@@ -237,7 +237,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void updateRuleSet_authorized() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
         Rule rule =
                 new Rule(
@@ -251,7 +251,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void updateRuleSet_correctMethodCall() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
         IntentSender mockReceiver = mock(IntentSender.class);
         List<Rule> rules =
@@ -271,7 +271,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void updateRuleSet_fail() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
         doThrow(new IOException()).when(mIntegrityFileManager).writeRules(any(), any(), any());
         IntentSender mockReceiver = mock(IntentSender.class);
@@ -292,7 +292,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void broadcastReceiverRegistration() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
         ArgumentCaptor<IntentFilter> intentFilterCaptor =
                 ArgumentCaptor.forClass(IntentFilter.class);
@@ -308,7 +308,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void handleBroadcast_correctArgs() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
@@ -345,7 +345,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void handleBroadcast_correctArgs_multipleCerts() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
@@ -368,7 +368,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void handleBroadcast_correctArgs_sourceStamp() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
@@ -393,7 +393,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void handleBroadcast_allow() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
@@ -412,7 +412,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void handleBroadcast_reject() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
@@ -438,7 +438,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void handleBroadcast_notInitialized() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
         when(mIntegrityFileManager.initialized()).thenReturn(false);
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
@@ -459,7 +459,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void verifierAsInstaller_skipIntegrityVerification() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
         setIntegrityCheckIncludesRuleProvider(false);
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
@@ -480,7 +480,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void getCurrentRules() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
         Rule rule = new Rule(IntegrityFormula.Application.packageNameEquals("package"), Rule.DENY);
         when(mIntegrityFileManager.readRules(any())).thenReturn(Arrays.asList(rule));
@@ -490,7 +490,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void getWhitelistedRuleProviders_returnsEmptyForNonSystemApps() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp(false);
 
         assertThat(mService.getWhitelistedRuleProviders()).isEmpty();
@@ -498,13 +498,13 @@ public class AppIntegrityManagerServiceImplTest {
 
     @Test
     public void getWhitelistedRuleProviders() throws Exception {
-        whitelistUsAsRuleProvider();
+        allowlistUsAsRuleProvider();
         makeUsSystemApp();
 
         assertThat(mService.getWhitelistedRuleProviders()).containsExactly(TEST_FRAMEWORK_PACKAGE);
     }
 
-    private void whitelistUsAsRuleProvider() {
+    private void allowlistUsAsRuleProvider() {
         Resources mockResources = mock(Resources.class);
         when(mockResources.getStringArray(R.array.config_integrityRuleProviderPackages))
                 .thenReturn(new String[] {TEST_FRAMEWORK_PACKAGE});

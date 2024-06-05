@@ -394,6 +394,26 @@ public class SharedConnectivityServiceTest {
         verify(mCallback, never()).onKnownNetworkConnectionStatusChanged(any());
     }
 
+    @Test
+    public void getHotspotNetworkConnectionStatus_withoutUpdate_returnsNull()
+            throws RemoteException {
+        SharedConnectivityService service = createService();
+        ISharedConnectivityService.Stub binder =
+                (ISharedConnectivityService.Stub) service.onBind(new Intent());
+
+        assertThat(binder.getHotspotNetworkConnectionStatus()).isNull();
+    }
+
+    @Test
+    public void getKnownNetworkConnectionStatus_withoutUpdate_returnsNull()
+            throws RemoteException {
+        SharedConnectivityService service = createService();
+        ISharedConnectivityService.Stub binder =
+                (ISharedConnectivityService.Stub) service.onBind(new Intent());
+
+        assertThat(binder.getKnownNetworkConnectionStatus()).isNull();
+    }
+
     private FakeSharedConnectivityService createService() {
         FakeSharedConnectivityService service = new FakeSharedConnectivityService();
         service.attachBaseContext(mContext);

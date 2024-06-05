@@ -27,6 +27,7 @@ import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresNoPermission;
 import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -62,6 +63,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntConsumer;
 
 /**
  * This class is a singleton that performs accessibility interaction
@@ -158,11 +160,15 @@ public final class AccessibilityInteractionClient
     private final SparseArray<Pair<Executor, AccessibilityService.TakeScreenshotCallback>>
             mTakeScreenshotOfWindowCallbacks = new SparseArray<>();
 
+    // SparseArray of interaction ID -> overlay executor+callback.
+    private final SparseArray<Pair<Executor, IntConsumer>> mAttachAccessibilityOverlayCallbacks =
+            new SparseArray<>();
     private Message mSameThreadMessage;
 
     private int mInteractionIdWaitingForPrefetchResult = -1;
     private int mConnectionIdWaitingForPrefetchResult;
     private String[] mPackageNamesForNextPrefetchResult;
+    private Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     /**
      * @return The client for the current thread.
@@ -826,11 +832,20 @@ public final class AccessibilityInteractionClient
                     //   A11yService -> App -> SurfaceFlinger -> A11yService
                     ScreenCapture.ScreenCaptureListener listener =
                             new ScreenCapture.ScreenCaptureListener(
-                                    screenshot -> sendWindowScreenshotSuccess(screenshot,
-                                            interactionId));
+                                    (screenshot, status) -> {
+                                        if (status != 0) {
+                                            sendTakeScreenshotOfWindowError(
+                                                    AccessibilityService
+                                                            .ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR,
+                                                    interactionId);
+                                        } else {
+                                            sendWindowScreenshotSuccess(screenshot,
+                                                    interactionId);
+                                        }
+                                    });
                     connection.takeScreenshotOfWindow(accessibilityWindowId, interactionId,
                             listener, this);
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    mMainHandler.postDelayed(() -> {
                         synchronized (mInstanceLock) {
                             // Notify failure if we still haven't sent a response after timeout.
                             if (mTakeScreenshotOfWindowCallbacks.contains(interactionId)) {
@@ -1176,6 +1191,8 @@ public final class AccessibilityInteractionClient
     /**
      * {@inheritDoc}
      */
+    @Override
+    @RequiresNoPermission
     public void setFindAccessibilityNodeInfoResult(AccessibilityNodeInfo info,
                 int interactionId) {
         synchronized (mInstanceLock) {
@@ -1217,6 +1234,8 @@ public final class AccessibilityInteractionClient
     /**
      * {@inheritDoc}
      */
+    @Override
+    @RequiresNoPermission
     public void setFindAccessibilityNodeInfosResult(List<AccessibilityNodeInfo> infos,
                 int interactionId) {
         synchronized (mInstanceLock) {
@@ -1246,6 +1265,7 @@ public final class AccessibilityInteractionClient
      * {@inheritDoc}
      */
     @Override
+    @RequiresNoPermission
     public void setPrefetchAccessibilityNodeInfoResult(@NonNull List<AccessibilityNodeInfo> infos,
                                                        int interactionId) {
         int interactionIdWaitingForPrefetchResultCopy = -1;
@@ -1310,6 +1330,8 @@ public final class AccessibilityInteractionClient
     /**
      * {@inheritDoc}
      */
+    @Override
+    @RequiresNoPermission
     public void setPerformAccessibilityActionResult(boolean succeeded, int interactionId) {
         synchronized (mInstanceLock) {
             if (interactionId > mInteractionId) {
@@ -1358,6 +1380,7 @@ public final class AccessibilityInteractionClient
      * @param interactionId The interaction id of the request.
      */
     @Override
+    @RequiresNoPermission
     public void sendTakeScreenshotOfWindowError(
             @AccessibilityService.ScreenshotErrorCode int errorCode, int interactionId) {
         synchronized (mInstanceLock) {
@@ -1621,7 +1644,11 @@ public final class AccessibilityInteractionClient
 
     private void logTraceClient(
             IAccessibilityServiceConnection connection, String method, String params) {
-        logTrace(connection, method, params, Binder.getCallingUid(),
+        logTrace(
+                connection,
+                method,
+                params,
+                Binder.getCallingUid(),
                 Arrays.asList(Thread.currentThread().getStackTrace()),
                 new HashSet<String>(Arrays.asList("getStackTrace", "logTraceClient")),
                 FLAGS_ACCESSIBILITY_INTERACTION_CLIENT);
@@ -1629,17 +1656,108 @@ public final class AccessibilityInteractionClient
 
     /** Attaches an accessibility overlay to the specified window. */
     public void attachAccessibilityOverlayToWindow(
-            int connectionId, int accessibilityWindowId, SurfaceControl sc) {
+            int connectionId,
+            int accessibilityWindowId,
+            SurfaceControl sc,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull IntConsumer callback) {
         synchronized (mInstanceLock) {
             try {
                 IAccessibilityServiceConnection connection = getConnection(connectionId);
                 if (connection == null) {
-                    Log.e(LOG_TAG, "Error while getting service connection.");
+                    executor.execute(
+                            () ->
+                                    callback.accept(
+                                            AccessibilityService.OVERLAY_RESULT_INTERNAL_ERROR));
                     return;
                 }
-                connection.attachAccessibilityOverlayToWindow(accessibilityWindowId, sc);
+                final int interactionId = mInteractionIdCounter.getAndIncrement();
+                mAttachAccessibilityOverlayCallbacks.put(
+                        interactionId, Pair.create(executor, callback));
+                connection.attachAccessibilityOverlayToWindow(
+                        interactionId, accessibilityWindowId, sc, this);
+                mMainHandler.postDelayed(
+                        () -> {
+                            synchronized (mInstanceLock) {
+                                // Notify failure if we still haven't sent a response after timeout.
+                                if (mAttachAccessibilityOverlayCallbacks.contains(interactionId)) {
+                                    sendAttachOverlayResult(
+                                            AccessibilityService.OVERLAY_RESULT_INTERNAL_ERROR,
+                                            interactionId);
+                                }
+                            }
+                        },
+                        TIMEOUT_INTERACTION_MILLIS);
             } catch (RemoteException re) {
                 re.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /** Attaches an accessibility overlay to the specified display. */
+    public void attachAccessibilityOverlayToDisplay(
+            int connectionId,
+            int displayId,
+            SurfaceControl sc,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull IntConsumer callback) {
+        synchronized (mInstanceLock) {
+            try {
+                IAccessibilityServiceConnection connection = getConnection(connectionId);
+                if (connection == null) {
+                    executor.execute(
+                            () ->
+                                    callback.accept(
+                                            AccessibilityService.OVERLAY_RESULT_INTERNAL_ERROR));
+                    return;
+                }
+                final int interactionId = mInteractionIdCounter.getAndIncrement();
+                mAttachAccessibilityOverlayCallbacks.put(
+                        interactionId, Pair.create(executor, callback));
+                connection.attachAccessibilityOverlayToDisplay(interactionId, displayId, sc, this);
+                mMainHandler.postDelayed(
+                        () -> {
+                            // Notify failure if we still haven't sent a response after timeout.
+                            if (mAttachAccessibilityOverlayCallbacks.contains(interactionId)) {
+                                sendAttachOverlayResult(
+                                        AccessibilityService.OVERLAY_RESULT_INTERNAL_ERROR,
+                                        interactionId);
+                            }
+                        },
+                        TIMEOUT_INTERACTION_MILLIS);
+            } catch (RemoteException re) {
+                re.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Sends a result code for an attach window overlay request to the requesting client.
+     *
+     * @param result The result code from {@link AccessibilityService.OverlayResult}.
+     * @param interactionId The interaction id of the request.
+     */
+    @Override
+    @RequiresNoPermission
+    public void sendAttachOverlayResult(
+            @AccessibilityService.AttachOverlayResult int result, int interactionId) {
+        if (!Flags.a11yOverlayCallbacks()) {
+            return;
+        }
+        synchronized (mInstanceLock) {
+            if (mAttachAccessibilityOverlayCallbacks.contains(interactionId)) {
+                final Pair<Executor, IntConsumer> pair =
+                        mAttachAccessibilityOverlayCallbacks.get(interactionId);
+                if (pair == null) {
+                    return;
+                }
+                final Executor executor = pair.first;
+                final IntConsumer callback = pair.second;
+                if (executor == null || callback == null) {
+                    return;
+                }
+                executor.execute(() -> callback.accept(result));
+                mAttachAccessibilityOverlayCallbacks.remove(interactionId);
             }
         }
     }

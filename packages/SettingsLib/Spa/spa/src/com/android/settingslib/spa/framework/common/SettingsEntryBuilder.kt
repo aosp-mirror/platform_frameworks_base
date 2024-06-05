@@ -147,19 +147,20 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
             return create(entryName, owner).setLink(toPage = owner)
         }
 
-        fun create(owner: SettingsPage, entryName: String, label: String? = null):
-            SettingsEntryBuilder {
-            return SettingsEntryBuilder(entryName, owner).setLabel(label ?: entryName)
-        }
+        fun create(
+            owner: SettingsPage,
+            entryName: String,
+            label: String = entryName,
+        ): SettingsEntryBuilder = SettingsEntryBuilder(entryName, owner).setLabel(label)
 
-        fun createInject(owner: SettingsPage, label: String? = null): SettingsEntryBuilder {
-            val label = label ?: "${INJECT_ENTRY_LABEL}_${owner.displayName}"
-            return createLinkTo(INJECT_ENTRY_LABEL, owner).setLabel(label)
-        }
+        fun createInject(
+            owner: SettingsPage,
+            label: String = "${INJECT_ENTRY_LABEL}_${owner.displayName}",
+        ): SettingsEntryBuilder = createLinkTo(INJECT_ENTRY_LABEL, owner).setLabel(label)
 
-        fun createRoot(owner: SettingsPage, label: String? = null): SettingsEntryBuilder {
-            val label = label ?: "${ROOT_ENTRY_LABEL}_${owner.displayName}"
-            return createLinkTo(ROOT_ENTRY_LABEL, owner).setLabel(label)
-        }
+        fun createRoot(
+            owner: SettingsPage,
+            label: String = "${ROOT_ENTRY_LABEL}_${owner.displayName}",
+        ): SettingsEntryBuilder = createLinkTo(ROOT_ENTRY_LABEL, owner).setLabel(label)
     }
 }

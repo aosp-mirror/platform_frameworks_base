@@ -2237,10 +2237,6 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
 
 
         mClassName = "com.android.smspush.unitTests.ReceiverActivity";
-        // Phone dummy = new DummyPhone(getContext());
-        // Phone gsm = PhoneFactory.getGsmPhone();
-        // GSMPhone gsm = new GSMPhone(getContext(), new SimulatedCommands(), null, true);
-        // WapPushOverSms dispatcher = new WapPushOverSms(dummy, null);
 
         try {
             // set up data

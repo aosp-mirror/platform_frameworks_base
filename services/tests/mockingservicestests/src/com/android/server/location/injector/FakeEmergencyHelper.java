@@ -27,6 +27,7 @@ public class FakeEmergencyHelper extends EmergencyHelper {
 
     public void setInEmergency(boolean inEmergency) {
         mInEmergency = inEmergency;
+        dispatchEmergencyStateChanged();
     }
 
     @Override

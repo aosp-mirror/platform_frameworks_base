@@ -19,6 +19,7 @@ package android.view;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Trace;
 
 /**
  * Similar to {@link InputEventReceiver}, but batches events to vsync boundaries when possible.
@@ -28,6 +29,7 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
     private Choreographer mChoreographer;
     private boolean mBatchingEnabled;
     private boolean mBatchedInputScheduled;
+    private final String mTag;
     private final Handler mHandler;
     private final Runnable mConsumeBatchedInputEvents = new Runnable() {
         @Override
@@ -42,6 +44,9 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
         super(inputChannel, looper);
         mChoreographer = choreographer;
         mBatchingEnabled = true;
+        mTag = inputChannel.getName();
+        traceBoolVariable("mBatchingEnabled", mBatchingEnabled);
+        traceBoolVariable("mBatchedInputScheduled", mBatchedInputScheduled);
         mHandler = new Handler(looper);
     }
 
@@ -71,6 +76,7 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
         }
 
         mBatchingEnabled = batchingEnabled;
+        traceBoolVariable("mBatchingEnabled", mBatchingEnabled);
         mHandler.removeCallbacks(mConsumeBatchedInputEvents);
         if (!batchingEnabled) {
             unscheduleBatchedInput();
@@ -81,6 +87,7 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
     protected void doConsumeBatchedInput(long frameTimeNanos) {
         if (mBatchedInputScheduled) {
             mBatchedInputScheduled = false;
+            traceBoolVariable("mBatchedInputScheduled", mBatchedInputScheduled);
             if (consumeBatchedInputEvents(frameTimeNanos) && frameTimeNanos != -1) {
                 // If we consumed a batch here, we want to go ahead and schedule the
                 // consumption of batched input events on the next frame. Otherwise, we would
@@ -95,6 +102,7 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
     private void scheduleBatchedInput() {
         if (!mBatchedInputScheduled) {
             mBatchedInputScheduled = true;
+            traceBoolVariable("mBatchedInputScheduled", mBatchedInputScheduled);
             mChoreographer.postCallback(Choreographer.CALLBACK_INPUT, mBatchedInputRunnable, null);
         }
     }
@@ -102,15 +110,27 @@ public class BatchedInputEventReceiver extends InputEventReceiver {
     private void unscheduleBatchedInput() {
         if (mBatchedInputScheduled) {
             mBatchedInputScheduled = false;
+            traceBoolVariable("mBatchedInputScheduled", mBatchedInputScheduled);
             mChoreographer.removeCallbacks(
                     Choreographer.CALLBACK_INPUT, mBatchedInputRunnable, null);
         }
     }
 
+    // @TODO(b/311142655): Delete this temporary tracing. It's only used here to debug a very
+    // specific issue.
+    private void traceBoolVariable(String name, boolean value) {
+        Trace.traceCounter(Trace.TRACE_TAG_INPUT, name, value ? 1 : 0);
+    }
+
     private final class BatchedInputRunnable implements Runnable {
         @Override
         public void run() {
-            doConsumeBatchedInput(mChoreographer.getFrameTimeNanos());
+            try {
+                Trace.traceBegin(Trace.TRACE_TAG_INPUT, mTag);
+                doConsumeBatchedInput(mChoreographer.getFrameTimeNanos());
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_INPUT);
+            }
         }
     }
     private final BatchedInputRunnable mBatchedInputRunnable = new BatchedInputRunnable();

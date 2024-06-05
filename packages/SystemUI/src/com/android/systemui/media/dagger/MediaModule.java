@@ -19,14 +19,13 @@ package com.android.systemui.media.dagger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
-import com.android.systemui.media.controls.pipeline.MediaDataManager;
-import com.android.systemui.media.controls.ui.MediaHierarchyManager;
-import com.android.systemui.media.controls.ui.MediaHost;
-import com.android.systemui.media.controls.ui.MediaHostStatesManager;
-import com.android.systemui.media.controls.util.MediaFlags;
+import com.android.systemui.media.controls.domain.MediaDomainModule;
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
+import com.android.systemui.media.controls.ui.controller.MediaCarouselController;
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
+import com.android.systemui.media.controls.ui.controller.MediaHostStatesManager;
+import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.media.dream.dagger.MediaComplicationComponent;
-import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
-import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogBuffer;
@@ -41,7 +40,11 @@ import java.util.Optional;
 import javax.inject.Named;
 
 /** Dagger module for the media package. */
-@Module(subcomponents = {
+@Module(
+        includes = {
+            MediaDomainModule.class
+        },
+        subcomponents = {
         MediaComplicationComponent.class,
 })
 public interface MediaModule {
@@ -49,6 +52,7 @@ public interface MediaModule {
     String QUICK_QS_PANEL = "media_quick_qs_panel";
     String KEYGUARD = "media_keyguard";
     String DREAM = "dream";
+    String COMMUNAL_HUB = "communal_Hub";
 
     /** */
     @Provides
@@ -56,8 +60,9 @@ public interface MediaModule {
     @Named(QS_PANEL)
     static MediaHost providesQSMediaHost(MediaHost.MediaHostStateHolder stateHolder,
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
-            MediaHostStatesManager statesManager) {
-        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+            MediaHostStatesManager statesManager, MediaCarouselController carouselController) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager,
+                carouselController);
     }
 
     /** */
@@ -66,8 +71,9 @@ public interface MediaModule {
     @Named(QUICK_QS_PANEL)
     static MediaHost providesQuickQSMediaHost(MediaHost.MediaHostStateHolder stateHolder,
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
-            MediaHostStatesManager statesManager) {
-        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+            MediaHostStatesManager statesManager, MediaCarouselController carouselController) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager,
+                carouselController);
     }
 
     /** */
@@ -76,8 +82,9 @@ public interface MediaModule {
     @Named(KEYGUARD)
     static MediaHost providesKeyguardMediaHost(MediaHost.MediaHostStateHolder stateHolder,
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
-            MediaHostStatesManager statesManager) {
-        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+            MediaHostStatesManager statesManager, MediaCarouselController carouselController) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager,
+                carouselController);
     }
 
     /** */
@@ -86,8 +93,20 @@ public interface MediaModule {
     @Named(DREAM)
     static MediaHost providesDreamMediaHost(MediaHost.MediaHostStateHolder stateHolder,
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
-            MediaHostStatesManager statesManager) {
-        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+            MediaHostStatesManager statesManager, MediaCarouselController carouselController) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager,
+                carouselController);
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    @Named(COMMUNAL_HUB)
+    static MediaHost providesCommunalMediaHost(MediaHost.MediaHostStateHolder stateHolder,
+            MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
+            MediaHostStatesManager statesManager, MediaCarouselController carouselController) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager,
+                carouselController);
     }
 
     /** Provides a logging buffer related to the media tap-to-transfer chip on the sender device. */
@@ -118,30 +137,5 @@ public interface MediaModule {
             return Optional.empty();
         }
         return Optional.of(helperLazy.get());
-    }
-
-    /** */
-    @Provides
-    @SysUISingleton
-    static Optional<MediaMuteAwaitConnectionCli> providesMediaMuteAwaitConnectionCli(
-            MediaFlags mediaFlags,
-            Lazy<MediaMuteAwaitConnectionCli> muteAwaitConnectionCliLazy
-    ) {
-        if (!mediaFlags.areMuteAwaitConnectionsEnabled()) {
-            return Optional.empty();
-        }
-        return Optional.of(muteAwaitConnectionCliLazy.get());
-    }
-
-    /** */
-    @Provides
-    @SysUISingleton
-    static Optional<NearbyMediaDevicesManager> providesNearbyMediaDevicesManager(
-            MediaFlags mediaFlags,
-            Lazy<NearbyMediaDevicesManager> nearbyMediaDevicesManagerLazy) {
-        if (!mediaFlags.areNearbyMediaDevicesEnabled()) {
-            return Optional.empty();
-        }
-        return Optional.of(nearbyMediaDevicesManagerLazy.get());
     }
 }

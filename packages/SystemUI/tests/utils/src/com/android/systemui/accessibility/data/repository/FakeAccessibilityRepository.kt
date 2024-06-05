@@ -16,8 +16,21 @@
 
 package com.android.systemui.accessibility.data.repository
 
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 
+@SysUISingleton
 class FakeAccessibilityRepository(
-    override val isTouchExplorationEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-) : AccessibilityRepository
+    override val isTouchExplorationEnabled: MutableStateFlow<Boolean>,
+    override val isEnabled: MutableStateFlow<Boolean>,
+) : AccessibilityRepository {
+    @Inject constructor() : this(MutableStateFlow(false), MutableStateFlow(false))
+}
+
+@Module
+interface FakeAccessibilityRepositoryModule {
+    @Binds fun bindFake(fake: FakeAccessibilityRepository): AccessibilityRepository
+}

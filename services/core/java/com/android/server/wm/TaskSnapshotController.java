@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.SnapshotController.TASK_CLOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -69,19 +68,12 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
                 Environment::getDataSystemCeDirectory);
         mPersister = new TaskSnapshotPersister(persistQueue, mPersistInfoProvider);
 
-        initialize(new TaskSnapshotCache(service, new AppSnapshotLoader(mPersistInfoProvider)));
+        initialize(new TaskSnapshotCache(new AppSnapshotLoader(mPersistInfoProvider)));
         final boolean snapshotEnabled =
                 !service.mContext
                         .getResources()
                         .getBoolean(com.android.internal.R.bool.config_disableTaskSnapshots);
         setSnapshotEnabled(snapshotEnabled);
-    }
-
-    void systemReady() {
-        if (!shouldDisableSnapshots()) {
-            mService.mSnapshotController.registerTransitionStateConsumer(TASK_CLOSE,
-                    this::handleTaskClose);
-        }
     }
 
     static PersistInfoProvider createPersistInfoProvider(WindowManagerService service,
@@ -116,20 +108,24 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
                 enableLowResSnapshots, lowResScaleFactor, use16BitFormat);
     }
 
-    void handleTaskClose(SnapshotController.TransitionState<Task> closeTaskTransitionRecord) {
+    // Still needed for legacy transition.(AppTransitionControllerTest)
+    void handleClosingApps(ArraySet<ActivityRecord> closingApps) {
         if (shouldDisableSnapshots()) {
             return;
         }
+        // We need to take a snapshot of the task if and only if all activities of the task are
+        // either closing or hidden.
         mTmpTasks.clear();
-        final ArraySet<Task> tasks = closeTaskTransitionRecord.getParticipant(false /* open */);
-        if (mService.mAtmService.getTransitionController().isShellTransitionsEnabled()) {
-            mTmpTasks.addAll(tasks);
-        } else {
-            for (Task task : tasks) {
-                getClosingTasksInner(task, mTmpTasks);
-            }
+        for (int i = closingApps.size() - 1; i >= 0; i--) {
+            final ActivityRecord activity = closingApps.valueAt(i);
+            if (activity.isActivityTypeHome()) continue;
+            final Task task = activity.getTask();
+            if (task == null) continue;
+
+            getClosingTasksInner(task, mTmpTasks);
         }
         snapshotTasks(mTmpTasks);
+        mTmpTasks.clear();
         mSkipClosingAppSnapshotTasks.clear();
     }
 
@@ -149,23 +145,32 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
     }
 
     void snapshotTasks(ArraySet<Task> tasks) {
-        snapshotTasks(tasks, false /* allowSnapshotHome */);
+        for (int i = tasks.size() - 1; i >= 0; i--) {
+            recordSnapshot(tasks.valueAt(i));
+        }
     }
 
-    TaskSnapshot recordSnapshot(Task task, boolean allowSnapshotHome) {
-        final boolean snapshotHome = allowSnapshotHome && task.isActivityTypeHome();
-        final TaskSnapshot snapshot = recordSnapshotInner(task, allowSnapshotHome);
-        if (!snapshotHome && snapshot != null) {
+    /**
+     * The attributes of task snapshot are based on task configuration. But sometimes the
+     * configuration may have been changed during a transition, so supply the ChangeInfo that
+     * stored the previous appearance of the closing task.
+     */
+    void recordSnapshot(Task task, Transition.ChangeInfo changeInfo) {
+        mCurrentChangeInfo = changeInfo;
+        try {
+            recordSnapshot(task);
+        } finally {
+            mCurrentChangeInfo = null;
+        }
+    }
+
+    TaskSnapshot recordSnapshot(Task task) {
+        final TaskSnapshot snapshot = recordSnapshotInner(task);
+        if (snapshot != null && !task.isActivityTypeHome()) {
             mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
             task.onSnapshotChanged(snapshot);
         }
         return snapshot;
-    }
-
-    private void snapshotTasks(ArraySet<Task> tasks, boolean allowSnapshotHome) {
-        for (int i = tasks.size() - 1; i >= 0; i--) {
-            recordSnapshot(tasks.valueAt(i), allowSnapshotHome);
-        }
     }
 
     /**
@@ -265,6 +270,11 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         return source.getTaskDescription();
     }
 
+    @Override
+    protected Rect getLetterboxInsets(ActivityRecord topActivity) {
+        return topActivity.getLetterboxInsets();
+    }
+
     void getClosingTasksInner(Task task, ArraySet<Task> outClosingTasks) {
         // Since RecentsAnimation will handle task snapshot while switching apps with the
         // best capture timing (e.g. IME window capture),
@@ -279,9 +289,9 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         }
     }
 
-    void notifyTaskRemovedFromRecents(int taskId, int userId) {
+    void removeAndDeleteSnapshot(int taskId, int userId) {
         mCache.onIdRemoved(taskId);
-        mPersister.onTaskRemovedFromRecents(taskId, userId);
+        mPersister.removeSnapshot(taskId, userId);
     }
 
     void removeSnapshotCache(int taskId) {
@@ -325,19 +335,22 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         if (displayContent == null) {
             return;
         }
+        // Allow taking snapshot of home when turning screen off to reduce the delay of waking from
+        // secure lock to home.
+        final boolean allowSnapshotHome = displayId == Display.DEFAULT_DISPLAY
+                && mService.mPolicy.isKeyguardSecure(mService.mCurrentUserId);
         mTmpTasks.clear();
-        displayContent.forAllTasks(task -> {
+        displayContent.forAllLeafTasks(task -> {
+            if (!allowSnapshotHome && task.isActivityTypeHome()) {
+                return;
+            }
             // Since RecentsAnimation will handle task snapshot while switching apps with the best
             // capture timing (e.g. IME window capture), No need additional task capture while task
             // is controlled by RecentsAnimation.
             if (task.isVisible() && !isAnimatingByRecents(task)) {
                 mTmpTasks.add(task);
             }
-        });
-        // Allow taking snapshot of home when turning screen off to reduce the delay of waking from
-        // secure lock to home.
-        final boolean allowSnapshotHome = displayId == Display.DEFAULT_DISPLAY
-                && mService.mPolicy.isKeyguardSecure(mService.mCurrentUserId);
-        snapshotTasks(mTmpTasks, allowSnapshotHome);
+        }, true /* traverseTopToBottom */);
+        snapshotTasks(mTmpTasks);
     }
 }

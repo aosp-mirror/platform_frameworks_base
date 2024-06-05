@@ -307,7 +307,11 @@ public class TypedArray implements AutoCloseable {
         if (type == TypedValue.TYPE_STRING) {
             final int cookie = data[index + STYLE_ASSET_COOKIE];
             if (cookie < 0) {
-                return mXml.getPooledString(data[index + STYLE_DATA]).toString();
+                String value = mXml.getPooledString(data[index + STYLE_DATA]).toString();
+                if (value != null && mXml != null && mXml.mValidator != null) {
+                    mXml.mValidator.validateResStrAttr(mXml, index, value);
+                }
+                return value;
             }
         }
         return null;
@@ -1391,13 +1395,18 @@ public class TypedArray implements AutoCloseable {
     private CharSequence loadStringValueAt(int index) {
         final int[] data = mData;
         final int cookie = data[index + STYLE_ASSET_COOKIE];
+        CharSequence value = null;
         if (cookie < 0) {
             if (mXml != null) {
-                return mXml.getPooledString(data[index + STYLE_DATA]);
+                value = mXml.getPooledString(data[index + STYLE_DATA]);
             }
-            return null;
+        } else {
+            value = mAssets.getPooledStringForCookie(cookie, data[index + STYLE_DATA]);
         }
-        return mAssets.getPooledStringForCookie(cookie, data[index + STYLE_DATA]);
+        if (value != null && mXml != null && mXml.mValidator != null) {
+            mXml.mValidator.validateResStrAttr(mXml, index / STYLE_NUM_ENTRIES, value);
+        }
+        return value;
     }
 
     /** @hide */

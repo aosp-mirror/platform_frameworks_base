@@ -19,6 +19,7 @@ package com.android.server.autofill;
 import static android.service.autofill.FillEventHistory.Event.NO_SAVE_UI_REASON_NONE;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_INLINE;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
+import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
@@ -32,8 +33,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
 import android.metrics.LogMaker;
@@ -93,6 +97,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 /**
  * Bridge between the {@code system_server}'s {@link AutofillManagerService} and the
@@ -250,6 +255,31 @@ final class AutofillManagerServiceImpl
     @Override // from PerUserSystemService
     protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws NameNotFoundException {
+        final List<ResolveInfo> resolveInfos =
+                getContext().getPackageManager().queryIntentServicesAsUser(
+                    new Intent(AutofillService.SERVICE_INTERFACE),
+                    // The MATCH_INSTANT flag is added because curret autofill CTS module is
+                    // defined in one apk, which makes the test autofill service installed in a
+                    // instant app when the CTS tests are running in instant app mode.
+                    // TODO: Remove MATCH_INSTANT flag after completing refactoring the CTS module
+                    //       to make the test autofill service a separate apk.
+                    PackageManager.GET_META_DATA | PackageManager.MATCH_INSTANT,
+                    mUserId);
+        boolean serviceHasAutofillIntentFilter = false;
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+            if (serviceInfo.getComponentName().equals(serviceComponent)) {
+                serviceHasAutofillIntentFilter = true;
+                break;
+            }
+        }
+        if (!serviceHasAutofillIntentFilter) {
+            Slog.w(TAG,
+                    "Autofill service from '" + serviceComponent.getPackageName() + "' does"
+                            + "not have intent filter " + AutofillService.SERVICE_INTERFACE);
+            throw new SecurityException("Service does not declare intent filter "
+                            + AutofillService.SERVICE_INTERFACE);
+        }
         mInfo = new AutofillServiceInfo(getContext(), serviceComponent, mUserId);
         return mInfo.getServiceInfo();
     }
@@ -265,19 +295,31 @@ final class AutofillManagerServiceImpl
      * @return {@code 0} if disabled, {@code FLAG_ADD_CLIENT_ENABLED} if enabled (it might be
      * OR'ed with {@code FLAG_AUGMENTED_AUTOFILL_REQUEST}).
      */
-    @GuardedBy("mLock")
-    int addClientLocked(IAutoFillManagerClient client, ComponentName componentName) {
-        if (mClients == null) {
-            mClients = new RemoteCallbackList<>();
-        }
-        mClients.register(client);
+    int addClientLocked(IAutoFillManagerClient client, ComponentName componentName,
+            boolean credmanRequested) {
+        synchronized (mLock) {
+            ComponentName credComponentName = getCredentialAutofillService(getContext());
 
-        if (isEnabledLocked()) return FLAG_ADD_CLIENT_ENABLED;
+            if (!credmanRequested
+                    && Objects.equals(credComponentName,
+                    mInfo == null ? null : mInfo.getServiceInfo().getComponentName())) {
+                // If the service component name corresponds to cred component name, then it means
+                // no autofill provider is selected by the user. Cred Autofill Service should only
+                // be active if there is a credman request.
+                return 0;
+            }
+            if (mClients == null) {
+                mClients = new RemoteCallbackList<>();
+            }
+            mClients.register(client);
 
-        // Check if it's enabled for augmented autofill
-        if (componentName != null && isAugmentedAutofillServiceAvailableLocked()
-                && isWhitelistedForAugmentedAutofillLocked(componentName)) {
-            return FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
+            if (isEnabledLocked()) return FLAG_ADD_CLIENT_ENABLED;
+
+            // Check if it's enabled for augmented autofill
+            if (componentName != null && isAugmentedAutofillServiceAvailableLocked()
+                    && isWhitelistedForAugmentedAutofillLocked(componentName)) {
+                return FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
+            }
         }
 
         // No flags / disabled
@@ -424,6 +466,7 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     void setAutofillFailureLocked(int sessionId, int uid, @NonNull List<AutofillId> ids) {
         if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
             return;
         }
         final Session session = mSessions.get(sessionId);
@@ -435,8 +478,23 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
+    void setViewAutofilled(int sessionId, int uid, @NonNull AutofillId id) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "setViewAutofilled(): no session for " + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setViewAutofilled(id);
+    }
+
+    @GuardedBy("mLock")
     void finishSessionLocked(int sessionId, int uid, @AutofillCommitReason int commitReason) {
         if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
             return;
         }
 
@@ -450,7 +508,7 @@ final class AutofillManagerServiceImpl
 
         final Session.SaveResult saveResult = session.showSaveLocked();
 
-        session.logContextCommitted(saveResult.getNoSaveUiReason(), commitReason);
+        session.logContextCommittedLocked(saveResult.getNoSaveUiReason(), commitReason);
 
         if (saveResult.isLogSaveShown()) {
             session.logSaveUiShown();
@@ -531,15 +589,15 @@ final class AutofillManagerServiceImpl
                 || mSessions.indexOfKey(sessionId) >= 0);
 
         assertCallerLocked(clientActivity, compatMode);
-
-        // It's null when the session is just for augmented autofill
-        final ComponentName serviceComponentName = mInfo == null ? null
+        ComponentName serviceComponentName = mInfo == null ? null
                 : mInfo.getServiceInfo().getComponentName();
+        boolean isPrimaryCredential = (flags & FLAG_VIEW_REQUESTS_CREDMAN_SERVICE) != 0;
+
         final Session newSession = new Session(this, mUi, getContext(), mHandler, mUserId, mLock,
                 sessionId, taskId, clientUid, clientActivityToken, clientCallback, hasCallback,
                 mUiLatencyHistory, mWtfHistory, serviceComponentName,
                 clientActivity, compatMode, bindInstantServiceAllowed, forAugmentedAutofillOnly,
-                flags, mInputMethodManagerInternal);
+                flags, mInputMethodManagerInternal, isPrimaryCredential);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
@@ -1263,7 +1321,8 @@ final class AutofillManagerServiceImpl
         RemoteFillService remoteService =
                 new RemoteFillService(
                         getContext(), mInfo.getServiceInfo().getComponentName(), mUserId,
-                        /* callbacks= */ null, mMaster.isInstantServiceAllowed());
+                        /* callbacks= */ null, mMaster.isInstantServiceAllowed(),
+                        mMaster.mCredentialAutofillService);
         remoteService.onSavedPasswordCountRequest(receiver);
     }
 
@@ -1413,7 +1472,7 @@ final class AutofillManagerServiceImpl
             Slog.v(TAG, "setAugmentedAutofillWhitelistLocked(packages=" + packages + ", activities="
                     + activities + ")");
         }
-        whitelistForAugmentedAutofillPackages(packages, activities);
+        allowlistForAugmentedAutofillPackages(packages, activities);
         final String serviceName;
         if (mRemoteAugmentedAutofillServiceInfo != null) {
             serviceName = mRemoteAugmentedAutofillServiceInfo.getComponentName()
@@ -1457,6 +1516,22 @@ final class AutofillManagerServiceImpl
         return true;
     }
 
+    @Nullable
+    private ComponentName getCredentialAutofillService(Context context) {
+        ComponentName componentName = null;
+        String credentialManagerAutofillCompName = context.getResources().getString(
+                R.string.config_defaultCredentialManagerAutofillService);
+        if (credentialManagerAutofillCompName != null
+                && !credentialManagerAutofillCompName.isEmpty()) {
+            componentName = ComponentName.unflattenFromString(
+                    credentialManagerAutofillCompName);
+        }
+        if (componentName == null) {
+            Slog.w(TAG, "Invalid CredentialAutofillService");
+        }
+        return componentName;
+    }
+
     @GuardedBy("mLock")
     private int getAugmentedAutofillServiceUidLocked() {
         if (mRemoteAugmentedAutofillServiceInfo == null) {
@@ -1477,7 +1552,7 @@ final class AutofillManagerServiceImpl
     /**
      * @throws IllegalArgumentException if packages or components are empty.
      */
-    private void whitelistForAugmentedAutofillPackages(@Nullable List<String> packages,
+    private void allowlistForAugmentedAutofillPackages(@Nullable List<String> packages,
             @Nullable List<ComponentName> components) {
         // TODO(b/123100824): add CTS test for when it's null
         synchronized (mLock) {
@@ -1671,9 +1746,10 @@ final class AutofillManagerServiceImpl
 
         @Override // from InlineSuggestionRenderCallbacksImpl
         public void onServiceDied(@NonNull RemoteInlineSuggestionRenderService service) {
-            // Don't do anything; eventually the system will bind to it again...
             Slog.w(TAG, "remote service died: " + service);
-            mRemoteInlineSuggestionRenderService = null;
+            synchronized (mLock) {
+                resetExtServiceLocked();
+            }
         }
     }
 
@@ -1745,6 +1821,10 @@ final class AutofillManagerServiceImpl
         synchronized (mLock) {
             return getRemoteFieldClassificationServiceLocked() != null;
         }
+    }
+
+    public boolean isAutofillCredmanIntegrationEnabled() {
+        return mMaster.isAutofillCredmanIntegrationEnabled();
     }
 
     /**

@@ -28,6 +28,7 @@ import android.view.MotionEvent;
 
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.BaseEventStreamTransformation;
+import com.android.server.accessibility.Flags;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -57,11 +58,18 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
     protected final boolean mDetectShortcutTrigger;
 
     /**
-     * {@code true} if this detector should detect and respond to triple-tap
+     * {@code true} if this detector should detect and respond to single-finger triple-tap
      * gestures for engaging and disengaging magnification,
      * {@code false} if it should ignore such gestures
      */
-    protected final boolean mDetectTripleTap;
+    protected final boolean mDetectSingleFingerTripleTap;
+
+    /**
+     * {@code true} if this detector should detect and respond to two-finger triple-tap
+     * gestures for engaging and disengaging magnification,
+     * {@code false} if it should ignore such gestures
+     */
+    protected final boolean mDetectTwoFingerTripleTap;
 
     /** Callback interface to report that magnification is interactive with a user. */
     public interface Callback {
@@ -85,12 +93,16 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
     private final AccessibilityTraceManager mTrace;
     protected final Callback mCallback;
 
-    protected MagnificationGestureHandler(int displayId, boolean detectTripleTap,
+    protected MagnificationGestureHandler(int displayId,
+            boolean detectSingleFingerTripleTap,
+            boolean detectTwoFingerTripleTap,
             boolean detectShortcutTrigger,
             AccessibilityTraceManager trace,
             @NonNull Callback callback) {
         mDisplayId = displayId;
-        mDetectTripleTap = detectTripleTap;
+        mDetectSingleFingerTripleTap = detectSingleFingerTripleTap;
+        mDetectTwoFingerTripleTap = Flags.enableMagnificationMultipleFingerMultipleTapGesture()
+                && detectTwoFingerTripleTap;
         mDetectShortcutTrigger = detectShortcutTrigger;
         mTrace = trace;
         mCallback = callback;
@@ -128,8 +140,8 @@ public abstract class MagnificationGestureHandler extends BaseEventStreamTransfo
     }
 
     private boolean shouldDispatchTransformedEvent(MotionEvent event) {
-        if ((!mDetectTripleTap && !mDetectShortcutTrigger) || !event.isFromSource(
-                SOURCE_TOUCHSCREEN)) {
+        if ((!mDetectSingleFingerTripleTap && !mDetectTwoFingerTripleTap && !mDetectShortcutTrigger)
+                || !event.isFromSource(SOURCE_TOUCHSCREEN)) {
             return true;
         }
         return false;

@@ -29,7 +29,7 @@ public class ShadowDefaultDialerManager {
     private static String sDefaultDialer;
 
     @Resetter
-    public void reset() {
+    public static void reset() {
         sDefaultDialer = null;
     }
 

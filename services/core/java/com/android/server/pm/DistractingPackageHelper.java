@@ -19,10 +19,7 @@ package com.android.server.pm;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 
 import android.annotation.NonNull;
-import android.content.Intent;
 import android.content.pm.PackageManager.DistractionRestriction;
-import android.os.Bundle;
-import android.os.Handler;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.IntArray;
@@ -32,6 +29,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -41,17 +39,16 @@ public final class DistractingPackageHelper {
 
     // TODO(b/198166813): remove PMS dependency
     private final PackageManagerService mPm;
-    private final PackageManagerServiceInjector mInjector;
     private final BroadcastHelper mBroadcastHelper;
     private final SuspendPackageHelper mSuspendPackageHelper;
 
     /**
      * Constructor for {@link PackageManagerService}.
      */
-    DistractingPackageHelper(PackageManagerService pm, PackageManagerServiceInjector injector,
-            BroadcastHelper broadcastHelper, SuspendPackageHelper suspendPackageHelper) {
+    DistractingPackageHelper(PackageManagerService pm,
+                             BroadcastHelper broadcastHelper,
+                             SuspendPackageHelper suspendPackageHelper) {
         mPm = pm;
-        mInjector = injector;
         mBroadcastHelper = broadcastHelper;
         mSuspendPackageHelper = suspendPackageHelper;
     }
@@ -126,11 +123,44 @@ public final class DistractingPackageHelper {
         if (!changedPackagesList.isEmpty()) {
             final String[] changedPackages = changedPackagesList.toArray(
                     new String[changedPackagesList.size()]);
-            sendDistractingPackagesChanged(changedPackages, changedUids.toArray(), userId,
-                    restrictionFlags);
+            mBroadcastHelper.sendDistractingPackagesChanged(mPm.snapshotComputer(),
+                    changedPackages, changedUids.toArray(), userId, restrictionFlags);
             mPm.scheduleWritePackageRestrictions(userId);
         }
         return unactionedPackages.toArray(new String[0]);
+    }
+
+
+    /**
+     * Gets {@link DistractionRestriction restrictions} of the given packages of the given user.
+     *
+     * The corresponding element of the resulting array will be -1 if a given package doesn't exist.
+     *
+     * @param packageNames The packages under which to check.
+     * @param userId The user under which to check.
+     * @return an array of distracting restriction state in order of the given packages
+     */
+    int[] getDistractingPackageRestrictionsAsUser(@NonNull Computer snapshot,
+            @NonNull String[] packageNames, int userId, int callingUid) {
+        int[] res = new int[packageNames.length];
+        Arrays.fill(res, -1);
+
+        if (ArrayUtils.isEmpty(packageNames)) {
+            return res;
+        }
+
+        for (int i = 0; i < packageNames.length; i++) {
+            final String packageName = packageNames[i];
+            final PackageStateInternal packageState =
+                    snapshot.getPackageStateForInstalledAndFiltered(
+                            packageName, callingUid, userId);
+            if (packageState == null) {
+                continue;
+            }
+
+            res[i] = packageState.getUserStateOrDefault(userId).getDistractionFlags();
+        }
+        return res;
     }
 
     /**
@@ -168,34 +198,9 @@ public final class DistractingPackageHelper {
         if (!changedPackages.isEmpty()) {
             final String[] packageArray = changedPackages.toArray(
                     new String[changedPackages.size()]);
-            sendDistractingPackagesChanged(packageArray, changedUids.toArray(), userId,
-                    RESTRICTION_NONE);
+            mBroadcastHelper.sendDistractingPackagesChanged(mPm.snapshotComputer(),
+                    packageArray, changedUids.toArray(), userId, RESTRICTION_NONE);
             mPm.scheduleWritePackageRestrictions(userId);
         }
-    }
-
-    /**
-     * Send broadcast intents for packages distracting changes.
-     *
-     * @param pkgList The names of packages which have suspension changes.
-     * @param uidList The uids of packages which have suspension changes.
-     * @param userId The user where packages reside.
-     */
-    void sendDistractingPackagesChanged(@NonNull String[] pkgList, int[] uidList, int userId,
-            int distractionFlags) {
-        final Bundle extras = new Bundle();
-        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
-        extras.putInt(Intent.EXTRA_DISTRACTION_RESTRICTIONS, distractionFlags);
-
-        final Handler handler = mInjector.getHandler();
-        handler.post(() -> mBroadcastHelper.sendPackageBroadcast(
-                Intent.ACTION_DISTRACTING_PACKAGES_CHANGED, null /* pkg */,
-                extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null /* targetPkg */,
-                null /* finishedReceiver */, new int[]{userId}, null /* instantUserIds */,
-                null /* broadcastAllowList */,
-                (callingUid, intentExtras) -> BroadcastHelper.filterExtrasChangedPackageList(
-                        mPm.snapshotComputer(), callingUid, intentExtras),
-                null /* bOptions */));
     }
 }

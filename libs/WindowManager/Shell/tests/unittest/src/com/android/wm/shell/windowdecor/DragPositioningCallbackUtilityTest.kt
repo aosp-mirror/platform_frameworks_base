@@ -76,7 +76,7 @@ class DragPositioningCallbackUtilityTest {
             minHeight = MIN_HEIGHT
             defaultMinSize = DEFAULT_MIN
             displayId = DISPLAY_ID
-            configuration.windowConfiguration.bounds = STARTING_BOUNDS
+            configuration.windowConfiguration.setBounds(STARTING_BOUNDS)
         }
         mockWindowDecoration.mDisplay = mockDisplay
         whenever(mockDisplay.displayId).thenAnswer { DISPLAY_ID }
@@ -178,6 +178,27 @@ class DragPositioningCallbackUtilityTest {
         assertThat(repositionTaskBounds.top).isEqualTo(STARTING_BOUNDS.top)
         assertThat(repositionTaskBounds.right).isEqualTo(STARTING_BOUNDS.right)
         assertThat(repositionTaskBounds.bottom).isEqualTo(STARTING_BOUNDS.bottom)
+    }
+
+    @Test
+    fun testDragEndSnapsTaskBoundsWhenOutsideValidDragArea() {
+        val startingPoint = PointF(STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.top.toFloat())
+        val repositionTaskBounds = Rect(STARTING_BOUNDS)
+        val validDragArea = Rect(DISPLAY_BOUNDS.left - 100,
+            STABLE_BOUNDS.top,
+            DISPLAY_BOUNDS.right - 100,
+            DISPLAY_BOUNDS.bottom - 100)
+
+        DragPositioningCallbackUtility.updateTaskBounds(repositionTaskBounds, STARTING_BOUNDS,
+            startingPoint, startingPoint.x - 1000, (DISPLAY_BOUNDS.bottom + 1000).toFloat())
+        DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(repositionTaskBounds,
+            validDragArea)
+        assertThat(repositionTaskBounds.left).isEqualTo(validDragArea.left)
+        assertThat(repositionTaskBounds.top).isEqualTo(validDragArea.bottom)
+        assertThat(repositionTaskBounds.right)
+            .isEqualTo(validDragArea.left + STARTING_BOUNDS.width())
+        assertThat(repositionTaskBounds.bottom)
+            .isEqualTo(validDragArea.bottom + STARTING_BOUNDS.height())
     }
 
     @Test

@@ -17,6 +17,8 @@ package com.android.systemui.qs;
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -26,7 +28,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
+import com.android.systemui.shade.LargeScreenHeaderHelper;
 import com.android.systemui.util.LargeScreenUtils;
 
 /**
@@ -40,6 +43,8 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     protected QuickQSPanel mHeaderQsPanel;
 
+    private boolean mSceneContainerEnabled;
+
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -50,6 +55,13 @@ public class QuickStatusBarHeader extends FrameLayout {
         mHeaderQsPanel = findViewById(R.id.quick_qs_panel);
 
         updateResources();
+    }
+
+    void setSceneContainerEnabled(boolean enabled) {
+        mSceneContainerEnabled = enabled;
+        if (mSceneContainerEnabled) {
+            updateResources();
+        }
     }
 
     @Override
@@ -82,11 +94,15 @@ public class QuickStatusBarHeader extends FrameLayout {
         setLayoutParams(lp);
 
         MarginLayoutParams qqsLP = (MarginLayoutParams) mHeaderQsPanel.getLayoutParams();
-        if (largeScreenHeaderActive) {
+        if (mSceneContainerEnabled) {
+            qqsLP.topMargin = 0;
+        } else if (largeScreenHeaderActive) {
             qqsLP.topMargin = mContext.getResources()
                     .getDimensionPixelSize(R.dimen.qqs_layout_margin_top);
         } else {
-            qqsLP.topMargin = mContext.getResources()
+            qqsLP.topMargin = centralizedStatusBarHeightFix()
+                    ? LargeScreenHeaderHelper.getLargeScreenHeaderHeight(mContext)
+                    : mContext.getResources()
                     .getDimensionPixelSize(R.dimen.large_screen_shade_header_min_height);
         }
         mHeaderQsPanel.setLayoutParams(qqsLP);

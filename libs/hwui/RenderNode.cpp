@@ -16,28 +16,29 @@
 
 #include "RenderNode.h"
 
+#include <SkPathOps.h>
+#include <gui/TraceUtils.h>
+#include <ui/FatVector.h>
+
+#include <algorithm>
+#include <atomic>
+#include <sstream>
+#include <string>
+
 #include "DamageAccumulator.h"
 #include "Debug.h"
 #include "Properties.h"
 #include "TreeInfo.h"
 #include "VectorDrawable.h"
 #include "private/hwui/WebViewFunctor.h"
-#ifdef __ANDROID__
 #include "renderthread/CanvasContext.h"
-#else
-#include "DamageAccumulator.h"
-#include "pipeline/skia/SkiaDisplayList.h"
+
+#ifdef __ANDROID__
+#include "include/gpu/ganesh/SkImageGanesh.h"
 #endif
-#include <gui/TraceUtils.h>
+#include "utils/ForceDark.h"
 #include "utils/MathUtils.h"
 #include "utils/StringUtils.h"
-
-#include <SkPathOps.h>
-#include <algorithm>
-#include <atomic>
-#include <sstream>
-#include <string>
-#include <ui/FatVector.h>
 
 namespace android {
 namespace uirenderer {
@@ -109,6 +110,13 @@ void RenderNode::output(std::ostream& output, uint32_t level) {
     output << std::endl;
 }
 
+void RenderNode::visit(std::function<void(const RenderNode&)> func) const {
+    func(*this);
+    if (mDisplayList) {
+        mDisplayList.visit(func);
+    }
+}
+
 int RenderNode::getUsageSize() {
     int size = sizeof(RenderNode);
     size += mStagingDisplayList.getUsedSize();
@@ -174,7 +182,6 @@ void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
 }
 
 void RenderNode::pushLayerUpdate(TreeInfo& info) {
-#ifdef __ANDROID__ // Layoutlib does not support CanvasContext and Layers
     LayerType layerType = properties().effectiveLayerType();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
@@ -206,7 +213,6 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     // That might be us, so tell CanvasContext that this layer is in the
     // tree and should not be destroyed.
     info.canvasContext.markLayerInUse(this);
-#endif
 }
 
 /**
@@ -218,7 +224,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
  * stencil buffer may be needed. Views that use a functor to draw will be forced onto a layer.
  */
 void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer) {
-    if (mDamageGenerationId == info.damageGenerationId) {
+    if (mDamageGenerationId == info.damageGenerationId && mDamageGenerationId != 0) {
         // We hit the same node a second time in the same tree. We don't know the minimal
         // damage rect anymore, so just push the biggest we can onto our parent's transform
         // We push directly onto parent in case we are clipped to bounds but have moved position.
@@ -258,6 +264,12 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
     prepareLayer(info, animatorDirtyMask);
     if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingDisplayListChanges(observer, info);
+    }
+
+    // always damageSelf when filtering backdrop content, or else the BackdropFilterDrawable will
+    // get a wrong snapshot of previous content.
+    if (mProperties.layerProperties().getBackdropImageFilter()) {
+        damageSelf(info);
     }
 
     if (mDisplayList) {
@@ -357,13 +369,18 @@ std::optional<RenderNode::SnapshotResult> RenderNode::updateSnapshotIfRequired(
                mImageFilterClipBounds != clipBounds ||
                mTargetImageFilterLayerSurfaceGenerationId != layerSurfaceGenerationId) {
         // Otherwise create a new snapshot with the given filter and snapshot
-        mSnapshotResult.snapshot =
-                snapshot->makeWithFilter(context,
-                                         imageFilter,
-                                         subset,
-                                         clipBounds,
-                                         &mSnapshotResult.outSubset,
-                                         &mSnapshotResult.outOffset);
+#ifdef __ANDROID__
+        if (context) {
+            mSnapshotResult.snapshot = SkImages::MakeWithFilter(
+                    context, snapshot, imageFilter, subset, clipBounds, &mSnapshotResult.outSubset,
+                    &mSnapshotResult.outOffset);
+        } else
+#endif
+        {
+            mSnapshotResult.snapshot = SkImages::MakeWithFilter(
+                    snapshot, imageFilter, subset, clipBounds, &mSnapshotResult.outSubset,
+                    &mSnapshotResult.outOffset);
+        }
         mTargetImageFilter = sk_ref_sp(imageFilter);
         mImageFilterClipBounds = clipBounds;
         mTargetImageFilterLayerSurfaceGenerationId = layerSurfaceGenerationId;
@@ -381,16 +398,21 @@ void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
     deleteDisplayList(observer, info);
     mDisplayList = std::move(mStagingDisplayList);
     if (mDisplayList) {
-        WebViewSyncData syncData {
-            .applyForceDark = info && !info->disableForceDark
-        };
+        WebViewSyncData syncData{.applyForceDark = shouldEnableForceDark(info)};
         mDisplayList.syncContents(syncData);
         handleForceDark(info);
     }
 }
 
+inline bool RenderNode::shouldEnableForceDark(TreeInfo* info) {
+    return CC_UNLIKELY(
+            info &&
+            (!info->disableForceDark ||
+             info->forceDarkType == android::uirenderer::ForceDarkType::FORCE_INVERT_COLOR_DARK));
+}
+
 void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
-    if (CC_LIKELY(!info || info->disableForceDark)) {
+    if (!shouldEnableForceDark(info)) {
         return;
     }
     auto usage = usageHint();
@@ -399,7 +421,13 @@ void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
         children.push_back(node);
     });
     if (mDisplayList.hasText()) {
-        usage = UsageHint::Foreground;
+        if (mDisplayList.hasFill()) {
+            // Handle a special case for custom views that draw both text and background in the
+            // same RenderNode, which would otherwise be altered to white-on-white text.
+            usage = UsageHint::Container;
+        } else {
+            usage = UsageHint::Foreground;
+        }
     }
     if (usage == UsageHint::Unknown) {
         if (children.size() > 1) {
@@ -425,8 +453,13 @@ void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
             drawn.join(bounds);
         }
     }
-    mDisplayList.applyColorTransform(
-            usage == UsageHint::Background ? ColorTransform::Dark : ColorTransform::Light);
+
+    if (usage == UsageHint::Container) {
+        mDisplayList.applyColorTransform(ColorTransform::Invert);
+    } else {
+        mDisplayList.applyColorTransform(usage == UsageHint::Background ? ColorTransform::Dark
+                                                                        : ColorTransform::Light);
+    }
 }
 
 void RenderNode::pushStagingDisplayListChanges(TreeObserver& observer, TreeInfo& info) {

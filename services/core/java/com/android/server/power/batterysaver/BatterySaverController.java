@@ -40,7 +40,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
-import com.android.server.power.PowerManagerService;
 import com.android.server.power.batterysaver.BatterySaverPolicy.BatterySaverPolicyListener;
 import com.android.server.power.batterysaver.BatterySaverPolicy.Policy;
 import com.android.server.power.batterysaver.BatterySaverPolicy.PolicyLevel;
@@ -223,7 +222,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     }
 
     /**
-     * Called by {@link PowerManagerService} on system ready, *with no lock held*.
+     * Called by {@link BatterySaverStateMachine} on system ready, *with no lock held*.
      */
     public void systemReady() {
         final IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);

@@ -46,6 +46,7 @@ android_test {
         "androidx.test.espresso.core",
         "androidx.test.espresso.contrib",
         "androidx.test.ext.truth",
+        "flag-junit",
         "frameworks-base-testutils",
         "hamcrest-library",
         "kotlin-test",
@@ -53,6 +54,7 @@ android_test {
         "mockito-target-extended-minus-junit4",
         "platform-compat-test-rules",
         "platform-test-annotations",
+        "PlatformProperties",
         "service-blobstore",
         "service-jobscheduler",
         "service-permission.impl",
@@ -67,10 +69,13 @@ android_test {
         "servicestests-core-utils",
         "servicestests-utils-mockito-extended",
         "testables",
-        "truth-prebuilt",
+        "truth",
         // TODO: remove once Android migrates to JUnit 4.12, which provides assertThrows
         "testng",
         "compatibility-device-util-axt",
+        "flag-junit",
+        "am_flags_lib",
+        "device_policy_aconfig_flags_lib",
     ],
 
     libs: [
@@ -114,4 +119,20 @@ java_library {
     libs: [
         "android.test.runner",
     ],
+}
+
+android_ravenwood_test {
+    name: "FrameworksMockingServicesTestsRavenwood",
+    libs: [
+        "android.test.mock",
+    ],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+        "services.core",
+    ],
+    srcs: [
+        "src/com/android/server/am/BroadcastRecordTest.java",
+    ],
+    auto_gen_config: true,
 }

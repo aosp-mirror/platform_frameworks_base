@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"Menú de accesibilidad"</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"El Menú de accesibilidad es un menú de gran tamaño que se muestra en pantalla y te permite controlar tu dispositivo para bloquearlo, controlar su volumen y brillo, realizar capturas de pantalla y mucho más."</string>
+    <string name="assistant_label" msgid="6796392082252272356">"Asistente"</string>
+    <string name="assistant_utterance" msgid="65509599221141377">"Asistente"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"Configuración de accesibilidad"</string>
+    <string name="power_label" msgid="7699720321491287839">"Encendido"</string>
+    <string name="power_utterance" msgid="7444296686402104807">"Opciones de encendido"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"Apps recientes"</string>
+    <string name="lockscreen_label" msgid="648347953557887087">"Bloquear pantalla"</string>
+    <string name="quick_settings_label" msgid="2999117381487601865">"Configuración rápida"</string>
+    <string name="notifications_label" msgid="6829741046963013567">"Notificaciones"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"Captura de pantalla"</string>
+    <string name="screenshot_utterance" msgid="1430760563401895074">"Tomar captura de pantalla"</string>
+    <string name="volume_up_label" msgid="8592766918780362870">"Subir volumen"</string>
+    <string name="volume_down_label" msgid="8574981863656447346">"Bajar volumen"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"Aumentar brillo"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"Disminuir brillo"</string>
+    <string name="previous_button_content_description" msgid="840869171117765966">"Ir a la pantalla anterior"</string>
+    <string name="next_button_content_description" msgid="6810058269847364406">"Ir a la siguiente pantalla"</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"El menú de Accesibilidad es un menú de gran tamaño que se muestra en la pantalla y te permite controlar tu dispositivo. Puedes bloquearlo, controlar el volumen y el brillo, realizar capturas de pantalla y mucho más."</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Controla el dispositivo con un menú de gran tamaño"</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Configuración del Menú de accesibilidad"</string>
+    <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Botones grandes"</string>
+    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Aumenta el tamaño de los botones del Menú de accesibilidad"</string>
+    <string name="pref_help_title" msgid="6871558837025010641">"Ayuda"</string>
+    <string name="brightness_percentage_label" msgid="7391554573977867369">"Brillo: <xliff:g id="PERCENTAGE">%1$s</xliff:g>%%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"Volumen de la música: <xliff:g id="PERCENTAGE">%1$s</xliff:g>%%"</string>
+</resources>

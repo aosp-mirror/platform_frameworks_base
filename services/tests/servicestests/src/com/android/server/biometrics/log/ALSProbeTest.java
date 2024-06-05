@@ -344,6 +344,21 @@ public class ALSProbeTest {
         verifyNoMoreInteractions(mSensorManager);
     }
 
+    @Test
+    public void testAwaitLuxWhenNoLightSensor() {
+        when(mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)).thenReturn(null);
+        mProbe = new ALSProbe(mSensorManager, new Handler(mLooper.getLooper()), TIMEOUT_MS - 1);
+
+        AtomicInteger lux = new AtomicInteger(-5);
+        mProbe.awaitNextLux((v) -> lux.set(Math.round(v)), null /* handler */);
+
+        // Verify that no light sensor will be registered.
+        verify(mSensorManager, times(0)).registerListener(
+                mSensorEventListenerCaptor.capture(), any(), anyInt());
+
+        assertThat(lux.get()).isEqualTo(-1);
+    }
+
     private void moveTimeBy(long millis) {
         mLooper.moveTimeForward(millis);
         mLooper.processAllMessages();

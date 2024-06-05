@@ -56,6 +56,7 @@ public class MediaOutputMetricLogger {
      * Update the endpoints of a content switching operation.
      * This method should be called before a switching operation, so the metric logger can track
      * source and target devices.
+     *
      * @param source the current connected media device
      * @param target the target media device for content switching to
      */
@@ -72,37 +73,9 @@ public class MediaOutputMetricLogger {
 
     /**
      * Do the metric logging of content switching success.
+     *
      * @param selectedDeviceType string representation of the target media device
-     * @param deviceList media device list for device count updating
-     */
-    public void logOutputSuccess(String selectedDeviceType, List<MediaDevice> deviceList) {
-        if (DEBUG) {
-            Log.d(TAG, "logOutputSuccess - selected device: " + selectedDeviceType);
-        }
-
-        if (mSourceDevice == null && mTargetDevice == null) {
-            return;
-        }
-
-        updateLoggingDeviceCount(deviceList);
-
-        SysUiStatsLog.write(
-                SysUiStatsLog.MEDIAOUTPUT_OP_SWITCH_REPORTED,
-                getLoggingDeviceType(mSourceDevice, true),
-                getLoggingDeviceType(mTargetDevice, false),
-                SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__RESULT__OK,
-                SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__SUBRESULT__NO_ERROR,
-                getLoggingPackageName(),
-                mWiredDeviceCount,
-                mConnectedBluetoothDeviceCount,
-                mRemoteDeviceCount,
-                mAppliedDeviceCountWithinRemoteGroup);
-    }
-
-    /**
-     * Do the metric logging of content switching success.
-     * @param selectedDeviceType string representation of the target media device
-     * @param deviceItemList media item list for device count updating
+     * @param deviceItemList     media item list for device count updating
      */
     public void logOutputItemSuccess(String selectedDeviceType, List<MediaItem> deviceItemList) {
         if (DEBUG) {
@@ -125,11 +98,14 @@ public class MediaOutputMetricLogger {
                 mWiredDeviceCount,
                 mConnectedBluetoothDeviceCount,
                 mRemoteDeviceCount,
-                mAppliedDeviceCountWithinRemoteGroup);
+                mAppliedDeviceCountWithinRemoteGroup,
+                mTargetDevice.isSuggestedDevice(),
+                mTargetDevice.hasOngoingSession());
     }
 
     /**
      * Do the metric logging of volume adjustment.
+     *
      * @param source the device been adjusted
      */
     public void logInteractionAdjustVolume(MediaDevice source) {
@@ -141,7 +117,8 @@ public class MediaOutputMetricLogger {
                 SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__ADJUST_VOLUME,
                 getInteractionDeviceType(source),
-                getLoggingPackageName());
+                getLoggingPackageName(),
+                source.isSuggestedDevice());
     }
 
     /**
@@ -156,7 +133,8 @@ public class MediaOutputMetricLogger {
                 SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__STOP_CASTING,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__UNKNOWN_TYPE,
-                getLoggingPackageName());
+                getLoggingPackageName(),
+                /*isSuggestedDevice = */false);
     }
 
     /**
@@ -171,42 +149,47 @@ public class MediaOutputMetricLogger {
                 SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__EXPANSION,
                 getInteractionDeviceType(source),
-                getLoggingPackageName());
+                getLoggingPackageName(),
+                source.isSuggestedDevice());
     }
 
     /**
-     * Do the metric logging of content switching failure.
-     * @param deviceList media device list for device count updating
-     * @param reason the reason of content switching failure
+     * Do the metric logging of muting device.
      */
-    public void logOutputFailure(List<MediaDevice> deviceList, int reason) {
+    public void logInteractionMute(MediaDevice source) {
         if (DEBUG) {
-            Log.e(TAG, "logRequestFailed - " + reason);
+            Log.d(TAG, "logInteraction - Mute");
         }
-
-        if (mSourceDevice == null && mTargetDevice == null) {
-            return;
-        }
-
-        updateLoggingDeviceCount(deviceList);
 
         SysUiStatsLog.write(
-                SysUiStatsLog.MEDIAOUTPUT_OP_SWITCH_REPORTED,
-                getLoggingDeviceType(mSourceDevice, true),
-                getLoggingDeviceType(mTargetDevice, false),
-                SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__RESULT__ERROR,
-                getLoggingSwitchOpSubResult(reason),
+                SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
+                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__MUTE,
+                getInteractionDeviceType(source),
                 getLoggingPackageName(),
-                mWiredDeviceCount,
-                mConnectedBluetoothDeviceCount,
-                mRemoteDeviceCount,
-                mAppliedDeviceCountWithinRemoteGroup);
+                source.isSuggestedDevice());
+    }
+
+    /**
+     * Do the metric logging of unmuting device.
+     */
+    public void logInteractionUnmute(MediaDevice source) {
+        if (DEBUG) {
+            Log.d(TAG, "logInteraction - Unmute");
+        }
+
+        SysUiStatsLog.write(
+                SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
+                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__UNMUTE,
+                getInteractionDeviceType(source),
+                getLoggingPackageName(),
+                source.isSuggestedDevice());
     }
 
     /**
      * Do the metric logging of content switching failure.
+     *
      * @param deviceItemList media item list for device count updating
-     * @param reason the reason of content switching failure
+     * @param reason         the reason of content switching failure
      */
     public void logOutputItemFailure(List<MediaItem> deviceItemList, int reason) {
         if (DEBUG) {
@@ -229,7 +212,9 @@ public class MediaOutputMetricLogger {
                 mWiredDeviceCount,
                 mConnectedBluetoothDeviceCount,
                 mRemoteDeviceCount,
-                mAppliedDeviceCountWithinRemoteGroup);
+                mAppliedDeviceCountWithinRemoteGroup,
+                mTargetDevice.isSuggestedDevice(),
+                mTargetDevice.hasOngoingSession());
     }
 
     private void updateLoggingDeviceCount(List<MediaDevice> deviceList) {
@@ -266,7 +251,7 @@ public class MediaOutputMetricLogger {
         mWiredDeviceCount = mConnectedBluetoothDeviceCount = mRemoteDeviceCount = 0;
         mAppliedDeviceCountWithinRemoteGroup = 0;
 
-        for (MediaItem mediaItem: deviceItemList) {
+        for (MediaItem mediaItem : deviceItemList) {
             if (mediaItem.getMediaDevice().isPresent()
                     && mediaItem.getMediaDevice().get().isConnected()) {
                 switch (mediaItem.getMediaDevice().get().getDeviceType()) {
@@ -326,6 +311,10 @@ public class MediaOutputMetricLogger {
                 return isSourceDevice
                         ? SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__SOURCE__REMOTE_GROUP
                         : SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__TARGET__REMOTE_GROUP;
+            case MediaDevice.MediaDeviceType.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER:
+                return isSourceDevice
+                        ? SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__SOURCE__AVR
+                        : SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__TARGET__AVR;
             default:
                 return isSourceDevice
                         ? SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__SOURCE__UNKNOWN_TYPE

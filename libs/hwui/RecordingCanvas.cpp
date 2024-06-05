@@ -36,6 +36,7 @@
 #include "SkImageFilter.h"
 #include "SkImageInfo.h"
 #include "SkLatticeIter.h"
+#include "SkMesh.h"
 #include "SkPaint.h"
 #include "SkPicture.h"
 #include "SkRRect.h"
@@ -49,6 +50,7 @@
 #include "effects/GainmapRenderer.h"
 #include "include/gpu/GpuTypes.h"  // from Skia
 #include "include/gpu/GrDirectContext.h"
+#include "include/gpu/ganesh/SkMeshGanesh.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/FunctorDrawable.h"
 #ifdef __ANDROID__
@@ -106,11 +108,6 @@ struct Op {
     uint32_t skip : 24;
 };
 static_assert(sizeof(Op) == 4, "");
-
-struct Flush final : Op {
-    static const auto kType = Type::Flush;
-    void draw(SkCanvas* c, const SkMatrix&) const { c->flush(); }
-};
 
 struct Save final : Op {
     static const auto kType = Type::Save;
@@ -209,6 +206,13 @@ struct ClipRegion final : Op {
     SkRegion region;
     SkClipOp op;
     void draw(SkCanvas* c, const SkMatrix&) const { c->clipRegion(region, op); }
+};
+struct ClipShader final : Op {
+    static const auto kType = Type::ClipShader;
+    ClipShader(const sk_sp<SkShader>& shader, SkClipOp op) : shader(shader), op(op) {}
+    sk_sp<SkShader> shader;
+    SkClipOp op;
+    void draw(SkCanvas* c, const SkMatrix&) const { c->clipShader(shader, op); }
 };
 struct ResetClip final : Op {
     static const auto kType = Type::ResetClip;
@@ -532,24 +536,26 @@ struct DrawSkMesh final : Op {
     mutable bool isGpuBased;
     mutable GrDirectContext::DirectContextID contextId;
     void draw(SkCanvas* c, const SkMatrix&) const {
+#ifdef __ANDROID__
         GrDirectContext* directContext = c->recordingContext()->asDirectContext();
 
         GrDirectContext::DirectContextID id = directContext->directContextID();
         if (!isGpuBased || contextId != id) {
             sk_sp<SkMesh::VertexBuffer> vb =
-                    SkMesh::CopyVertexBuffer(directContext, cpuMesh.refVertexBuffer());
+                    SkMeshes::CopyVertexBuffer(directContext, cpuMesh.refVertexBuffer());
             if (!cpuMesh.indexBuffer()) {
                 gpuMesh = SkMesh::Make(cpuMesh.refSpec(), cpuMesh.mode(), vb, cpuMesh.vertexCount(),
                                        cpuMesh.vertexOffset(), cpuMesh.refUniforms(),
-                                       cpuMesh.bounds())
+                                       SkSpan<SkRuntimeEffect::ChildPtr>(), cpuMesh.bounds())
                                   .mesh;
             } else {
                 sk_sp<SkMesh::IndexBuffer> ib =
-                        SkMesh::CopyIndexBuffer(directContext, cpuMesh.refIndexBuffer());
+                        SkMeshes::CopyIndexBuffer(directContext, cpuMesh.refIndexBuffer());
                 gpuMesh = SkMesh::MakeIndexed(cpuMesh.refSpec(), cpuMesh.mode(), vb,
                                               cpuMesh.vertexCount(), cpuMesh.vertexOffset(), ib,
                                               cpuMesh.indexCount(), cpuMesh.indexOffset(),
-                                              cpuMesh.refUniforms(), cpuMesh.bounds())
+                                              cpuMesh.refUniforms(),
+                                              SkSpan<SkRuntimeEffect::ChildPtr>(), cpuMesh.bounds())
                                   .mesh;
             }
 
@@ -558,15 +564,18 @@ struct DrawSkMesh final : Op {
         }
 
         c->drawMesh(gpuMesh, blender, paint);
+#else
+        c->drawMesh(cpuMesh, blender, paint);
+#endif
     }
 };
 
 struct DrawMesh final : Op {
     static const auto kType = Type::DrawMesh;
     DrawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint)
-            : mesh(mesh), blender(std::move(blender)), paint(paint) {}
+            : mesh(mesh.takeSnapshot()), blender(std::move(blender)), paint(paint) {}
 
-    const Mesh& mesh;
+    Mesh::Snapshot mesh;
     sk_sp<SkBlender> blender;
     SkPaint paint;
 
@@ -675,12 +684,11 @@ public:
             // because the webview functor still doesn't respect the canvas clip stack.
             const SkIRect deviceBounds = c->getDeviceClipBounds();
             if (mLayerSurface == nullptr || c->imageInfo() != mLayerImageInfo) {
-                GrRecordingContext* directContext = c->recordingContext();
                 mLayerImageInfo =
                         c->imageInfo().makeWH(deviceBounds.width(), deviceBounds.height());
-                mLayerSurface = SkSurface::MakeRenderTarget(directContext, skgpu::Budgeted::kYes,
-                                                            mLayerImageInfo, 0,
-                                                            kTopLeft_GrSurfaceOrigin, nullptr);
+                // SkCanvas::makeSurface returns a new surface that will be GPU-backed if
+                // canvas was also.
+                mLayerSurface = c->makeSurface(mLayerImageInfo);
             }
 
             SkCanvas* layerCanvas = mLayerSurface->getCanvas();
@@ -717,6 +725,27 @@ static constexpr inline bool is_power_of_two(int value) {
     return (value & (value - 1)) == 0;
 }
 
+template <typename T>
+constexpr bool doesPaintHaveFill(T& paint) {
+    using T1 = std::remove_cv_t<T>;
+    if constexpr (std::is_same_v<T1, SkPaint>) {
+        return paint.getStyle() != SkPaint::Style::kStroke_Style;
+    } else if constexpr (std::is_same_v<T1, SkPaint&>) {
+        return paint.getStyle() != SkPaint::Style::kStroke_Style;
+    } else if constexpr (std::is_same_v<T1, SkPaint*>) {
+        return paint && paint->getStyle() != SkPaint::Style::kStroke_Style;
+    } else if constexpr (std::is_same_v<T1, const SkPaint*>) {
+        return paint && paint->getStyle() != SkPaint::Style::kStroke_Style;
+    }
+
+    return false;
+}
+
+template <typename... Args>
+constexpr bool hasPaintWithFill(Args&&... args) {
+    return (... || doesPaintHaveFill(args));
+}
+
 template <typename T, typename... Args>
 void* DisplayListData::push(size_t pod, Args&&... args) {
     size_t skip = SkAlignPtr(sizeof(T) + pod);
@@ -735,6 +764,14 @@ void* DisplayListData::push(size_t pod, Args&&... args) {
     new (op) T{std::forward<Args>(args)...};
     op->type = (uint32_t)T::kType;
     op->skip = skip;
+
+    // check if this is a fill op or not, in case we need to avoid messing with it with force invert
+    if constexpr (!std::is_same_v<T, DrawTextBlob>) {
+        if (hasPaintWithFill(args...)) {
+            mHasFill = true;
+        }
+    }
+
     return op + 1;
 }
 
@@ -750,10 +787,6 @@ inline void DisplayListData::map(const Fn fns[], Args... args) const {
         }
         ptr += skip;
     }
-}
-
-void DisplayListData::flush() {
-    this->push<Flush>(0);
 }
 
 void DisplayListData::save() {
@@ -795,6 +828,9 @@ void DisplayListData::clipRRect(const SkRRect& rrect, SkClipOp op, bool aa) {
 }
 void DisplayListData::clipRegion(const SkRegion& region, SkClipOp op) {
     this->push<ClipRegion>(0, region, op);
+}
+void DisplayListData::clipShader(const sk_sp<SkShader>& shader, SkClipOp op) {
+    this->push<ClipShader>(0, shader, op);
 }
 void DisplayListData::resetClip() {
     this->push<ResetClip>(0);
@@ -1047,10 +1083,6 @@ sk_sp<SkSurface> RecordingCanvas::onNewSurface(const SkImageInfo&, const SkSurfa
     return nullptr;
 }
 
-void RecordingCanvas::onFlush() {
-    fDL->flush();
-}
-
 void RecordingCanvas::willSave() {
     mSaveCount++;
     fDL->save();
@@ -1111,6 +1143,11 @@ void RecordingCanvas::onClipRegion(const SkRegion& region, SkClipOp op) {
     }
     fDL->clipRegion(region, op);
     this->INHERITED::onClipRegion(region, op);
+}
+void RecordingCanvas::onClipShader(sk_sp<SkShader> shader, SkClipOp op) {
+    setClipMayBeComplex();
+    fDL->clipShader(shader, op);
+    this->INHERITED::onClipShader(shader, op);
 }
 void RecordingCanvas::onResetClip() {
     // This is part of "replace op" emulation, but rely on the following intersection
@@ -1257,15 +1294,6 @@ void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 
 void RecordingCanvas::drawWebView(skiapipeline::FunctorDrawable* drawable) {
     fDL->drawWebView(drawable);
-}
-
-[[nodiscard]] const SkMesh& DrawMeshPayload::getSkMesh() const {
-    LOG_FATAL_IF(!meshWrapper && !mesh, "One of Mesh or Mesh must be non-null");
-    if (meshWrapper) {
-        return meshWrapper->getSkMesh();
-    } else {
-        return *mesh;
-    }
 }
 
 }  // namespace uirenderer

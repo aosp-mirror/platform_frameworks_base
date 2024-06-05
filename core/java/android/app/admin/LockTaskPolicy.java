@@ -19,6 +19,7 @@ package android.app.admin;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.admin.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -75,7 +76,7 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
      */
     public LockTaskPolicy(@Nullable Set<String> packages) {
         if (packages != null) {
-            mPackages.addAll(packages);
+            setPackagesInternal(packages);
         }
         setValue(this);
     }
@@ -93,7 +94,7 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
      */
     public LockTaskPolicy(@Nullable Set<String> packages, int flags) {
         if (packages != null) {
-            mPackages.addAll(packages);
+            setPackagesInternal(packages);
         }
         mFlags = flags;
         setValue(this);
@@ -123,7 +124,7 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
      */
     public void setPackages(@NonNull Set<String> packages) {
         Objects.requireNonNull(packages);
-        mPackages = new HashSet<>(packages);
+        setPackagesInternal(packages);
     }
 
     /**
@@ -131,6 +132,15 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
      */
     public void setFlags(int flags) {
         mFlags = flags;
+    }
+
+    private void setPackagesInternal(Set<String> packages) {
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
+            for (String p : packages) {
+                PolicySizeVerifier.enforceMaxPackageNameLength(p);
+            }
+        }
+        mPackages = new HashSet<>(packages);
     }
 
     @Override

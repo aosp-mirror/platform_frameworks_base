@@ -34,6 +34,7 @@
         android:background="@drawable/expand_button_pill_bg"
         android:gravity="center_vertical"
         android:layout_gravity="center_vertical"
+        android:duplicateParentState="true"
         >
 
         <TextView
@@ -51,7 +52,7 @@
             android:id="@+id/expand_button_icon"
             android:layout_width="@dimen/notification_expand_button_pill_height"
             android:layout_height="@dimen/notification_expand_button_pill_height"
-            android:padding="2dp"
+            android:padding="@dimen/notification_expand_button_icon_padding"
             android:scaleType="fitCenter"
             android:importantForAccessibility="no"
             />

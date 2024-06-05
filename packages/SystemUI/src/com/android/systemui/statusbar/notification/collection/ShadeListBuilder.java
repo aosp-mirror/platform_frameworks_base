@@ -69,6 +69,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.NamedListenerSet;
 import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
@@ -121,14 +122,14 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     private final List<NotifSection> mNotifSections = new ArrayList<>();
     private NotifStabilityManager mNotifStabilityManager;
 
-    private final List<OnBeforeTransformGroupsListener> mOnBeforeTransformGroupsListeners =
-            new ArrayList<>();
-    private final List<OnBeforeSortListener> mOnBeforeSortListeners =
-            new ArrayList<>();
-    private final List<OnBeforeFinalizeFilterListener> mOnBeforeFinalizeFilterListeners =
-            new ArrayList<>();
-    private final List<OnBeforeRenderListListener> mOnBeforeRenderListListeners =
-            new ArrayList<>();
+    private final NamedListenerSet<OnBeforeTransformGroupsListener>
+            mOnBeforeTransformGroupsListeners = new NamedListenerSet<>();
+    private final NamedListenerSet<OnBeforeSortListener>
+            mOnBeforeSortListeners = new NamedListenerSet<>();
+    private final NamedListenerSet<OnBeforeFinalizeFilterListener>
+            mOnBeforeFinalizeFilterListeners = new NamedListenerSet<>();
+    private final NamedListenerSet<OnBeforeRenderListListener>
+            mOnBeforeRenderListListeners = new NamedListenerSet<>();
     @Nullable private OnRenderListListener mOnRenderListListener;
 
     private List<ListEntry> mReadOnlyNotifList = Collections.unmodifiableList(mNotifList);
@@ -184,28 +185,28 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
         Assert.isMainThread();
 
         mPipelineState.requireState(STATE_IDLE);
-        mOnBeforeTransformGroupsListeners.add(listener);
+        mOnBeforeTransformGroupsListeners.addIfAbsent(listener);
     }
 
     void addOnBeforeSortListener(OnBeforeSortListener listener) {
         Assert.isMainThread();
 
         mPipelineState.requireState(STATE_IDLE);
-        mOnBeforeSortListeners.add(listener);
+        mOnBeforeSortListeners.addIfAbsent(listener);
     }
 
     void addOnBeforeFinalizeFilterListener(OnBeforeFinalizeFilterListener listener) {
         Assert.isMainThread();
 
         mPipelineState.requireState(STATE_IDLE);
-        mOnBeforeFinalizeFilterListeners.add(listener);
+        mOnBeforeFinalizeFilterListeners.addIfAbsent(listener);
     }
 
     void addOnBeforeRenderListListener(OnBeforeRenderListListener listener) {
         Assert.isMainThread();
 
         mPipelineState.requireState(STATE_IDLE);
-        mOnBeforeRenderListListeners.add(listener);
+        mOnBeforeRenderListListeners.addIfAbsent(listener);
     }
 
     void addPreRenderInvalidator(Invalidator invalidator) {
@@ -496,7 +497,9 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
                     mTempSectionMembers.add(entry);
                 }
             }
+            Trace.beginSection(section.getLabel());
             section.getSectioner().onEntriesUpdated(mTempSectionMembers);
+            Trace.endSection();
             mTempSectionMembers.clear();
         }
         Trace.endSection();
@@ -1240,8 +1243,9 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
         if (cmp != 0) return cmp;
 
         cmp = -1 * Long.compare(
-                o1.getRepresentativeEntry().getSbn().getNotification().when,
-                o2.getRepresentativeEntry().getSbn().getNotification().when);
+                o1.getRepresentativeEntry().getSbn().getNotification().getWhen(),
+                o2.getRepresentativeEntry().getSbn().getNotification().getWhen());
+
         return cmp;
     };
 
@@ -1253,8 +1257,8 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
         if (cmp != 0) return cmp;
 
         cmp = -1 * Long.compare(
-                o1.getRepresentativeEntry().getSbn().getNotification().when,
-                o2.getRepresentativeEntry().getSbn().getNotification().when);
+                o1.getRepresentativeEntry().getSbn().getNotification().getWhen(),
+                o2.getRepresentativeEntry().getSbn().getNotification().getWhen());
         return cmp;
     };
 
@@ -1430,33 +1434,33 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
 
     private void dispatchOnBeforeTransformGroups(List<ListEntry> entries) {
         Trace.beginSection("ShadeListBuilder.dispatchOnBeforeTransformGroups");
-        for (int i = 0; i < mOnBeforeTransformGroupsListeners.size(); i++) {
-            mOnBeforeTransformGroupsListeners.get(i).onBeforeTransformGroups(entries);
-        }
+        mOnBeforeTransformGroupsListeners.forEachTraced(listener -> {
+            listener.onBeforeTransformGroups(entries);
+        });
         Trace.endSection();
     }
 
     private void dispatchOnBeforeSort(List<ListEntry> entries) {
         Trace.beginSection("ShadeListBuilder.dispatchOnBeforeSort");
-        for (int i = 0; i < mOnBeforeSortListeners.size(); i++) {
-            mOnBeforeSortListeners.get(i).onBeforeSort(entries);
-        }
+        mOnBeforeSortListeners.forEachTraced(listener -> {
+            listener.onBeforeSort(entries);
+        });
         Trace.endSection();
     }
 
     private void dispatchOnBeforeFinalizeFilter(List<ListEntry> entries) {
         Trace.beginSection("ShadeListBuilder.dispatchOnBeforeFinalizeFilter");
-        for (int i = 0; i < mOnBeforeFinalizeFilterListeners.size(); i++) {
-            mOnBeforeFinalizeFilterListeners.get(i).onBeforeFinalizeFilter(entries);
-        }
+        mOnBeforeFinalizeFilterListeners.forEachTraced(listener -> {
+            listener.onBeforeFinalizeFilter(entries);
+        });
         Trace.endSection();
     }
 
     private void dispatchOnBeforeRenderList(List<ListEntry> entries) {
         Trace.beginSection("ShadeListBuilder.dispatchOnBeforeRenderList");
-        for (int i = 0; i < mOnBeforeRenderListListeners.size(); i++) {
-            mOnBeforeRenderListListeners.get(i).onBeforeRenderList(entries);
-        }
+        mOnBeforeRenderListListeners.forEachTraced(listener -> {
+            listener.onBeforeRenderList(entries);
+        });
         Trace.endSection();
     }
 

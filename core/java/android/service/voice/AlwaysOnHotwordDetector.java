@@ -22,6 +22,7 @@ import static android.service.voice.SoundTriggerFailure.ERROR_CODE_UNKNOWN;
 import static android.service.voice.VoiceInteractionService.MULTIPLE_ACTIVE_HOTWORD_DETECTORS;
 
 import android.annotation.ElapsedRealtimeLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -67,6 +68,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
+import com.android.internal.infra.AndroidFuture;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -324,6 +326,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     private final Handler mHandler;
     private final IBinder mBinder = new Binder();
     private final boolean mSupportSandboxedDetectionService;
+    private final String mAttributionTag;
 
     @GuardedBy("mLock")
     private boolean mIsAvailabilityOverriddenByTestApi = false;
@@ -430,7 +433,10 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         @ElapsedRealtimeLong
         private final long mHalEventReceivedMillis;
 
-        private EventPayload(boolean captureAvailable,
+        private final boolean mIsRecognitionStopped;
+
+        private EventPayload(
+                boolean captureAvailable,
                 @Nullable AudioFormat audioFormat,
                 int captureSession,
                 @DataFormat int dataFormat,
@@ -438,7 +444,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 @Nullable HotwordDetectedResult hotwordDetectedResult,
                 @Nullable ParcelFileDescriptor audioStream,
                 @NonNull List<KeyphraseRecognitionExtra> keyphraseExtras,
-                @ElapsedRealtimeLong long halEventReceivedMillis) {
+                @ElapsedRealtimeLong long halEventReceivedMillis,
+                boolean isRecognitionStopped) {
             mCaptureAvailable = captureAvailable;
             mCaptureSession = captureSession;
             mAudioFormat = audioFormat;
@@ -448,6 +455,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             mAudioStream = audioStream;
             mKephraseExtras = keyphraseExtras;
             mHalEventReceivedMillis = halEventReceivedMillis;
+            mIsRecognitionStopped = isRecognitionStopped;
         }
 
         /**
@@ -577,8 +585,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
 
         /**
-         * Timestamp of when the trigger event from SoundTriggerHal was received by the system
-         * server.
+         * Timestamp of when the trigger event from SoundTriggerHal was received by the framework.
          *
          * Clock monotonic including suspend time or its equivalent on the system,
          * in the same units and timebase as {@link SystemClock#elapsedRealtime()}.
@@ -589,6 +596,12 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         @ElapsedRealtimeLong
         public long getHalEventReceivedMillis() {
             return mHalEventReceivedMillis;
+        }
+
+        /** Returns whether the system has stopped hotword recognition because of this detection. */
+        @FlaggedApi(android.app.wearable.Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
+        public boolean isRecognitionStopped() {
+            return mIsRecognitionStopped;
         }
 
         /**
@@ -609,6 +622,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             private List<KeyphraseRecognitionExtra> mKeyphraseExtras = Collections.emptyList();
             @ElapsedRealtimeLong
             private long mHalEventReceivedMillis = -1;
+            // default to true to keep prior behavior
+            private boolean mIsRecognitionStopped = true;
 
             public Builder() {}
 
@@ -745,13 +760,31 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             }
 
             /**
+             * Sets whether the system has stopped hotword recognition because of this detection.
+             */
+            @FlaggedApi(android.app.wearable.Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
+            @NonNull
+            public Builder setIsRecognitionStopped(boolean isRecognitionStopped) {
+                mIsRecognitionStopped = isRecognitionStopped;
+                return this;
+            }
+
+            /**
              * Builds an {@link EventPayload} instance
              */
             @NonNull
             public EventPayload build() {
-                return new EventPayload(mCaptureAvailable, mAudioFormat, mCaptureSession,
-                        mDataFormat, mData, mHotwordDetectedResult, mAudioStream,
-                        mKeyphraseExtras, mHalEventReceivedMillis);
+                return new EventPayload(
+                        mCaptureAvailable,
+                        mAudioFormat,
+                        mCaptureSession,
+                        mDataFormat,
+                        mData,
+                        mHotwordDetectedResult,
+                        mAudioStream,
+                        mKeyphraseExtras,
+                        mHalEventReceivedMillis,
+                        mIsRecognitionStopped);
             }
         }
     }
@@ -785,13 +818,15 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
 
         /**
          * Called when the keyphrase is spoken.
-         * This implicitly stops listening for the keyphrase once it's detected.
-         * Clients should start a recognition again once they are done handling this
-         * detection.
          *
-         * @param eventPayload Payload data for the detection event.
-         *        This may contain the trigger audio, if requested when calling
-         *        {@link AlwaysOnHotwordDetector#startRecognition(int)}.
+         * <p>If {@code eventPayload.isRecognitionStopped()} returns true, this implicitly stops
+         * listening for the keyphrase once it's detected. Clients should start a recognition again
+         * once they are done handling this detection.
+         *
+         * @param eventPayload Payload data for the detection event. This may contain the trigger
+         *     audio, if requested when calling {@link
+         *     AlwaysOnHotwordDetector#startRecognition(int)} or if the audio comes from the {@link
+         *     android.service.wearable.WearableSensingService}.
          */
         public abstract void onDetected(@NonNull EventPayload eventPayload);
 
@@ -847,13 +882,17 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
      * @param targetSdkVersion The target SDK version.
      * @param SupportSandboxedDetectionService {@code true} if HotwordDetectionService should be
      * triggered, otherwise {@code false}.
+     * @param attributionTag an optional attribution tag passed form the
+     * {@link VoiceInteractionService} context via the
+     * {@link createAlwaysOnHotwordDetectorInternal(String, Locale, boolean, PersistableBundle,
+     * SharedMemory, ModuleProperties, Executor, Callback)}.
      *
      * @hide
      */
     public AlwaysOnHotwordDetector(String text, Locale locale, Executor executor, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
-            boolean supportSandboxedDetectionService) {
+            boolean supportSandboxedDetectionService, @Nullable String attributionTag) {
         super(modelManagementService, executor, callback);
 
         mHandler = new MyHandler(Looper.getMainLooper());
@@ -866,6 +905,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
         mSupportSandboxedDetectionService = supportSandboxedDetectionService;
+        mAttributionTag = attributionTag;
     }
 
     // Do nothing. This method should not be abstract.
@@ -877,11 +917,14 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             @Nullable SoundTrigger.ModuleProperties moduleProperties) {
         if (mSupportSandboxedDetectionService) {
             initAndVerifyDetector(options, sharedMemory, mInternalCallback,
-                    DETECTOR_TYPE_TRUSTED_HOTWORD_DSP);
+                    DETECTOR_TYPE_TRUSTED_HOTWORD_DSP, mAttributionTag);
         }
         try {
             Identity identity = new Identity();
             identity.packageName = ActivityThread.currentOpPackageName();
+            if (IS_IDENTITY_WITH_ATTRIBUTION_TAG) {
+                identity.attributionTag = mAttributionTag;
+            }
             if (moduleProperties == null) {
                 moduleProperties = mModelManagementService
                         .listModuleProperties(identity)
@@ -1623,6 +1666,20 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
 
         @Override
+        public void onKeyphraseDetectedFromExternalSource(HotwordDetectedResult result) {
+            Slog.i(TAG, "onKeyphraseDetectedFromExternalSource");
+            EventPayload.Builder eventPayloadBuilder = new EventPayload.Builder();
+            if (android.app.wearable.Flags.enableHotwordWearableSensingApi()) {
+                eventPayloadBuilder.setIsRecognitionStopped(false);
+            }
+            Message.obtain(
+                            mHandler,
+                            MSG_HOTWORD_DETECTED,
+                            eventPayloadBuilder.setHotwordDetectedResult(result).build())
+                    .sendToTarget();
+        }
+
+        @Override
         public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
             Slog.w(TAG, "Generic sound trigger event detected at AOHD: " + event);
         }
@@ -1701,6 +1758,11 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         public void onProcessRestarted() {
             Slog.i(TAG, "onProcessRestarted");
             mHandler.sendEmptyMessage(MSG_PROCESS_RESTARTED);
+        }
+
+        @Override
+        public void onOpenFile(String filename, AndroidFuture future) throws RemoteException {
+            throw new UnsupportedOperationException("Hotword cannot access files from the disk.");
         }
     }
 

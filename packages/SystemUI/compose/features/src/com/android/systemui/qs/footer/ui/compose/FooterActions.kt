@@ -16,6 +16,12 @@
 
 package com.android.systemui.qs.footer.ui.compose
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.LocalIndication
@@ -38,7 +44,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +51,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
@@ -64,12 +68,13 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.animation.Expandable
+import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.background
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.colorAttr
-import com.android.systemui.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
@@ -78,7 +83,44 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsForegroundServicesButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsSecurityButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import com.android.systemui.qs.ui.composable.QuickSettings
+import com.android.systemui.qs.ui.composable.QuickSettingsTheme
+import com.android.systemui.res.R
 import kotlinx.coroutines.launch
+
+@Composable
+fun SceneScope.FooterActionsWithAnimatedVisibility(
+    viewModel: FooterActionsViewModel,
+    isCustomizing: Boolean,
+    customizingAnimationDuration: Int,
+    lifecycleOwner: LifecycleOwner,
+    modifier: Modifier = Modifier,
+) {
+    AnimatedVisibility(
+        visible = !isCustomizing,
+        enter =
+            expandVertically(
+                animationSpec = tween(customizingAnimationDuration),
+                initialHeight = { 0 },
+            ) + fadeIn(tween(customizingAnimationDuration)),
+        exit =
+            shrinkVertically(
+                animationSpec = tween(customizingAnimationDuration),
+                targetHeight = { 0 },
+            ) + fadeOut(tween(customizingAnimationDuration)),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        QuickSettingsTheme {
+            // This view has its own horizontal padding
+            // TODO(b/321716470) This should use a lifecycle tied to the scene.
+            FooterActions(
+                viewModel = viewModel,
+                qsVisibilityLifecycleOwner = lifecycleOwner,
+                modifier = Modifier.element(QuickSettings.Elements.FooterActions),
+            )
+        }
+    }
+}
 
 /** The Quick Settings footer actions row. */
 @Composable
@@ -89,10 +131,9 @@ fun FooterActions(
 ) {
     val context = LocalContext.current
 
-    // Collect visibility and alphas as soon as we are composed, even when not visible.
-    val isVisible by viewModel.isVisible.collectAsState()
-    val alpha by viewModel.alpha.collectAsState()
-    val backgroundAlpha = viewModel.backgroundAlpha.collectAsState()
+    // Collect alphas as soon as we are composed, even when not visible.
+    val alpha by viewModel.alpha.collectAsStateWithLifecycle()
+    val backgroundAlpha = viewModel.backgroundAlpha.collectAsStateWithLifecycle()
 
     var security by remember { mutableStateOf<FooterActionsSecurityButtonViewModel?>(null) }
     var foregroundServices by remember {
@@ -121,8 +162,8 @@ fun FooterActions(
         }
     }
 
-    val backgroundColor = colorAttr(R.attr.underSurfaceColor)
-    val contentColor = LocalAndroidColorScheme.current.deprecated.textColorPrimary
+    val backgroundColor = colorAttr(R.attr.underSurface)
+    val contentColor = LocalAndroidColorScheme.current.onSurface
     val backgroundTopRadius = dimensionResource(R.dimen.qs_corner_radius)
     val backgroundModifier =
         remember(
@@ -137,19 +178,17 @@ fun FooterActions(
             )
         }
 
+    val horizontalPadding = dimensionResource(R.dimen.qs_content_horizontal_padding)
     Row(
         modifier
             .fillMaxWidth()
             .graphicsLayer { this.alpha = alpha }
-            .drawWithContent {
-                if (isVisible) {
-                    drawContent()
-                }
-            }
             .then(backgroundModifier)
             .padding(
                 top = dimensionResource(R.dimen.qs_footer_actions_top_padding),
                 bottom = dimensionResource(R.dimen.qs_footer_actions_bottom_padding),
+                start = horizontalPadding,
+                end = horizontalPadding,
             )
             .layout { measurable, constraints ->
                 // All buttons have a 4dp padding to increase their touch size. To be consistent
@@ -268,7 +307,7 @@ private fun NumberButton(
     val interactionSource = remember { MutableInteractionSource() }
 
     Expandable(
-        color = colorAttr(R.attr.offStateColor),
+        color = colorAttr(R.attr.shadeInactive),
         shape = CircleShape,
         onClick = onClick,
         interactionSource = interactionSource,
@@ -287,7 +326,7 @@ private fun NumberButton(
                     number.toString(),
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = LocalAndroidColorScheme.current.deprecated.textColorPrimary,
+                    color = colorAttr(R.attr.onShadeInactiveVariant),
                     // TODO(b/242040009): This should only use a standard text style instead and
                     // should not override the text size.
                     fontSize = 18.sp,
@@ -305,7 +344,7 @@ private fun NumberButton(
 @Composable
 private fun NewChangesDot(modifier: Modifier = Modifier) {
     val contentDescription = stringResource(R.string.fgs_dot_content_description)
-    val color = LocalAndroidColorScheme.current.deprecated.colorAccentTertiary
+    val color = LocalAndroidColorScheme.current.tertiary
 
     Canvas(modifier.size(12.dp).semantics { this.contentDescription = contentDescription }) {
         drawCircle(color)
@@ -323,10 +362,9 @@ private fun TextButton(
 ) {
     Expandable(
         shape = CircleShape,
-        color = colorAttr(R.attr.underSurfaceColor),
-        contentColor = LocalAndroidColorScheme.current.deprecated.textColorSecondary,
-        borderStroke =
-            BorderStroke(1.dp, LocalAndroidColorScheme.current.deprecated.colorBackground),
+        color = colorAttr(R.attr.underSurface),
+        contentColor = LocalAndroidColorScheme.current.onSurfaceVariant,
+        borderStroke = BorderStroke(1.dp, colorAttr(R.attr.shadeInactive)),
         modifier = modifier.padding(horizontal = 4.dp),
         onClick = onClick,
     ) {

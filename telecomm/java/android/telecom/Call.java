@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -24,12 +25,14 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 
 import com.android.internal.telecom.IVideoProvider;
+import com.android.server.telecom.flags.Flags;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -207,100 +210,6 @@ public final class Call {
             "android.telecom.extra.SILENT_RINGING_REQUESTED";
 
     /**
-     * Call event sent from a {@link Call} via {@link #sendCallEvent(String, Bundle)} to inform
-     * Telecom that the user has requested that the current {@link Call} should be handed over
-     * to another {@link ConnectionService}.
-     * <p>
-     * The caller must specify the {@link #EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE} to indicate to
-     * Telecom which {@link PhoneAccountHandle} the {@link Call} should be handed over to.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EVENT_REQUEST_HANDOVER =
-            "android.telecom.event.REQUEST_HANDOVER";
-
-    /**
-     * Extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Specifies the
-     * {@link PhoneAccountHandle} to which a call should be handed over to.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE =
-            "android.telecom.extra.HANDOVER_PHONE_ACCOUNT_HANDLE";
-
-    /**
-     * Integer extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Specifies the
-     * video state of the call when it is handed over to the new {@link PhoneAccount}.
-     * <p>
-     * Valid values: {@link VideoProfile#STATE_AUDIO_ONLY},
-     * {@link VideoProfile#STATE_BIDIRECTIONAL}, {@link VideoProfile#STATE_RX_ENABLED}, and
-     * {@link VideoProfile#STATE_TX_ENABLED}.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EXTRA_HANDOVER_VIDEO_STATE =
-            "android.telecom.extra.HANDOVER_VIDEO_STATE";
-
-    /**
-     * Extra key used with the {@link #EVENT_REQUEST_HANDOVER} call event.  Used by the
-     * {@link InCallService} initiating a handover to provide a {@link Bundle} with extra
-     * information to the handover {@link ConnectionService} specified by
-     * {@link #EXTRA_HANDOVER_PHONE_ACCOUNT_HANDLE}.
-     * <p>
-     * This {@link Bundle} is not interpreted by Telecom, but passed as-is to the
-     * {@link ConnectionService} via the request extras when
-     * {@link ConnectionService#onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}
-     * is called to initate the handover.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EXTRA_HANDOVER_EXTRAS = "android.telecom.extra.HANDOVER_EXTRAS";
-
-    /**
-     * Call event sent from Telecom to the handover {@link ConnectionService} via
-     * {@link Connection#onCallEvent(String, Bundle)} to inform a {@link Connection} that a handover
-     * to the {@link ConnectionService} has completed successfully.
-     * <p>
-     * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EVENT_HANDOVER_COMPLETE =
-            "android.telecom.event.HANDOVER_COMPLETE";
-
-    /**
-     * Call event sent from Telecom to the handover destination {@link ConnectionService} via
-     * {@link Connection#onCallEvent(String, Bundle)} to inform the handover destination that the
-     * source connection has disconnected.  The {@link Bundle} parameter for the call event will be
-     * {@code null}.
-     * <p>
-     * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EVENT_HANDOVER_SOURCE_DISCONNECTED =
-            "android.telecom.event.HANDOVER_SOURCE_DISCONNECTED";
-
-    /**
-     * Call event sent from Telecom to the handover {@link ConnectionService} via
-     * {@link Connection#onCallEvent(String, Bundle)} to inform a {@link Connection} that a handover
-     * to the {@link ConnectionService} has failed.
-     * <p>
-     * A handover is initiated with the {@link #EVENT_REQUEST_HANDOVER} call event.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EVENT_HANDOVER_FAILED =
-            "android.telecom.event.HANDOVER_FAILED";
-
-    /**
      * Event reported from the Telecom stack to report an in-call diagnostic message which the
      * dialer app may opt to display to the user.  A diagnostic message is used to communicate
      * scenarios the device has detected which may impact the quality of the ongoing call.
@@ -360,16 +269,25 @@ public final class Call {
             "android.telecom.extra.DIAGNOSTIC_MESSAGE";
 
     /**
-     * Event reported from the Telecom stack to indicate that the {@link Connection} is not able to
-     * find any network and likely will not get connected. Upon receiving this event, the dialer
-     * app should show satellite SOS button if satellite is provisioned.
-     * <p>
-     * The dialer app receives this event via
-     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
-     * @hide
+     * Boolean indicating that the call is a verified business call.
+     *
+     * {@link Connection#setExtras(Bundle)} or {@link Connection#putExtras(Bundle)}
+     * should be used to notify Telecom this extra has been set.
      */
-    public static final String EVENT_DISPLAY_SOS_MESSAGE =
-            "android.telecom.event.DISPLAY_SOS_MESSAGE";
+    @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+    public static final String EXTRA_IS_BUSINESS_CALL =
+            "android.telecom.extra.IS_BUSINESS_CALL";
+
+    /**
+     * String value indicating the asserted display name reported via
+     * ImsCallProfile#EXTRA_ASSERTED_DISPLAY_NAME.
+     *
+     * {@link Connection#setExtras(Bundle)} or {@link Connection#putExtras(Bundle)}
+     * should be used to notify Telecom this extra has been set.
+     */
+    @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+    public static final String EXTRA_ASSERTED_DISPLAY_NAME =
+            "android.telecom.extra.ASSERTED_DISPLAY_NAME";
 
     /**
      * Reject reason used with {@link #reject(int)} to indicate that the user is rejecting this
@@ -725,8 +643,17 @@ public final class Call {
          */
         public static final int PROPERTY_CROSS_SIM = 0x00004000;
 
+        /**
+         * The connection is using transactional call APIs.
+         * <p>
+         * The underlying connection was added as a transactional call via the
+         * {@link TelecomManager#addCall} API.
+         */
+        @FlaggedApi(Flags.FLAG_VOIP_APP_ACTIONS_SUPPORT)
+        public static final int PROPERTY_IS_TRANSACTIONAL = 0x00008000;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00004000
+        // Next PROPERTY value: 0x00010000
         //******************************************************************************************
 
         private final @CallState int mState;
@@ -924,6 +851,9 @@ public final class Call {
             if (hasProperty(properties, PROPERTY_CROSS_SIM)) {
                 builder.append(" PROPERTY_CROSS_SIM");
             }
+            if (hasProperty(properties, PROPERTY_IS_TRANSACTIONAL)) {
+                builder.append(" PROPERTY_IS_TRANSACTIONAL");
+            }
             builder.append("]");
             return builder.toString();
         }
@@ -934,6 +864,13 @@ public final class Call {
         public final @CallState int getState() {
             return mState;
         }
+
+        /**
+         * @return the Telecom identifier associated with this {@link Call} . This is not a stable
+         * identifier and is not guaranteed to be unique across device reboots.
+         */
+        @FlaggedApi(Flags.FLAG_CALL_DETAILS_ID_CHANGES)
+        public @NonNull String getId() { return mTelecomCallId; }
 
         /** {@hide} */
         @TestApi
@@ -1885,7 +1822,7 @@ public final class Call {
      * Tones are both played locally for the user to hear and sent to the network to be relayed
      * to the remote device.
      * <p>
-     * You must ensure that any call to {@link #playDtmfTone(char}) is followed by a matching
+     * You must ensure that any call to {@link #playDtmfTone(char)} is followed by a matching
      * call to {@link #stopDtmfTone()} and that each tone is stopped before a new one is started.
      * The play and stop commands are relayed to the underlying
      * {@link android.telecom.ConnectionService} as executed; implementations may not correctly
@@ -2654,7 +2591,9 @@ public final class Call {
         // remove ourselves from the Phone. Note that we do this after completing all state updates
         // so a client can cleanly transition all their UI to the state appropriate for a
         // DISCONNECTED Call while still relying on the existence of that Call in the Phone's list.
-        if (mState == STATE_DISCONNECTED) {
+        // Check if the original state is already disconnected, otherwise onCallRemoved will be
+        // triggered before onCallAdded.
+        if (mState == STATE_DISCONNECTED && stateChanged) {
             fireCallDestroyed();
         }
     }
@@ -2951,21 +2890,27 @@ public final class Call {
 
         for(String key : bundle.keySet()) {
             if (key != null) {
-                final Object value = bundle.get(key);
-                final Object newValue = newBundle.get(key);
                 if (!newBundle.containsKey(key)) {
                     return false;
                 }
-                if (value instanceof Bundle && newValue instanceof Bundle) {
-                    if (!areBundlesEqual((Bundle) value, (Bundle) newValue)) {
+                // In case new call extra contains non-framework class objects, return false to
+                // force update the call extra
+                try {
+                    final Object value = bundle.get(key);
+                    final Object newValue = newBundle.get(key);
+                    if (value instanceof Bundle && newValue instanceof Bundle) {
+                        if (!areBundlesEqual((Bundle) value, (Bundle) newValue)) {
+                            return false;
+                        }
+                    }
+                    if (value instanceof byte[] && newValue instanceof byte[]) {
+                        if (!Arrays.equals((byte[]) value, (byte[]) newValue)) {
+                            return false;
+                        }
+                    } else if (!Objects.equals(value, newValue)) {
                         return false;
                     }
-                }
-                if (value instanceof byte[] && newValue instanceof byte[]) {
-                    if (!Arrays.equals((byte[]) value, (byte[]) newValue)) {
-                        return false;
-                    }
-                } else if (!Objects.equals(value, newValue)) {
+                } catch (BadParcelableException e) {
                     return false;
                 }
             }

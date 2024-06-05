@@ -23,6 +23,7 @@ import android.hardware.biometrics.BiometricConstants;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -135,6 +136,14 @@ public class BiometricSchedulerOperation {
         mCancelWatchdog = () -> {
             if (!isFinished()) {
                 Slog.e(TAG, "[Watchdog Triggered]: " + this);
+                try {
+                    mClientMonitor.getListener().onError(mClientMonitor.getSensorId(),
+                            mClientMonitor.getCookie(), BiometricConstants.BIOMETRIC_ERROR_CANCELED,
+                            0 /* vendorCode */);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception when trying to send error in cancel "
+                            + "watchdog.");
+                }
                 getWrappedCallback(mOnStartCallback)
                         .onClientFinished(mClientMonitor, false /* success */);
             }
@@ -385,6 +394,11 @@ public class BiometricSchedulerOperation {
         final boolean isAuthentication = mClientMonitor instanceof AuthenticationConsumer;
         final boolean isDetection = mClientMonitor instanceof DetectionConsumer;
         return isAuthentication || isDetection;
+    }
+
+    /** If this operation is {@link StartUserClient}. */
+    public boolean isStartUserOperation() {
+        return mClientMonitor instanceof StartUserClient<?, ?>;
     }
 
     /** If this operation performs acquisition {@link AcquisitionClient}. */

@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.content.Context;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
 import android.os.Binder;
@@ -36,8 +37,12 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
+import com.android.internal.app.IVoiceInteractionAccessibilitySettingsListener;
 import com.android.internal.app.IVoiceInteractionManagerService;
+import com.android.internal.infra.AndroidFuture;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -55,20 +60,28 @@ import java.util.function.Consumer;
 public class VisualQueryDetector {
     private static final String TAG = VisualQueryDetector.class.getSimpleName();
     private static final boolean DEBUG = false;
+    private static final int SETTINGS_DISABLE_BIT = 0;
+    private static final int SETTINGS_ENABLE_BIT = 1;
 
     private final Callback mCallback;
     private final Executor mExecutor;
+    private final Context mContext;
     private final IVoiceInteractionManagerService mManagerService;
     private final VisualQueryDetectorInitializationDelegate mInitializationDelegate;
+    private final String mAttributionTag;
+    // Used to manage the internal mapping of exposed listener API and internal aidl impl
+    private AccessibilityDetectionEnabledListenerWrapper mActiveAccessibilityListenerWrapper = null;
 
     VisualQueryDetector(
             IVoiceInteractionManagerService managerService,
-            @NonNull @CallbackExecutor Executor executor,
-            Callback callback) {
+            @NonNull @CallbackExecutor Executor executor, Callback callback, Context context,
+            @Nullable String attributionTag) {
         mManagerService = managerService;
         mCallback = callback;
         mExecutor = executor;
         mInitializationDelegate = new VisualQueryDetectorInitializationDelegate();
+        mContext = context;
+        mAttributionTag = attributionTag;
     }
 
     /**
@@ -86,7 +99,9 @@ public class VisualQueryDetector {
      */
     public void updateState(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
-        mInitializationDelegate.updateState(options, sharedMemory);
+        synchronized (mInitializationDelegate.getLock()) {
+            mInitializationDelegate.updateState(options, sharedMemory);
+        }
     }
 
 
@@ -108,18 +123,21 @@ public class VisualQueryDetector {
         if (DEBUG) {
             Slog.i(TAG, "#startRecognition");
         }
-        // check if the detector is active with the initialization delegate
-        mInitializationDelegate.startRecognition();
+        synchronized (mInitializationDelegate.getLock()) {
+            // check if the detector is active with the initialization delegate
+            mInitializationDelegate.startRecognition();
 
-        try {
-            mManagerService.startPerceiving(new BinderCallback(mExecutor, mCallback));
-        } catch (SecurityException e) {
-            Slog.e(TAG, "startRecognition failed: " + e);
-            return false;
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            try {
+                mManagerService.startPerceiving(new BinderCallback(
+                        mExecutor, mCallback, mInitializationDelegate.getLock()));
+            } catch (SecurityException e) {
+                Slog.e(TAG, "startRecognition failed: " + e);
+                return false;
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+            return true;
         }
-        return true;
     }
 
     /**
@@ -132,15 +150,17 @@ public class VisualQueryDetector {
         if (DEBUG) {
             Slog.i(TAG, "#stopRecognition");
         }
-        // check if the detector is active with the initialization delegate
-        mInitializationDelegate.startRecognition();
+        synchronized (mInitializationDelegate.getLock()) {
+            // check if the detector is active with the initialization delegate
+            mInitializationDelegate.stopRecognition();
 
-        try {
-            mManagerService.stopPerceiving();
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            try {
+                mManagerService.stopPerceiving();
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+            return true;
         }
-        return true;
     }
 
     /**
@@ -152,12 +172,118 @@ public class VisualQueryDetector {
         if (DEBUG) {
             Slog.i(TAG, "#destroy");
         }
-        mInitializationDelegate.destroy();
+        synchronized (mInitializationDelegate.getLock()) {
+            mInitializationDelegate.destroy();
+        }
+    }
+
+    /**
+     * Gets the binary value that controls the egress of accessibility data from
+     * {@link VisualQueryDetectedResult#setAccessibilityDetectionData(byte[])} is enabled.
+     *
+     * @return boolean value denoting if the setting is on. Default is {@code false}.
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
+    public boolean isAccessibilityDetectionEnabled() {
+        Slog.d(TAG, "Fetching accessibility setting");
+        synchronized (mInitializationDelegate.getLock()) {
+            try {
+                return mManagerService.getAccessibilityDetectionEnabled();
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Sets a listener subscribing to the value of the system setting that controls the egress of
+     * accessibility data from
+     * {@link VisualQueryDetectedResult#setAccessibilityDetectionData(byte[])} is enabled.
+     *
+     * Only one listener can be set at a time. The listener set must be unset with
+     * {@link clearAccessibilityDetectionEnabledListener(Consumer<Boolean>)}
+     * in order to set a new listener. Otherwise, this method will throw a
+     * {@link IllegalStateException}.
+     *
+     * @param listener Listener of type {@code Consumer<Boolean>} to subscribe to the value update.
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
+    public void setAccessibilityDetectionEnabledListener(@NonNull Consumer<Boolean> listener) {
+        Slog.d(TAG, "Registering Accessibility settings listener.");
+        synchronized (mInitializationDelegate.getLock()) {
+            try {
+                if (mActiveAccessibilityListenerWrapper != null) {
+                    Slog.e(TAG, "Fail to register accessibility setting listener: "
+                            + "already registered and not unregistered.");
+                    throw new IllegalStateException(
+                            "Cannot register listener with listeners already set.");
+                }
+                mActiveAccessibilityListenerWrapper =
+                        new AccessibilityDetectionEnabledListenerWrapper(listener);
+                mManagerService.registerAccessibilityDetectionSettingsListener(
+                        mActiveAccessibilityListenerWrapper);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Clear the listener that has been set with
+     * {@link setAccessibilityDetectionEnabledListener(Consumer<Boolean>)} such that when the value
+     * of the setting that controls the egress of accessibility data is changed the listener gets
+     * notified.
+     *
+     * If there is not listener that has been registered, the call to this method will lead to a
+     * {@link IllegalStateException}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
+    public void clearAccessibilityDetectionEnabledListener() {
+        Slog.d(TAG, "Unregistering Accessibility settings listener.");
+        synchronized (mInitializationDelegate.getLock()) {
+            try {
+                if (mActiveAccessibilityListenerWrapper == null) {
+                    Slog.e(TAG, "Not able to remove the listener: listener does not exist.");
+                    throw new IllegalStateException("Cannot clear listener since it is not set.");
+                }
+                mManagerService.unregisterAccessibilityDetectionSettingsListener(
+                        mActiveAccessibilityListenerWrapper);
+                mActiveAccessibilityListenerWrapper = null;
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+
+    private final class AccessibilityDetectionEnabledListenerWrapper
+            extends IVoiceInteractionAccessibilitySettingsListener.Stub {
+
+        private Consumer<Boolean> mListener;
+
+        AccessibilityDetectionEnabledListenerWrapper(Consumer<Boolean> listener) {
+            mListener = listener;
+        }
+
+        @Override
+        public void onAccessibilityDetectionChanged(boolean enabled) {
+            mListener.accept(enabled);
+        }
     }
 
     /** @hide */
     public void dump(String prefix, PrintWriter pw) {
-        // TODO: implement this
+        synchronized (mInitializationDelegate.getLock()) {
+            mInitializationDelegate.dump(prefix, pw);
+        }
     }
 
     /** @hide */
@@ -167,12 +293,21 @@ public class VisualQueryDetector {
 
     /** @hide */
     void registerOnDestroyListener(Consumer<AbstractDetector> onDestroyListener) {
-        mInitializationDelegate.registerOnDestroyListener(onDestroyListener);
+        synchronized (mInitializationDelegate.getLock()) {
+            mInitializationDelegate.registerOnDestroyListener(onDestroyListener);
+        }
     }
 
     /**
-     * A class that lets a VoiceInteractionService implementation interact with
-     * visual query detection APIs.
+     * A class that lets a VoiceInteractionService implementation interact with visual query
+     * detection APIs.
+     *
+     * Note that methods in this callbacks are not thread-safe so the invocation of each
+     * methods will have different order from how they are called in the
+     * {@link VisualQueryDetectionService}. It is expected to pass a single thread executor or a
+     * serial executor as the callback executor when creating the {@link VisualQueryDetector}
+     * with {@link VoiceInteractionService#createVisualQueryDetector(
+     * PersistableBundle, SharedMemory, Executor, Callback)}.
      */
     public interface Callback {
 
@@ -183,6 +318,17 @@ public class VisualQueryDetector {
          * @param partialQuery The partial query in a text form being streamed.
          */
         void onQueryDetected(@NonNull String partialQuery);
+
+        /**
+         * Called when the {@link VisualQueryDetectionService} starts to stream partial results
+         * with {@link VisualQueryDetectionService#streamQuery(VisualQueryDetectedResult)}.
+         *
+         * @param partialResult The partial query in a text form being streamed.
+         */
+        @SuppressLint("UnflaggedApi") // b/325678077 flags not supported in isolated process
+        default void onQueryDetected(@NonNull VisualQueryDetectedResult partialResult) {
+            throw new UnsupportedOperationException("This emthod must be implemented for use.");
+        }
 
         /**
          * Called when the {@link VisualQueryDetectionService} decides to abandon the streamed
@@ -245,8 +391,8 @@ public class VisualQueryDetector {
         @Override
         void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
             initAndVerifyDetector(options, sharedMemory,
-                    new InitializationStateListener(mExecutor, mCallback),
-                    DETECTOR_TYPE_VISUAL_QUERY_DETECTOR);
+                    new InitializationStateListener(mExecutor, mCallback, mContext),
+                    DETECTOR_TYPE_VISUAL_QUERY_DETECTOR, mAttributionTag);
         }
 
         @Override
@@ -274,6 +420,15 @@ public class VisualQueryDetector {
         public boolean isUsingSandboxedDetectionService() {
             return true;
         }
+
+        @Override
+        public void dump(String prefix, PrintWriter pw) {
+            // No-op
+        }
+
+        private Object getLock() {
+            return mLock;
+        }
     }
 
     private static class BinderCallback
@@ -281,31 +436,54 @@ public class VisualQueryDetector {
         private final Executor mExecutor;
         private final VisualQueryDetector.Callback mCallback;
 
-        BinderCallback(Executor executor, VisualQueryDetector.Callback callback) {
+        private final Object mLock;
+
+        BinderCallback(Executor executor, VisualQueryDetector.Callback callback, Object lock) {
             this.mExecutor = executor;
             this.mCallback = callback;
+            this.mLock = lock;
+        }
+
+        /** Called when the detected query is valid. */
+        @Override
+        public void onQueryDetected(@NonNull String partialQuery) {
+            Slog.v(TAG, "BinderCallback#onQueryDetected");
+            Binder.withCleanCallingIdentity(() -> {
+                synchronized (mLock) {
+                    mExecutor.execute(()->mCallback.onQueryDetected(partialQuery));
+                }
+            });
         }
 
         /** Called when the detected result is valid. */
         @Override
-        public void onQueryDetected(@NonNull String partialQuery) {
-            Slog.v(TAG, "BinderCallback#onQueryDetected");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> mCallback.onQueryDetected(partialQuery)));
+        public void onResultDetected(@NonNull VisualQueryDetectedResult partialResult) {
+            Slog.v(TAG, "BinderCallback#onResultDetected");
+            Binder.withCleanCallingIdentity(() -> {
+                synchronized (mLock) {
+                    mExecutor.execute(()->mCallback.onQueryDetected(partialResult));
+                }
+            });
         }
 
         @Override
         public void onQueryFinished() {
             Slog.v(TAG, "BinderCallback#onQueryFinished");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> mCallback.onQueryFinished()));
+            Binder.withCleanCallingIdentity(() -> {
+                synchronized (mLock) {
+                    mExecutor.execute(()->mCallback.onQueryFinished());
+                }
+            });
         }
 
         @Override
         public void onQueryRejected() {
             Slog.v(TAG, "BinderCallback#onQueryRejected");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> mCallback.onQueryRejected()));
+            Binder.withCleanCallingIdentity(() -> {
+                synchronized (mLock) {
+                    mExecutor.execute(()->mCallback.onQueryRejected());
+                }
+            });
         }
 
         /** Called when the detection fails due to an error. */
@@ -330,9 +508,12 @@ public class VisualQueryDetector {
         private final Executor mExecutor;
         private final Callback mCallback;
 
-        InitializationStateListener(Executor executor, Callback callback) {
+        private final Context mContext;
+
+        InitializationStateListener(Executor executor, Callback callback, Context context) {
             this.mExecutor = executor;
             this.mCallback = callback;
+            this.mContext = context;
         }
 
         @Override
@@ -341,6 +522,13 @@ public class VisualQueryDetector {
                 HotwordDetectedResult result) {
             if (DEBUG) {
                 Slog.i(TAG, "Ignored #onKeyphraseDetected event");
+            }
+        }
+
+        @Override
+        public void onKeyphraseDetectedFromExternalSource(HotwordDetectedResult result) {
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onKeyphraseDetectedFromExternalSource event");
             }
         }
 
@@ -424,6 +612,23 @@ public class VisualQueryDetector {
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
                 mCallback.onUnknownFailure(
                         !TextUtils.isEmpty(errorMessage) ? errorMessage : "Error data is null");
+            }));
+        }
+        @Override
+        public void onOpenFile(String filename, AndroidFuture future) throws RemoteException {
+            Slog.v(TAG, "BinderCallback#onOpenFile " + filename);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                Slog.v(TAG, "onOpenFile: " + filename + "under internal app storage.");
+                File f = new File(mContext.getFilesDir(), filename);
+                ParcelFileDescriptor pfd = null;
+                try {
+                    pfd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
+                    Slog.d(TAG, "Successfully opened a file with ParcelFileDescriptor.");
+                } catch (FileNotFoundException e) {
+                    Slog.e(TAG, "Cannot open file. No ParcelFileDescriptor returned.");
+                } finally {
+                    future.complete(pfd);
+                }
             }));
         }
     }

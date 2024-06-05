@@ -16,15 +16,24 @@
 
 package com.android.settingslib.spa.widget.ui
 
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.colorResource
+import com.airbnb.lottie.LottieProperty
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.airbnb.lottie.compose.rememberLottieDynamicProperties
+import com.airbnb.lottie.compose.rememberLottieDynamicProperty
+import com.android.settingslib.color.R
 
 @Composable
 fun Lottie(
@@ -38,6 +47,36 @@ fun Lottie(
     }
 }
 
+object LottieColorUtils {
+    private val DARK_TO_LIGHT_THEME_COLOR_MAP = mapOf(
+        ".grey200" to R.color.settingslib_color_grey800,
+        ".grey600" to R.color.settingslib_color_grey400,
+        ".grey800" to R.color.settingslib_color_grey300,
+        ".grey900" to R.color.settingslib_color_grey50,
+        ".red400" to R.color.settingslib_color_red600,
+        ".black" to android.R.color.white,
+        ".blue400" to R.color.settingslib_color_blue600,
+        ".green400" to R.color.settingslib_color_green600,
+        ".green200" to R.color.settingslib_color_green500,
+        ".red200" to R.color.settingslib_color_red500,
+        ".cream" to R.color.settingslib_color_charcoal
+    )
+
+    @Composable
+    private fun getDefaultPropertiesList() =
+        DARK_TO_LIGHT_THEME_COLOR_MAP.map { (key, colorRes) ->
+            val color = colorResource(colorRes).toArgb()
+            rememberLottieDynamicProperty(
+                property = LottieProperty.COLOR_FILTER,
+                keyPath = arrayOf("**", key, "**")
+            ){ PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP) }
+        }
+
+    @Composable
+    fun getDefaultDynamicProperties() =
+        rememberLottieDynamicProperties(*getDefaultPropertiesList().toTypedArray())
+}
+
 @Composable
 private fun BaseLottie(resId: Int) {
     val composition by rememberLottieComposition(
@@ -47,8 +86,10 @@ private fun BaseLottie(resId: Int) {
         composition,
         iterations = LottieConstants.IterateForever,
     )
+    val isLightMode = !isSystemInDarkTheme()
     LottieAnimation(
         composition = composition,
+        dynamicProperties = LottieColorUtils.getDefaultDynamicProperties().takeIf { isLightMode },
         progress = { progress },
     )
 }

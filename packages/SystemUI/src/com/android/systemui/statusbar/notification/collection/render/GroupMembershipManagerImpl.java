@@ -18,42 +18,56 @@ package com.android.systemui.statusbar.notification.collection.render;
 
 import static com.android.systemui.statusbar.notification.collection.GroupEntry.ROOT_ENTRY;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 /**
  * ShadeListBuilder groups notifications from system server. This manager translates
  * ShadeListBuilder's method of grouping to be used within SystemUI.
  */
+@SysUISingleton
 public class GroupMembershipManagerImpl implements GroupMembershipManager {
-    @Override
-    public boolean isGroupSummary(NotificationEntry entry) {
-        return getGroupSummary(entry) == entry;
-    }
+    @Inject
+    public GroupMembershipManagerImpl() {}
 
     @Override
-    public NotificationEntry getGroupSummary(NotificationEntry entry) {
-        if (isEntryTopLevel(entry) || entry.getParent() == null) {
+    public boolean isGroupSummary(@NonNull NotificationEntry entry) {
+        if (entry.getParent() == null) {
+            // The entry is not attached, so it doesn't count.
+            return false;
+        }
+        // If entry is a summary, its parent is a GroupEntry with summary = entry.
+        return entry.getParent().getSummary() == entry;
+    }
+
+    @Nullable
+    @Override
+    public NotificationEntry getGroupSummary(@NonNull NotificationEntry entry) {
+        if (isTopLevelEntry(entry) || entry.getParent() == null) {
             return null;
         }
-
-        return entry.getParent().getRepresentativeEntry();
+        return entry.getParent().getSummary();
     }
 
     @Override
-    public boolean isChildInGroup(NotificationEntry entry) {
-        return !isEntryTopLevel(entry);
+    public boolean isChildInGroup(@NonNull NotificationEntry entry) {
+        // An entry is a child if it's not a summary or top level entry, but it is attached.
+        return !isGroupSummary(entry) && !isTopLevelEntry(entry) && entry.getParent() != null;
     }
 
     @Override
-    public boolean isOnlyChildInGroup(NotificationEntry entry) {
+    public boolean isOnlyChildInGroup(@NonNull NotificationEntry entry) {
         if (entry.getParent() == null) {
-            return false;
+            return false; // The entry is not attached.
         }
 
         return !isGroupSummary(entry) && entry.getParent().getChildren().size() == 1;
@@ -61,20 +75,24 @@ public class GroupMembershipManagerImpl implements GroupMembershipManager {
 
     @Nullable
     @Override
-    public List<NotificationEntry> getChildren(ListEntry entry) {
+    public List<NotificationEntry> getChildren(@NonNull ListEntry entry) {
         if (entry instanceof GroupEntry) {
             return ((GroupEntry) entry).getChildren();
         }
 
-        if (isGroupSummary(entry.getRepresentativeEntry())) {
+        NotificationEntry representativeEntry = entry.getRepresentativeEntry();
+        if (representativeEntry != null && isGroupSummary(representativeEntry)) {
             // maybe we were actually passed the summary
-            return entry.getRepresentativeEntry().getParent().getChildren();
+            GroupEntry parent = representativeEntry.getParent();
+            if (parent != null) {
+                return parent.getChildren();
+            }
         }
 
         return null;
     }
 
-    private boolean isEntryTopLevel(NotificationEntry entry) {
+    private boolean isTopLevelEntry(@NonNull NotificationEntry entry) {
         return entry.getParent() == ROOT_ENTRY;
     }
 }

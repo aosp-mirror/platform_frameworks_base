@@ -16,11 +16,10 @@
 
 package com.android.dynsystem;
 
-import static android.os.AsyncTask.Status.FINISHED;
-import static android.os.AsyncTask.Status.PENDING;
 import static android.os.AsyncTask.Status.RUNNING;
 import static android.os.image.DynamicSystemClient.ACTION_HIDE_NOTIFICATION;
 import static android.os.image.DynamicSystemClient.ACTION_NOTIFY_IF_IN_USE;
+import static android.os.image.DynamicSystemClient.ACTION_NOTIFY_KEYGUARD_DISMISSED;
 import static android.os.image.DynamicSystemClient.ACTION_START_INSTALL;
 import static android.os.image.DynamicSystemClient.CAUSE_ERROR_EXCEPTION;
 import static android.os.image.DynamicSystemClient.CAUSE_ERROR_INVALID_URL;
@@ -61,7 +60,6 @@ import android.os.RemoteException;
 import android.os.image.DynamicSystemClient;
 import android.os.image.DynamicSystemManager;
 import android.text.TextUtils;
-import android.util.EventLog;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -105,14 +103,6 @@ public class DynamicSystemInstallationService extends Service
     private static final String NOTIFICATION_CHANNEL_ID = "com.android.dynsystem";
     private static final int NOTIFICATION_ID = 1;
 
-    /*
-     * Event log tags
-     */
-    private static final int EVENT_DSU_PROGRESS_UPDATE = 120000;
-    private static final int EVENT_DSU_INSTALL_COMPLETE = 120001;
-    private static final int EVENT_DSU_INSTALL_FAILED = 120002;
-    private static final int EVENT_DSU_INSTALL_INSUFFICIENT_SPACE = 120003;
-
     protected static void logEventProgressUpdate(
             String partitionName,
             long installedBytes,
@@ -120,8 +110,7 @@ public class DynamicSystemInstallationService extends Service
             int partitionNumber,
             int totalPartitionNumber,
             int totalProgressPercentage) {
-        EventLog.writeEvent(
-                EVENT_DSU_PROGRESS_UPDATE,
+        EventLogTags.writeDsuProgressUpdate(
                 partitionName,
                 installedBytes,
                 totalBytes,
@@ -131,15 +120,15 @@ public class DynamicSystemInstallationService extends Service
     }
 
     protected static void logEventComplete() {
-        EventLog.writeEvent(EVENT_DSU_INSTALL_COMPLETE);
+        EventLogTags.writeDsuInstallComplete();
     }
 
     protected static void logEventFailed(String cause) {
-        EventLog.writeEvent(EVENT_DSU_INSTALL_FAILED, cause);
+        EventLogTags.writeDsuInstallFailed(cause);
     }
 
     protected static void logEventInsufficientSpace() {
-        EventLog.writeEvent(EVENT_DSU_INSTALL_INSUFFICIENT_SPACE);
+        EventLogTags.writeDsuInstallInsufficientSpace();
     }
 
     /*
@@ -173,7 +162,7 @@ public class DynamicSystemInstallationService extends Service
 
     // This is for testing only now
     private boolean mEnableWhenCompleted;
-    private boolean mOneShot;
+    private boolean mOneShot = true;
     private boolean mHideNotification;
 
     private InstallationAsyncTask.Progress mInstallTaskProgress;
@@ -234,6 +223,8 @@ public class DynamicSystemInstallationService extends Service
             executeNotifyIfInUseCommand();
         } else if (ACTION_HIDE_NOTIFICATION.equals(action)) {
             executeHideNotificationCommand();
+        } else if (ACTION_NOTIFY_KEYGUARD_DISMISSED.equals(action)) {
+            executeNotifyKeyguardDismissed();
         }
 
         return Service.START_NOT_STICKY;
@@ -418,12 +409,23 @@ public class DynamicSystemInstallationService extends Service
         mDynSystem.remove();
     }
 
+    private boolean isDsuSlotLocked() {
+        // Slot names ending with ".lock" are a customized installation.
+        // We expect the client app to provide custom UI to enter/exit DSU mode.
+        // We will ignore the ACTION_REBOOT_TO_NORMAL command and will not show
+        // notifications in this case.
+        return mDynSystem.getActiveDsuSlot().endsWith(".lock");
+    }
+
     private void executeRebootToNormalCommand() {
         if (!isInDynamicSystem()) {
             Log.e(TAG, "It's already running in normal system.");
             return;
         }
-
+        if (isDsuSlotLocked()) {
+            Log.e(TAG, "Ignore the reboot intent for a locked DSU slot");
+            return;
+        }
         if (!mDynSystem.setEnable(/* enable = */ false, /* oneShot = */ false)) {
             Log.e(TAG, "Failed to disable DynamicSystem.");
 
@@ -445,13 +447,13 @@ public class DynamicSystemInstallationService extends Service
     private void executeNotifyIfInUseCommand() {
         switch (getStatus()) {
             case STATUS_IN_USE:
-                if (!mHideNotification) {
+                if (!mHideNotification && !isDsuSlotLocked()) {
                     startForeground(NOTIFICATION_ID,
                             buildNotification(STATUS_IN_USE, CAUSE_NOT_SPECIFIED));
                 }
                 break;
             case STATUS_READY:
-                if (!mHideNotification) {
+                if (!mHideNotification && !isDsuSlotLocked()) {
                     startForeground(NOTIFICATION_ID,
                             buildNotification(STATUS_READY, CAUSE_NOT_SPECIFIED));
                 }
@@ -472,6 +474,10 @@ public class DynamicSystemInstallationService extends Service
                 stopForeground(STOP_FOREGROUND_REMOVE);
                 break;
         }
+    }
+
+    private void executeNotifyKeyguardDismissed() {
+        postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED, null);
     }
 
     private void resetTaskAndStop() {

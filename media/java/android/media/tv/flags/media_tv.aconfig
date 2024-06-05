@@ -1,0 +1,26 @@
+package: "android.media.tv.flags"
+container: "system"
+
+flag {
+    name: "broadcast_visibility_types"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Constants for standardizing broadcast visibility types."
+    bug: "222402395"
+}
+
+flag {
+    name: "enable_ad_service_fw"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Enable the TV client-side AD framework."
+    bug: "303506816"
+}
+
+flag {
+    name: "tiaf_v_apis"
+    is_exported: true
+    namespace: "media_tv"
+    description: "TIAF V3.0 APIs for Android V"
+    bug: "303323657"
+}

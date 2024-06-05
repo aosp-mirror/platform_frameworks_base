@@ -19,87 +19,83 @@ package com.android.settingslib.spaprivileged.model.app
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
+import android.content.pm.FakeFeatureFlagsImpl
+import android.content.pm.Flags
+import android.content.pm.ModuleInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.PackageManager.ResolveInfoFlags
 import android.content.pm.ResolveInfo
 import android.content.pm.UserInfo
 import android.content.res.Resources
+import android.os.BadParcelableException
+import android.os.DeadObjectException
 import android.os.UserManager
+import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.R
-import com.android.settingslib.spaprivileged.framework.common.userManager
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Mock
-import org.mockito.Mockito.any
-import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.eq
-import org.mockito.Mockito.verify
-import org.mockito.Spy
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.stub
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class AppListRepositoryTest {
     @get:Rule
-    val mockito: MockitoRule = MockitoJUnit.rule()
+    val mSetFlagsRule = SetFlagsRule()
 
-    @Spy
-    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val resources = mock<Resources> {
+        on { getStringArray(R.array.config_hideWhenDisabled_packageNames) } doReturn emptyArray()
+    }
 
-    @Mock
-    private lateinit var resources: Resources
-
-    @Mock
-    private lateinit var packageManager: PackageManager
-
-    @Mock
-    private lateinit var userManager: UserManager
-
-    private lateinit var repository: AppListRepository
-
-    @Before
-    fun setUp() {
-        whenever(context.resources).thenReturn(resources)
-        whenever(resources.getStringArray(R.array.config_hideWhenDisabled_packageNames))
-            .thenReturn(emptyArray())
-        whenever(context.packageManager).thenReturn(packageManager)
-        whenever(context.userManager).thenReturn(userManager)
-        whenever(packageManager.getInstalledModules(anyInt())).thenReturn(emptyList())
-        whenever(packageManager.getHomeActivities(any())).thenAnswer {
+    private val packageManager = mock<PackageManager> {
+        on { getInstalledModules(any()) } doReturn emptyList()
+        on { getHomeActivities(any()) } doAnswer {
             @Suppress("UNCHECKED_CAST")
             val resolveInfos = it.arguments[0] as MutableList<ResolveInfo>
             resolveInfos += resolveInfoOf(packageName = HOME_APP.packageName)
             null
         }
-        whenever(
-            packageManager.queryIntentActivitiesAsUser(any(), any<ResolveInfoFlags>(), anyInt())
-        ).thenReturn(listOf(resolveInfoOf(packageName = IN_LAUNCHER_APP.packageName)))
-        whenever(userManager.getUserInfo(ADMIN_USER_ID)).thenReturn(UserInfo().apply {
-            flags = UserInfo.FLAG_ADMIN
-        })
-        whenever(userManager.getProfileIdsWithDisabled(ADMIN_USER_ID))
-            .thenReturn(intArrayOf(ADMIN_USER_ID, MANAGED_PROFILE_USER_ID))
-
-        repository = AppListRepositoryImpl(context)
+        on { queryIntentActivitiesAsUser(any(), any<ResolveInfoFlags>(), any<Int>()) } doReturn
+            listOf(resolveInfoOf(packageName = IN_LAUNCHER_APP.packageName))
     }
 
+    private val mockUserManager = mock<UserManager> {
+        on { getUserInfo(ADMIN_USER_ID) } doReturn UserInfo().apply {
+            flags = UserInfo.FLAG_ADMIN
+        }
+        on { getProfileIdsWithDisabled(ADMIN_USER_ID) } doReturn
+            intArrayOf(ADMIN_USER_ID, MANAGED_PROFILE_USER_ID)
+    }
+
+    private val context: Context = spy(ApplicationProvider.getApplicationContext()) {
+        on { resources } doReturn resources
+        on { packageManager } doReturn packageManager
+        on { getSystemService(UserManager::class.java) } doReturn mockUserManager
+    }
+
+    private val repository = AppListRepositoryImpl(context)
+
     private fun mockInstalledApplications(apps: List<ApplicationInfo>, userId: Int) {
-        whenever(
-            packageManager.getInstalledApplicationsAsUser(any<ApplicationInfoFlags>(), eq(userId))
-        ).thenReturn(apps)
+        packageManager.stub {
+            on { getInstalledApplicationsAsUser(any<ApplicationInfoFlags>(), eq(userId)) } doReturn
+                apps
+        }
     }
 
     @Test
@@ -108,7 +104,7 @@ class AppListRepositoryTest {
 
         val appList = repository.loadApps(
             userId = ADMIN_USER_ID,
-            showInstantApps = false,
+            loadInstantApps = false,
         )
 
         assertThat(appList).containsExactly(NORMAL_APP)
@@ -120,7 +116,7 @@ class AppListRepositoryTest {
 
         val appList = repository.loadApps(
             userId = ADMIN_USER_ID,
-            showInstantApps = true,
+            loadInstantApps = true,
         )
 
         assertThat(appList).containsExactly(NORMAL_APP, INSTANT_APP)
@@ -136,12 +132,10 @@ class AppListRepositoryTest {
         )
 
         assertThat(appList).containsExactly(NORMAL_APP)
-        val flags = ArgumentCaptor.forClass(ApplicationInfoFlags::class.java)
-        verify(packageManager).getInstalledApplicationsAsUser(flags.capture(), eq(ADMIN_USER_ID))
-        assertThat(flags.value.value).isEqualTo(
-            PackageManager.MATCH_DISABLED_COMPONENTS or
-                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
-        )
+        val flags = argumentCaptor<ApplicationInfoFlags> {
+            verify(packageManager).getInstalledApplicationsAsUser(capture(), eq(ADMIN_USER_ID))
+        }.firstValue
+        assertThat(flags.value and PackageManager.MATCH_ANY_USER.toLong()).isEqualTo(0L)
     }
 
     @Test
@@ -154,9 +148,10 @@ class AppListRepositoryTest {
         )
 
         assertThat(appList).containsExactly(NORMAL_APP)
-        val flags = ArgumentCaptor.forClass(ApplicationInfoFlags::class.java)
-        verify(packageManager).getInstalledApplicationsAsUser(flags.capture(), eq(ADMIN_USER_ID))
-        assertThat(flags.value.value and PackageManager.MATCH_ANY_USER.toLong()).isGreaterThan(0L)
+        val flags = argumentCaptor<ApplicationInfoFlags> {
+            verify(packageManager).getInstalledApplicationsAsUser(capture(), eq(ADMIN_USER_ID))
+        }.firstValue
+        assertThat(flags.value and PackageManager.MATCH_ANY_USER.toLong()).isGreaterThan(0L)
     }
 
     @Test
@@ -268,6 +263,70 @@ class AppListRepositoryTest {
     }
 
     @Test
+    fun loadApps_archivedAppsEnabled() = runTest {
+        val fakeFlags = FakeFeatureFlagsImpl()
+        fakeFlags.setFlag(Flags.FLAG_ARCHIVING, true)
+        mockInstalledApplications(listOf(NORMAL_APP, ARCHIVED_APP), ADMIN_USER_ID)
+        val repository = AppListRepositoryImpl(context, fakeFlags)
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
+
+        assertThat(appList).containsExactly(NORMAL_APP, ARCHIVED_APP)
+        val flags = argumentCaptor<ApplicationInfoFlags> {
+            verify(packageManager).getInstalledApplicationsAsUser(capture(), eq(ADMIN_USER_ID))
+        }.firstValue
+        assertThat(flags.value).isEqualTo(
+            (PackageManager.MATCH_DISABLED_COMPONENTS or
+                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong() or
+                PackageManager.MATCH_ARCHIVED_PACKAGES
+        )
+    }
+
+    @Test
+    fun loadApps_hasApkInApexInfo_shouldNotIncludeAllHiddenApps() = runTest {
+        mSetFlagsRule.enableFlags(Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX)
+        packageManager.stub {
+            on { getInstalledModules(any()) } doReturn listOf(HIDDEN_MODULE)
+        }
+        mockInstalledApplications(
+            listOf(NORMAL_APP, HIDDEN_APEX_APP, HIDDEN_MODULE_APP),
+            ADMIN_USER_ID
+        )
+
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
+
+        assertThat(appList).containsExactly(NORMAL_APP)
+    }
+
+    @Test
+    fun loadApps_noApkInApexInfo_shouldNotIncludeHiddenSystemModule() = runTest {
+        mSetFlagsRule.disableFlags(Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX)
+        packageManager.stub {
+            on { getInstalledModules(any()) } doReturn listOf(HIDDEN_MODULE)
+        }
+        mockInstalledApplications(
+            listOf(NORMAL_APP, HIDDEN_APEX_APP, HIDDEN_MODULE_APP),
+            ADMIN_USER_ID
+        )
+
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
+
+        assertThat(appList).containsExactly(NORMAL_APP, HIDDEN_APEX_APP)
+    }
+
+    @Test
+    fun loadApps_hasException_returnEmptyList() = runTest {
+        packageManager.stub {
+            on {
+                getInstalledApplicationsAsUser(any<ApplicationInfoFlags>(), eq(ADMIN_USER_ID))
+            } doThrow BadParcelableException(DeadObjectException())
+        }
+
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
+
+        assertThat(appList).isEmpty()
+    }
+
+    @Test
     fun showSystemPredicate_showSystem() = runTest {
         val app = SYSTEM_APP
 
@@ -312,7 +371,12 @@ class AppListRepositoryTest {
     fun getSystemPackageNames_returnExpectedValues() = runTest {
         mockInstalledApplications(
             apps = listOf(
-                NORMAL_APP, INSTANT_APP, SYSTEM_APP, UPDATED_SYSTEM_APP, HOME_APP, IN_LAUNCHER_APP
+                NORMAL_APP,
+                INSTANT_APP,
+                SYSTEM_APP,
+                UPDATED_SYSTEM_APP,
+                HOME_APP,
+                IN_LAUNCHER_APP,
             ),
             userId = ADMIN_USER_ID,
         )
@@ -323,6 +387,26 @@ class AppListRepositoryTest {
         )
 
         assertThat(systemPackageNames).containsExactly(SYSTEM_APP.packageName)
+    }
+
+    @Test
+    fun loadAndFilterApps_loadNonSystemApp_returnExpectedValues() = runTest {
+        mockInstalledApplications(
+            apps = listOf(
+                NORMAL_APP,
+                INSTANT_APP,
+                SYSTEM_APP,
+                UPDATED_SYSTEM_APP,
+                HOME_APP,
+                IN_LAUNCHER_APP,
+            ),
+            userId = ADMIN_USER_ID,
+        )
+
+        val appList = repository.loadAndFilterApps(userId = ADMIN_USER_ID, isSystemApp = false)
+
+        assertThat(appList)
+            .containsExactly(NORMAL_APP, UPDATED_SYSTEM_APP, HOME_APP, IN_LAUNCHER_APP)
     }
 
     private suspend fun getShowSystemPredicate(showSystem: Boolean) =
@@ -364,6 +448,26 @@ class AppListRepositoryTest {
         val IN_LAUNCHER_APP = ApplicationInfo().apply {
             packageName = "app.in.launcher"
             flags = ApplicationInfo.FLAG_SYSTEM
+        }
+
+        val ARCHIVED_APP = ApplicationInfo().apply {
+            packageName = "archived.app"
+            flags = ApplicationInfo.FLAG_SYSTEM
+            isArchived = true
+        }
+
+        val HIDDEN_APEX_APP = ApplicationInfo().apply {
+            packageName = "hidden.apex.package"
+        }
+
+        val HIDDEN_MODULE_APP = ApplicationInfo().apply {
+            packageName = "hidden.module.package"
+        }
+
+        val HIDDEN_MODULE = ModuleInfo().apply {
+            packageName = "hidden.module.package"
+            apkInApexPackageNames = listOf("hidden.apex.package")
+            isHidden = true
         }
 
         fun resolveInfoOf(packageName: String) = ResolveInfo().apply {

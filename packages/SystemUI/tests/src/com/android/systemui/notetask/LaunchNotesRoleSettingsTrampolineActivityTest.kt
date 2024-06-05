@@ -18,13 +18,13 @@ package com.android.systemui.notetask
 
 import android.content.Context
 import android.content.Intent
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.dx.mockito.inline.extended.ExtendedMockito.verify
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.activity.SingleActivityFactory
 import com.android.systemui.notetask.LaunchNotesRoleSettingsTrampolineActivity.Companion.ACTION_MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE
 import com.android.systemui.notetask.NoteTaskEntryPoint.QUICK_AFFORDANCE
 import com.android.systemui.util.mockito.any
@@ -37,7 +37,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper
 class LaunchNotesRoleSettingsTrampolineActivityTest : SysuiTestCase() {
@@ -47,13 +47,9 @@ class LaunchNotesRoleSettingsTrampolineActivityTest : SysuiTestCase() {
     @Rule
     @JvmField
     val activityRule =
-        ActivityTestRule<LaunchNotesRoleSettingsTrampolineActivity>(
-            /* activityFactory= */ object :
-                SingleActivityFactory<LaunchNotesRoleSettingsTrampolineActivity>(
-                    LaunchNotesRoleSettingsTrampolineActivity::class.java
-                ) {
-                override fun create(intent: Intent?) =
-                    LaunchNotesRoleSettingsTrampolineActivity(noteTaskController)
+        ActivityTestRule(
+            /* activityFactory= */ SingleActivityFactory {
+                LaunchNotesRoleSettingsTrampolineActivity(noteTaskController)
             },
             /* initialTouchMode= */ false,
             /* launchActivity= */ false,

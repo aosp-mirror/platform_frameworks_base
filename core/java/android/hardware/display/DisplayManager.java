@@ -20,6 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -27,9 +28,11 @@ import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -44,6 +47,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -69,7 +73,11 @@ import java.util.function.Predicate;
 @SystemService(Context.DISPLAY_SERVICE)
 public final class DisplayManager {
     private static final String TAG = "DisplayManager";
-    private static final boolean DEBUG = false;
+
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.DisplayManager DEBUG && adb reboot'
+    static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG)
+            || Log.isLoggable("DisplayManager_All", Log.DEBUG);
     private static final boolean ENABLE_VIRTUAL_DISPLAY_REFRESH_RATE = true;
 
     /**
@@ -360,15 +368,26 @@ public final class DisplayManager {
      * @see #createVirtualDisplay
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public static final int VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH = 1 << 6;
 
     /**
      * Virtual display flag: Indicates that the orientation of this display device is coupled to
-     * the rotation of its associated logical display.
+     * the orientation of its associated logical display.
+     * <p>
+     * The flag should not be set when the physical display is mounted in a fixed orientation
+     * such as on a desk. Without this flag, display manager will apply a coordinate transformation
+     * such as a scale and translation to letterbox or pillarbox format under the assumption that
+     * the physical orientation of the display is invariant. With this flag set, the content will
+     * rotate to fill in the space of the display, as it does on the internal device display.
+     * </p>
      *
      * @see #createVirtualDisplay
      * @hide
      */
+    @FlaggedApi(android.companion.virtual.flags.Flags.FLAG_VDM_PUBLIC_APIS)
+    @SystemApi
     public static final int VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT = 1 << 7;
 
     /**
@@ -387,14 +406,13 @@ public final class DisplayManager {
 
     /**
      * Virtual display flag: Indicates that the display should support system decorations. Virtual
-     * displays without this flag shouldn't show home, IME or any other system decorations.
+     * displays without this flag shouldn't show home, navigation bar or wallpaper.
      * <p>This flag doesn't work without {@link #VIRTUAL_DISPLAY_FLAG_TRUSTED}</p>
      *
      * @see #createVirtualDisplay
      * @see #VIRTUAL_DISPLAY_FLAG_TRUSTED
      * @hide
      */
-    // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
     @TestApi
     public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 9;
 
@@ -554,7 +572,8 @@ public final class DisplayManager {
             EVENT_FLAG_DISPLAY_CHANGED,
             EVENT_FLAG_DISPLAY_REMOVED,
             EVENT_FLAG_DISPLAY_BRIGHTNESS,
-            EVENT_FLAG_HDR_SDR_RATIO_CHANGED
+            EVENT_FLAG_HDR_SDR_RATIO_CHANGED,
+            EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventsMask {}
@@ -609,6 +628,13 @@ public final class DisplayManager {
      * @hide
      */
     public static final long EVENT_FLAG_HDR_SDR_RATIO_CHANGED = 1L << 4;
+
+    /**
+     * Event flag to register for a display's connection changed.
+     *
+     * @hide
+     */
+    public static final long EVENT_FLAG_DISPLAY_CONNECTION_CHANGED = 1L << 5;
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -757,7 +783,8 @@ public final class DisplayManager {
      */
     public void registerDisplayListener(@NonNull DisplayListener listener,
             @Nullable Handler handler, @EventsMask long eventsMask) {
-        mGlobal.registerDisplayListener(listener, handler, eventsMask);
+        mGlobal.registerDisplayListener(listener, handler, eventsMask,
+                ActivityThread.currentPackageName());
     }
 
     /**
@@ -888,6 +915,25 @@ public final class DisplayManager {
     @UnsupportedAppUsage
     public WifiDisplayStatus getWifiDisplayStatus() {
         return mGlobal.getWifiDisplayStatus();
+    }
+
+    /**
+     * Enable a connected display that is currently disabled.
+     * @hide
+     */
+    @RequiresPermission("android.permission.MANAGE_DISPLAYS")
+    public void enableConnectedDisplay(int displayId) {
+        mGlobal.enableConnectedDisplay(displayId);
+    }
+
+
+    /**
+     * Disable a connected display that is currently enabled.
+     * @hide
+     */
+    @RequiresPermission("android.permission.MANAGE_DISPLAYS")
+    public void disableConnectedDisplay(int displayId) {
+        mGlobal.disableConnectedDisplay(displayId);
     }
 
     /**
@@ -1607,6 +1653,22 @@ public final class DisplayManager {
     }
 
     /**
+     * Allows internal application to restrict display modes to specified modeIds
+     *
+     * @param displayId display that restrictions will be applied to
+     * @param modeIds allowed mode ids
+     *
+     * @hide
+     */
+    @RequiresPermission("android.permission.RESTRICT_DISPLAY_MODES")
+    public void requestDisplayModes(int displayId, @Nullable int[] modeIds) {
+        if (modeIds != null && modeIds.length == 0) {
+            throw new IllegalArgumentException("requestDisplayModes: modesIds can't be empty");
+        }
+        mGlobal.requestDisplayModes(displayId, modeIds);
+    }
+
+    /**
      * Listens for changes in available display devices.
      */
     public interface DisplayListener {
@@ -1633,6 +1695,24 @@ public final class DisplayManager {
          * @param displayId The id of the logical display that changed.
          */
         void onDisplayChanged(int displayId);
+
+        /**
+         * Called when a display is connected, but not necessarily used.
+         *
+         * A display is always connected before being added.
+         * @hide
+         */
+        default void onDisplayConnected(int displayId) { }
+
+        /**
+         * Called when a display is disconnected.
+         *
+         * If a display was added, a display is only disconnected after it has been removed. Note,
+         * however, that the display may have been disconnected by the time the removed event is
+         * received by the listener.
+         * @hide
+         */
+        default void onDisplayDisconnected(int displayId) { }
     }
 
     /**
@@ -1762,6 +1842,21 @@ public final class DisplayManager {
          * 123,1,critical,0.8,default;123,1,moderate,0.6,id_2;456,2,moderate,0.9,critical,0.7
          */
         String KEY_BRIGHTNESS_THROTTLING_DATA = "brightness_throttling_data";
+
+        /**
+         * Key for the power throttling data as a String formatted, from the display
+         * device config.
+         */
+        String KEY_POWER_THROTTLING_DATA = "power_throttling_data";
+
+        /**
+         * Key for normal brightness mode controller feature flag.
+         * It enables NormalBrightnessModeController.
+         * Read value via {@link android.provider.DeviceConfig#getBoolean(String, String, boolean)}
+         * with {@link android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER} as the namespace.
+         * @hide
+         */
+        String KEY_USE_NORMAL_BRIGHTNESS_MODE_CONTROLLER = "use_normal_brightness_mode_controller";
 
         /**
          * Key for disabling screen wake locks while apps are in cached state.

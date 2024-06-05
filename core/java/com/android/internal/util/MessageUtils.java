@@ -26,6 +26,8 @@ import java.lang.reflect.Modifier;
 /**
  * Static utility class for dealing with {@link Message} objects.
  */
+// Exported to Mainline modules; cannot use annotations
+// @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class MessageUtils {
 
     private static final String TAG = MessageUtils.class.getSimpleName();

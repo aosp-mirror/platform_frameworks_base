@@ -16,14 +16,9 @@
 
 package com.android.server.pm;
 
-import static android.app.AppOpsManager.MODE_DEFAULT;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.DataLoaderType;
 import android.content.pm.IPackageInstallObserver2;
-import android.content.pm.PackageInstaller;
-import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -43,6 +38,7 @@ final class InstallArgs {
     final IPackageInstallObserver2 mObserver;
     // Always refers to PackageManager flags only
     final int mInstallFlags;
+    final int mDevelopmentInstallFlags;
     @NonNull
     final InstallSource mInstallSource;
     final String mVolumeUuid;
@@ -66,11 +62,12 @@ final class InstallArgs {
     // The list of instruction sets supported by this app. This is currently
     // only used during the rmdex() phase to clean up resources. We can get rid of this
     // if we move dex files under the common app path.
-    @Nullable String[] mInstructionSets;
+    @Nullable
+    final String[] mInstructionSets;
 
     InstallArgs(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
-            int installFlags, InstallSource installSource, String volumeUuid,
-            UserHandle user, String[] instructionSets, String abiOverride,
+            int installFlags, int developmentInstallFlags, InstallSource installSource,
+            String volumeUuid,  UserHandle user, String[] instructionSets, String abiOverride,
             @NonNull ArrayMap<String, Integer> permissionStates,
             List<String> allowlistedRestrictedPermissions,
             int autoRevokePermissionsMode, String traceMethod, int traceCookie,
@@ -80,6 +77,7 @@ final class InstallArgs {
         mOriginInfo = originInfo;
         mMoveInfo = moveInfo;
         mInstallFlags = installFlags;
+        mDevelopmentInstallFlags = developmentInstallFlags;
         mObserver = observer;
         mInstallSource = Preconditions.checkNotNull(installSource);
         mVolumeUuid = volumeUuid;
@@ -98,23 +96,5 @@ final class InstallArgs {
         mDataLoaderType = dataLoaderType;
         mPackageSource = packageSource;
         mApplicationEnabledSettingPersistent = applicationEnabledSettingPersistent;
-    }
-
-    /**
-     * Create args that describe an existing installed package. Typically used
-     * when cleaning up old installs, or used as a move source.
-     */
-    InstallArgs(String codePath, String[] instructionSets) {
-        this(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY, null, null,
-                instructionSets, null, new ArrayMap<>(), null, MODE_DEFAULT, null, 0,
-                SigningDetails.UNKNOWN, PackageManager.INSTALL_REASON_UNKNOWN,
-                PackageManager.INSTALL_SCENARIO_DEFAULT, false, DataLoaderType.NONE,
-                PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED, false);
-        mCodeFile = (codePath != null) ? new File(codePath) : null;
-    }
-
-    /** @see PackageSettingBase#getPath() */
-    String getCodePath() {
-        return (mCodeFile != null) ? mCodeFile.getAbsolutePath() : null;
     }
 }

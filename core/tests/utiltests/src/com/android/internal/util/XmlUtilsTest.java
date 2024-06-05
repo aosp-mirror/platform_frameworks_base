@@ -17,13 +17,17 @@
 package com.android.internal.util;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import android.util.Xml;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,9 +36,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class XmlUtilsTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class XmlUtilsTest {
 
     // https://code.google.com/p/android/issues/detail?id=63717
+    @Test
     public void testMapWithNullKeys() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
         Map<String, Object> map = new HashMap<String, Object>();
@@ -48,6 +54,7 @@ public class XmlUtilsTest extends TestCase {
         assertEquals("fooValue", deserialized.get("foo"));
     }
 
+    @Test
     public void testreadWriteXmlByteArrayValue() throws Exception {
         byte[] testByteArray = {0x1 , 0xa, 0xb, 0x9, 0x34, (byte) 0xaa, (byte) 0xba, (byte) 0x99};
 

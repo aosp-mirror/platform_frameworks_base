@@ -15,14 +15,11 @@
  */
 package com.android.wm.shell.bubbles.animation;
 
-import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_COLLAPSE_ANIMATOR;
-import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_EXPANDED_VIEW_DRAGGING;
-import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
-import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.BubbleExpandedView.BACKGROUND_ALPHA;
 import static com.android.wm.shell.bubbles.BubbleExpandedView.BOTTOM_CLIP_PROPERTY;
 import static com.android.wm.shell.bubbles.BubbleExpandedView.CONTENT_ALPHA;
 import static com.android.wm.shell.bubbles.BubbleExpandedView.MANAGE_BUTTON_ALPHA;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -31,7 +28,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
+import android.graphics.PointF;
 import android.view.HapticFeedbackConstants;
 import android.view.ViewConfiguration;
 
@@ -41,6 +38,7 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.bubbles.BubbleExpandedView;
@@ -54,8 +52,6 @@ import java.util.List;
  * hide the {@link BubbleExpandedView}
  */
 public class ExpandedViewAnimationControllerImpl implements ExpandedViewAnimationController {
-
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "ExpandedViewAnimCtrl" : TAG_BUBBLES;
 
     private static final float COLLAPSE_THRESHOLD = 0.02f;
 
@@ -121,9 +117,6 @@ public class ExpandedViewAnimationControllerImpl implements ExpandedViewAnimatio
     @Override
     public void setExpandedView(BubbleExpandedView expandedView) {
         if (mExpandedView != null) {
-            if (DEBUG_COLLAPSE_ANIMATOR) {
-                Log.d(TAG, "updating expandedView, resetting previous");
-            }
             if (mCollapseAnimation != null) {
                 mCollapseAnimation.cancel();
             }
@@ -140,17 +133,14 @@ public class ExpandedViewAnimationControllerImpl implements ExpandedViewAnimatio
         if (mExpandedView != null) {
             mDraggedAmount = OverScroll.dampedScroll(distance, mExpandedView.getContentHeight());
 
-            if (DEBUG_COLLAPSE_ANIMATOR && DEBUG_EXPANDED_VIEW_DRAGGING) {
-                Log.d(TAG, "updateDrag: distance=" + distance + " dragged=" + mDraggedAmount);
-            }
+            ProtoLog.d(WM_SHELL_BUBBLES,
+                    "updateDrag: distance=%f dragged=%d", distance, mDraggedAmount);
 
             setCollapsedAmount(mDraggedAmount);
 
             if (!mNotifiedAboutThreshold && isPastCollapseThreshold()) {
                 mNotifiedAboutThreshold = true;
-                if (DEBUG_COLLAPSE_ANIMATOR) {
-                    Log.d(TAG, "notifying over collapse threshold");
-                }
+                ProtoLog.d(WM_SHELL_BUBBLES, "notifying over collapse threshold");
                 vibrateIfEnabled();
             }
         }
@@ -172,45 +162,37 @@ public class ExpandedViewAnimationControllerImpl implements ExpandedViewAnimatio
         if (mSwipeDownVelocity > mMinFlingVelocity) {
             // Swipe velocity is positive and over fling velocity.
             // This is a swipe down, always reset to expanded state, regardless of dragged amount.
-            if (DEBUG_COLLAPSE_ANIMATOR) {
-                Log.d(TAG,
-                        "not collapsing expanded view, swipe down velocity: " + mSwipeDownVelocity
-                                + " minV: " + mMinFlingVelocity);
-            }
+            ProtoLog.d(WM_SHELL_BUBBLES,
+                    "not collapsing expanded view, swipe down velocity=%f minV=%d",
+                    mSwipeDownVelocity, mMinFlingVelocity);
             return false;
         }
 
         if (mSwipeUpVelocity > mMinFlingVelocity) {
             // Swiping up and over fling velocity, collapse the view.
-            if (DEBUG_COLLAPSE_ANIMATOR) {
-                Log.d(TAG,
-                        "collapse expanded view, swipe up velocity: " + mSwipeUpVelocity + " minV: "
-                                + mMinFlingVelocity);
-            }
+            ProtoLog.d(WM_SHELL_BUBBLES,
+                    "collapse expanded view, swipe up velocity=%f minV=%d",
+                    mSwipeUpVelocity, mMinFlingVelocity);
             return true;
         }
 
         if (isPastCollapseThreshold()) {
-            if (DEBUG_COLLAPSE_ANIMATOR) {
-                Log.d(TAG, "collapse expanded view, past threshold, dragged: " + mDraggedAmount);
-            }
+            ProtoLog.d(WM_SHELL_BUBBLES,
+                    "collapse expanded view, past threshold, dragged=%d", mDraggedAmount);
             return true;
         }
 
-        if (DEBUG_COLLAPSE_ANIMATOR) {
-            Log.d(TAG, "not collapsing expanded view");
-        }
+        ProtoLog.d(WM_SHELL_BUBBLES, "not collapsing expanded view");
 
         return false;
     }
 
     @Override
-    public void animateCollapse(Runnable startStackCollapse, Runnable after) {
-        if (DEBUG_COLLAPSE_ANIMATOR) {
-            Log.d(TAG,
-                    "expandedView animate collapse swipeVel=" + mSwipeUpVelocity + " minFlingVel="
-                            + mMinFlingVelocity);
-        }
+    public void animateCollapse(Runnable startStackCollapse, Runnable after,
+            PointF collapsePosition) {
+        ProtoLog.d(WM_SHELL_BUBBLES, "expandedView animate collapse swipeVel=%f minFlingVel=%d"
+                        + " collapsePosition=%f,%f", mSwipeUpVelocity, mMinFlingVelocity,
+                collapsePosition.x, collapsePosition.y);
         if (mExpandedView != null) {
             // Mark it as animating immediately to avoid updates to the view before animation starts
             mExpandedView.setAnimating(true);
@@ -243,9 +225,7 @@ public class ExpandedViewAnimationControllerImpl implements ExpandedViewAnimatio
 
     @Override
     public void animateBackToExpanded() {
-        if (DEBUG_COLLAPSE_ANIMATOR) {
-            Log.d(TAG, "expandedView animate back to expanded");
-        }
+        ProtoLog.d(WM_SHELL_BUBBLES, "expandedView animate back to expanded");
         BubbleExpandedView expandedView = mExpandedView;
         if (expandedView == null) {
             return;
@@ -297,10 +277,19 @@ public class ExpandedViewAnimationControllerImpl implements ExpandedViewAnimatio
     }
 
     @Override
+    public boolean shouldAnimateExpansion() {
+        return false;
+    }
+
+    @Override
+    public void animateExpansion(long startDelayMillis, Runnable after, PointF collapsePosition,
+            PointF bubblePosition) {
+        // TODO - animate
+    }
+
+    @Override
     public void reset() {
-        if (DEBUG_COLLAPSE_ANIMATOR) {
-            Log.d(TAG, "reset expandedView collapsed state");
-        }
+        ProtoLog.d(WM_SHELL_BUBBLES, "reset expandedView collapsed state");
         if (mExpandedView == null) {
             return;
         }

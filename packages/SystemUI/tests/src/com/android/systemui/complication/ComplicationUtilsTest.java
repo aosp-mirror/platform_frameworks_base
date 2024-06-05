@@ -27,7 +27,6 @@ import static com.android.systemui.complication.Complication.COMPLICATION_TYPE_W
 import static com.android.systemui.complication.ComplicationUtils.convertComplicationType;
 import static com.android.systemui.complication.ComplicationUtils.convertComplicationTypes;
 
-
 import static com.google.common.truth.Truth.assertThat;
 
 import android.testing.AndroidTestingRunner;

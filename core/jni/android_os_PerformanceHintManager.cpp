@@ -16,15 +16,16 @@
 
 #define LOG_TAG "PerfHint-jni"
 
-#include "jni.h"
-
+#include <android/performance_hint.h>
 #include <dlfcn.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <utils/Log.h>
+
 #include <vector>
 
 #include "core_jni_helpers.h"
+#include "jni.h"
 
 namespace android {
 
@@ -34,26 +35,41 @@ struct APerformanceHintManager;
 struct APerformanceHintSession;
 
 typedef APerformanceHintManager* (*APH_getManager)();
+typedef int64_t (*APH_getPreferredUpdateRateNanos)(APerformanceHintManager* manager);
 typedef APerformanceHintSession* (*APH_createSession)(APerformanceHintManager*, const int32_t*,
                                                       size_t, int64_t);
-typedef int64_t (*APH_getPreferredUpdateRateNanos)(APerformanceHintManager* manager);
 typedef void (*APH_updateTargetWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_reportActualWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_closeSession)(APerformanceHintSession* session);
 typedef void (*APH_sendHint)(APerformanceHintSession*, int32_t);
-typedef void (*APH_setThreads)(APerformanceHintSession*, const pid_t*, size_t);
+typedef int (*APH_setThreads)(APerformanceHintSession*, const pid_t*, size_t);
 typedef void (*APH_getThreadIds)(APerformanceHintSession*, int32_t* const, size_t* const);
+typedef void (*APH_setPreferPowerEfficiency)(APerformanceHintSession*, bool);
+typedef void (*APH_reportActualWorkDuration2)(APerformanceHintSession*, AWorkDuration*);
+
+typedef AWorkDuration* (*AWD_create)();
+typedef void (*AWD_setTimeNanos)(AWorkDuration*, int64_t);
+typedef void (*AWD_release)(AWorkDuration*);
 
 bool gAPerformanceHintBindingInitialized = false;
 APH_getManager gAPH_getManagerFn = nullptr;
-APH_createSession gAPH_createSessionFn = nullptr;
 APH_getPreferredUpdateRateNanos gAPH_getPreferredUpdateRateNanosFn = nullptr;
+APH_createSession gAPH_createSessionFn = nullptr;
 APH_updateTargetWorkDuration gAPH_updateTargetWorkDurationFn = nullptr;
 APH_reportActualWorkDuration gAPH_reportActualWorkDurationFn = nullptr;
 APH_closeSession gAPH_closeSessionFn = nullptr;
 APH_sendHint gAPH_sendHintFn = nullptr;
 APH_setThreads gAPH_setThreadsFn = nullptr;
 APH_getThreadIds gAPH_getThreadIdsFn = nullptr;
+APH_setPreferPowerEfficiency gAPH_setPreferPowerEfficiencyFn = nullptr;
+APH_reportActualWorkDuration2 gAPH_reportActualWorkDuration2Fn = nullptr;
+
+AWD_create gAWD_createFn = nullptr;
+AWD_setTimeNanos gAWD_setWorkPeriodStartTimestampNanosFn = nullptr;
+AWD_setTimeNanos gAWD_setActualTotalDurationNanosFn = nullptr;
+AWD_setTimeNanos gAWD_setActualCpuDurationNanosFn = nullptr;
+AWD_setTimeNanos gAWD_setActualGpuDurationNanosFn = nullptr;
+AWD_release gAWD_releaseFn = nullptr;
 
 void ensureAPerformanceHintBindingInitialized() {
     if (gAPerformanceHintBindingInitialized) return;
@@ -65,16 +81,16 @@ void ensureAPerformanceHintBindingInitialized() {
     LOG_ALWAYS_FATAL_IF(gAPH_getManagerFn == nullptr,
                         "Failed to find required symbol APerformanceHint_getManager!");
 
-    gAPH_createSessionFn = (APH_createSession)dlsym(handle_, "APerformanceHint_createSession");
-    LOG_ALWAYS_FATAL_IF(gAPH_createSessionFn == nullptr,
-                        "Failed to find required symbol APerformanceHint_createSession!");
-
     gAPH_getPreferredUpdateRateNanosFn =
             (APH_getPreferredUpdateRateNanos)dlsym(handle_,
                                                    "APerformanceHint_getPreferredUpdateRateNanos");
     LOG_ALWAYS_FATAL_IF(gAPH_getPreferredUpdateRateNanosFn == nullptr,
                         "Failed to find required symbol "
                         "APerformanceHint_getPreferredUpdateRateNanos!");
+
+    gAPH_createSessionFn = (APH_createSession)dlsym(handle_, "APerformanceHint_createSession");
+    LOG_ALWAYS_FATAL_IF(gAPH_createSessionFn == nullptr,
+                        "Failed to find required symbol APerformanceHint_createSession!");
 
     gAPH_updateTargetWorkDurationFn =
             (APH_updateTargetWorkDuration)dlsym(handle_,
@@ -96,8 +112,7 @@ void ensureAPerformanceHintBindingInitialized() {
 
     gAPH_sendHintFn = (APH_sendHint)dlsym(handle_, "APerformanceHint_sendHint");
     LOG_ALWAYS_FATAL_IF(gAPH_sendHintFn == nullptr,
-                        "Failed to find required symbol "
-                        "APerformanceHint_sendHint!");
+                        "Failed to find required symbol APerformanceHint_sendHint!");
 
     gAPH_setThreadsFn = (APH_setThreads)dlsym(handle_, "APerformanceHint_setThreads");
     LOG_ALWAYS_FATAL_IF(gAPH_setThreadsFn == nullptr,
@@ -107,10 +122,68 @@ void ensureAPerformanceHintBindingInitialized() {
     LOG_ALWAYS_FATAL_IF(gAPH_getThreadIdsFn == nullptr,
                         "Failed to find required symbol APerformanceHint_getThreadIds!");
 
+    gAPH_setPreferPowerEfficiencyFn =
+            (APH_setPreferPowerEfficiency)dlsym(handle_,
+                                                "APerformanceHint_setPreferPowerEfficiency");
+    LOG_ALWAYS_FATAL_IF(gAPH_setPreferPowerEfficiencyFn == nullptr,
+                        "Failed to find required symbol "
+                        "APerformanceHint_setPreferPowerEfficiency!");
+
+    gAPH_reportActualWorkDuration2Fn =
+            (APH_reportActualWorkDuration2)dlsym(handle_,
+                                                 "APerformanceHint_reportActualWorkDuration2");
+    LOG_ALWAYS_FATAL_IF(gAPH_reportActualWorkDuration2Fn == nullptr,
+                        "Failed to find required symbol "
+                        "APerformanceHint_reportActualWorkDuration2!");
+
+    gAWD_createFn = (AWD_create)dlsym(handle_, "AWorkDuration_create");
+    LOG_ALWAYS_FATAL_IF(gAWD_createFn == nullptr,
+                        "Failed to find required symbol AWorkDuration_create!");
+
+    gAWD_setWorkPeriodStartTimestampNanosFn =
+            (AWD_setTimeNanos)dlsym(handle_, "AWorkDuration_setWorkPeriodStartTimestampNanos");
+    LOG_ALWAYS_FATAL_IF(gAWD_setWorkPeriodStartTimestampNanosFn == nullptr,
+                        "Failed to find required symbol "
+                        "AWorkDuration_setWorkPeriodStartTimestampNanos!");
+
+    gAWD_setActualTotalDurationNanosFn =
+            (AWD_setTimeNanos)dlsym(handle_, "AWorkDuration_setActualTotalDurationNanos");
+    LOG_ALWAYS_FATAL_IF(gAWD_setActualTotalDurationNanosFn == nullptr,
+                        "Failed to find required symbol "
+                        "AWorkDuration_setActualTotalDurationNanos!");
+
+    gAWD_setActualCpuDurationNanosFn =
+            (AWD_setTimeNanos)dlsym(handle_, "AWorkDuration_setActualCpuDurationNanos");
+    LOG_ALWAYS_FATAL_IF(gAWD_setActualCpuDurationNanosFn == nullptr,
+                        "Failed to find required symbol AWorkDuration_setActualCpuDurationNanos!");
+
+    gAWD_setActualGpuDurationNanosFn =
+            (AWD_setTimeNanos)dlsym(handle_, "AWorkDuration_setActualGpuDurationNanos");
+    LOG_ALWAYS_FATAL_IF(gAWD_setActualGpuDurationNanosFn == nullptr,
+                        "Failed to find required symbol AWorkDuration_setActualGpuDurationNanos!");
+
+    gAWD_releaseFn = (AWD_release)dlsym(handle_, "AWorkDuration_release");
+    LOG_ALWAYS_FATAL_IF(gAWD_releaseFn == nullptr,
+                        "Failed to find required symbol AWorkDuration_release!");
+
     gAPerformanceHintBindingInitialized = true;
 }
 
 } // namespace
+
+static void throwExceptionForErrno(JNIEnv* env, int err, const std::string& msg) {
+    switch (err) {
+        case EINVAL:
+            jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", msg.c_str());
+            break;
+        case EPERM:
+            jniThrowExceptionFmt(env, "java/lang/SecurityException", msg.c_str());
+            break;
+        default:
+            jniThrowException(env, "java/lang/RuntimeException", msg.c_str());
+            break;
+    }
+}
 
 static jlong nativeAcquireManager(JNIEnv* env, jclass clazz) {
     ensureAPerformanceHintBindingInitialized();
@@ -174,8 +247,11 @@ static void nativeSetThreads(JNIEnv* env, jclass clazz, jlong nativeSessionPtr, 
     for (size_t i = 0; i < tidsArray.size(); ++i) {
         tidsVector.push_back(static_cast<int32_t>(tidsArray[i]));
     }
-    gAPH_setThreadsFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr),
-                      tidsVector.data(), tidsVector.size());
+    int err = gAPH_setThreadsFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr),
+                                tidsVector.data(), tidsVector.size());
+    if (err != 0) {
+        throwExceptionForErrno(env, err, "Failed to set threads for hint session");
+    }
 }
 
 // This call should only be used for validation in tests only. This call will initiate two IPC
@@ -199,11 +275,37 @@ static jintArray nativeGetThreadIds(JNIEnv* env, jclass clazz, jlong nativeSessi
         return nullptr;
     }
     jint* threadIds = env->GetIntArrayElements(jintArr, 0);
-    for (int i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         threadIds[i] = tidsVector[i];
     }
     env->ReleaseIntArrayElements(jintArr, threadIds, 0);
     return jintArr;
+}
+
+static void nativeSetPreferPowerEfficiency(JNIEnv* env, jclass clazz, jlong nativeSessionPtr,
+                                           jboolean enabled) {
+    ensureAPerformanceHintBindingInitialized();
+    gAPH_setPreferPowerEfficiencyFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr),
+                                    enabled);
+}
+
+static void nativeReportActualWorkDuration2(JNIEnv* env, jclass clazz, jlong nativeSessionPtr,
+                                            jlong workPeriodStartTimestampNanos,
+                                            jlong actualTotalDurationNanos,
+                                            jlong actualCpuDurationNanos,
+                                            jlong actualGpuDurationNanos) {
+    ensureAPerformanceHintBindingInitialized();
+
+    AWorkDuration* workDuration = gAWD_createFn();
+    gAWD_setWorkPeriodStartTimestampNanosFn(workDuration, workPeriodStartTimestampNanos);
+    gAWD_setActualTotalDurationNanosFn(workDuration, actualTotalDurationNanos);
+    gAWD_setActualCpuDurationNanosFn(workDuration, actualCpuDurationNanos);
+    gAWD_setActualGpuDurationNanosFn(workDuration, actualGpuDurationNanos);
+
+    gAPH_reportActualWorkDuration2Fn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr),
+                                     workDuration);
+
+    gAWD_releaseFn(workDuration);
 }
 
 static const JNINativeMethod gPerformanceHintMethods[] = {
@@ -216,6 +318,8 @@ static const JNINativeMethod gPerformanceHintMethods[] = {
         {"nativeSendHint", "(JI)V", (void*)nativeSendHint},
         {"nativeSetThreads", "(J[I)V", (void*)nativeSetThreads},
         {"nativeGetThreadIds", "(J)[I", (void*)nativeGetThreadIds},
+        {"nativeSetPreferPowerEfficiency", "(JZ)V", (void*)nativeSetPreferPowerEfficiency},
+        {"nativeReportActualWorkDuration", "(JJJJJ)V", (void*)nativeReportActualWorkDuration2},
 };
 
 int register_android_os_PerformanceHintManager(JNIEnv* env) {

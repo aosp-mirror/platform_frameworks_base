@@ -22,7 +22,6 @@ import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PIP_TRANSITION;
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
@@ -48,7 +47,6 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Pair;
-import android.util.Size;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
@@ -75,25 +73,25 @@ import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.common.pip.IPip;
+import com.android.wm.shell.common.pip.IPipAnimationListener;
+import com.android.wm.shell.common.pip.PipAppOpsListener;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipKeepClearAlgorithmInterface;
+import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
-import com.android.wm.shell.pip.IPip;
-import com.android.wm.shell.pip.IPipAnimationListener;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
-import com.android.wm.shell.pip.PipAppOpsListener;
-import com.android.wm.shell.pip.PipBoundsAlgorithm;
-import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipDisplayLayoutState;
-import com.android.wm.shell.pip.PipKeepClearAlgorithmInterface;
-import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
-import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
-import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
@@ -123,13 +121,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private static final long PIP_KEEP_CLEAR_AREAS_DELAY =
             SystemProperties.getLong("persist.wm.debug.pip_keep_clear_areas_delay", 200);
 
-    private boolean mEnablePipKeepClearAlgorithm =
-            SystemProperties.getBoolean("persist.wm.debug.enable_pip_keep_clear_algorithm", true);
-
-    @VisibleForTesting
-    void setEnablePipKeepClearAlgorithm(boolean value) {
-        mEnablePipKeepClearAlgorithm = value;
-    }
+    private static final long ENABLE_TOUCH_DELAY_MS = 200L;
 
     private Context mContext;
     protected ShellExecutor mMainExecutor;
@@ -142,7 +134,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
     private PipKeepClearAlgorithmInterface mPipKeepClearAlgorithm;
     private PipBoundsState mPipBoundsState;
-    private PipSizeSpecHandler mPipSizeSpecHandler;
     private PipDisplayLayoutState mPipDisplayLayoutState;
     private PipMotionHelper mPipMotionHelper;
     private PipTouchHandler mTouchHandler;
@@ -162,13 +153,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private final Runnable mMovePipInResponseToKeepClearAreasChangeCallback =
             this::onKeepClearAreasChangedCallback;
 
+    private final Runnable mEnableTouchCallback = () -> mTouchHandler.setTouchEnabled(true);
+
     private void onKeepClearAreasChangedCallback() {
         if (mIsKeyguardShowingOrAnimating) {
             // early bail out if the change was caused by keyguard showing up
-            return;
-        }
-        if (!mEnablePipKeepClearAlgorithm) {
-            // early bail out if the keep clear areas feature is disabled
             return;
         }
         if (mPipBoundsState.isStashed()) {
@@ -188,10 +177,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     private void updatePipPositionForKeepClearAreas() {
-        if (!mEnablePipKeepClearAlgorithm) {
-            // early bail out if the keep clear areas feature is disabled
-            return;
-        }
         if (mIsKeyguardShowingOrAnimating) {
             // early bail out if the change was caused by keyguard showing up
             return;
@@ -261,6 +246,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             // The same rotation may have been set by auto PiP-able or fixed rotation. So notify
             // the change with fromRotation=false to apply the rotated destination bounds from
             // PipTaskOrganizer#onMovementBoundsChanged.
+            // We need to update the bounds scale in case this was from fixed rotation, as the
+            // current proportion was computed using the previous orientation max size and is wrong.
+            mPipBoundsState.updateBoundsScale();
             updateMovementBounds(null, false /* fromRotation */,
                     false /* fromImeAdjustment */, false /* fromShelfAdjustment */, t);
             return;
@@ -344,15 +332,17 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
                         Set<Rect> unrestricted) {
                     if (mPipDisplayLayoutState.getDisplayId() == displayId) {
-                        if (mEnablePipKeepClearAlgorithm) {
-                            mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
+                        mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
 
-                            mMainExecutor.removeCallbacks(
-                                    mMovePipInResponseToKeepClearAreasChangeCallback);
-                            mMainExecutor.executeDelayed(
-                                    mMovePipInResponseToKeepClearAreasChangeCallback,
-                                    PIP_KEEP_CLEAR_AREAS_DELAY);
-                        }
+                        mMainExecutor.removeCallbacks(
+                                mMovePipInResponseToKeepClearAreasChangeCallback);
+                        mMainExecutor.executeDelayed(
+                                mMovePipInResponseToKeepClearAreasChangeCallback,
+                                PIP_KEEP_CLEAR_AREAS_DELAY);
+
+                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "onKeepClearAreasChanged: restricted=%s, unrestricted=%s",
+                                restricted, unrestricted);
                     }
                 }
             };
@@ -402,7 +392,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipKeepClearAlgorithmInterface pipKeepClearAlgorithm,
             PipBoundsState pipBoundsState,
-            PipSizeSpecHandler pipSizeSpecHandler,
             PipDisplayLayoutState pipDisplayLayoutState,
             PipMotionHelper pipMotionHelper,
             PipMediaController pipMediaController,
@@ -426,7 +415,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
         return new PipController(context, shellInit, shellCommandHandler, shellController,
                 displayController, pipAnimationController, pipAppOpsListener,
-                pipBoundsAlgorithm, pipKeepClearAlgorithm, pipBoundsState, pipSizeSpecHandler,
+                pipBoundsAlgorithm, pipKeepClearAlgorithm, pipBoundsState,
                 pipDisplayLayoutState, pipMotionHelper, pipMediaController, phonePipMenuController,
                 pipTaskOrganizer, pipTransitionState, pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
@@ -444,7 +433,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipKeepClearAlgorithmInterface pipKeepClearAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
-            PipSizeSpecHandler pipSizeSpecHandler,
             @NonNull PipDisplayLayoutState pipDisplayLayoutState,
             PipMotionHelper pipMotionHelper,
             PipMediaController pipMediaController,
@@ -461,8 +449,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor
     ) {
-
-
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
@@ -472,7 +458,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipKeepClearAlgorithm = pipKeepClearAlgorithm;
         mPipBoundsState = pipBoundsState;
-        mPipSizeSpecHandler = pipSizeSpecHandler;
         mPipDisplayLayoutState = pipDisplayLayoutState;
         mPipMotionHelper = pipMotionHelper;
         mPipTaskOrganizer = pipTaskOrganizer;
@@ -493,7 +478,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mDisplayInsetsController = displayInsetsController;
         mTabletopModeController = tabletopModeController;
 
-        shellInit.addInitCallback(this::onInit, this);
+        if (!PipUtils.isPip2ExperimentEnabled()) {
+            shellInit.addInitCallback(this::onInit, this);
+        }
     }
 
     private void onInit() {
@@ -660,25 +647,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                             // there's a keyguard present
                             return;
                         }
-                        int oldMaxMovementBound = mPipBoundsState.getMovementBounds().bottom;
                         onDisplayChangedUncheck(mDisplayController
                                         .getDisplayLayout(mPipDisplayLayoutState.getDisplayId()),
                                 false /* saveRestoreSnapFraction */);
-                        int newMaxMovementBound = mPipBoundsState.getMovementBounds().bottom;
-                        if (!mEnablePipKeepClearAlgorithm) {
-                            // offset PiP to adjust for bottom inset change
-                            int pipTop = mPipBoundsState.getBounds().top;
-                            int diff = newMaxMovementBound - oldMaxMovementBound;
-                            if (diff < 0 && pipTop > newMaxMovementBound) {
-                                // bottom inset has increased, move PiP up if it is too low
-                                mPipMotionHelper.animateToOffset(mPipBoundsState.getBounds(),
-                                        newMaxMovementBound - pipTop);
-                            }
-                            if (diff > 0 && oldMaxMovementBound == pipTop) {
-                                // bottom inset has decreased, move PiP down if it was by the edge
-                                mPipMotionHelper.animateToOffset(mPipBoundsState.getBounds(), diff);
-                            }
-                        }
                     }
                 });
 
@@ -707,7 +678,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             // Try to move the PiP window if we have entered PiP mode.
             if (mPipTransitionState.hasEnteredPip()) {
                 final Rect pipBounds = mPipBoundsState.getBounds();
-                final Point edgeInsets = mPipSizeSpecHandler.getScreenEdgeInsets();
+                final Point edgeInsets = mPipDisplayLayoutState.getScreenEdgeInsets();
                 if ((pipBounds.height() + 2 * edgeInsets.y) > (displayBounds.height() / 2)) {
                     // PiP bounds is too big to fit either half, bail early.
                     return;
@@ -766,7 +737,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipBoundsAlgorithm.onConfigurationChanged(mContext);
         mTouchHandler.onConfigurationChanged();
         mPipBoundsState.onConfigurationChanged();
-        mPipSizeSpecHandler.onConfigurationChanged();
+        mPipDisplayLayoutState.onConfigurationChanged();
     }
 
     @Override
@@ -795,6 +766,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     private void onDisplayChangedUncheck(DisplayLayout layout, boolean saveRestoreSnapFraction) {
+        if (mPipTransitionState.getInSwipePipToHomeTransition()) {
+            // If orientation is changed when performing swipe-pip animation, DisplayLayout has
+            // been updated in startSwipePipToHome. So it is unnecessary to update again when
+            // receiving onDisplayConfigurationChanged. This also avoids TouchHandler.userResizeTo
+            // update surface position in different orientation by the intermediate state. The
+            // desired resize will be done by the end of transition.
+            return;
+        }
         Runnable updateDisplayLayout = () -> {
             final boolean fromRotation = Transitions.ENABLE_SHELL_TRANSITIONS
                     && mPipDisplayLayoutState.getDisplayLayout().rotation() != layout.rotation();
@@ -823,20 +802,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     mPipBoundsAlgorithm.getMovementBounds(postChangeBounds),
                     mPipBoundsState.getStashedState());
 
-            // Scale PiP on density dpi change, so it appears to be the same size physically.
-            final boolean densityDpiChanged =
-                    mPipDisplayLayoutState.getDisplayLayout().densityDpi() != 0
-                    && (mPipDisplayLayoutState.getDisplayLayout().densityDpi()
-                            != layout.densityDpi());
-            if (densityDpiChanged) {
-                final float scale = (float) layout.densityDpi()
-                        / mPipDisplayLayoutState.getDisplayLayout().densityDpi();
-                postChangeBounds.set(0, 0,
-                        (int) (postChangeBounds.width() * scale),
-                        (int) (postChangeBounds.height() * scale));
-            }
-
             updateDisplayLayout.run();
+
+            // Resize the PiP bounds to be at the same scale relative to the new size spec. For
+            // example, if PiP was resized to 90% of the maximum size on the previous layout,
+            // make sure it is 90% of the new maximum size spec.
+            postChangeBounds.set(0, 0,
+                    (int) (mPipBoundsState.getMaxSize().x * mPipBoundsState.getBoundsScale()),
+                    (int) (mPipBoundsState.getMaxSize().y * mPipBoundsState.getBoundsScale()));
 
             // Calculate the PiP bounds in the new orientation based on same fraction along the
             // rotated movement bounds.
@@ -848,6 +821,15 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     mPipDisplayLayoutState.getDisplayBounds(),
                     mPipDisplayLayoutState.getDisplayLayout().stableInsets());
 
+            // make sure we user resize to the updated bounds to avoid animating to any outdated
+            // sizes from the previous layout upon double tap CUJ
+            mPipBoundsState.setHasUserResizedPip(true);
+            mTouchHandler.setUserResizeBounds(postChangeBounds);
+
+            final boolean densityDpiChanged =
+                    mPipDisplayLayoutState.getDisplayLayout().densityDpi() != 0
+                            && (mPipDisplayLayoutState.getDisplayLayout().densityDpi()
+                            != layout.densityDpi());
             if (densityDpiChanged) {
                 // Using PipMotionHelper#movePip directly here may cause race condition since
                 // the app content in PiP mode may or may not be updated for the new density dpi.
@@ -859,21 +841,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 // Directly move PiP to its final destination bounds without animation.
                 mPipTaskOrganizer.scheduleFinishResizePip(postChangeBounds);
             }
-
-            // if the pip window size is beyond allowed bounds user resize to normal bounds
-            if (mPipBoundsState.getBounds().width() < mPipBoundsState.getMinSize().x
-                    || mPipBoundsState.getBounds().width() > mPipBoundsState.getMaxSize().x
-                    || mPipBoundsState.getBounds().height() < mPipBoundsState.getMinSize().y
-                    || mPipBoundsState.getBounds().height() > mPipBoundsState.getMaxSize().y) {
-                mTouchHandler.userResizeTo(mPipBoundsState.getNormalBounds(), snapFraction);
-            }
-
         } else {
             updateDisplayLayout.run();
         }
     }
 
-    private void onSystemUiStateChanged(boolean isValidState, int flag) {
+    private void onSystemUiStateChanged(boolean isValidState, long flag) {
         mTouchHandler.onSystemUiStateChanged(isValidState);
     }
 
@@ -939,12 +912,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      * Sets both shelf visibility and its height.
      */
     private void setShelfHeight(boolean visible, int height) {
-        if (!mIsKeyguardShowingOrAnimating) {
-            setShelfHeightLocked(visible, height);
-        }
+        // turn this into Launcher keep clear area registration instead
+        setLauncherKeepClearAreaHeight(visible, height);
     }
 
     private void setLauncherKeepClearAreaHeight(boolean visible, int height) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "setLauncherKeepClearAreaHeight: visible=%b, height=%d", visible, height);
         if (visible) {
             Rect rect = new Rect(
                     0, mPipBoundsState.getDisplayBounds().bottom - height,
@@ -1000,26 +974,36 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
             PictureInPictureParams pictureInPictureParams,
             int launcherRotation, Rect hotseatKeepClearArea) {
-
-        if (mEnablePipKeepClearAlgorithm) {
-            // pre-emptively add the keep clear area for Hotseat, so that it is taken into account
-            // when calculating the entry destination bounds of PiP window
-            mPipBoundsState.getRestrictedKeepClearAreas().add(hotseatKeepClearArea);
-        } else {
-            int shelfHeight = hotseatKeepClearArea.height();
-            setShelfHeightLocked(shelfHeight > 0 /* visible */, shelfHeight);
-        }
+        // preemptively add the keep clear area for Hotseat, so that it is taken into account
+        // when calculating the entry destination bounds of PiP window
+        mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG,
+                hotseatKeepClearArea);
         onDisplayRotationChangedNotInPip(mContext, launcherRotation);
+        // cache current min/max size
+        Point minSize = mPipBoundsState.getMinSize();
+        Point maxSize = mPipBoundsState.getMaxSize();
+        final float aspectRatioFloat;
+        if (pictureInPictureParams.hasSetAspectRatio()) {
+            aspectRatioFloat = pictureInPictureParams.getAspectRatioFloat();
+        } else {
+            aspectRatioFloat = mPipBoundsAlgorithm.getDefaultAspectRatio();
+        }
+        mPipBoundsState.updateMinMaxSize(aspectRatioFloat);
         final Rect entryBounds = mPipTaskOrganizer.startSwipePipToHome(componentName, activityInfo,
                 pictureInPictureParams);
+        // restore min/max size, as this is referenced later in OnDisplayChangingListener and needs
+        // to reflect the pre-rotation state for it to work
+        mPipBoundsState.setMinSize(minSize.x, minSize.y);
+        mPipBoundsState.setMaxSize(maxSize.x, maxSize.y);
         // sync mPipBoundsState with the newly calculated bounds.
         mPipBoundsState.setNormalBounds(entryBounds);
         return entryBounds;
     }
 
     private void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
-            SurfaceControl overlay) {
-        mPipTaskOrganizer.stopSwipePipToHome(taskId, componentName, destinationBounds, overlay);
+            SurfaceControl overlay, Rect appBounds) {
+        mPipTaskOrganizer.stopSwipePipToHome(taskId, componentName, destinationBounds, overlay,
+                appBounds);
     }
 
     private void abortSwipePipToHome(int taskId, ComponentName componentName) {
@@ -1062,6 +1046,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             saveReentryState(pipBounds);
         }
         // Disable touches while the animation is running
+        mMainExecutor.removeCallbacks(mEnableTouchCallback);
         mTouchHandler.setTouchEnabled(false);
         if (mPinnedStackAnimationRecentsCallback != null) {
             mPinnedStackAnimationRecentsCallback.onPipAnimationStarted();
@@ -1074,22 +1059,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     /** Save the state to restore to on re-entry. */
     public void saveReentryState(Rect pipBounds) {
         float snapFraction = mPipBoundsAlgorithm.getSnapFraction(pipBounds);
-
-        if (!mPipBoundsState.hasUserResizedPip()) {
-            mPipBoundsState.saveReentryState(null /* bounds */, snapFraction);
-            return;
-        }
-
-        Size reentrySize = new Size(pipBounds.width(), pipBounds.height());
-
-        // TODO: b/279937014 Investigate why userResizeBounds are empty with shell transitions on
-        // fallback to using the userResizeBounds if userResizeBounds are not empty
-        if (!mTouchHandler.getUserResizeBounds().isEmpty()) {
-            Rect userResizeBounds = mTouchHandler.getUserResizeBounds();
-            reentrySize = new Size(userResizeBounds.width(), userResizeBounds.height());
-        }
-
-        mPipBoundsState.saveReentryState(reentrySize, snapFraction);
+        mPipBoundsState.saveReentryState(snapFraction);
     }
 
     @Override
@@ -1107,7 +1077,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         InteractionJankMonitor.getInstance().end(CUJ_PIP_TRANSITION);
 
         // Re-enable touches after the animation completes
-        mTouchHandler.setTouchEnabled(true);
+        mMainExecutor.executeDelayed(mEnableTouchCallback, ENABLE_TOUCH_DELAY_MS);
         mTouchHandler.onPinnedStackAnimationEnded(direction);
     }
 
@@ -1179,6 +1149,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
         // Update the display layout
         mPipDisplayLayoutState.rotateTo(toRotation);
+        mTouchHandler.updateMinMaxSize(mPipBoundsState.getAspectRatio());
+
+        postChangeStackBounds.set(0, 0,
+                (int) (mPipBoundsState.getMaxSize().x * mPipBoundsState.getBoundsScale()),
+                (int) (mPipBoundsState.getMaxSize().y * mPipBoundsState.getBoundsScale()));
 
         // Calculate the stack bounds in the new orientation based on same fraction along the
         // rotated movement bounds.
@@ -1204,7 +1179,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipTaskOrganizer.dump(pw, innerPrefix);
         mPipBoundsState.dump(pw, innerPrefix);
         mPipInputConsumer.dump(pw, innerPrefix);
-        mPipSizeSpecHandler.dump(pw, innerPrefix);
         mPipDisplayLayoutState.dump(pw, innerPrefix);
     }
 
@@ -1220,7 +1194,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void onSystemUiStateChanged(boolean isSysUiStateValid, int flag) {
+        public void onSystemUiStateChanged(boolean isSysUiStateValid, long flag) {
             mMainExecutor.execute(() -> {
                 PipController.this.onSystemUiStateChanged(isSysUiStateValid, flag);
             });
@@ -1252,6 +1226,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             mMainExecutor.execute(() -> {
                 PipController.this.showPictureInPictureMenu();
             });
+        }
+
+        @Override
+        public PipTransitionController getPipTransitionController() {
+            return mPipTransitionController;
         }
     }
 
@@ -1312,13 +1291,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
         @Override
         public void stopSwipePipToHome(int taskId, ComponentName componentName,
-                Rect destinationBounds, SurfaceControl overlay) {
+                Rect destinationBounds, SurfaceControl overlay, Rect appBounds) {
             if (overlay != null) {
                 overlay.setUnreleasedWarningCallSite("PipController.stopSwipePipToHome");
             }
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> controller.stopSwipePipToHome(
-                            taskId, componentName, destinationBounds, overlay));
+                            taskId, componentName, destinationBounds, overlay, appBounds));
         }
 
         @Override

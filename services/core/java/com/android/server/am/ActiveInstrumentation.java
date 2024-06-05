@@ -40,6 +40,9 @@ class ActiveInstrumentation {
     // The application being instrumented
     ApplicationInfo mTargetInfo;
 
+    // Whether the application is instrumented as an sdk running in the sdk_sandbox.
+    boolean mIsSdkInSandbox;
+
     // Where to save profiling
     String mProfileFile;
 

@@ -86,8 +86,8 @@
     <uses-permission android:name="android.permission.TEST_GRANTED" />
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
     <uses-permission android:name="com.google.android.googleapps.permission.ACCESS_GOOGLE_PASSWORD" />
-    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" />
-    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.ALL_SERVICES" />
+    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" android:maxSdkVersion="34"/>
+    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.ALL_SERVICES" android:maxSdkVersion="34"/>
 
     <uses-permission android:name="android.permission.MANAGE_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
@@ -165,6 +165,7 @@
 
     <!-- AccessibilityShortcutChooserActivityTest permissions -->
     <uses-permission android:name="android.permission.MANAGE_ACCESSIBILITY" />
+    <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
 
     <application
         android:theme="@style/Theme"
@@ -222,6 +223,39 @@
 
         <activity android:name="android.widget.TextViewActivity"
                 android:label="TextViewActivity"
+                android:screenOrientation="portrait"
+                android:exported="true"
+                android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.widget.HorizontalScrollViewActivity"
+                android:label="HorizontalScrollViewActivity"
+                android:screenOrientation="portrait"
+                android:exported="true"
+                android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.widget.ScrollViewActivity"
+                android:label="ScrollViewActivity"
+                android:screenOrientation="portrait"
+                android:exported="true"
+                android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.widget.AbsListViewActivity"
+                android:label="AbsListViewActivity"
                 android:screenOrientation="portrait"
                 android:exported="true"
                 android:theme="@android:style/Theme.Material.Light">
@@ -1716,6 +1750,26 @@
             <meta-data android:name="android.view.im"
                        android:resource="@xml/ime_meta_handwriting"/>
         </service>
+
+        <activity android:name="android.widget.PointerIconTestActivity"
+                  android:label="PointerIconTestActivity"
+                  android:screenOrientation="portrait"
+                  android:exported="true"
+                  android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.view.ViewGroupTestActivity"
+                  android:label="ViewGroup Test"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

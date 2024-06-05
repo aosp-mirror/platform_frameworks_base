@@ -86,10 +86,14 @@ public class SystemSensorManager extends SensorManager {
     private static native long nativeCreate(String opPackageName);
     private static native boolean nativeGetSensorAtIndex(long nativeInstance,
             Sensor sensor, int index);
+    private static native boolean nativeGetDefaultDeviceSensorAtIndex(long nativeInstance,
+            Sensor sensor, int index);
     private static native void nativeGetDynamicSensors(long nativeInstance, List<Sensor> list);
     private static native void nativeGetRuntimeSensors(
             long nativeInstance, int deviceId, List<Sensor> list);
     private static native boolean nativeIsDataInjectionEnabled(long nativeInstance);
+    private static native boolean nativeIsReplayDataInjectionEnabled(long nativeInstance);
+    private static native boolean nativeIsHalBypassReplayDataInjectionEnabled(long nativeInstance);
 
     private static native int nativeCreateDirectChannel(
             long nativeInstance, int deviceId, long size, int channelType, int fd,
@@ -129,6 +133,7 @@ public class SystemSensorManager extends SensorManager {
             mDynamicSensorCallbacks = new HashMap<>();
     private BroadcastReceiver mDynamicSensorBroadcastReceiver;
     private BroadcastReceiver mRuntimeSensorBroadcastReceiver;
+    private VirtualDeviceManager.VirtualDeviceListener mVirtualDeviceListener;
 
     // Looper associated with the context in which this instance was created.
     private final Looper mMainLooper;
@@ -159,11 +164,14 @@ public class SystemSensorManager extends SensorManager {
         // initialize the sensor list
         for (int index = 0;; ++index) {
             Sensor sensor = new Sensor();
-            if (!nativeGetSensorAtIndex(mNativeInstance, sensor, index)) break;
+            if (android.companion.virtual.flags.Flags.enableNativeVdm()) {
+                if (!nativeGetDefaultDeviceSensorAtIndex(mNativeInstance, sensor, index)) break;
+            } else {
+                if (!nativeGetSensorAtIndex(mNativeInstance, sensor, index)) break;
+            }
             mFullSensorsList.add(sensor);
             mHandleToSensor.put(sensor.getHandle(), sensor);
         }
-
     }
 
     /** @hide */
@@ -383,20 +391,41 @@ public class SystemSensorManager extends SensorManager {
         }
     }
 
-    protected boolean initDataInjectionImpl(boolean enable) {
+    protected boolean initDataInjectionImpl(boolean enable, @DataInjectionMode int mode) {
         synchronized (sLock) {
+            boolean isDataInjectionModeEnabled = false;
             if (enable) {
-                boolean isDataInjectionModeEnabled = nativeIsDataInjectionEnabled(mNativeInstance);
+                switch (mode) {
+                    case DATA_INJECTION:
+                        isDataInjectionModeEnabled = nativeIsDataInjectionEnabled(mNativeInstance);
+                        break;
+                    case REPLAY_DATA_INJECTION:
+                        isDataInjectionModeEnabled = nativeIsReplayDataInjectionEnabled(
+                                mNativeInstance);
+                        break;
+                    case HAL_BYPASS_REPLAY_DATA_INJECTION:
+                        isDataInjectionModeEnabled = nativeIsHalBypassReplayDataInjectionEnabled(
+                                mNativeInstance);
+                        break;
+                    default:
+                        break;
+                }
                 // The HAL does not support injection OR SensorService hasn't been set in DI mode.
                 if (!isDataInjectionModeEnabled) {
-                    Log.e(TAG, "Data Injection mode not enabled");
+                    Log.e(TAG, "The correct Data Injection mode has not been enabled");
                     return false;
+                }
+                if (sInjectEventQueue != null && sInjectEventQueue.getDataInjectionMode() != mode) {
+                    // The inject event queue has been initialized for a different type of DI
+                    // close it and create a new one
+                    sInjectEventQueue.dispose();
+                    sInjectEventQueue = null;
                 }
                 // Initialize a client for data_injection.
                 if (sInjectEventQueue == null) {
                     try {
                         sInjectEventQueue = new InjectEventQueue(
-                                mMainLooper, this, mContext.getPackageName());
+                                mMainLooper, this, mode, mContext.getPackageName());
                     } catch (RuntimeException e) {
                         Log.e(TAG, "Cannot create InjectEventQueue: " + e);
                     }
@@ -419,6 +448,12 @@ public class SystemSensorManager extends SensorManager {
             if (sInjectEventQueue == null) {
                 Log.e(TAG, "Data injection mode not activated before calling injectSensorData");
                 return false;
+            }
+            if (sInjectEventQueue.getDataInjectionMode() != HAL_BYPASS_REPLAY_DATA_INJECTION
+                    && !sensor.isDataInjectionSupported()) {
+                // DI mode and Replay DI mode require support from the sensor HAL
+                // HAL Bypass mode doesn't require this.
+                throw new IllegalArgumentException("sensor does not support data injection");
             }
             int ret = sInjectEventQueue.injectSensorData(sensor.getHandle(), values, accuracy,
                                                          timestamp);
@@ -488,23 +523,25 @@ public class SystemSensorManager extends SensorManager {
 
                     Handler mainHandler = new Handler(mContext.getMainLooper());
 
-                    for (Map.Entry<DynamicSensorCallback, Handler> entry :
-                            mDynamicSensorCallbacks.entrySet()) {
-                        final DynamicSensorCallback callback = entry.getKey();
-                        Handler handler =
-                                entry.getValue() == null ? mainHandler : entry.getValue();
+                    synchronized (mDynamicSensorCallbacks) {
+                        for (Map.Entry<DynamicSensorCallback, Handler> entry :
+                                mDynamicSensorCallbacks.entrySet()) {
+                            final DynamicSensorCallback callback = entry.getKey();
+                            Handler handler =
+                                    entry.getValue() == null ? mainHandler : entry.getValue();
 
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                for (Sensor s: addedList) {
-                                    callback.onDynamicSensorConnected(s);
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    for (Sensor s: addedList) {
+                                        callback.onDynamicSensorConnected(s);
+                                    }
+                                    for (Sensor s: removedList) {
+                                        callback.onDynamicSensorDisconnected(s);
+                                    }
                                 }
-                                for (Sensor s: removedList) {
-                                    callback.onDynamicSensorDisconnected(s);
-                                }
-                            }
-                        });
+                            });
+                        }
                     }
 
                     for (Sensor s: removedList) {
@@ -518,7 +555,11 @@ public class SystemSensorManager extends SensorManager {
     }
 
     private List<Sensor> createRuntimeSensorListLocked(int deviceId) {
-        setupRuntimeSensorBroadcastReceiver();
+        if (android.companion.virtual.flags.Flags.vdmPublicApis()) {
+            setupVirtualDeviceListener();
+        } else {
+            setupRuntimeSensorBroadcastReceiver();
+        }
         List<Sensor> list = new ArrayList<>();
         nativeGetRuntimeSensors(mNativeInstance, deviceId, list);
         mFullRuntimeSensorListByDevice.put(deviceId, list);
@@ -558,6 +599,34 @@ public class SystemSensorManager extends SensorManager {
         }
     }
 
+    private void setupVirtualDeviceListener() {
+        if (mVirtualDeviceListener != null) {
+            return;
+        }
+        if (mVdm == null) {
+            mVdm = mContext.getSystemService(VirtualDeviceManager.class);
+            if (mVdm == null) {
+                return;
+            }
+        }
+        mVirtualDeviceListener = new VirtualDeviceManager.VirtualDeviceListener() {
+            @Override
+            public void onVirtualDeviceClosed(int deviceId) {
+                synchronized (mFullRuntimeSensorListByDevice) {
+                    List<Sensor> removedSensors =
+                            mFullRuntimeSensorListByDevice.removeReturnOld(deviceId);
+                    if (removedSensors != null) {
+                        for (Sensor s : removedSensors) {
+                            cleanupSensorConnection(s);
+                        }
+                    }
+                    mRuntimeSensorListByDeviceByType.remove(deviceId);
+                }
+            }
+        };
+        mVdm.registerVirtualDeviceListener(mContext.getMainExecutor(), mVirtualDeviceListener);
+    }
+
     private void setupDynamicSensorBroadcastReceiver() {
         if (mDynamicSensorBroadcastReceiver == null) {
             mDynamicSensorBroadcastReceiver = new BroadcastReceiver() {
@@ -565,7 +634,7 @@ public class SystemSensorManager extends SensorManager {
                 public void onReceive(Context context, Intent intent) {
                     if (intent.getAction().equals(Intent.ACTION_DYNAMIC_SENSOR_CHANGED)) {
                         if (DEBUG_DYNAMIC_SENSOR) {
-                            Log.i(TAG, "DYNS received DYNAMIC_SENSOR_CHANED broadcast");
+                            Log.i(TAG, "DYNS received DYNAMIC_SENSOR_CHANGED broadcast");
                         }
                         // Dynamic sensors probably changed
                         mDynamicSensorListDirty = true;
@@ -581,12 +650,6 @@ public class SystemSensorManager extends SensorManager {
         }
     }
 
-    private void teardownDynamicSensorBroadcastReceiver() {
-        mDynamicSensorCallbacks.clear();
-        mContext.unregisterReceiver(mDynamicSensorBroadcastReceiver);
-        mDynamicSensorBroadcastReceiver = null;
-    }
-
     /** @hide */
     protected void registerDynamicSensorCallbackImpl(
             DynamicSensorCallback callback, Handler handler) {
@@ -597,22 +660,26 @@ public class SystemSensorManager extends SensorManager {
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
         }
-        if (mDynamicSensorCallbacks.containsKey(callback)) {
-            // has been already registered, ignore
-            return;
-        }
+        synchronized (mDynamicSensorCallbacks) {
+            if (mDynamicSensorCallbacks.containsKey(callback)) {
+                // has been already registered, ignore
+                return;
+            }
 
-        setupDynamicSensorBroadcastReceiver();
-        mDynamicSensorCallbacks.put(callback, handler);
+            setupDynamicSensorBroadcastReceiver();
+            mDynamicSensorCallbacks.put(callback, handler);
+        }
     }
 
     /** @hide */
     protected void unregisterDynamicSensorCallbackImpl(
             DynamicSensorCallback callback) {
         if (DEBUG_DYNAMIC_SENSOR) {
-            Log.i(TAG, "Removing dynamic sensor listerner");
+            Log.i(TAG, "Removing dynamic sensor listener");
         }
-        mDynamicSensorCallbacks.remove(callback);
+        synchronized (mDynamicSensorCallbacks) {
+            mDynamicSensorCallbacks.remove(callback);
+        }
     }
 
     /*
@@ -740,7 +807,7 @@ public class SystemSensorManager extends SensorManager {
             }
             if (hardwareBuffer.getWidth() < MIN_DIRECT_CHANNEL_BUFFER_SIZE) {
                 throw new IllegalArgumentException(
-                        "Width if HaradwareBuffer must be greater than "
+                        "Width if HardwareBuffer must be greater than "
                         + MIN_DIRECT_CHANNEL_BUFFER_SIZE);
             }
             if ((hardwareBuffer.getUsage() & HardwareBuffer.USAGE_SENSOR_DIRECT_DATA) == 0) {
@@ -771,7 +838,7 @@ public class SystemSensorManager extends SensorManager {
 
     /*
      * BaseEventQueue is the communication channel with the sensor service,
-     * SensorEventQueue, TriggerEventQueue are subclases and there is one-to-one mapping between
+     * SensorEventQueue, TriggerEventQueue are subclasses and there is one-to-one mapping between
      * the queues and the listeners. InjectEventQueue is also a sub-class which is a special case
      * where data is being injected into the sensor HAL through the sensor service. It is not
      * associated with any listener and there is one InjectEventQueue associated with a
@@ -798,6 +865,8 @@ public class SystemSensorManager extends SensorManager {
 
         protected static final int OPERATING_MODE_NORMAL = 0;
         protected static final int OPERATING_MODE_DATA_INJECTION = 1;
+        protected static final int OPERATING_MODE_REPLAY_DATA_INJECTION = 3;
+        protected static final int OPERATING_MODE_HAL_BYPASS_REPLAY_DATA_INJECTION = 4;
 
         BaseEventQueue(Looper looper, SystemSensorManager manager, int mode, String packageName) {
             if (packageName == null) packageName = "";
@@ -1107,8 +1176,12 @@ public class SystemSensorManager extends SensorManager {
     }
 
     final class InjectEventQueue extends BaseEventQueue {
-        public InjectEventQueue(Looper looper, SystemSensorManager manager, String packageName) {
-            super(looper, manager, OPERATING_MODE_DATA_INJECTION, packageName);
+
+        private int mMode;
+        public InjectEventQueue(Looper looper, SystemSensorManager manager,
+                @DataInjectionMode int mode, String packageName) {
+            super(looper, manager, mode, packageName);
+            mMode = mode;
         }
 
         int injectSensorData(int handle, float[] values, int accuracy, long timestamp) {
@@ -1133,6 +1206,10 @@ public class SystemSensorManager extends SensorManager {
         @SuppressWarnings("unused")
         protected void removeSensorEvent(Sensor sensor) {
 
+        }
+
+        int getDataInjectionMode() {
+            return mMode;
         }
     }
 

@@ -17,12 +17,10 @@
 
 package com.android.systemui.user.ui.viewmodel
 
-import android.content.Context
 import android.graphics.drawable.Drawable
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Text
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -33,8 +31,7 @@ import kotlinx.coroutines.flow.mapLatest
 class StatusBarUserChipViewModel
 @Inject
 constructor(
-    @Application private val context: Context,
-    interactor: UserInteractor,
+    interactor: UserSwitcherInteractor,
 ) {
     /** Whether the status bar chip ui should be available */
     val chipEnabled: Boolean = interactor.isStatusBarUserChipEnabled

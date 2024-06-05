@@ -25,13 +25,17 @@ import android.annotation.UserIdInt;
 import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.VirtualDisplayConfig;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.ArraySet;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.IInputFilter;
@@ -45,10 +49,14 @@ import android.view.SurfaceControlViewHost;
 import android.view.WindowInfo;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.inputmethod.ImeTracker;
+import android.window.ScreenCapture;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
+import com.android.server.wm.SensitiveContentPackages.PackageInfo;
 
 import java.lang.annotation.Retention;
 import java.util.List;
@@ -152,7 +160,9 @@ public abstract class WindowManagerInternal {
     public interface WindowsForAccessibilityCallback {
 
         /**
-         * Called when the windows for accessibility changed.
+         * Called when the windows for accessibility changed. This is called if
+         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2} is
+         * false.
          *
          * @param forceSend Send the windows for accessibility even if they haven't changed.
          * @param topFocusedDisplayId The display Id which has the top focused window.
@@ -161,6 +171,23 @@ public abstract class WindowManagerInternal {
          */
         void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
                 IBinder topFocusedWindowToken, @NonNull List<WindowInfo> windows);
+
+        /**
+         * Called when the windows for accessibility changed. This is called if
+         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2} is
+         * true.
+         * TODO(b/322444245): Remove screenSize parameter by getting it from
+         *  DisplayManager#getDisplay(int).getRealSize() on the a11y side.
+         *
+         * @param forceSend Send the windows for accessibility even if they haven't changed.
+         * @param topFocusedDisplayId The display Id which has the top focused window.
+         * @param topFocusedWindowToken The window token of top focused window.
+         * @param screenSize The size of the display that the change happened.
+         * @param windows The windows for accessibility.
+         */
+        void onAccessibilityWindowsChanged(boolean forceSend, int topFocusedDisplayId,
+                @NonNull IBinder topFocusedWindowToken, @NonNull Point screenSize,
+                @NonNull List<AccessibilityWindowsPopulator.AccessibilityWindow> windows);
     }
 
     /**
@@ -279,6 +306,18 @@ public abstract class WindowManagerInternal {
     }
 
     /**
+     * An interface to be notified on window removal.
+     */
+    public interface OnWindowRemovedListener {
+        /**
+         * Called when a window is removed.
+         *
+         * @param token the client token
+         */
+        void onWindowRemoved(IBinder token);
+    }
+
+    /**
      * An interface to be notified when keyguard exit animation should start.
      */
     public interface KeyguardExitAnimationStartListener {
@@ -301,6 +340,19 @@ public abstract class WindowManagerInternal {
     }
 
     /**
+      * An interface to be notified about requested changes in the IME visibility.
+      */
+    public interface OnImeRequestedChangedListener {
+        /**
+         * Called when the requested IME visibility is changed.
+         *
+         * @param windowToken The window token
+         * @param imeVisible {@code true} if the IME should be shown, {@code false} to hide
+         */
+        void onImeRequestedChanged(IBinder windowToken, boolean imeVisible);
+    }
+
+    /**
      * An interface to customize drag and drop behaviors.
      */
     public interface IDragDropCallback {
@@ -309,8 +361,7 @@ public abstract class WindowManagerInternal {
                 InputChannel source) {
             return state.register(display)
                 .thenApply(unused ->
-                    service.transferTouchFocus(source, state.getInputChannel(),
-                            true /* isDragDrop */));
+                    service.startDragAndDrop(source, state.getInputChannel()));
         }
 
         /**
@@ -403,13 +454,12 @@ public abstract class WindowManagerInternal {
     public abstract void setMagnificationSpec(int displayId, MagnificationSpec spec);
 
     /**
-     * Set by the accessibility framework to indicate whether the magnifiable regions of the display
-     * should be shown.
+     * Set by the accessibility framework to indicate whether fullscreen magnification is activated.
      *
      * @param displayId The logical display id.
-     * @param show {@code true} to show magnifiable region bounds, {@code false} to hide
+     * @param activated The activation of fullscreen magnification
      */
-    public abstract void setForceShowMagnifiableBounds(int displayId, boolean show);
+    public abstract void setFullscreenMagnificationActivated(int displayId, boolean activated);
 
     /**
      * Obtains the magnification regions.
@@ -596,14 +646,6 @@ public abstract class WindowManagerInternal {
     public abstract void unregisterTaskSystemBarsListener(TaskSystemBarsListener listener);
 
     /**
-     * Registers a listener to be notified to start the keyguard exit animation.
-     *
-     * @param listener The listener to register.
-     */
-    public abstract void registerKeyguardExitAnimationStartListener(
-            KeyguardExitAnimationStartListener listener);
-
-    /**
      * Reports that the password for the given user has changed.
      */
     public abstract void reportPasswordChanged(int userId);
@@ -653,6 +695,14 @@ public abstract class WindowManagerInternal {
     public abstract void setOnHardKeyboardStatusChangeListener(
         OnHardKeyboardStatusChangeListener listener);
 
+
+    /**
+     * Sets the callback listener for requested IME visibility changes in ImeInsetsSourceProvider
+     *
+     * @param listener The listener to set
+     */
+    public abstract void setOnImeRequestedChangedListener(OnImeRequestedChangedListener listener);
+
     /**
      * Requests the window manager to resend the windows for accessibility on specified display.
      *
@@ -693,6 +743,21 @@ public abstract class WindowManagerInternal {
      * @param showWhenLocked whether {@param token} can continue to be shown on the lock screen.
      */
     public abstract void setWallpaperShowWhenLocked(IBinder windowToken, boolean showWhenLocked);
+
+    /**
+     * Sets the crop hints of a {@link WallpaperWindowToken}. Only effective for image wallpapers.
+     *
+     * @param windowToken wallpaper token previously added via {@link #addWindowToken}
+     * @param cropHints a map that represents which part of the wallpaper should be shown, for
+     *                       each type of {@link android.app.WallpaperManager.ScreenOrientation}.
+     */
+    public abstract void setWallpaperCropHints(IBinder windowToken, SparseArray<Rect> cropHints);
+
+    /**
+     * Transmits the {@link WallpaperCropUtils} instance to {@link WallpaperController}.
+     * {@link WallpaperCropUtils} contains the helpers to properly position the wallpaper.
+     */
+    public abstract void setWallpaperCropUtils(WallpaperCropUtils wallpaperCropUtils);
 
     /**
      * Returns {@code true} if a Window owned by {@code uid} has focus.
@@ -752,9 +817,31 @@ public abstract class WindowManagerInternal {
     public abstract Context getTopFocusedDisplayUiContext();
 
     /**
-     * Checks if this display is configured and allowed to show system decorations.
+     * Sets whether the relevant display content can host the relevant home activity and wallpaper.
+     *
+     * @param displayUniqueId The unique ID of the display. Note that the display may not yet be
+     *   created, but whenever it is, this property will be applied.
+     * @param displayType The type of the display, e.g. {@link Display#TYPE_VIRTUAL}.
+     * @param supported Whether home and wallpaper are supported on this display.
      */
-    public abstract boolean shouldShowSystemDecorOnDisplay(int displayId);
+    public abstract void setHomeSupportedOnDisplay(
+            @NonNull String displayUniqueId, int displayType, boolean supported);
+
+    /**
+     * Checks if this display is configured and allowed to show home activity and wallpaper.
+     *
+     * <p>This is implied for displays that have {@link Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS}
+     * and can also be set via {@link VirtualDisplayConfig.Builder#setHomeSupported}.</p>
+     */
+    public abstract boolean isHomeSupportedOnDisplay(int displayId);
+
+    /**
+     * Removes any settings relevant to the given display.
+     *
+     * <p>This may be used when a property is set for a display unique ID before the display
+     * creation but the actual display creation failed for some reason.</p>
+     */
+    public abstract void clearDisplaySettings(@NonNull String displayUniqueId, int displayType);
 
     /**
      * Indicates the policy for how the display should show IME.
@@ -768,20 +855,20 @@ public abstract class WindowManagerInternal {
      * Show IME on imeTargetWindow once IME has finished layout.
      *
      * @param imeTargetWindowToken token of the (IME target) window which IME should be shown.
-     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
+     * @param statsToken the token tracking the current IME request.
      */
     public abstract void showImePostLayout(IBinder imeTargetWindowToken,
-            @Nullable ImeTracker.Token statsToken);
+            @NonNull ImeTracker.Token statsToken);
 
     /**
      * Hide IME using imeTargetWindow when requested.
      *
-     * @param imeTargetWindowToken token of the (IME target) window on which requests hiding IME.
+     * @param imeTargetWindowToken token of the (IME target) window which requests hiding IME.
      * @param displayId the id of the display the IME is on.
-     * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
+     * @param statsToken the token tracking the current IME request.
      */
     public abstract void hideIme(IBinder imeTargetWindowToken, int displayId,
-            @Nullable ImeTracker.Token statsToken);
+            @NonNull ImeTracker.Token statsToken);
 
     /**
      * Tell window manager about a package that should be running with a restricted range of
@@ -841,6 +928,11 @@ public abstract class WindowManagerInternal {
      */
     public abstract ImeTargetInfo onToggleImeRequested(boolean show,
             @NonNull IBinder focusedToken, @NonNull IBinder requestToken, int displayId);
+
+    /**
+     * Returns the token to identify the target window that the IME is associated with.
+     */
+    public abstract @Nullable IBinder getTargetWindowTokenFromInputToken(IBinder inputToken);
 
     /** The information of input method target when IME is requested to show or hide. */
     public static class ImeTargetInfo {
@@ -954,4 +1046,91 @@ public abstract class WindowManagerInternal {
 
     /** Returns the SurfaceControl accessibility services should use for accessibility overlays. */
     public abstract SurfaceControl getA11yOverlayLayer(int displayId);
+
+    /**
+     * Captures the entire display specified by the displayId using the args provided. If the args
+     * are null or if the sourceCrop is invalid or null, the entire display bounds will be captured.
+     */
+    public abstract void captureDisplay(int displayId,
+                                        @Nullable ScreenCapture.CaptureArgs captureArgs,
+                                        ScreenCapture.ScreenCaptureListener listener);
+
+    /**
+     * Device has a software navigation bar (separate from the status bar) on specific display.
+     *
+     * @param displayId the id of display to check if there is a software navigation bar.
+     */
+    public abstract boolean hasNavigationBar(int displayId);
+
+    /**
+     * Controls whether the app-requested screen orientation is always respected.
+     *
+     * @param respected If {@code true}, the app requested orientation is always respected.
+     *                  Otherwise, the system might ignore the request due to
+     *                  {@link com.android.server.wm.DisplayArea#getIgnoreOrientationRequest}.
+     * @param fromOrientations The orientations we want to map to the correspondent orientations
+     *                         in toOrientation.
+     * @param toOrientations The orientations we map to the ones in fromOrientations at the same
+     *                       index
+     */
+    public abstract void setOrientationRequestPolicy(boolean respected,
+            int[] fromOrientations, int[] toOrientations);
+
+    /**
+     * Set current screen capture session id that will be used during sensitive content protections.
+     *
+     * @param sessionId Session id for this screen capture protection
+     */
+    public abstract void setBlockScreenCaptureForAppsSessionId(long sessionId);
+
+    /**
+     * Set whether screen capture should be disabled for all windows of a specific app windows based
+     * on sensitive content protections.
+     *
+     * @param packageInfos set of {@link PackageInfo} whose windows should be blocked from capture
+     */
+    public abstract void addBlockScreenCaptureForApps(@NonNull ArraySet<PackageInfo> packageInfos);
+
+    /**
+     * Clears apps added to collection of apps in which screen capture should be disabled.
+     *
+     * @param packageInfos set of {@link PackageInfo} whose windows should be unblocked
+     *                     from capture.
+     */
+    public abstract void removeBlockScreenCaptureForApps(
+            @NonNull ArraySet<PackageInfo> packageInfos);
+
+    /**
+     * Clears all apps added to collection of apps in which screen capture should be disabled.
+     *
+     * <p> This clears and resets any existing set or added applications from
+     * * {@link #addBlockScreenCaptureForApps(ArraySet)}
+     */
+    public abstract void clearBlockedApps();
+
+    /**
+     * Register a listener to receive a callback on window removal.
+     *
+     * @param listener the listener to be registered.
+     */
+    public abstract void registerOnWindowRemovedListener(OnWindowRemovedListener listener);
+
+    /**
+     * Removes the listener.
+     *
+     * @param listener the listener to be removed.
+     */
+    public abstract void unregisterOnWindowRemovedListener(OnWindowRemovedListener listener);
+
+    /**
+     * Moves the current focus to the adjacent activity if it has the latest created window.
+     */
+    public abstract boolean moveFocusToAdjacentEmbeddedActivityIfNeeded();
+
+    /**
+     * Returns an instance of {@link ScreenshotHardwareBuffer} containing the current
+     * screenshot.
+     */
+    public abstract ScreenshotHardwareBuffer takeAssistScreenshot(
+            Set<Integer> windowTypesToExclude);
 }

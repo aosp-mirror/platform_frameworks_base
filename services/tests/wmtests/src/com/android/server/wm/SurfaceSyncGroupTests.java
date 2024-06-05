@@ -23,25 +23,33 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import android.app.Activity;
 import android.app.Instrumentation;
+import android.app.KeyguardManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.platform.test.annotations.Presubmit;
-import android.server.wm.scvh.SurfaceSyncGroupActivity;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.cts.surfacevalidator.BitmapPixelChecker;
+import android.widget.FrameLayout;
 import android.window.SurfaceSyncGroup;
 
+import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.server.wm.utils.CommonUtils;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,10 +64,10 @@ public class SurfaceSyncGroupTests {
     private static final long TIMEOUT_S = HW_TIMEOUT_MULTIPLIER * 5L;
 
     @Rule
-    public ActivityTestRule<SurfaceSyncGroupActivity> mActivityRule = new ActivityTestRule<>(
-            SurfaceSyncGroupActivity.class);
+    public ActivityTestRule<TestActivity> mActivityRule = new ActivityTestRule<>(
+            TestActivity.class);
 
-    private SurfaceSyncGroupActivity mActivity;
+    private TestActivity mActivity;
 
     Instrumentation mInstrumentation;
 
@@ -72,6 +80,12 @@ public class SurfaceSyncGroupTests {
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mHandlerThread.start();
         mHandler = mHandlerThread.getThreadHandler();
+    }
+
+    @After
+    public void tearDown() {
+        mHandlerThread.quitSafely();
+        CommonUtils.waitUntilActivityRemoved(mActivity);
     }
 
     @Test
@@ -186,5 +200,25 @@ public class SurfaceSyncGroupTests {
                 numMatchingPixels);
 
         swBitmap.recycle();
+    }
+
+    public static class TestActivity extends Activity {
+        private ViewGroup mParentView;
+
+        @Override
+        public void onCreate(@Nullable Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+
+            mParentView = new FrameLayout(this);
+            setContentView(mParentView);
+
+            KeyguardManager km = getSystemService(KeyguardManager.class);
+            km.requestDismissKeyguard(this, null);
+        }
+
+        public View getBackgroundView() {
+            return mParentView;
+        }
     }
 }

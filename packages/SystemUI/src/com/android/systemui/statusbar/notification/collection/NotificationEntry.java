@@ -40,8 +40,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager.Policy;
 import android.app.Person;
 import android.app.RemoteInput;
+import android.app.RemoteInputHistoryItem;
 import android.content.Context;
-import android.content.pm.ShortcutInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -49,7 +49,6 @@ import android.os.SystemClock;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
-import android.util.ArraySet;
 import android.view.ContentInfo;
 
 import androidx.annotation.NonNull;
@@ -71,6 +70,10 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.stack.PriorityBucket;
 import com.android.systemui.util.ListenerSet;
+
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlow;
+import kotlinx.coroutines.flow.StateFlowKt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -127,11 +130,11 @@ public final class NotificationEntry extends ListEntry {
     public int targetSdk;
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
+    public List<RemoteInputHistoryItem> remoteInputs = null;
     public String remoteInputMimeType;
     public Uri remoteInputUri;
     public ContentInfo remoteInputAttachment;
     private Notification.BubbleMetadata mBubbleMetadata;
-    private ShortcutInfo mShortcutInfo;
 
     /**
      * If {@link RemoteInput#getEditChoicesBeforeSending} is enabled, and the user is
@@ -146,12 +149,13 @@ public final class NotificationEntry extends ListEntry {
     private int mCachedContrastColor = COLOR_INVALID;
     private int mCachedContrastColorIsFor = COLOR_INVALID;
     private InflationTask mRunningTask = null;
-    private Throwable mDebugThrowable;
     public CharSequence remoteInputTextWhenReset;
     public long lastRemoteInputSent = NOT_LAUNCHED_YET;
-    public final ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
-    public CharSequence headsUpStatusBarText;
-    public CharSequence headsUpStatusBarTextPublic;
+
+    private final MutableStateFlow<CharSequence> mHeadsUpStatusBarText =
+            StateFlowKt.MutableStateFlow(null);
+    private final MutableStateFlow<CharSequence> mHeadsUpStatusBarTextPublic =
+            StateFlowKt.MutableStateFlow(null);
 
     // indicates when this entry's view was first attached to a window
     // this value will reset when the view is completely removed from the shade (ie: filtered out)
@@ -162,16 +166,17 @@ public final class NotificationEntry extends ListEntry {
      */
     private boolean hasSentReply;
 
-    private boolean mSensitive = true;
-    private ListenerSet<OnSensitivityChangedListener> mOnSensitivityChangedListeners =
+    private final MutableStateFlow<Boolean> mSensitive = StateFlowKt.MutableStateFlow(true);
+    private final ListenerSet<OnSensitivityChangedListener> mOnSensitivityChangedListeners =
             new ListenerSet<>();
 
-    private boolean mAutoHeadsUp;
     private boolean mPulseSupressed;
     private int mBucket = BUCKET_ALERTING;
-    @Nullable private Long mPendingAnimationDuration;
     private boolean mIsMarkedForUserTriggeredMovement;
-    private boolean mIsAlerting;
+    private boolean mIsHeadsUpEntry;
+
+    private boolean mHasEverBeenGroupSummary;
+    private boolean mHasEverBeenGroupChild;
 
     public boolean mRemoteEditImeAnimatingAway;
     public boolean mRemoteEditImeVisible;
@@ -180,11 +185,6 @@ public final class NotificationEntry extends ListEntry {
      * Flag to determine if the entry is blockable by DnD filters
      */
     private boolean mBlockable;
-
-    /**
-     * The {@link SystemClock#elapsedRealtime()} when this notification entry was created.
-     */
-    public long mCreationElapsedRealTime;
 
     /**
      * Whether this notification has ever been a non-sticky HUN.
@@ -219,6 +219,26 @@ public final class NotificationEntry extends ListEntry {
         mIsDemoted = true;
     }
 
+    /** called when entry is currently a summary of a group */
+    public void markAsGroupSummary() {
+        mHasEverBeenGroupSummary = true;
+    }
+
+    /** whether this entry has ever been marked as a summary */
+    public boolean hasEverBeenGroupSummary() {
+        return mHasEverBeenGroupSummary;
+    }
+
+    /** called when entry is currently a child in a group */
+    public void markAsGroupChild() {
+        mHasEverBeenGroupChild = true;
+    }
+
+    /** whether this entry has ever been marked as a child */
+    public boolean hasEverBeenGroupChild() {
+        return mHasEverBeenGroupChild;
+    }
+
     /**
      * @param sbn the StatusBarNotification from system server
      * @param ranking also from system server
@@ -236,13 +256,8 @@ public final class NotificationEntry extends ListEntry {
         mKey = sbn.getKey();
         setSbn(sbn);
         setRanking(ranking);
-        mCreationElapsedRealTime = SystemClock.elapsedRealtime();
     }
 
-    @VisibleForTesting
-    public void setCreationElapsedRealTime(long time) {
-        mCreationElapsedRealTime = time;
-    }
     @Override
     public NotificationEntry getRepresentativeEntry() {
         return this;
@@ -553,19 +568,6 @@ public final class NotificationEntry extends ListEntry {
         return mRunningTask;
     }
 
-    /**
-     * Set a throwable that is used for debugging
-     *
-     * @param debugThrowable the throwable to save
-     */
-    public void setDebugThrowable(Throwable debugThrowable) {
-        mDebugThrowable = debugThrowable;
-    }
-
-    public Throwable getDebugThrowable() {
-        return mDebugThrowable;
-    }
-
     public void onRemoteInputInserted() {
         lastRemoteInputSent = NOT_LAUNCHED_YET;
         remoteInputTextWhenReset = null;
@@ -721,12 +723,6 @@ public final class NotificationEntry extends ListEntry {
         return row != null && row.areChildrenExpanded();
     }
 
-
-    //TODO: probably less confusing to say "is group fully visible"
-    public boolean isGroupNotFullyVisible() {
-        return row == null || row.isGroupNotFullyVisible();
-    }
-
     public NotificationGuts getGuts() {
         if (row != null) return row.getGuts();
         return null;
@@ -748,7 +744,11 @@ public final class NotificationEntry extends ListEntry {
         return row != null && row.getGuts() != null && row.getGuts().isExposed();
     }
 
-    public boolean isChildInGroup() {
+    /**
+     * @return Whether the notification row is a child of a group notification view; false if the
+     * row is null
+     */
+    public boolean rowIsChildInGroup() {
         return row != null && row.isChildInGroup();
     }
 
@@ -789,28 +789,6 @@ public final class NotificationEntry extends ListEntry {
         }
         // don't dismiss ongoing Notifications when the device is locked
         return !mSbn.isOngoing() || !isLocked;
-    }
-
-    /**
-     * @return Can the underlying notification be individually dismissed?
-     * @see #canViewBeDismissed()
-     */
-    // TODO: This logic doesn't belong on NotificationEntry. It should be moved to a controller
-    // that can be added as a dependency to any class that needs to answer this question.
-    public boolean legacyIsDismissableRecursive() {
-        if  (mSbn.isOngoing()) {
-            return false;
-        }
-        List<NotificationEntry> children = getAttachedNotifChildren();
-        if (children != null && children.size() > 0) {
-            for (int i = 0; i < children.size(); i++) {
-                NotificationEntry child =  children.get(i);
-                if (child.getSbn().isOngoing()) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     public boolean canViewBeDismissed() {
@@ -931,6 +909,11 @@ public final class NotificationEntry extends ListEntry {
         return Objects.equals(n.category, category);
     }
 
+    /** @see #setSensitive(boolean, boolean)  */
+    public StateFlow<Boolean> isSensitive() {
+        return mSensitive;
+    }
+
     /**
      * Set this notification to be sensitive.
      *
@@ -939,17 +922,13 @@ public final class NotificationEntry extends ListEntry {
      */
     public void setSensitive(boolean sensitive, boolean deviceSensitive) {
         getRow().setSensitive(sensitive, deviceSensitive);
-        if (sensitive != mSensitive) {
-            mSensitive = sensitive;
+        if (sensitive != mSensitive.getValue()) {
+            mSensitive.setValue(sensitive);
             for (NotificationEntry.OnSensitivityChangedListener listener :
                     mOnSensitivityChangedListeners) {
                 listener.onSensitivityChanged(this);
             }
         }
-    }
-
-    public boolean isSensitive() {
-        return mSensitive;
     }
 
     /** Add a listener to be notified when the entry's sensitivity changes. */
@@ -960,6 +939,32 @@ public final class NotificationEntry extends ListEntry {
     /** Remove a listener that was registered above. */
     public void removeOnSensitivityChangedListener(OnSensitivityChangedListener listener) {
         mOnSensitivityChangedListeners.remove(listener);
+    }
+
+    /** @see #setHeadsUpStatusBarText(CharSequence) */
+    public StateFlow<CharSequence> getHeadsUpStatusBarText() {
+        return mHeadsUpStatusBarText;
+    }
+
+    /**
+     * Sets the text to be displayed on the StatusBar, when this notification is the top pinned
+     * heads up.
+     */
+    public void setHeadsUpStatusBarText(CharSequence headsUpStatusBarText) {
+        this.mHeadsUpStatusBarText.setValue(headsUpStatusBarText);
+    }
+
+    /** @see #setHeadsUpStatusBarTextPublic(CharSequence) */
+    public StateFlow<CharSequence> getHeadsUpStatusBarTextPublic() {
+        return mHeadsUpStatusBarTextPublic;
+    }
+
+    /**
+     * Sets the text to be displayed on the StatusBar, when this notification is the top pinned
+     * heads up, and its content is sensitive right now.
+     */
+    public void setHeadsUpStatusBarTextPublic(CharSequence headsUpStatusBarTextPublic) {
+        this.mHeadsUpStatusBarTextPublic.setValue(headsUpStatusBarTextPublic);
     }
 
     public boolean isPulseSuppressed() {
@@ -983,12 +988,12 @@ public final class NotificationEntry extends ListEntry {
         mIsMarkedForUserTriggeredMovement = marked;
     }
 
-    public void setIsAlerting(boolean isAlerting) {
-        mIsAlerting = isAlerting;
+    public void setIsHeadsUpEntry(boolean isHeadsUpEntry) {
+        mIsHeadsUpEntry = isHeadsUpEntry;
     }
 
-    public boolean isAlerting() {
-        return mIsAlerting;
+    public boolean isHeadsUpEntry() {
+        return mIsHeadsUpEntry;
     }
 
     /** Set whether this notification is currently used to animate a launch. */
@@ -999,6 +1004,36 @@ public final class NotificationEntry extends ListEntry {
     /** Whether this notification is currently used to animate a launch. */
     public boolean isExpandAnimationRunning() {
         return mExpandAnimationRunning;
+    }
+
+    /**
+     * @return NotificationStyle
+     */
+    public String getNotificationStyle() {
+        if (isSummaryWithChildren()) {
+            return "summary";
+        }
+
+        final Class<? extends Notification.Style> style =
+                getSbn().getNotification().getNotificationStyle();
+        return style == null ? "nostyle" : style.getSimpleName();
+    }
+
+    /**
+     * Return {@code true} if notification's visibility is {@link Notification.VISIBILITY_PRIVATE}
+     */
+    public boolean isNotificationVisibilityPrivate() {
+        return getSbn().getNotification().visibility == Notification.VISIBILITY_PRIVATE;
+    }
+
+    /**
+     * Return {@code true} if notification's channel lockscreen visibility is
+     * {@link Notification.VISIBILITY_PRIVATE}
+     */
+    public boolean isChannelVisibilityPrivate() {
+        return getRanking().getChannel() != null
+                && getRanking().getChannel().getLockscreenVisibility()
+                == Notification.VISIBILITY_PRIVATE;
     }
 
     /** Information about a suggestion that is being edited. */

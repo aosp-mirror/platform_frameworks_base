@@ -20,6 +20,8 @@ import android.annotation.Nullable;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.inputmethodservice.InputMethodService;
+import android.os.CancellationSignal;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,7 +33,9 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InsertGesture;
+import android.view.inputmethod.InsertModeGesture;
 import android.view.inputmethod.JoinOrSplitGesture;
+import android.view.inputmethod.PreviewableHandwritingGesture;
 import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
 import android.widget.AdapterView;
@@ -47,11 +51,14 @@ import java.util.function.IntConsumer;
 
 public class HandwritingIme extends InputMethodService {
     private static final int OP_NONE = 0;
+    // ------- PreviewableHandwritingGesture BEGIN -----
     private static final int OP_SELECT = 1;
     private static final int OP_DELETE = 2;
+    // ------- PreviewableHandwritingGesture END -----
     private static final int OP_INSERT = 3;
     private static final int OP_REMOVE_SPACE = 4;
     private static final int OP_JOIN_OR_SPLIT = 5;
+    private static final int OP_INSERT_MODE = 6;
 
     private InkView mInk;
 
@@ -69,6 +76,10 @@ public class HandwritingIme extends InputMethodService {
     private LinearLayout mBoundsInfoCheckBoxes;
 
     private final IntConsumer mResultConsumer = value -> Log.d(TAG, "Gesture result: " + value);
+
+    private CancellationSignal mCancellationSignal = new CancellationSignal();
+    private boolean mUsePreview;
+    private CheckBox mGesturePreviewCheckbox;
 
     interface HandwritingFinisher {
         void finish();
@@ -98,71 +109,105 @@ public class HandwritingIme extends InputMethodService {
 
     private void onStylusEvent(@Nullable MotionEvent event) {
         // TODO Hookup recognizer here
+        HandwritingGesture gesture;
         switch (event.getAction()) {
-            case MotionEvent.ACTION_UP: {
-                if (areRichGesturesEnabled()) {
-                    HandwritingGesture gesture = null;
-                    switch (mRichGestureMode) {
-                        case OP_SELECT:
-                            gesture = new SelectGesture.Builder()
-                                    .setGranularity(mRichGestureGranularity)
-                                    .setSelectionArea(getSanitizedRectF(mRichGestureStartPoint.x,
-                                            mRichGestureStartPoint.y, event.getX(), event.getY()))
-                                    .setFallbackText("fallback text")
-                                    .build();
-                            break;
-                        case OP_DELETE:
-                            gesture = new DeleteGesture.Builder()
-                                    .setGranularity(mRichGestureGranularity)
-                                    .setDeletionArea(getSanitizedRectF(mRichGestureStartPoint.x,
-                                            mRichGestureStartPoint.y, event.getX(), event.getY()))
-                                    .setFallbackText("fallback text")
-                                    .build();
-                            break;
-                        case OP_INSERT:
-                            gesture = new InsertGesture.Builder()
-                                    .setInsertionPoint(new PointF(
-                                            mRichGestureStartPoint.x, mRichGestureStartPoint.y))
-                                    .setTextToInsert(" ")
-                                    .setFallbackText("fallback text")
-                                    .build();
-                            break;
-                        case OP_REMOVE_SPACE:
-                            gesture = new RemoveSpaceGesture.Builder()
-                                    .setPoints(
-                                            new PointF(mRichGestureStartPoint.x,
-                                                    mRichGestureStartPoint.y),
-                                            new PointF(event.getX(), event.getY()))
-                                    .setFallbackText("fallback text")
-                                    .build();
-                            break;
-                        case OP_JOIN_OR_SPLIT:
-                            gesture = new JoinOrSplitGesture.Builder()
-                                    .setJoinOrSplitPoint(new PointF(
-                                            mRichGestureStartPoint.x, mRichGestureStartPoint.y))
-                                    .setFallbackText("fallback text")
-                                    .build();
-                            break;
+            case MotionEvent.ACTION_MOVE:
+                if (mUsePreview && areRichGesturesEnabled()) {
+                    gesture = computeGesture(event, true /* isPreview */);
+                    if (gesture == null) {
+                        Log.e(TAG, "Preview not supported for gesture: " + mRichGestureMode);
+                        return;
                     }
+                    performGesture(gesture, true /* isPreview */);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if (areRichGesturesEnabled()) {
+                    gesture = computeGesture(event, false /* isPreview */);
                     if (gesture == null) {
                         // This shouldn't happen
                         Log.e(TAG, "Unrecognized gesture mode: " + mRichGestureMode);
                         return;
                     }
-                    performGesture(gesture);
+                    performGesture(gesture, false /* isPreview */);
                 } else {
                     // insert random ASCII char
                     sendKeyChar((char) (56 + new Random().nextInt(66)));
                 }
                 return;
-            }
             case MotionEvent.ACTION_DOWN: {
                 if (areRichGesturesEnabled()) {
                     mRichGestureStartPoint = new PointF(event.getX(), event.getY());
                 }
-                return;
             }
         }
+    }
+
+    private HandwritingGesture computeGesture(MotionEvent event, boolean isPreview) {
+        HandwritingGesture gesture = null;
+        switch (mRichGestureMode) {
+            case OP_SELECT:
+                gesture = new SelectGesture.Builder()
+                        .setGranularity(mRichGestureGranularity)
+                        .setSelectionArea(getSanitizedRectF(mRichGestureStartPoint.x,
+                                mRichGestureStartPoint.y, event.getX(), event.getY()))
+                        .setFallbackText("fallback text")
+                        .build();
+                break;
+            case OP_DELETE:
+                gesture = new DeleteGesture.Builder()
+                        .setGranularity(mRichGestureGranularity)
+                        .setDeletionArea(getSanitizedRectF(mRichGestureStartPoint.x,
+                                mRichGestureStartPoint.y, event.getX(), event.getY()))
+                        .setFallbackText("fallback text")
+                        .build();
+                break;
+            case OP_INSERT:
+                gesture = new InsertGesture.Builder()
+                        .setInsertionPoint(new PointF(
+                                mRichGestureStartPoint.x, mRichGestureStartPoint.y))
+                        .setTextToInsert(" ")
+                        .setFallbackText("fallback text")
+                        .build();
+                break;
+            case OP_REMOVE_SPACE:
+                if (isPreview) {
+                    break;
+                }
+                gesture = new RemoveSpaceGesture.Builder()
+                        .setPoints(
+                                new PointF(mRichGestureStartPoint.x,
+                                        mRichGestureStartPoint.y),
+                                new PointF(event.getX(), event.getY()))
+                        .setFallbackText("fallback text")
+                        .build();
+                break;
+            case OP_JOIN_OR_SPLIT:
+                if (isPreview) {
+                    break;
+                }
+                gesture = new JoinOrSplitGesture.Builder()
+                        .setJoinOrSplitPoint(new PointF(
+                                mRichGestureStartPoint.x, mRichGestureStartPoint.y))
+                        .setFallbackText("fallback text")
+                        .build();
+                break;
+            case OP_INSERT_MODE:
+                if (isPreview) {
+                    break;
+                }
+                mCancellationSignal = new CancellationSignal();
+                InsertModeGesture img = new InsertModeGesture.Builder()
+                        .setInsertionPoint(new PointF(
+                                mRichGestureStartPoint.x, mRichGestureStartPoint.y))
+                        .setFallbackText("fallback text")
+                        .setCancellationSignal(mCancellationSignal)
+                        .build();
+                gesture = img;
+                new Handler().postDelayed(() -> img.getCancellationSignal().cancel(), 5000);
+                break;
+        }
+        return gesture;
     }
 
     /**
@@ -193,10 +238,14 @@ public class HandwritingIme extends InputMethodService {
         return rectF;
     }
 
-    private void performGesture(HandwritingGesture gesture) {
+    private void performGesture(HandwritingGesture gesture, boolean isPreview) {
         InputConnection ic = getCurrentInputConnection();
         if (getCurrentInputStarted() && ic != null) {
-            ic.performHandwritingGesture(gesture, Runnable::run, mResultConsumer);
+            if (isPreview) {
+                ic.previewHandwritingGesture((PreviewableHandwritingGesture) gesture, null);
+            } else {
+                ic.performHandwritingGesture(gesture, Runnable::run, mResultConsumer);
+            }
         } else {
             // This shouldn't happen
             Log.e(TAG, "No active InputConnection");
@@ -216,10 +265,19 @@ public class HandwritingIme extends InputMethodService {
         layout.addView(getRichGestureActionsSpinner());
         layout.addView(getRichGestureGranularitySpinner());
         layout.addView(getBoundsInfoCheckBoxes());
+        layout.addView(getPreviewCheckBox());
         layout.setBackgroundColor(getColor(R.color.holo_green_light));
         view.addView(layout);
 
         return view;
+    }
+
+    private View getPreviewCheckBox() {
+        mGesturePreviewCheckbox = new CheckBox(this);
+        mGesturePreviewCheckbox.setText("Use Gesture Previews (for Previewable Gestures)");
+        mGesturePreviewCheckbox.setOnCheckedChangeListener(
+                (buttonView, isChecked) -> mUsePreview = isChecked);
+        return mGesturePreviewCheckbox;
     }
 
     private View getRichGestureActionsSpinner() {
@@ -236,6 +294,7 @@ public class HandwritingIme extends InputMethodService {
                 "Rich gesture INSERT",
                 "Rich gesture REMOVE SPACE",
                 "Rich gesture JOIN OR SPLIT",
+                "Rich gesture INSERT MODE",
         };
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, items);
@@ -245,8 +304,13 @@ public class HandwritingIme extends InputMethodService {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mRichGestureMode = position;
-                mRichGestureGranularitySpinner.setEnabled(
-                        mRichGestureMode == OP_SELECT || mRichGestureMode == OP_DELETE);
+                boolean supportsGranularityAndPreview =
+                        mRichGestureMode == OP_SELECT || mRichGestureMode == OP_DELETE;
+                mRichGestureGranularitySpinner.setEnabled(supportsGranularityAndPreview);
+                mGesturePreviewCheckbox.setEnabled(supportsGranularityAndPreview);
+                if (!supportsGranularityAndPreview) {
+                    mUsePreview = false;
+                }
                 Log.d(TAG, "Setting RichGesture Mode " + mRichGestureMode);
             }
 

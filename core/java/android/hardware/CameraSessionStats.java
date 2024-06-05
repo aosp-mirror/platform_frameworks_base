@@ -16,9 +16,11 @@
 package android.hardware;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Range;
 
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  * The camera action state used for passing camera usage information from
  * camera service to camera service proxy .
@@ -64,6 +66,9 @@ public class CameraSessionStats implements Parcelable {
     private ArrayList<CameraStreamStats> mStreamStats;
     private String mUserTag;
     private int mVideoStabilizationMode;
+    private boolean mUsedUltraWide;
+    private boolean mUsedZoomOverride;
+    private Range<Integer> mMostRequestedFpsRange;
     private int mSessionIndex;
     private CameraExtensionSessionStats mCameraExtensionSessionStats;
 
@@ -82,6 +87,9 @@ public class CameraSessionStats implements Parcelable {
         mDeviceError = false;
         mStreamStats = new ArrayList<CameraStreamStats>();
         mVideoStabilizationMode = -1;
+        mUsedUltraWide = false;
+        mUsedZoomOverride = false;
+        mMostRequestedFpsRange = new Range<Integer>(0, 0);
         mSessionIndex = 0;
         mCameraExtensionSessionStats = new CameraExtensionSessionStats();
     }
@@ -102,6 +110,10 @@ public class CameraSessionStats implements Parcelable {
         mSessionType = sessionType;
         mInternalReconfigure = internalReconfigure;
         mStreamStats = new ArrayList<CameraStreamStats>();
+        mVideoStabilizationMode = -1;
+        mUsedUltraWide = false;
+        mUsedZoomOverride = false;
+        mMostRequestedFpsRange = new Range<Integer>(0, 0);
         mSessionIndex = sessionIdx;
         mCameraExtensionSessionStats = new CameraExtensionSessionStats();
     }
@@ -147,8 +159,12 @@ public class CameraSessionStats implements Parcelable {
         dest.writeTypedList(mStreamStats);
         dest.writeString(mUserTag);
         dest.writeInt(mVideoStabilizationMode);
+        dest.writeBoolean(mUsedUltraWide);
+        dest.writeBoolean(mUsedZoomOverride);
         dest.writeInt(mSessionIndex);
         mCameraExtensionSessionStats.writeToParcel(dest, 0);
+        dest.writeInt(mMostRequestedFpsRange.getLower());
+        dest.writeInt(mMostRequestedFpsRange.getUpper());
     }
 
     public void readFromParcel(Parcel in) {
@@ -173,8 +189,15 @@ public class CameraSessionStats implements Parcelable {
 
         mUserTag = in.readString();
         mVideoStabilizationMode = in.readInt();
+
+        mUsedUltraWide = in.readBoolean();
+        mUsedZoomOverride = in.readBoolean();
+
         mSessionIndex = in.readInt();
         mCameraExtensionSessionStats = CameraExtensionSessionStats.CREATOR.createFromParcel(in);
+        int minFps = in.readInt();
+        int maxFps = in.readInt();
+        mMostRequestedFpsRange = new Range<Integer>(minFps, maxFps);
     }
 
     public String getCameraId() {
@@ -245,11 +268,23 @@ public class CameraSessionStats implements Parcelable {
         return mVideoStabilizationMode;
     }
 
+    public boolean getUsedUltraWide() {
+        return mUsedUltraWide;
+    }
+
+    public boolean getUsedZoomOverride() {
+        return mUsedZoomOverride;
+    }
+
     public int getSessionIndex() {
         return mSessionIndex;
     }
 
     public CameraExtensionSessionStats getExtensionSessionStats() {
         return mCameraExtensionSessionStats;
+    }
+
+    public Range<Integer> getMostRequestedFpsRange() {
+        return mMostRequestedFpsRange;
     }
 }

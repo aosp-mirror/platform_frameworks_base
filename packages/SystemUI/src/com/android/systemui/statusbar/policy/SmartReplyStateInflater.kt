@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy
 
+import android.app.ActivityOptions
 import android.app.Notification
 import android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY
 import android.app.PendingIntent
@@ -40,7 +41,7 @@ import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.Button
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper
@@ -491,7 +492,11 @@ class SmartReplyInflaterImpl @Inject constructor(
             entry.setHasSentReply()
             try {
                 val intent = createRemoteInputIntent(smartReplies, choice)
-                smartReplies.pendingIntent.send(context, 0, intent)
+                val opts = ActivityOptions.makeBasic()
+                opts.setPendingIntentBackgroundActivityStartMode(
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                smartReplies.pendingIntent.send(context, 0, intent, /* onFinished */null,
+                        /* handler */ null, /* requiredPermission */ null, opts.toBundle())
             } catch (e: PendingIntent.CanceledException) {
                 Log.w(TAG, "Unable to send smart reply", e)
             }

@@ -21,7 +21,6 @@ import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowInsets.Type.tappableElement;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
@@ -44,16 +43,17 @@ import android.view.InsetsFrameProvider;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import com.android.internal.policy.SystemBarUtils;
-import com.android.systemui.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.DelegateLaunchAnimatorController;
+import com.android.systemui.animation.ActivityTransitionAnimator;
+import com.android.systemui.animation.DelegateTransitionAnimatorController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.unfold.util.JankMonitorTransitionProgressListener;
@@ -125,14 +125,19 @@ public class StatusBarWindowController {
      * is different.
      */
     public void refreshStatusBarHeight() {
-        int heightFromConfig = SystemBarUtils.getStatusBarHeight(mContext);
+        Trace.beginSection("StatusBarWindowController#refreshStatusBarHeight");
+        try {
+            int heightFromConfig = SystemBarUtils.getStatusBarHeight(mContext);
 
-        if (mBarHeight != heightFromConfig) {
-            mBarHeight = heightFromConfig;
-            apply(mCurrentState);
+            if (mBarHeight != heightFromConfig) {
+                mBarHeight = heightFromConfig;
+                apply(mCurrentState);
+            }
+
+            if (DEBUG) Log.v(TAG, "defineSlots");
+        } finally {
+            Trace.endSection();
         }
-
-        if (DEBUG) Log.v(TAG, "defineSlots");
     }
 
     /**
@@ -183,23 +188,23 @@ public class StatusBarWindowController {
      *   updated animation controller that handles status-bar-related animation details. Returns an
      *   empty optional if the animation is *not* on a view in the status bar.
      */
-    public Optional<ActivityLaunchAnimator.Controller> wrapAnimationControllerIfInStatusBar(
-            View rootView, ActivityLaunchAnimator.Controller animationController) {
+    public Optional<ActivityTransitionAnimator.Controller> wrapAnimationControllerIfInStatusBar(
+            View rootView, ActivityTransitionAnimator.Controller animationController) {
         if (rootView != mStatusBarWindowView) {
             return Optional.empty();
         }
 
-        animationController.setLaunchContainer(mLaunchAnimationContainer);
-        return Optional.of(new DelegateLaunchAnimatorController(animationController) {
+        animationController.setTransitionContainer(mLaunchAnimationContainer);
+        return Optional.of(new DelegateTransitionAnimatorController(animationController) {
             @Override
-            public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {
-                getDelegate().onLaunchAnimationStart(isExpandingFullyAbove);
+            public void onTransitionAnimationStart(boolean isExpandingFullyAbove) {
+                getDelegate().onTransitionAnimationStart(isExpandingFullyAbove);
                 setLaunchAnimationRunning(true);
             }
 
             @Override
-            public void onLaunchAnimationEnd(boolean isExpandingFullyAbove) {
-                getDelegate().onLaunchAnimationEnd(isExpandingFullyAbove);
+            public void onTransitionAnimationEnd(boolean isExpandingFullyAbove) {
+                getDelegate().onTransitionAnimationEnd(isExpandingFullyAbove);
                 setLaunchAnimationRunning(false);
             }
         });
@@ -361,9 +366,9 @@ public class StatusBarWindowController {
                 || state.mIsLaunchAnimationRunning
                 // Don't force-show the status bar if the user has already dismissed it.
                 || state.mOngoingProcessRequiresStatusBarVisible) {
-            mLpChanged.privateFlags |= PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
+            mLpChanged.forciblyShownTypes |= WindowInsets.Type.statusBars();
         } else {
-            mLpChanged.privateFlags &= ~PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
+            mLpChanged.forciblyShownTypes &= ~WindowInsets.Type.statusBars();
         }
     }
 }

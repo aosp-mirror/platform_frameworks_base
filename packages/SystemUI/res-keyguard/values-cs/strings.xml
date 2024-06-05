@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíjení"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Rychlé nabíjení"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Pomalé nabíjení"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Optimalizované nabíjení za účelem ochrany baterie"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problém s nabíjecím příslušenstvím"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Klávesy odemknete stisknutím tlačítka nabídky."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíjení je odloženo za účelem ochrany baterie"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Zkontrolujte nabíjecí příslušenství"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Síť je blokována"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Žádná SIM karta"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Přidejte SIM kartu."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM karta chybí nebo je nečitelná. Přidejte SIM kartu."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM kartu nelze použít."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM karta byla natrvalo deaktivována.\n Požádejte svého poskytovatele bezdrátových služeb o další SIM kartu."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM karta je zablokována."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM karta je blokována pomocí kódu PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Odblokování SIM karty…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Po uzamčení je třeba zadat PIN"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Po uzamčení je třeba zadat heslo"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Po uzamčení je třeba zadat gesto"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Aktualizace se nainstaluje v období neaktivity"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Aktualizace se nainstaluje, až zařízení nebudete používat"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Je potřeba další krok. PIN dlouho nepoužit."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Je potřeba další krok. Heslo dlouho nepoužito."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Je potřeba další krok. Gesto dlouho nepoužito."</string>
@@ -87,7 +83,7 @@
     <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Příliš mnoho pokusů s nesprávným kódem PIN"</string>
     <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Příliš mnoho pokusů s nesprávným gestem"</string>
     <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Příliš mnoho pokusů s nesprávným heslem"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Zkuste to znovu za # sekundu.}few{Zkuste to znovu za # sekundy.}many{Zkuste to znovu za # sekundy.}other{Zkuste to znovu za # sekund.}}"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Zkuste to znovu za # sekundu}few{Zkuste to znovu za # sekundy}many{Zkuste to znovu za # sekundy}other{Zkuste to znovu za # sekund}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Zadejte kód PIN SIM karty."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Zadejte kód PIN SIM karty <xliff:g id="CARRIER">%1$s</xliff:g>."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> eSIM kartu deaktivujte, chcete-li zařízení používat bez mobilních služeb."</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Z bezpečnostních důvodů raději použijte gesto"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Z bezpečnostních důvodů raději použijte PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Z bezpečnostních důvodů raději použijte heslo"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Pro ještě lepší zabezpečení je vyžadován kód PIN"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Pro ještě lepší zabezpečení je vyžadováno gesto"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Pro ještě lepší zabezpečení je vyžadováno heslo"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Zařízení je uzamknuto administrátorem"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Zařízení bylo ručně uzamčeno"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nerozpoznáno"</string>

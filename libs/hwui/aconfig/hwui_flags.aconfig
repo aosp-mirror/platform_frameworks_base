@@ -1,0 +1,92 @@
+package: "com.android.graphics.hwui.flags"
+container: "system"
+
+flag {
+  name: "clip_shader"
+  is_exported: true
+  namespace: "core_graphics"
+  description: "API for canvas shader clipping operations"
+  bug: "280116960"
+}
+
+flag {
+  name: "matrix_44"
+  is_exported: true
+  namespace: "core_graphics"
+  description: "API for 4x4 matrix and related canvas functions"
+  bug: "280116960"
+}
+
+flag {
+  name: "limited_hdr"
+  is_exported: true
+  namespace: "core_graphics"
+  description: "API to enable apps to restrict the amount of HDR headroom that is used"
+  bug: "234181960"
+}
+
+flag {
+  name: "high_contrast_text_luminance"
+  namespace: "accessibility"
+  description: "Use luminance to determine how to make text more high contrast, instead of RGB heuristic"
+  bug: "186567103"
+}
+
+flag {
+  name: "high_contrast_text_small_text_rect"
+  namespace: "accessibility"
+  description: "Draw a solid rectangle background behind text instead of a stroke outline"
+  bug: "186567103"
+}
+
+flag {
+  name: "hdr_10bit_plus"
+  namespace: "core_graphics"
+  description: "Use 10101010 and FP16 formats for HDR-UI when available"
+  bug: "284159488"
+}
+
+flag {
+  name: "gainmap_animations"
+  is_exported: true
+  namespace: "core_graphics"
+  description: "APIs to help enable animations involving gainmaps"
+  bug: "296482289"
+}
+
+flag {
+  name: "gainmap_constructor_with_metadata"
+  is_exported: true
+  namespace: "core_graphics"
+  description: "APIs to create a new gainmap with a bitmap for metadata."
+  bug: "304478551"
+}
+
+flag {
+  name: "clip_surfaceviews"
+  namespace: "core_graphics"
+  description: "Clip z-above surfaceviews to global clip rect"
+  bug: "298621623"
+}
+
+flag {
+  name: "requested_formats_v"
+  is_exported: true
+  namespace: "core_graphics"
+  description: "Enable r_8, r_16_uint, rg_1616_uint, and rgba_10101010 in the SDK"
+  bug: "292545615"
+}
+
+flag {
+  name: "animate_hdr_transitions"
+  namespace: "core_graphics"
+  description: "Automatically animate all changes in HDR headroom"
+  bug: "314810174"
+}
+
+flag {
+  name: "draw_region"
+  namespace: "core_graphics"
+  description: "Add canvas#drawRegion API"
+  bug: "318612129"
+}

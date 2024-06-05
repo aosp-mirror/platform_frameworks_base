@@ -47,7 +47,7 @@ android_test {
 
     static_libs: [
         "androidx.test.rules",
-        "truth-prebuilt",
+        "truth",
     ],
 
     compile_multilib: "both",

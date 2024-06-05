@@ -15,13 +15,14 @@
   ~ limitations under the License
   -->
 <com.android.systemui.statusbar.KeyboardShortcutAppItemLayout
+        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal"
+        android:background="@drawable/list_item_background"
+        android:focusable="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
+        android:minHeight="@dimen/ksh_app_item_minimum_height"
         android:paddingBottom="8dp">
     <ImageView
             android:id="@+id/keyboard_shortcuts_icon"
@@ -39,7 +40,8 @@
             android:layout_height="wrap_content"
             android:paddingEnd="12dp"
             android:paddingBottom="4dp"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textColor="?androidprv:attr/materialColorOnSurface"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="16sp"
             android:maxLines="5"
             android:singleLine="false"
@@ -56,5 +58,5 @@
             android:textSize="14sp"
             android:scrollHorizontally="false"
             android:layout_centerVertical="true"
-            android:focusable="true"/>
+            android:padding="0dp" />
 </com.android.systemui.statusbar.KeyboardShortcutAppItemLayout>

@@ -183,6 +183,8 @@ public class Am extends BaseCommand {
                 instrument.disableTestApiChecks = false;
             } else if (opt.equals("--no-isolated-storage")) {
                 instrument.disableIsolatedStorage = true;
+            } else if (opt.equals("--no-logcat")) {
+                instrument.captureLogcat = false;
             } else if (opt.equals("--user")) {
                 instrument.userId = parseUserArg(nextArgRequired());
             } else if (opt.equals("--abi")) {
@@ -193,6 +195,9 @@ public class Am extends BaseCommand {
                 instrument.alwaysCheckSignature = true;
             } else if (opt.equals("--instrument-sdk-sandbox")) {
                 instrument.instrumentSdkSandbox = true;
+            } else if (opt.equals("--instrument-sdk-in-sandbox")) {
+                instrument.instrumentSdkSandbox = true;
+                instrument.instrumentSdkInSandbox = true;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;

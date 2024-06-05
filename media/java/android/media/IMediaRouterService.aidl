@@ -26,7 +26,7 @@ import android.media.RouteDiscoveryPreference;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
-
+import android.os.UserHandle;
 /**
  * {@hide}
  */
@@ -50,12 +50,12 @@ interface IMediaRouterService {
     // MediaRouterService.java for readability.
 
     // Methods for MediaRouter2
-    boolean verifyPackageExists(String clientPackageName);
-    List<MediaRoute2Info> getSystemRoutes();
+    List<MediaRoute2Info> getSystemRoutes(String callerPackageName, boolean isProxyRouter);
     RoutingSessionInfo getSystemSessionInfo();
 
     void registerRouter2(IMediaRouter2 router, String packageName);
     void unregisterRouter2(IMediaRouter2 router);
+    void updateScanningStateWithRouter2(IMediaRouter2 router, @JavaPassthrough(annotation="@android.media.MediaRouter2.ScanningState") int scanningState);
     void setDiscoveryRequestWithRouter2(IMediaRouter2 router,
             in RouteDiscoveryPreference preference);
     void setRouteListingPreference(IMediaRouter2 router,
@@ -74,23 +74,26 @@ interface IMediaRouterService {
 
     // Methods for MediaRouter2Manager
     List<RoutingSessionInfo> getRemoteSessions(IMediaRouter2Manager manager);
-    RoutingSessionInfo getSystemSessionInfoForPackage(
-            IMediaRouter2Manager manager, String packageName);
+    RoutingSessionInfo getSystemSessionInfoForPackage(String callerPackageName,
+        String targetPackageName);
     void registerManager(IMediaRouter2Manager manager, String packageName);
+    void registerProxyRouter(IMediaRouter2Manager manager, String callingPackageName, String targetPackageName, in UserHandle targetUser);
     void unregisterManager(IMediaRouter2Manager manager);
     void setRouteVolumeWithManager(IMediaRouter2Manager manager, int requestId,
             in MediaRoute2Info route, int volume);
-    void startScan(IMediaRouter2Manager manager);
-    void stopScan(IMediaRouter2Manager manager);
+    void updateScanningState(IMediaRouter2Manager manager, @JavaPassthrough(annotation="@android.media.MediaRouter2.ScanningState") int scanningState);
 
     void requestCreateSessionWithManager(IMediaRouter2Manager manager, int requestId,
-            in RoutingSessionInfo oldSession, in @nullable MediaRoute2Info route);
+            in RoutingSessionInfo oldSession, in @nullable MediaRoute2Info route,
+            in UserHandle transferInitiatorUserHandle, in String transferInitiatorPackageName);
     void selectRouteWithManager(IMediaRouter2Manager manager, int requestId,
             String sessionId, in MediaRoute2Info route);
     void deselectRouteWithManager(IMediaRouter2Manager manager, int requestId,
             String sessionId, in MediaRoute2Info route);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL)")
     void transferToRouteWithManager(IMediaRouter2Manager manager, int requestId,
-            String sessionId, in MediaRoute2Info route);
+            String sessionId, in MediaRoute2Info route,
+            in UserHandle transferInitiatorUserHandle, String transferInitiatorPackageName);
     void setSessionVolumeWithManager(IMediaRouter2Manager manager, int requestId,
             String sessionId, int volume);
     void releaseSessionWithManager(IMediaRouter2Manager manager, int requestId, String sessionId);

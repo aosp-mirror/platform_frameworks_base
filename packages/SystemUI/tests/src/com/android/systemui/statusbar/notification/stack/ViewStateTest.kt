@@ -16,77 +16,52 @@
 
 package com.android.systemui.statusbar.notification.stack
 
-import android.testing.AndroidTestingRunner
-import android.util.Log
-import android.util.Log.TerribleFailureHandler
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.assertDoesNotLogWtf
+import com.android.systemui.log.assertLogsWtf
 import kotlin.math.log2
 import kotlin.math.sqrt
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ViewStateTest : SysuiTestCase() {
     private val viewState = ViewState()
 
-    private var wtfHandler: TerribleFailureHandler? = null
-    private var wtfCount = 0
-
     @Suppress("DIVISION_BY_ZERO")
     @Test
     fun testWtfs() {
-        interceptWtfs()
-
         // Setting valid values doesn't cause any wtfs.
-        viewState.alpha = 0.1f
-        viewState.xTranslation = 0f
-        viewState.yTranslation = 10f
-        viewState.zTranslation = 20f
-        viewState.scaleX = 0.5f
-        viewState.scaleY = 0.25f
-
-        expectWtfs(0)
+        assertDoesNotLogWtf {
+            viewState.alpha = 0.1f
+            viewState.xTranslation = 0f
+            viewState.yTranslation = 10f
+            viewState.zTranslation = 20f
+            viewState.scaleX = 0.5f
+            viewState.scaleY = 0.25f
+        }
 
         // Setting NaN values leads to wtfs being logged, and the value not being changed.
-        viewState.alpha = 0.0f / 0.0f
-        expectWtfs(1)
+        assertLogsWtf { viewState.alpha = 0.0f / 0.0f }
         Assert.assertEquals(viewState.alpha, 0.1f)
 
-        viewState.xTranslation = Float.NaN
-        expectWtfs(2)
+        assertLogsWtf { viewState.xTranslation = Float.NaN }
         Assert.assertEquals(viewState.xTranslation, 0f)
 
-        viewState.yTranslation = log2(-10.0).toFloat()
-        expectWtfs(3)
+        assertLogsWtf { viewState.yTranslation = log2(-10.0).toFloat() }
         Assert.assertEquals(viewState.yTranslation, 10f)
 
-        viewState.zTranslation = sqrt(-1.0).toFloat()
-        expectWtfs(4)
+        assertLogsWtf { viewState.zTranslation = sqrt(-1.0).toFloat() }
         Assert.assertEquals(viewState.zTranslation, 20f)
 
-        viewState.scaleX = Float.POSITIVE_INFINITY + Float.NEGATIVE_INFINITY
-        expectWtfs(5)
+        assertLogsWtf { viewState.scaleX = Float.POSITIVE_INFINITY + Float.NEGATIVE_INFINITY }
         Assert.assertEquals(viewState.scaleX, 0.5f)
 
-        viewState.scaleY = Float.POSITIVE_INFINITY * 0
-        expectWtfs(6)
+        assertLogsWtf { viewState.scaleY = Float.POSITIVE_INFINITY * 0 }
         Assert.assertEquals(viewState.scaleY, 0.25f)
-    }
-
-    private fun interceptWtfs() {
-        wtfCount = 0
-        wtfHandler =
-            Log.setWtfHandler { _: String?, e: Log.TerribleFailure, _: Boolean ->
-                Log.e("ViewStateTest", "Observed WTF: $e")
-                wtfCount++
-            }
-    }
-
-    private fun expectWtfs(expectedWtfCount: Int) {
-        Assert.assertNotNull(wtfHandler)
-        Assert.assertEquals(expectedWtfCount, wtfCount)
     }
 }

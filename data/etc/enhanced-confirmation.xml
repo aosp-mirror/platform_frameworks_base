@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+ -->
+
+<!--
+This XML defines an allowlist of packages that should be exempt from ECM (Enhanced Confirmation
+Mode).
+
+Example usage:
+
+    <enhanced-confirmation-trusted-package
+         package="com.example.app"
+         sha256-cert-digest="E9:7A:BC:2C:D1:CA:8D:58:6A:57:0B:8C:F8:60:AA:D2:8D:13:30:2A:FB:C9:00:2C:5D:53:B2:6C:09:A4:85:A0"/>
+    ...
+
+    <enhanced-confirmation-trusted-installer
+         package="com.example.installer"
+         sha256-cert-digest="E9:7A:BC:2C:D1:CA:8D:58:6A:57:0B:8C:F8:60:AA:D2:8D:13:30:2A:FB:C9:00:2C:5D:53:B2:6C:09:A4:85:A0"/>
+    ...
+
+The <enhanced-confirmation-trusted-package> entry shown in the above example indicates that
+"com.example.app" should be considered a "trusted package". A "trusted package" will be exempt from
+ECM restrictions.
+
+The <enhanced-confirmation-trusted-installer> entry shown in the above example indicates that
+"com.example.app" should be considered a "trusted installer". Apps installed by "trusted installers"
+will be exempt from ECM restrictions, with conditions explained in the next few paragraphs.
+
+If zero <enhanced-confirmation-trusted-installer> entries are declared, then *all* packages will be
+exempt from ECM restrictions, except apps meeting *all* of the following criteria:
+
+    A. The app is not pre-installed, and
+    B. The app has no matching <enhanced-confirmation-trusted-package> entries declared, and
+    C. The app is marked by its installer as coming from an untrustworthy package source.
+
+(For example, an installer may set an app's package source to
+PackageInstaller.PACKAGE_SOURCE_DOWNLOADED_FILE or PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE,
+which are considered untrustworthy.)
+
+If one or more <enhanced-confirmation-trusted-installer> entries are declared, then packages must,
+in order to be exempt from ECM, meet at least one of the following criteria:
+
+    A. Be installed by an installer with a matching <enhanced-confirmation-trusted-installer> entry
+       declared, and be marked as coming from an "trustworthy" package source by the installer, or
+    B. Be installed via a pre-installed installer, and be marked as coming from a "trustworthy"
+       package source by the installer, or
+    C. Have a matching <enhanced-confirmation-trusted-package> entry declared.
+
+For either type of XML element:
+
+- The "package" XML attribute refers to the app's package name.
+- The "sha256-cert-digest" XML attribute refers to the SHA-256 hash of an app signing certificate.
+
+For any entry to successfully apply to a package, both XML attributes must be present, and must
+match the package. That is, the package name must match the "package" attribute, and the app must be
+signed by the signing certificate identified by the "sha256-cert-digest" attribute.
+-->
+
+<config></config>

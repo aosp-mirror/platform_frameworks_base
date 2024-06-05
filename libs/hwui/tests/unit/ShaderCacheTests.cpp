@@ -49,7 +49,7 @@ public:
      */
     static void reinitializeAllFields(ShaderCache& cache) {
         ShaderCache newCache = ShaderCache();
-        std::lock_guard<std::mutex> lock(cache.mMutex);
+        std::lock_guard lock(cache.mMutex), newLock(newCache.mMutex);
         // By order of declaration
         cache.mInitialized = newCache.mInitialized;
         cache.mBlobCache.reset(nullptr);
@@ -72,7 +72,7 @@ public:
      * manually, as seen in the "terminate" testing helper function.
      */
     static void setSaveDelayMs(ShaderCache& cache, unsigned int saveDelayMs) {
-        std::lock_guard<std::mutex> lock(cache.mMutex);
+        std::lock_guard lock(cache.mMutex);
         cache.mDeferredSaveDelayMs = saveDelayMs;
     }
 
@@ -81,7 +81,7 @@ public:
      * Next call to "initShaderDiskCache" will load again the in-memory cache from disk.
      */
     static void terminate(ShaderCache& cache, bool saveContent) {
-        std::lock_guard<std::mutex> lock(cache.mMutex);
+        std::lock_guard lock(cache.mMutex);
         if (saveContent) {
             cache.saveToDiskLocked();
         }
@@ -93,6 +93,7 @@ public:
      */
     template <typename T>
     static bool validateCache(ShaderCache& cache, std::vector<T> hash) {
+        std::lock_guard lock(cache.mMutex);
         return cache.validateCache(hash.data(), hash.size() * sizeof(T));
     }
 
@@ -108,7 +109,7 @@ public:
      */
     static void waitForPendingSave(ShaderCache& cache, const int timeoutMs = 50) {
         {
-            std::lock_guard<std::mutex> lock(cache.mMutex);
+            std::lock_guard lock(cache.mMutex);
             ASSERT_TRUE(cache.mSavePending);
         }
         bool saving = true;
@@ -123,7 +124,7 @@ public:
             usleep(delayMicroseconds);
             elapsedMilliseconds += (float)delayMicroseconds / 1000;
 
-            std::lock_guard<std::mutex> lock(cache.mMutex);
+            std::lock_guard lock(cache.mMutex);
             saving = cache.mSavePending;
         }
     }
@@ -369,9 +370,9 @@ TEST(ShaderCacheTest, testCacheValidation) {
 }
 
 using namespace android::uirenderer;
-RENDERTHREAD_SKIA_PIPELINE_TEST(ShaderCacheTest, testOnVkFrameFlushed) {
+RENDERTHREAD_TEST(ShaderCacheTest, testOnVkFrameFlushed) {
     if (Properties::getRenderPipelineType() != RenderPipelineType::SkiaVulkan) {
-        // RENDERTHREAD_SKIA_PIPELINE_TEST declares both SkiaVK and SkiaGL variants.
+        // RENDERTHREAD_TEST declares both SkiaVK and SkiaGL variants.
         GTEST_SKIP() << "This test is only applicable to RenderPipelineType::SkiaVulkan";
     }
     if (!folderExist(getExternalStorageFolder())) {

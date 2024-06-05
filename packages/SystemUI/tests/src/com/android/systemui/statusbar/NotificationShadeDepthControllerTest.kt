@@ -17,23 +17,24 @@
 package com.android.systemui.statusbar
 
 import android.os.IBinder
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Choreographer
 import android.view.View
 import android.view.ViewRootImpl
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.WallpaperController
 import com.android.systemui.util.mockito.eq
 import com.google.common.truth.Truth.assertThat
@@ -58,7 +59,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @SmallTest
 class NotificationShadeDepthControllerTest : SysuiTestCase() {
@@ -114,8 +115,9 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
                 notificationShadeWindowController,
                 dozeParameters,
                 context,
+                    ResourcesSplitShadeStateController(),
                 dumpManager,
-                configurationController)
+                configurationController,)
         notificationShadeDepthController.shadeAnimation = shadeAnimation
         notificationShadeDepthController.brightnessMirrorSpring = brightnessSpring
         notificationShadeDepthController.root = root
@@ -140,7 +142,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun onPanelExpansionChanged_apliesBlur_ifShade() {
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f))
+                fraction = 1f, expanded = true, tracking = false))
         verify(shadeAnimation).animateTo(eq(maxBlur))
     }
 
@@ -148,7 +150,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun onPanelExpansionChanged_animatesBlurIn_ifShade() {
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 0.01f, expanded = false, tracking = false, dragDownPxAmount = 0f))
+                fraction = 0.01f, expanded = false, tracking = false))
         verify(shadeAnimation).animateTo(eq(maxBlur))
     }
 
@@ -158,7 +160,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         clearInvocations(shadeAnimation)
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 0f, expanded = false, tracking = false, dragDownPxAmount = 0f))
+                fraction = 0f, expanded = false, tracking = false))
         verify(shadeAnimation).animateTo(eq(0))
     }
 
@@ -166,7 +168,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun onPanelExpansionChanged_animatesBlurOut_ifFlick() {
         val event =
             ShadeExpansionChangeEvent(
-                fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f)
+                fraction = 1f, expanded = true, tracking = false)
         onPanelExpansionChanged_apliesBlur_ifShade()
         clearInvocations(shadeAnimation)
         notificationShadeDepthController.onPanelExpansionChanged(event)
@@ -187,7 +189,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         clearInvocations(shadeAnimation)
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 0.6f, expanded = true, tracking = true, dragDownPxAmount = 0f))
+                fraction = 0.6f, expanded = true, tracking = true))
         verify(shadeAnimation).animateTo(eq(maxBlur))
     }
 
@@ -195,7 +197,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun onPanelExpansionChanged_respectsMinPanelPullDownFraction() {
         val event =
             ShadeExpansionChangeEvent(
-                fraction = 0.5f, expanded = true, tracking = true, dragDownPxAmount = 0f)
+                fraction = 0.5f, expanded = true, tracking = true)
         notificationShadeDepthController.panelPullDownMinFraction = 0.5f
         notificationShadeDepthController.onPanelExpansionChanged(event)
         assertThat(notificationShadeDepthController.shadeExpansion).isEqualTo(0f)
@@ -223,7 +225,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.qsPanelExpansion = 1f
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f))
+                fraction = 1f, expanded = true, tracking = false))
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(blurUtils).applyBlur(any(), eq(maxBlur), eq(false))
     }
@@ -234,7 +236,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.qsPanelExpansion = 0.25f
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f))
+                fraction = 1f, expanded = true, tracking = false))
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(wallpaperController)
             .setNotificationShadeZoom(eq(ShadeInterpolation.getNotificationScrimAlpha(0.25f)))
@@ -246,7 +248,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f))
+                fraction = 1f, expanded = true, tracking = false))
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
 
         verify(wallpaperController).setNotificationShadeZoom(0f)
@@ -258,7 +260,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f))
+                fraction = 1f, expanded = true, tracking = false))
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
 
         verify(wallpaperController).setNotificationShadeZoom(floatThat { it > 0 })
@@ -271,7 +273,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         val expanded = true
         val tracking = false
         val dragDownPxAmount = 0f
-        val event = ShadeExpansionChangeEvent(rawFraction, expanded, tracking, dragDownPxAmount)
+        val event = ShadeExpansionChangeEvent(rawFraction, expanded, tracking)
         val inOrder = Mockito.inOrder(wallpaperController)
 
         notificationShadeDepthController.onPanelExpansionChanged(event)
@@ -336,7 +338,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun updateBlurCallback_setsBlur_whenExpanded() {
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f))
+                fraction = 1f, expanded = true, tracking = false))
         `when`(shadeAnimation.radius).thenReturn(maxBlur.toFloat())
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(blurUtils).applyBlur(any(), eq(maxBlur), eq(false))
@@ -346,7 +348,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun updateBlurCallback_ignoreShadeBlurUntilHidden_overridesZoom() {
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f))
+                fraction = 1f, expanded = true, tracking = false))
         `when`(shadeAnimation.radius).thenReturn(maxBlur.toFloat())
         notificationShadeDepthController.blursDisabledForAppLaunch = true
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
@@ -365,7 +367,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun ignoreBlurForUnlock_ignores() {
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f))
+                fraction = 1f, expanded = true, tracking = false))
         `when`(shadeAnimation.radius).thenReturn(maxBlur.toFloat())
 
         notificationShadeDepthController.blursDisabledForAppLaunch = false
@@ -382,7 +384,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun ignoreBlurForUnlock_doesNotIgnore() {
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f))
+                fraction = 1f, expanded = true, tracking = false))
         `when`(shadeAnimation.radius).thenReturn(maxBlur.toFloat())
 
         notificationShadeDepthController.blursDisabledForAppLaunch = false
@@ -414,7 +416,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         // And shade is blurred
         notificationShadeDepthController.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(
-                fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f))
+                fraction = 1f, expanded = true, tracking = false))
         `when`(shadeAnimation.radius).thenReturn(maxBlur.toFloat())
 
         notificationShadeDepthController.updateBlurCallback.doFrame(0)

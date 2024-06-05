@@ -38,6 +38,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.LooperMode;
 import org.robolectric.util.ReflectionHelpers;
 
 import java.util.ArrayList;
@@ -167,6 +168,7 @@ public class MetricsFeatureProviderTest {
     }
 
     @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
     public void getAttribution_notSet_shouldReturnUnknown() {
         final Activity activity = Robolectric.setupActivity(Activity.class);
 
@@ -202,5 +204,25 @@ public class MetricsFeatureProviderTest {
 
         assertThat(loggable).isFalse();
         verifyNoMoreInteractions(mLogWriter);
+    }
+
+    @Test
+    public void logSettingsTileClickWithProfile_isPersonalProfile_shouldTagPersonal() {
+        final String key = "abc";
+        final boolean loggable = mProvider.logSettingsTileClickWithProfile(key,
+                MetricsEvent.SETTINGS_GESTURES, false);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).clicked(MetricsEvent.SETTINGS_GESTURES, "abc/personal");
+    }
+
+    @Test
+    public void logSettingsTileClickWithProfile_isWorkProfile_shouldTagWork() {
+        final String key = "abc";
+        final boolean loggable = mProvider.logSettingsTileClickWithProfile(key,
+                MetricsEvent.SETTINGS_GESTURES, true);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).clicked(MetricsEvent.SETTINGS_GESTURES, "abc/work");
     }
 }

@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"ઍપ્લિકેશન ઇન્સ્ટૉલ કરી."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"શું તમે આ ઍપ ઇન્સ્ટૉલ કરવા માગો છો?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"શું તમે આ ઍપ અપડેટ કરવા માગો છો?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"આ ઍપને <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>થી અપડેટ કરવી છે?\n\nઆ ઍપ સામાન્ય રીતે <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>થી અપડેટ મેળવે છે. અલગ સૉર્સથી અપડેટ કરીને, તમે તમારા ફોન પર કોઈપણ સૉર્સથી ભાવિ અપડેટ મેળવી શકો છો. ઍપની કાર્યક્ષમતા બદલાઈ શકે છે."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;શું આ ઍપને &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;થી અપડેટ કરવી છે?&lt;/p&gt;&lt;p&gt;આ ઍપ સામાન્ય રીતે &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;થી અપડેટ મેળવે છે. અલગ સૉર્સથી અપડેટ કરીને, તમે તમારા ટૅબ્લેટ પર કોઈપણ સૉર્સથી ભાવિ અપડેટ મેળવી શકો છો. ઍપની કાર્યક્ષમતામાં ફેરફાર થઈ શકે.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;શું આ ઍપને &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;થી અપડેટ કરવી છે?&lt;/p&gt;&lt;p&gt;આ ઍપ સામાન્ય રીતે &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;થી અપડેટ મેળવે છે. અલગ સૉર્સથી અપડેટ કરીને, તમે તમારા ટીવી પર કોઈપણ સૉર્સથી ભાવિ અપડેટ મેળવી શકો છો. ઍપની કાર્યક્ષમતામાં ફેરફાર થઈ શકે.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;શું આ ઍપને &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;થી અપડેટ કરવી છે?&lt;/p&gt;&lt;p&gt;આ ઍપ સામાન્ય રીતે &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;થી અપડેટ મેળવે છે. અલગ સૉર્સથી અપડેટ કરીને, તમે તમારા ફોન પર કોઈપણ સૉર્સથી ભાવિ અપડેટ મેળવી શકો છો. ઍપની કાર્યક્ષમતામાં ફેરફાર થઈ શકે.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"ઍપ્લિકેશન ઇન્સ્ટૉલ કરી નથી."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"પૅકેજને ઇન્સ્ટૉલ થવાથી બ્લૉક કરવામાં આવ્યું હતું."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"પૅકેજનો અસ્તિત્વમાંના પૅકેજ સાથે વિરોધાભાસ હોવાને કારણે ઍપ્લિકેશન ઇન્સ્ટૉલ થઈ નથી."</string>
@@ -42,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"આ વપરાશકર્તા અજાણી ઍપ્લિકેશનોને ઇન્સ્ટૉલ કરી શકતા નથી"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"આ વપરાશકર્તાને ઍપ્લિકેશનો ઇન્સ્ટૉલ કરવાની મંજૂરી નથી"</string>
     <string name="ok" msgid="7871959885003339302">"ઓકે"</string>
+    <string name="archive" msgid="4447791830199354721">"આર્કાઇવ કરો"</string>
     <string name="update_anyway" msgid="8792432341346261969">"તો પણ અપડેટ કરો"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ઍપને મેનેજ કરો"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"સ્પેસ નથી"</string>
@@ -55,7 +58,12 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"ઍપ્લિકેશન અનઇન્સ્ટૉલ કરો"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"અપડેટ અનઇન્સ્ટૉલ કરો"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g>, નીચેની ઍપ્લિકેશનનો ભાગ છે:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"શું તમે આ ઍપને અનઇન્સ્ટૉલ કરવા માંગો છો?"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"શું તમે આ ઍપને અનઇન્સ્ટૉલ કરવા માગો છો?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"તમારો વ્યક્તિગત ડેટા સાચવવામાં આવશે"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"શું આ ઍપને તમામ વપરાશકર્તાઓ માટે આર્કાઇવ કરીએ? તમારો વ્યક્તિગત ડેટા સાચવવામાં આવશે"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"શું આ ઍપને તમારી ઑફિસની પ્રોફાઇલ પર આર્કાઇવ કરીએ? તમારો વ્યક્તિગત ડેટા સાચવવામાં આવશે"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"શું આ ઍપને <xliff:g id="USERNAME">%1$s</xliff:g> માટે આર્કાઇવ કરીએ? તમારો વ્યક્તિગત ડેટા સાચવવામાં આવશે"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"શું તમે તમારી ખાનગી સ્પેસમાંથી આ ઍપને આર્કાઇવ કરવા માગો છો? તમારો વ્યક્તિગત ડેટા સાચવવામાં આવશે"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"શું તમે "<b>"બધા"</b>" વપરાશકર્તાઓ માટે આ ઍપ્લિકેશનને અનઇન્સ્ટૉલ કરવા માગો છો? ડિવાઇસ પરના "<b>"બધા"</b>" વપરાશકર્તાઓની ઍપ્લિકેશન અને તેનો ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"શું તમે <xliff:g id="USERNAME">%1$s</xliff:g> વપરાશકર્તા માટે આ ઍપ્લિકેશનને અનઇન્સ્ટૉલ કરવા માગો છો?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"શું તમે તમારી ઑફિસની પ્રોફાઇલમાંથી આ ઍપને અનઇન્સ્ટૉલ કરવા માગો છો?"</string>
@@ -64,6 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g>નો ઍપ ડેટા રાખો."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"શું તમે આ ઍપ ડિલીટ કરવા માગો છો?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"શું તમે આ ઍપને અનઇન્સ્ટૉલ કરવા માગો છો? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ની ક્લોન પણ ડિલીટ કરવામાં આવશે."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"શું તમે તમારી ખાનગી સ્પેસમાંથી આ ઍપ અનઇન્સ્ટૉલ કરવા માગો છો?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ચાલી રહેલા અનઇન્સ્ટૉલ"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"નિષ્ફળ થયેલા અનઇન્સ્ટૉલ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"અનઇન્સ્ટૉલ કરી રહ્યાં છીએ…"</string>
@@ -83,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"વપરાશકર્તાઓને મેનેજ કરો"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> અનઇન્સ્ટૉલ કરી શકાઈ નથી."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"પૅકેજનું વિશ્લેષણ કરવામાં સમસ્યા આવી હતી."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear પર ઇન્સ્ટૉલ/અનઇન્સ્ટૉલ ક્રિયાઓ સમર્થિત નથી."</string>
     <string name="message_staging" msgid="8032722385658438567">"ઍપ્લિકેશનની પ્રક્રિયા ચાલુ છે…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"અજાણ"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"તમારી સુરક્ષા માટે, હાલમાં તમારા ટૅબ્લેટને આ સૉર્સ પરથી અજાણી ઍપ ઇન્સ્ટૉલ કરવાની મંજૂરી નથી. તમે આને સેટિંગમાં બદલી શકો છો."</string>
@@ -95,10 +102,30 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"તમારું ટૅબ્લેટ અને વ્યક્તિગત ડેટા અજાણી ઍપ્લિકેશનો દ્વારા હુમલા માટે વધુ સંવેદનશીલ છે. આ ઍપ્લિકેશન ઇન્સ્ટૉલ કરીને તમે સંમત થાઓ છો કે આનો ઉપયોગ કરવાથી તમારા ટૅબ્લેટને થતી કોઈપણ હાનિ અથવા ડેટાના નુકસાન માટે તમે જવાબદાર છો."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"તમારું ટીવી અને વ્યક્તિગત ડેટા અજાણી ઍપ્લિકેશનો દ્વારા હુમલા માટે વધુ સંવેદનશીલ છે. આ ઍપ્લિકેશન ઇન્સ્ટૉલ કરીને તમે સંમત થાઓ છો કે આનો ઉપયોગ કરવાથી તમારા ટીવીને થતી કોઈપણ હાનિ અથવા ડેટાના નુકસાન માટે તમે જવાબદાર છો."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ની ક્લોન"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> આર્કાઇવ કરીએ?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"આગળ વધો"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"સેટિંગ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"એમ્બેડ ઍપ્લિકેશનો ઇન્સ્ટૉલ/અનઇન્સ્ટૉલ"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ઍપ ઇન્સ્ટૉલ થવાનું નોટિફિકેશન"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"સફળતાપૂર્વક ઇન્સ્ટૉલ કરેલ"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"“<xliff:g id="APPNAME">%1$s</xliff:g>” સફળતાપૂર્વક ઇન્સ્ટૉલ કરેલ"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%2$s</xliff:g>માંથી <xliff:g id="APPNAME">%1$s</xliff:g> રિસ્ટોર કરીએ?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"બૅકગ્રાઉન્ડમાં આ ઍપ ડાઉનલોડ થવાનું શરૂ થશે"</string>
+    <string name="restore" msgid="8460854736328970444">"રિસ્ટોર કરો"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"તમે ઑફલાઇન છો"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"આ ઍપ રિસ્ટોર કરવા માટે, તમારું ઇન્ટરનેટ કનેક્શન ચેક કરો અને ફરી પ્રયત્ન કરો"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"કંઈક ખોટું થયું"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"આ ઍપને રિસ્ટોર કરવામાં કોઈ સમસ્યા આવી હતી"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"પર્યાપ્ત સ્ટોરેજ નથી"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"આ ઍપને રિસ્ટોર કરવા માટે, તમે આ ડિવાઇસ પર સ્પેસ ખાલી કરી શકો છો. આવશ્યક સ્ટોરેજ: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"પગલું આવશ્યક છે"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"આ ઍપને રિસ્ટોર કરવા માટે આગળના પગલાં અનુસરો"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> બંધ છે"</string>
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"આ ઍપને રિસ્ટોર કરવા માટે, સેટિંગમાં <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ચાલુ કરો"</string>
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> અનઇન્સ્ટૉલ કર્યું છે"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"આ ઍપને રિસ્ટોર કરવા માટે, તમારે <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ઇન્સ્ટૉલ કરવું જરૂરી છે"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"આગળ વધો"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"સ્ટોરેજ સાફ કરો"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"સેટિંગ"</string>
+    <string name="close" msgid="5214897374055647996">"બંધ કરો"</string>
 </resources>

@@ -23,7 +23,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
 import android.os.Binder;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArrayMap;
 import android.util.proto.ProtoOutputStream;
 
@@ -36,6 +38,7 @@ import com.android.internal.os.BinderLatencyProto.ApiStats;
 import com.android.internal.os.BinderLatencyProto.Dims;
 import com.android.internal.os.BinderLatencyProto.RepeatedApiStats;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -47,7 +50,11 @@ import java.util.Random;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 @Presubmit
+@IgnoreUnderRavenwood(blockedBy = BinderLatencyObserver.class)
 public class BinderLatencyObserverTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     @Test
     public void testLatencyCollectionWithMultipleClasses() {
         TestBinderLatencyObserver blo = new TestBinderLatencyObserver();

@@ -39,15 +39,16 @@ namespace android {
 
 // --- Spot ---
 
-void TouchSpotController::Spot::updateSprite(const SpriteIcon* icon, float x, float y,
-                                             int32_t displayId) {
+void TouchSpotController::Spot::updateSprite(const SpriteIcon* icon, float newX, float newY,
+                                             ui::LogicalDisplayId displayId, bool skipScreenshot) {
     sprite->setLayer(Sprite::BASE_LAYER_SPOT + id);
     sprite->setAlpha(alpha);
     sprite->setTransformationMatrix(SpriteTransformationMatrix(scale, 0.0f, 0.0f, scale));
-    sprite->setPosition(x, y);
+    sprite->setPosition(newX, newY);
     sprite->setDisplayId(displayId);
-    this->x = x;
-    this->y = y;
+    sprite->setSkipScreenshot(skipScreenshot);
+    x = newX;
+    y = newY;
 
     if (icon != mLastIcon) {
         mLastIcon = icon;
@@ -68,7 +69,8 @@ void TouchSpotController::Spot::dump(std::string& out, const char* prefix) const
 
 // --- TouchSpotController ---
 
-TouchSpotController::TouchSpotController(int32_t displayId, PointerControllerContext& context)
+TouchSpotController::TouchSpotController(ui::LogicalDisplayId displayId,
+                                         PointerControllerContext& context)
       : mDisplayId(displayId), mContext(context) {
     mContext.getPolicy()->loadPointerResources(&mResources, mDisplayId);
 }
@@ -84,7 +86,7 @@ TouchSpotController::~TouchSpotController() {
 }
 
 void TouchSpotController::setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
-                                   BitSet32 spotIdBits) {
+                                   BitSet32 spotIdBits, bool skipScreenshot) {
 #if DEBUG_SPOT_UPDATES
     ALOGD("setSpots: idBits=%08x", spotIdBits.value);
     for (BitSet32 idBits(spotIdBits); !idBits.isEmpty();) {
@@ -93,13 +95,13 @@ void TouchSpotController::setSpots(const PointerCoords* spotCoords, const uint32
         const PointerCoords& c = spotCoords[spotIdToIndex[id]];
         ALOGD(" spot %d: position=(%0.3f, %0.3f), pressure=%0.3f, displayId=%" PRId32 ".", id,
               c.getAxisValue(AMOTION_EVENT_AXIS_X), c.getAxisValue(AMOTION_EVENT_AXIS_Y),
-              c.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE), displayId);
+              c.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE), mDisplayId.id);
     }
 #endif
 
     std::scoped_lock lock(mLock);
-    sp<SpriteController> spriteController = mContext.getSpriteController();
-    spriteController->openTransaction();
+    auto& spriteController = mContext.getSpriteController();
+    spriteController.openTransaction();
 
     // Add or move spots for fingers that are down.
     for (BitSet32 idBits(spotIdBits); !idBits.isEmpty();) {
@@ -116,7 +118,7 @@ void TouchSpotController::setSpots(const PointerCoords* spotCoords, const uint32
             spot = createAndAddSpotLocked(id, mLocked.displaySpots);
         }
 
-        spot->updateSprite(&icon, x, y, mDisplayId);
+        spot->updateSprite(&icon, x, y, mDisplayId, skipScreenshot);
     }
 
     for (Spot* spot : mLocked.displaySpots) {
@@ -125,7 +127,7 @@ void TouchSpotController::setSpots(const PointerCoords* spotCoords, const uint32
         }
     }
 
-    spriteController->closeTransaction();
+    spriteController.closeTransaction();
 }
 
 void TouchSpotController::clearSpots() {
@@ -167,7 +169,7 @@ TouchSpotController::Spot* TouchSpotController::createAndAddSpotLocked(uint32_t 
         sprite = mLocked.recycledSprites.back();
         mLocked.recycledSprites.pop_back();
     } else {
-        sprite = mContext.getSpriteController()->createSprite();
+        sprite = mContext.getSpriteController().createSprite();
     }
 
     // Return the new spot.
@@ -273,7 +275,7 @@ void TouchSpotController::dump(std::string& out, const char* prefix) const {
     out += prefix;
     out += "SpotController:\n";
     out += prefix;
-    StringAppendF(&out, INDENT "DisplayId: %" PRId32 "\n", mDisplayId);
+    StringAppendF(&out, INDENT "DisplayId: %s\n", mDisplayId.toString().c_str());
     std::scoped_lock lock(mLock);
     out += prefix;
     StringAppendF(&out, INDENT "Animating: %s\n", toString(mLocked.animating));

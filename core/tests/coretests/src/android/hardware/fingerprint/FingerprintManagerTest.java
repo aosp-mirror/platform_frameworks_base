@@ -26,7 +26,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -74,6 +76,8 @@ public class FingerprintManagerTest {
     private FingerprintManager.AuthenticationCallback mAuthCallback;
     @Mock
     private FingerprintManager.EnrollmentCallback mEnrollCallback;
+    @Mock
+    private FingerprintManager.FingerprintDetectionCallback mFingerprintDetectionCallback;
 
     @Captor
     private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mCaptor;
@@ -91,6 +95,7 @@ public class FingerprintManagerTest {
         mHandler = new Handler(mLooper.getLooper());
 
         when(mContext.getMainLooper()).thenReturn(mLooper.getLooper());
+        when(mContext.getMainThreadHandler()).thenReturn(mHandler);
         when(mContext.getOpPackageName()).thenReturn(PACKAGE_NAME);
         when(mContext.getAttributionTag()).thenReturn(ATTRIBUTION_TAG);
         when(mContext.getApplicationInfo()).thenReturn(new ApplicationInfo());
@@ -160,10 +165,63 @@ public class FingerprintManagerTest {
 
         mCaptor.getValue().onAllAuthenticatorsRegistered(mProps);
         mFingerprintManager.enroll(null, new CancellationSignal(), USER_ID,
-                mEnrollCallback, FingerprintManager.ENROLL_ENROLL);
+                mEnrollCallback, FingerprintManager.ENROLL_ENROLL,
+                (new FingerprintEnrollOptions.Builder()).build());
 
         verify(mEnrollCallback).onEnrollmentError(eq(FINGERPRINT_ERROR_UNABLE_TO_PROCESS),
                 anyString());
-        verify(mService, never()).enroll(any(), any(), anyInt(), any(), anyString(), anyInt());
+        verify(mService, never()).enroll(any(), any(), anyInt(), any(), anyString(), anyInt(),
+                any());
+    }
+
+    @Test
+    public void detectClient_onError() throws RemoteException {
+        ArgumentCaptor<IFingerprintServiceReceiver> argumentCaptor =
+                ArgumentCaptor.forClass(IFingerprintServiceReceiver.class);
+
+        mFingerprintManager.detectFingerprint(new CancellationSignal(),
+                mFingerprintDetectionCallback,
+                new FingerprintAuthenticateOptions.Builder().build());
+
+        verify(mService).detectFingerprint(any(), argumentCaptor.capture(), any());
+
+        argumentCaptor.getValue().onError(5 /* error */, 0 /* vendorCode */);
+        mLooper.dispatchAll();
+
+        verify(mFingerprintDetectionCallback).onDetectionError(anyInt());
+    }
+
+    @Test
+    public void authenticate_onErrorCanceled() throws RemoteException {
+        final FingerprintManager.AuthenticationCallback authenticationCallback1 = mock(
+                FingerprintManager.AuthenticationCallback.class);
+        final FingerprintManager.AuthenticationCallback authenticationCallback2 = mock(
+                FingerprintManager.AuthenticationCallback.class);
+
+        final ArgumentCaptor<IFingerprintServiceReceiver> fingerprintServiceReceiverArgumentCaptor =
+                ArgumentCaptor.forClass(IFingerprintServiceReceiver.class);
+
+        mFingerprintManager.authenticate(null, new CancellationSignal(),
+                authenticationCallback1, mHandler,
+                new FingerprintAuthenticateOptions.Builder().build());
+        mFingerprintManager.authenticate(null, new CancellationSignal(),
+                authenticationCallback2, mHandler,
+                new FingerprintAuthenticateOptions.Builder().build());
+
+        verify(mService, times(2)).authenticate(any(IBinder.class), eq(0L),
+                fingerprintServiceReceiverArgumentCaptor.capture(), any());
+
+        final List<IFingerprintServiceReceiver> fingerprintServiceReceivers =
+                fingerprintServiceReceiverArgumentCaptor.getAllValues();
+        fingerprintServiceReceivers.get(0).onError(5 /* error */, 0 /* vendorCode */);
+        mLooper.dispatchAll();
+
+        verify(authenticationCallback1).onAuthenticationError(eq(5), anyString());
+        verify(authenticationCallback2, never()).onAuthenticationError(anyInt(), anyString());
+
+        fingerprintServiceReceivers.get(1).onError(5 /* error */, 0 /* vendorCode */);
+        mLooper.dispatchAll();
+
+        verify(authenticationCallback2).onAuthenticationError(eq(5), anyString());
     }
 }

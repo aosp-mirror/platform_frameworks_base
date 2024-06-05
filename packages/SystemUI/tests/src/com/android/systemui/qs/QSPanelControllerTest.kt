@@ -1,25 +1,31 @@
 package com.android.systemui.qs
 
 import android.content.res.Configuration
-import android.test.suitebuilder.annotation.SmallTest
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import android.testing.TestableResources
+import android.view.ContextThemeWrapper
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.controls.ui.MediaHost
-import com.android.systemui.media.controls.ui.MediaHostState
+import com.android.systemui.haptics.qs.QSLongPressEffect
+import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
+import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.settings.brightness.BrightnessController
 import com.android.systemui.settings.brightness.BrightnessSliderController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.tuner.TunerService
 import com.google.common.truth.Truth.assertThat
+import javax.inject.Provider
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -35,7 +41,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class QSPanelControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var qsPanel: QSPanel
@@ -58,6 +64,10 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock private lateinit var configuration: Configuration
     @Mock private lateinit var pagedTileLayout: PagedTileLayout
+    @Mock private lateinit var longPressEffectProvider: Provider<QSLongPressEffect>
+    @Mock private lateinit var mediaCarouselInteractor: MediaCarouselInteractor
+
+    private val usingMediaPlayer: Boolean by lazy { !SceneContainerFlag.isEnabled }
 
     private lateinit var controller: QSPanelController
     private val testableResources: TestableResources = mContext.orCreateTestableResources
@@ -70,6 +80,8 @@ class QSPanelControllerTest : SysuiTestCase() {
         whenever(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
         setShouldUseSplitShade(false)
         whenever(qsPanel.resources).thenReturn(testableResources.resources)
+        whenever(qsPanel.context)
+                .thenReturn( ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings))
         whenever(qsPanel.getOrCreateTileLayout()).thenReturn(pagedTileLayout)
         whenever(statusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false)
         whenever(qsPanel.setListening(anyBoolean())).then {
@@ -81,7 +93,7 @@ class QSPanelControllerTest : SysuiTestCase() {
             tunerService,
             qsHost,
             qsCustomizerController,
-            /* usingMediaPlayer= */ true,
+            /* usingMediaPlayer= */ usingMediaPlayer,
             mediaHost,
             qsTileRevealControllerFactory,
             dumpManager,
@@ -91,7 +103,10 @@ class QSPanelControllerTest : SysuiTestCase() {
             brightnessControllerFactory,
             brightnessSliderFactory,
             falsingManager,
-            statusBarKeyguardViewManager
+            statusBarKeyguardViewManager,
+            ResourcesSplitShadeStateController(),
+            longPressEffectProvider,
+            mediaCarouselInteractor,
         )
     }
 
@@ -152,6 +167,21 @@ class QSPanelControllerTest : SysuiTestCase() {
         setShouldUseSplitShade(false)
         controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
         verify(qsPanel).setCanCollapse(true)
+    }
+
+    @Test
+    fun multipleListeningOnlyCallsBrightnessControllerOnce() {
+        controller.setListening(true, true)
+        controller.setListening(true, false)
+        controller.setListening(true, true)
+
+        verify(brightnessController).registerCallbacks()
+
+        controller.setListening(false, true)
+        controller.setListening(false, false)
+        controller.setListening(false, true)
+
+        verify(brightnessController).unregisterCallbacks()
     }
 
     private fun setShouldUseSplitShade(shouldUse: Boolean) {

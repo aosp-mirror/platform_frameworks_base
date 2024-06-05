@@ -28,6 +28,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class BatteryUsageStatsQuery implements Parcelable {
 
     @NonNull
@@ -80,6 +81,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     private final long mMaxStatsAgeMs;
     private final long mFromTimestamp;
     private final long mToTimestamp;
+    private final double mMinConsumedPowerThreshold;
     private final @BatteryConsumer.PowerComponent int[] mPowerComponents;
 
     private BatteryUsageStatsQuery(@NonNull Builder builder) {
@@ -87,6 +89,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         mUserIds = builder.mUserIds != null ? builder.mUserIds.toArray()
                 : new int[]{UserHandle.USER_ALL};
         mMaxStatsAgeMs = builder.mMaxStatsAgeMs;
+        mMinConsumedPowerThreshold = builder.mMinConsumedPowerThreshold;
         mFromTimestamp = builder.mFromTimestamp;
         mToTimestamp = builder.mToTimestamp;
         mPowerComponents = builder.mPowerComponents;
@@ -137,6 +140,14 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     }
 
     /**
+     * Returns the minimal power component consumed power threshold. The small power consuming
+     * components will be reported as zero.
+     */
+    public double getMinConsumedPowerThreshold() {
+        return mMinConsumedPowerThreshold;
+    }
+
+    /**
      * Returns the exclusive lower bound of the stored snapshot timestamps that should be included
      * in the aggregation.  Ignored if {@link #getToTimestamp()} is zero.
      */
@@ -158,6 +169,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         mUserIds = new int[in.readInt()];
         in.readIntArray(mUserIds);
         mMaxStatsAgeMs = in.readLong();
+        mMinConsumedPowerThreshold = in.readDouble();
         mFromTimestamp = in.readLong();
         mToTimestamp = in.readLong();
         mPowerComponents = in.createIntArray();
@@ -169,6 +181,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         dest.writeInt(mUserIds.length);
         dest.writeIntArray(mUserIds);
         dest.writeLong(mMaxStatsAgeMs);
+        dest.writeDouble(mMinConsumedPowerThreshold);
         dest.writeLong(mFromTimestamp);
         dest.writeLong(mToTimestamp);
         dest.writeIntArray(mPowerComponents);
@@ -202,6 +215,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         private long mMaxStatsAgeMs = DEFAULT_MAX_STATS_AGE_MS;
         private long mFromTimestamp;
         private long mToTimestamp;
+        private double mMinConsumedPowerThreshold = 0;
         private @BatteryConsumer.PowerComponent int[] mPowerComponents;
 
         /**
@@ -287,6 +301,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          * @param fromTimestamp Exclusive starting timestamp, as per System.currentTimeMillis()
          * @param toTimestamp Inclusive ending timestamp, as per System.currentTimeMillis()
          */
+        // TODO(b/298459065): switch to monotonic clock
         public Builder aggregateSnapshots(long fromTimestamp, long toTimestamp) {
             mFromTimestamp = fromTimestamp;
             mToTimestamp = toTimestamp;
@@ -299,6 +314,15 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          */
         public Builder setMaxStatsAgeMs(long maxStatsAgeMs) {
             mMaxStatsAgeMs = maxStatsAgeMs;
+            return this;
+        }
+
+        /**
+         * Set the minimal power component consumed power threshold. The small power consuming
+         * components will be reported as zero.
+         */
+        public Builder setMinConsumedPowerThreshold(double minConsumedPowerThreshold) {
+            mMinConsumedPowerThreshold = minConsumedPowerThreshold;
             return this;
         }
     }

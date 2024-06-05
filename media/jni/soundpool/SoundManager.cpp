@@ -29,7 +29,7 @@ namespace android::soundpool {
 static const size_t kDecoderThreads = std::thread::hardware_concurrency() >= 4 ? 2 : 1;
 
 SoundManager::SoundManager()
-    : mDecoder{std::make_unique<SoundDecoder>(this, kDecoderThreads)}
+    : mDecoder{std::make_unique<SoundDecoder>(this, kDecoderThreads, ANDROID_PRIORITY_NORMAL)}
 {
     ALOGV("%s()", __func__);
 }

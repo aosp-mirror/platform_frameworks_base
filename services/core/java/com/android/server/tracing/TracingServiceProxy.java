@@ -93,6 +93,7 @@ public class TracingServiceProxy extends SystemService {
     private final Context mContext;
     private final PackageManager mPackageManager;
     private final LruCache<ComponentName, ServiceConnector<IMessenger>> mCachedReporterServices;
+    private boolean mServicePublished = false;
 
     private final ITracingServiceProxy.Stub mTracingServiceProxy = new ITracingServiceProxy.Stub() {
         /**
@@ -119,8 +120,16 @@ public class TracingServiceProxy extends SystemService {
     }
 
     @Override
-    public void onStart() {
-        publishBinderService(TRACING_SERVICE_PROXY_BINDER_NAME, mTracingServiceProxy);
+    public void onStart() {}
+
+    @Override
+    public void onUserUnlocking(@NonNull TargetUser user) {
+        // We need the device storage to be unlocked before we can accept and forward
+        // requests.
+        if (!mServicePublished) {
+            publishBinderService(TRACING_SERVICE_PROXY_BINDER_NAME, mTracingServiceProxy);
+            mServicePublished = true;
+        }
     }
 
     private void notifyTraceur(boolean sessionStolen) {

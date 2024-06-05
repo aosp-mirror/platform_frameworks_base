@@ -26,7 +26,7 @@ import android.view.ViewGroup;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.shadow.DoubleShadowIconDrawable;
 import com.android.systemui.shared.shadow.DoubleShadowTextHelper.ShadowInfo;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;
@@ -139,6 +139,20 @@ public class DreamOverlayStatusBarView extends ConstraintLayout {
 
         mSystemStatusViewGroup = findViewById(R.id.dream_overlay_system_status);
         mExtraSystemStatusViewGroup = findViewById(R.id.dream_overlay_extra_items);
+    }
+
+    protected static String getLoggableStatusIconType(@StatusIconType int type) {
+        return switch (type) {
+            case STATUS_ICON_NOTIFICATIONS -> "notifications";
+            case STATUS_ICON_WIFI_UNAVAILABLE -> "wifi_unavailable";
+            case STATUS_ICON_ALARM_SET -> "alarm_set";
+            case STATUS_ICON_CAMERA_DISABLED -> "camera_disabled";
+            case STATUS_ICON_MIC_DISABLED -> "mic_disabled";
+            case STATUS_ICON_MIC_CAMERA_DISABLED -> "mic_camera_disabled";
+            case STATUS_ICON_PRIORITY_MODE_ON -> "priority_mode_on";
+            case STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE -> "assistant_attention_active";
+            default -> type + "(unknown)";
+        };
     }
 
     void showIcon(@StatusIconType int iconType, boolean show, @Nullable String contentDescription) {

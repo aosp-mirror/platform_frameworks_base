@@ -179,7 +179,7 @@ public class LocalActivityManager {
             }
 
             mActivityThread.handleStartActivity(clientRecord, pendingActions,
-                    null /* activityOptions */);
+                    null /* sceneTransitionInfo */);
             r.curState = STARTED;
             
             if (desiredState == RESUMED) {
@@ -413,7 +413,7 @@ public class LocalActivityManager {
         if (localLOGV) Log.v(TAG, r.id + ": destroying");
         final ActivityClientRecord clientRecord = mActivityThread.getActivityClient(r);
         if (clientRecord != null) {
-            mActivityThread.performDestroyActivity(clientRecord, finish, 0 /* configChanges */,
+            mActivityThread.performDestroyActivity(clientRecord, finish,
                     false /* getNonConfigInstance */, "LocalActivityManager::performDestroy");
         }
         r.activity = null;
@@ -684,7 +684,7 @@ public class LocalActivityManager {
                 if (localLOGV) Log.v(TAG, r.id + ": no corresponding record");
                 continue;
             }
-            mActivityThread.performDestroyActivity(clientRecord, finishing, 0 /* configChanges */,
+            mActivityThread.performDestroyActivity(clientRecord, finishing,
                     false /* getNonConfigInstance */, "LocalActivityManager::dispatchDestroy");
         }
         mActivities.clear();

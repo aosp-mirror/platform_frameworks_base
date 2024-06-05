@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.pipeline.shared
 import android.net.Network
 import android.net.NetworkCapabilities
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 
 /** Helper object for logs that are shared between wifi and mobile. */
 object LoggerHelper {

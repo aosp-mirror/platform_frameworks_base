@@ -16,6 +16,7 @@
 
 package android.security.keystore;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
@@ -81,6 +82,7 @@ public class KeyInfo implements KeySpec {
     private final @KeyProperties.AuthEnum int mUserAuthenticationType;
     private final boolean mUserAuthenticationRequirementEnforcedBySecureHardware;
     private final boolean mUserAuthenticationValidWhileOnBody;
+    private final boolean mUnlockedDeviceRequired;
     private final boolean mTrustedUserPresenceRequired;
     private final boolean mInvalidatedByBiometricEnrollment;
     private final boolean mUserConfirmationRequired;
@@ -107,6 +109,7 @@ public class KeyInfo implements KeySpec {
             @KeyProperties.AuthEnum int userAuthenticationType,
             boolean userAuthenticationRequirementEnforcedBySecureHardware,
             boolean userAuthenticationValidWhileOnBody,
+            boolean unlockedDeviceRequired,
             boolean trustedUserPresenceRequired,
             boolean invalidatedByBiometricEnrollment,
             boolean userConfirmationRequired,
@@ -132,6 +135,7 @@ public class KeyInfo implements KeySpec {
         mUserAuthenticationRequirementEnforcedBySecureHardware =
                 userAuthenticationRequirementEnforcedBySecureHardware;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
+        mUnlockedDeviceRequired = unlockedDeviceRequired;
         mTrustedUserPresenceRequired = trustedUserPresenceRequired;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         mUserConfirmationRequired = userConfirmationRequired;
@@ -272,6 +276,20 @@ public class KeyInfo implements KeySpec {
      */
     public boolean isUserAuthenticationRequired() {
         return mUserAuthenticationRequired;
+    }
+
+    /**
+     * Returns {@code true} if the key is authorized to be used only while the device is unlocked.
+     *
+     * <p>This authorization applies only to secret key and private key operations. Public key
+     * operations are not restricted.
+     *
+     * @see KeyGenParameterSpec.Builder#setUnlockedDeviceRequired(boolean)
+     * @see KeyProtection.Builder#setUnlockedDeviceRequired(boolean)
+     */
+    @FlaggedApi(android.security.Flags.FLAG_KEYINFO_UNLOCKED_DEVICE_REQUIRED)
+    public boolean isUnlockedDeviceRequired() {
+        return mUnlockedDeviceRequired;
     }
 
     /**

@@ -26,6 +26,7 @@ import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_PRESENT;
 import static android.os.BatteryManager.EXTRA_STATUS;
+import static android.os.OsProtoEnums.BATTERY_PLUGGED_NONE;
 
 import android.content.Context;
 import android.content.Intent;
@@ -39,13 +40,17 @@ import java.util.Optional;
  * Stores and computes some battery information.
  */
 public class BatteryStatus {
-    private static final int LOW_BATTERY_THRESHOLD = 20;
+
     private static final int DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT = 5000000;
 
+    public static final int BATTERY_LEVEL_UNKNOWN = -1;
     public static final int CHARGING_UNKNOWN = -1;
     public static final int CHARGING_SLOWLY = 0;
     public static final int CHARGING_REGULAR = 1;
     public static final int CHARGING_FAST = 2;
+    public static final int LOW_BATTERY_THRESHOLD = 20;
+    public static final int SEVERE_LOW_BATTERY_THRESHOLD = 10;
+    public static final int EXTREME_LOW_BATTERY_THRESHOLD = 3;
 
     public final int status;
     public final int level;
@@ -90,21 +95,7 @@ public class BatteryStatus {
         present = batteryChangedIntent.getBooleanExtra(EXTRA_PRESENT, true);
         this.incompatibleCharger = incompatibleCharger;
 
-        final int maxChargingMicroAmp = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT,
-                -1);
-        int maxChargingMicroVolt = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
-
-        if (maxChargingMicroVolt <= 0) {
-            maxChargingMicroVolt = DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT;
-        }
-        if (maxChargingMicroAmp > 0) {
-            // Calculating muW = muA * muV / (10^6 mu^2 / mu); splitting up the divisor
-            // to maintain precision equally on both factors.
-            maxChargingWattage = (maxChargingMicroAmp / 1000)
-                    * (maxChargingMicroVolt / 1000);
-        } else {
-            maxChargingWattage = -1;
-        }
+        maxChargingWattage = calculateMaxChargingMicroWatt(batteryChangedIntent);
     }
 
     /** Determine whether the device is plugged. */
@@ -119,14 +110,15 @@ public class BatteryStatus {
     }
 
     /**
-     * Determine whether the device is plugged in wireless. */
+     * Determine whether the device is plugged in wireless.
+     */
     public boolean isPluggedInWireless() {
         return plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
     }
 
     /** Determine whether the device is plugged in dock. */
     public boolean isPluggedInDock() {
-        return plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
+        return isPluggedInDock(plugged);
     }
 
     /**
@@ -140,20 +132,21 @@ public class BatteryStatus {
 
     /** Whether battery is low and needs to be charged. */
     public boolean isBatteryLow() {
-        return level < LOW_BATTERY_THRESHOLD;
+        return isLowBattery(level);
     }
 
     /** Whether battery defender is enabled. */
     public boolean isBatteryDefender() {
-        return chargingStatus == CHARGING_POLICY_ADAPTIVE_LONGLIFE;
+        return isBatteryDefender(chargingStatus);
     }
 
-    /** Return current chargin speed is fast, slow or normal. */
+    /** Return current charging speed is fast, slow or normal. */
     public final int getChargingSpeed(Context context) {
         final int slowThreshold = context.getResources().getInteger(
                 R.integer.config_chargingSlowlyThreshold);
         final int fastThreshold = context.getResources().getInteger(
-                R.integer.config_chargingFastThreshold);
+                getFastChargingThresholdResId());
+
         return maxChargingWattage <= 0 ? CHARGING_UNKNOWN :
                 maxChargingWattage < slowThreshold ? CHARGING_SLOWLY :
                         maxChargingWattage > fastThreshold ? CHARGING_FAST :
@@ -194,21 +187,51 @@ public class BatteryStatus {
         return status == BATTERY_STATUS_FULL || level >= 100;
     }
 
+    /**
+     * Whether or not the device is charged. Note that some devices never return 100% for battery
+     * level, so this allows either battery level or status to determine if the battery is charged.
+     *
+     * @param status the value from extra {@link BatteryManager.EXTRA_STATUS} of
+     *     {@link Intent.ACTION_BATTERY_CHANGED} intent
+     * @param level the value from extra {@link BatteryManager.EXTRA_LEVEL} of
+     *     {@link Intent.ACTION_BATTERY_CHANGED} intent
+     * @param scale the value from extra {@link BatteryManager.EXTRA_SCALE} of
+     *     {@link Intent.ACTION_BATTERY_CHANGED} intent
+     */
+    public static boolean isCharged(int status, int level, int scale) {
+        var batteryLevel = getBatteryLevel(level, scale);
+        return isCharged(status, batteryLevel);
+    }
+
     /** Gets the battery level from the intent. */
     public static int getBatteryLevel(Intent batteryChangedIntent) {
         if (batteryChangedIntent == null) {
-            return -1; /*invalid battery level*/
+            return BATTERY_LEVEL_UNKNOWN;
         }
-        final int level = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        final int level =
+                batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, BATTERY_LEVEL_UNKNOWN);
         final int scale = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 0);
+        return getBatteryLevel(level, scale);
+    }
+
+    /**
+     * Gets the battery level from the value of {@link Intent.BATTERY_CHANGED_INTENT}'s EXTRA_LEVEL
+     * and EXTRA_SCALE.
+     */
+    public static int getBatteryLevel(int level, int scale) {
         return scale == 0
-                ? -1 /*invalid battery level*/
+                ? BATTERY_LEVEL_UNKNOWN
                 : Math.round((level / (float) scale) * 100f);
+    }
+
+    /** Returns the plugged type from {@code batteryChangedIntent}. */
+    public static int getPluggedType(Intent batteryChangedIntent) {
+        return batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, 0);
     }
 
     /** Whether the device is plugged or not. */
     public static boolean isPluggedIn(Intent batteryChangedIntent) {
-        return isPluggedIn(batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, 0));
+        return isPluggedIn(getPluggedType(batteryChangedIntent));
     }
 
     /** Whether the device is plugged or not. */
@@ -217,5 +240,181 @@ public class BatteryStatus {
                 || plugged == BatteryManager.BATTERY_PLUGGED_USB
                 || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
                 || plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
+    }
+
+    /** Determine whether the device is plugged in dock. */
+    public static boolean isPluggedInDock(Intent batteryChangedIntent) {
+        return isPluggedInDock(
+                batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, BATTERY_PLUGGED_NONE));
+    }
+
+    /** Determine whether the device is plugged in dock. */
+    public static boolean isPluggedInDock(int plugged) {
+        return plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
+    }
+
+    /**
+     * Whether the battery is low or not.
+     *
+     * @param batteryChangedIntent the {@link ACTION_BATTERY_CHANGED} intent
+     * @return {@code true} if the battery level is less or equal to {@link LOW_BATTERY_THRESHOLD}
+     */
+    public static boolean isLowBattery(Intent batteryChangedIntent) {
+        int level = getBatteryLevel(batteryChangedIntent);
+        return isLowBattery(level);
+    }
+
+    /**
+     * Whether the battery is low or not.
+     *
+     * @param batteryLevel the battery level
+     * @return {@code true} if the battery level is less or equal to {@link LOW_BATTERY_THRESHOLD}
+     */
+    public static boolean isLowBattery(int batteryLevel) {
+        return batteryLevel <= LOW_BATTERY_THRESHOLD;
+    }
+
+    /**
+     * Whether the battery is severe low or not.
+     *
+     * @param batteryChangedIntent the ACTION_BATTERY_CHANGED intent
+     * @return {@code true} if the battery level is less or equal to {@link
+     * SEVERE_LOW_BATTERY_THRESHOLD}
+     */
+    public static boolean isSevereLowBattery(Intent batteryChangedIntent) {
+        int batteryLevel = getBatteryLevel(batteryChangedIntent);
+        return isSevereLowBattery(batteryLevel);
+    }
+
+    /**
+     * Whether the battery is severe low or not.
+     *
+     * @param batteryLevel the value of battery level
+     * @return {@code true} if the battery level is less or equal to {@link
+     * SEVERE_LOW_BATTERY_THRESHOLD}
+     */
+    public static boolean isSevereLowBattery(int batteryLevel) {
+        return batteryLevel <= SEVERE_LOW_BATTERY_THRESHOLD;
+    }
+
+    /**
+     * Whether the battery is extreme low or not.
+     *
+     * @param batteryChangedIntent the ACTION_BATTERY_CHANGED intent
+     * @return {@code true} if the battery level is less or equal to {@link
+     * EXTREME_LOW_BATTERY_THRESHOLD}
+     */
+    public static boolean isExtremeLowBattery(Intent batteryChangedIntent) {
+        int level = getBatteryLevel(batteryChangedIntent);
+        return isExtremeLowBattery(level);
+    }
+
+    /**
+     * Whether the battery is extreme low or not.
+     *
+     * @return {@code true} if the {@code batteryLevel} is less or equal to
+     * {@link EXTREME_LOW_BATTERY_THRESHOLD}
+     */
+    public static boolean isExtremeLowBattery(int batteryLevel) {
+        return batteryLevel <= EXTREME_LOW_BATTERY_THRESHOLD;
+    }
+
+    /**
+     * Whether the battery defender is enabled or not.
+     *
+     * @param batteryChangedIntent the ACTION_BATTERY_CHANGED intent
+     * @return {@code true} if the battery defender is enabled. It could be dock defend, dwell
+     * defend, or temp defend
+     */
+    public static boolean isBatteryDefender(Intent batteryChangedIntent) {
+        int chargingStatus =
+                batteryChangedIntent.getIntExtra(EXTRA_CHARGING_STATUS, CHARGING_POLICY_DEFAULT);
+        return isBatteryDefender(chargingStatus);
+    }
+
+    /**
+     * Whether the battery defender is enabled or not.
+     *
+     * @param chargingStatus for {@link EXTRA_CHARGING_STATUS} field in the ACTION_BATTERY_CHANGED
+     *     intent
+     * @return {@code true} if the battery defender is enabled. It could be dock defend, dwell
+     *     defend, or temp defend
+     */
+    public static boolean isBatteryDefender(int chargingStatus) {
+        return chargingStatus == CHARGING_POLICY_ADAPTIVE_LONGLIFE;
+    }
+
+    /**
+     * Calculates the charging speed based on the {@link R.integer.config_chargingSlowlyThreshold}
+     * and {@link R.integer.config_chargingFastThreshold}.
+     *
+     * @param context the application context
+     * @param batteryChangedIntent the intent from {@link Intent.ACTION_BATTERY_CHANGED}
+     * @return the charging speed. {@link CHARGING_REGULAR}, {@link CHARGING_FAST}, {@link
+     *     CHARGING_SLOWLY} or {@link CHARGING_UNKNOWN}
+     */
+    public static int getChargingSpeed(Context context, Intent batteryChangedIntent) {
+        final int maxChargingMicroCurrent =
+                batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT, -1);
+        int maxChargingMicroVolt = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
+
+        return calculateChargingSpeed(context, maxChargingMicroCurrent, maxChargingMicroVolt);
+    }
+
+    /**
+     * Calculates the charging speed based on the {@link R.integer.config_chargingSlowlyThreshold}
+     * and {@link R.integer.config_chargingFastThreshold}.
+     *
+     * @param maxChargingMicroCurrent the max charging micro current that is retrieved form the
+     *     extra of {@link Intent.Action_BATTERY_CHANGED}
+     * @param maxChargingMicroVolt the max charging micro voltage that is retrieved form the extra
+     *     of {@link Intent.Action_BATTERY_CHANGED}
+     * @return the charging speed. {@link CHARGING_REGULAR}, {@link CHARGING_FAST}, {@link
+     *     CHARGING_SLOWLY} or {@link CHARGING_UNKNOWN}
+     */
+    public static int calculateChargingSpeed(
+            Context context, int maxChargingMicroCurrent, int maxChargingMicroVolt) {
+        final int maxChargingMicroWatt =
+                calculateMaxChargingMicroWatt(maxChargingMicroCurrent, maxChargingMicroVolt);
+
+        if (maxChargingMicroWatt <= 0) {
+            return CHARGING_UNKNOWN;
+        } else if (maxChargingMicroWatt
+                < context.getResources().getInteger(R.integer.config_chargingSlowlyThreshold)) {
+            return CHARGING_SLOWLY;
+        } else if (maxChargingMicroWatt
+                > context.getResources().getInteger(getFastChargingThresholdResId())) {
+            return CHARGING_FAST;
+        } else {
+            return CHARGING_REGULAR;
+        }
+    }
+
+    private static int calculateMaxChargingMicroWatt(Intent batteryChangedIntent) {
+        final int maxChargingMicroAmp =
+                batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT, -1);
+        int maxChargingMicroVolt = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
+
+        return calculateMaxChargingMicroWatt(maxChargingMicroAmp, maxChargingMicroVolt);
+    }
+
+    private static int calculateMaxChargingMicroWatt(int maxChargingMicroAmp,
+            int maxChargingMicroVolt) {
+        if (maxChargingMicroVolt <= 0) {
+            maxChargingMicroVolt = DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT;
+        }
+
+        if (maxChargingMicroAmp > 0) {
+            // Calculating µW = mA * mV
+            return (int) Math.round(maxChargingMicroAmp * 0.001 * maxChargingMicroVolt * 0.001);
+        } else {
+            return -1;
+        }
+    }
+
+    private static int getFastChargingThresholdResId() {
+        return BatteryUtils.isChargingStringV2Enabled()
+                        ? R.integer.config_chargingFastThreshold_v2
+                        : R.integer.config_chargingFastThreshold;
     }
 }

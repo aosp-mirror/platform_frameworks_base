@@ -21,11 +21,8 @@ import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NO
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_REMOTE_INPUT;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
-
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -78,6 +75,8 @@ public class RestrictedLockUtilsTest {
 
         when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE))
                 .thenReturn(mDevicePolicyManager);
+        when(mContext.getSystemService(DevicePolicyManager.class))
+                .thenReturn(mDevicePolicyManager);
         when(mContext.getSystemService(Context.USER_SERVICE))
                 .thenReturn(mUserManager);
         when(mContext.getPackageManager())
@@ -87,14 +86,20 @@ public class RestrictedLockUtilsTest {
     }
 
     @Test
-    public void checkIfRestrictionEnforced_deviceOwner() {
+    public void checkIfRestrictionEnforced_deviceOwner()
+            throws PackageManager.NameNotFoundException {
         UserManager.EnforcingUser enforcingUser = new UserManager.EnforcingUser(mUserId,
                 UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
         final String userRestriction = UserManager.DISALLOW_UNINSTALL_APPS;
         when(mUserManager.getUserRestrictionSources(userRestriction,
                 UserHandle.of(mUserId))).
                 thenReturn(Collections.singletonList(enforcingUser));
-        setUpDeviceOwner(mAdmin1);
+
+        when(mContext.createPackageContextAsUser(any(), eq(0),
+                eq(UserHandle.of(mUserId))))
+                .thenReturn(mContext);
+
+        setUpDeviceOwner(mAdmin1, mUserId);
 
         EnforcedAdmin enforcedAdmin = RestrictedLockUtilsInternal
                 .checkIfRestrictionEnforced(mContext, userRestriction, mUserId);
@@ -105,14 +110,20 @@ public class RestrictedLockUtilsTest {
     }
 
     @Test
-    public void checkIfRestrictionEnforced_profileOwner() {
+    public void checkIfRestrictionEnforced_profileOwner()
+            throws PackageManager.NameNotFoundException {
         UserManager.EnforcingUser enforcingUser = new UserManager.EnforcingUser(mUserId,
                 UserManager.RESTRICTION_SOURCE_PROFILE_OWNER);
         final String userRestriction = UserManager.DISALLOW_UNINSTALL_APPS;
         when(mUserManager.getUserRestrictionSources(userRestriction,
                 UserHandle.of(mUserId))).
                 thenReturn(Collections.singletonList(enforcingUser));
-        setUpProfileOwner(mAdmin1, mUserId);
+
+        when(mContext.createPackageContextAsUser(any(), eq(0),
+                eq(UserHandle.of(mUserId))))
+                .thenReturn(mContext);
+
+        setUpProfileOwner(mAdmin1);
 
         EnforcedAdmin enforcedAdmin = RestrictedLockUtilsInternal
                 .checkIfRestrictionEnforced(mContext, userRestriction, mUserId);
@@ -326,11 +337,12 @@ public class RestrictedLockUtilsTest {
                 .thenReturn(Arrays.asList(activeAdmins));
     }
 
-    private void setUpDeviceOwner(ComponentName admin) {
+    private void setUpDeviceOwner(ComponentName admin, int userId) {
         when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser()).thenReturn(admin);
+        when(mDevicePolicyManager.getDeviceOwnerUser()).thenReturn(UserHandle.of(userId));
     }
 
-    private void setUpProfileOwner(ComponentName admin, int userId) {
-        when(mDevicePolicyManager.getProfileOwnerAsUser(userId)).thenReturn(admin);
+    private void setUpProfileOwner(ComponentName admin) {
+        when(mDevicePolicyManager.getProfileOwner()).thenReturn(admin);
     }
 }

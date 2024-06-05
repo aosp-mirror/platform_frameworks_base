@@ -1,0 +1,44 @@
+package: "com.android.settingslib.media.flags"
+container: "system"
+
+flag {
+  name: "use_media_router2_for_info_media_manager"
+  namespace: "media_solutions"
+  description: "Gates whether to use a MediaRouter2-based implementation of InfoMediaManager, instead of the legacy MediaRouter2Manager-based implementation."
+  bug: "192657812"
+}
+
+flag {
+  name: "enable_tv_media_output_dialog"
+  namespace: "tv_system_ui"
+  description: "Gates all the changes for the tv specific media output dialog"
+  bug: "303205631"
+}
+
+flag {
+    name: "enable_output_switcher_for_system_routing"
+    namespace: "media_solutions"
+    description: "Enable Output Switcher when no media is playing."
+    bug: "284227163"
+}
+
+flag {
+    name: "remove_unnecessary_route_scanning"
+    namespace: "media_solutions"
+    description: "Avoid active scan requests on UI components that only display route status information."
+    bug: "332515672"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "use_playback_info_for_routing_controls"
+    namespace: "media_solutions"
+    description: "Use app-provided playback info when providing media routing information."
+    bug: "333564788"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+

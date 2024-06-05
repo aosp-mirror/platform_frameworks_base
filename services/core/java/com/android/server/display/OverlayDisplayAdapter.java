@@ -36,6 +36,7 @@ import android.view.SurfaceControl;
 
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.mode.DisplayModeDirector;
 
 import java.io.PrintWriter;
@@ -134,8 +135,9 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
 
     // Called with SyncRoot lock held.
     public OverlayDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
-            Context context, Handler handler, Listener listener, Handler uiHandler) {
-        super(syncRoot, context, handler, listener, TAG);
+            Context context, Handler handler, Listener listener, Handler uiHandler,
+            DisplayManagerFlags featureFlags) {
+        super(syncRoot, context, handler, listener, TAG, featureFlags);
         mUiHandler = uiHandler;
     }
 
@@ -307,7 +309,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mSurface.release();
                 mSurface = null;
             }
-            DisplayControl.destroyDisplay(getDisplayTokenLocked());
+            DisplayControl.destroyVirtualDisplay(getDisplayTokenLocked());
         }
 
         @Override
@@ -465,7 +467,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         public void onWindowCreated(SurfaceTexture surfaceTexture, float refreshRate,
                 long presentationDeadlineNanos, int state) {
             synchronized (getSyncRoot()) {
-                IBinder displayToken = DisplayControl.createDisplay(mName, mFlags.mSecure);
+                IBinder displayToken = DisplayControl.createVirtualDisplay(mName, mFlags.mSecure);
                 mDevice = new OverlayDisplayDevice(displayToken, mName, mModes, mActiveMode,
                         DEFAULT_MODE_INDEX, refreshRate, presentationDeadlineNanos,
                         mFlags, state, surfaceTexture, mNumber) {

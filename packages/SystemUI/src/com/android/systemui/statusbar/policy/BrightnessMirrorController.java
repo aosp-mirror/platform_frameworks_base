@@ -25,8 +25,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
+import com.android.systemui.settings.brightness.MirrorController;
 import com.android.systemui.settings.brightness.ToggleSlider;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeViewController;
@@ -38,8 +39,7 @@ import java.util.function.Consumer;
 /**
  * Controls showing and hiding of the brightness mirror.
  */
-public class BrightnessMirrorController
-        implements CallbackController<BrightnessMirrorController.BrightnessMirrorListener> {
+public class BrightnessMirrorController implements MirrorController {
 
     private final NotificationShadeWindowView mStatusBarWindow;
     private final Consumer<Boolean> mVisibilityCallback;
@@ -71,6 +71,7 @@ public class BrightnessMirrorController
         updateResources();
     }
 
+    @Override
     public void showMirror() {
         mBrightnessMirror.setVisibility(View.VISIBLE);
         mVisibilityCallback.accept(true);
@@ -78,16 +79,14 @@ public class BrightnessMirrorController
         mDepthController.setBrightnessMirrorVisible(true);
     }
 
+    @Override
     public void hideMirror() {
         mVisibilityCallback.accept(false);
         mNotificationPanel.setAlpha(255, true /* animate */);
         mDepthController.setBrightnessMirrorVisible(false);
     }
 
-    /**
-     * Set the location and size of the mirror container to match that of the slider in QS
-     * @param original the original view in QS
-     */
+    @Override
     public void setLocationAndSize(View original) {
         original.getLocationInWindow(mInt2Cache);
 
@@ -112,6 +111,7 @@ public class BrightnessMirrorController
         }
     }
 
+    @Override
     public ToggleSlider getToggleSlider() {
         return mToggleSliderController;
     }
@@ -175,9 +175,5 @@ public class BrightnessMirrorController
 
     public void onUiModeChanged() {
         reinflate();
-    }
-
-    public interface BrightnessMirrorListener {
-        void onBrightnessMirrorReinflated(View brightnessMirror);
     }
 }

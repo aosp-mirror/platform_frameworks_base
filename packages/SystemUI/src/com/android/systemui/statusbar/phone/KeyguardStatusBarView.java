@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
 import static com.android.systemui.util.Utils.getStatusBarHeaderHeightKeyguard;
 
@@ -24,33 +25,39 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Trace;
 import android.util.AttributeSet;
-import android.util.Pair;
 import android.util.TypedValue;
 import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.app.animation.Interpolators;
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.res.R;
+import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange;
+import com.android.systemui.statusbar.phone.ui.TintedIconManager;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
+
+import kotlinx.coroutines.flow.FlowKt;
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlow;
+import kotlinx.coroutines.flow.StateFlowKt;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -83,6 +90,9 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private int mStatusBarPaddingEnd;
     private int mMinDotWidth;
     private View mSystemIconsContainer;
+    private View mSystemIcons;
+    private final MutableStateFlow<DarkChange> mDarkChange = StateFlowKt.MutableStateFlow(
+            DarkChange.EMPTY);
 
     private View mCutoutSpace;
     private ViewGroup mStatusIconArea;
@@ -96,7 +106,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private DisplayCutout mDisplayCutout;
     private int mRoundedCornerPadding = 0;
     // right and left padding applied to this view to account for cutouts and rounded corners
-    private Pair<Integer, Integer> mPadding = new Pair(0, 0);
+    private Insets mPadding = Insets.of(0, 0, 0, 0);
 
     /**
      * The clipping on the top
@@ -113,6 +123,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mSystemIconsContainer = findViewById(R.id.system_icons_container);
+        mSystemIcons = findViewById(R.id.system_icons);
         mMultiUserAvatar = findViewById(R.id.multi_user_avatar);
         mCarrierLabel = findViewById(R.id.keyguard_carrier_text);
         mBatteryView = mSystemIconsContainer.findViewById(R.id.battery);
@@ -122,6 +133,9 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mUserSwitcherContainer = findViewById(R.id.user_switcher_container);
         mIsPrivacyDotEnabled = mContext.getResources().getBoolean(R.bool.config_enablePrivacyDot);
         loadDimens();
+        if (!centralizedStatusBarHeightFix()) {
+            setGravity(Gravity.CENTER_VERTICAL);
+        }
     }
 
     /**
@@ -161,6 +175,13 @@ public class KeyguardStatusBarView extends RelativeLayout {
                 mStatusIconContainer.getPaddingBottom()
         );
 
+        mSystemIcons.setPaddingRelative(
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_start),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_top),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_end),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_bottom)
+        );
+
         // Respect font size setting.
         mCarrierLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(
@@ -169,7 +190,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
 
         int marginStart = calculateMargin(
                 getResources().getDimensionPixelSize(R.dimen.keyguard_carrier_text_margin),
-                mPadding.first);
+                mPadding.left);
         lp.setMarginStart(marginStart);
 
         mCarrierLabel.setLayoutParams(lp);
@@ -181,7 +202,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     private void updateKeyguardStatusBarHeight() {
-        MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
+        ViewGroup.LayoutParams lp = (ViewGroup.LayoutParams) getLayoutParams();
         lp.height = getStatusBarHeaderHeightKeyguard(mContext);
         setLayoutParams(lp);
     }
@@ -271,7 +292,16 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     private boolean updateLayoutConsideringCutout(StatusBarContentInsetsProvider insetsProvider) {
-        mDisplayCutout = getRootWindowInsets().getDisplayCutout();
+        return setDisplayCutout(
+                getRootWindowInsets().getDisplayCutout(),
+                insetsProvider);
+    }
+
+    /** Sets the {@link DisplayCutout}, updating the view to render around the cutout. */
+    public boolean setDisplayCutout(
+            @Nullable DisplayCutout displayCutout,
+            StatusBarContentInsetsProvider insetsProvider) {
+        mDisplayCutout = displayCutout;
         updateKeyguardStatusBarHeight();
         updatePadding(insetsProvider);
         if (mDisplayCutout == null || insetsProvider.currentRotationHasCornerCutout()) {
@@ -288,11 +318,12 @@ public class KeyguardStatusBarView extends RelativeLayout {
 
         // consider privacy dot space
         final int minLeft = (isLayoutRtl() && mIsPrivacyDotEnabled)
-                ? Math.max(mMinDotWidth, mPadding.first) : mPadding.first;
+                ? Math.max(mMinDotWidth, mPadding.left) : mPadding.left;
         final int minRight = (!isLayoutRtl() && mIsPrivacyDotEnabled)
-                ? Math.max(mMinDotWidth, mPadding.second) : mPadding.second;
+                ? Math.max(mMinDotWidth, mPadding.right) : mPadding.right;
 
-        setPadding(minLeft, waterfallTop, minRight, 0);
+        int top = centralizedStatusBarHeightFix() ? waterfallTop + mPadding.top : waterfallTop;
+        setPadding(minLeft, top, minRight, 0);
     }
 
     private boolean updateLayoutParamsNoCutout() {
@@ -352,15 +383,22 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mMultiUserAvatar.setImageDrawable(picture);
     }
 
-    /** Should only be called from {@link KeyguardStatusBarViewController}. */
-    void onBatteryLevelChanged(boolean charging) {
+    /**
+     * Should only be called from {@link KeyguardStatusBarViewController} or
+     * {@link com.android.systemui.statusbar.ui.binder.KeyguardStatusBarViewBinder}.
+     */
+    public void onBatteryChargingChanged(boolean charging) {
         if (mBatteryCharging != charging) {
             mBatteryCharging = charging;
             updateVisibilities();
         }
     }
 
-    void setKeyguardUserSwitcherEnabled(boolean enabled) {
+    /**
+     * Should only be called from {@link KeyguardStatusBarViewController} or
+     * {@link com.android.systemui.statusbar.ui.binder.KeyguardStatusBarViewBinder}.
+     */
+    public void setKeyguardUserSwitcherEnabled(boolean enabled) {
         mKeyguardUserSwitcherEnabled = enabled;
     }
 
@@ -372,49 +410,6 @@ public class KeyguardStatusBarView extends RelativeLayout {
     @VisibleForTesting
     boolean isKeyguardUserAvatarEnabled() {
         return mKeyguardUserAvatarEnabled;
-    }
-
-    private void animateNextLayoutChange() {
-        final int systemIconsCurrentX = mSystemIconsContainer.getLeft();
-        final boolean userAvatarVisible = mMultiUserAvatar.getParent() == mStatusIconArea;
-        getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                getViewTreeObserver().removeOnPreDrawListener(this);
-                boolean userAvatarHiding = userAvatarVisible
-                        && mMultiUserAvatar.getParent() != mStatusIconArea;
-                mSystemIconsContainer.setX(systemIconsCurrentX);
-                mSystemIconsContainer.animate()
-                        .translationX(0)
-                        .setDuration(400)
-                        .setStartDelay(userAvatarHiding ? 300 : 0)
-                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                        .start();
-                if (userAvatarHiding) {
-                    getOverlay().add(mMultiUserAvatar);
-                    mMultiUserAvatar.animate()
-                            .alpha(0f)
-                            .setDuration(300)
-                            .setStartDelay(0)
-                            .setInterpolator(Interpolators.ALPHA_OUT)
-                            .withEndAction(() -> {
-                                mMultiUserAvatar.setAlpha(1f);
-                                getOverlay().remove(mMultiUserAvatar);
-                            })
-                            .start();
-
-                } else {
-                    mMultiUserAvatar.setAlpha(0f);
-                    mMultiUserAvatar.animate()
-                            .alpha(1f)
-                            .setDuration(300)
-                            .setStartDelay(200)
-                            .setInterpolator(Interpolators.ALPHA_IN);
-                }
-                return true;
-            }
-        });
-
     }
 
     @Override
@@ -437,7 +432,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     /** Should only be called from {@link KeyguardStatusBarViewController}. */
-    void onThemeChanged(StatusBarIconController.TintedIconManager iconManager) {
+    void onThemeChanged(TintedIconManager iconManager) {
         mBatteryView.setColorsFromContext(mContext);
         updateIconsAndTextColors(iconManager);
     }
@@ -454,12 +449,17 @@ public class KeyguardStatusBarView extends RelativeLayout {
         }
     }
 
-    private void updateIconsAndTextColors(StatusBarIconController.TintedIconManager iconManager) {
+    private void updateIconsAndTextColors(TintedIconManager iconManager) {
         @ColorInt int textColor = Utils.getColorAttrDefaultColor(mContext,
                 R.attr.wallpaperTextColor);
+        float luminance = Color.luminance(textColor);
         @ColorInt int iconColor = Utils.getColorStateListDefaultColor(mContext,
-                Color.luminance(textColor) < 0.5 ? R.color.dark_mode_icon_color_single_tone :
-                R.color.light_mode_icon_color_single_tone);
+                    luminance < 0.5
+                        ? com.android.settingslib.R.color.dark_mode_icon_color_single_tone
+                        : com.android.settingslib.R.color.light_mode_icon_color_single_tone);
+        @ColorInt int contrastColor = luminance < 0.5
+                ? DarkIconDispatcherImpl.DEFAULT_ICON_TINT
+                : DarkIconDispatcherImpl.DEFAULT_INVERSE_ICON_TINT;
         float intensity = textColor == Color.WHITE ? 0 : 1;
         mCarrierLabel.setTextColor(iconColor);
 
@@ -467,13 +467,14 @@ public class KeyguardStatusBarView extends RelativeLayout {
         if (userSwitcherName != null) {
             userSwitcherName.setTextColor(Utils.getColorStateListDefaultColor(
                     mContext,
-                    R.color.light_mode_icon_color_single_tone));
+                    com.android.settingslib.R.color.light_mode_icon_color_single_tone));
         }
 
         if (iconManager != null) {
-            iconManager.setTint(iconColor);
+            iconManager.setTint(iconColor, contrastColor);
         }
 
+        mDarkChange.setValue(new DarkChange(mEmptyTintRect, intensity, iconColor));
         applyDarkness(R.id.battery, mEmptyTintRect, intensity, iconColor);
         applyDarkness(R.id.clock, mEmptyTintRect, intensity, iconColor);
     }
@@ -535,5 +536,9 @@ public class KeyguardStatusBarView extends RelativeLayout {
         Trace.beginSection("KeyguardStatusBarView#onMeasure");
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         Trace.endSection();
+    }
+
+    public StateFlow<DarkChange> darkChangeFlow() {
+        return FlowKt.asStateFlow(mDarkChange);
     }
 }

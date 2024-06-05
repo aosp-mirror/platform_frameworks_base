@@ -19,16 +19,22 @@ package com.android.settingslib.bluetooth;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHapClient;
+import android.bluetooth.BluetoothHapPresetInfo;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothStatusCodes;
 import android.content.Context;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.settingslib.R;
 
@@ -36,6 +42,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * HapClientProfile handles the Bluetooth HAP service client role.
@@ -92,6 +99,8 @@ public class HapClientProfile implements LocalBluetoothProfile {
                 device.refresh();
             }
 
+            // Check current list of CachedDevices to see if any are hearing aid devices.
+            mDeviceManager.updateHearingAidsDevices();
             mIsProfileReady = true;
             mProfileManager.callServiceConnectedListeners();
         }
@@ -118,7 +127,52 @@ public class HapClientProfile implements LocalBluetoothProfile {
     }
 
     /**
-     * Get hearing aid devices matching connection states{
+     * Registers a {@link BluetoothHapClient.Callback} that will be invoked during the
+     * operation of this profile.
+     *
+     * Repeated registration of the same <var>callback</var> object after the first call to this
+     * method will result with IllegalArgumentException being thrown, even when the
+     * <var>executor</var> is different. API caller would have to call
+     * {@link #unregisterCallback(BluetoothHapClient.Callback)} with the same callback object
+     * before registering it again.
+     *
+     * @param executor an {@link Executor} to execute given callback
+     * @param callback user implementation of the {@link BluetoothHapClient.Callback}
+     * @throws NullPointerException if a null executor, or callback is given, or
+     *  IllegalArgumentException if the same <var>callback</var> is already registered.
+     * @hide
+     */
+    public void registerCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull BluetoothHapClient.Callback callback) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot register callback.");
+            return;
+        }
+        mService.registerCallback(executor, callback);
+    }
+
+    /**
+     * Unregisters the specified {@link BluetoothHapClient.Callback}.
+     * <p>The same {@link BluetoothHapClient.Callback} object used when calling
+     * {@link #registerCallback(Executor, BluetoothHapClient.Callback)} must be used.
+     *
+     * <p>Callbacks are automatically unregistered when application process goes away
+     *
+     * @param callback user implementation of the {@link BluetoothHapClient.Callback}
+     * @throws NullPointerException when callback is null or IllegalArgumentException when no
+     *  callback is registered
+     * @hide
+     */
+    public void unregisterCallback(@NonNull BluetoothHapClient.Callback callback) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot unregister callback.");
+            return;
+        }
+        mService.unregisterCallback(callback);
+    }
+
+    /**
+     * Gets hearing aid devices matching connection states{
      * {@code BluetoothProfile.STATE_CONNECTED},
      * {@code BluetoothProfile.STATE_CONNECTING},
      * {@code BluetoothProfile.STATE_DISCONNECTING}}
@@ -133,7 +187,7 @@ public class HapClientProfile implements LocalBluetoothProfile {
     }
 
     /**
-     * Get hearing aid devices matching connection states{
+     * Gets hearing aid devices matching connection states{
      * {@code BluetoothProfile.STATE_DISCONNECTED},
      * {@code BluetoothProfile.STATE_CONNECTED},
      * {@code BluetoothProfile.STATE_CONNECTING},
@@ -222,6 +276,270 @@ public class HapClientProfile implements LocalBluetoothProfile {
         return mService.supportsWritablePresets(device);
     }
 
+
+    /**
+     * Gets the group identifier, which can be used in the group related part of the API.
+     *
+     * <p>Users are expected to get group identifier for each of the connected device to discover
+     * the device grouping. This allows them to make an informed decision which devices can be
+     * controlled by single group API call and which require individual device calls.
+     *
+     * <p>Note that some binaural HA devices may not support group operations, therefore are not
+     * considered a valid HAP group. In such case -1 is returned even if such device is a valid Le
+     * Audio Coordinated Set member.
+     *
+     * @param device is the device for which we want to get the hap group identifier
+     * @return valid group identifier or -1
+     * @hide
+     */
+    public int getHapGroup(@NonNull BluetoothDevice device) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot get hap group.");
+            return BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
+        }
+        return mService.getHapGroup(device);
+    }
+
+    /**
+     * Gets the currently active preset for a HA device.
+     *
+     * @param device is the device for which we want to set the active preset
+     * @return active preset index or {@link BluetoothHapClient#PRESET_INDEX_UNAVAILABLE} if the
+     *         device is not connected.
+     * @hide
+     */
+    public int getActivePresetIndex(@NonNull BluetoothDevice device) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot get active preset index.");
+            return BluetoothHapClient.PRESET_INDEX_UNAVAILABLE;
+        }
+        return mService.getActivePresetIndex(device);
+    }
+
+    /**
+     * Gets the currently active preset info for a remote device.
+     *
+     * @param device is the device for which we want to get the preset name
+     * @return currently active preset info if selected, null if preset info is not available for
+     *     the remote device
+     * @hide
+     */
+    @Nullable
+    public BluetoothHapPresetInfo getActivePresetInfo(@NonNull BluetoothDevice device) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot get active preset info.");
+            return null;
+        }
+        return mService.getActivePresetInfo(device);
+    }
+
+    /**
+     * Selects the currently active preset for a HA device
+     *
+     * <p>On success,
+     * {@link BluetoothHapClient.Callback#onPresetSelected(BluetoothDevice, int, int)} will be
+     * called with reason code {@link BluetoothStatusCodes#REASON_LOCAL_APP_REQUEST} On failure,
+     * {@link BluetoothHapClient.Callback#onPresetSelectionFailed(BluetoothDevice, int)} will be
+     * called.
+     *
+     * @param device is the device for which we want to set the active preset
+     * @param presetIndex is an index of one of the available presets
+     * @hide
+     */
+    public void selectPreset(@NonNull BluetoothDevice device, int presetIndex) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot select preset.");
+            return;
+        }
+        mService.selectPreset(device, presetIndex);
+    }
+
+
+    /**
+     * Selects the currently active preset for a Hearing Aid device group.
+     *
+     * <p>This group call may replace multiple device calls if those are part of the valid HAS
+     * group. Note that binaural HA devices may or may not support group.
+     *
+     * <p>On success,
+     * {@link BluetoothHapClient.Callback#onPresetSelected(BluetoothDevice, int, int)} will be
+     * called for each device within the group with reason code
+     * {@link BluetoothStatusCodes#REASON_LOCAL_APP_REQUEST} On failure,
+     * {@link BluetoothHapClient.Callback#onPresetSelectionForGroupFailed(int, int)} will be
+     * called for the group.
+     *
+     * @param groupId is the device group identifier for which want to set the active preset
+     * @param presetIndex is an index of one of the available presets
+     * @hide
+     */
+    public void selectPresetForGroup(int groupId, int presetIndex) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot select preset for group.");
+            return;
+        }
+        mService.selectPresetForGroup(groupId, presetIndex);
+    }
+
+    /**
+     * Sets the next preset as a currently active preset for a HA device
+     *
+     * <p>Note that the meaning of 'next' is HA device implementation specific and does not
+     * necessarily mean a higher preset index.
+     *
+     * @param device is the device for which we want to set the active preset
+     * @hide
+     */
+    public void switchToNextPreset(@NonNull BluetoothDevice device) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot switch to next preset.");
+            return;
+        }
+        mService.switchToNextPreset(device);
+    }
+
+
+    /**
+     * Sets the next preset as a currently active preset for a HA device group
+     *
+     * <p>Note that the meaning of 'next' is HA device implementation specific and does not
+     * necessarily mean a higher preset index.
+     *
+     * <p>This group call may replace multiple device calls if those are part of the valid HAS
+     * group. Note that binaural HA devices may or may not support group.
+     *
+     * @param groupId is the device group identifier for which want to set the active preset
+     * @hide
+     */
+    public void switchToNextPresetForGroup(int groupId) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot switch to next preset for group.");
+            return;
+        }
+        mService.switchToNextPresetForGroup(groupId);
+    }
+
+    /**
+     * Sets the previous preset as a currently active preset for a HA device.
+     *
+     * <p>Note that the meaning of 'previous' is HA device implementation specific and does not
+     * necessarily mean a lower preset index.
+     *
+     * @param device is the device for which we want to set the active preset
+     * @hide
+     */
+    public void switchToPreviousPreset(@NonNull BluetoothDevice device) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot switch to previous preset.");
+            return;
+        }
+        mService.switchToPreviousPreset(device);
+    }
+
+
+    /**
+     * Sets the next preset as a currently active preset for a HA device group
+     *
+     * <p>Note that the meaning of 'next' is HA device implementation specific and does not
+     * necessarily mean a higher preset index.
+     *
+     * <p>This group call may replace multiple device calls if those are part of the valid HAS
+     * group. Note that binaural HA devices may or may not support group.
+     *
+     * @param groupId is the device group identifier for which want to set the active preset
+     * @hide
+     */
+    public void switchToPreviousPresetForGroup(int groupId) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot switch to previous preset for "
+                    + "group.");
+            return;
+        }
+        mService.switchToPreviousPresetForGroup(groupId);
+    }
+
+    /**
+     * Requests the preset info
+     *
+     * @param device is the device for which we want to get the preset name
+     * @param presetIndex is an index of one of the available presets
+     * @return preset info
+     * @hide
+     */
+    public BluetoothHapPresetInfo getPresetInfo(@NonNull BluetoothDevice device, int presetIndex) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot get preset info.");
+            return null;
+        }
+        return mService.getPresetInfo(device, presetIndex);
+    }
+
+    /**
+     * Gets all preset info for a particular device
+     *
+     * @param device is the device for which we want to get all presets info
+     * @return a list of all known preset info
+     * @hide
+     */
+    @NonNull
+    public List<BluetoothHapPresetInfo> getAllPresetInfo(@NonNull BluetoothDevice device) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot get all preset info.");
+            return new ArrayList<>();
+        }
+        return mService.getAllPresetInfo(device);
+    }
+
+    /**
+     * Sets the preset name for a particular device
+     *
+     * <p>Note that the name length is restricted to 40 characters.
+     *
+     * <p>On success,
+     * {@link BluetoothHapClient.Callback#onPresetInfoChanged(BluetoothDevice, List, int)} with a
+     * new name will be called and reason code
+     * {@link BluetoothStatusCodes#REASON_LOCAL_APP_REQUEST} On failure,
+     * {@link BluetoothHapClient.Callback#onSetPresetNameFailed(BluetoothDevice, int)} will be
+     * called.
+     *
+     * @param device is the device for which we want to get the preset name
+     * @param presetIndex is an index of one of the available presets
+     * @param name is a new name for a preset, maximum length is 40 characters
+     * @hide
+     */
+    public void setPresetName(@NonNull BluetoothDevice device, int presetIndex,
+            @NonNull String name) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot set preset name.");
+            return;
+        }
+        mService.setPresetName(device, presetIndex, name);
+    }
+
+    /**
+     * Sets the name for a hearing aid preset.
+     *
+     * <p>Note that the name length is restricted to 40 characters.
+     *
+     * <p>On success,
+     * {@link BluetoothHapClient.Callback#onPresetInfoChanged(BluetoothDevice, List, int)} with a
+     * new name will be called for each device within the group with reason code
+     * {@link BluetoothStatusCodes#REASON_LOCAL_APP_REQUEST} On failure,
+     * {@link BluetoothHapClient.Callback#onSetPresetNameForGroupFailed(int, int)} will be invoked
+     *
+     * @param groupId is the device group identifier
+     * @param presetIndex is an index of one of the available presets
+     * @param name is a new name for a preset, maximum length is 40 characters
+     * @hide
+     */
+    public void setPresetNameForGroup(int groupId, int presetIndex, @NonNull String name) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot set preset name for group.");
+            return;
+        }
+        mService.setPresetNameForGroup(groupId, presetIndex, name);
+    }
+
+
     @Override
     public boolean accessProfileEnabled() {
         return false;
@@ -258,19 +576,19 @@ public class HapClientProfile implements LocalBluetoothProfile {
 
     @Override
     public boolean setEnabled(BluetoothDevice device, boolean enabled) {
-        boolean isEnabled = false;
+        boolean isSuccessful = false;
         if (mService == null || device == null) {
             return false;
         }
         if (enabled) {
             if (mService.getConnectionPolicy(device) < CONNECTION_POLICY_ALLOWED) {
-                isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
+                isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
             }
         } else {
-            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
+            isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
 
-        return isEnabled;
+        return isSuccessful;
     }
 
     @Override

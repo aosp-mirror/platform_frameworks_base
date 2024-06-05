@@ -26,20 +26,31 @@ android_test {
         "services.devicepolicy",
         "services.net",
         "services.usage",
+        "service-permission.stubs.system_server",
         "guava",
         "androidx.test.rules",
         "hamcrest-library",
         "mockito-target-inline-minus-junit4",
+        "platform-compat-test-rules",
         "platform-test-annotations",
         "platformprotosnano",
         "statsdprotolite",
+        "StatsdTestUtils",
         "hamcrest-library",
         "servicestests-utils",
         "testables",
-        "truth-prebuilt",
+        "truth",
+        "TestParameterInjector",
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",
+        "flag-junit",
+        "notification_flags_lib",
+        "platform-test-rules",
+        "SettingsLib",
+        "libprotobuf-java-lite",
+        "platformprotoslite",
+        "platform-parametric-runner-lib",
     ],
 
     libs: [
@@ -77,4 +88,7 @@ android_test {
         "libutils",
         "netd_aidl_interface-V5-cpp",
     ],
+
+    // Required for TestParameterInjector
+    javacflags: ["-parameters"],
 }

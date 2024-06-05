@@ -18,8 +18,10 @@
 
 #include "androidfw/Idmap.h"
 
+#include "android-base/file.h"
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
+#include "android-base/utf8.h"
 #include "androidfw/misc.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/Util.h"
@@ -250,7 +252,12 @@ std::optional<std::string_view> ReadString(const uint8_t** in_out_data_ptr, size
 }
 } // namespace
 
-LoadedIdmap::LoadedIdmap(std::string&& idmap_path, const Idmap_header* header,
+// O_PATH is a lightweight way of creating an FD, only exists on Linux
+#ifndef O_PATH
+#define O_PATH (0)
+#endif
+
+LoadedIdmap::LoadedIdmap(const std::string& idmap_path, const Idmap_header* header,
                          const Idmap_data_header* data_header,
                          const Idmap_target_entry* target_entries,
                          const Idmap_target_entry_inline* target_inline_entries,
@@ -267,10 +274,10 @@ LoadedIdmap::LoadedIdmap(std::string&& idmap_path, const Idmap_header* header,
       configurations_(configs),
       overlay_entries_(overlay_entries),
       string_pool_(std::move(string_pool)),
-      idmap_path_(std::move(idmap_path)),
+      idmap_fd_(android::base::utf8::open(idmap_path.c_str(), O_RDONLY|O_CLOEXEC|O_BINARY|O_PATH)),
       overlay_apk_path_(overlay_apk_path),
       target_apk_path_(target_apk_path),
-      idmap_last_mod_time_(getFileModDate(idmap_path_.data())) {}
+      idmap_last_mod_time_(getFileModDate(idmap_fd_.get())) {}
 
 std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(StringPiece idmap_path, StringPiece idmap_data) {
   ATRACE_CALL();
@@ -294,12 +301,12 @@ std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(StringPiece idmap_path, StringPie
                                dtohl(header->version), kIdmapCurrentVersion);
     return {};
   }
+  std::optional<std::string_view> target_path = ReadString(&data_ptr, &data_size, "target path");
+    if (!target_path) {
+      return {};
+    }
   std::optional<std::string_view> overlay_path = ReadString(&data_ptr, &data_size, "overlay path");
   if (!overlay_path) {
-    return {};
-  }
-  std::optional<std::string_view> target_path = ReadString(&data_ptr, &data_size, "target path");
-  if (!target_path) {
     return {};
   }
   if (!ReadString(&data_ptr, &data_size, "target name") ||
@@ -364,11 +371,11 @@ std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(StringPiece idmap_path, StringPie
   return std::unique_ptr<LoadedIdmap>(
       new LoadedIdmap(std::string(idmap_path), header, data_header, target_entries,
                       target_inline_entries, target_inline_entry_values, configurations,
-                      overlay_entries, std::move(idmap_string_pool), *target_path, *overlay_path));
+                      overlay_entries, std::move(idmap_string_pool), *overlay_path, *target_path));
 }
 
 bool LoadedIdmap::IsUpToDate() const {
-  return idmap_last_mod_time_ == getFileModDate(idmap_path_.c_str());
+  return idmap_last_mod_time_ == getFileModDate(idmap_fd_.get());
 }
 
 }  // namespace android

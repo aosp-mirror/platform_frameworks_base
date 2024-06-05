@@ -254,7 +254,10 @@ public class V4Signature {
         this.signingInfos = signingInfos;
     }
 
-    private static V4Signature readFrom(InputStream stream) throws IOException {
+    /**
+     * Constructs a V4Signature from an InputStream.
+     */
+    public static V4Signature readFrom(InputStream stream) throws IOException {
         final int version = readIntLE(stream);
         int maxSize = INCFS_MAX_SIGNATURE_SIZE;
         final byte[] hashingInfo = readBytes(stream, maxSize);

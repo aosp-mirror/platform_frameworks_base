@@ -16,6 +16,9 @@
 
 package com.android.server.appop;
 
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
@@ -29,15 +32,22 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OnOpActiveChangedListener;
+import android.companion.virtual.VirtualDeviceManager;
+import android.companion.virtual.VirtualDeviceParams;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Process;
+import android.permission.PermissionManager;
+import android.virtualdevice.cts.common.VirtualDeviceRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -50,6 +60,14 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class AppOpsActiveWatcherTest {
 
+    @Rule
+    public VirtualDeviceRule virtualDeviceRule =
+            VirtualDeviceRule.withAdditionalPermissions(
+                    Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+                    Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+                    Manifest.permission.CREATE_VIRTUAL_DEVICE,
+                    Manifest.permission.GET_APP_OPS_STATS
+            );
     private static final long NOTIFICATION_TIMEOUT_MILLIS = 5000;
 
     @Test
@@ -69,7 +87,7 @@ public class AppOpsActiveWatcherTest {
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()),
-                isNull(), eq(true), anyInt(), anyInt());
+                isNull(), eq(Context.DEVICE_ID_DEFAULT), eq(true), anyInt(), anyInt());
 
         // This should be the only callback we got
         verifyNoMoreInteractions(listener);
@@ -88,7 +106,7 @@ public class AppOpsActiveWatcherTest {
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()), isNull(),
-                eq(false), anyInt(), anyInt());
+                eq(Context.DEVICE_ID_DEFAULT), eq(false), anyInt(), anyInt());
 
         // Verify that the op is not active
         assertThat(appOpsManager.isOperationActive(AppOpsManager.OP_CAMERA,
@@ -126,11 +144,77 @@ public class AppOpsActiveWatcherTest {
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
                 eq(Process.myUid()), eq(getContext().getPackageName()), isNull(),
-                eq(true), anyInt(), anyInt());
+                eq(Context.DEVICE_ID_DEFAULT), eq(true), anyInt(), anyInt());
 
         // Finish up
         appOpsManager.finishOp(AppOpsManager.OP_CAMERA);
         appOpsManager.stopWatchingActive(listener);
+    }
+
+    @Test
+    public void testWatchActiveOpsForExternalDevice() {
+        VirtualDeviceManager.VirtualDevice virtualDevice =
+                virtualDeviceRule.createManagedVirtualDevice(
+                        new VirtualDeviceParams.Builder()
+                                .setDevicePolicy(POLICY_TYPE_CAMERA, DEVICE_POLICY_CUSTOM)
+                                .build()
+                );
+
+        PermissionManager permissionManager =
+                getContext().getSystemService(PermissionManager.class);
+
+        // Unlike runtime permission being automatically granted to the default device, we need to
+        // grant camera permission to the external device first before we can start op.
+        permissionManager.grantRuntimePermission(
+                getContext().getOpPackageName(),
+                Manifest.permission.CAMERA,
+                virtualDevice.getPersistentDeviceId()
+        );
+
+        final OnOpActiveChangedListener listener = mock(OnOpActiveChangedListener.class);
+        AttributionSource attributionSource = new AttributionSource(Process.myUid(),
+                getContext().getOpPackageName(), getContext().getAttributionTag(),
+                virtualDevice.getDeviceId());
+
+        final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
+        appOpsManager.startWatchingActive(new String[]{AppOpsManager.OPSTR_CAMERA,
+                AppOpsManager.OPSTR_RECORD_AUDIO}, getContext().getMainExecutor(), listener);
+
+        appOpsManager.startOpNoThrow(getContext().getAttributionSource().getToken(),
+                AppOpsManager.OP_CAMERA, attributionSource, false, "",
+                AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
+
+        verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
+                .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
+                eq(Process.myUid()), eq(getContext().getOpPackageName()),
+                eq(getContext().getAttributionTag()), eq(virtualDevice.getDeviceId()), eq(true),
+                eq(AppOpsManager.ATTRIBUTION_FLAGS_NONE),
+                eq(AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE));
+        verifyNoMoreInteractions(listener);
+
+        appOpsManager.finishOp(getContext().getAttributionSource().getToken(),
+                AppOpsManager.OP_CAMERA, attributionSource);
+
+        verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
+                .times(1)).onOpActiveChanged(eq(AppOpsManager.OPSTR_CAMERA),
+                eq(Process.myUid()), eq(getContext().getOpPackageName()),
+                eq(getContext().getAttributionTag()), eq(virtualDevice.getDeviceId()), eq(false),
+                eq(AppOpsManager.ATTRIBUTION_FLAGS_NONE),
+                eq(AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE));
+        verifyNoMoreInteractions(listener);
+
+        appOpsManager.stopWatchingActive(listener);
+
+        appOpsManager.startOpNoThrow(getContext().getAttributionSource().getToken(),
+                AppOpsManager.OP_CAMERA, attributionSource, false, "",
+                AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
+
+        verifyNoMoreInteractions(listener);
+
+        appOpsManager.finishOp(getContext().getAttributionSource().getToken(),
+                AppOpsManager.OP_CAMERA, attributionSource);
+
+        verifyNoMoreInteractions(listener);
     }
 
     @Test

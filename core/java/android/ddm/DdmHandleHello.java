@@ -16,6 +16,7 @@
 
 package android.ddm;
 
+import android.os.DdmSyncState;
 import android.os.Debug;
 import android.os.UserHandle;
 import android.util.Log;
@@ -40,11 +41,6 @@ public class DdmHandleHello extends DdmHandle {
     private static final int CLIENT_PROTOCOL_VERSION = 1;
 
     private static DdmHandleHello mInstance = new DdmHandleHello();
-
-    private static final String[] FRAMEWORK_FEATURES = new String[] {
-        "opengl-tracing",
-        "view-hierarchy",
-    };
 
     /* singleton, do not instantiate */
     private DdmHandleHello() {}
@@ -145,7 +141,9 @@ public class DdmHandleHello extends DdmHandle {
                             + instructionSetDescription.length() * 2
                             + vmFlags.length() * 2
                             + 1
-                            + pkgName.length() * 2);
+                            + pkgName.length() * 2
+                            // STAG id (int)
+                            + Integer.BYTES);
         out.order(ChunkHandler.CHUNK_ORDER);
         out.putInt(CLIENT_PROTOCOL_VERSION);
         out.putInt(android.os.Process.myPid());
@@ -161,6 +159,10 @@ public class DdmHandleHello extends DdmHandle {
         out.put((byte)(isNativeDebuggable ? 1 : 0));
         out.putInt(pkgName.length());
         putString(out, pkgName);
+
+        // Added API 34 (and advertised via FEAT ddm packet)
+        // Send the current boot stage in ActivityThread
+        out.putInt(DdmSyncState.getStage().toInt());
 
         Chunk reply = new Chunk(CHUNK_HELO, out);
 
@@ -185,22 +187,25 @@ public class DdmHandleHello extends DdmHandle {
         if (false)
             Log.v("ddm-heap", "Got feature list request");
 
-        int size = 4 + 4 * (vmFeatures.length + FRAMEWORK_FEATURES.length);
-        for (int i = vmFeatures.length-1; i >= 0; i--)
+        String[] fmFeatures = Debug.getFeatureList();
+        int size = 4 + 4 * (vmFeatures.length + fmFeatures.length);
+        for (int i = vmFeatures.length - 1; i >= 0; i--) {
             size += vmFeatures[i].length() * 2;
-        for (int i = FRAMEWORK_FEATURES.length-1; i>= 0; i--)
-            size += FRAMEWORK_FEATURES[i].length() * 2;
+        }
+        for (int i = fmFeatures.length - 1; i >= 0; i--) {
+            size += fmFeatures[i].length() * 2;
+        }
 
         ByteBuffer out = ByteBuffer.allocate(size);
         out.order(ChunkHandler.CHUNK_ORDER);
-        out.putInt(vmFeatures.length + FRAMEWORK_FEATURES.length);
+        out.putInt(vmFeatures.length + fmFeatures.length);
         for (int i = vmFeatures.length-1; i >= 0; i--) {
             out.putInt(vmFeatures[i].length());
             putString(out, vmFeatures[i]);
         }
-        for (int i = FRAMEWORK_FEATURES.length-1; i >= 0; i--) {
-            out.putInt(FRAMEWORK_FEATURES[i].length());
-            putString(out, FRAMEWORK_FEATURES[i]);
+        for (int i = fmFeatures.length - 1; i >= 0; i--) {
+            out.putInt(fmFeatures[i].length());
+            putString(out, fmFeatures[i]);
         }
 
         return new Chunk(CHUNK_FEAT, out);

@@ -18,11 +18,16 @@
           package="com.android.server.wm.flicker.testapp">
 
     <uses-sdk android:minSdkVersion="29"
-              android:targetSdkVersion="29"/>
+              android:targetSdkVersion="35"/>
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application android:allowBackup="false"
                  android:supportsRtl="true">
         <uses-library android:name="androidx.window.extensions" android:required="false"/>
-
+        <property
+            android:name="android.window.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED"
+            android:value="true" />
         <activity android:name=".SimpleActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SimpleActivity"
                   android:theme="@style/CutoutShortEdges"
@@ -68,7 +73,8 @@
         <activity android:name=".SeamlessRotationActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SeamlessRotationActivity"
                   android:theme="@style/CutoutShortEdges"
-                  android:configChanges="orientation|screenSize"
+                  android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+                  android:showWhenLocked="true"
                   android:label="SeamlessActivity"
                   android:exported="true">
             <intent-filter>
@@ -99,6 +105,38 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".PortraitImmersiveActivity"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.PortraitImmersiveActivity"
+                  android:immersive="true"
+                  android:resizeableActivity="true"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/OptOutEdgeToEdge.NoTitleBar"
+                  android:configChanges="screenSize"
+                  android:label="PortraitImmersiveActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".LaunchTransparentActivity"
+                  android:resizeableActivity="false"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/OptOutEdgeToEdge"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchTransparentActivity"
+                  android:label="LaunchTransparentActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".TransparentActivity"
+                  android:theme="@style/TransparentTheme"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.TransparentActivity"
+                  android:label="TransparentActivity"
+                  android:exported="false">
         </activity>
         <activity android:name=".LaunchNewActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchNewActivity"
@@ -191,8 +229,31 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ActivityEmbeddingTrampolineActivity"
+            android:label="ActivityEmbedding Trampoline"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false">
+        </activity>
+        <activity
             android:name=".ActivityEmbeddingSecondaryActivity"
             android:label="ActivityEmbedding Secondary"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:supportsPictureInPicture="true"
+            android:exported="false"/>
+        <activity
+            android:name=".ActivityEmbeddingThirdActivity"
+            android:label="ActivityEmbedding Third"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false"/>
+        <activity
+            android:name=".ActivityEmbeddingAlwaysExpandActivity"
+            android:label="ActivityEmbedding AlwaysExpand"
             android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
             android:theme="@style/CutoutShortEdges"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
@@ -216,7 +277,7 @@
                   android:exported="true"
                   android:label="MailActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.MailActivity"
-                  android:theme="@style/Theme.AppCompat.Light">
+                  android:theme="@style/OptOutEdgeToEdge.AppCompatTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -225,7 +286,7 @@
         <activity android:name=".GameActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.GameActivity"
                   android:immersive="true"
-                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:theme="@style/OptOutEdgeToEdge.NoTitleBar"
                   android:configChanges="screenSize"
                   android:label="GameActivity"
                   android:exported="true">
@@ -304,6 +365,17 @@
             android:exported="false"
             android:theme="@style/CutoutShortEdges"
             android:resizeableActivity="true"/>
+        <activity
+            android:name=".TransferSplashscreenActivity"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.TransferSplashscreenActivity"
+            android:label="TransferSplashscreenActivity"
+            android:theme="@style/SplashscreenAppTheme"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
         <service
             android:name=".AssistantInteractionSessionService"
             android:exported="true"

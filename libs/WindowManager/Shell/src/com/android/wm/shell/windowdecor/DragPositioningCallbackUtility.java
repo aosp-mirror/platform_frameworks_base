@@ -26,9 +26,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
-import android.window.WindowContainerTransaction;
 
-import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 
 /**
@@ -83,8 +81,6 @@ public class DragPositioningCallbackUtility {
         // Make sure the new resizing destination in any direction falls within the stable bounds.
         // If not, set the bounds back to the old location that was valid to avoid conflicts with
         // some regions such as the gesture area.
-        displayController.getDisplayLayout(windowDecoration.mDisplay.getDisplayId())
-                .getStableBounds(stableBounds);
         if ((ctrlType & CTRL_TYPE_LEFT) != 0) {
             final int candidateLeft = repositionTaskBounds.left + (int) delta.x;
             repositionTaskBounds.left = (candidateLeft > stableBounds.left)
@@ -132,8 +128,7 @@ public class DragPositioningCallbackUtility {
             Rect taskBoundsAtDragStart, PointF repositionStartPoint, SurfaceControl.Transaction t,
             float x, float y) {
         updateTaskBounds(repositionTaskBounds, taskBoundsAtDragStart, repositionStartPoint, x, y);
-        t.setPosition(decoration.mTaskSurface, repositionTaskBounds.left,
-                repositionTaskBounds.top);
+        t.setPosition(decoration.mTaskSurface, repositionTaskBounds.left, repositionTaskBounds.top);
     }
 
     static void updateTaskBounds(Rect repositionTaskBounds, Rect taskBoundsAtDragStart,
@@ -145,15 +140,32 @@ public class DragPositioningCallbackUtility {
     }
 
     /**
-     * Apply a bounds change to a task.
-     * @param windowDecoration decor of task we are changing bounds for
-     * @param taskBounds new bounds of this task
-     * @param taskOrganizer applies the provided WindowContainerTransaction
+     * If task bounds are outside of provided drag area, snap the bounds to be just inside the
+     * drag area.
+     * @param repositionTaskBounds bounds determined by task positioner
+     * @param validDragArea the area that task must be positioned inside
+     * @return whether bounds were modified
      */
-    static void applyTaskBoundsChange(WindowContainerTransaction wct,
-            WindowDecoration windowDecoration, Rect taskBounds, ShellTaskOrganizer taskOrganizer) {
-        wct.setBounds(windowDecoration.mTaskInfo.token, taskBounds);
-        taskOrganizer.applyTransaction(wct);
+    public static boolean snapTaskBoundsIfNecessary(Rect repositionTaskBounds, Rect validDragArea) {
+        // If we were never supplied a valid drag area, do not restrict movement.
+        // Otherwise, we restrict deltas to keep task position inside the Rect.
+        if (validDragArea.width() == 0) return false;
+        boolean result = false;
+        if (repositionTaskBounds.left < validDragArea.left) {
+            repositionTaskBounds.offset(validDragArea.left - repositionTaskBounds.left, 0);
+            result = true;
+        } else if (repositionTaskBounds.left > validDragArea.right) {
+            repositionTaskBounds.offset(validDragArea.right - repositionTaskBounds.left, 0);
+            result = true;
+        }
+        if (repositionTaskBounds.top < validDragArea.top) {
+            repositionTaskBounds.offset(0, validDragArea.top - repositionTaskBounds.top);
+            result = true;
+        } else if (repositionTaskBounds.top > validDragArea.bottom) {
+            repositionTaskBounds.offset(0, validDragArea.bottom - repositionTaskBounds.top);
+            result = true;
+        }
+        return result;
     }
 
     private static float getMinWidth(DisplayController displayController,

@@ -32,7 +32,8 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:paddingStart="@dimen/settingslib_switchbar_padding_left"
-        android:paddingEnd="@dimen/settingslib_switchbar_padding_right">
+        android:paddingEnd="@dimen/settingslib_switchbar_padding_right"
+        android:background="@drawable/settingslib_switch_bar_bg">
 
         <TextView
             android:id="@+id/switch_text"

@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lader"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lader raskt"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lader sakte"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladingen er optimalisert for å beskytte batteriet"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problem med ladetilbehøret"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Trykk på menyknappen for å låse opp."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladingen er satt på vent for å beskytte batteriet"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> · Sjekk ladetilbehøret"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Nettverket er låst"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Ingen SIM-kort"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Legg til et SIM-kort."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM-kortet mangler eller kan ikke leses. Legg til et SIM-kort."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM-kortet kan ikke brukes."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM-kortet er deaktivert permanent.\n Kontakt leverandøren av trådløstjenesten for å få et nytt SIM-kort."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-kortet er låst."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM-kortet er låst med PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Låser opp SIM-kortet …"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"PIN-koden kreves etter låsing"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Passordet kreves etter låsing"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Mønsteret kreves etter låsing"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Oppdateringen installeres når enheten er inaktiv"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Oppdateringen installeres når enheten ikke brukes"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Økt sikkerhet kreves. Har ikke brukt PIN-koden nylig"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Økt sikkerhet kreves. Har ikke brukt passordet nylig"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Økt sikkerhet kreves. Har ikke brukt mønsteret nylig"</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Bruk mønster i stedet, for å øke sikkerheten"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Bruk PIN-kode i stedet, for å øke sikkerheten"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Bruk passord i stedet, for å øke sikkerheten"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Du må skrive inn PIN-koden for ekstra sikkerhet"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Du må tegne mønsteret for ekstra sikkerhet"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Du må skrive inn passordet for ekstra sikkerhet"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Enheten er låst av administratoren"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Enheten ble låst manuelt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ikke gjenkjent"</string>

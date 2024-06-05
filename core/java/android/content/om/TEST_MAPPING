@@ -18,17 +18,10 @@
       "name": "OverlayHostTests"
     },
     {
-      "name": "CtsAppSecurityHostTestCases",
-      "options": [
-        {
-          "include-filter": "android.appsecurity.cts.OverlayHostTest"
-        }
-      ]
-    }
-  ],
-  "presubmit-large": [
+      "name": "CtsOverlayHostTestCases"
+    },
     {
-      "name": "CtsContentTestCases",
+      "name": "CtsResourcesTestCases",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"

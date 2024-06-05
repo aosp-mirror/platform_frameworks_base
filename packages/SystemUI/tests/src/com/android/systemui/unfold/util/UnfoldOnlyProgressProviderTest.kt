@@ -16,9 +16,10 @@
 package com.android.systemui.unfold.util
 
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.unfold.TestUnfoldTransitionProvider
+import com.android.systemui.unfold.FakeUnfoldTransitionProvider
 import com.android.systemui.unfold.progress.TestUnfoldProgressListener
 import com.google.common.util.concurrent.MoreExecutors
 import org.junit.Before
@@ -27,10 +28,11 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
+@TestableLooper.RunWithLooper
 class UnfoldOnlyProgressProviderTest : SysuiTestCase() {
 
     private val listener = TestUnfoldProgressListener()
-    private val sourceProvider = TestUnfoldTransitionProvider()
+    private val sourceProvider = FakeUnfoldTransitionProvider()
 
     private val foldProvider = TestFoldProvider()
 
@@ -54,9 +56,7 @@ class UnfoldOnlyProgressProviderTest : SysuiTestCase() {
         sourceProvider.onTransitionProgress(0.5f)
         sourceProvider.onTransitionFinished()
 
-        with(listener.ensureTransitionFinished()) {
-            assertLastProgress(0.5f)
-        }
+        with(listener.ensureTransitionFinished()) { assertLastProgress(0.5f) }
     }
 
     @Test
@@ -121,8 +121,6 @@ class UnfoldOnlyProgressProviderTest : SysuiTestCase() {
         sourceProvider.onTransitionProgress(0.1f)
         sourceProvider.onTransitionFinished()
 
-        with(listener.ensureTransitionFinished()) {
-            assertLastProgress(0.1f)
-        }
+        with(listener.ensureTransitionFinished()) { assertLastProgress(0.1f) }
     }
 }

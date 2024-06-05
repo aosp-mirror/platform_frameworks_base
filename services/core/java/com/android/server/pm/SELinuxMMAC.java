@@ -68,12 +68,12 @@ public final class SELinuxMMAC {
 
     // All policy stanzas read from mac_permissions.xml. This is also the lock
     // to synchronize access during policy load and access attempts.
-    private static List<Policy> sPolicies = new ArrayList<>();
+    private static final List<Policy> sPolicies = new ArrayList<>();
     /** Whether or not the policy files have been read */
     private static boolean sPolicyRead;
 
     /** Required MAC permissions files */
-    private static List<File> sMacPermissions = new ArrayList<>();
+    private static final List<File> sMacPermissions = new ArrayList<>();
 
     private static final String DEFAULT_SEINFO = "default";
 
@@ -82,6 +82,8 @@ public final class SELinuxMMAC {
 
     // Append targetSdkVersion=n to existing seinfo label where n is the app's targetSdkVersion
     private static final String TARGETSDKVERSION_STR = ":targetSdkVersion=";
+
+    private static final String PARTITION_STR = ":partition=";
 
     /**
      * Allows opt-in to the latest targetSdkVersion enforced changes without changing target SDK.
@@ -373,15 +375,33 @@ public final class SELinuxMMAC {
         return pkg.getTargetSdkVersion();
     }
 
+    private static String getPartition(PackageState state) {
+        if (state.isSystemExt()) {
+            return "system_ext";
+        } else if (state.isProduct()) {
+            return "product";
+        } else if (state.isVendor()) {
+            return "vendor";
+        } else if (state.isOem()) {
+            return "oem";
+        } else if (state.isOdm()) {
+            return "odm";
+        } else if (state.isSystem()) {
+            return "system";
+        }
+        return "";
+    }
+
     /**
      * Selects a security label to a package based on input parameters and the seinfo tag taken
      * from a matched policy. All signature based policy stanzas are consulted and, if no match
      * is found, the default seinfo label of 'default' is used. The security label is attached to
      * the ApplicationInfo instance of the package.
      *
-     * @param pkg               object representing the package to be labeled.
-     * @param sharedUser if the app shares a sharedUserId, then this has the shared setting.
-     * @param compatibility     the PlatformCompat service to ask about state of compat changes.
+     * @param packageState  {@link PackageState} object representing the package to be labeled.
+     * @param pkg           {@link AndroidPackage} object representing the package to be labeled.
+     * @param sharedUser    if the app shares a sharedUserId, then this has the shared setting.
+     * @param compatibility the PlatformCompat service to ask about state of compat changes.
      * @return String representing the resulting seinfo.
      */
     public static String getSeInfo(@NonNull PackageState packageState, @NonNull AndroidPackage pkg,
@@ -393,7 +413,7 @@ public final class SELinuxMMAC {
         final boolean isPrivileged =
                 (sharedUser != null) ? sharedUser.isPrivileged() | packageState.isPrivileged()
                         : packageState.isPrivileged();
-        return getSeInfo(pkg, isPrivileged, targetSdkVersion);
+        return getSeInfo(packageState, pkg, isPrivileged, targetSdkVersion);
     }
 
     /**
@@ -402,15 +422,16 @@ public final class SELinuxMMAC {
      * is found, the default seinfo label of 'default' is used. The security label is attached to
      * the ApplicationInfo instance of the package.
      *
-     * @param pkg object representing the package to be labeled.
-     * @param isPrivileged boolean.
+     * @param packageState     {@link PackageState} object representing the package to be labeled.
+     * @param pkg              {@link AndroidPackage} object representing the package to be labeled.
+     * @param isPrivileged     boolean.
      * @param targetSdkVersion int. If this pkg runs as a sharedUser, targetSdkVersion is the
      *        greater of: lowest targetSdk for all pkgs in the sharedUser, or
      *        MINIMUM_TARGETSDKVERSION.
      * @return String representing the resulting seinfo.
      */
-    public static String getSeInfo(AndroidPackage pkg, boolean isPrivileged,
-            int targetSdkVersion) {
+    public static String getSeInfo(PackageState packageState, AndroidPackage pkg,
+            boolean isPrivileged, int targetSdkVersion) {
         String seInfo = null;
         synchronized (sPolicies) {
             if (!sPolicyRead) {
@@ -437,8 +458,13 @@ public final class SELinuxMMAC {
 
         seInfo += TARGETSDKVERSION_STR + targetSdkVersion;
 
+        String partition = getPartition(packageState);
+        if (!partition.isEmpty()) {
+            seInfo += PARTITION_STR + partition;
+        }
+
         if (DEBUG_POLICY_INSTALL) {
-            Slog.i(TAG, "package (" + pkg.getPackageName() + ") labeled with "
+            Slog.i(TAG, "package (" + packageState.getPackageName() + ") labeled with "
                     + "seinfo=" + seInfo);
         }
         return seInfo;
@@ -579,7 +605,7 @@ final class Policy {
         // Check for exact signature matches across all certs.
         Signature[] certs = mCerts.toArray(new Signature[0]);
         if (pkg.getSigningDetails() != SigningDetails.UNKNOWN
-                && !Signature.areExactMatch(certs, pkg.getSigningDetails().getSignatures())) {
+                && !Signature.areExactMatch(pkg.getSigningDetails(), certs)) {
 
             // certs aren't exact match, but the package may have rotated from the known system cert
             if (certs.length > 1 || !pkg.getSigningDetails().hasCertificate(certs[0])) {

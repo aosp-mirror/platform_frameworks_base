@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.BatterySaverPolicyConfig;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -44,6 +45,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
 import com.android.server.power.BatterySaverStateMachineProto;
+import com.android.server.power.PowerManagerService;
 
 import java.io.PrintWriter;
 import java.time.Duration;
@@ -96,6 +98,9 @@ public class BatterySaverStateMachine {
     private static final String TAG = "BatterySaverStateMachine";
     private static final String DYNAMIC_MODE_NOTIF_CHANNEL_ID = "dynamic_mode_notification";
     private static final String BATTERY_SAVER_NOTIF_CHANNEL_ID = "battery_saver_channel";
+    private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
+    private static final String EXTRA_SHOW_FRAGMENT_TITLE = ":settings:show_fragment_args";
+    private static final String PREFERENCE_KEY_BATTERY_SAVER_SCHEDULER = "battery_saver_schedule";
     private static final int DYNAMIC_MODE_NOTIFICATION_ID = 1992;
     private static final int STICKY_AUTO_DISABLED_NOTIFICATION_ID = 1993;
     private final Object mLock;
@@ -165,6 +170,9 @@ public class BatterySaverStateMachine {
 
     /** Config flag to track if battery saver's sticky behaviour is disabled. */
     private final boolean mBatterySaverStickyBehaviourDisabled;
+
+    /** Config flag to track if "Battery Saver turned off" notification is enabled. */
+    private final boolean mBatterySaverTurnedOffNotificationEnabled;
 
     /**
      * Whether or not to end sticky battery saver upon reaching a level specified by
@@ -249,8 +257,28 @@ public class BatterySaverStateMachine {
 
         mBatterySaverStickyBehaviourDisabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled);
+        mBatterySaverTurnedOffNotificationEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_batterySaverTurnedOffNotificationEnabled);
         mDynamicPowerSavingsDefaultDisableThreshold = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_dynamicPowerSavingsDefaultDisableThreshold);
+    }
+
+    /**
+     * Called by {@link PowerManagerService} on system ready, *with no lock held*.
+     */
+    public void systemReady() {
+        mBatterySaverController.systemReady();
+        getBatterySaverPolicy().systemReady();
+    }
+
+    /** @return Battery saver controller. */
+    public BatterySaverController getBatterySaverController() {
+        return mBatterySaverController;
+    }
+
+    /** @return Battery saver policy. */
+    public BatterySaverPolicy getBatterySaverPolicy() {
+        return mBatterySaverController.getBatterySaverPolicy();
     }
 
     /** @return true if the automatic percentage based mode should be used */
@@ -807,7 +835,11 @@ public class BatterySaverStateMachine {
         // Handle triggering the notification to show/hide when appropriate
         if (intReason == BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON
                 || intReason == BatterySaverController.REASON_PERCENTAGE_AUTOMATIC_ON) {
-            triggerDynamicModeNotification();
+            if (Flags.updateAutoTurnOnNotificationStringAndAction()) {
+                triggerDynamicModeNotificationV2();
+            } else {
+                triggerDynamicModeNotification();
+            }
         } else if (!enable) {
             hideDynamicModeNotification();
         }
@@ -838,7 +870,35 @@ public class BatterySaverStateMachine {
     }
 
     @VisibleForTesting
+    void triggerDynamicModeNotificationV2() {
+        // The current lock is the PowerManager lock, which sits very low in the service lock
+        // hierarchy. We shouldn't call out to NotificationManager with the PowerManager lock.
+        runOnBgThread(() -> {
+            NotificationManager manager = mContext.getSystemService(NotificationManager.class);
+            ensureNotificationChannelExists(manager, DYNAMIC_MODE_NOTIF_CHANNEL_ID,
+                    R.string.dynamic_mode_notification_channel_name);
+
+            // The bundle is used for highlighting a settings item when launching the settings page.
+            final var highlightBundle = new Bundle(1 /* capacity */);
+            highlightBundle.putString(
+                    EXTRA_FRAGMENT_ARG_KEY, PREFERENCE_KEY_BATTERY_SAVER_SCHEDULER);
+
+            manager.notifyAsUser(TAG, DYNAMIC_MODE_NOTIFICATION_ID,
+                    buildNotificationV2(DYNAMIC_MODE_NOTIF_CHANNEL_ID,
+                            R.string.dynamic_mode_notification_title_v2,
+                            R.string.dynamic_mode_notification_summary_v2,
+                            Settings.ACTION_BATTERY_SAVER_SETTINGS,
+                            0L /* timeoutMs */,
+                            highlightBundle),
+                    UserHandle.ALL);
+        });
+    }
+
+    @VisibleForTesting
     void triggerStickyDisabledNotification() {
+        if (!mBatterySaverTurnedOffNotificationEnabled) {
+            return;
+        }
         // The current lock is the PowerManager lock, which sits very low in the service lock
         // hierarchy. We shouldn't call out to NotificationManager with the PowerManager lock.
         runOnBgThread(() -> {
@@ -870,6 +930,32 @@ public class BatterySaverStateMachine {
         Resources res = mContext.getResources();
         Intent intent = new Intent(intentAction);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent batterySaverIntent = PendingIntent.getActivity(
+                mContext, 0 /* requestCode */, intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+        final String title = res.getString(titleId);
+        final String summary = res.getString(summaryId);
+
+        return new Notification.Builder(mContext, channelId)
+                .setSmallIcon(R.drawable.ic_battery)
+                .setContentTitle(title)
+                .setContentText(summary)
+                .setContentIntent(batterySaverIntent)
+                .setStyle(new Notification.BigTextStyle().bigText(summary))
+                .setOnlyAlertOnce(true)
+                .setAutoCancel(true)
+                .setTimeoutAfter(timeoutMs)
+                .build();
+    }
+
+    private Notification buildNotificationV2(@NonNull String channelId, @StringRes int titleId,
+            @StringRes int summaryId, @NonNull String intentAction, long timeoutMs,
+            @NonNull Bundle highlightBundle) {
+        Resources res = mContext.getResources();
+        Intent intent = new Intent(intentAction)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                .putExtra(EXTRA_SHOW_FRAGMENT_TITLE, highlightBundle);
+
         PendingIntent batterySaverIntent = PendingIntent.getActivity(
                 mContext, 0 /* requestCode */, intent,
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
@@ -937,8 +1023,7 @@ public class BatterySaverStateMachine {
             ipw.print(mBatterySaverController.isAdaptiveEnabled());
             if (mBatterySaverController.isAdaptiveEnabled()) {
                 ipw.print(" (advertise=");
-                ipw.print(
-                        mBatterySaverController.getBatterySaverPolicy().shouldAdvertiseIsEnabled());
+                ipw.print(getBatterySaverPolicy().shouldAdvertiseIsEnabled());
                 ipw.print(")");
             }
             ipw.decreaseIndent();
@@ -979,6 +1064,8 @@ public class BatterySaverStateMachine {
             ipw.println(mSettingBatterySaverTriggerThreshold);
             ipw.print("mBatterySaverStickyBehaviourDisabled=");
             ipw.println(mBatterySaverStickyBehaviourDisabled);
+            ipw.print("mBatterySaverTurnedOffNotificationEnabled=");
+            ipw.println(mBatterySaverTurnedOffNotificationEnabled);
 
             ipw.print("mDynamicPowerSavingsDefaultDisableThreshold=");
             ipw.println(mDynamicPowerSavingsDefaultDisableThreshold);
@@ -1005,7 +1092,7 @@ public class BatterySaverStateMachine {
             proto.write(BatterySaverStateMachineProto.IS_ADAPTIVE_ENABLED,
                     mBatterySaverController.isAdaptiveEnabled());
             proto.write(BatterySaverStateMachineProto.SHOULD_ADVERTISE_IS_ENABLED,
-                    mBatterySaverController.getBatterySaverPolicy().shouldAdvertiseIsEnabled());
+                    getBatterySaverPolicy().shouldAdvertiseIsEnabled());
 
             proto.write(BatterySaverStateMachineProto.BOOT_COMPLETED, mBootCompleted);
             proto.write(BatterySaverStateMachineProto.SETTINGS_LOADED, mSettingsLoaded);

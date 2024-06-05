@@ -31,7 +31,6 @@ import android.util.Log;
 
 import javax.inject.Inject;
 
-
 /**
  * Executes the smart action tapped by the user in the notification.
  */
@@ -55,7 +54,8 @@ public class SmartActionsReceiver extends BroadcastReceiver {
             Log.d(TAG, "Executing smart action [" + actionType + "]:" + pendingIntent.getIntent());
         }
         ActivityOptions opts = ActivityOptions.makeBasic();
-
+        opts.setPendingIntentBackgroundActivityStartMode(
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
         try {
             pendingIntent.send(context, 0, fillIn, null, null, null, opts.toBundle());
         } catch (PendingIntent.CanceledException e) {

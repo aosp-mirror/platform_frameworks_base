@@ -16,7 +16,8 @@
 
 package android.window;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.view.Surface.ROTATION_0;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 
@@ -31,6 +32,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.WindowInsets;
@@ -80,7 +82,7 @@ public final class WindowMetricsController {
         final Rect bounds;
         final float density;
         final boolean isScreenRound;
-        final int windowingMode;
+        final int activityType;
         synchronized (ResourcesManager.getInstance()) {
             final Configuration config = mContext.getResources().getConfiguration();
             final WindowConfiguration winConfig = config.windowConfiguration;
@@ -90,11 +92,11 @@ public final class WindowMetricsController {
             // as DisplayMetrics#density
             density = config.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
             isScreenRound = config.isScreenRound();
-            windowingMode = winConfig.getWindowingMode();
+            activityType = winConfig.getActivityType();
         }
         final IBinder token = Context.getToken(mContext);
         final Supplier<WindowInsets> insetsSupplier = () -> getWindowInsetsFromServerForDisplay(
-                mContext.getDisplayId(), token, bounds, isScreenRound, windowingMode);
+                mContext.getDisplayId(), token, bounds, isScreenRound, activityType);
         return new WindowMetrics(new Rect(bounds), insetsSupplier, density);
     }
 
@@ -105,23 +107,22 @@ public final class WindowMetricsController {
      * @param token the token of Activity or WindowContext
      * @param bounds the window bounds to calculate insets for
      * @param isScreenRound if the display identified by displayId is round
-     * @param windowingMode the windowing mode of the window to calculate insets for
+     * @param activityType the activity type of the window to calculate insets for
      * @return WindowInsets calculated for the given window bounds, on the given display
      */
     private static WindowInsets getWindowInsetsFromServerForDisplay(int displayId, IBinder token,
-            Rect bounds, boolean isScreenRound, int windowingMode) {
+            Rect bounds, boolean isScreenRound, int activityType) {
         try {
             final InsetsState insetsState = new InsetsState();
-            final boolean alwaysConsumeSystemBars = WindowManagerGlobal.getWindowManagerService()
-                    .getWindowInsets(displayId, token, insetsState);
+            WindowManagerGlobal.getWindowManagerService().getWindowInsets(
+                    displayId, token, insetsState);
             final float overrideInvScale = CompatibilityInfo.getOverrideInvertedScale();
             if (overrideInvScale != 1f) {
                 insetsState.scale(overrideInvScale);
             }
             return insetsState.calculateInsets(bounds, null /* ignoringVisibilityState */,
-                    isScreenRound, alwaysConsumeSystemBars, SOFT_INPUT_ADJUST_NOTHING,
-                    0 /* flags */, SYSTEM_UI_FLAG_VISIBLE,
-                    WindowManager.LayoutParams.INVALID_WINDOW_TYPE, windowingMode,
+                    isScreenRound, SOFT_INPUT_ADJUST_NOTHING, 0 /* flags */, SYSTEM_UI_FLAG_VISIBLE,
+                    WindowManager.LayoutParams.INVALID_WINDOW_TYPE, activityType,
                     null /* idSideMap */);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -145,23 +146,28 @@ public final class WindowMetricsController {
         for (int i = 0; i < possibleDisplayInfos.size(); i++) {
             currentDisplayInfo = possibleDisplayInfos.get(i);
 
-            // Calculate max bounds for this rotation and state.
-            Rect maxBounds = new Rect(0, 0, currentDisplayInfo.logicalWidth,
-                    currentDisplayInfo.logicalHeight);
+            // Calculate max bounds for natural rotation and state.
+            Rect maxBounds = new Rect(0, 0, currentDisplayInfo.getNaturalWidth(),
+                    currentDisplayInfo.getNaturalHeight());
 
-            // Calculate insets for the rotated max bounds.
+            // Calculate insets for the natural max bounds.
             final boolean isScreenRound = (currentDisplayInfo.flags & Display.FLAG_ROUND) != 0;
-            // Initialize insets based upon display rotation. Note any window-provided insets
+            // Initialize insets based on Surface.ROTATION_0. Note any window-provided insets
             // will not be set.
             windowInsets = getWindowInsetsFromServerForDisplay(
                     currentDisplayInfo.displayId, null /* token */,
                     new Rect(0, 0, currentDisplayInfo.getNaturalWidth(),
                             currentDisplayInfo.getNaturalHeight()), isScreenRound,
-                    WINDOWING_MODE_FULLSCREEN);
-            // Set the hardware-provided insets.
+                    ACTIVITY_TYPE_UNDEFINED);
+            // Set the hardware-provided insets. Always with the ROTATION_0 result.
+            DisplayCutout cutout = currentDisplayInfo.displayCutout;
+            if (cutout != null && currentDisplayInfo.rotation != ROTATION_0) {
+                cutout = cutout.getRotated(
+                        currentDisplayInfo.logicalWidth, currentDisplayInfo.logicalHeight,
+                        currentDisplayInfo.rotation, ROTATION_0);
+            }
             windowInsets = new WindowInsets.Builder(windowInsets).setRoundedCorners(
-                            currentDisplayInfo.roundedCorners)
-                    .setDisplayCutout(currentDisplayInfo.displayCutout).build();
+                    currentDisplayInfo.roundedCorners).setDisplayCutout(cutout).build();
 
             // Multiply default density scale because WindowMetrics provide the density value with
             // the scaling factor for the Density Independent Pixel unit, which is the same unit

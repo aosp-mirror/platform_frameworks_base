@@ -26,6 +26,7 @@ import static android.service.notification.NotificationListenerService.REASON_CL
 import static android.service.notification.NotificationStats.DISMISSAL_SHADE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_NOT_CANCELED;
 import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_UNKNOWN;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.DISMISSED;
@@ -47,6 +48,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -120,7 +122,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
     @Mock private IStatusBarService mStatusBarService;
     @Mock private NotifPipelineFlags mNotifPipelineFlags;
-    @Mock private NotifCollectionLogger mLogger;
+    private final NotifCollectionLogger mLogger = spy(new NotifCollectionLogger(logcatLogBuffer()));
     @Mock private LogBufferEulogizer mEulogizer;
     @Mock private Handler mMainHandler;
 

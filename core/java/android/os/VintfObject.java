@@ -17,9 +17,11 @@
 package android.os;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.util.Slog;
+import android.app.ActivityThread;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -31,6 +33,10 @@ import java.util.Map;
 public class VintfObject {
 
     private static final String LOG_TAG = "VintfObject";
+
+    static {
+        System.loadLibrary("vintf_jni");
+    }
 
     /**
      * Slurps all device information (both manifests and both matrices)
@@ -44,44 +50,8 @@ public class VintfObject {
     public static native String[] report();
 
     /**
-     * Verify that the given metadata for an OTA package is compatible with
-     * this device.
-     *
-     * @param packageInfo a list of serialized form of HalManifest's /
-     * CompatibilityMatri'ces (XML).
-     * @return = 0 if success (compatible)
-     *         &gt; 0 if incompatible
-     *         &lt; 0 if any error (mount partition fails, illformed XML, etc.)
-     *
-     * @deprecated Checking compatibility against an OTA package is no longer
-     * supported because the format of VINTF metadata in the OTA package may not
-     * be recognized by the current system.
-     *
-     * <p>
-     * <ul>
-     * <li>This function always returns 0 for non-empty {@code packageInfo}.
-     * </li>
-     * <li>This function returns the result of {@link #verifyWithoutAvb} for
-     * null or empty {@code packageInfo}.</li>
-     * </ul>
-     *
-     * @hide
-     */
-    @Deprecated
-    public static int verify(String[] packageInfo) {
-        if (packageInfo != null && packageInfo.length > 0) {
-            Slog.w(LOG_TAG, "VintfObject.verify() with non-empty packageInfo is deprecated. "
-                    + "Skipping compatibility checks for update package.");
-            return 0;
-        }
-        Slog.w(LOG_TAG, "VintfObject.verify() is deprecated. Call verifyWithoutAvb() instead.");
-        return verifyWithoutAvb();
-    }
-
-    /**
-     * Verify Vintf compatibility on the device without checking AVB
-     * (Android Verified Boot). It is useful to verify a running system
-     * image where AVB check is irrelevant.
+     * Verify Vintf compatibility on the device at boot time. Certain checks
+     * like kernel checks, AVB checks are disabled.
      *
      * @return = 0 if success (compatible)
      *         > 0 if incompatible
@@ -89,7 +59,7 @@ public class VintfObject {
      *
      * @hide
      */
-    public static native int verifyWithoutAvb();
+    public static native int verifyBuildAtBoot();
 
     /**
      * @return a list of HAL names and versions that is supported by this
@@ -145,6 +115,21 @@ public class VintfObject {
      */
     @TestApi
     public static native Long getTargetFrameworkCompatibilityMatrixVersion();
+
+    /**
+     * Executes a shell command using shell user identity, and return the standard output in string.
+     *
+     * @hide
+     */
+    private static @Nullable String runShellCommand(@NonNull String command) throws IOException {
+        var activityThread = ActivityThread.currentActivityThread();
+        var instrumentation = activityThread.getInstrumentation();
+        var automation = instrumentation.getUiAutomation();
+        var pfd = automation.executeShellCommand(command);
+        try (var is = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
+            return new String(is.readAllBytes());
+        }
+    }
 
     private VintfObject() {}
 }

@@ -16,9 +16,16 @@
 
 package android.content.pm;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArraySet;
+
+import java.security.PublicKey;
+import java.util.Collection;
 
 /**
  * Information pertaining to the signing certificates used to sign a package.
@@ -30,6 +37,43 @@ public final class SigningInfo implements Parcelable {
 
     public SigningInfo() {
         mSigningDetails = SigningDetails.UNKNOWN;
+    }
+
+    /**
+     * Creates a new instance of information used to sign the APK.
+     *
+     * @param schemeVersion version of signing schema.
+     * @param apkContentsSigners signing certificates.
+     * @param publicKeys for the signing certificates.
+     * @param signingCertificateHistory All signing certificates the package has proven it is
+     *                                  authorized to use.
+     *
+     * @see
+     * <a href="https://source.android.com/docs/security/features/apksigning#schemes">APK signing
+     * schemas</a>
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public SigningInfo(@SignatureSchemeVersion int schemeVersion,
+            @Nullable Collection<Signature> apkContentsSigners,
+            @Nullable Collection<PublicKey> publicKeys,
+            @Nullable Collection<Signature> signingCertificateHistory) {
+        if (schemeVersion <= 0 || apkContentsSigners == null) {
+            mSigningDetails = SigningDetails.UNKNOWN;
+            return;
+        }
+        Signature[] signatures = apkContentsSigners != null && !apkContentsSigners.isEmpty()
+                ? apkContentsSigners.toArray(new Signature[apkContentsSigners.size()])
+                : null;
+        Signature[] pastSignatures =
+                signingCertificateHistory != null && !signingCertificateHistory.isEmpty()
+                ? signingCertificateHistory.toArray(new Signature[signingCertificateHistory.size()])
+                : null;
+        if (Signature.areExactArraysMatch(signatures, pastSignatures)) {
+            pastSignatures = null;
+        }
+        ArraySet<PublicKey> keys =
+                publicKeys != null && !publicKeys.isEmpty() ? new ArraySet<>(publicKeys) : null;
+        mSigningDetails = new SigningDetails(signatures, schemeVersion, keys, pastSignatures);
     }
 
     /**
@@ -116,6 +160,26 @@ public final class SigningInfo implements Parcelable {
         return mSigningDetails.getSignatures();
     }
 
+    /**
+     * Returns the version of signing schema used to sign the APK.
+     *
+     * @see
+     * <a href="https://source.android.com/docs/security/features/apksigning#schemes">APK signing
+     * schemas</a>
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public @SignatureSchemeVersion int getSchemeVersion() {
+        return mSigningDetails.getSignatureSchemeVersion();
+    }
+
+    /**
+     * Returns the public keys for the signing certificates.
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public @NonNull Collection<PublicKey> getPublicKeys() {
+        return mSigningDetails.getPublicKeys();
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -124,6 +188,14 @@ public final class SigningInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         mSigningDetails.writeToParcel(dest, parcelableFlags);
+    }
+
+    /**
+     *  @hide
+     */
+    @NonNull
+    public SigningDetails getSigningDetails() {
+        return mSigningDetails;
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<SigningInfo> CREATOR =

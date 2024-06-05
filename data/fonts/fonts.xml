@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
+    DEPRECATED: This XML file is no longer a source of the font files installed
+    in the system.
+
+    For the device vendors: please add your font configurations to the
+    platform/frameworks/base/data/font_fallback.xml and also add it to this XML
+    file as much as possible for apps that reads this XML file.
+
+    For the application developers: please stop reading this XML file and use
+    android.graphics.fonts.SystemFonts#getAvailableFonts Java API or
+    ASystemFontIterator_open NDK API for getting list of system installed
+    font files.
+
     WARNING: Parsing of this file by third-party apps is not supported. The
     file, and the font files it refers to, will be renamed and/or moved out
     from their respective location in the next Android release, and/or the
@@ -276,6 +288,99 @@
         <font weight="700" style="italic">SourceSansPro-BoldItalic.ttf</font>
     </family>
     <alias name="source-sans-pro-semi-bold" to="source-sans-pro" weight="600"/>
+
+    <family name="roboto-flex">
+        <font weight="100" style="normal">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="0" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="100" />
+        </font>
+        <font weight="200" style="normal">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="0" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="200" />
+        </font>
+        <font weight="300" style="normal">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="0" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="300" />
+        </font>
+        <font weight="400" style="normal">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="0" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="400" />
+        </font>
+        <font weight="500" style="normal">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="0" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="500" />
+        </font>
+        <font weight="600" style="normal">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="0" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="600" />
+        </font>
+        <font weight="700" style="normal">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="0" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="700" />
+        </font>
+        <font weight="800" style="normal">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="0" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="800" />
+        </font>
+        <font weight="900" style="normal">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="0" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="900" />
+        </font>
+        <font weight="100" style="italic">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="-10" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="100" />
+        </font>
+        <font weight="200" style="italic">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="-10" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="200" />
+        </font>
+        <font weight="300" style="italic">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="-10" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="300" />
+        </font>
+        <font weight="400" style="italic">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="-10" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="400" />
+        </font>
+        <font weight="500" style="italic">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="-10" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="500" />
+        </font>
+        <font weight="600" style="italic">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="-10" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="600" />
+        </font>
+        <font weight="700" style="italic">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="-10" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="700" />
+        </font>
+        <font weight="800" style="italic">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="-10" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="800" />
+        </font>
+        <font weight="900" style="italic">RobotoFlex-Regular.ttf
+          <axis tag="slnt" stylevalue="-10" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="900" />
+        </font>
+    </family>
 
     <!-- fallback fonts -->
     <family lang="und-Arab" variant="elegant">
@@ -1325,6 +1430,16 @@
         </font>
         <font weight="400" style="normal" index="0" fallbackFor="serif"
               postScriptName="NotoSerifCJKjp-Regular">NotoSerifCJK-Regular.ttc
+        </font>
+    </family>
+    <family lang="ja">
+        <font weight="400" style="normal" postScriptName="NotoSerifHentaigana-ExtraLight">
+            NotoSerifHentaigana.ttf
+            <axis tag="wght" stylevalue="400"/>
+        </font>
+        <font weight="700" style="normal" postScriptName="NotoSerifHentaigana-ExtraLight">
+            NotoSerifHentaigana.ttf
+            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="ko">

@@ -34,6 +34,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.DurationMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -46,10 +47,12 @@ import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
+import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.IIntentReceiver;
-import android.content.IIntentSender;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.PackageManager.InstallReason;
@@ -58,15 +61,14 @@ import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.pm.verify.domain.DomainSet;
 import android.graphics.Bitmap;
 import android.icu.util.ULocale;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.FileBridge;
 import android.os.Handler;
 import android.os.HandlerExecutor;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -148,6 +150,9 @@ import java.util.function.Consumer;
 public class PackageInstaller {
     private static final String TAG = "PackageInstaller";
 
+    private static final String ACTION_WAIT_INSTALL_CONSTRAINTS =
+            "android.content.pm.action.WAIT_INSTALL_CONSTRAINTS";
+
     /** {@hide} */
     public static final boolean ENABLE_REVOCABLE_FD =
             SystemProperties.getBoolean("fw.revocable_fd", false);
@@ -172,6 +177,10 @@ public class PackageInstaller {
      * Broadcast Action: Explicit broadcast sent to the last known default launcher when a session
      * for a new install is committed. For managed profile, this is sent to the default launcher
      * of the primary profile.
+     * For user-profiles that have items restricted on home screen, this broadcast is sent to
+     * the default launcher of the primary profile, only if it has either
+     * {@link Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL} or
+     * {@link Manifest.permission.ACCESS_HIDDEN_PROFILES} permission.
      * <p>
      * The associated session is defined in {@link #EXTRA_SESSION} and the user for which this
      * session was created in {@link Intent#EXTRA_USER}.
@@ -319,6 +328,14 @@ public class PackageInstaller {
      */
     @SystemApi
     public static final String EXTRA_CALLBACK = "android.content.pm.extra.CALLBACK";
+    /**
+     * Key for passing extra delete flags during archiving.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
+    public static final String EXTRA_DELETE_FLAGS = "android.content.pm.extra.DELETE_FLAGS";
 
     /**
      * Type of DataLoader for this session. Will be one of
@@ -339,10 +356,66 @@ public class PackageInstaller {
      * point at the existing base APK (when adding splits to an existing app).
      *
      * @hide
+     * @deprecated Resolved base path of an install session should not be available to unauthorized
+     * callers. Use {@link SessionInfo#getResolvedBaseApkPath()} instead.
      */
+    @Deprecated
     @SystemApi
     public static final String EXTRA_RESOLVED_BASE_PATH =
             "android.content.pm.extra.RESOLVED_BASE_PATH";
+
+    /**
+     * Extra field for the package name of a package that is requested to be unarchived. Sent as
+     * part of the {@link android.content.Intent#ACTION_UNARCHIVE_PACKAGE} intent.
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final String EXTRA_UNARCHIVE_PACKAGE_NAME =
+            "android.content.pm.extra.UNARCHIVE_PACKAGE_NAME";
+
+    /**
+     * Extra field for the unarchive ID. Sent as
+     * part of the {@link android.content.Intent#ACTION_UNARCHIVE_PACKAGE} intent.
+     *
+     * @see SessionParams#setUnarchiveId
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final String EXTRA_UNARCHIVE_ID =
+            "android.content.pm.extra.UNARCHIVE_ID";
+
+    /**
+     * If true, the requestor of the unarchival has specified that the app should be unarchived
+     * for all users. Sent as part of the {@link android.content.Intent#ACTION_UNARCHIVE_PACKAGE}
+     * intent.
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final String EXTRA_UNARCHIVE_ALL_USERS =
+            "android.content.pm.extra.UNARCHIVE_ALL_USERS";
+
+    /**
+     * Current status of an unarchive operation. Will be one of
+     * {@link #UNARCHIVAL_OK}, {@link #UNARCHIVAL_ERROR_USER_ACTION_NEEDED},
+     * {@link #UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE}, {@link #UNARCHIVAL_ERROR_NO_CONNECTIVITY},
+     * {@link #UNARCHIVAL_GENERIC_ERROR}, {@link #UNARCHIVAL_ERROR_INSTALLER_DISABLED} or
+     * {@link #UNARCHIVAL_ERROR_INSTALLER_UNINSTALLED}.
+     *
+     * <p> If the status is not {@link #UNARCHIVAL_OK}, then {@link Intent#EXTRA_INTENT} will be set
+     * with an intent for a corresponding follow-up action (e.g. storage clearing dialog) or a
+     * failure dialog.
+     *
+     * <p> Used as part of {@link #requestUnarchive} to return the status of the unarchival through
+     * the {@link IntentSender}.
+     *
+     * @see #requestUnarchive
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final String EXTRA_UNARCHIVE_STATUS = "android.content.pm.extra.UNARCHIVE_STATUS";
+
+    /**
+     * A list of warnings that occurred during installation.
+     *
+     * @hide
+     */
+    public static final String EXTRA_WARNINGS = "android.content.pm.extra.WARNINGS";
 
     /**
      * Streaming installation pending.
@@ -602,6 +675,91 @@ public class PackageInstaller {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserActionReason {}
+
+    /**
+     * The unarchival status is not set.
+     *
+     * @hide
+     */
+    public static final int UNARCHIVAL_STATUS_UNSET = -1;
+
+    /**
+     * The unarchival is possible and will commence.
+     *
+     * <p> Note that this does not mean that the unarchival has completed. This status should be
+     * sent before any longer asynchronous action (e.g. app download) is started.
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final int UNARCHIVAL_OK = 0;
+
+    /**
+     * The user needs to interact with the installer to enable the installation.
+     *
+     * <p> An example use case for this could be that the user needs to login to allow the
+     * download for a paid app.
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final int UNARCHIVAL_ERROR_USER_ACTION_NEEDED = 1;
+
+    /**
+     * Not enough storage to unarchive the application.
+     *
+     * <p> The installer can optionally provide a {@code userActionIntent} for a space-clearing
+     * dialog. If no action is provided, then a generic intent
+     * {@link android.os.storage.StorageManager#ACTION_MANAGE_STORAGE} is started instead.
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final int UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE = 2;
+
+    /**
+     * The device is not connected to the internet
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final int UNARCHIVAL_ERROR_NO_CONNECTIVITY = 3;
+
+    /**
+     * The installer responsible for the unarchival is disabled.
+     *
+     * <p> The system will return this status if appropriate. Installers do not need to verify for
+     * this error.
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final int UNARCHIVAL_ERROR_INSTALLER_DISABLED = 4;
+
+    /**
+     * The installer responsible for the unarchival has been uninstalled
+     *
+     * <p> The system will return this status if appropriate. Installers do not need to verify for
+     * this error.
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final int UNARCHIVAL_ERROR_INSTALLER_UNINSTALLED = 5;
+
+    /**
+     * Generic error: The app cannot be unarchived.
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final int UNARCHIVAL_GENERIC_ERROR = 100;
+
+    /**
+     * The set of error types that can be set for
+     * {@link #reportUnarchivalState}.
+     *
+     * @hide
+     */
+    @IntDef(value = {
+            UNARCHIVAL_STATUS_UNSET,
+            UNARCHIVAL_OK,
+            UNARCHIVAL_ERROR_USER_ACTION_NEEDED,
+            UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE,
+            UNARCHIVAL_ERROR_NO_CONNECTIVITY,
+            UNARCHIVAL_ERROR_INSTALLER_DISABLED,
+            UNARCHIVAL_ERROR_INSTALLER_UNINSTALLED,
+            UNARCHIVAL_GENERIC_ERROR,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UnarchivalStatus {}
+
 
     /** Default set of checksums - includes all available checksums.
      * @see Session#requestChecksums  */
@@ -967,6 +1125,37 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Install package in an archived state.
+     *
+     * @param archivedPackageInfo archived package data such as package name, signature etc.
+     * @param sessionParams used to create an underlying installation session
+     * @param statusReceiver Called when the state of the session changes. Intents
+     *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
+     *                       individual status codes on how to handle them.
+     * @see #createSession
+     * @see PackageInstaller.Session#commit
+     */
+    @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public void installPackageArchived(@NonNull ArchivedPackageInfo archivedPackageInfo,
+            @NonNull SessionParams sessionParams,
+            @NonNull IntentSender statusReceiver) {
+        Objects.requireNonNull(archivedPackageInfo, "archivedPackageInfo cannot be null");
+        Objects.requireNonNull(sessionParams, "sessionParams cannot be null");
+        Objects.requireNonNull(statusReceiver, "statusReceiver cannot be null");
+        try {
+            mInstaller.installPackageArchived(
+                    archivedPackageInfo.getParcel(),
+                    sessionParams,
+                    statusReceiver,
+                    mInstallerPackageName,
+                    new UserHandle(mUserId));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** {@hide} */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES)
@@ -1066,6 +1255,9 @@ public class PackageInstaller {
      * @param timeoutMillis The maximum time to wait, in milliseconds until the
      *                      constraints are satisfied. The caller will be notified via
      *                      {@code statusReceiver} if timeout happens before commit.
+     * @throws IllegalArgumentException if the {@code statusReceiver} from an immutable
+     *             {@link android.app.PendingIntent} when caller has a target SDK of API
+     *             35 or above.
      */
     public void commitSessionAfterInstallConstraintsAreMet(int sessionId,
             @NonNull IntentSender statusReceiver, @NonNull InstallConstraints constraints,
@@ -1074,34 +1266,68 @@ public class PackageInstaller {
             var session = mInstaller.openSession(sessionId);
             session.seal();
             var packageNames = session.fetchPackageNames();
-            var intentSender = new IntentSender((IIntentSender) new IIntentSender.Stub() {
-                @Override
-                public void send(int code, Intent intent, String resolvedType,
-                        IBinder allowlistToken, IIntentReceiver finishedReceiver,
-                        String requiredPermission, Bundle options)  {
-                    var result = intent.getParcelableExtra(
-                            PackageInstaller.EXTRA_INSTALL_CONSTRAINTS_RESULT,
-                            InstallConstraintsResult.class);
-                    try {
-                        if (result.areAllConstraintsSatisfied()) {
-                            session.commit(statusReceiver, false);
-                        } else {
-                            // timeout
-                            final Intent fillIn = new Intent();
-                            fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-                            fillIn.putExtra(PackageInstaller.EXTRA_STATUS, STATUS_FAILURE_TIMEOUT);
-                            fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
-                                    "Install constraints not satisfied within timeout");
-                            statusReceiver.sendIntent(
-                                    ActivityThread.currentApplication(), 0, fillIn, null, null);
-                        }
-                    } catch (Exception ignore) {
-                    }
-                }
-            });
-            waitForInstallConstraints(packageNames, constraints, intentSender, timeoutMillis);
+            var context = ActivityThread.currentApplication();
+            var localIntentSender = new LocalIntentSender(context, sessionId, session,
+                    statusReceiver);
+            waitForInstallConstraints(packageNames, constraints,
+                    localIntentSender.getIntentSender(), timeoutMillis);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static final class LocalIntentSender extends BroadcastReceiver {
+
+        private final Context mContext;
+        private final IntentSender mStatusReceiver;
+        private final int mSessionId;
+        private final IPackageInstallerSession mSession;
+
+        LocalIntentSender(Context context, int sessionId, IPackageInstallerSession session,
+                IntentSender statusReceiver) {
+            mContext = context;
+            mSessionId = sessionId;
+            mSession = session;
+            mStatusReceiver = statusReceiver;
+        }
+
+        private IntentSender getIntentSender() {
+            Intent intent = new Intent(ACTION_WAIT_INSTALL_CONSTRAINTS).setPackage(
+                    mContext.getPackageName());
+            mContext.registerReceiver(this, new IntentFilter(ACTION_WAIT_INSTALL_CONSTRAINTS),
+                    Context.RECEIVER_EXPORTED);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent,
+                    PendingIntent.FLAG_MUTABLE);
+            return pendingIntent.getIntentSender();
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            InstallConstraintsResult result = intent.getParcelableExtra(
+                    PackageInstaller.EXTRA_INSTALL_CONSTRAINTS_RESULT,
+                    InstallConstraintsResult.class);
+            try {
+                if (result.areAllConstraintsSatisfied()) {
+                    mSession.commit(mStatusReceiver, false);
+                } else {
+                    // timeout
+                    final Intent fillIn = new Intent();
+                    fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, mSessionId);
+                    fillIn.putExtra(PackageInstaller.EXTRA_STATUS, STATUS_FAILURE_TIMEOUT);
+                    fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
+                            "Install constraints not satisfied within timeout");
+                    mStatusReceiver.sendIntent(ActivityThread.currentApplication(), 0, fillIn, null,
+                            null);
+                }
+            } catch (Exception ignore) {
+                // no-op
+            } finally {
+                unregisterReceiver();
+            }
+        }
+
+        private void unregisterReceiver() {
+            mContext.unregisterReceiver(this);
         }
     }
 
@@ -1455,8 +1681,7 @@ public class PackageInstaller {
          * This returns all names which have been previously written through
          * {@link #openWrite(String, long, long)} as part of this session.
          *
-         * @throws SecurityException if called after the session has been
-         *             committed or abandoned.
+         * @throws SecurityException if called after the session has been abandoned.
          */
         public @NonNull String[] getNames() throws IOException {
             try {
@@ -1740,6 +1965,9 @@ public class PackageInstaller {
          *
          * @throws SecurityException if streams opened through
          *             {@link #openWrite(String, long, long)} are still open.
+         * @throws IllegalArgumentException if the {@code statusReceiver} from an immutable
+         *             {@link android.app.PendingIntent} when caller has a target SDK of API
+         *             version 35 or above.
          *
          * @see android.app.admin.DevicePolicyManager
          * @see #requestUserPreapproval
@@ -1768,6 +1996,9 @@ public class PackageInstaller {
          * @param statusReceiver Called when the state of the session changes. Intents
          *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
          *                       individual status codes on how to handle them.
+         * @throws IllegalArgumentException if the {@code statusReceiver} from an immutable
+         *             {@link android.app.PendingIntent} when caller has a target SDK of API
+         *             35 or above.
          *
          * @hide
          */
@@ -2070,6 +2301,66 @@ public class PackageInstaller {
                 throw e.rethrowFromSystemServer();
             }
         }
+
+        /**
+         * Sets the pre-verified domains for the app to be installed. By setting pre-verified
+         * domains, the installer allows the app to be opened by the app links of these domains
+         * immediately after it is installed.
+         *
+         * <p>The specified pre-verified domains should be a subset of the hostnames declared with
+         * {@code android:host} and {@code android:autoVerify=true} in the intent filters of the
+         * AndroidManifest.xml of the app. If some of the specified domains are not declared in
+         * the manifest, they will be ignored.</p>
+         * <p>If this API is called multiple times on the same {@link #Session}, the last call
+         * overrides the previous ones.</p>
+         * <p>The instant app installer is the only entity that may call this API.
+         * </p>
+         *
+         * @param preVerifiedDomains domains that are already pre-verified by the installer.
+         *
+         * @throws IllegalArgumentException if the number or the total size of the pre-verified
+         *                                  domains exceeds the maximum allowed, or if the domain
+         *                                  names contain invalid characters.
+         * @throws SecurityException if called from an installer that is not the instant app
+         *                           installer of the device, or if called after the session has
+         *                           been committed or abandoned.
+         *
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_SET_PRE_VERIFIED_DOMAINS)
+        @RequiresPermission(Manifest.permission.ACCESS_INSTANT_APPS)
+        public void setPreVerifiedDomains(@NonNull Set<String> preVerifiedDomains) {
+            Preconditions.checkArgument(preVerifiedDomains != null && !preVerifiedDomains.isEmpty(),
+                    "Provided pre-verified domains cannot be null or empty.");
+            try {
+                mSession.setPreVerifiedDomains(new DomainSet(preVerifiedDomains));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Retrieve the pre-verified domains set in a session.
+         * See {@link #setPreVerifiedDomains(Set)} for the definition of pre-verified domains.
+         *
+         * @throws SecurityException if called from an installer that is not the owner of the
+         *                           session, or if called after the session has been committed or
+         *                           abandoned.
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_SET_PRE_VERIFIED_DOMAINS)
+        @RequiresPermission(Manifest.permission.ACCESS_INSTANT_APPS)
+        @NonNull
+        public Set<String> getPreVerifiedDomains() {
+            try {
+                DomainSet domainSet = mSession.getPreVerifiedDomains();
+                return domainSet != null ? domainSet.getDomains() : Collections.emptySet();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -2099,7 +2390,9 @@ public class PackageInstaller {
      * or the parser isn't able to parse the supplied source(s).
      * @hide
      */
+    @SystemApi
     @NonNull
+    @FlaggedApi(Flags.FLAG_READ_INSTALL_INFO)
     public InstallInfo readInstallInfo(@NonNull ParcelFileDescriptor pfd,
             @Nullable String debugPathName, int flags) throws PackageParsingException {
         final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
@@ -2109,6 +2402,133 @@ public class PackageInstaller {
             throw new PackageParsingException(result.getErrorCode(), result.getErrorMessage());
         }
         return new InstallInfo(result);
+    }
+
+    /**
+     * Requests to archive a package which is currently installed.
+     *
+     * <p> During the archival process, the apps APKs and cache are removed from the device while
+     * the user data is kept. Through the {@link #requestUnarchive} call, apps
+     * can be restored again through their responsible installer.
+     *
+     * <p> Archived apps are returned as displayable apps through the {@link LauncherApps} APIs and
+     * will be displayed to users with UI treatment to highlight that said apps are archived. If
+     * a user taps on an archived app, the app will be unarchived and the restoration process is
+     * communicated.
+     *
+     * @param statusReceiver Callback used to notify when the operation is completed.
+     * @throws PackageManager.NameNotFoundException If {@code packageName} isn't found or not
+     *                                              available to the caller or isn't archived.
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.DELETE_PACKAGES,
+            Manifest.permission.REQUEST_DELETE_PACKAGES})
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public void requestArchive(@NonNull String packageName, @NonNull IntentSender statusReceiver)
+            throws PackageManager.NameNotFoundException {
+        try {
+            mInstaller.requestArchive(packageName, mInstallerPackageName, /*flags=*/ 0,
+                    statusReceiver, new UserHandle(mUserId));
+        } catch (ParcelableException e) {
+            e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Requests to unarchive a currently archived package.
+     *
+     * <p> Sends a request to unarchive an app to the responsible installer. The installer is
+     * determined by {@link InstallSourceInfo#getUpdateOwnerPackageName()}, or
+     * {@link InstallSourceInfo#getInstallingPackageName()} if the former value is null.
+     *
+     * <p> The installation will happen asynchronously and can be observed through
+     * {@link android.content.Intent#ACTION_PACKAGE_ADDED}.
+     *
+     * @param statusReceiver Callback used to notify whether the installer has accepted the
+     *                       unarchival request or an error has occurred. The status update will be
+     *                       sent though {@link #EXTRA_UNARCHIVE_STATUS}. Only one status will be
+     *                       sent.
+     * @throws PackageManager.NameNotFoundException If {@code packageName} isn't found or not
+     *                                              visible to the caller or if the package has no
+     *                                              installer on the device anymore to unarchive it.
+     * @throws IOException If parameters were unsatisfiable, such as lack of disk space.
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.INSTALL_PACKAGES,
+            Manifest.permission.REQUEST_INSTALL_PACKAGES})
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public void requestUnarchive(@NonNull String packageName, @NonNull IntentSender statusReceiver)
+            throws IOException, PackageManager.NameNotFoundException {
+        try {
+            mInstaller.requestUnarchive(packageName, mInstallerPackageName, statusReceiver,
+                    new UserHandle(mUserId));
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reports the status of an unarchival to the system.
+     *
+     * @param unarchiveId          the ID provided by the system as part of the
+     *                             intent.action.UNARCHIVE broadcast with EXTRA_UNARCHIVE_ID.
+     * @param status               is used for the system to provide the user with necessary
+     *                             follow-up steps or errors.
+     * @param requiredStorageBytes If the error is UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE this field
+     *                             should be set to specify how many additional bytes of storage
+     *                             are required to unarchive the app.
+     * @param userActionIntent     Optional intent to start a follow up action required to
+     *                             facilitate the unarchival flow (e.g. user needs to log in).
+     * @throws PackageManager.NameNotFoundException if no unarchival with {@code unarchiveId} exists
+     */
+    // TODO(b/314960798) Remove old API once it's unused
+    @RequiresPermission(anyOf = {
+            Manifest.permission.INSTALL_PACKAGES,
+            Manifest.permission.REQUEST_INSTALL_PACKAGES})
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public void reportUnarchivalStatus(int unarchiveId, @UnarchivalStatus int status,
+            long requiredStorageBytes, @Nullable PendingIntent userActionIntent)
+            throws PackageManager.NameNotFoundException {
+        try {
+            mInstaller.reportUnarchivalStatus(unarchiveId, status, requiredStorageBytes,
+                    userActionIntent, new UserHandle(mUserId));
+        } catch (ParcelableException e) {
+            e.maybeRethrow(PackageManager.NameNotFoundException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reports the state of an unarchival to the system.
+     *
+     * @see UnarchivalState for the different state options.
+     * @throws PackageManager.NameNotFoundException if no unarchival with {@code unarchiveId} exists
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.INSTALL_PACKAGES,
+            Manifest.permission.REQUEST_INSTALL_PACKAGES})
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public void reportUnarchivalState(@NonNull UnarchivalState unarchivalState)
+            throws PackageManager.NameNotFoundException {
+        Objects.requireNonNull(unarchivalState);
+        try {
+            mInstaller.reportUnarchivalStatus(unarchivalState.getUnarchiveId(),
+                    unarchivalState.getStatus(), unarchivalState.getRequiredStorageBytes(),
+                    unarchivalState.getUserActionIntent(), new UserHandle(mUserId));
+        } catch (ParcelableException e) {
+            e.maybeRethrow(PackageManager.NameNotFoundException.class);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     // (b/239722738) This class serves as a bridge between the PackageLite class, which
@@ -2172,8 +2592,8 @@ public class PackageInstaller {
          * Includes the size of the raw APKs, possibly unpacked resources, raw dex metadata files,
          * and all relevant native code.
          * @throws IOException when size of native binaries cannot be calculated.
-         * @hide
          */
+        @FlaggedApi(Flags.FLAG_READ_INSTALL_INFO)
         public long calculateInstalledSize(@NonNull SessionParams params,
                 @NonNull ParcelFileDescriptor pfd) throws IOException {
             return InstallLocationUtils.calculateInstalledSize(mPkg, params.abiOverride,
@@ -2363,12 +2783,20 @@ public class PackageInstaller {
         public DataLoaderParams dataLoaderParams;
         /** {@hide} */
         public int rollbackDataPolicy = PackageManager.ROLLBACK_DATA_POLICY_RESTORE;
+        /** @hide */
+        public long rollbackLifetimeMillis = 0;
+        /** {@hide} */
+        public int rollbackImpactLevel = PackageManager.ROLLBACK_USER_IMPACT_LOW;
         /** {@hide} */
         public boolean forceQueryableOverride;
         /** {@hide} */
         public int requireUserAction = USER_ACTION_UNSPECIFIED;
         /** {@hide} */
         public boolean applicationEnabledSettingPersistent = false;
+        /** {@hide} */
+        public int developmentInstallFlags = 0;
+        /** {@hide} */
+        public int unarchiveId = -1;
 
         private final ArrayMap<String, Integer> mPermissionStates;
 
@@ -2415,9 +2843,13 @@ public class PackageInstaller {
                 dataLoaderParams = new DataLoaderParams(dataLoaderParamsParcel);
             }
             rollbackDataPolicy = source.readInt();
+            rollbackLifetimeMillis = source.readLong();
+            rollbackImpactLevel = source.readInt();
             requireUserAction = source.readInt();
             packageSource = source.readInt();
             applicationEnabledSettingPersistent = source.readBoolean();
+            developmentInstallFlags = source.readInt();
+            unarchiveId = source.readInt();
         }
 
         /** {@hide} */
@@ -2446,9 +2878,13 @@ public class PackageInstaller {
             ret.requiredInstalledVersionCode = requiredInstalledVersionCode;
             ret.dataLoaderParams = dataLoaderParams;
             ret.rollbackDataPolicy = rollbackDataPolicy;
+            ret.rollbackLifetimeMillis = rollbackLifetimeMillis;
+            ret.rollbackImpactLevel = rollbackImpactLevel;
             ret.requireUserAction = requireUserAction;
             ret.packageSource = packageSource;
             ret.applicationEnabledSettingPersistent = applicationEnabledSettingPersistent;
+            ret.developmentInstallFlags = developmentInstallFlags;
+            ret.unarchiveId = unarchiveId;
             return ret;
         }
 
@@ -2585,8 +3021,8 @@ public class PackageInstaller {
          * Sets the state of permissions for the package at installation.
          * <p/>
          * Granting any runtime permissions require the
-         * {@link android.Manifest.permission#INSTALL_GRANT_RUNTIME_PERMISSIONS
-         * INSTALL_GRANT_RUNTIME_PERMISSIONS} permission to be held by the caller. Revoking runtime
+         * {@code android.Manifest.permission#INSTALL_GRANT_RUNTIME_PERMISSIONS}
+         * permission to be held by the caller. Revoking runtime
          * permissions is not allowed, even during app update sessions.
          * <p/>
          * Holders without the permission are allowed to change the following special permissions:
@@ -2726,12 +3162,7 @@ public class PackageInstaller {
          */
         @SystemApi
         public void setEnableRollback(boolean enable) {
-            if (enable) {
-                installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
-            } else {
-                installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
-            }
-            rollbackDataPolicy = PackageManager.ROLLBACK_DATA_POLICY_RESTORE;
+            setEnableRollback(enable, PackageManager.ROLLBACK_DATA_POLICY_RESTORE);
         }
 
         /**
@@ -2755,10 +3186,59 @@ public class PackageInstaller {
                 installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
             } else {
                 installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
+                rollbackLifetimeMillis = 0;
             }
             rollbackDataPolicy = dataPolicy;
         }
 
+        /**
+         * If rollback enabled for this session (via {@link #setEnableRollback}, set period
+         * after which rollback files will be deleted due to expiration
+         * {@link RollbackManagerServiceImpl#deleteRollback}.
+         *
+         * <p>For multi-package installs, this value must be set on the parent session.
+         * Child session rollback lifetime will be ignored.
+         *
+         * @param lifetimeMillis period after which rollback expires
+         * @throws IllegalArgumentException if lifetimeMillis is negative or rollback is not
+         * enabled via setEnableRollback.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
+        @FlaggedApi(Flags.FLAG_ROLLBACK_LIFETIME)
+        public void setRollbackLifetimeMillis(@DurationMillisLong long lifetimeMillis) {
+            if (lifetimeMillis < 0) {
+                throw new IllegalArgumentException("rollbackLifetimeMillis can't be negative.");
+            }
+            if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) == 0) {
+                throw new IllegalArgumentException(
+                        "Can't set rollbackLifetimeMillis when rollback is not enabled");
+            }
+            rollbackLifetimeMillis = lifetimeMillis;
+        }
+
+        /**
+         * rollbackImpactLevel is a measure of impact a rollback has on the user. This can take one
+         * of 3 values:
+         * <ul>
+         *     <li>{@link PackageManager#ROLLBACK_USER_IMPACT_LOW} (default)</li>
+         *     <li>{@link PackageManager#ROLLBACK_USER_IMPACT_HIGH} (1)</li>
+         *     <li>{@link PackageManager#ROLLBACK_USER_IMPACT_ONLY_MANUAL} (2)</li>
+         * </ul>
+         *
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
+        @FlaggedApi(Flags.FLAG_RECOVERABILITY_DETECTION)
+        public void setRollbackImpactLevel(@PackageManager.RollbackImpactLevel int impactLevel) {
+            if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) == 0) {
+                throw new IllegalArgumentException(
+                        "Can't set rollbackImpactLevel when rollback is not enabled");
+            }
+            rollbackImpactLevel = impactLevel;
+        }
 
         /**
          * @deprecated use {@link #setRequestDowngrade(boolean)}.
@@ -2879,7 +3359,13 @@ public class PackageInstaller {
          *
          * By default this is the app that created the {@link PackageInstaller} object.
          *
-         * @param installerPackageName name of the installer package
+         * Note: Only applications with {@link android.Manifest.permission#INSTALL_PACKAGES}
+         * permission are allowed to set an installer that is not the caller's own installer
+         * package name, otherwise it will cause a {@link SecurityException} when creating the
+         * install session.
+         *
+         * @param installerPackageName The name of the installer package, its length must be less
+         *                            than {@code 255}, otherwise it will be invalid.
          */
         public void setInstallerPackageName(@Nullable String installerPackageName) {
             this.installerPackageName = installerPackageName;
@@ -2978,10 +3464,16 @@ public class PackageInstaller {
          *     <li>{@code requireUserAction} is set to {@link #USER_ACTION_NOT_REQUIRED}.</li>
          *     <li>The app being installed targets:
          *          <ul>
+         *              <li>{@link android.os.Build.VERSION_CODES#Q API 29} or higher on
+         *              Android S  ({@link android.os.Build.VERSION_CODES#S API 31})</li>
          *              <li>{@link android.os.Build.VERSION_CODES#R API 30} or higher on
          *              Android T ({@link android.os.Build.VERSION_CODES#TIRAMISU API 33})</li>
-         *              <li>{@link android.os.Build.VERSION_CODES#S API 31} or higher <b>after</b>
-         *              Android T ({@link android.os.Build.VERSION_CODES#TIRAMISU API 33})</li>
+         *              <li>{@link android.os.Build.VERSION_CODES#S API 31} or higher on
+         *              Android U ({@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE API 34})
+         *              </li>
+         *              <li>{@link android.os.Build.VERSION_CODES#TIRAMISU API 33} or higher on
+         *              Android V ({@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM API 35})
+         *              </li>
          *          </ul>
          *     </li>
          *     <li>The installer is:
@@ -3058,6 +3550,19 @@ public class PackageInstaller {
             }
         }
 
+        /**
+         * Used to set the unarchive ID received as part of an
+         * {@link Intent#ACTION_UNARCHIVE_PACKAGE}.
+         *
+         * <p> The ID should be retrieved from the unarchive intent and passed into the
+         * session that's being created to unarchive the app in question. Used to link the unarchive
+         * intent and the install session to disambiguate.
+         */
+        @FlaggedApi(Flags.FLAG_ARCHIVING)
+        public void setUnarchiveId(int unarchiveId) {
+            this.unarchiveId = unarchiveId;
+        }
+
         /** @hide */
         @NonNull
         public ArrayMap<String, Integer> getPermissionStates() {
@@ -3111,8 +3616,12 @@ public class PackageInstaller {
             pw.printPair("requiredInstalledVersionCode", requiredInstalledVersionCode);
             pw.printPair("dataLoaderParams", dataLoaderParams);
             pw.printPair("rollbackDataPolicy", rollbackDataPolicy);
+            pw.printPair("rollbackLifetimeMillis", rollbackLifetimeMillis);
+            pw.printPair("rollbackImpactLevel", rollbackImpactLevel);
             pw.printPair("applicationEnabledSettingPersistent",
                     applicationEnabledSettingPersistent);
+            pw.printHexPair("developmentInstallFlags", developmentInstallFlags);
+            pw.printPair("unarchiveId", unarchiveId);
             pw.println();
         }
 
@@ -3151,9 +3660,13 @@ public class PackageInstaller {
                 dest.writeParcelable(null, flags);
             }
             dest.writeInt(rollbackDataPolicy);
+            dest.writeLong(rollbackLifetimeMillis);
+            dest.writeInt(rollbackImpactLevel);
             dest.writeInt(requireUserAction);
             dest.writeInt(packageSource);
             dest.writeBoolean(applicationEnabledSettingPersistent);
+            dest.writeInt(developmentInstallFlags);
+            dest.writeInt(unarchiveId);
         }
 
         public static final Parcelable.Creator<SessionParams>
@@ -3343,6 +3856,12 @@ public class PackageInstaller {
         /** {@hide} */
         public int rollbackDataPolicy;
 
+        /** @hide */
+        public long rollbackLifetimeMillis;
+
+        /** {@hide} */
+        public int rollbackImpactLevel;
+
         /** {@hide} */
         public int requireUserAction;
 
@@ -3410,6 +3929,8 @@ public class PackageInstaller {
             isCommitted = source.readBoolean();
             isPreapprovalRequested = source.readBoolean();
             rollbackDataPolicy = source.readInt();
+            rollbackLifetimeMillis = source.readLong();
+            rollbackImpactLevel = source.readInt();
             createdMillis = source.readLong();
             requireUserAction = source.readInt();
             installerUid = source.readInt();
@@ -3610,7 +4131,9 @@ public class PackageInstaller {
          *
          * @hide
          */
+        @SystemApi
         @RequiresPermission(Manifest.permission.READ_INSTALLED_SESSION_PATHS)
+        @FlaggedApi(Flags.FLAG_GET_RESOLVED_APK_PATH)
         public @Nullable String getResolvedBaseApkPath() {
             return resolvedBaseCodePath;
         }
@@ -3988,6 +4511,17 @@ public class PackageInstaller {
             return pendingUserActionReason;
         }
 
+        /**
+         * Returns true if the session is an unarchival.
+         *
+         * @see PackageInstaller#requestUnarchive
+         */
+        @FlaggedApi(Flags.FLAG_ARCHIVING)
+        public boolean isUnarchival() {
+            return (installFlags & PackageManager.INSTALL_UNARCHIVE) != 0;
+        }
+
+
         @Override
         public int describeContents() {
             return 0;
@@ -4033,6 +4567,8 @@ public class PackageInstaller {
             dest.writeBoolean(isCommitted);
             dest.writeBoolean(isPreapprovalRequested);
             dest.writeInt(rollbackDataPolicy);
+            dest.writeLong(rollbackLifetimeMillis);
+            dest.writeInt(rollbackImpactLevel);
             dest.writeLong(createdMillis);
             dest.writeInt(requireUserAction);
             dest.writeInt(installerUid);
@@ -4085,7 +4621,8 @@ public class PackageInstaller {
          * @param label
          *   The label representing the app to be installed.
          * @param locale
-         *   The locale of the app label being used.
+         *   The locale is used to get the app label from the APKs (includes the base APK and
+         *   split APKs) related to the package to be installed.
          * @param packageName
          *   The package name of the app to be installed.
          * @hide
@@ -4192,7 +4729,10 @@ public class PackageInstaller {
             }
 
             /**
-             * The locale of the app label being used.
+             * The locale is used to get the app label from the APKs (includes the base APK and
+             * split APKs) related to the package to be installed. The caller needs to make sure
+             * the app label is consistent with the app label of {@link PreapprovalDetails} when
+             * validating the installation. Otherwise, the pre-approval install session will fail.
              */
             public @NonNull Builder setLocale(@NonNull ULocale value) {
                 checkNotUsed();
@@ -4299,9 +4839,9 @@ public class PackageInstaller {
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/core/java/android/content/pm/PackageInstaller.java",
                 inputSignatures = "private final @android.annotation.Nullable android.graphics.Bitmap mIcon\nprivate final @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate final @android.annotation.NonNull android.icu.util.ULocale mLocale\nprivate final @android.annotation.NonNull java.lang.String mPackageName\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<android.content.pm.PackageInstaller.PreapprovalDetails> CREATOR\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\npublic @java.lang.Override int describeContents()\nclass PreapprovalDetails extends java.lang.Object implements [android.os.Parcelable]\nprivate @android.annotation.Nullable android.graphics.Bitmap mIcon\nprivate @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate @android.annotation.NonNull android.icu.util.ULocale mLocale\nprivate @android.annotation.NonNull java.lang.String mPackageName\nprivate  long mBuilderFieldsSet\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.PreapprovalDetails.Builder setIcon(android.graphics.Bitmap)\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.PreapprovalDetails.Builder setLabel(java.lang.CharSequence)\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.PreapprovalDetails.Builder setLocale(android.icu.util.ULocale)\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.PreapprovalDetails.Builder setPackageName(java.lang.String)\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.PreapprovalDetails build()\nprivate  void checkNotUsed()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genToString=true)")
+
         @Deprecated
         private void __metadata() {}
-
 
         //@formatter:on
         // End of generated code
@@ -4693,13 +5233,188 @@ public class PackageInstaller {
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/core/java/android/content/pm/PackageInstaller.java",
                 inputSignatures = "public static final @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints GENTLE_UPDATE\nprivate final  boolean mDeviceIdleRequired\nprivate final  boolean mAppNotForegroundRequired\nprivate final  boolean mAppNotInteractingRequired\nprivate final  boolean mAppNotTopVisibleRequired\nprivate final  boolean mNotInCallRequired\nclass InstallConstraints extends java.lang.Object implements [android.os.Parcelable]\nprivate  boolean mDeviceIdleRequired\nprivate  boolean mAppNotForegroundRequired\nprivate  boolean mAppNotInteractingRequired\nprivate  boolean mAppNotTopVisibleRequired\nprivate  boolean mNotInCallRequired\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setDeviceIdleRequired()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setAppNotForegroundRequired()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setAppNotInteractingRequired()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setAppNotTopVisibleRequired()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setNotInCallRequired()\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints build()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genParcelable=true, genHiddenConstructor=true, genEqualsHashCode=true)")
+
         @Deprecated
         private void __metadata() {}
-
 
         //@formatter:on
         // End of generated code
 
+    }
+
+    /**
+     * Used to communicate the unarchival state in {@link #reportUnarchivalState}.
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final class UnarchivalState {
+
+        /**
+         * The caller is able to facilitate the unarchival for the given {@code unarchiveId}.
+         *
+         * @param unarchiveId the ID provided by the system as part of the intent.action.UNARCHIVE
+         *                    broadcast with EXTRA_UNARCHIVE_ID.
+         */
+        @NonNull
+        public static UnarchivalState createOkState(int unarchiveId) {
+            return new UnarchivalState(unarchiveId, UNARCHIVAL_OK, /* requiredStorageBytes= */ -1,
+                    /* userActionIntent= */ null);
+        }
+
+        /**
+         * User action is required before commencing with the unarchival for the given
+         * {@code unarchiveId}. E.g., this could be used if it's necessary for the user to sign-in
+         * first.
+         *
+         * @param unarchiveId      the ID provided by the system as part of the
+         *                         intent.action.UNARCHIVE
+         *                         broadcast with EXTRA_UNARCHIVE_ID.
+         * @param userActionIntent optional intent to start a follow up action required to
+         *                         facilitate the unarchival flow (e.g. user needs to log in).
+         */
+        @NonNull
+        public static UnarchivalState createUserActionRequiredState(int unarchiveId,
+                @NonNull PendingIntent userActionIntent) {
+            Objects.requireNonNull(userActionIntent);
+            return new UnarchivalState(unarchiveId, UNARCHIVAL_ERROR_USER_ACTION_NEEDED,
+                    /* requiredStorageBytes= */ -1, userActionIntent);
+        }
+
+        /**
+         * There is not enough storage to start the unarchival for the given {@code unarchiveId}.
+         *
+         * @param unarchiveId          the ID provided by the system as part of the
+         *                             intent.action.UNARCHIVE
+         *                             broadcast with EXTRA_UNARCHIVE_ID.
+         * @param requiredStorageBytes ff the error is UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE this
+         *                             field should be set to specify how many additional bytes of
+         *                             storage are required to unarchive the app.
+         * @param userActionIntent     can optionally be set to provide a custom storage-clearing
+         *                             action.
+         */
+        @NonNull
+        public static UnarchivalState createInsufficientStorageState(int unarchiveId,
+                long requiredStorageBytes, @Nullable PendingIntent userActionIntent) {
+            return new UnarchivalState(unarchiveId, UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE,
+                    requiredStorageBytes, userActionIntent);
+        }
+
+        /**
+         * The device has no data connectivity and unarchival cannot be started for the given
+         * {@code unarchiveId}.
+         *
+         * @param unarchiveId the ID provided by the system as part of the intent.action.UNARCHIVE
+         *                    broadcast with EXTRA_UNARCHIVE_ID.
+         */
+        @NonNull
+        public static UnarchivalState createNoConnectivityState(int unarchiveId) {
+            return new UnarchivalState(unarchiveId, UNARCHIVAL_ERROR_NO_CONNECTIVITY,
+                    /* requiredStorageBytes= */ -1,/* userActionIntent= */ null);
+        }
+
+        /**
+         * Generic error state for all cases that are not covered by other methods in this class.
+         *
+         * @param unarchiveId the ID provided by the system as part of the intent.action.UNARCHIVE
+         *                    broadcast with EXTRA_UNARCHIVE_ID.
+         */
+        @NonNull
+        public static UnarchivalState createGenericErrorState(int unarchiveId) {
+            return new UnarchivalState(unarchiveId, UNARCHIVAL_GENERIC_ERROR,
+                    /* requiredStorageBytes= */ -1,/* userActionIntent= */ null);
+        }
+
+
+        /**
+         * The ID provided by the system as part of the intent.action.UNARCHIVE broadcast with
+         * EXTRA_UNARCHIVE_ID.
+         */
+        private final int mUnarchiveId;
+
+        /** Used for the system to provide the user with necessary follow-up steps or errors. */
+        @UnarchivalStatus
+        private final int mStatus;
+
+        /**
+         * If the error is UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE this field should be set to specify
+         * how many additional bytes of storage are required to unarchive the app.
+         */
+        private final long mRequiredStorageBytes;
+
+        /**
+         * Optional intent to start a follow up action required to facilitate the unarchival flow
+         * (e.g., user needs to log in).
+         */
+        @Nullable
+        private final PendingIntent mUserActionIntent;
+
+        /**
+         * Creates a new UnarchivalState.
+         *
+         * @param unarchiveId          The ID provided by the system as part of the
+         *                             intent.action.UNARCHIVE broadcast with
+         *                             EXTRA_UNARCHIVE_ID.
+         * @param status               Used for the system to provide the user with necessary
+         *                             follow-up steps or errors.
+         * @param requiredStorageBytes If the error is UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE this
+         *                             field should be set to specify
+         *                             how many additional bytes of storage are required to
+         *                             unarchive the app.
+         * @param userActionIntent     Optional intent to start a follow up action required to
+         *                             facilitate the unarchival flow
+         *                             (e.g,. user needs to log in).
+         * @hide
+         */
+        private UnarchivalState(
+                int unarchiveId,
+                @UnarchivalStatus int status,
+                long requiredStorageBytes,
+                @Nullable PendingIntent userActionIntent) {
+            this.mUnarchiveId = unarchiveId;
+            this.mStatus = status;
+            com.android.internal.util.AnnotationValidations.validate(
+                    UnarchivalStatus.class, null, mStatus);
+            this.mRequiredStorageBytes = requiredStorageBytes;
+            this.mUserActionIntent = userActionIntent;
+        }
+
+        /**
+         * The ID provided by the system as part of the intent.action.UNARCHIVE broadcast with
+         * EXTRA_UNARCHIVE_ID.
+         *
+         * @hide
+         */
+        int getUnarchiveId() {
+            return mUnarchiveId;
+        }
+
+        /**
+         * Used for the system to provide the user with necessary follow-up steps or errors.
+         *
+         * @hide
+         */
+        @UnarchivalStatus int getStatus() {
+            return mStatus;
+        }
+
+        /**
+         * If the error is UNARCHIVAL_ERROR_INSUFFICIENT_STORAGE this field should be set to specify
+         * how many additional bytes of storage are required to unarchive the app.
+         *
+         * @hide
+         */
+        long getRequiredStorageBytes() {
+            return mRequiredStorageBytes;
+        }
+
+        /**
+         * Optional intent to start a follow up action required to facilitate the unarchival flow
+         * (e.g. user needs to log in).
+         *
+         * @hide
+         */
+        @Nullable PendingIntent getUserActionIntent() {
+            return mUserActionIntent;
+        }
     }
 
 }

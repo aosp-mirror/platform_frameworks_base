@@ -186,11 +186,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="409235464399258501">"Изключено"</item>
-    <item msgid="4195153527464162486">"Рег. буфер – 64 КБ"</item>
-    <item msgid="7464037639415220106">"Рег. буфер – 256 КБ"</item>
-    <item msgid="8539423820514360724">"Рег. буфер – 1 МБ"</item>
-    <item msgid="1984761927103140651">"Рег. буфер – 4 МБ"</item>
-    <item msgid="2983219471251787208">"Регистрационен буфер – 8 МБ"</item>
+    <item msgid="4195153527464162486">"Рег. буфер – 64 хил."</item>
+    <item msgid="7464037639415220106">"Рег. буфер – 256 хил."</item>
+    <item msgid="8539423820514360724">"Рег. буфер – 1 млн."</item>
+    <item msgid="1984761927103140651">"Рег. буфер – 4 млн."</item>
+    <item msgid="2983219471251787208">"Регистрационен буфер – 8 млн."</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Изкл."</item>
@@ -281,5 +281,11 @@
     <item msgid="3825132913289380004">"RNDIS (Ethernet през USB)"</item>
     <item msgid="8828567335701536560">"Аудиоизточник"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
+  </string-array>
+  <string-array name="grammatical_gender_values">
+    <item msgid="4976102487934077239">"0"</item>
+    <item msgid="2646486108212979598">"1"</item>
+    <item msgid="3753634915787796632">"2"</item>
+    <item msgid="4779928470672877922">"3"</item>
   </string-array>
 </resources>

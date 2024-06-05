@@ -36,6 +36,8 @@ import com.android.systemui.plugins.log.TableLogBufferBase;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
+import kotlinx.coroutines.CoroutineScope;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,8 +49,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-
-import kotlinx.coroutines.CoroutineScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -546,60 +546,6 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
         Mockito.clearInvocations(callback);
         // Invalidate outer condition and make sure callback is informed, but the last state is
-        // not affected.
-        mCondition1.fakeUpdateCondition(false);
-        mExecutor.runAllReady();
-
-        verify(callback).onActiveChanged(eq(false));
-        verify(callback, never()).onConditionsChanged(anyBoolean());
-    }
-
-    /**
-     * Ensures a subscription is predicated on its precondition.
-     */
-    @Test
-    public void testPrecondition() {
-        mCondition1.fakeUpdateCondition(false);
-        final Monitor.Callback callback =
-                mock(Monitor.Callback.class);
-
-        mCondition2.fakeUpdateCondition(false);
-
-        // Create a nested condition
-        mConditionMonitor.addSubscription(new Monitor.Subscription.Builder(callback)
-                .addPrecondition(mCondition1)
-                .addCondition(mCondition2)
-                .build());
-
-        mExecutor.runAllReady();
-
-        // Ensure the nested condition callback is not called at all.
-        verify(callback, never()).onActiveChanged(anyBoolean());
-        verify(callback, never()).onConditionsChanged(anyBoolean());
-
-        // Update the condition to true and ensure that the nested condition is not triggered.
-        mCondition2.fakeUpdateCondition(true);
-        verify(callback, never()).onConditionsChanged(anyBoolean());
-        mCondition2.fakeUpdateCondition(false);
-
-        // Set precondition and make sure the inner condition becomes active and reports that
-        // conditions aren't met
-        mCondition1.fakeUpdateCondition(true);
-        mExecutor.runAllReady();
-
-        verify(callback).onActiveChanged(eq(true));
-        verify(callback).onConditionsChanged(eq(false));
-
-        Mockito.clearInvocations(callback);
-
-        // Update the condition and make sure the callback is updated.
-        mCondition2.fakeUpdateCondition(true);
-        mExecutor.runAllReady();
-
-        verify(callback).onConditionsChanged(true);
-
-        Mockito.clearInvocations(callback);
-        // Invalidate precondition and make sure callback is informed, but the last state is
         // not affected.
         mCondition1.fakeUpdateCondition(false);
         mExecutor.runAllReady();

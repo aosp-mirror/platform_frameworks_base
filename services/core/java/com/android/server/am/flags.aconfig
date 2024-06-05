@@ -1,0 +1,136 @@
+package: "com.android.server.am"
+container: "system"
+
+flag {
+    name: "oomadjuster_correctness_rewrite"
+    namespace: "backstage_power"
+    description: "Utilize new OomAdjuster implementation"
+    bug: "298055811"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "fgs_abuse_detection"
+    namespace: "backstage_power"
+    description: "Detect abusive FGS behavior for certain types (camera, mic, media, location)."
+    bug: "295545575"
+}
+
+flag {
+    name: "fgs_boot_completed"
+    namespace: "backstage_power"
+    description: "Disable BOOT_COMPLETED broadcast FGS start for certain types"
+    bug: "296558535"
+}
+
+flag {
+    name: "fgs_disable_saw"
+    namespace: "backstage_power"
+    description: "Disable System Alert Window FGS start"
+    bug: "296558535"
+}
+
+flag {
+    name: "bfgs_managed_network_access"
+    namespace: "backstage_power"
+    description: "Restrict network access for certain applications in BFGS process state"
+    bug: "304347838"
+}
+# Whether to use the new while-in-use / BG-FGS-start logic
+flag {
+     namespace: "backstage_power"
+     name: "new_fgs_restriction_logic"
+     description: "Enable the new FGS restriction logic"
+     bug: "276963716"
+}
+
+flag {
+    name: "service_binding_oom_adj_policy"
+    namespace: "backstage_power"
+    description: "Optimize the service bindings by different policies like skipping oom adjuster"
+    bug: "318717054"
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "defer_outgoing_broadcasts"
+    description: "Defer outgoing broadcasts from processes in freezable state"
+    bug: "327496592"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "avoid_repeated_bcast_re_enqueues"
+    description: "Avoid re-enqueueing a broadcast repeatedly"
+    bug: "319225224"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "log_excessive_binder_proxies"
+    description: "Log the excessive incoming binder proxies into statsd"
+    bug: "298263955"
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "avoid_resolving_type"
+    description: "Avoid resolving data type for sticky broadcasts"
+    bug: "323817802"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "use_permission_manager_for_broadcast_delivery_check"
+    description: "Use PermissionManager API for broadcast delivery permission checks."
+    bug: "315468967"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "trace_receiver_registration"
+    description: "Add tracing for broadcast receiver registration and un-registration"
+    bug: "336385821"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "migrate_full_oomadj_updates"
+    namespace: "backstage_power"
+    description: "Migrate full updates to partial updates where possible"
+    bug: "324915545"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "skip_unimportant_connections"
+    namespace: "backstage_power"
+    description: "Avoid OomAdjuster calculations for connections that won't change importance"
+    bug: "323376416"
+}
+
+flag {
+    name: "simplify_process_traversal"
+    namespace: "backstage_power"
+    description: "Simplify the OomAdjuster's process traversal mechanism."
+    bug: "336178916"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

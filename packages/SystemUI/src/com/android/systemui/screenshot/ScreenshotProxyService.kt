@@ -17,19 +17,20 @@ package com.android.systemui.screenshot
 
 import android.content.Intent
 import android.os.IBinder
+import android.os.RemoteException
 import android.util.Log
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shade.ShadeExpansionStateManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Provides state from the main SystemUI process on behalf of the Screenshot process. */
-internal class ScreenshotProxyService
+class ScreenshotProxyService
 @Inject
 constructor(
     private val mExpansionMgr: ShadeExpansionStateManager,
@@ -47,14 +48,22 @@ constructor(
             }
 
             override fun dismissKeyguard(callback: IOnDoneCallback) {
-                lifecycleScope.launch { executeAfterDismissing(callback) }
+                lifecycleScope.launch("IScreenshotProxy#dismissKeyguard") {
+                    executeAfterDismissing(callback)
+                }
             }
         }
 
     private suspend fun executeAfterDismissing(callback: IOnDoneCallback) =
         withContext(mMainDispatcher) {
             activityStarter.executeRunnableDismissingKeyguard(
-                Runnable { callback.onDone(true) },
+                {
+                    try {
+                        callback.onDone(true)
+                    } catch (e: RemoteException) {
+                        Log.w(TAG, "Failed to complete callback transaction", e)
+                    }
+                },
                 null,
                 true /* dismissShade */,
                 true /* afterKeyguardGone */,

@@ -20,6 +20,7 @@ import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import android.annotation.Nullable;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
+import android.app.admin.flags.Flags;
 import android.content.ComponentName;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -86,6 +87,11 @@ class OwnersData {
     private static final String ATTR_DEVICE_OWNER_TYPE_VALUE = "value";
 
     private static final String ATTR_MIGRATED_TO_POLICY_ENGINE = "migratedToPolicyEngine";
+    private static final String ATTR_SECURITY_LOG_MIGRATED = "securityLogMigrated";
+    private static final String ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED =
+            "passwordComplexityMigrated";
+    private static final String ATTR_SUSPENDED_PACKAGES_MIGRATED = "suspendedPackagesMigrated";
+    private static final String ATTR_MIGRATED_POST_UPGRADE = "migratedPostUpgrade";
 
     // Internal state for the device owner package.
     OwnerInfo mDeviceOwner;
@@ -113,6 +119,11 @@ class OwnersData {
     private final PolicyPathProvider mPathProvider;
 
     boolean mMigratedToPolicyEngine = false;
+    boolean mSecurityLoggingMigrated = false;
+    boolean mRequiredPasswordComplexityMigrated = false;
+    boolean mSuspendedPackagesMigrated = false;
+
+    boolean mPoliciesMigratedPostUpdate = false;
 
     OwnersData(PolicyPathProvider pathProvider) {
         mPathProvider = pathProvider;
@@ -350,7 +361,8 @@ class OwnersData {
 
         @Override
         boolean shouldWrite() {
-            return (mDeviceOwner != null) || (mSystemUpdatePolicy != null)
+            return Flags.alwaysPersistDo()
+                    || (mDeviceOwner != null) || (mSystemUpdatePolicy != null)
                     || (mSystemUpdateInfo != null);
         }
 
@@ -397,6 +409,18 @@ class OwnersData {
 
             out.startTag(null, TAG_POLICY_ENGINE_MIGRATION);
             out.attributeBoolean(null, ATTR_MIGRATED_TO_POLICY_ENGINE, mMigratedToPolicyEngine);
+            out.attributeBoolean(null, ATTR_MIGRATED_POST_UPGRADE, mPoliciesMigratedPostUpdate);
+            if (Flags.securityLogV2Enabled()) {
+                out.attributeBoolean(null, ATTR_SECURITY_LOG_MIGRATED, mSecurityLoggingMigrated);
+            }
+            if (Flags.unmanagedModeMigration()) {
+                out.attributeBoolean(null, ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED,
+                        mRequiredPasswordComplexityMigrated);
+                out.attributeBoolean(null, ATTR_SUSPENDED_PACKAGES_MIGRATED,
+                        mSuspendedPackagesMigrated);
+
+            }
+
             out.endTag(null, TAG_POLICY_ENGINE_MIGRATION);
 
         }
@@ -457,6 +481,17 @@ class OwnersData {
                 case TAG_POLICY_ENGINE_MIGRATION:
                     mMigratedToPolicyEngine = parser.getAttributeBoolean(
                             null, ATTR_MIGRATED_TO_POLICY_ENGINE, false);
+                    mPoliciesMigratedPostUpdate = parser.getAttributeBoolean(
+                            null, ATTR_MIGRATED_POST_UPGRADE, false);
+                    mSecurityLoggingMigrated = Flags.securityLogV2Enabled()
+                            && parser.getAttributeBoolean(null, ATTR_SECURITY_LOG_MIGRATED, false);
+                    mRequiredPasswordComplexityMigrated = Flags.unmanagedModeMigration()
+                            && parser.getAttributeBoolean(null,
+                                    ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED, false);
+                    mSuspendedPackagesMigrated = Flags.unmanagedModeMigration()
+                            && parser.getAttributeBoolean(null,
+                                    ATTR_SUSPENDED_PACKAGES_MIGRATED, false);
+
                     break;
                 default:
                     Slog.e(TAG, "Unexpected tag: " + tag);

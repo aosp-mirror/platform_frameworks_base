@@ -16,14 +16,24 @@
 
 package com.android.server.media;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.media.AudioManager;
-import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
 import android.media.MediaRoute2Info;
+import android.media.audiopolicy.AudioProductStrategy;
+import android.os.Looper;
 import android.os.ServiceManager;
+import android.os.UserHandle;
+
+import com.android.media.flags.Flags;
+
+import java.util.List;
 
 /**
  * Controls device routes.
@@ -35,53 +45,89 @@ import android.os.ServiceManager;
  */
 /* package */ interface DeviceRouteController {
 
-    /**
-     * Returns a new instance of {@link DeviceRouteController}.
-     */
-    /* package */ static DeviceRouteController createInstance(@NonNull Context context,
+    /** Returns a new instance of {@link DeviceRouteController}. */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
+    /* package */ static DeviceRouteController createInstance(
+            @NonNull Context context,
+            @NonNull Looper looper,
             @NonNull OnDeviceRouteChangedListener onDeviceRouteChangedListener) {
         AudioManager audioManager = context.getSystemService(AudioManager.class);
-        IAudioService audioService = IAudioService.Stub.asInterface(
-                ServiceManager.getService(Context.AUDIO_SERVICE));
+        AudioProductStrategy strategyForMedia = AudioRoutingUtils.getMediaAudioProductStrategy();
 
-        MediaFeatureFlagManager flagManager = MediaFeatureFlagManager.getInstance();
-        boolean isUsingLegacyController = flagManager.getBoolean(
-                MediaFeatureFlagManager.FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER,
-                true);
+        BluetoothManager bluetoothManager = context.getSystemService(BluetoothManager.class);
+        BluetoothAdapter btAdapter =
+                bluetoothManager != null ? bluetoothManager.getAdapter() : null;
 
-        if (isUsingLegacyController) {
-            return new LegacyDeviceRouteController(context,
+        // TODO: b/305199571 - Make the audio policies implementation work without the need for a
+        // bluetooth adapter or a strategy for media. If no strategy for media is available we can
+        // disallow media router transfers, and without a bluetooth adapter we can remove support
+        // for transfers to inactive bluetooth routes.
+        if (strategyForMedia != null
+                && btAdapter != null
+                && Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
+            return new AudioManagerRouteController(
+                    context,
                     audioManager,
-                    audioService,
+                    looper,
+                    strategyForMedia,
+                    btAdapter,
                     onDeviceRouteChangedListener);
         } else {
-            return new AudioPoliciesDeviceRouteController(context,
-                    audioManager,
-                    audioService,
-                    onDeviceRouteChangedListener);
+            IAudioService audioService =
+                    IAudioService.Stub.asInterface(
+                            ServiceManager.getService(Context.AUDIO_SERVICE));
+            return new LegacyDeviceRouteController(
+                    context, audioManager, audioService, onDeviceRouteChangedListener);
         }
     }
 
-    /**
-     * Select the route with the given built-in or wired {@link MediaRoute2Info.Type}.
-     *
-     * <p>If the type is {@code null} then unselects the route and falls back to the default device
-     * route observed from
-     * {@link com.android.server.audio.AudioService#startWatchingRoutes(IAudioRoutesObserver)}.
-     *
-     * @param type device type. May be {@code null} to unselect currently selected route.
-     * @return whether the selection succeeds. If the selection fails the state of the controller
-     * remains intact.
-     */
-    boolean selectRoute(@Nullable @MediaRoute2Info.Type Integer type);
+    /** Returns device route availability status. */
+    @MediaRoute2Info.SuitabilityStatus
+    static int getBuiltInSpeakerSuitabilityStatus(@NonNull Context context) {
+        if (!Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+            // Route is always suitable if the flag is disabled.
+            return MediaRoute2Info.SUITABILITY_STATUS_SUITABLE_FOR_DEFAULT_TRANSFER;
+        }
+
+        int availabilityStatus =
+                context.getResources()
+                        .getInteger(
+                                com.android.internal.R.integer
+                                        .config_mediaRouter_builtInSpeakerSuitability);
+
+        switch (availabilityStatus) {
+            case MediaRoute2Info.SUITABILITY_STATUS_SUITABLE_FOR_DEFAULT_TRANSFER:
+            case MediaRoute2Info.SUITABILITY_STATUS_SUITABLE_FOR_MANUAL_TRANSFER:
+            case MediaRoute2Info.SUITABILITY_STATUS_NOT_SUITABLE_FOR_TRANSFER:
+                return availabilityStatus;
+            default:
+                return MediaRoute2Info.SUITABILITY_STATUS_SUITABLE_FOR_DEFAULT_TRANSFER;
+        }
+    }
+
+    /** Returns the currently selected device (built-in or wired) route. */
+    @NonNull
+    MediaRoute2Info getSelectedRoute();
 
     /**
-     * Returns currently selected device (built-in or wired) route.
+     * Returns all available routes.
      *
-     * @return non-null device route.
+     * <p>Note that this method returns available routes including the selected route because (a)
+     * this interface doesn't guarantee that the internal state of the controller won't change
+     * between calls to {@link #getSelectedRoute()} and this method and (b) {@link
+     * #getSelectedRoute()} may be treated as a transferable route (not a selected route) if the
+     * selected route is from {@link BluetoothRouteController}.
      */
-    @NonNull
-    MediaRoute2Info getDeviceRoute();
+    List<MediaRoute2Info> getAvailableRoutes();
+
+    /**
+     * Transfers device output to the given route.
+     *
+     * <p>If the route is {@code null} then active route will be deactivated.
+     *
+     * @param routeId to switch to or {@code null} to unset the active device.
+     */
+    void transferTo(@Nullable String routeId);
 
     /**
      * Updates device route volume.
@@ -92,16 +138,24 @@ import android.os.ServiceManager;
     boolean updateVolume(int volume);
 
     /**
+     * Starts listening for changes in the system to keep an up to date view of available and
+     * selected devices.
+     */
+    void start(UserHandle mUser);
+
+    /**
+     * Stops keeping the internal state up to date with the system, releasing any resources acquired
+     * in {@link #start}
+     */
+    void stop();
+
+    /**
      * Interface for receiving events when device route has changed.
      */
     interface OnDeviceRouteChangedListener {
 
-        /**
-         * Called when device route has changed.
-         *
-         * @param deviceRoute non-null device route.
-         */
-        void onDeviceRouteChanged(@NonNull MediaRoute2Info deviceRoute);
+        /** Called when device route has changed. */
+        void onDeviceRouteChanged();
     }
 
 }

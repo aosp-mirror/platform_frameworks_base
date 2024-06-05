@@ -16,6 +16,7 @@
 
 package com.android.shell;
 
+import static android.app.admin.flags.Flags.onboardingBugreportStorageBugFix;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -50,7 +51,6 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.BugreportManager;
 import android.os.BugreportManager.BugreportCallback;
-import android.os.BugreportManager.BugreportCallback.BugreportErrorCode;
 import android.os.BugreportParams;
 import android.os.Bundle;
 import android.os.FileUtils;
@@ -90,9 +90,9 @@ import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
-import com.google.android.collect.Lists;
-
 import libcore.io.Streams;
+
+import com.google.android.collect.Lists;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -110,6 +110,8 @@ import java.security.NoSuchAlgorithmException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -169,6 +171,8 @@ public class BugreportProgressService extends Service {
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
     static final String EXTRA_ORIGINAL_INTENT = "android.intent.extra.ORIGINAL_INTENT";
     static final String EXTRA_INFO = "android.intent.extra.INFO";
+    static final String EXTRA_EXTRA_ATTACHMENT_URI =
+            "android.intent.extra.EXTRA_ATTACHMENT_URI";
 
     private static final int MSG_SERVICE_COMMAND = 1;
     private static final int MSG_DELAYED_SCREENSHOT = 2;
@@ -441,10 +445,14 @@ public class BugreportProgressService extends Service {
         }
     }
 
-    private static void sendRemoteBugreportFinishedBroadcast(Context context,
+    private void sendRemoteBugreportFinishedBroadcast(Context context,
             String bugreportFileName, File bugreportFile, long nonce) {
-        cleanupOldFiles(REMOTE_BUGREPORT_FILES_AMOUNT, REMOTE_MIN_KEEP_AGE,
-                bugreportFile.getParentFile());
+        // Remote bugreports are stored in the same directory as normal bugreports, meaning that
+        // the remote bugreport storage limit will get applied to normal bugreports whenever a
+        // remote bugreport is triggered. The fix in cleanupOldFiles applies the normal bugreport
+        // limit to the remote bugreports as a quick fix.
+        cleanupOldFiles(
+                REMOTE_BUGREPORT_FILES_AMOUNT, REMOTE_MIN_KEEP_AGE, bugreportFile.getParentFile());
         final Intent intent = new Intent(DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH);
         final Uri bugreportUri = getUri(context, bugreportFile);
         final String bugreportHash = generateFileHash(bugreportFileName);
@@ -495,18 +503,58 @@ public class BugreportProgressService extends Service {
         return fileHash;
     }
 
-    static void cleanupOldFiles(final int minCount, final long minAge, File bugreportsDir) {
+    void cleanupOldFiles(final int minCount, final long minAge, File bugreportsDir) {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    FileUtils.deleteOlderFiles(bugreportsDir, minCount, minAge);
+                    if (onboardingBugreportStorageBugFix()) {
+                        cleanupOldBugreports();
+                    } else {
+                        FileUtils.deleteOlderFiles(bugreportsDir, minCount, minAge);
+                    }
                 } catch (RuntimeException e) {
                     Log.e(TAG, "RuntimeException deleting old files", e);
                 }
                 return null;
             }
         }.execute();
+    }
+
+    private void cleanupOldBugreports() {
+        final File[] files = mBugreportsDir.listFiles();
+        if (files == null) return;
+
+        // Sort with newest files first
+        Arrays.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File lhs, File rhs) {
+                return Long.compare(rhs.lastModified(), lhs.lastModified());
+            }
+        });
+
+        int normalBugreportFilesCount = 0;
+        int deferredBugreportFilesCount = 0;
+        for (int i = 0; i < files.length; i++) {
+            final File file = files[i];
+
+            // tmp files are deferred bugreports which have their separate storage limit
+            boolean isDeferredBugreportFile = file.getName().endsWith(".tmp");
+            if (isDeferredBugreportFile) {
+                deferredBugreportFilesCount++;
+            } else {
+                normalBugreportFilesCount++;
+            }
+            // Keep files newer than minAgeMs
+            final long age = System.currentTimeMillis() - file.lastModified();
+            final int count = isDeferredBugreportFile
+                    ? deferredBugreportFilesCount : normalBugreportFilesCount;
+            if (count > MIN_KEEP_COUNT  && age > MIN_KEEP_AGE) {
+                if (file.delete()) {
+                    Log.d(TAG, "Deleted old file " + file);
+                }
+            }
+        }
     }
 
     /**
@@ -634,9 +682,10 @@ public class BugreportProgressService extends Service {
         long nonce = intent.getLongExtra(EXTRA_BUGREPORT_NONCE, 0);
         String baseName = getBugreportBaseName(bugreportType);
         String name = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
+        Uri extraAttachment = intent.getParcelableExtra(EXTRA_EXTRA_ATTACHMENT_URI, Uri.class);
 
-        BugreportInfo info = new BugreportInfo(mContext, baseName, name,
-                shareTitle, shareDescription, bugreportType, mBugreportsDir, nonce);
+        BugreportInfo info = new BugreportInfo(mContext, baseName, name, shareTitle,
+                shareDescription, bugreportType, mBugreportsDir, nonce, extraAttachment);
         synchronized (mLock) {
             if (info.bugreportFile.exists()) {
                 Log.e(TAG, "Failed to start bugreport generation, the requested bugreport file "
@@ -1184,6 +1233,10 @@ public class BugreportProgressService extends Service {
             clipData.addItem(new ClipData.Item(null, null, null, screenshotUri));
             attachments.add(screenshotUri);
         }
+        if (info.extraAttachment != null) {
+            clipData.addItem(new ClipData.Item(null, null, null, info.extraAttachment));
+            attachments.add(info.extraAttachment);
+        }
         intent.setClipData(clipData);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
 
@@ -1212,11 +1265,29 @@ public class BugreportProgressService extends Service {
 
     private void maybeShowWarningMessageAndCloseNotification(int id) {
         if (!hasUserDecidedNotToGetWarningMessage()) {
-            Intent warningIntent = buildWarningIntent(mContext, /* sendIntent */ null);
+            Intent warningIntent;
+            if (mIsWatch) {
+                warningIntent = buildWearWarningIntent();
+            } else {
+                warningIntent = buildWarningIntent(mContext, /* sendIntent */ null);
+            }
             warningIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(warningIntent);
         }
         NotificationManager.from(mContext).cancel(id);
+    }
+
+    /**
+     * Build intent to show warning dialog on Wear after bugreport is done
+     */
+    private Intent buildWearWarningIntent() {
+        Intent intent = new Intent();
+        intent.setClassName(mContext, getPackageName() + ".WearBugreportWarningActivity");
+        if (mContext.getPackageManager().resolveActivity(intent, /* flags */ 0) == null) {
+            Log.e(TAG, "Cannot find wear bugreport warning activity");
+            return buildWarningIntent(mContext, /* sendIntent */ null);
+        }
+        return intent;
     }
 
     private void shareBugreport(int id, BugreportInfo sharedInfo) {
@@ -2024,6 +2095,9 @@ public class BugreportProgressService extends Service {
          */
         final long nonce;
 
+        @Nullable
+        public Uri extraAttachment = null;
+
         private final Object mLock = new Object();
 
         /**
@@ -2031,7 +2105,8 @@ public class BugreportProgressService extends Service {
          */
         BugreportInfo(Context context, String baseName, String name,
                 @Nullable String shareTitle, @Nullable String shareDescription,
-                @BugreportParams.BugreportMode int type, File bugreportsDir, long nonce) {
+                @BugreportParams.BugreportMode int type, File bugreportsDir, long nonce,
+                @Nullable Uri extraAttachment) {
             this.context = context;
             this.name = this.initialName = name;
             this.shareTitle = shareTitle == null ? "" : shareTitle;
@@ -2040,6 +2115,7 @@ public class BugreportProgressService extends Service {
             this.nonce = nonce;
             this.baseName = baseName;
             this.bugreportFile = new File(bugreportsDir, getFileName(this, ".zip"));
+            this.extraAttachment = extraAttachment;
         }
 
         void createBugreportFile() {

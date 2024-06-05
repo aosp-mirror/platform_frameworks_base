@@ -23,8 +23,8 @@ map key 43 POUND
 ### ROW 1
 
 key GRAVE {
-    label:                              '`'
-    base:                               '`'
+    label:                              '\u0300'
+    base:                               '\u0300'
     shift:                              '\u00AC'
     ralt:                               '\u00A6'
 }
@@ -39,6 +39,7 @@ key 2 {
     label:                              '2'
     base:                               '2'
     shift:                              '"'
+    ralt:                               '\u0308'
 }
 
 key 3 {
@@ -64,6 +65,7 @@ key 6 {
     label:                              '6'
     base:                               '6'
     shift:                              '^'
+    ralt:                               '\u0302'
 }
 
 key 7 {
@@ -116,6 +118,9 @@ key W {
     base:                               'w'
     shift, capslock:                    'W'
     shift+capslock:                     'w'
+    ralt:                               '\u1e83'
+    shift+ralt, capslock+ralt:          '\u1e82'
+    shift+capslock+ralt:                '\u1e83'
 }
 
 key E {
@@ -147,6 +152,9 @@ key Y {
     base:                               'y'
     shift, capslock:                    'Y'
     shift+capslock:                     'y'
+    ralt:                               '\u00fd'
+    shift+ralt, capslock+ralt:          '\u00dd'
+    shift+capslock+ralt:                '\u00fd'
 }
 
 key U {
@@ -196,6 +204,7 @@ key RIGHT_BRACKET {
     label:                              ']'
     base:                               ']'
     shift:                              '}'
+    shift+ralt:                         '|'
 }
 
 ### ROW 3
@@ -276,14 +285,16 @@ key APOSTROPHE {
     label:                              '\''
     base:                               '\''
     shift:                              '@'
+    ralt:                               '\u0301'
+    shift+ralt:                         '`'
 }
 
 key POUND {
     label:                              '#'
     base:                               '#'
     shift:                              '~'
-    ralt:                               '\\'
-    shift+ralt:                         '|'
+    ralt:                               '\u0303'
+    shift+ralt:                         '\\'
 }
 
 ### ROW 4
@@ -313,6 +324,9 @@ key C {
     base:                               'c'
     shift, capslock:                    'C'
     shift+capslock:                     'c'
+    ralt:                               '\u00e7'
+    shift+ralt, capslock+ralt:          '\u00c7'
+    shift+capslock+ralt:                '\u00e7'
 }
 
 key V {

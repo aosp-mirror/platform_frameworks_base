@@ -16,6 +16,8 @@
 
 package com.android.systemui.wallet.ui;
 
+import static com.android.systemui.wallet.util.WalletCardUtilsKt.getPaymentCards;
+
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -41,16 +43,16 @@ import androidx.annotation.NonNull;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /** Controller for the wallet card carousel screen. */
 public class WalletScreenController implements
@@ -126,22 +128,11 @@ public class WalletScreenController implements
             return;
         }
         Log.i(TAG, "Successfully retrieved wallet cards.");
-        List<WalletCard> walletCards = response.getWalletCards();
+        List<WalletCard> walletCards = getPaymentCards(response.getWalletCards());
 
-        boolean allUnknown = true;
-        for (WalletCard card : walletCards) {
-            if (card.getCardType() != WalletCard.CARD_TYPE_UNKNOWN) {
-                allUnknown = false;
-                break;
-            }
-        }
-
-        List<WalletCardViewInfo> paymentCardData = new ArrayList<>();
-        for (WalletCard card : walletCards) {
-            if (allUnknown || card.getCardType() == WalletCard.CARD_TYPE_PAYMENT) {
-                paymentCardData.add(new QAWalletCardViewInfo(mContext, card));
-            }
-        }
+        List<WalletCardViewInfo> paymentCardData = walletCards.stream().map(
+                card -> new QAWalletCardViewInfo(mContext, card)
+        ).collect(Collectors.toList());
 
         // Get on main thread for UI updates.
         mHandler.post(() -> {

@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengecas"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengecas dengan cepat"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengecas dengan perlahan"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Pengecasan dioptimumkan untuk melindungi bateri"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Isu berkaitan aksesori pengecasan"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Tekan Menu untuk membuka kunci."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Pengecasan ditunda untuk melindungi bateri"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Periksa aksesori pengecasan"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Rangkaian dikunci"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Tiada SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Tambah SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM tiada atau tidak boleh dibaca. Tambah SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM tidak boleh digunakan."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM anda telah dinyahaktifkan secara kekal.\n Hubungi penyedia perkhidmatan wayarles anda untuk mendapatkan SIM lain."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM dikunci."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM dikunci PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Membuka kunci SIM…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"PIN diperlukan selepas kunci semua"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Kata laluan diperlukan selepas kunci semua"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Corak diperlukan selepas kunci semua"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Kemaskinian akan dipasang semasa waktu tidak aktif"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Kemaskinian akan dipasang apabila peranti tidak digunakan"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Keselamatan tambahan diperlukan. PIN tidak digunakan."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Keselamatan tambahan diperlukan. Kata laluan tidak digunakan."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Keselamatan tambahan diperlukan. Corak tidak digunakan."</string>
@@ -87,7 +83,7 @@
     <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Terlalu banyak percubaan dengan PIN yang salah"</string>
     <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Terlalu banyak percubaan dengan corak yang salah"</string>
     <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Terlalu banyak percubaan dengan kata laluan yang salah"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Cuba lagi dalam # saat.}other{Cuba lagi dalam # saat.}}"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Cuba lagi selepas # saat.}other{Cuba lagi selepas # saat.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Masukkan PIN SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Masukkan PIN SIM untuk \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Lumpuhkan eSIM untuk menggunakan peranti tanpa perkhidmatan mudah alih."</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Untuk keselamatan tambahan, gunakan corak"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Untuk keselamatan tambahan, gunakan PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Untuk keselamatan tambahan, gunakan kata laluan"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"PIN diperlukan untuk keselamatan tambahan"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Corak diperlukan untuk keselamatan tambahan"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Kata laluan diperlukan untuk keselamatan tambahan"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Peranti dikunci oleh pentadbir"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Peranti telah dikunci secara manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Tidak dikenali"</string>

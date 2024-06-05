@@ -19,10 +19,14 @@ package android.view.accessibility;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.accessibilityservice.IBrailleDisplayController;
 import android.accessibilityservice.MagnificationConfig;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
+import android.annotation.RequiresNoPermission;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Region;
+import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteCallback;
@@ -142,6 +146,10 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void setMagnificationCallbackEnabled(int displayId, boolean enabled) {}
 
+    public boolean isMagnificationSystemUIConnected() {
+        return false;
+    }
+
     public boolean setSoftKeyboardShowMode(int showMode) {
         return false;
     }
@@ -214,19 +222,49 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
 
     public void setAnimationScale(float scale) {}
 
+    @RequiresNoPermission
     @Override
     public void setInstalledAndEnabledServices(List<AccessibilityServiceInfo> infos)
             throws RemoteException {
     }
 
+    @RequiresNoPermission
     @Override
     public List<AccessibilityServiceInfo> getInstalledAndEnabledServices() throws RemoteException {
         return null;
     }
 
+    @RequiresNoPermission
     @Override
-    public void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc) {}
+    public void attachAccessibilityOverlayToDisplay(
+            int interactionId,
+            int displayId,
+            SurfaceControl sc,
+            IAccessibilityInteractionConnectionCallback callback) {}
 
+    @RequiresNoPermission
     @Override
-    public void attachAccessibilityOverlayToWindow(int accessibilityWindowId, SurfaceControl sc) {}
+    public void attachAccessibilityOverlayToWindow(
+            int interactionId,
+            int accessibilityWindowId,
+            SurfaceControl sc,
+            IAccessibilityInteractionConnectionCallback callback) {}
+
+    @EnforcePermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    @Override
+    public void connectBluetoothBrailleDisplay(
+            String bluetoothAddress, IBrailleDisplayController controller) {
+        connectBluetoothBrailleDisplay_enforcePermission();
+    }
+
+    @RequiresNoPermission
+    @Override
+    public void connectUsbBrailleDisplay(
+            UsbDevice usbDevice, IBrailleDisplayController controller) {}
+
+    @EnforcePermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)
+    @Override
+    public void setTestBrailleDisplayData(List<Bundle> brailleDisplays) {
+        setTestBrailleDisplayData_enforcePermission();
+    }
 }

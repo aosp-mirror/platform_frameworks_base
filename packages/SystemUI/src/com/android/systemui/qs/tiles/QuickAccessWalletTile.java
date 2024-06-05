@@ -16,10 +16,17 @@
 
 package com.android.systemui.qs.tiles;
 
-import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.provider.Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT;
+import static android.graphics.drawable.Icon.TYPE_URI;
+import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
+import static android.graphics.drawable.Icon.TYPE_RESOURCE;
+import static android.graphics.drawable.Icon.TYPE_BITMAP;
+import static android.graphics.drawable.Icon.TYPE_ADAPTIVE_BITMAP;
+import static android.graphics.drawable.Icon.TYPE_DATA;
 
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE;
+import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_WALLET_APP_CHANGE;
+import static com.android.systemui.wallet.util.WalletCardUtilsKt.getPaymentCards;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -33,7 +40,6 @@ import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.WalletCard;
 import android.service.quicksettings.Tile;
 import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,8 +47,8 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -53,6 +59,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
@@ -117,7 +124,8 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     protected void handleSetListening(boolean listening) {
         super.handleSetListening(listening);
         if (listening) {
-            mController.setupWalletChangeObservers(mCardRetriever, DEFAULT_PAYMENT_APP_CHANGE);
+            mController.setupWalletChangeObservers(mCardRetriever, DEFAULT_PAYMENT_APP_CHANGE,
+                    DEFAULT_WALLET_APP_CHANGE);
             if (!mController.getWalletClient().isWalletServiceAvailable()
                     || !mController.getWalletClient().isWalletFeatureAvailable()) {
                 Log.i(TAG, "QAW service is unavailable, recreating the wallet client.");
@@ -128,9 +136,9 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
-        ActivityLaunchAnimator.Controller animationController =
-                view == null ? null : ActivityLaunchAnimator.Controller.fromView(view,
+    protected void handleClick(@Nullable Expandable expandable) {
+        ActivityTransitionAnimator.Controller animationController =
+                expandable == null ? null : expandable.activityTransitionController(
                         InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE);
 
         mUiHandler.post(
@@ -179,10 +187,17 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
 
     @Override
     public boolean isAvailable() {
+        if (isWalletRoleAvailable()) {
+            return !mPackageManager.hasSystemFeature(FEATURE_CHROME_OS);
+        }
         return mPackageManager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
                 && !mPackageManager.hasSystemFeature(FEATURE_CHROME_OS)
                 && mSecureSettings.getStringForUser(NFC_PAYMENT_DEFAULT_COMPONENT,
                     UserHandle.USER_CURRENT) != null;
+    }
+
+    private boolean isWalletRoleAvailable() {
+        return mHost.getUserId() == UserHandle.USER_SYSTEM && mController.isWalletRoleAvailable();
     }
 
     @Nullable
@@ -200,7 +215,8 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     @Override
     protected void handleDestroy() {
         super.handleDestroy();
-        mController.unregisterWalletChangeObservers(DEFAULT_PAYMENT_APP_CHANGE);
+        mController.unregisterWalletChangeObservers(DEFAULT_PAYMENT_APP_CHANGE,
+                DEFAULT_WALLET_APP_CHANGE);
     }
 
     private class WalletCardRetriever implements
@@ -210,7 +226,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         public void onWalletCardsRetrieved(@NonNull GetWalletCardsResponse response) {
             Log.i(TAG, "Successfully retrieved wallet cards.");
             mIsWalletUpdating = false;
-            List<WalletCard> cards = response.getWalletCards();
+            List<WalletCard> cards = getPaymentCards(response.getWalletCards());
             if (cards.isEmpty()) {
                 Log.d(TAG, "No wallet cards exist.");
                 mCardViewDrawable = null;
@@ -226,11 +242,21 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 return;
             }
             mSelectedCard = cards.get(selectedIndex);
-            android.graphics.drawable.Icon cardImageIcon = mSelectedCard.getCardImage();
-            if (cardImageIcon.getType() == TYPE_URI) {
-                mCardViewDrawable = null;
-            } else {
-                mCardViewDrawable = mSelectedCard.getCardImage().loadDrawable(mContext);
+            switch (mSelectedCard.getCardImage().getType()) {
+                case TYPE_URI:
+                case TYPE_URI_ADAPTIVE_BITMAP:
+                    mCardViewDrawable = null;
+                    break;
+                case TYPE_RESOURCE:
+                case TYPE_BITMAP:
+                case TYPE_ADAPTIVE_BITMAP:
+                case TYPE_DATA:
+                    mCardViewDrawable = mSelectedCard.getCardImage().loadDrawable(mContext);
+                    break;
+                default:
+                    Log.e(TAG, "Unknown icon type: " + mSelectedCard.getCardImage().getType());
+                    mCardViewDrawable = null;
+                    break;
             }
             refreshState();
         }

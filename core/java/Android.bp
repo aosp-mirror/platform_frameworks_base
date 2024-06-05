@@ -9,23 +9,29 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+aidl_library {
+    name: "HardwareBuffer_aidl",
+    hdrs: ["android/hardware/HardwareBuffer.aidl"],
+}
+
 filegroup {
     name: "framework-core-sources",
     srcs: [
         "**/*.java",
         "**/*.aidl",
+        ":framework-nfc-non-updatable-sources",
     ],
     visibility: ["//frameworks/base"],
 }
 
-filegroup {
-    name: "IKeyAttestationApplicationIdProvider.aidl",
-    srcs: ["android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl"],
-}
-
-filegroup {
-    name: "IDropBoxManagerService.aidl",
-    srcs: ["com/android/internal/os/IDropBoxManagerService.aidl"],
+aidl_library {
+    name: "IDropBoxManagerService_aidl",
+    srcs: [
+        "com/android/internal/os/IDropBoxManagerService.aidl",
+    ],
+    hdrs: [
+        "android/os/DropBoxManager.aidl",
+    ],
 }
 
 filegroup {
@@ -120,6 +126,7 @@ filegroup {
     srcs: [
         "android/os/IExternalVibrationController.aidl",
         "android/os/IExternalVibratorService.aidl",
+        "android/os/ExternalVibrationScale.aidl",
     ],
 }
 
@@ -128,8 +135,6 @@ filegroup {
     srcs: [
         "android/os/Temperature.aidl",
         "android/os/CoolingDevice.aidl",
-        "android/os/IHintManager.aidl",
-        "android/os/IHintSession.aidl",
         "android/os/IThermalEventListener.aidl",
         "android/os/IThermalStatusListener.aidl",
         "android/os/IThermalService.aidl",
@@ -138,7 +143,31 @@ filegroup {
     ],
 }
 
-filegroup {
+aidl_interface {
+    name: "android.os.hintmanager_aidl",
+    srcs: [
+        "android/os/IHintManager.aidl",
+        "android/os/IHintSession.aidl",
+    ],
+    unstable: true,
+    backend: {
+        java: {
+            sdk_version: "module_current",
+            enabled: true,
+        },
+        cpp: {
+            enabled: false,
+        },
+        ndk: {
+            enabled: true,
+        },
+    },
+    imports: [
+        "android.hardware.power-V5",
+    ],
+}
+
+aidl_library {
     name: "ILogcatManagerService_aidl",
     srcs: ["android/os/logcat/ILogcatManagerService.aidl"],
 }
@@ -159,6 +188,9 @@ java_library {
     srcs: [
         "com/android/internal/logging/UiEventLoggerImpl.java",
         ":statslog-framework-java-gen",
+    ],
+    libs: [
+        "androidx.annotation_annotation",
     ],
     static_libs: ["modules-utils-uieventlogger-interface"],
 }
@@ -212,7 +244,6 @@ filegroup {
         "com/android/internal/util/ConcurrentUtils.java",
         "com/android/internal/util/DumpUtils.java",
         "com/android/internal/util/FastPrintWriter.java",
-        "com/android/internal/util/FastXmlSerializer.java",
         "com/android/internal/util/FunctionalUtils.java",
         "com/android/internal/util/ParseUtils.java",
         "com/android/internal/util/RingBufferIndices.java",
@@ -400,6 +431,10 @@ aidl_interface {
     backend: {
         rust: {
             enabled: true,
+            apex_available: [
+                "//apex_available:platform",
+                "com.android.virt",
+            ],
         },
     },
 }
@@ -419,6 +454,16 @@ aidl_interface {
             enabled: true,
         },
     },
+}
+
+aidl_interface {
+    name: "android.companion.virtual.virtualdevice_aidl",
+    unstable: true,
+    host_supported: true,
+    srcs: [
+        "android/companion/virtualnative/IVirtualDeviceManagerNative.aidl",
+    ],
+    local_include_dir: ".",
 }
 
 filegroup {
@@ -441,7 +486,6 @@ filegroup {
         "com/android/internal/util/AsyncChannel.java",
         "com/android/internal/util/AsyncService.java",
         "com/android/internal/util/BitwiseInputStream.java",
-        "com/android/internal/util/FastXmlSerializer.java",
         "com/android/internal/util/HexDump.java",
         "com/android/internal/util/IndentingPrintWriter.java",
         "com/android/internal/util/UserIcons.java",
@@ -491,7 +535,6 @@ filegroup {
         "android/net/InterfaceConfiguration.java",
         "android/util/BackupUtils.java",
         "android/util/Rational.java",
-        "com/android/internal/util/FastXmlSerializer.java",
         "com/android/internal/util/HexDump.java",
         "com/android/internal/util/MessageUtils.java",
         "com/android/internal/util/WakeupMessage.java",
@@ -511,12 +554,37 @@ filegroup {
 }
 
 java_library {
+    name: "protolog-group",
+    srcs: [
+        "com/android/internal/protolog/common/IProtoLogGroup.java",
+    ],
+}
+
+// PackageManager common
+filegroup {
+    name: "framework-pm-common-shared-srcs",
+    srcs: [
+        "com/android/server/pm/pkg/AndroidPackage.java",
+        "com/android/server/pm/pkg/AndroidPackageSplit.java",
+    ],
+}
+
+filegroup {
+    name: "protolog-impl",
+    srcs: [
+        "com/android/internal/protolog/ProtoLogImpl.java",
+    ],
+}
+
+java_library {
     name: "protolog-lib",
     platform_apis: true,
     srcs: [
         "com/android/internal/protolog/ProtoLogImpl.java",
         "com/android/internal/protolog/ProtoLogViewerConfigReader.java",
-        ":protolog-common-src",
+    ],
+    static_libs: [
+        "perfetto_trace_javastream_protos_jarjar",
     ],
 }
 

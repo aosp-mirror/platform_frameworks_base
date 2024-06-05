@@ -31,14 +31,16 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.test.TestLooper;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableResources;
 import android.view.Window;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 
@@ -48,7 +50,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.List;
 
@@ -72,8 +75,14 @@ public class SideFpsEventHandlerTest {
     private static final Integer AUTO_DISMISS_DIALOG = 500;
 
     @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
+    @Rule
     public TestableContext mContext =
             new TestableContext(InstrumentationRegistry.getContext(), null);
+
+    private final AccessibilityManager mAccessibilityManager =
+            mContext.getSystemService(AccessibilityManager.class);
 
     @Mock
     private PackageManager mPackageManager;
@@ -89,9 +98,8 @@ public class SideFpsEventHandlerTest {
     private BiometricStateListener mBiometricStateListener;
 
     @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-
+    public void setup() throws RemoteException {
+        disableAccessibility();
         mContext.addMockSystemService(PackageManager.class, mPackageManager);
         mContext.addMockSystemService(FingerprintManager.class, mFingerprintManager);
         TestableResources resources = mContext.getOrCreateTestableResources();
@@ -192,9 +200,8 @@ public class SideFpsEventHandlerTest {
     }
 
     @Test
-    public void dialogDismissesAfterTime() throws Exception {
+    public void dialogDismissesAfterTime_accessibilityDisabled() throws Exception {
         setupWithSensor(true /* hasSfps */, true /* initialized */);
-
         setBiometricState(BiometricStateListener.STATE_ENROLLING);
         when(mDialog.isShowing()).thenReturn(true);
         assertThat(mEventHandler.shouldConsumeSinglePress(80000L)).isTrue();
@@ -207,9 +214,23 @@ public class SideFpsEventHandlerTest {
     }
 
     @Test
-    public void dialogDoesNotDismissOnSensorTouch() throws Exception {
+    public void dialogDoesNotDismissAfterTime_accessibilityEnabled() throws Exception {
+        enableAccessibility();
         setupWithSensor(true /* hasSfps */, true /* initialized */);
+        setBiometricState(BiometricStateListener.STATE_ENROLLING);
+        when(mDialog.isShowing()).thenReturn(true);
+        assertThat(mEventHandler.shouldConsumeSinglePress(80000L)).isTrue();
 
+        mLooper.dispatchAll();
+        verify(mDialog).show();
+        mLooper.moveTimeForward(AUTO_DISMISS_DIALOG);
+        mLooper.dispatchAll();
+        verify(mDialog, never()).dismiss();
+    }
+
+    @Test
+    public void dialogDoesNotDismissOnSensorTouch_accessibilityDisabled() throws Exception {
+        setupWithSensor(true /* hasSfps */, true /* initialized */);
         setBiometricState(BiometricStateListener.STATE_ENROLLING);
         when(mDialog.isShowing()).thenReturn(true);
         assertThat(mEventHandler.shouldConsumeSinglePress(80000L)).isTrue();
@@ -218,15 +239,43 @@ public class SideFpsEventHandlerTest {
         verify(mDialog).show();
 
         mBiometricStateListener.onBiometricAction(BiometricStateListener.ACTION_SENSOR_TOUCH);
-        mLooper.moveTimeForward(AUTO_DISMISS_DIALOG - 1);
         mLooper.dispatchAll();
-
         verify(mDialog, never()).dismiss();
+    }
+
+    @Test
+    public void dialogDismissesOnSensorTouch_accessibilityEnabled() throws Exception {
+        enableAccessibility();
+        setupWithSensor(true /* hasSfps */, true /* initialized */);
+        setBiometricState(BiometricStateListener.STATE_ENROLLING);
+        when(mDialog.isShowing()).thenReturn(true);
+        assertThat(mEventHandler.shouldConsumeSinglePress(80000L)).isTrue();
+
+        mLooper.dispatchAll();
+        verify(mDialog).show();
+
+        mBiometricStateListener.onBiometricAction(BiometricStateListener.ACTION_SENSOR_TOUCH);
+        mLooper.dispatchAll();
+        verify(mDialog).dismiss();
     }
 
     private void setBiometricState(@BiometricStateListener.State int newState) {
         if (mBiometricStateListener != null) {
             mBiometricStateListener.onStateChanged(newState);
+            mLooper.dispatchAll();
+        }
+    }
+
+    private void enableAccessibility() throws RemoteException {
+        if (mAccessibilityManager != null) {
+            mAccessibilityManager.getClient().setState(1);
+            mLooper.dispatchAll();
+        }
+    }
+
+    private void disableAccessibility() throws RemoteException {
+        if (mAccessibilityManager != null) {
+            mAccessibilityManager.getClient().setState(0);
             mLooper.dispatchAll();
         }
     }

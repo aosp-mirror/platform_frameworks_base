@@ -17,43 +17,41 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"تطبيق \"مدير الجهاز المصاحب\""</string>
-    <!-- no translation found for confirmation_title (8024993972587946678) -->
-    <skip />
+    <string name="confirmation_title" msgid="2244241995958340998">"‏هل تريد السماح لـ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; بالوصول إلى &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;؟"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"الساعة"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"‏اختَر <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ليديرها تطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <!-- no translation found for summary_watch (6566922405914995759) -->
-    <skip />
-    <!-- no translation found for summary_watch_single_device (7443464525873186735) -->
-    <skip />
-    <string name="profile_name_glasses" msgid="8488394059007275998">"النظارة"</string>
-    <!-- no translation found for summary_glasses (3808267780579061241) -->
-    <skip />
-    <!-- no translation found for summary_glasses_single_device (7051392780285915640) -->
-    <skip />
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"‏اختيار جهاز ليديره تطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"اختيار \"<xliff:g id="PROFILE_NAME">%1$s</xliff:g>\" لإعداده"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"سيتم السماح لهذا التطبيق بمزامنة المعلومات، مثلاً اسم المتصل، والوصول إلى هذه الأذونات على \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
+    <string name="confirmation_title_glasses" msgid="8288346850537727333">"‏هل تريد السماح لتطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; بإدارة &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;؟"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"جهاز"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"سيتم السماح لهذا التطبيق بالوصول إلى هذه الأذونات على \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"‏السماح لتطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; بالوصول إلى هذه المعلومات من هاتفك"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"‏هل تريد منح &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; إذنًا لبث التطبيقات المُثبَّتة على هاتفك؟"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"‏سيتمكّن %1$s من الوصول إلى كل المحتوى المعروض أو الذي يتم تشغيله على الهاتف، بما في ذلك الملفات الصوتية والصور وكلمات المرور والرسائل.&lt;br/&gt;&lt;br/&gt;سيتمكّن %1$s من بث التطبيقات إلى أن توقف إمكانية استخدام هذا الإذن."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"الخدمات التي تعمل بين الأجهزة"</string>
-    <string name="helper_summary_app_streaming" msgid="5977509499890099">"يطلب تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> الحصول على إذن نيابةً عن <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> لمشاركة التطبيقات بين أجهزتك."</string>
+    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"يطلب تطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" الحصول على إذن نيابةً عن \"<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>\" لبثّ محتوى التطبيقات بين أجهزتك."</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"تطلب \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" الحصول على إذن نيابةً عن <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> لعرض التطبيقات وبثها بين أجهزتك"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"‏السماح لتطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; بالوصول إلى هذه المعلومات من هاتفك"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"‏خدمات Google Play"</string>
-    <string name="helper_summary_computer" msgid="9050724687678157852">"يطلب تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> الحصول على إذن نيابةً عن <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> للوصول إلى الصور والوسائط والإشعارات في هاتفك."</string>
-    <string name="title_nearby_device_streaming" msgid="179278282547719200">"‏السماح للتطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; بتنفيذ هذا الإجراء من هاتفك"</string>
-    <string name="helper_title_nearby_device_streaming" msgid="6124438217620593669">"خدمات تعمل على عدة أجهزة"</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="5538329403511524333">"يطلب \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" الحصول على إذن نيابةً عن \"<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>\" لبثّ محتوى إلى أجهزتك المجاورة."</string>
+    <string name="helper_summary_computer" msgid="8774832742608187072">"يطلب تطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" الحصول على إذن نيابةً عن \"<xliff:g id="DISPLAY_NAME">%2$s</xliff:g>\" للوصول إلى الصور والوسائط والإشعارات في هاتفك."</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"‏هل تريد السماح للتطبيق &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; باتّخاذ هذا الإجراء؟"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"‏هل تريد منح &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; إذنًا لبث التطبيقات والوصول إلى ميزات النظام على هاتفك؟"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"‏سيتمكّن %1$s من الوصول إلى كل المحتوى المعروض أو الذي يتم تشغيله على هاتفك، بما في ذلك الملفات الصوتية والصور ومعلومات الدفع وكلمات المرور والرسائل.&lt;br/&gt;&lt;br/&gt;سيتمكّن %1$s من بث التطبيقات والوصول إلى ميزات النظام إلى أن توقف إمكانية استخدام هذا الإذن."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"يطلب \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" الحصول على إذن نيابةً عن \"<xliff:g id="DEVICE_NAME">%2$s</xliff:g>\" لبثّ التطبيقات وميزات النظام الأخرى إلى أجهزتك المجاورة."</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"جهاز"</string>
-    <!-- no translation found for summary_generic_single_device (4735072202474939111) -->
-    <skip />
-    <!-- no translation found for summary_generic (4988130802522924650) -->
-    <skip />
+    <string name="summary_generic" msgid="1761976003668044801">"سيتمكّن هذا التطبيق من مزامنة المعلومات، مثل اسم المتصل، بين هاتفك والجهاز المحدّد."</string>
     <string name="consent_yes" msgid="8344487259618762872">"السماح"</string>
     <string name="consent_no" msgid="2640796915611404382">"عدم السماح"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"إلغاء"</string>
     <string name="consent_back" msgid="2560683030046918882">"رجوع"</string>
+    <string name="permission_expand" msgid="893185038020887411">"توسيع <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"تصغير <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"‏هل تريد منح التطبيقات على &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; نفس الأذونات على &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;؟"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"‏قد يتضمّن هذا الوصول إلى &lt;strong&gt;الميكروفون&lt;/strong&gt; و&lt;strong&gt;الكاميرا&lt;/strong&gt; و&lt;strong&gt;الموقع الجغرافي&lt;/strong&gt; وأذونات الوصول إلى المعلومات الحساسة الأخرى في &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;يمكنك تغيير هذه الأذونات في أي وقت في إعداداتك على &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"رمز التطبيق"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"زر مزيد من المعلومات"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"مزيد من المعلومات"</string>
     <string name="permission_phone" msgid="2661081078692784919">"الهاتف"</string>
     <string name="permission_sms" msgid="6337141296535774786">"الرسائل القصيرة"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"جهات الاتصال"</string>
@@ -61,19 +59,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"الميكروفون"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"سجلّ المكالمات"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"الأجهزة المجاورة"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"تغيير جهاز إخراج الوسائط"</string>
     <string name="permission_storage" msgid="6831099350839392343">"الصور والوسائط"</string>
-    <string name="permission_notification" msgid="693762568127741203">"الإشعارات"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"الإشعارات"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"التطبيقات"</string>
-    <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"بثّ محتوى إلى الأجهزة المجاورة"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"يمكن إجراء المكالمات الهاتفية وإدارتها."</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"يمكن قراءة سجلّ المكالمات الهاتفية والكتابة فيه."</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"يمكن إرسال الرسائل القصيرة وعرضها."</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"يمكن الوصول إلى جهات الاتصال."</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"يمكن الوصول إلى التقويم."</string>
-    <string name="permission_microphone_summary" msgid="4241354865859396558">"يمكن تسجيل الصوت باستخدام الميكروفون."</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"يمكن العثور على الموضع النسبي للأجهزة المجاورة والربط بها وتحديدها."</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"يمكن لهذا الملف الشخصي قراءة جميع الإشعارات، بما في ذلك المعلومات، مثل جهات الاتصال والرسائل والصور."</string>
+    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"البثّ"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"إجراء المكالمات الهاتفية وإدارتها"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"قراءة سجلّ المكالمات الهاتفية والكتابة إليه"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"إرسال الرسائل القصيرة وعرضها"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"الوصول إلى جهات اتصالك"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"الوصول إلى تقويمك"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"تسجيل الصوت"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"يمكن العثور على الأجهزة المجاورة والربط بها وتحديد موقعها النسبي."</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"يمكن لهذا الملف الشخصي قراءة جميع الإشعارات، بما في ذلك المعلومات، مثل جهات الاتصال والرسائل والصور."</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"‏• قراءة كل الإشعارات بما فيها المعلومات، مثل جهات الاتصال والرسائل والصور&lt;br/&gt;• إرسال الإشعارات&lt;br/&gt;&lt;br/&gt;يمكنك إدارة الإذن الممنوح لهذا التطبيق بقراءة الإشعارات وإرسالها في أي وقت من خلال الإعدادات &gt; الإشعارات."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"بث تطبيقات هاتفك"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="5776807830582725074">"بثّ محتوى إلى جهاز مجاور"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"بثّ التطبيقات وميزات النظام الأخرى من هاتفك"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"يتيح لك هذا الإذن الاطّلاع على مجموعة من الأجهزة المتاحة وتحديد الجهاز المسموح له بتشغيل الصوت أو الفيديو أو بثّهما من التطبيقات الأخرى."</string>
+    <string name="device_type" product="default" msgid="8268703872070046263">"هاتف"</string>
+    <string name="device_type" product="tablet" msgid="5038791954983067774">"جهاز لوحي"</string>
 </resources>

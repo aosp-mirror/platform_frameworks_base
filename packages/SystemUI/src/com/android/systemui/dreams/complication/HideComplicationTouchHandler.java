@@ -16,6 +16,7 @@
 
 package com.android.systemui.dreams.complication;
 
+import static com.android.systemui.Flags.removeDreamOverlayHideOnTouch;
 import static com.android.systemui.dreams.complication.dagger.ComplicationModule.COMPLICATIONS_FADE_OUT_DELAY;
 import static com.android.systemui.dreams.complication.dagger.ComplicationModule.COMPLICATIONS_RESTORE_TIMEOUT;
 
@@ -25,11 +26,11 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.android.systemui.ambient.touch.TouchHandler;
+import com.android.systemui.ambient.touch.TouchMonitor;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
-import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -46,12 +47,12 @@ import javax.inject.Named;
  * {@link HideComplicationTouchHandler} is responsible for hiding the overlay complications from
  * visibility whenever there is touch interactions outside the overlay. The overlay interaction
  * scope includes touches to the complication plus any touch entry region for gestures as specified
- * to the {@link DreamOverlayTouchMonitor}.
+ * to the {@link TouchMonitor}.
  *
- * This {@link DreamTouchHandler} is also responsible for fading in the complications at the end
- * of the {@link com.android.systemui.dreams.touch.DreamTouchHandler.TouchSession}.
+ * This {@link TouchHandler} is also responsible for fading in the complications at the end
+ * of the {@link TouchHandler.TouchSession}.
  */
-public class HideComplicationTouchHandler implements DreamTouchHandler {
+public class HideComplicationTouchHandler implements TouchHandler {
     private static final String TAG = "HideComplicationHandler";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -71,6 +72,7 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
     private final Runnable mRestoreComplications = new Runnable() {
         @Override
         public void run() {
+            Log.d(TAG, "Restoring complications...");
             mVisibilityController.setVisibility(View.VISIBLE);
             mHidden = false;
         }
@@ -83,6 +85,7 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
                 // Avoid interfering with the exit animations.
                 return;
             }
+            Log.d(TAG, "Hiding complications...");
             mVisibilityController.setVisibility(View.INVISIBLE);
             mHidden = true;
             if (mHiddenCallback != null) {
@@ -118,7 +121,7 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
         final boolean bouncerShowing = mStatusBarKeyguardViewManager.isBouncerShowing();
 
         // If other sessions are interested in this touch, do not fade out elements.
-        if (session.getActiveSessionCount() > 1 || bouncerShowing
+        if (removeDreamOverlayHideOnTouch() || session.getActiveSessionCount() > 1 || bouncerShowing
                 || mOverlayStateController.areExitAnimationsRunning()) {
             if (DEBUG) {
                 Log.d(TAG, "not fading. Active session count: " + session.getActiveSessionCount()
@@ -136,9 +139,7 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
             final MotionEvent motionEvent = (MotionEvent) ev;
 
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                if (DEBUG) {
-                    Log.d(TAG, "ACTION_DOWN received");
-                }
+                Log.i(TAG, "ACTION_DOWN received");
 
                 final ListenableFuture<Boolean> touchCheck = mTouchInsetManager
                         .checkWithinTouchRegion(Math.round(motionEvent.getX()),
@@ -163,6 +164,8 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
                 }, mExecutor);
             } else if (motionEvent.getAction() == MotionEvent.ACTION_CANCEL
                     || motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                Log.i(TAG, "ACTION_CANCEL|ACTION_UP received");
+
                 // End session and initiate delayed reappearance of the complications.
                 session.pop();
                 runAfterHidden(() -> mCancelCallbacks.add(
@@ -179,8 +182,10 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
     private void runAfterHidden(Runnable runnable) {
         mExecutor.execute(() -> {
             if (mHidden) {
+                Log.i(TAG, "Executing after hidden runnable immediately...");
                 runnable.run();
             } else {
+                Log.i(TAG, "Queuing after hidden runnable...");
                 mHiddenCallback = runnable;
             }
         });

@@ -25,11 +25,12 @@ import android.util.Log;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
+import com.android.systemui.res.R;
 import com.android.systemui.util.InitializationChecker;
 import com.android.wm.shell.dagger.WMShellConcurrencyModule;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
+import com.android.wm.shell.shared.ShellTransitions;
 import com.android.wm.shell.sysui.ShellInterface;
-import com.android.wm.shell.transition.ShellTransitions;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -93,7 +94,7 @@ public abstract class SystemUIInitializer {
                     .setOneHanded(mWMComponent.getOneHanded())
                     .setBubbles(mWMComponent.getBubbles())
                     .setTaskViewFactory(mWMComponent.getTaskViewFactory())
-                    .setTransitions(mWMComponent.getTransitions())
+                    .setShellTransitions(mWMComponent.getShellTransitions())
                     .setKeyguardTransitions(mWMComponent.getKeyguardTransitions())
                     .setStartingSurface(mWMComponent.getStartingSurface())
                     .setDisplayAreaHelper(mWMComponent.getDisplayAreaHelper())
@@ -114,7 +115,7 @@ public abstract class SystemUIInitializer {
                     .setOneHanded(Optional.ofNullable(null))
                     .setBubbles(Optional.ofNullable(null))
                     .setTaskViewFactory(Optional.ofNullable(null))
-                    .setTransitions(new ShellTransitions() {})
+                    .setShellTransitions(new ShellTransitions() {})
                     .setKeyguardTransitions(new KeyguardTransitions() {})
                     .setDisplayAreaHelper(Optional.ofNullable(null))
                     .setStartingSurface(Optional.ofNullable(null))
@@ -123,9 +124,6 @@ public abstract class SystemUIInitializer {
                     .setDesktopMode(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
-        if (initializeComponents) {
-            mSysUIComponent.init();
-        }
 
         // Every other part of our codebase currently relies on Dependency, so we
         // really need to ensure the Dependency gets initialized early on.

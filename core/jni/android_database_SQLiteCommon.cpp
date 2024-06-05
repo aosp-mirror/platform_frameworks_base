@@ -229,7 +229,7 @@ void throw_sqlite3_exception(JNIEnv* env, int errcode,
             fullMessage.append(": ");
             fullMessage.append(message);
         }
-        jniThrowException(env, exceptionClass, fullMessage.string());
+        jniThrowException(env, exceptionClass, fullMessage.c_str());
     } else {
         jniThrowException(env, exceptionClass, message);
     }

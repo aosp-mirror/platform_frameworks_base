@@ -18,13 +18,21 @@ package android.tests.enforcepermission.service;
 
 import android.annotation.EnforcePermission;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.PermissionEnforcer;
 import android.tests.enforcepermission.INested;
 import android.util.Log;
 
 public class NestedTestService extends Service {
     private static final String TAG = "EnforcePermission.NestedTestService";
+    private INested.Stub mBinder;
+
+    @Override
+    public void onCreate() {
+        mBinder = new Stub(this);
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -32,7 +40,12 @@ public class NestedTestService extends Service {
         return mBinder;
     }
 
-    private final INested.Stub mBinder = new INested.Stub() {
+    private static class Stub extends INested.Stub {
+
+        Stub(Context context) {
+            super(PermissionEnforcer.fromContext(context));
+        }
+
         @Override
         @EnforcePermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
         public void ProtectedByAccessNetworkState() {
@@ -44,5 +57,5 @@ public class NestedTestService extends Service {
         public void ProtectedByReadSyncSettings() {
             ProtectedByReadSyncSettings_enforcePermission();
         }
-    };
+    }
 }

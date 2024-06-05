@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.pipeline.shared.data.model
 
 import android.net.NetworkCapabilities
-import com.android.systemui.log.LogMessage
+import com.android.systemui.log.core.LogMessage
 
 /**
  * A model for all of the current default connections(s).

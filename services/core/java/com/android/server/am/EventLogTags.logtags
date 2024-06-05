@@ -31,7 +31,7 @@ option java_package com.android.server.am
 30017 am_low_memory (Num Processes|1|1)
 
 # Kill a process to reclaim memory.
-30023 am_kill (User|1|5),(PID|1|5),(Process Name|3),(OomAdj|1|5),(Reason|3)
+30023 am_kill (User|1|5),(PID|1|5),(Process Name|3),(OomAdj|1|5),(Reason|3),(Rss|2|2)
 # Discard an undelivered serialized broadcast (timeout/ANR/crash)
 30024 am_broadcast_discard_filter (User|1|5),(Broadcast|1|5),(Action|3),(Receiver Number|1|1),(BroadcastFilter|1|5)
 30025 am_broadcast_discard_app (User|1|5),(Broadcast|1|5),(Action|3),(Receiver Number|1|1),(App|3)
@@ -127,5 +127,17 @@ option java_package com.android.server.am
 30102 am_foreground_service_stop (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3),(fgsType|1)
 30103 am_foreground_service_timed_out (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3),(fgsType|1)
 
+# Report collection of cpu used by a process
+30104 am_cpu (Pid|2|5),(UID|2|5),(Base Name|3),(Uptime|2|3),(Stime|2|3),(Utime|2|3)
+
 # Intent Sender redirect for UserHandle.USER_CURRENT
 30110 am_intent_sender_redirect_user (userId|1|5)
+
+# Caller information to clear application data
+30120 am_clear_app_data_caller (pid|1),(uid|1),(package|3)
+
+30111 am_uid_state_changed (UID|1|5),(Seq|1|5),(UidState|1|5),(OldUidState|1|5),(Capability|1|5),(OldCapability|1|5),(Flags|1|5),(reason|3)
+30112 am_proc_state_changed (UID|1|5),(PID|1|5),(Seq|1|5),(ProcState|1|5),(OldProcState|1|5),(OomAdj|1|5),(OldOomAdj|1|5),(reason|3)
+
+# "Misc" events. See OomAdjusterDebugLogger.java
+30113 am_oom_adj_misc (Event|1|5),(UID|1|5),(PID|1|5),(Seq|1|5),(Arg1|1|5),(Arg2|1|5),(reason|3)

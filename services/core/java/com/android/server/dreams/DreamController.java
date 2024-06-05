@@ -16,13 +16,13 @@
 
 package com.android.server.dreams;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 import static android.os.PowerManager.USER_ACTIVITY_EVENT_OTHER;
 import static android.os.PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS;
 
 import android.app.ActivityTaskManager;
 import android.app.BroadcastOptions;
+import android.app.IAppTask;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -205,7 +205,7 @@ final class DreamController {
             Intent intent = new Intent(DreamService.SERVICE_INTERFACE);
             intent.setComponent(name);
             intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            intent.putExtra(DreamService.EXTRA_DREAM_OVERLAY_COMPONENT, overlayComponentName);
+            DreamService.setDreamOverlayComponent(intent, overlayComponentName);
             try {
                 if (!mContext.bindServiceAsUser(intent, mCurrentDream,
                         Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
@@ -229,6 +229,37 @@ final class DreamController {
     }
 
     /**
+     * Provides an appTask for the dream with token {@code dreamToken}, so that the dream controller
+     * can stop the dream task when necessary.
+     */
+    void setDreamAppTask(Binder dreamToken, IAppTask appTask) {
+        if (mCurrentDream == null || mCurrentDream.mToken != dreamToken
+                || mCurrentDream.mAppTask != null) {
+            Slog.e(TAG, "Illegal dream activity start. mCurrentDream.mToken = "
+                    + mCurrentDream.mToken + ", illegal dreamToken = " + dreamToken
+                    + ". Ending this dream activity.");
+            try {
+                appTask.finishAndRemoveTask();
+            } catch (RemoteException | RuntimeException e) {
+                Slog.e(TAG, "Unable to stop illegal dream activity.");
+            }
+            return;
+        }
+
+        mCurrentDream.mAppTask = appTask;
+    }
+
+    void setDreamIsObscured(boolean isObscured) {
+        if (mCurrentDream != null) {
+            mCurrentDream.mDreamIsObscured = isObscured;
+        }
+    }
+
+    boolean dreamIsFrontmost() {
+        return mCurrentDream != null && mCurrentDream.dreamIsFrontmost();
+    }
+
+    /**
      * Sends a user activity signal to PowerManager to stop the screen from turning off immediately
      * if there hasn't been any user interaction in a while.
      */
@@ -248,6 +279,21 @@ final class DreamController {
     public void stopDream(boolean immediate, String reason) {
         stopPreviousDreams();
         stopDreamInstance(immediate, reason, mCurrentDream);
+    }
+
+    public boolean bringDreamToFront() {
+        if (mCurrentDream == null || mCurrentDream.mService == null) {
+            return false;
+        }
+
+        try {
+            mCurrentDream.mService.comeToFront();
+            return true;
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error asking dream to come to the front", e);
+        }
+
+        return false;
     }
 
     /**
@@ -329,8 +375,14 @@ final class DreamController {
                     mSentStartBroadcast = false;
                 }
 
-                mActivityTaskManager.removeRootTasksWithActivityTypes(
-                        new int[] {ACTIVITY_TYPE_DREAM});
+                if (mCurrentDream != null && mCurrentDream.mAppTask != null) {
+                    // Finish the dream task in case it hasn't finished by itself already.
+                    try {
+                        mCurrentDream.mAppTask.finishAndRemoveTask();
+                    } catch (RemoteException | RuntimeException e) {
+                        Slog.e(TAG, "Unable to stop dream activity.");
+                    }
+                }
 
                 mListener.onDreamStopped(dream.mToken);
             }
@@ -390,6 +442,7 @@ final class DreamController {
         public final boolean mIsPreviewMode;
         public final boolean mCanDoze;
         public final int mUserId;
+        public IAppTask mAppTask;
 
         public PowerManager.WakeLock mWakeLock;
         public boolean mBound;
@@ -398,6 +451,7 @@ final class DreamController {
         private String mStopReason;
         private long mDreamStartTime;
         public boolean mWakingGently;
+        private boolean mDreamIsObscured;
 
         private final Runnable mStopPreviousDreamsIfNeeded = this::stopPreviousDreamsIfNeeded;
         private final Runnable mReleaseWakeLockIfNeeded = this::releaseWakeLockIfNeeded;
@@ -494,6 +548,10 @@ final class DreamController {
                 mWakeLock = null;
                 mHandler.removeCallbacks(mReleaseWakeLockIfNeeded);
             }
+        }
+
+        boolean dreamIsFrontmost() {
+            return !mDreamIsObscured;
         }
     }
 }

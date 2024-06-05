@@ -57,20 +57,23 @@ public class RowContentBindStage extends BindStage<RowContentBindParams> {
             @NonNull StageCallback callback) {
         RowContentBindParams params = getStageParams(entry);
 
-        mLogger.logStageParams(entry, params);
+        mLogger.logExecutingStage(entry, params);
 
         // Resolve content to bind/unbind.
         @InflationFlag int inflationFlags = params.getContentViews();
         @InflationFlag int invalidatedFlags = params.getDirtyContentViews();
 
+        // Rebind the content views which are needed now, and the corresponding old views are
+        // invalidated
         @InflationFlag int contentToBind = invalidatedFlags & inflationFlags;
+        // Unbind the content views that are not needed
         @InflationFlag int contentToUnbind = inflationFlags ^ FLAG_CONTENT_VIEW_ALL;
 
         // Bind/unbind with parameters
         mBinder.unbindContent(entry, row, contentToUnbind);
 
         BindParams bindParams = new BindParams();
-        bindParams.isLowPriority = params.useLowPriority();
+        bindParams.isMinimized = params.useMinimized();
         bindParams.usesIncreasedHeight = params.useIncreasedHeight();
         bindParams.usesIncreasedHeadsUpHeight = params.useIncreasedHeadsUpHeight();
         boolean forceInflate = params.needsReinflation();
@@ -96,7 +99,10 @@ public class RowContentBindStage extends BindStage<RowContentBindParams> {
     protected void abortStage(
             @NonNull NotificationEntry entry,
             @NonNull ExpandableNotificationRow row) {
-        mBinder.cancelBind(entry, row);
+        final boolean cancelledBind = mBinder.cancelBind(entry, row);
+        if (cancelledBind) {
+            mLogger.logAbortStageCancelledBind(entry);
+        }
     }
 
     @Override

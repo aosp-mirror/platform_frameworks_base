@@ -18,14 +18,13 @@
 #include "SkBlendMode.h"
 #include "SkCanvas.h"
 #include "SkSurface.h"
-#include "include/gpu/GpuTypes.h" // from Skia
 
 #include "TransformCanvas.h"
 #include "SkiaDisplayList.h"
 
 using android::uirenderer::StretchMask;
 
-void StretchMask::draw(GrRecordingContext* context,
+void StretchMask::draw(GrRecordingContext*,
                        const StretchEffect& stretch,
                        const SkRect& bounds,
                        skiapipeline::SkiaDisplayList* displayList,
@@ -35,16 +34,14 @@ void StretchMask::draw(GrRecordingContext* context,
     if (mMaskSurface == nullptr || mMaskSurface->width() != width ||
         mMaskSurface->height() != height) {
         // Create a new surface if we don't have one or our existing size does
-        // not match.
-        mMaskSurface = SkSurface::MakeRenderTarget(
-            context,
-            skgpu::Budgeted::kYes,
-            SkImageInfo::Make(
-                width,
-                height,
-                SkColorType::kAlpha_8_SkColorType,
-                SkAlphaType::kPremul_SkAlphaType)
-        );
+        // not match. SkCanvas::makeSurface returns a new surface that will
+        // be GPU-backed if canvas was also.
+        mMaskSurface = canvas->makeSurface(SkImageInfo::Make(
+            width,
+            height,
+            SkColorType::kAlpha_8_SkColorType,
+            SkAlphaType::kPremul_SkAlphaType
+        ));
         mIsDirty = true;
     }
 
@@ -53,7 +50,7 @@ void StretchMask::draw(GrRecordingContext* context,
         // Make sure to apply target transformation to the mask canvas
         // to ensure the replayed drawing commands generate the same result
         auto previousMatrix = displayList->mParentMatrix;
-        displayList->mParentMatrix = maskCanvas->getTotalMatrix();
+        displayList->mParentMatrix = maskCanvas->getLocalToDeviceAs3x3();
         maskCanvas->save();
         maskCanvas->drawColor(0, SkBlendMode::kClear);
         TransformCanvas transformCanvas(maskCanvas, SkBlendMode::kSrcOver);

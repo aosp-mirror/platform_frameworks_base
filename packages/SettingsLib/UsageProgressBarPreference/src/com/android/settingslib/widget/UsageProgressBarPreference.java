@@ -20,6 +20,7 @@ import android.content.Context;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
 import android.text.style.AbsoluteSizeSpan;
 import android.util.AttributeSet;
 import android.view.View;
@@ -30,6 +31,8 @@ import android.widget.TextView;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
+
+import com.android.settingslib.widget.preference.usage.R;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -172,6 +175,7 @@ public class UsageProgressBarPreference extends Preference {
             bottomSummary.setVisibility(View.GONE);
         } else {
             bottomSummary.setVisibility(View.VISIBLE);
+            bottomSummary.setMovementMethod(LinkMovementMethod.getInstance());
             bottomSummary.setText(mBottomSummary);
         }
 

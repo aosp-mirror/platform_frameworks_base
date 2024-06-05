@@ -55,7 +55,7 @@ static void copy2DVecToArray(JNIEnv *env, jlongArray ar, std::vector<std::vector
 
 static jboolean KernelCpuUidFreqTimeBpfMapReader_removeUidRange(JNIEnv *env, jclass, jint startUid,
                                                                 jint endUid) {
-    for (uint32_t uid = startUid; uid <= endUid; ++uid) {
+    for (jint uid = startUid; uid <= endUid; ++uid) {
         if (!android::bpf::clearUidTimes(uid)) return false;
     }
     return true;

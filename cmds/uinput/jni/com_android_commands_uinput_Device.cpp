@@ -16,12 +16,24 @@
 
 #define LOG_TAG "UinputCommandDevice"
 
-#include <linux/uinput.h>
+#include "com_android_commands_uinput_Device.h"
 
+#include <android-base/stringprintf.h>
+#include <android/looper.h>
+#include <android_os_Parcel.h>
 #include <fcntl.h>
+#include <input/InputEventLabels.h>
 #include <inttypes.h>
+#include <jni.h>
+#include <linux/uinput.h>
+#include <log/log.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <time.h>
 #include <unistd.h>
+
 #include <algorithm>
 #include <array>
 #include <cstdio>
@@ -29,19 +41,6 @@
 #include <iterator>
 #include <memory>
 #include <vector>
-
-#include <android/looper.h>
-#include <android_os_Parcel.h>
-#include <jni.h>
-#include <log/log.h>
-#include <nativehelper/JNIHelp.h>
-#include <nativehelper/ScopedLocalRef.h>
-#include <nativehelper/ScopedPrimitiveArray.h>
-#include <nativehelper/ScopedUtfChars.h>
-
-#include <android-base/stringprintf.h>
-
-#include "com_android_commands_uinput_Device.h"
 
 namespace android {
 namespace uinput {
@@ -97,9 +96,9 @@ JNIEnv* DeviceCallback::getJNIEnv() {
     return env;
 }
 
-std::unique_ptr<UinputDevice> UinputDevice::open(int32_t id, const char* name, int32_t vid,
-                                                 int32_t pid, uint16_t bus, uint32_t ffEffectsMax,
-                                                 const char* port,
+std::unique_ptr<UinputDevice> UinputDevice::open(int32_t id, const char* name, int32_t vendorId,
+                                                 int32_t productId, int32_t versionId, uint16_t bus,
+                                                 uint32_t ffEffectsMax, const char* port,
                                                  std::unique_ptr<DeviceCallback> callback) {
     android::base::unique_fd fd(::open(UINPUT_PATH, O_RDWR | O_NONBLOCK | O_CLOEXEC));
     if (!fd.ok()) {
@@ -119,8 +118,9 @@ std::unique_ptr<UinputDevice> UinputDevice::open(int32_t id, const char* name, i
     strlcpy(setupDescriptor.name, name, UINPUT_MAX_NAME_SIZE);
     setupDescriptor.id.version = 1;
     setupDescriptor.id.bustype = bus;
-    setupDescriptor.id.vendor = vid;
-    setupDescriptor.id.product = pid;
+    setupDescriptor.id.vendor = vendorId;
+    setupDescriptor.id.product = productId;
+    setupDescriptor.id.version = versionId;
     setupDescriptor.ff_effects_max = ffEffectsMax;
 
     // Request device configuration.
@@ -166,14 +166,14 @@ UinputDevice::~UinputDevice() {
     ::ioctl(mFd, UI_DEV_DESTROY);
 }
 
-void UinputDevice::injectEvent(uint16_t type, uint16_t code, int32_t value) {
+void UinputDevice::injectEvent(std::chrono::microseconds timestamp, uint16_t type, uint16_t code,
+                               int32_t value) {
     struct input_event event = {};
     event.type = type;
     event.code = code;
     event.value = value;
-    timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    TIMESPEC_TO_TIMEVAL(&event.time, &ts);
+    event.time.tv_sec = timestamp.count() / 1'000'000;
+    event.time.tv_usec = timestamp.count() % 1'000'000;
 
     if (::write(mFd, &event, sizeof(input_event)) < 0) {
         ALOGE("Could not write event %" PRIu16 " %" PRIu16 " with value %" PRId32 " : %s", type,
@@ -243,9 +243,9 @@ std::vector<int32_t> toVector(JNIEnv* env, jintArray javaArray) {
     return data;
 }
 
-static jlong openUinputDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint id, jint vid,
-                              jint pid, jint bus, jint ffEffectsMax, jstring rawPort,
-                              jobject callback) {
+static jlong openUinputDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint id,
+                              jint vendorId, jint productId, jint versionId, jint bus,
+                              jint ffEffectsMax, jstring rawPort, jobject callback) {
     ScopedUtfChars name(env, rawName);
     if (name.c_str() == nullptr) {
         return 0;
@@ -256,8 +256,8 @@ static jlong openUinputDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, 
             std::make_unique<uinput::DeviceCallback>(env, callback);
 
     std::unique_ptr<uinput::UinputDevice> d =
-            uinput::UinputDevice::open(id, name.c_str(), vid, pid, bus, ffEffectsMax, port.c_str(),
-                                       std::move(cb));
+            uinput::UinputDevice::open(id, name.c_str(), vendorId, productId, versionId, bus,
+                                       ffEffectsMax, port.c_str(), std::move(cb));
     return reinterpret_cast<jlong>(d.release());
 }
 
@@ -268,12 +268,12 @@ static void closeUinputDevice(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) 
     }
 }
 
-static void injectEvent(JNIEnv* /* env */, jclass /* clazz */, jlong ptr, jint type, jint code,
-                        jint value) {
+static void injectEvent(JNIEnv* /* env */, jclass /* clazz */, jlong ptr, jlong timestampMicros,
+                        jint type, jint code, jint value) {
     uinput::UinputDevice* d = reinterpret_cast<uinput::UinputDevice*>(ptr);
     if (d != nullptr) {
-        d->injectEvent(static_cast<uint16_t>(type), static_cast<uint16_t>(code),
-                       static_cast<int32_t>(value));
+        d->injectEvent(std::chrono::microseconds(timestampMicros), static_cast<uint16_t>(type),
+                       static_cast<uint16_t>(code), static_cast<int32_t>(value));
     } else {
         ALOGE("Could not inject event, Device* is null!");
     }
@@ -284,7 +284,10 @@ static void configure(JNIEnv* env, jclass /* clazz */, jint handle, jint code,
     std::vector<int32_t> configs = toVector(env, rawConfigs);
     // Configure uinput device, with user specified code and value.
     for (auto& config : configs) {
-        ::ioctl(static_cast<int>(handle), _IOW(UINPUT_IOCTL_BASE, code, int), config);
+        if (::ioctl(static_cast<int>(handle), _IOW(UINPUT_IOCTL_BASE, code, int), config) < 0) {
+            ALOGE("Error configuring device (ioctl %d, value 0x%x): %s", code, config,
+                  strerror(errno));
+        }
     }
 }
 
@@ -307,15 +310,36 @@ static void setAbsInfo(JNIEnv* env, jclass /* clazz */, jint handle, jint axisCo
     ::ioctl(static_cast<int>(handle), UI_ABS_SETUP, &absSetup);
 }
 
+static jint getEvdevEventTypeByLabel(JNIEnv* env, jclass /* clazz */, jstring rawLabel) {
+    ScopedUtfChars label(env, rawLabel);
+    return InputEventLookup::getLinuxEvdevEventTypeByLabel(label.c_str()).value_or(-1);
+}
+
+static jint getEvdevEventCodeByLabel(JNIEnv* env, jclass /* clazz */, jint type, jstring rawLabel) {
+    ScopedUtfChars label(env, rawLabel);
+    return InputEventLookup::getLinuxEvdevEventCodeByLabel(type, label.c_str()).value_or(-1);
+}
+
+static jint getEvdevInputPropByLabel(JNIEnv* env, jclass /* clazz */, jstring rawLabel) {
+    ScopedUtfChars label(env, rawLabel);
+    return InputEventLookup::getLinuxEvdevInputPropByLabel(label.c_str()).value_or(-1);
+}
+
 static JNINativeMethod sMethods[] = {
         {"nativeOpenUinputDevice",
-         "(Ljava/lang/String;IIIIILjava/lang/String;"
+         "(Ljava/lang/String;IIIIIILjava/lang/String;"
          "Lcom/android/commands/uinput/Device$DeviceCallback;)J",
          reinterpret_cast<void*>(openUinputDevice)},
-        {"nativeInjectEvent", "(JIII)V", reinterpret_cast<void*>(injectEvent)},
+        {"nativeInjectEvent", "(JJIII)V", reinterpret_cast<void*>(injectEvent)},
         {"nativeConfigure", "(II[I)V", reinterpret_cast<void*>(configure)},
         {"nativeSetAbsInfo", "(IILandroid/os/Parcel;)V", reinterpret_cast<void*>(setAbsInfo)},
         {"nativeCloseUinputDevice", "(J)V", reinterpret_cast<void*>(closeUinputDevice)},
+        {"nativeGetEvdevEventTypeByLabel", "(Ljava/lang/String;)I",
+         reinterpret_cast<void*>(getEvdevEventTypeByLabel)},
+        {"nativeGetEvdevEventCodeByLabel", "(ILjava/lang/String;)I",
+         reinterpret_cast<void*>(getEvdevEventCodeByLabel)},
+        {"nativeGetEvdevInputPropByLabel", "(Ljava/lang/String;)I",
+         reinterpret_cast<void*>(getEvdevInputPropByLabel)},
 };
 
 int register_com_android_commands_uinput_Device(JNIEnv* env) {

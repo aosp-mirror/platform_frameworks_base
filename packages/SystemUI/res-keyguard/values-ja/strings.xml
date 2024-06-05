@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電中"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 急速充電中"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 低速充電中"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • バッテリーを保護するために、充電が最適化されています"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電用アクセサリに関する問題"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"メニューからロックを解除できます。"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • バッテリーを保護するため、充電を一時停止しています"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電用アクセサリを確認してください"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ネットワークがロックされました"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM がありません"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"SIM を追加してください。"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM が見つからないか読み取れません。SIM を追加してください。"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM が使用できません。"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM が完全に無効になっています。\n ワイヤレス サービス プロバイダにお問い合わせのうえ、新しい SIM を入手してください。"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM がロックされています。"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM が PUK でロックされました。"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM ロックを解除しています…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"ロックダウン後は PIN の入力が必要になります"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"ロックダウン後はパスワードの入力が必要になります"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"ロックダウン後はパターンの入力が必要になります"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"アップデートはアクティブでない時間帯にインストールされます"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"アップデートは、デバイスを使用していないときにインストールされます"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"セキュリティ強化が必要: PIN がしばらく未使用です。"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"セキュリティ強化が必要: パスワードがしばらく未使用です。"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"セキュリティ強化が必要: パターンがしばらく未使用です。"</string>
@@ -84,9 +80,9 @@
     <string name="kg_face_locked_out" msgid="2751559491287575">"顔認証でロックを解除できません。何度もログインに失敗したためログインできません。"</string>
     <string name="kg_fp_locked_out" msgid="6228277682396768830">"指紋でロックを解除できません。何度もログインに失敗したためログインできません。"</string>
     <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"信頼エージェントは利用できません"</string>
-    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"間違った PIN による試行回数が上限を超えました"</string>
-    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"間違ったパターンによる試行回数が上限を超えました"</string>
-    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"間違ったパスワードによる試行回数が上限を超えました"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"間違った PIN による試行回数が上限に達しました"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"間違ったパターンによる試行回数が上限に達しました"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"間違ったパスワードによる試行回数が上限に達しました"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{# 秒後にもう一度お試しください。}other{# 秒後にもう一度お試しください。}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIM PIN を入力してください。"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"「<xliff:g id="CARRIER">%1$s</xliff:g>」の SIM PIN を入力してください。"</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"画面ロックを解除するにはパターンを入力してください"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"画面ロックを解除するには PIN を入力してください"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"画面ロックを解除するにはパスワードを入力してください"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"追加の確認のため PIN が必要です"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"追加の確認のためパターンが必要です"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"追加の確認のためパスワードが必要です"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"デバイスは管理者によりロックされています"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"デバイスは手動でロックされました"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"認識されませんでした"</string>

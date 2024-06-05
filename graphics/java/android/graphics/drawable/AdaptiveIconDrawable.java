@@ -98,7 +98,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
      * extra content to reveal within the clip path when performing affine transformations on the
      * layers.
      *
-     * Each layers will reserve 25% of it's width and height.
+     * Each layers will reserve 25% of its width and height.
      *
      * As a result, the view port of the layers is smaller than their intrinsic width and height.
      */

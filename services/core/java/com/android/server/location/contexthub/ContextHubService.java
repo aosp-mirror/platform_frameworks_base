@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
+import android.chre.flags.Flags;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +30,8 @@ import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManagerInternal;
+import android.hardware.contexthub.ErrorCode;
+import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
 import android.hardware.location.ContextHubTransaction;
@@ -52,6 +55,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
@@ -74,10 +78,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.PriorityQueue;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -148,6 +156,16 @@ public class ContextHubService extends IContextHubService.Stub {
     private final ScheduledThreadPoolExecutor mDailyMetricTimer =
             new ScheduledThreadPoolExecutor(1);
 
+    // A queue of reliable message records for duplicate detection
+    private final PriorityQueue<ReliableMessageRecord> mReliableMessageRecordQueue =
+            new PriorityQueue<ReliableMessageRecord>(
+                    (ReliableMessageRecord left, ReliableMessageRecord right) -> {
+                        return Long.compare(left.getTimestamp(), right.getTimestamp());
+                    });
+
+    // The test mode manager that manages behaviors during test mode.
+    private final TestModeManager mTestModeManager = new TestModeManager();
+
     // The period of the recurring time
     private static final int PERIOD_METRIC_QUERY_DAYS = 1;
 
@@ -160,6 +178,9 @@ public class ContextHubService extends IContextHubService.Stub {
     private boolean mIsBtScanningEnabled = false;
     private boolean mIsBtMainEnabled = false;
 
+    // True if test mode is enabled for the Context Hub
+    private AtomicBoolean mIsTestModeEnabled = new AtomicBoolean(false);
+
     // A hashmap used to record if a contexthub is waiting for daily query
     private Set<Integer> mMetricQueryPendingContextHubIds =
             Collections.newSetFromMap(new ConcurrentHashMap<Integer, Boolean>());
@@ -168,6 +189,8 @@ public class ContextHubService extends IContextHubService.Stub {
     private final Object mSendWifiSettingUpdateLock = new Object();
 
     private SensorPrivacyManagerInternal mSensorPrivacyManagerInternal;
+
+    private UserManager mUserManager = null;
 
     private final Map<Integer, AtomicLong> mLastRestartTimestampMap = new HashMap<>();
 
@@ -204,8 +227,17 @@ public class ContextHubService extends IContextHubService.Stub {
         @Override
         public void handleNanoappMessage(short hostEndpointId, NanoAppMessage message,
                 List<String> nanoappPermissions, List<String> messagePermissions) {
-            handleClientMessageCallback(mContextHubId, hostEndpointId, message, nanoappPermissions,
-                    messagePermissions);
+            if (Flags.reliableMessageImplementation()
+                    && Flags.reliableMessageTestModeBehavior()
+                    && mIsTestModeEnabled.get()
+                    && mTestModeManager.handleNanoappMessage(mContextHubId, hostEndpointId,
+                            message, nanoappPermissions, messagePermissions)) {
+                // The TestModeManager handled the nanoapp message, so return here.
+                return;
+            }
+
+            handleClientMessageCallback(mContextHubId, hostEndpointId, message,
+                    nanoappPermissions, messagePermissions);
         }
 
         @Override
@@ -214,6 +246,113 @@ public class ContextHubService extends IContextHubService.Stub {
             initExistingCallbacks();
             resetSettings();
             Log.i(TAG, "Finished Context Hub Service restart");
+        }
+
+        @Override
+        public void handleMessageDeliveryStatus(MessageDeliveryStatus messageDeliveryStatus) {
+            handleMessageDeliveryStatusCallback(messageDeliveryStatus);
+        }
+    }
+
+    /**
+     * Records a reliable message from a nanoapp for duplicate detection.
+     */
+    private static class ReliableMessageRecord {
+        public static final int TIMEOUT_NS = 1000000000;
+
+        public int mContextHubId;
+        public long mTimestamp;
+        public int mMessageSequenceNumber;
+        byte mErrorCode;
+
+        ReliableMessageRecord(int contextHubId, long timestamp,
+                int messageSequenceNumber, byte errorCode) {
+            mContextHubId = contextHubId;
+            mTimestamp = timestamp;
+            mMessageSequenceNumber = messageSequenceNumber;
+            mErrorCode = errorCode;
+        }
+
+        public int getContextHubId() {
+            return mContextHubId;
+        }
+
+        public long getTimestamp() {
+            return mTimestamp;
+        }
+
+        public int getMessageSequenceNumber() {
+            return mMessageSequenceNumber;
+        }
+
+        public byte getErrorCode() {
+            return mErrorCode;
+        }
+
+        public void setErrorCode(byte errorCode) {
+            mErrorCode = errorCode;
+        }
+
+        public boolean isExpired() {
+            return mTimestamp + TIMEOUT_NS < SystemClock.elapsedRealtimeNanos();
+        }
+    }
+
+    /**
+     * A class to manage behaviors during test mode. This is used for testing.
+     */
+    private class TestModeManager {
+        /**
+         * Probability (in percent) of duplicating a message.
+         */
+        private static final int MESSAGE_DUPLICATION_PROBABILITY_PERCENT = 50;
+
+        /**
+         * The number of total messages to send when the duplicate event happens.
+         */
+        private static final int NUM_MESSAGES_TO_DUPLICATE = 3;
+
+        /**
+         * A probability percent for a certain event.
+         */
+        private static final int MAX_PROBABILITY_PERCENT = 100;
+
+        private Random mRandom = new Random();
+
+        /**
+         * @see ContextHubServiceCallback.handleNanoappMessage
+         * @return whether the message was handled
+         */
+        public boolean handleNanoappMessage(int contextHubId,
+                short hostEndpointId, NanoAppMessage message,
+                List<String> nanoappPermissions, List<String> messagePermissions) {
+            if (!message.isReliable()) {
+                return false;
+            }
+
+            if (Flags.reliableMessageDuplicateDetectionService()
+                && didEventHappen(MESSAGE_DUPLICATION_PROBABILITY_PERCENT)) {
+                Log.i(TAG, "[TEST MODE] Duplicating message ("
+                        + NUM_MESSAGES_TO_DUPLICATE
+                        + " sends) with message sequence number: "
+                        + message.getMessageSequenceNumber());
+                for (int i = 0; i < NUM_MESSAGES_TO_DUPLICATE; ++i) {
+                    handleClientMessageCallback(contextHubId, hostEndpointId,
+                            message, nanoappPermissions, messagePermissions);
+                }
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Returns true if the event with percentPercent did happen.
+         *
+         * @param probabilityPercent the percent probability of the event.
+         * @return true if the event happened, false otherwise.
+         */
+        private boolean didEventHappen(int probabilityPercent) {
+            return mRandom.nextInt(MAX_PROBABILITY_PERCENT) < probabilityPercent;
         }
     }
 
@@ -491,6 +630,14 @@ public class ContextHubService extends IContextHubService.Stub {
             return;
         }
 
+        if (mUserManager == null) {
+            mUserManager = mContext.getSystemService(UserManager.class);
+            if (mUserManager == null) {
+                Log.e(TAG, "Unable to get the UserManager service");
+                return;
+            }
+        }
+
         sendMicrophoneDisableSettingUpdateForCurrentUser();
         if (mSensorPrivacyManagerInternal == null) {
             Log.e(TAG, "Unable to add a sensor privacy listener for all users");
@@ -499,8 +646,9 @@ public class ContextHubService extends IContextHubService.Stub {
 
         mSensorPrivacyManagerInternal.addSensorPrivacyListenerForAllUsers(
                 SensorPrivacyManager.Sensors.MICROPHONE, (userId, enabled) -> {
-                    if (userId == getCurrentUserId()) {
-                        Log.d(TAG, "User: " + userId + "mic privacy: " + enabled);
+                    // If we are in HSUM mode, any user can change the microphone setting
+                    if (mUserManager.isHeadlessSystemUserMode() || userId == getCurrentUserId()) {
+                        Log.d(TAG, "User: " + userId + " mic privacy: " + enabled);
                         sendMicrophoneDisableSettingUpdate(enabled);
                     }
                 });
@@ -543,6 +691,8 @@ public class ContextHubService extends IContextHubService.Stub {
      * Resets the settings. Called when a context hub restarts or the AIDL HAL dies
      */
     private void resetSettings() {
+        mIsTestModeEnabled.set(false);
+
         sendLocationSettingUpdate();
         sendWifiSettingUpdate(/* forceUpdate= */ true);
         sendAirplaneModeSettingUpdate();
@@ -810,8 +960,8 @@ public class ContextHubService extends IContextHubService.Stub {
                         info.getAppId(), msg.getMsgType(), msg.getData());
 
                 IContextHubClient client = mDefaultClientMap.get(contextHubHandle);
-                success = (client.sendMessageToNanoApp(message) ==
-                        ContextHubTransaction.RESULT_SUCCESS);
+                success = client.sendMessageToNanoApp(message)
+                        == ContextHubTransaction.RESULT_SUCCESS;
             } else {
                 Log.e(TAG, "Failed to send nanoapp message - nanoapp with handle "
                         + nanoAppHandle + " does not exist.");
@@ -829,16 +979,120 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param message the message contents
      * @param nanoappPermissions the set of permissions the nanoapp holds
      * @param messagePermissions the set of permissions that should be used for attributing
-     *     permissions when this message is consumed by a client
+     *        permissions when this message is consumed by a client
      */
-    private void handleClientMessageCallback(
-            int contextHubId,
-            short hostEndpointId,
-            NanoAppMessage message,
-            List<String> nanoappPermissions,
+    private void handleClientMessageCallback(int contextHubId, short hostEndpointId,
+            NanoAppMessage message, List<String> nanoappPermissions,
             List<String> messagePermissions) {
-        mClientManager.onMessageFromNanoApp(
-                contextHubId, hostEndpointId, message, nanoappPermissions, messagePermissions);
+        if (!Flags.reliableMessageImplementation()
+                || !Flags.reliableMessageDuplicateDetectionService()) {
+            byte errorCode = mClientManager.onMessageFromNanoApp(contextHubId, hostEndpointId,
+                    message, nanoappPermissions, messagePermissions);
+            if (message.isReliable() && errorCode != ErrorCode.OK) {
+                sendMessageDeliveryStatusToContextHub(contextHubId,
+                        message.getMessageSequenceNumber(), errorCode);
+            }
+            return;
+        }
+
+        if (!message.isReliable()) {
+            mClientManager.onMessageFromNanoApp(
+                    contextHubId, hostEndpointId, message,
+                    nanoappPermissions, messagePermissions);
+            cleanupReliableMessageRecordQueue();
+            return;
+        }
+
+        byte errorCode = ErrorCode.OK;
+        synchronized (mReliableMessageRecordQueue) {
+            Optional<ReliableMessageRecord> record =
+                    findReliableMessageRecord(contextHubId,
+                            message.getMessageSequenceNumber());
+
+            if (record.isPresent()) {
+                errorCode = record.get().getErrorCode();
+                if (errorCode == ErrorCode.TRANSIENT_ERROR) {
+                    Log.w(TAG, "Found duplicate reliable message with message sequence number: "
+                            + record.get().getMessageSequenceNumber() + ": retrying");
+                    errorCode = mClientManager.onMessageFromNanoApp(
+                            contextHubId, hostEndpointId, message,
+                            nanoappPermissions, messagePermissions);
+                    record.get().setErrorCode(errorCode);
+                } else {
+                    Log.w(TAG, "Found duplicate reliable message with message sequence number: "
+                            + record.get().getMessageSequenceNumber());
+                }
+            } else {
+                errorCode = mClientManager.onMessageFromNanoApp(
+                        contextHubId, hostEndpointId, message,
+                        nanoappPermissions, messagePermissions);
+                mReliableMessageRecordQueue.add(
+                        new ReliableMessageRecord(contextHubId,
+                                SystemClock.elapsedRealtimeNanos(),
+                                message.getMessageSequenceNumber(),
+                                errorCode));
+            }
+        }
+
+        sendMessageDeliveryStatusToContextHub(contextHubId,
+                message.getMessageSequenceNumber(), errorCode);
+        cleanupReliableMessageRecordQueue();
+    }
+
+    /**
+     * Finds a reliable message record in the queue that matches the given
+     * context hub ID and message sequence number. This function assumes
+     * the caller is synchronized on mReliableMessageRecordQueue.
+     *
+     * @param contextHubId the ID of the hub
+     * @param messageSequenceNumber the message sequence number
+     *
+     * @return the record if found, or empty if not found
+     */
+    private Optional<ReliableMessageRecord> findReliableMessageRecord(
+            int contextHubId, int messageSequenceNumber) {
+        for (ReliableMessageRecord record: mReliableMessageRecordQueue) {
+            if (record.getContextHubId() == contextHubId
+                && record.getMessageSequenceNumber() == messageSequenceNumber) {
+                return Optional.of(record);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Removes old entries from the reliable message record queue.
+     */
+    private void cleanupReliableMessageRecordQueue() {
+        synchronized (mReliableMessageRecordQueue) {
+            while (mReliableMessageRecordQueue.peek() != null
+                   && mReliableMessageRecordQueue.peek().isExpired()) {
+                mReliableMessageRecordQueue.poll();
+            }
+        }
+    }
+
+    /**
+     * Sends the message delivery status to the Context Hub.
+     *
+     * @param contextHubId the ID of the hub
+     * @param messageSequenceNumber the message sequence number
+     * @param errorCode the error code, one of the enum ErrorCode
+     */
+    private void sendMessageDeliveryStatusToContextHub(int contextHubId,
+            int messageSequenceNumber, byte errorCode) {
+        if (!Flags.reliableMessageImplementation()) {
+            return;
+        }
+
+        MessageDeliveryStatus status = new MessageDeliveryStatus();
+        status.messageSequenceNumber = messageSequenceNumber;
+        status.errorCode = errorCode;
+        if (mContextHubWrapper.sendMessageDeliveryStatusToContextHub(contextHubId, status)
+                != ContextHubTransaction.RESULT_SUCCESS) {
+            Log.e(TAG, "Failed to send the reliable message status for message sequence number: "
+                    + messageSequenceNumber + " with error code: " + errorCode);
+        }
     }
 
     /**
@@ -882,6 +1136,16 @@ public class ContextHubService extends IContextHubService.Stub {
     private void handleTransactionResultCallback(int contextHubId, int transactionId,
             boolean success) {
         mTransactionManager.onTransactionResponse(transactionId, success);
+    }
+
+    /**
+     * Handles a message delivery status from a Context Hub.
+     *
+     * @param messageDeliveryStatus     The message delivery status to deliver.
+     */
+    private void handleMessageDeliveryStatusCallback(MessageDeliveryStatus messageDeliveryStatus) {
+        mTransactionManager.onMessageDeliveryResponse(messageDeliveryStatus.messageSequenceNumber,
+                messageDeliveryStatus.errorCode == ErrorCode.OK);
     }
 
     /**
@@ -1182,6 +1446,9 @@ public class ContextHubService extends IContextHubService.Stub {
     public boolean setTestMode(boolean enable) {
         super.setTestMode_enforcePermission();
         boolean status = mContextHubWrapper.setTestMode(enable);
+        if (status) {
+            mIsTestModeEnabled.set(enable);
+        }
 
         // Query nanoapps to update service state after test mode state change.
         for (int contextHubId: mDefaultClientMap.keySet()) {
@@ -1419,13 +1686,17 @@ public class ContextHubService extends IContextHubService.Stub {
                 mContextHubWrapper.onBtMainSettingChanged(btEnabled);
             }
         } else {
-            Log.d(TAG, "BT adapter not available. Defaulting to disabled");
-            if (forceUpdate || mIsBtMainEnabled) {
-                mIsBtMainEnabled = false;
+            Log.d(TAG, "BT adapter not available. Getting permissions from user settings");
+            boolean btEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.BLUETOOTH_ON, 0) == 1;
+            boolean btScanEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE, 0) == 1;
+            if (forceUpdate || mIsBtMainEnabled != btEnabled) {
+                mIsBtMainEnabled = btEnabled;
                 mContextHubWrapper.onBtMainSettingChanged(mIsBtMainEnabled);
             }
-            if (forceUpdate || mIsBtScanningEnabled) {
-                mIsBtScanningEnabled = false;
+            if (forceUpdate || mIsBtScanningEnabled != btScanEnabled) {
+                mIsBtScanningEnabled = btScanEnabled;
                 mContextHubWrapper.onBtScanningSettingChanged(mIsBtScanningEnabled);
             }
         }

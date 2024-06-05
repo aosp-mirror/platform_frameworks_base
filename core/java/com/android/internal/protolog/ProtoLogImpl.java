@@ -16,30 +16,45 @@
 
 package com.android.internal.protolog;
 
+import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.CACHE_UPDATER;
+import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LEGACY_OUTPUT_FILE_PATH;
+import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LEGACY_VIEWER_CONFIG_PATH;
+import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LOG_GROUPS;
+import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.VIEWER_CONFIG_PATH;
+
 import android.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.IProtoLogGroup;
+import com.android.internal.protolog.common.LogLevel;
+import com.android.internal.protolog.common.ProtoLogToolInjected;
 
-import java.io.File;
+import java.util.TreeMap;
 
 /**
  * A service for the ProtoLog logging system.
  */
-public class ProtoLogImpl extends BaseProtoLogImpl {
-    private static final int BUFFER_CAPACITY = 1024 * 1024;
-    private static final String LOG_FILENAME = "/data/misc/wmtrace/wm_log.winscope";
-    private static final String VIEWER_CONFIG_FILENAME = "/system/etc/protolog.conf.json.gz";
-    private static final int PER_CHUNK_SIZE = 1024;
+public class ProtoLogImpl {
+    private static IProtoLog sServiceInstance = null;
 
-    private static ProtoLogImpl sServiceInstance = null;
+    @ProtoLogToolInjected(VIEWER_CONFIG_PATH)
+    private static String sViewerConfigPath;
 
-    static {
-        addLogGroupEnum(ProtoLogGroup.values());
-    }
+    @ProtoLogToolInjected(LEGACY_VIEWER_CONFIG_PATH)
+    private static String sLegacyViewerConfigPath;
+
+    @ProtoLogToolInjected(LEGACY_OUTPUT_FILE_PATH)
+    private static String sLegacyOutputFilePath;
+
+    @ProtoLogToolInjected(LOG_GROUPS)
+    private static TreeMap<String, IProtoLogGroup> sLogGroups;
+
+    @ProtoLogToolInjected(CACHE_UPDATER)
+    private static Runnable sCacheUpdater;
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
-    public static void d(IProtoLogGroup group, int messageHash, int paramsMask,
+    public static void d(IProtoLogGroup group, long messageHash, int paramsMask,
             @Nullable String messageString,
             Object... args) {
         getSingleInstance()
@@ -47,7 +62,7 @@ public class ProtoLogImpl extends BaseProtoLogImpl {
     }
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
-    public static void v(IProtoLogGroup group, int messageHash, int paramsMask,
+    public static void v(IProtoLogGroup group, long messageHash, int paramsMask,
             @Nullable String messageString,
             Object... args) {
         getSingleInstance().log(LogLevel.VERBOSE, group, messageHash, paramsMask, messageString,
@@ -55,21 +70,21 @@ public class ProtoLogImpl extends BaseProtoLogImpl {
     }
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
-    public static void i(IProtoLogGroup group, int messageHash, int paramsMask,
+    public static void i(IProtoLogGroup group, long messageHash, int paramsMask,
             @Nullable String messageString,
             Object... args) {
         getSingleInstance().log(LogLevel.INFO, group, messageHash, paramsMask, messageString, args);
     }
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
-    public static void w(IProtoLogGroup group, int messageHash, int paramsMask,
+    public static void w(IProtoLogGroup group, long messageHash, int paramsMask,
             @Nullable String messageString,
             Object... args) {
         getSingleInstance().log(LogLevel.WARN, group, messageHash, paramsMask, messageString, args);
     }
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
-    public static void e(IProtoLogGroup group, int messageHash, int paramsMask,
+    public static void e(IProtoLogGroup group, long messageHash, int paramsMask,
             @Nullable String messageString,
             Object... args) {
         getSingleInstance()
@@ -77,40 +92,41 @@ public class ProtoLogImpl extends BaseProtoLogImpl {
     }
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
-    public static void wtf(IProtoLogGroup group, int messageHash, int paramsMask,
+    public static void wtf(IProtoLogGroup group, long messageHash, int paramsMask,
             @Nullable String messageString,
             Object... args) {
         getSingleInstance().log(LogLevel.WTF, group, messageHash, paramsMask, messageString, args);
     }
 
-    /** Returns true iff logging is enabled for the given {@code IProtoLogGroup}. */
-    public static boolean isEnabled(IProtoLogGroup group) {
-        return group.isLogToLogcat()
-                || (group.isLogToProto() && getSingleInstance().isProtoEnabled());
+    /**
+     * Should return true iff we should be logging to either protolog or logcat for this group
+     * and log level.
+     */
+    public static boolean isEnabled(IProtoLogGroup group, LogLevel level) {
+        return getSingleInstance().isEnabled(group, level);
     }
 
     /**
      * Returns the single instance of the ProtoLogImpl singleton class.
      */
-    public static synchronized ProtoLogImpl getSingleInstance() {
+    public static synchronized IProtoLog getSingleInstance() {
         if (sServiceInstance == null) {
-            sServiceInstance = new ProtoLogImpl(
-                    new File(LOG_FILENAME)
-                    , BUFFER_CAPACITY
-                    , new ProtoLogViewerConfigReader()
-                    , PER_CHUNK_SIZE);
+            if (android.tracing.Flags.perfettoProtologTracing()) {
+                sServiceInstance = new PerfettoProtoLogImpl(
+                        sViewerConfigPath, sLogGroups, sCacheUpdater);
+            } else {
+                sServiceInstance = new LegacyProtoLogImpl(
+                        sLegacyOutputFilePath, sLegacyViewerConfigPath, sLogGroups, sCacheUpdater);
+            }
+
+            sCacheUpdater.run();
         }
         return sServiceInstance;
     }
 
     @VisibleForTesting
-    public static synchronized void setSingleInstance(@Nullable ProtoLogImpl instance) {
+    public static synchronized void setSingleInstance(@Nullable IProtoLog instance) {
         sServiceInstance = instance;
     }
-
-    public ProtoLogImpl(File logFile, int bufferCapacity,
-            ProtoLogViewerConfigReader viewConfigReader, int perChunkSize) {
-        super(logFile, VIEWER_CONFIG_FILENAME, bufferCapacity, viewConfigReader, perChunkSize);
-  }
 }
 

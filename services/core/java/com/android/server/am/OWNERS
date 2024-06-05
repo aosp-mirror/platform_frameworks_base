@@ -9,7 +9,6 @@ mwachens@google.com
 sudheersai@google.com
 suprabh@google.com
 varunshah@google.com
-kwekua@google.com
 bookatz@google.com
 jji@google.com
 
@@ -18,6 +17,7 @@ ogunwale@google.com
 
 # Permissions & Packages
 patb@google.com
+per-file AccessCheckDelegateHelper.java = file:/core/java/android/permission/OWNERS
 
 # Battery Stats
 joeo@google.com
@@ -32,7 +32,7 @@ narayan@google.com
 per-file *Assist* = file:/core/java/android/service/voice/OWNERS
 per-file *Voice* = file:/core/java/android/service/voice/OWNERS
 
-per-file SettingsToPropertiesMapper.java = omakoto@google.com, yamasani@google.com
+per-file SettingsToPropertiesMapper.java = omakoto@google.com, yamasani@google.com, dzshen@google.com, zhidou@google.com, tedbauer@google.com
 
 per-file CarUserSwitchingDialog.java = file:platform/packages/services/Car:/OWNERS
 

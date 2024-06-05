@@ -23,12 +23,16 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 
 import android.annotation.Nullable;
+import android.app.ActivityTaskManager;
+import android.app.Flags;
 import android.app.PictureInPictureParams;
+import android.app.PictureInPictureUiState;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
@@ -37,9 +41,15 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.split.SplitScreenUtils;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
@@ -51,7 +61,6 @@ import java.util.List;
  */
 public abstract class PipTransitionController implements Transitions.TransitionHandler {
 
-    protected final PipAnimationController mPipAnimationController;
     protected final PipBoundsAlgorithm mPipBoundsAlgorithm;
     protected final PipBoundsState mPipBoundsState;
     protected final ShellTaskOrganizer mShellTaskOrganizer;
@@ -59,6 +68,7 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     protected final Transitions mTransitions;
     private final List<PipTransitionCallback> mPipTransitionCallbacks = new ArrayList<>();
     protected PipTaskOrganizer mPipOrganizer;
+    protected DefaultMixedHandler mMixedHandler;
 
     protected final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
             new PipAnimationController.PipAnimationCallback() {
@@ -77,9 +87,9 @@ public abstract class PipTransitionController implements Transitions.TransitionH
                     if (direction == TRANSITION_DIRECTION_REMOVE_STACK) {
                         return;
                     }
-                    if (isInPipDirection(direction) && animator.getContentOverlayLeash() != null) {
-                        mPipOrganizer.fadeOutAndRemoveOverlay(animator.getContentOverlayLeash(),
-                                animator::clearContentOverlay, true /* withStartDelay*/);
+                    if (isInPipDirection(direction) && mPipOrganizer.mPipOverlay != null) {
+                        mPipOrganizer.fadeOutAndRemoveOverlay(mPipOrganizer.mPipOverlay,
+                                null /* callback */, true /* withStartDelay*/);
                     }
                     onFinishResize(taskInfo, animator.getDestinationBounds(), direction, tx);
                     sendOnPipTransitionFinished(direction);
@@ -89,9 +99,9 @@ public abstract class PipTransitionController implements Transitions.TransitionH
                 public void onPipAnimationCancel(TaskInfo taskInfo,
                         PipAnimationController.PipTransitionAnimator animator) {
                     final int direction = animator.getTransitionDirection();
-                    if (isInPipDirection(direction) && animator.getContentOverlayLeash() != null) {
-                        mPipOrganizer.fadeOutAndRemoveOverlay(animator.getContentOverlayLeash(),
-                                animator::clearContentOverlay, true /* withStartDelay */);
+                    if (isInPipDirection(direction) && mPipOrganizer.mPipOverlay != null) {
+                        mPipOrganizer.fadeOutAndRemoveOverlay(mPipOrganizer.mPipOverlay,
+                                null /* callback */, true /* withStartDelay */);
                     }
                     sendOnPipTransitionCancelled(animator.getTransitionDirection());
                 }
@@ -115,6 +125,13 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /**
+     * Called when the Shell wants to start resizing Pip transition/animation.
+     */
+    public void startResizeTransition(WindowContainerTransaction wct) {
+        // Default implementation does nothing.
+    }
+
+    /**
      * Called when the transition animation can't continue (eg. task is removed during
      * animation)
      */
@@ -134,25 +151,31 @@ public abstract class PipTransitionController implements Transitions.TransitionH
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
             @NonNull Transitions transitions,
             PipBoundsState pipBoundsState,
-            PipMenuController pipMenuController, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipAnimationController pipAnimationController) {
+            PipMenuController pipMenuController, PipBoundsAlgorithm pipBoundsAlgorithm) {
         mPipBoundsState = pipBoundsState;
         mPipMenuController = pipMenuController;
         mShellTaskOrganizer = shellTaskOrganizer;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
-        mPipAnimationController = pipAnimationController;
         mTransitions = transitions;
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             shellInit.addInitCallback(this::onInit, this);
         }
     }
 
-    private void onInit() {
+    protected void onInit() {
         mTransitions.addHandler(this);
     }
 
     void setPipOrganizer(PipTaskOrganizer pto) {
         mPipOrganizer = pto;
+    }
+
+    public void setMixedHandler(DefaultMixedHandler mixedHandler) {
+        mMixedHandler = mixedHandler;
+    }
+
+    public void applyTransaction(WindowContainerTransaction wct) {
+        mShellTaskOrganizer.applyTransaction(wct);
     }
 
     /**
@@ -169,6 +192,17 @@ public abstract class PipTransitionController implements Transitions.TransitionH
             final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
             callback.onPipTransitionStarted(direction, pipBounds);
         }
+        if (isInPipDirection(direction) && Flags.enablePipUiStateCallbackOnEntering()) {
+            try {
+                ActivityTaskManager.getService().onPictureInPictureUiStateChanged(
+                        new PictureInPictureUiState.Builder()
+                                .setTransitioningToPip(true)
+                                .build());
+            } catch (RemoteException | IllegalStateException e) {
+                ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "Failed to set alert PiP state change.");
+            }
+        }
     }
 
     protected void sendOnPipTransitionFinished(
@@ -176,6 +210,17 @@ public abstract class PipTransitionController implements Transitions.TransitionH
         for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
             final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
             callback.onPipTransitionFinished(direction);
+        }
+        if (isInPipDirection(direction) && Flags.enablePipUiStateCallbackOnEntering()) {
+            try {
+                ActivityTaskManager.getService().onPictureInPictureUiStateChanged(
+                        new PictureInPictureUiState.Builder()
+                                .setTransitioningToPip(false)
+                                .build());
+            } catch (RemoteException | IllegalStateException e) {
+                ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "Failed to set alert PiP state change.");
+            }
         }
     }
 
@@ -226,9 +271,9 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /** Whether a particular package is same as current pip package. */
-    public boolean isInPipPackage(String packageName) {
+    public boolean isPackageActiveInPip(String packageName) {
         final TaskInfo inPipTask = mPipOrganizer.getTaskInfo();
-        return packageName != null && inPipTask != null
+        return packageName != null && inPipTask != null && mPipOrganizer.isInPip()
                 && packageName.equals(SplitScreenUtils.getPackageName(inPipTask.baseIntent));
     }
 
@@ -264,6 +309,20 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     /** End the currently-playing PiP animation. */
     public void end() {
     }
+
+    /**
+     * End the currently-playing PiP animation.
+     *
+     * @param onTransitionEnd callback to run upon finishing the playing transition.
+     */
+    public void end(@Nullable Runnable onTransitionEnd) {
+    }
+
+    /** Starts the {@link android.window.SystemPerformanceHinter.HighPerfSession}. */
+    public void startHighPerfSession() {}
+
+    /** Closes the {@link android.window.SystemPerformanceHinter.HighPerfSession}. */
+    public void closeHighPerfSession() {}
 
     /**
      * Callback interface for PiP transitions (both from and to PiP mode)

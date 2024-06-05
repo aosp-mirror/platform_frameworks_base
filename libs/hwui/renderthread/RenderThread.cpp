@@ -21,6 +21,8 @@
 #include <dlfcn.h>
 #include <gl/GrGLInterface.h>
 #include <gui/TraceUtils.h>
+#include <include/gpu/ganesh/gl/GrGLDirectContext.h>
+#include <private/android/choreographer.h>
 #include <sys/resource.h>
 #include <ui/FatVector.h>
 #include <utils/Condition.h>
@@ -149,7 +151,7 @@ void RenderThread::frameCallback(int64_t vsyncId, int64_t frameDeadline, int64_t
         ATRACE_FORMAT("queue mFrameCallbackTask to run after %.2fms",
                       toFloatMillis(runAt - SteadyClock::now()).count());
         queue().postAt(toNsecs_t(runAt.time_since_epoch()).count(),
-                       [=]() { dispatchFrameCallbacks(); });
+                       [this]() { dispatchFrameCallbacks(); });
     }
 }
 
@@ -286,7 +288,7 @@ void RenderThread::requireGlContext() {
     auto glesVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
     auto size = glesVersion ? strlen(glesVersion) : -1;
     cacheManager().configureContext(&options, glesVersion, size);
-    sk_sp<GrDirectContext> grContext(GrDirectContext::MakeGL(std::move(glInterface), options));
+    sk_sp<GrDirectContext> grContext(GrDirectContexts::MakeGL(std::move(glInterface), options));
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     setGrContext(grContext);
 }
@@ -357,7 +359,15 @@ void RenderThread::dumpGraphicsMemory(int fd, bool includeProfileData) {
 
     String8 cachesOutput;
     mCacheManager->dumpMemoryUsage(cachesOutput, mRenderState);
-    dprintf(fd, "\nPipeline=%s\n%s\n", pipelineToString(), cachesOutput.string());
+    dprintf(fd, "\nPipeline=%s\n%s", pipelineToString(), cachesOutput.c_str());
+    for (auto&& context : mCacheManager->mCanvasContexts) {
+        context->visitAllRenderNodes([&](const RenderNode& node) {
+            if (node.isTextureView()) {
+                dprintf(fd, "TextureView: %dx%d\n", node.getWidth(), node.getHeight());
+            }
+        });
+    }
+    dprintf(fd, "\n");
 }
 
 void RenderThread::getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {

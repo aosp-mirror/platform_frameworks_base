@@ -407,8 +407,8 @@ Status IncidentService::systemRunning() {
 Status IncidentService::getIncidentReportList(const String16& pkg16, const String16& cls16,
             vector<String16>* result) {
     status_t err;
-    const string pkg(String8(pkg16).string());
-    const string cls(String8(cls16).string());
+    const string pkg(String8(pkg16).c_str());
+    const string cls(String8(cls16).c_str());
 
     // List the reports
     vector<sp<ReportFile>> all;
@@ -441,9 +441,9 @@ Status IncidentService::getIncidentReport(const String16& pkg16, const String16&
             const String16& id16, IncidentManager::IncidentReport* result) {
     status_t err;
 
-    const string pkg(String8(pkg16).string());
-    const string cls(String8(cls16).string());
-    const string id(String8(id16).string());
+    const string pkg(String8(pkg16).c_str());
+    const string cls(String8(cls16).c_str());
+    const string id(String8(id16).c_str());
 
     IncidentReportArgs args;
     sp<ReportFile> file = mWorkDirectory->getReport(pkg, cls, id, &args);
@@ -470,9 +470,9 @@ Status IncidentService::getIncidentReport(const String16& pkg16, const String16&
 
 Status IncidentService::deleteIncidentReports(const String16& pkg16, const String16& cls16,
             const String16& id16) {
-    const string pkg(String8(pkg16).string());
-    const string cls(String8(cls16).string());
-    const string id(String8(id16).string());
+    const string pkg(String8(pkg16).c_str());
+    const string cls(String8(cls16).c_str());
+    const string id(String8(id16).c_str());
 
     sp<ReportFile> file = mWorkDirectory->getReport(pkg, cls, id, nullptr);
     if (file != nullptr) {
@@ -484,7 +484,7 @@ Status IncidentService::deleteIncidentReports(const String16& pkg16, const Strin
 }
 
 Status IncidentService::deleteAllIncidentReports(const String16& pkg16) {
-    const string pkg(String8(pkg16).string());
+    const string pkg(String8(pkg16).c_str());
 
     mWorkDirectory->commitAll(pkg);
     mBroadcaster->clearPackageBroadcasts(pkg);
@@ -517,6 +517,9 @@ status_t IncidentService::onTransact(uint32_t code, const Parcel& data, Parcel* 
             sp<IShellCallback> shellCallback = IShellCallback::asInterface(data.readStrongBinder());
             sp<IResultReceiver> resultReceiver =
                     IResultReceiver::asInterface(data.readStrongBinder());
+            if (resultReceiver == nullptr) {
+                return BAD_VALUE;
+            }
 
             FILE* fin = fdopen(in.release(), "r");
             FILE* fout = fdopen(out.release(), "w");
@@ -537,7 +540,7 @@ status_t IncidentService::onTransact(uint32_t code, const Parcel& data, Parcel* 
                 fflush(fout);
                 fclose(fout);
             }
-            if (fout != NULL) {
+            if (ferr != NULL) {
                 fflush(ferr);
                 fclose(ferr);
             }
@@ -564,12 +567,12 @@ status_t IncidentService::command(FILE* in, FILE* out, FILE* err, Vector<String8
                 fprintf(out, "Not enough arguments for section\n");
                 return NO_ERROR;
             }
-            int id = atoi(args[1]);
+            int id = atoi(args[1].c_str());
             int idx = 0;
             while (SECTION_LIST[idx] != NULL) {
                 const Section* section = SECTION_LIST[idx];
                 if (section->id == id) {
-                    fprintf(out, "Section[%d] %s\n", id, section->name.string());
+                    fprintf(out, "Section[%d] %s\n", id, section->name.c_str());
                     break;
                 }
                 idx++;
@@ -593,7 +596,7 @@ status_t IncidentService::cmd_help(FILE* out) {
 
 static void printPrivacy(const Privacy* p, FILE* out, String8 indent) {
     if (p == NULL) return;
-    fprintf(out, "%sid:%d, type:%d, dest:%d\n", indent.string(), p->field_id, p->type, p->policy);
+    fprintf(out, "%sid:%d, type:%d, dest:%d\n", indent.c_str(), p->field_id, p->type, p->policy);
     if (p->children == NULL) return;
     for (int i = 0; p->children[i] != NULL; i++) {  // NULL-terminated.
         printPrivacy(p->children[i], out, indent + "  ");
@@ -606,7 +609,7 @@ status_t IncidentService::cmd_privacy(FILE* in, FILE* out, FILE* err, Vector<Str
     const int argCount = args.size();
     if (argCount >= 3) {
         String8 opt = args[1];
-        int sectionId = atoi(args[2].string());
+        int sectionId = atoi(args[2].c_str());
 
         const Privacy* p = get_privacy_of_section(sectionId);
         if (p == NULL) {

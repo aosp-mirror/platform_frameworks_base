@@ -23,7 +23,10 @@ package {
 
 android_test {
     name: "SurfaceViewBufferTests",
-    srcs: ["**/*.java","**/*.kt"],
+    srcs: [
+        "**/*.java",
+        "**/*.kt",
+    ],
     manifest: "AndroidManifest.xml",
     test_config: "AndroidTest.xml",
     platform_apis: true,
@@ -41,7 +44,8 @@ android_test {
         "kotlin-stdlib",
         "kotlinx-coroutines-android",
         "flickerlib",
-        "truth-prebuilt",
+        "flickerlib-trace_processor_shell",
+        "truth",
         "cts-wm-util",
         "CtsSurfaceValidatorLib",
     ],
@@ -60,7 +64,7 @@ cc_library_shared {
         "libandroid",
     ],
     include_dirs: [
-        "system/core/include"
+        "system/core/include",
     ],
     stl: "libc++_static",
     cflags: [

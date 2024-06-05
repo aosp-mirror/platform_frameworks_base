@@ -15,7 +15,20 @@ license {
     ],
 }
 
-cc_library_shared {
+soong_config_module_type {
+    name: "cc_library_shared_for_libandroid_runtime",
+    module_type: "cc_library_shared",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "release_binder_death_recipient_weak_from_jni",
+        "release_package_libandroid_runtime_punch_holes",
+    ],
+    properties: [
+        "cflags",
+    ],
+}
+
+cc_library_shared_for_libandroid_runtime {
     name: "libandroid_runtime",
     host_supported: true,
     cflags: [
@@ -31,7 +44,10 @@ cc_library_shared {
 
         "-Wall",
         "-Werror",
+        "-Wextra",
+        "-Wthread-safety",
         "-Wno-error=deprecated-declarations",
+        "-Wno-unused-parameter",
         "-Wunused",
         "-Wunreachable-code",
     ],
@@ -41,6 +57,15 @@ cc_library_shared {
     product_variables: {
         eng: {
             cflags: ["-DNO_RESET_STACK_PROTECTOR"],
+        },
+    },
+
+    soong_config_variables: {
+        release_binder_death_recipient_weak_from_jni: {
+            cflags: ["-DBINDER_DEATH_RECIPIENT_WEAK_FROM_JNI"],
+        },
+        release_package_libandroid_runtime_punch_holes: {
+            cflags: ["-DENABLE_PUNCH_HOLES"],
         },
     },
 
@@ -57,6 +82,14 @@ cc_library_shared {
         "android_util_StringBlock.cpp",
         "android_util_XmlBlock.cpp",
         "android_util_jar_StrictJarFile.cpp",
+        "android_view_InputDevice.cpp",
+        "android_view_KeyCharacterMap.cpp",
+        "android_view_KeyEvent.cpp",
+        "android_view_MotionEvent.cpp",
+        "android_view_Surface.cpp",
+        "android_view_VelocityTracker.cpp",
+        "android_view_VerifiedKeyEvent.cpp",
+        "android_view_VerifiedMotionEvent.cpp",
         "com_android_internal_util_VirtualRefBasePtr.cpp",
         "core_jni_helpers.cpp",
         ":deviceproductinfoconstants_aidl",
@@ -72,15 +105,20 @@ cc_library_shared {
     shared_libs: [
         "libbase",
         "libcutils",
+        "libtracing_perfetto",
         "libharfbuzz_ng",
         "liblog",
         "libminikin",
         "libz",
+        "server_configurable_flags",
+        "android.database.sqlite-aconfig-cc",
+        "android.media.audiopolicy-aconfig-cc",
     ],
 
     static_libs: [
         "libnativehelper_lazy",
         "libziparchive_for_incfs",
+        "libguiflags",
     ],
 
     export_include_dirs: [
@@ -97,6 +135,7 @@ cc_library_shared {
             srcs: [
                 "AndroidRuntime.cpp",
                 "com_android_internal_content_F2fsUtils.cpp",
+                "com_android_internal_content_FileSystemUtils.cpp",
                 "com_android_internal_content_NativeLibraryHelper.cpp",
                 "com_google_android_gles_jni_EGLImpl.cpp",
                 "com_google_android_gles_jni_GLImpl.cpp", // TODO: .arm
@@ -121,30 +160,24 @@ cc_library_shared {
                 "android_database_SQLiteConnection.cpp",
                 "android_database_SQLiteGlobal.cpp",
                 "android_database_SQLiteDebug.cpp",
+                "android_database_SQLiteRawStatement.cpp",
                 "android_graphics_GraphicBuffer.cpp",
                 "android_graphics_SurfaceTexture.cpp",
                 "android_view_CompositionSamplingListener.cpp",
                 "android_view_DisplayEventReceiver.cpp",
                 "android_view_InputChannel.cpp",
-                "android_view_InputDevice.cpp",
                 "android_view_InputEventReceiver.cpp",
                 "android_view_InputEventSender.cpp",
                 "android_view_InputQueue.cpp",
-                "android_view_KeyCharacterMap.cpp",
-                "android_view_KeyEvent.cpp",
-                "android_view_MotionEvent.cpp",
                 "android_view_MotionPredictor.cpp",
                 "android_view_PointerIcon.cpp",
-                "android_view_Surface.cpp",
                 "android_view_SurfaceControl.cpp",
                 "android_view_SurfaceControlHdrLayerInfoListener.cpp",
+                "android_view_WindowManagerGlobal.cpp",
                 "android_graphics_BLASTBufferQueue.cpp",
                 "android_view_SurfaceSession.cpp",
                 "android_view_TextureView.cpp",
                 "android_view_TunnelModeEnabledListener.cpp",
-                "android_view_VelocityTracker.cpp",
-                "android_view_VerifiedKeyEvent.cpp",
-                "android_view_VerifiedMotionEvent.cpp",
                 "android_text_Hyphenator.cpp",
                 "android_os_Debug.cpp",
                 "android_os_GraphicsEnvironment.cpp",
@@ -164,8 +197,6 @@ cc_library_shared {
                 "android_os_SharedMemory.cpp",
                 "android_os_storage_StorageManager.cpp",
                 "android_os_UEventObserver.cpp",
-                "android_os_VintfObject.cpp",
-                "android_os_VintfRuntimeInfo.cpp",
                 "android_os_incremental_IncrementalManager.cpp",
                 "android_net_LocalSocketImpl.cpp",
                 "android_service_DataLoaderService.cpp",
@@ -242,9 +273,13 @@ cc_library_shared {
                 "fd_utils.cpp",
                 "android_hardware_input_InputWindowHandle.cpp",
                 "android_hardware_input_InputApplicationHandle.cpp",
+                "android_window_InputTransferToken.cpp",
                 "android_window_WindowInfosListener.cpp",
                 "android_window_ScreenCapture.cpp",
                 "jni_common.cpp",
+                "android_tracing_PerfettoDataSource.cpp",
+                "android_tracing_PerfettoDataSourceInstance.cpp",
+                "android_tracing_PerfettoProducer.cpp",
             ],
 
             static_libs: [
@@ -253,6 +288,7 @@ cc_library_shared {
                 "libdmabufinfo",
                 "libgif",
                 "libgui_window_info_static",
+                "libkernelconfigs",
                 "libseccomp_policy",
                 "libgrallocusage",
                 "libscrypt_static",
@@ -278,6 +314,7 @@ cc_library_shared {
                 "libdebuggerd_client",
                 "libutils",
                 "libbinder",
+                "libbinderdebug",
                 "libbinder_ndk",
                 "libui",
                 "libgraphicsenv",
@@ -322,7 +359,6 @@ cc_library_shared {
                 "libnativeloader_lazy",
                 "libmemunreachable",
                 "libhidlbase",
-                "libvintf",
                 "libnativedisplay",
                 "libnativewindow",
                 "libdl",
@@ -331,6 +367,8 @@ cc_library_shared {
                 "server_configurable_flags",
                 "libimage_io",
                 "libultrahdr",
+                "libperfetto_c",
+                "libtracing_perfetto",
             ],
             export_shared_lib_headers: [
                 // our headers include libnativewindow's public headers
@@ -356,7 +394,8 @@ cc_library_shared {
                 "-Wno-unused-function",
             ],
             srcs: [
-                "LayoutlibLoader.cpp",
+                "platform/host/HostRuntime.cpp",
+                "platform/host/native_window_jni.cpp",
             ],
             include_dirs: [
                 "external/vulkan-headers/include",
@@ -376,6 +415,7 @@ cc_library_shared {
                 "libhostgraphics",
                 "libhwui",
                 "libimage_type_recognition",
+                "libinput",
                 "libjpeg",
                 "libpiex",
                 "libpng",
@@ -399,20 +439,14 @@ cc_library_shared {
                 "android_database_SQLiteConnection.cpp",
                 "android_database_SQLiteGlobal.cpp",
                 "android_database_SQLiteDebug.cpp",
+                "android_database_SQLiteRawStatement.cpp",
                 "android_hardware_input_InputApplicationHandle.cpp",
                 "android_os_MessageQueue.cpp",
                 "android_os_Parcel.cpp",
 
-                "android_view_KeyCharacterMap.cpp",
-                "android_view_KeyEvent.cpp",
                 "android_view_InputChannel.cpp",
-                "android_view_InputDevice.cpp",
                 "android_view_InputEventReceiver.cpp",
                 "android_view_InputEventSender.cpp",
-                "android_view_MotionEvent.cpp",
-                "android_view_VelocityTracker.cpp",
-                "android_view_VerifiedKeyEvent.cpp",
-                "android_view_VerifiedMotionEvent.cpp",
 
                 "android_util_AssetManager.cpp",
                 "android_util_Binder.cpp",
@@ -420,7 +454,6 @@ cc_library_shared {
                 "android_util_FileObserver.cpp",
             ],
             static_libs: [
-                "libinput",
                 "libbinderthreadstateutils",
                 "libsqlite",
                 "libgui_window_info_static",
@@ -430,13 +463,29 @@ cc_library_shared {
                 // (e.g. gDefaultServiceManager)
                 "libbinder",
                 "libhidlbase", // libhwbinder is in here
-                "libvintf",
             ],
         },
     },
+}
 
-    // Workaround Clang LTO crash.
-    lto: {
-        never: true,
-    },
+cc_library_shared {
+    name: "libvintf_jni",
+
+    cpp_std: "gnu++20",
+
+    srcs: [
+        "android_os_VintfObject.cpp",
+        "android_os_VintfRuntimeInfo.cpp",
+    ],
+
+    shared_libs: [
+        "libbase",
+        "liblog",
+        "libnativehelper",
+        "libvintf",
+    ],
+
+    required: [
+        "vintf",
+    ],
 }

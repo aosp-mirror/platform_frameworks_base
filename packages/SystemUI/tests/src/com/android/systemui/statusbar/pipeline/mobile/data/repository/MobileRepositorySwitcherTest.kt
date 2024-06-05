@@ -18,7 +18,9 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode
@@ -59,7 +61,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -72,7 +73,7 @@ import org.mockito.MockitoAnnotations
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class MobileRepositorySwitcherTest : SysuiTestCase() {
     private lateinit var underTest: MobileRepositorySwitcher
     private lateinit var realRepo: MobileConnectionsRepositoryImpl
@@ -130,10 +131,13 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 mobileMappings,
                 fakeBroadcastDispatcher,
                 context,
-                IMMEDIATE,
+                /* bgDispatcher = */ IMMEDIATE,
                 scope,
+                /* mainDispatcher = */ IMMEDIATE,
                 FakeAirplaneModeRepository(),
                 wifiRepository,
+                mock(),
+                mock(),
                 mock(),
             )
 
@@ -243,13 +247,33 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
         private val IMMEDIATE = Dispatchers.Main.immediate
 
         private const val SUB_1_ID = 1
+        private const val SUB_1_NAME = "Carrier $SUB_1_ID"
         private val SUB_1 =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
-        private val MODEL_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
+            mock<SubscriptionInfo>().also {
+                whenever(it.subscriptionId).thenReturn(SUB_1_ID)
+                whenever(it.carrierName).thenReturn(SUB_1_NAME)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
+            }
+        private val MODEL_1 =
+            SubscriptionModel(
+                subscriptionId = SUB_1_ID,
+                carrierName = SUB_1_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
+            )
 
         private const val SUB_2_ID = 2
+        private const val SUB_2_NAME = "Carrier $SUB_2_ID"
         private val SUB_2 =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_2_ID) }
-        private val MODEL_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
+            mock<SubscriptionInfo>().also {
+                whenever(it.subscriptionId).thenReturn(SUB_2_ID)
+                whenever(it.carrierName).thenReturn(SUB_2_NAME)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
+            }
+        private val MODEL_2 =
+            SubscriptionModel(
+                subscriptionId = SUB_2_ID,
+                carrierName = SUB_2_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
+            )
     }
 }

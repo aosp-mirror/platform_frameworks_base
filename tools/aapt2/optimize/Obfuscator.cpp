@@ -40,9 +40,9 @@ Obfuscator::Obfuscator(OptimizeOptions& optimizeOptions)
       collapse_key_stringpool_(optimizeOptions.table_flattener_options.collapse_key_stringpool) {
 }
 
-std::string ShortenFileName(android::StringPiece file_path, int output_length) {
+std::string Obfuscator::ShortenFileName(android::StringPiece file_path, int output_length) {
   std::size_t hash_num = std::hash<android::StringPiece>{}(file_path);
-  std::string result = "";
+  std::string result;
   // Convert to (modified) base64 so that it is a proper file path.
   for (int i = 0; i < output_length; i++) {
     uint8_t sextet = hash_num & 0x3f;
@@ -52,10 +52,33 @@ std::string ShortenFileName(android::StringPiece file_path, int output_length) {
   return result;
 }
 
+static std::string RenameDisallowedFileNames(const std::string& file_name) {
+  // We are renaming shortened file names to make sure they not a reserved file name in Windows.
+  // See: https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file. We are renaming
+  // "COM" and "LPT" too because we are appending a number in case of hash collisions; "COM1",
+  // "COM2", etc. are reserved names.
+  static const char* const reserved_windows_names[] = {"CON", "PRN", "AUX", "NUL", "COM", "LPT"};
+  if (file_name.length() == 3) {
+    // Need to convert the file name to uppercase as Windows is case insensitive. E.g., "NuL",
+    // "nul", and "NUl" are also reserved.
+    std::string result_upper_cased(3, 0);
+    std::transform(file_name.begin(), file_name.end(), result_upper_cased.begin(),
+                   [](unsigned char c) { return std::toupper(c); });
+    for (auto reserved_windows_name : reserved_windows_names) {
+      if (result_upper_cased == reserved_windows_name) {
+        // Simple solution to make it a non-reserved name is to add an underscore
+        return "_" + file_name;
+      }
+    }
+  }
+
+  return file_name;
+}
+
 // Return the optimal hash length such that at most 10% of resources collide in
 // their shortened path.
 // Reference: http://matt.might.net/articles/counting-hash-collisions/
-int OptimalShortenedLength(int num_resources) {
+static int OptimalShortenedLength(int num_resources) {
   if (num_resources > 4000) {
     return 3;
   } else {
@@ -63,8 +86,8 @@ int OptimalShortenedLength(int num_resources) {
   }
 }
 
-std::string GetShortenedPath(android::StringPiece shortened_filename,
-                             android::StringPiece extension, int collision_count) {
+static std::string GetShortenedPath(android::StringPiece shortened_filename,
+                                    android::StringPiece extension, int collision_count) {
   std::string shortened_path = std::string("res/") += shortened_filename;
   if (collision_count > 0) {
     shortened_path += std::to_string(collision_count);
@@ -82,9 +105,9 @@ struct PathComparator {
   }
 };
 
-static bool HandleShortenFilePaths(ResourceTable* table,
-                                   std::map<std::string, std::string>& shortened_path_map,
-                                   const std::set<ResourceName>& path_shorten_exemptions) {
+bool Obfuscator::HandleShortenFilePaths(ResourceTable* table,
+                                        std::map<std::string, std::string>& shortened_path_map,
+                                        const std::set<ResourceName>& path_shorten_exemptions) {
   // used to detect collisions
   std::unordered_set<std::string> shortened_paths;
   std::set<FileReference*, PathComparator> file_refs;
@@ -112,7 +135,8 @@ static bool HandleShortenFilePaths(ResourceTable* table,
     // Android detects ColorStateLists via pathname, skip res/color*
     if (util::StartsWith(res_subdir, "res/color")) continue;
 
-    std::string shortened_filename = ShortenFileName(*file_ref->path, num_chars);
+    std::string shortened_filename =
+        RenameDisallowedFileNames(ShortenFileName(*file_ref->path, num_chars));
     int collision_count = 0;
     std::string shortened_path = GetShortenedPath(shortened_filename, extension, collision_count);
     while (shortened_paths.find(shortened_path) != shortened_paths.end()) {

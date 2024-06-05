@@ -17,10 +17,10 @@
 package com.android.systemui.biometrics
 
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogLevel.ERROR
-import com.android.systemui.log.LogLevel.VERBOSE
-import com.android.systemui.log.LogLevel.WARNING
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogLevel.ERROR
+import com.android.systemui.log.core.LogLevel.VERBOSE
+import com.android.systemui.log.core.LogLevel.WARNING
 import com.android.systemui.log.dagger.UdfpsLog
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
@@ -41,5 +41,9 @@ class UdfpsLogger @Inject constructor(@UdfpsLog private val logBuffer: LogBuffer
 
     fun log(tag: String, @CompileTimeConstant msg: String, level: LogLevel) {
         logBuffer.log(tag, level, msg)
+    }
+
+    fun requestMaxRefreshRate(request: Boolean) {
+        logBuffer.log("RefreshRate", LogLevel.DEBUG, { bool1 = request }, { "Request max: $bool1" })
     }
 }

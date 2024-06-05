@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.screenshot
+package com.android.settingslib.spa.screenshot.widget.preference
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.runtime.Composable
+import com.android.settingslib.spa.screenshot.util.settingsScreenshotTestRule
 import com.android.settingslib.spa.widget.preference.ProgressBarPreference
 import com.android.settingslib.spa.widget.preference.ProgressBarPreferenceModel
 import com.android.settingslib.spa.widget.preference.ProgressBarWithDataPreference
@@ -28,23 +29,24 @@ import com.android.settingslib.spa.widget.ui.CircularProgressBar
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 import platform.test.screenshot.DeviceEmulationSpec
+import platform.test.screenshot.PhoneAndTabletMinimal
 
 /** A screenshot test for ExampleFeature. */
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 class ProgressBarPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     companion object {
-        @Parameterized.Parameters(name = "{0}")
+        @Parameters(name = "{0}")
         @JvmStatic
         fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletMinimal
     }
 
     @get:Rule
     val screenshotRule =
-        SettingsScreenshotTestRule(
+        settingsScreenshotTestRule(
             emulationSpec,
-            "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
         )
 
     @Test

@@ -77,9 +77,10 @@ class ModernStatusBarViewTest : SysuiTestCase() {
     fun onDarkChanged_bindingReceivesIconAndDecorTint() {
         val view = createAndInitView()
 
-        view.onDarkChanged(arrayListOf(), 1.0f, 0x12345678)
+        view.onDarkChangedWithContrast(arrayListOf(), 0x12345678, 0x12344321)
 
         assertThat(binding.iconTint).isEqualTo(0x12345678)
+        assertThat(binding.contrastTint).isEqualTo(0x12344321)
         assertThat(binding.decorTint).isEqualTo(0x12345678)
     }
 
@@ -87,9 +88,10 @@ class ModernStatusBarViewTest : SysuiTestCase() {
     fun setStaticDrawableColor_bindingReceivesIconTint() {
         val view = createAndInitView()
 
-        view.setStaticDrawableColor(0x12345678)
+        view.setStaticDrawableColor(0x12345678, 0x12344321)
 
         assertThat(binding.iconTint).isEqualTo(0x12345678)
+        assertThat(binding.contrastTint).isEqualTo(0x12344321)
     }
 
     @Test
@@ -144,13 +146,15 @@ class ModernStatusBarViewTest : SysuiTestCase() {
 
     inner class TestBinding : ModernStatusBarViewBinding {
         var iconTint: Int? = null
+        var contrastTint: Int? = null
         var decorTint: Int? = null
         var onVisibilityStateChangedCalled: Boolean = false
 
         var shouldIconBeVisibleInternal: Boolean = true
 
-        override fun onIconTintChanged(newTint: Int) {
+        override fun onIconTintChanged(newTint: Int, contrastTint: Int) {
             iconTint = newTint
+            this.contrastTint = contrastTint
         }
 
         override fun onDecorTintChanged(newTint: Int) {

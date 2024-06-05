@@ -19,11 +19,11 @@ package com.android.systemui.util.service;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import android.testing.AndroidTestingRunner;
-
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -36,11 +36,12 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class PersistentConnectionManagerTest extends SysuiTestCase {
     private static final int MAX_RETRIES = 5;
     private static final int RETRY_DELAY_MS = 1000;
     private static final int CONNECTION_MIN_DURATION_MS = 5000;
+    private static final String DUMPSYS_NAME = "dumpsys_name";
 
     private FakeSystemClock mFakeClock = new FakeSystemClock();
     private FakeExecutor mFakeExecutor = new FakeExecutor(mFakeClock);
@@ -49,7 +50,13 @@ public class PersistentConnectionManagerTest extends SysuiTestCase {
     private ObservableServiceConnection<Proxy> mConnection;
 
     @Mock
+    private ObservableServiceConnection.Callback<Proxy> mConnectionCallback;
+
+    @Mock
     private Observer mObserver;
+
+    @Mock
+    private DumpManager mDumpManager;
 
     private static class Proxy {
     }
@@ -63,6 +70,8 @@ public class PersistentConnectionManagerTest extends SysuiTestCase {
         mConnectionManager = new PersistentConnectionManager<>(
                 mFakeClock,
                 mFakeExecutor,
+                mDumpManager,
+                DUMPSYS_NAME,
                 mConnection,
                 MAX_RETRIES,
                 RETRY_DELAY_MS,
@@ -153,5 +162,17 @@ public class PersistentConnectionManagerTest extends SysuiTestCase {
 
         callbackCaptor.getValue().onSourceChanged();
         verify(mConnection).bind();
+    }
+
+    @Test
+    public void testAddConnectionCallback() {
+        mConnectionManager.addConnectionCallback(mConnectionCallback);
+        verify(mConnection).addCallback(mConnectionCallback);
+    }
+
+    @Test
+    public void testRemoveConnectionCallback() {
+        mConnectionManager.removeConnectionCallback(mConnectionCallback);
+        verify(mConnection).removeCallback(mConnectionCallback);
     }
 }

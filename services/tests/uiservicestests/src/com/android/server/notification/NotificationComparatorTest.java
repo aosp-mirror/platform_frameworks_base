@@ -15,17 +15,20 @@
  */
 package com.android.server.notification;
 
-import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.NO_SORT_BY_INTERRUPTIVENESS;
+import static android.telecom.TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
@@ -33,8 +36,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -45,7 +50,9 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.server.UiServiceTestCase;
@@ -54,16 +61,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 @SmallTest
-@RunWith(Parameterized.class)
+@RunWith(AndroidJUnit4.class)
 public class NotificationComparatorTest extends UiServiceTestCase {
     @Mock Context mMockContext;
     @Mock TelecomManager mTm;
@@ -97,24 +105,9 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     private NotificationRecord mRecordColorized;
     private NotificationRecord mRecordColorizedCall;
 
-    @Parameterized.Parameters(name = "sortByInterruptiveness={0}")
-    public static Boolean[] getSortByInterruptiveness() {
-        return new Boolean[] { true, false };
-    }
-
-    @Parameterized.Parameter
-    public boolean mSortByInterruptiveness;
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        SystemUiSystemPropertiesFlags.TEST_RESOLVER = flag -> {
-            if (flag.mSysPropKey.equals(NO_SORT_BY_INTERRUPTIVENESS.mSysPropKey)) {
-                return !mSortByInterruptiveness;
-            }
-            return new SystemUiSystemPropertiesFlags.DebugResolver().isEnabled(flag);
-        };
-
         int userId = UserHandle.myUserId();
 
         final Resources res = mContext.getResources();
@@ -309,13 +302,8 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         expected.add(mNoMediaSessionMedia);
         expected.add(mRecordCheater);
         expected.add(mRecordCheaterColorized);
-        if (mSortByInterruptiveness) {
-            expected.add(mRecordMinCall);
-            expected.add(mRecordMinCallNonInterruptive);
-        } else {
-            expected.add(mRecordMinCallNonInterruptive);
-            expected.add(mRecordMinCall);
-        }
+        expected.add(mRecordMinCallNonInterruptive);
+        expected.add(mRecordMinCall);
 
         List<NotificationRecord> actual = new ArrayList<>();
         actual.addAll(expected);
@@ -330,11 +318,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     public void testRankingScoreOverrides() {
         NotificationComparator comp = new NotificationComparator(mMockContext);
         NotificationRecord recordMinCallNonInterruptive = spy(mRecordMinCallNonInterruptive);
-        if (mSortByInterruptiveness) {
-            assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) < 0);
-        } else {
-            assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) > 0);
-        }
+        assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) > 0);
 
         when(recordMinCallNonInterruptive.getRankingScore()).thenReturn(1f);
         assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) > 0);
@@ -358,6 +342,73 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         NotificationComparator comp = new NotificationComparator(mMockContext);
         assertTrue(comp.isImportantPeople(mRecordStarredContact));
         assertTrue(comp.isImportantPeople(mRecordContact));
+    }
+
+    @Test
+    public void testChangeDialerPackageWhileSorting() throws InterruptedException {
+        final int halfList = 100;
+        int userId = UserHandle.myUserId();
+        when(mTm.getDefaultDialerPackage()).thenReturn("B");
+
+        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor = ArgumentCaptor.forClass(
+                BroadcastReceiver.class);
+        NotificationComparator comparator = new NotificationComparator(mMockContext);
+        verify(mMockContext).registerReceiver(broadcastReceiverCaptor.capture(), any());
+        BroadcastReceiver dialerChangedBroadcastReceiver = broadcastReceiverCaptor.getValue();
+
+        ArrayList<NotificationRecord> records = new ArrayList<>();
+        for (int i = 0; i < halfList; i++) {
+            Notification notifCallFromPkgA = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
+                    .setCategory(Notification.CATEGORY_CALL)
+                    .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                    .build();
+            records.add(new NotificationRecord(mMockContext,
+                    new StatusBarNotification("A", "A", 2 * i, "callA", callUid, callUid,
+                            notifCallFromPkgA, new UserHandle(userId), "", 0),
+                    getDefaultChannel()));
+
+            Notification notifCallFromPkgB = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
+                    .setCategory(Notification.CATEGORY_CALL)
+                    .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                    .build();
+            records.add(new NotificationRecord(mMockContext,
+                    new StatusBarNotification("B", "B", 2 * i + 1, "callB", callUid, callUid,
+                            notifCallFromPkgB, new UserHandle(userId), "", 0),
+                    getDefaultChannel()));
+        }
+
+        CountDownLatch allDone = new CountDownLatch(2);
+        new Thread(() -> {
+            // The lock prevents the other thread from changing the dialer package mid-sort, so:
+            // 1) Results should be "all B before all A" (asserted below).
+            // 2) No "IllegalArgumentException: Comparison method violates its general contract!"
+            synchronized (comparator.mStateLock) {
+                records.sort(comparator);
+                allDone.countDown();
+            }
+        }).start();
+
+        new Thread(() -> {
+            String nextDialer = "A";
+            while (allDone.getCount() == 2) {
+                Intent dialerChangedIntent = new Intent();
+                dialerChangedIntent.putExtra(EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, nextDialer);
+                dialerChangedBroadcastReceiver.onReceive(mMockContext, dialerChangedIntent);
+                nextDialer = nextDialer.equals("A") ? "B" : "A";
+            }
+            allDone.countDown();
+        }).start();
+
+        allDone.await();
+
+        for (int i = 0; i < halfList; i++) {
+            assertWithMessage("Wrong element in position #" + i)
+                    .that(records.get(i).getSbn().getPackageName()).isEqualTo("B");
+        }
+        for (int i = halfList; i < 2 * halfList; i++) {
+            assertWithMessage("Wrong element in position #" + i)
+                    .that(records.get(i).getSbn().getPackageName()).isEqualTo("A");
+        }
     }
 
     private NotificationChannel getDefaultChannel() {

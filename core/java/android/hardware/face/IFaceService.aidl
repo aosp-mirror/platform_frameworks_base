@@ -15,6 +15,7 @@
  */
 package android.hardware.face;
 
+import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IBiometricStateListener;
@@ -25,7 +26,9 @@ import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
 import android.hardware.face.FaceAuthenticateOptions;
+import android.hardware.face.FaceEnrollOptions;
 import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.face.FaceSensorConfigurations;
 import android.view.Surface;
 
 /**
@@ -93,7 +96,7 @@ interface IFaceService {
     @EnforcePermission("MANAGE_BIOMETRIC")
     long enroll(int userId, IBinder token, in byte [] hardwareAuthToken, IFaceServiceReceiver receiver,
             String opPackageName, in int [] disabledFeatures,
-            in Surface previewSurface, boolean debugConsent);
+            in Surface previewSurface, boolean debugConsent, in FaceEnrollOptions options);
 
     // Start remote face enrollment
     @EnforcePermission("MANAGE_BIOMETRIC")
@@ -161,15 +164,21 @@ interface IFaceService {
     void getFeature(IBinder token, int userId, int feature, IFaceServiceReceiver receiver,
             String opPackageName);
 
-    // Registers all HIDL and AIDL sensors. Only HIDL sensor properties need to be provided, because
-    // AIDL sensor properties are retrieved directly from the available HALs. If no HIDL HALs exist,
-    // hidlSensors must be non-null and empty. See AuthService.java
+    //Register all available face sensors.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void registerAuthenticators(in List<FaceSensorPropertiesInternal> hidlSensors);
+    void registerAuthenticators(in FaceSensorConfigurations faceSensorConfigurations);
 
     // Adds a callback which gets called when the service registers all of the face
     // authenticators. The callback is automatically removed after it's invoked.
     void addAuthenticatorsRegisteredCallback(IFaceAuthenticatorsRegisteredCallback callback);
+
+    // Registers AuthenticationStateListener.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    void registerAuthenticationStateListener(AuthenticationStateListener listener);
+
+    // Unregisters AuthenticationStateListener.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    void unregisterAuthenticationStateListener(AuthenticationStateListener listener);
 
     // Registers BiometricStateListener.
     void registerBiometricStateListener(IBiometricStateListener listener);
@@ -177,5 +186,5 @@ interface IFaceService {
     // Internal operation used to clear face biometric scheduler.
     // Ensures that the scheduler is not stuck.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void scheduleWatchdog();
+    oneway void scheduleWatchdog();
 }

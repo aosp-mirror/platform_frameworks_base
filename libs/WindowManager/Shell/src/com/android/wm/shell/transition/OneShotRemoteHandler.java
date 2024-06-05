@@ -27,6 +27,7 @@ import android.window.IRemoteTransitionFinishedCallback;
 import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowAnimationState;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -44,7 +45,7 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
     private IBinder mTransition = null;
 
     /** The remote to delegate animation to */
-    private final RemoteTransition mRemote;
+    private RemoteTransition mRemote;
 
     public OneShotRemoteHandler(@NonNull ShellExecutor mainExecutor,
             @NonNull RemoteTransition remote) {
@@ -63,28 +64,11 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (mTransition != transition) return false;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Using registered One-shot remote"
-                + " transition %s for #%d.", mRemote, info.getDebugId());
+                + " transition %s for (#%d).", mRemote, info.getDebugId());
 
-        final IBinder.DeathRecipient remoteDied = () -> {
-            Log.e(Transitions.TAG, "Remote transition died, finishing");
-            mMainExecutor.execute(
-                    () -> finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */));
-        };
-        IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
-            @Override
-            public void onTransitionFinished(WindowContainerTransaction wct,
-                    SurfaceControl.Transaction sct) {
-                if (mRemote.asBinder() != null) {
-                    mRemote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
-                }
-                if (sct != null) {
-                    finishTransaction.merge(sct);
-                }
-                mMainExecutor.execute(() -> {
-                    finishCallback.onTransitionFinished(wct, null /* wctCB */);
-                });
-            }
-        };
+        final IBinder.DeathRecipient remoteDied = createDeathRecipient(finishCallback);
+        IRemoteTransitionFinishedCallback cb =
+                createFinishedCallback(info, finishTransaction, finishCallback, remoteDied);
         Transitions.setRunningRemoteTransitionDelegate(mRemote.getAppThread());
         try {
             if (mRemote.asBinder() != null) {
@@ -104,7 +88,8 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             if (mRemote.asBinder() != null) {
                 mRemote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
             }
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            finishCallback.onTransitionFinished(null /* wct */);
+            mRemote = null;
         }
         return true;
     }
@@ -113,17 +98,24 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Merging registered One-shot remote"
+                + " transition %s for (#%d).", mRemote, info.getDebugId());
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
             public void onTransitionFinished(WindowContainerTransaction wct,
                     SurfaceControl.Transaction sct) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                        "Finished merging one-shot remote transition %s for (#%d).", mRemote,
+                        info.getDebugId());
                 // We have merged, since we sent the transaction over binder, the one in this
                 // process won't be cleared if the remote applied it. We don't actually know if the
                 // remote applied the transaction, but applying twice will break surfaceflinger
                 // so just assume the worst-case and clear the local transaction.
                 t.clear();
-                mMainExecutor.execute(
-                        () -> finishCallback.onTransitionFinished(wct, null /* wctCB */));
+                mMainExecutor.execute(() -> {
+                    finishCallback.onTransitionFinished(wct);
+                    mRemote = null;
+                });
             }
         };
         try {
@@ -140,6 +132,51 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
     }
 
     @Override
+    public boolean takeOverAnimation(
+            @NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction transaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback,
+            @NonNull WindowAnimationState[] states) {
+        if (mTransition != transition) return false;
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION, "Using registered One-shot "
+                + "remote transition %s to take over (#%d).", mRemote, info.getDebugId());
+
+        final IBinder.DeathRecipient remoteDied = createDeathRecipient(finishCallback);
+        IRemoteTransitionFinishedCallback cb = createFinishedCallback(
+                info, null /* finishTransaction */, finishCallback, remoteDied);
+
+        Transitions.setRunningRemoteTransitionDelegate(mRemote.getAppThread());
+
+        try {
+            if (mRemote.asBinder() != null) {
+                mRemote.asBinder().linkToDeath(remoteDied, 0 /* flags */);
+            }
+
+            // If the remote is actually in the same process, then make a copy of parameters since
+            // remote impls assume that they have to clean-up native references.
+            final SurfaceControl.Transaction remoteStartT =
+                    RemoteTransitionHandler.copyIfLocal(transaction, mRemote.getRemoteTransition());
+            final TransitionInfo remoteInfo =
+                    remoteStartT == transaction ? info : info.localRemoteCopy();
+            mRemote.getRemoteTransition().takeOverAnimation(
+                    transition, remoteInfo, remoteStartT, cb, states);
+
+            // Assume that remote will apply the transaction.
+            transaction.clear();
+            return true;
+        } catch (RemoteException e) {
+            Log.e(Transitions.TAG, "Error running remote transition takeover.", e);
+            if (mRemote.asBinder() != null) {
+                mRemote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
+            }
+            finishCallback.onTransitionFinished(null /* wct */);
+            mRemote = null;
+        }
+
+        return false;
+    }
+
+    @Override
     @Nullable
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @Nullable TransitionRequestInfo request) {
@@ -150,6 +187,51 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "RemoteTransition directly requested"
                 + " for %s: %s", transition, remote);
         return new WindowContainerTransaction();
+    }
+
+    @Override
+    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+            @Nullable SurfaceControl.Transaction finishTransaction) {
+        try {
+            mRemote.getRemoteTransition().onTransitionConsumed(transition, aborted);
+        } catch (RemoteException e) {
+            Log.e(Transitions.TAG, "Error calling onTransitionConsumed()", e);
+        }
+    }
+
+    private IBinder.DeathRecipient createDeathRecipient(
+            Transitions.TransitionFinishCallback finishCallback) {
+        return () -> {
+            Log.e(Transitions.TAG, "Remote transition died, finishing");
+            mMainExecutor.execute(
+                    () -> finishCallback.onTransitionFinished(null /* wct */));
+        };
+    }
+
+    private IRemoteTransitionFinishedCallback createFinishedCallback(
+            @NonNull TransitionInfo info,
+            @Nullable SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback,
+            @NonNull IBinder.DeathRecipient remoteDied) {
+        return new IRemoteTransitionFinishedCallback.Stub() {
+            @Override
+            public void onTransitionFinished(WindowContainerTransaction wct,
+                    SurfaceControl.Transaction sct) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                        "Finished one-shot remote transition %s for (#%d).", mRemote,
+                        info.getDebugId());
+                if (mRemote.asBinder() != null) {
+                    mRemote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
+                }
+                if (finishTransaction != null && sct != null) {
+                    finishTransaction.merge(sct);
+                }
+                mMainExecutor.execute(() -> {
+                    finishCallback.onTransitionFinished(wct);
+                    mRemote = null;
+                });
+            }
+        };
     }
 
     @Override

@@ -16,6 +16,8 @@
 
 package android.inputmethodservice;
 
+import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
+import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 
 import android.animation.ValueAnimator;
@@ -75,6 +77,10 @@ final class NavigationBarController {
         default void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
         }
 
+        default boolean isShown() {
+            return false;
+        }
+
         default String toDebugString() {
             return "No-op implementation";
         }
@@ -113,6 +119,13 @@ final class NavigationBarController {
 
     void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
         mImpl.onNavButtonFlagsChanged(navButtonFlags);
+    }
+
+    /**
+     * Returns whether the IME navigation bar is currently shown.
+     */
+    boolean isShown() {
+        return mImpl.isShown();
     }
 
     String toDebugString() {
@@ -230,6 +243,16 @@ final class NavigationBarController {
 
             setIconTintInternal(calculateTargetDarkIntensity(mAppearance,
                     mDrawLegacyNavigationBarBackground));
+
+            if (ENABLE_HIDE_IME_CAPTION_BAR) {
+                mNavigationBarFrame.setOnApplyWindowInsetsListener((view, insets) -> {
+                    if (mNavigationBarFrame != null) {
+                        boolean visible = insets.isVisible(captionBar());
+                        mNavigationBarFrame.setVisibility(visible ? View.VISIBLE : View.GONE);
+                    }
+                    return view.onApplyWindowInsets(insets);
+                });
+            }
         }
 
         private void uninstallNavigationBarFrameIfNecessary() {
@@ -239,6 +262,9 @@ final class NavigationBarController {
             final ViewParent parent = mNavigationBarFrame.getParent();
             if (parent instanceof ViewGroup) {
                 ((ViewGroup) parent).removeView(mNavigationBarFrame);
+            }
+            if (ENABLE_HIDE_IME_CAPTION_BAR) {
+                mNavigationBarFrame.setOnApplyWindowInsetsListener(null);
             }
             mNavigationBarFrame = null;
         }
@@ -414,7 +440,9 @@ final class NavigationBarController {
                         decor.bringChildToFront(mNavigationBarFrame);
                     }
                 }
-                mNavigationBarFrame.setVisibility(View.VISIBLE);
+                if (!ENABLE_HIDE_IME_CAPTION_BAR) {
+                    mNavigationBarFrame.setVisibility(View.VISIBLE);
+                }
             }
         }
 
@@ -434,6 +462,11 @@ final class NavigationBarController {
             final boolean prevShouldShowImeSwitcherWhenImeIsShown =
                     mShouldShowImeSwitcherWhenImeIsShown;
             mShouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherWhenImeIsShown;
+
+            if (ENABLE_HIDE_IME_CAPTION_BAR) {
+                mService.mWindow.getWindow().getDecorView().getWindowInsetsController()
+                        .setImeCaptionBarInsetsHeight(getImeCaptionBarHeight());
+            }
 
             if (imeDrawsImeNavBar) {
                 installNavigationBarFrameIfNecessary();
@@ -526,6 +559,22 @@ final class NavigationBarController {
                 onSystemBarAppearanceChanged(mAppearance);
             }
             return drawLegacyNavigationBarBackground;
+        }
+
+        /**
+         * Returns the height of the IME caption bar if this should be shown, or {@code 0} instead.
+         */
+        private int getImeCaptionBarHeight() {
+            return mImeDrawsImeNavBar
+                    ? mService.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_frame_height)
+                    : 0;
+        }
+
+        @Override
+        public boolean isShown() {
+            return mNavigationBarFrame != null
+                    && mNavigationBarFrame.getVisibility() == View.VISIBLE;
         }
 
         @Override

@@ -23,7 +23,9 @@ import static android.view.inputmethod.EditorInfoProto.INPUT_TYPE;
 import static android.view.inputmethod.EditorInfoProto.PACKAGE_NAME;
 import static android.view.inputmethod.EditorInfoProto.PRIVATE_IME_OPTIONS;
 import static android.view.inputmethod.EditorInfoProto.TARGET_INPUT_METHOD_USER_ID;
+import static android.view.inputmethod.Flags.FLAG_EDITORINFO_HANDWRITING_ENABLED;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -716,6 +718,47 @@ public class EditorInfo implements InputType, Parcelable {
         return set;
     }
 
+    private boolean mIsStylusHandwritingEnabled;
+
+
+    /**
+     * AndroidX Core library 1.13.0 introduced EditorInfoCompat#setStylusHandwritingEnabled and
+     * EditorInfoCompat#isStylusHandwritingEnabled which used a boolean value in the EditorInfo
+     * extras bundle. These methods do not set or check the Android V property since the Android V
+     * SDK was not yet available. In order for EditorInfoCompat#isStylusHandwritingEnabled to return
+     * the correct value for EditorInfo created by Android V TextView, the extras bundle value
+     * should be set. This is the extras bundle key.
+     *
+     * @hide
+     */
+    public static final String STYLUS_HANDWRITING_ENABLED_ANDROIDX_EXTRAS_KEY =
+            "androidx.core.view.inputmethod.EditorInfoCompat.STYLUS_HANDWRITING_ENABLED";
+
+    /**
+     * Set {@code true} if the {@code Editor} has
+     * {@link InputMethodManager#startStylusHandwriting stylus handwriting} enabled.
+     * {@code false} by default, {@code Editor} must set it {@code true} to indicate that
+     * it supports stylus handwriting.
+     *
+     * @param enabled {@code true} if stylus handwriting is enabled.
+     * @see View#setAutoHandwritingEnabled(boolean)
+     */
+    @FlaggedApi(FLAG_EDITORINFO_HANDWRITING_ENABLED)
+    public void setStylusHandwritingEnabled(boolean enabled) {
+        mIsStylusHandwritingEnabled = enabled;
+    }
+
+    /**
+     * Returns {@code true} when an {@code Editor} has stylus handwriting enabled.
+     * {@code false} by default.
+     * @see #setStylusHandwritingEnabled(boolean)
+     * @see InputMethodManager#isStylusHandwritingAvailable()
+     */
+    @FlaggedApi(FLAG_EDITORINFO_HANDWRITING_ENABLED)
+    public boolean isStylusHandwritingEnabled() {
+        return mIsStylusHandwritingEnabled;
+    }
+
     /**
      * If not {@code null}, this editor needs to talk to IMEs that run for the specified user, no
      * matter what user ID the calling process has.
@@ -1211,6 +1254,7 @@ public class EditorInfo implements InputType, Parcelable {
         pw.println(prefix + "supportedHandwritingGesturePreviewTypes="
                 + InputMethodDebug.handwritingGestureTypeFlagsToString(
                         mSupportedHandwritingGesturePreviewTypes));
+        pw.println(prefix + "isStylusHandwritingEnabled=" + mIsStylusHandwritingEnabled);
         pw.println(prefix + "contentMimeTypes=" + Arrays.toString(contentMimeTypes));
         if (targetInputMethodUser != null) {
             pw.println(prefix + "targetInputMethodUserId=" + targetInputMethodUser.getIdentifier());
@@ -1277,6 +1321,9 @@ public class EditorInfo implements InputType, Parcelable {
         dest.writeBundle(extras);
         dest.writeInt(mSupportedHandwritingGestureTypes);
         dest.writeInt(mSupportedHandwritingGesturePreviewTypes);
+        if (Flags.editorinfoHandwritingEnabled()) {
+            dest.writeBoolean(mIsStylusHandwritingEnabled);
+        }
         dest.writeBoolean(mInitialSurroundingText != null);
         if (mInitialSurroundingText != null) {
             mInitialSurroundingText.writeToParcel(dest, flags);
@@ -1316,6 +1363,9 @@ public class EditorInfo implements InputType, Parcelable {
                     res.extras = source.readBundle();
                     res.mSupportedHandwritingGestureTypes = source.readInt();
                     res.mSupportedHandwritingGesturePreviewTypes = source.readInt();
+                    if (Flags.editorinfoHandwritingEnabled()) {
+                        res.mIsStylusHandwritingEnabled = source.readBoolean();
+                    }
                     boolean hasInitialSurroundingText = source.readBoolean();
                     if (hasInitialSurroundingText) {
                         res.mInitialSurroundingText =

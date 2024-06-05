@@ -19,13 +19,19 @@ package android.hardware.camera2.impl;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.Context;
+import android.graphics.ImageFormat;
 import android.hardware.ICameraService;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraExtensionCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CaptureFailure;
@@ -58,6 +64,8 @@ import android.util.Size;
 import android.util.SparseArray;
 import android.view.Surface;
 
+import com.android.internal.camera.flags.Flags;
+
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,9 +92,22 @@ public class CameraDeviceImpl extends CameraDevice
 
     private static final int REQUEST_ID_NONE = -1;
 
+    /**
+     * Starting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM},
+     * {@link #isSessionConfigurationSupported} also checks for compatibility of session parameters
+     * when supported by the HAL. This ChangeId guards enabling that functionality for apps
+     * that target {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long CHECK_PARAMS_IN_IS_SESSION_CONFIGURATION_SUPPORTED = 320741775;
+
     // TODO: guard every function with if (!mRemoteDevice) check (if it was closed)
     private ICameraDeviceUserWrapper mRemoteDevice;
     private boolean mRemoteDeviceInit = false;
+
+    // CameraDeviceSetup object to delegate some of the newer calls to.
+    @Nullable private final CameraDeviceSetup mCameraDeviceSetup;
 
     // Lock to synchronize cross-thread access to device public interface
     final Object mInterfaceLock = new Object(); // access from this class and Session only!
@@ -126,7 +147,8 @@ public class CameraDeviceImpl extends CameraDevice
 
     private final String mCameraId;
     private final CameraCharacteristics mCharacteristics;
-    private final Map<String, CameraCharacteristics> mPhysicalIdsToChars;
+    private Map<String, CameraCharacteristics> mPhysicalIdsToChars;
+    private final CameraManager mCameraManager;
     private final int mTotalPartialCount;
     private final Context mContext;
 
@@ -270,21 +292,78 @@ public class CameraDeviceImpl extends CameraDevice
         }
     };
 
+    private class ClientStateCallback extends StateCallback {
+        private final Executor mClientExecutor;
+        private final StateCallback mClientStateCallback;
+
+        private ClientStateCallback(@NonNull Executor clientExecutor,
+                @NonNull StateCallback clientStateCallback) {
+            mClientExecutor = clientExecutor;
+            mClientStateCallback = clientStateCallback;
+        }
+
+        public void onClosed(@NonNull CameraDevice camera) {
+            mClientExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mClientStateCallback.onClosed(camera);
+                }
+            });
+        }
+        @Override
+        public void onOpened(@NonNull CameraDevice camera) {
+            mClientExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mClientStateCallback.onOpened(camera);
+                }
+            });
+        }
+
+        @Override
+        public void onDisconnected(@NonNull CameraDevice camera) {
+            mClientExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mClientStateCallback.onDisconnected(camera);
+                }
+            });
+        }
+
+        @Override
+        public void onError(@NonNull CameraDevice camera, int error) {
+            mClientExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mClientStateCallback.onError(camera, error);
+                }
+            });
+        }
+    }
+
     public CameraDeviceImpl(String cameraId, StateCallback callback, Executor executor,
                         CameraCharacteristics characteristics,
-                        Map<String, CameraCharacteristics> physicalIdsToChars,
+                        @NonNull CameraManager manager,
                         int appTargetSdkVersion,
-                        Context ctx) {
-        if (cameraId == null || callback == null || executor == null || characteristics == null) {
+                        Context ctx,
+                        @Nullable CameraDevice.CameraDeviceSetup cameraDeviceSetup) {
+        if (cameraId == null || callback == null || executor == null || characteristics == null
+                || manager == null) {
             throw new IllegalArgumentException("Null argument given");
         }
         mCameraId = cameraId;
-        mDeviceCallback = callback;
-        mDeviceExecutor = executor;
+        if (Flags.singleThreadExecutor()) {
+            mDeviceCallback = new ClientStateCallback(executor, callback);
+            mDeviceExecutor = Executors.newSingleThreadExecutor();
+        } else {
+            mDeviceCallback = callback;
+            mDeviceExecutor = executor;
+        }
         mCharacteristics = characteristics;
-        mPhysicalIdsToChars = physicalIdsToChars;
+        mCameraManager = manager;
         mAppTargetSdkVersion = appTargetSdkVersion;
         mContext = ctx;
+        mCameraDeviceSetup = cameraDeviceSetup;
 
         final int MAX_TAG_LEN = 23;
         String tag = String.format("CameraDevice-JV-%s", mCameraId);
@@ -301,6 +380,18 @@ public class CameraDeviceImpl extends CameraDevice
         } else {
             mTotalPartialCount = partialCount;
         }
+    }
+
+    private Map<String, CameraCharacteristics> getPhysicalIdToChars() {
+        if (mPhysicalIdsToChars == null) {
+            try {
+                mPhysicalIdsToChars = mCameraManager.getPhysicalIdToCharsMap(mCharacteristics);
+            } catch (CameraAccessException e) {
+                Log.e(TAG, "Unable to query the physical characteristics map!");
+            }
+        }
+
+        return mPhysicalIdsToChars;
     }
 
     public CameraDeviceCallbacks getCallbacks() {
@@ -778,9 +869,13 @@ public class CameraDeviceImpl extends CameraDevice
     public boolean isSessionConfigurationSupported(
             @NonNull SessionConfiguration sessionConfig) throws CameraAccessException,
             UnsupportedOperationException, IllegalArgumentException {
-        synchronized(mInterfaceLock) {
+        synchronized (mInterfaceLock) {
             checkIfCameraClosedOrInError();
-
+            if (CompatChanges.isChangeEnabled(CHECK_PARAMS_IN_IS_SESSION_CONFIGURATION_SUPPORTED)
+                    && Flags.cameraDeviceSetup()
+                    && mCameraDeviceSetup != null) {
+                return mCameraDeviceSetup.isSessionConfigurationSupported(sessionConfig);
+            }
             return mRemoteDevice.isSessionConfigurationSupported(sessionConfig);
         }
     }
@@ -794,14 +889,25 @@ public class CameraDeviceImpl extends CameraDevice
         }
     }
 
-    private void overrideEnableZsl(CameraMetadataNative request, boolean newValue) {
+    /**
+     * Disable CONTROL_ENABLE_ZSL based on targetSdkVersion and capture template.
+     */
+    public static void disableZslIfNeeded(CameraMetadataNative request,
+            int targetSdkVersion, int templateType) {
+        // If targetSdkVersion is at least O, no need to set ENABLE_ZSL to false
+        // for STILL_CAPTURE template.
+        if (targetSdkVersion >= Build.VERSION_CODES.O
+                && templateType == TEMPLATE_STILL_CAPTURE) {
+            return;
+        }
+
         Boolean enableZsl = request.get(CaptureRequest.CONTROL_ENABLE_ZSL);
         if (enableZsl == null) {
             // If enableZsl is not available, don't override.
             return;
         }
 
-        request.set(CaptureRequest.CONTROL_ENABLE_ZSL, newValue);
+        request.set(CaptureRequest.CONTROL_ENABLE_ZSL, false);
     }
 
     @Override
@@ -821,12 +927,7 @@ public class CameraDeviceImpl extends CameraDevice
 
             templatedRequest = mRemoteDevice.createDefaultRequest(templateType);
 
-            // If app target SDK is older than O, or it's not a still capture template, enableZsl
-            // must be false in the default request.
-            if (mAppTargetSdkVersion < Build.VERSION_CODES.O ||
-                    templateType != TEMPLATE_STILL_CAPTURE) {
-                overrideEnableZsl(templatedRequest, false);
-            }
+            disableZslIfNeeded(templatedRequest, mAppTargetSdkVersion, templateType);
 
             CaptureRequest.Builder builder = new CaptureRequest.Builder(
                     templatedRequest, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE,
@@ -846,12 +947,7 @@ public class CameraDeviceImpl extends CameraDevice
 
             templatedRequest = mRemoteDevice.createDefaultRequest(templateType);
 
-            // If app target SDK is older than O, or it's not a still capture template, enableZsl
-            // must be false in the default request.
-            if (mAppTargetSdkVersion < Build.VERSION_CODES.O ||
-                    templateType != TEMPLATE_STILL_CAPTURE) {
-                overrideEnableZsl(templatedRequest, false);
-            }
+            disableZslIfNeeded(templatedRequest, mAppTargetSdkVersion, templateType);
 
             CaptureRequest.Builder builder = new CaptureRequest.Builder(
                     templatedRequest, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE,
@@ -1148,11 +1244,7 @@ public class CameraDeviceImpl extends CameraDevice
                             "remove holder for requestId %d, "
                             + "because lastFrame is %d.",
                             requestId, lastFrameNumber));
-                }
-            }
 
-            if (holder != null) {
-                if (DEBUG) {
                     Log.v(TAG, "immediately trigger onCaptureSequenceAborted because"
                             + " request did not reach HAL");
                 }
@@ -1478,6 +1570,11 @@ public class CameraDeviceImpl extends CameraDevice
             }
         }
 
+        // Allow RAW formats, even when not advertised.
+        if (isRawFormat(inputFormat)) {
+            return true;
+        }
+
         if (validFormat == false) {
             return false;
         }
@@ -1515,7 +1612,7 @@ public class CameraDeviceImpl extends CameraDevice
             return true;
         }
 
-        for (Map.Entry<String, CameraCharacteristics> entry : mPhysicalIdsToChars.entrySet()) {
+        for (Map.Entry<String, CameraCharacteristics> entry : getPhysicalIdToChars().entrySet()) {
             configMap = entry.getValue().get(ck);
 
             if (configMap != null &&
@@ -1542,6 +1639,11 @@ public class CameraDeviceImpl extends CameraDevice
                 if (format == inputFormat) {
                     validFormat = true;
                 }
+            }
+
+            // Allow RAW formats, even when not advertised.
+            if (Flags.multiResRawReprocessing() && isRawFormat(inputFormat)) {
+                return;
             }
 
             if (validFormat == false) {
@@ -2173,11 +2275,9 @@ public class CameraDeviceImpl extends CameraDevice
 
                 final CaptureCallbackHolder holder =
                         CameraDeviceImpl.this.mCaptureCallbackMap.get(requestId);
-                final CaptureRequest request = holder.getRequest(resultExtras.getSubsequenceId());
 
                 boolean isPartialResult =
                         (resultExtras.getPartialResultCount() < mTotalPartialCount);
-                int requestType = request.getRequestType();
 
                 // Check if we have a callback for this
                 if (holder == null) {
@@ -2187,12 +2287,11 @@ public class CameraDeviceImpl extends CameraDevice
                                         + frameNumber);
                     }
 
-                    updateTracker(requestId, frameNumber, requestType, /*result*/null,
-                            isPartialResult);
-
                     return;
                 }
 
+                final CaptureRequest request = holder.getRequest(resultExtras.getSubsequenceId());
+                int requestType = request.getRequestType();
                 if (isClosed()) {
                     if (DEBUG) {
                         Log.d(TAG,
@@ -2489,6 +2588,11 @@ public class CameraDeviceImpl extends CameraDevice
         return mCharacteristics;
     }
 
+    private boolean isRawFormat(int format) {
+        return (format == ImageFormat.RAW_PRIVATE || format == ImageFormat.RAW10
+                || format == ImageFormat.RAW12 || format == ImageFormat.RAW_SENSOR);
+    }
+
     /**
      * Listener for binder death.
      *
@@ -2541,21 +2645,38 @@ public class CameraDeviceImpl extends CameraDevice
     public void createExtensionSession(ExtensionSessionConfiguration extensionConfiguration)
             throws CameraAccessException {
         HashMap<String, CameraCharacteristics> characteristicsMap = new HashMap<>(
-                mPhysicalIdsToChars);
+                getPhysicalIdToChars());
         characteristicsMap.put(mCameraId, mCharacteristics);
+        boolean initializationFailed = true;
+        IBinder token = new Binder(TAG + " : " + mNextSessionId++);
         try {
-            if (CameraExtensionCharacteristics.areAdvancedExtensionsSupported()) {
+            boolean ret = CameraExtensionCharacteristics.registerClient(mContext, token,
+                    extensionConfiguration.getExtension(), mCameraId,
+                    CameraExtensionUtils.getCharacteristicsMapNative(characteristicsMap));
+            if (!ret) {
+                token = null;
+                throw new UnsupportedOperationException("Unsupported extension!");
+            }
+
+            if (CameraExtensionCharacteristics.areAdvancedExtensionsSupported(
+                        extensionConfiguration.getExtension())) {
                 mCurrentAdvancedExtensionSession =
                         CameraAdvancedExtensionSessionImpl.createCameraAdvancedExtensionSession(
                                 this, characteristicsMap, mContext, extensionConfiguration,
-                                mNextSessionId++);
+                                mNextSessionId, token);
             } else {
                 mCurrentExtensionSession = CameraExtensionSessionImpl.createCameraExtensionSession(
                         this, characteristicsMap, mContext, extensionConfiguration,
-                        mNextSessionId++);
+                        mNextSessionId, token);
             }
+            initializationFailed = false;
         } catch (RemoteException e) {
             throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
+        } finally {
+            if (initializationFailed && (token != null)) {
+                CameraExtensionCharacteristics.unregisterClient(mContext, token,
+                        extensionConfiguration.getExtension());
+            }
         }
     }
 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_input_method_framework",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -43,6 +44,8 @@ android_test_helper_app {
     },
     export_package_resources: true,
     sdk_version: "current",
+
+    certificate: "platform",
 }
 
 android_library {

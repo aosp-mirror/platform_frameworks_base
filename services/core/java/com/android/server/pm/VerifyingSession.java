@@ -47,6 +47,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.DataLoaderType;
+import android.content.pm.Flags;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -139,7 +140,8 @@ final class VerifyingSession {
     private final UserHandle mUser;
     @NonNull
     private final PackageManagerService mPm;
-    private final InstallPackageHelper mInstallPackageHelper;
+
+    private final int mInstallReason;
 
     VerifyingSession(UserHandle user, File stagedDir, IPackageInstallObserver2 observer,
             PackageInstaller.SessionParams sessionParams, InstallSource installSource,
@@ -147,7 +149,6 @@ final class VerifyingSession {
             boolean userActionRequired, PackageManagerService pm) {
         mPm = pm;
         mUser = user;
-        mInstallPackageHelper = new InstallPackageHelper(mPm);
         mOriginInfo = OriginInfo.fromStagedFile(stagedDir);
         mObserver = observer;
         mInstallFlags = sessionParams.installFlags;
@@ -169,6 +170,7 @@ final class VerifyingSession {
         mUserActionRequiredType = sessionParams.requireUserAction;
         mIsInherit = sessionParams.mode == MODE_INHERIT_EXISTING;
         mIsStaged = sessionParams.isStaged;
+        mInstallReason = sessionParams.installReason;
     }
 
     @Override
@@ -181,7 +183,7 @@ final class VerifyingSession {
         PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mPm.mContext,
                 mPackageLite, mOriginInfo.mResolvedPath, mInstallFlags, mPackageAbiOverride);
 
-        Pair<Integer, String> ret = mInstallPackageHelper.verifyReplacingVersionCode(
+        Pair<Integer, String> ret = mPm.verifyReplacingVersionCode(
                 pkgLite, mRequiredInstalledVersionCode, mInstallFlags);
         setReturnCode(ret.first, ret.second);
         if (mRet != INSTALL_SUCCEEDED) {
@@ -191,7 +193,9 @@ final class VerifyingSession {
         // Perform package verification and enable rollback (unless we are simply moving the
         // package).
         if (!mOriginInfo.mExisting) {
-            if (!isApex()) {
+            final boolean verifyForRollback = Flags.recoverabilityDetection()
+                    ? !isARollback() : true;
+            if (!isApex() && !isArchivedInstallation() && verifyForRollback) {
                 // TODO(b/182426975): treat APEX as APK when APK verification is concerned
                 sendApkVerificationRequest(pkgLite);
             }
@@ -199,6 +203,11 @@ final class VerifyingSession {
                 sendEnableRollbackRequest();
             }
         }
+    }
+
+    private boolean isARollback() {
+        return mInstallReason == PackageManager.INSTALL_REASON_ROLLBACK
+                && mInstallSource.mInitiatingPackageName.equals("android");
     }
 
     private void sendApkVerificationRequest(PackageInfoLite pkgLite) {
@@ -357,6 +366,12 @@ final class VerifyingSession {
         UserHandle verifierUser = getUser();
         if (verifierUser == UserHandle.ALL) {
             verifierUser = UserHandle.of(mPm.mUserManager.getCurrentUserId());
+        }
+        // TODO(b/300965895): Remove when inconsistencies loading classpaths from apex for
+        // user > 1 are fixed. Tests should cover verifiers from apex classpaths run on
+        // primary user, secondary user and work profile.
+        if (pkgLite.isSdkLibrary) {
+            verifierUser = UserHandle.SYSTEM;
         }
         final int verifierUserId = verifierUser.getIdentifier();
 
@@ -537,7 +552,12 @@ final class VerifyingSession {
         }
 
         final int verificationCodeAtTimeout;
-        if (getDefaultVerificationResponse() == PackageManager.VERIFICATION_ALLOW) {
+        // Allows package verification to continue in the event the app being updated is verifying
+        // itself and fails to respond
+        if (Flags.emergencyInstallPermission() && requiredVerifierPackages.contains(
+                pkgLite.packageName)) {
+            verificationCodeAtTimeout = PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT;
+        } else if (getDefaultVerificationResponse() == PackageManager.VERIFICATION_ALLOW) {
             verificationCodeAtTimeout = PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT;
         } else {
             verificationCodeAtTimeout = PackageManager.VERIFICATION_REJECT;
@@ -589,27 +609,14 @@ final class VerifyingSession {
             final PackageVerificationResponse response = new PackageVerificationResponse(
                     verificationCodeAtTimeout, requiredUid);
 
-            if (streaming) {
-                // For streaming installations, count verification timeout from the broadcast.
-                startVerificationTimeoutCountdown(verificationId, streaming, response,
-                        verificationTimeout);
-            }
+            startVerificationTimeoutCountdown(verificationId, streaming, response,
+                    verificationTimeout);
 
             // Send the intent to the required verification agent, but only start the
             // verification timeout after the target BroadcastReceivers have run.
             mPm.mContext.sendOrderedBroadcastAsUser(requiredIntent, verifierUser,
                     receiverPermission, AppOpsManager.OP_NONE, options.toBundle(),
-                    new BroadcastReceiver() {
-                        @Override
-                        public void onReceive(Context context, Intent intent) {
-                            if (!streaming) {
-                                // For NON-streaming installations, count verification timeout from
-                                // the broadcast was processed by all receivers.
-                                startVerificationTimeoutCountdown(verificationId, streaming,
-                                        response, verificationTimeout);
-                            }
-                        }
-                    }, null, 0, null, null);
+                    null, null, 0, null, null);
         }
 
         Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
@@ -742,7 +749,7 @@ final class VerifyingSession {
                 continue;
             }
 
-            final int verifierUid = mInstallPackageHelper.getUidForVerifier(verifierInfo);
+            final int verifierUid = mPm.getUidForVerifier(verifierInfo);
             if (verifierUid == -1) {
                 continue;
             }
@@ -908,6 +915,9 @@ final class VerifyingSession {
     }
     public boolean isApex() {
         return (mInstallFlags & PackageManager.INSTALL_APEX) != 0;
+    }
+    public boolean isArchivedInstallation() {
+        return (mInstallFlags & PackageManager.INSTALL_ARCHIVED) != 0;
     }
     public boolean isStaged() {
         return mIsStaged;

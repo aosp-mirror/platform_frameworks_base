@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- The name of this application. Credential Manager is a service that centralizes and provides
+  access to a user's credentials used to sign in to various apps. [CHAR LIMIT=80] -->
+  <string name="app_name">Credential Manager</string>
+  <!-- Title of a screen prompting if the user would like to use their saved passkey.
+  [CHAR LIMIT=80] -->
+  <string name="use_passkey_title">Use passkey?</string>
+  <!-- Title of a screen prompting if the user would like to sign in with provider
+  [CHAR LIMIT=80] -->
+  <string name="use_password_title">Use password?</string>
+  <!-- Text on this dismiss button of a screen. [CHAR LIMIT=NONE] -->
+  <string name="dialog_dismiss_button">Dismiss</string>
+  <!-- Text on the continue button of a screen. [CHAR LIMIT=NONE] -->
+  <string name="dialog_continue_button">Continue</string>
+  <!-- Text on the sign in options button of a screen. [CHAR LIMIT=NONE] -->
+  <string name="dialog_sign_in_options_button">Sign-in Options</string>
+  <!-- Title for multiple credentials folded screen. [CHAR LIMIT=NONE] -->
+  <string name="sign_in_options_title">Sign-in Options</string>
+  <!-- Provider settings list title. [CHAR LIMIT=NONE] -->
+  <string name="provider_list_title">Manage sign-ins</string>
+  <!-- Title for multiple credentials screen. [CHAR LIMIT=NONE] -->
+  <string name="choose_sign_in_title">Choose a sign in</string>
+  <!-- Title for multiple credentials screen with only passkeys. [CHAR LIMIT=NONE] -->
+  <string name="choose_passkey_title">Choose passkey</string>
+  <!-- Title for multiple credentials screen with only passwords. [CHAR LIMIT=NONE] -->
+  <string name="choose_password_title">Choose password</string>
+  <!-- Text on the sign in on phone button [CHAR LIMIT=NONE] -->
+  <string name="sign_in_on_phone_button">Sign in on phone</string>
+  <!-- Text on the locked provider button when unlocked[CHAR LIMIT=NONE] -->
+  <string name="locked_credential_entry_label_subtext_no_sign_in">No sign-in info</string>
+  <!-- Text on the locked provider button when locked[CHAR LIMIT=NONE] -->
+  <string name="locked_credential_entry_label_subtext_tap_to_unlock">Tap to unlock</string>
+
+</resources>

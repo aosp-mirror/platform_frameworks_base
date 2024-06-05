@@ -19,7 +19,7 @@ package com.android.keyguard.logging
 import com.android.systemui.biometrics.AuthRippleController
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.KeyguardLog
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.google.errorprone.annotations.CompileTimeConstant
@@ -80,6 +80,23 @@ constructor(
         )
     }
 
+    fun delayShowingTrustAgentError(
+        msg: CharSequence,
+        fpEngaged: Boolean,
+        faceRunning: Boolean,
+    ) {
+        buffer.log(
+            BIO_TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = msg.toString()
+                bool1 = fpEngaged
+                bool2 = faceRunning
+            },
+            { "Delay showing trustAgentError:$str1. fpEngaged:$bool1 faceRunning:$bool2 " }
+        )
+    }
+
     fun logUpdateDeviceEntryIndication(
         animate: Boolean,
         visible: Boolean,
@@ -94,6 +111,41 @@ constructor(
                 bool3 = dozing
             },
             { "updateDeviceEntryIndication animate:$bool1 visible:$bool2 dozing $bool3" }
+        )
+    }
+
+    fun logUpdateLockScreenUserLockedMsg(
+        userId: Int,
+        userUnlocked: Boolean,
+        encryptedOrLockdown: Boolean,
+    ) {
+        buffer.log(
+            KeyguardIndicationController.TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = userId
+                bool1 = userUnlocked
+                bool2 = encryptedOrLockdown
+            },
+            {
+                "updateLockScreenUserLockedMsg userId=$int1 " +
+                    "userUnlocked:$bool1 encryptedOrLockdown:$bool2"
+            }
+        )
+    }
+
+    fun logDropFaceMessage(
+        message: CharSequence,
+        followUpMessage: CharSequence?,
+    ) {
+        buffer.log(
+            KeyguardIndicationController.TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = message.toString()
+                str2 = followUpMessage?.toString()
+            },
+            { "droppingFaceMessage message=$str1 followUpMessage:$str2" }
         )
     }
 

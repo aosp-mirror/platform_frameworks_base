@@ -16,8 +16,6 @@
 
 package com.android.systemui;
 
-import android.content.res.Configuration;
-
 import androidx.annotation.NonNull;
 
 import java.io.PrintWriter;
@@ -35,22 +33,34 @@ import java.io.PrintWriter;
  *  abstract fun bind(impl: FoobarStartable): CoreStartable
  *  </pre>
  *
- * @see SystemUIApplication#startServicesIfNeeded()
+ * If your CoreStartable depends on different CoreStartables starting before it, you can specify
+ * another map binding listing out its dependencies:
+ *  <pre>
+ *  &#64;Provides
+ *  &#64;IntoMap
+ *  &#64;Dependencies  // Important! com.android.systemui.startable.Dependencies.
+ *  &#64;ClassKey(FoobarStartable::class)
+ *  fun providesDeps(): Set&lt;Class&lt;out CoreStartable&gt;&gt; {
+ *      return setOf(OtherStartable::class.java)
+ *  }
+ *  </pre>
+ *
+ *
+ * @see SystemUIApplication#startSystemUserServicesIfNeeded()
  */
 public interface CoreStartable extends Dumpable {
+    String STARTABLE_DEPENDENCIES = "startable_dependencies";
 
     /** Main entry point for implementations. Called shortly after SysUI startup. */
     void start();
 
-    /** Called when the device configuration changes. This will not be called before
-     * {@link #start()}, but it could be called before {@link #onBootCompleted()}.
-     *
-     * @see android.app.Application#onConfigurationChanged(Configuration)  */
-    default void onConfigurationChanged(Configuration newConfig) {
-    }
-
     @Override
     default void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+    }
+
+    /** Called to determine if the dumpable should be registered as critical or normal priority */
+    default boolean isDumpCritical() {
+        return true;
     }
 
     /** Called immediately after the system broadcasts

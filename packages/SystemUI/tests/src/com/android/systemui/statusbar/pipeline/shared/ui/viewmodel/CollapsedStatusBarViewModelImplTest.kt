@@ -16,46 +16,71 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.assertLogsWtf
+import com.android.systemui.mediaprojection.data.model.MediaProjectionState
+import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
+import com.android.systemui.screenrecord.data.model.ScreenRecordModel
+import com.android.systemui.screenrecord.data.repository.screenRecordRepository
+import com.android.systemui.statusbar.chips.domain.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsMediaProjectionChip
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsScreenRecordChip
+import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
+import com.android.systemui.statusbar.data.model.StatusBarMode
+import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository.Companion.DISPLAY_ID
+import com.android.systemui.statusbar.data.repository.fakeStatusBarModeRepository
+import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
+import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
+import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
+import com.android.systemui.statusbar.phone.domain.interactor.lightsOutInteractor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@OptIn(ExperimentalCoroutinesApi::class)
 class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
+    private val kosmos = Kosmos().apply { testDispatcher = UnconfinedTestDispatcher() }
 
-    private lateinit var underTest: CollapsedStatusBarViewModel
+    private val testScope = kosmos.testScope
 
-    private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
-    private lateinit var testScope: TestScope
+    private val statusBarModeRepository = kosmos.fakeStatusBarModeRepository
+    private val activeNotificationListRepository = kosmos.activeNotificationListRepository
+    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
 
-    @Before
-    fun setUp() {
-        testScope = TestScope(UnconfinedTestDispatcher())
-
-        keyguardTransitionRepository = FakeKeyguardTransitionRepository()
-        val interactor =
-            KeyguardTransitionInteractor(keyguardTransitionRepository, testScope.backgroundScope)
-        underTest = CollapsedStatusBarViewModelImpl(interactor, testScope.backgroundScope)
-    }
+    private val underTest =
+        CollapsedStatusBarViewModelImpl(
+            kosmos.lightsOutInteractor,
+            kosmos.activeNotificationsInteractor,
+            kosmos.keyguardTransitionInteractor,
+            kosmos.ongoingActivityChipsViewModel,
+            kosmos.applicationCoroutineScope,
+        )
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_started_isTrue() =
         testScope.runTest {
-            val job = underTest.isTransitioningFromLockscreenToOccluded.launchIn(this)
+            val latest by collectLastValue(underTest.isTransitioningFromLockscreenToOccluded)
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -66,15 +91,13 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
                 )
             )
 
-            assertThat(underTest.isTransitioningFromLockscreenToOccluded.value).isTrue()
-
-            job.cancel()
+            assertThat(latest).isTrue()
         }
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_running_isTrue() =
         testScope.runTest {
-            val job = underTest.isTransitioningFromLockscreenToOccluded.launchIn(this)
+            val latest by collectLastValue(underTest.isTransitioningFromLockscreenToOccluded)
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -85,34 +108,27 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
                 )
             )
 
-            assertThat(underTest.isTransitioningFromLockscreenToOccluded.value).isTrue()
-
-            job.cancel()
+            assertThat(latest).isTrue()
         }
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_finished_isFalse() =
         testScope.runTest {
-            val job = underTest.isTransitioningFromLockscreenToOccluded.launchIn(this)
+            val latest by collectLastValue(underTest.isTransitioningFromLockscreenToOccluded)
 
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    KeyguardState.LOCKSCREEN,
-                    KeyguardState.OCCLUDED,
-                    value = 0f,
-                    TransitionState.FINISHED,
-                )
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.OCCLUDED,
+                testScope.testScheduler,
             )
 
-            assertThat(underTest.isTransitioningFromLockscreenToOccluded.value).isFalse()
-
-            job.cancel()
+            assertThat(latest).isFalse()
         }
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_canceled_isFalse() =
         testScope.runTest {
-            val job = underTest.isTransitioningFromLockscreenToOccluded.launchIn(this)
+            val latest by collectLastValue(underTest.isTransitioningFromLockscreenToOccluded)
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -123,15 +139,13 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
                 )
             )
 
-            assertThat(underTest.isTransitioningFromLockscreenToOccluded.value).isFalse()
-
-            job.cancel()
+            assertThat(latest).isFalse()
         }
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_irrelevantTransition_isFalse() =
         testScope.runTest {
-            val job = underTest.isTransitioningFromLockscreenToOccluded.launchIn(this)
+            val latest by collectLastValue(underTest.isTransitioningFromLockscreenToOccluded)
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -142,15 +156,13 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
                 )
             )
 
-            assertThat(underTest.isTransitioningFromLockscreenToOccluded.value).isFalse()
-
-            job.cancel()
+            assertThat(latest).isFalse()
         }
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_followsRepoUpdates() =
         testScope.runTest {
-            val job = underTest.isTransitioningFromLockscreenToOccluded.launchIn(this)
+            val latest by collectLastValue(underTest.isTransitioningFromLockscreenToOccluded)
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -161,7 +173,7 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
                 )
             )
 
-            assertThat(underTest.isTransitioningFromLockscreenToOccluded.value).isTrue()
+            assertThat(latest).isTrue()
 
             // WHEN the repo updates the transition to finished
             keyguardTransitionRepository.sendTransitionStep(
@@ -174,9 +186,7 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
             )
 
             // THEN our manager also updates
-            assertThat(underTest.isTransitioningFromLockscreenToOccluded.value).isFalse()
-
-            job.cancel()
+            assertThat(latest).isFalse()
         }
 
     @Test
@@ -308,9 +318,106 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
                     KeyguardState.DREAMING,
                     value = 1.0f,
                     TransitionState.FINISHED,
-                )
+                ),
+                // We're intentionally not sending STARTED to validate that FINISHED steps are
+                // ignored.
+                validateStep = false,
             )
 
             assertThat(emissions).isEmpty()
         }
+
+    @Test
+    @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
+    fun areNotificationsLightsOut_lowProfileWithNotifications_true() =
+        testScope.runTest {
+            statusBarModeRepository.defaultDisplay.statusBarMode.value =
+                StatusBarMode.LIGHTS_OUT_TRANSPARENT
+            activeNotificationListRepository.activeNotifications.value =
+                activeNotificationsStore(testNotifications)
+
+            val actual by collectLastValue(underTest.areNotificationsLightsOut(DISPLAY_ID))
+
+            assertThat(actual).isTrue()
+        }
+
+    @Test
+    @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
+    fun areNotificationsLightsOut_lowProfileWithoutNotifications_false() =
+        testScope.runTest {
+            statusBarModeRepository.defaultDisplay.statusBarMode.value =
+                StatusBarMode.LIGHTS_OUT_TRANSPARENT
+            activeNotificationListRepository.activeNotifications.value =
+                activeNotificationsStore(emptyList())
+
+            val actual by collectLastValue(underTest.areNotificationsLightsOut(DISPLAY_ID))
+
+            assertThat(actual).isFalse()
+        }
+
+    @Test
+    @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
+    fun areNotificationsLightsOut_defaultStatusBarModeWithoutNotifications_false() =
+        testScope.runTest {
+            statusBarModeRepository.defaultDisplay.statusBarMode.value = StatusBarMode.TRANSPARENT
+            activeNotificationListRepository.activeNotifications.value =
+                activeNotificationsStore(emptyList())
+
+            val actual by collectLastValue(underTest.areNotificationsLightsOut(DISPLAY_ID))
+
+            assertThat(actual).isFalse()
+        }
+
+    @Test
+    @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
+    fun areNotificationsLightsOut_defaultStatusBarModeWithNotifications_false() =
+        testScope.runTest {
+            statusBarModeRepository.defaultDisplay.statusBarMode.value = StatusBarMode.TRANSPARENT
+            activeNotificationListRepository.activeNotifications.value =
+                activeNotificationsStore(testNotifications)
+
+            val actual by collectLastValue(underTest.areNotificationsLightsOut(DISPLAY_ID))
+
+            assertThat(actual).isFalse()
+        }
+
+    @Test
+    @DisableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
+    fun areNotificationsLightsOut_requiresFlagEnabled() =
+        testScope.runTest {
+            assertLogsWtf {
+                val flow = underTest.areNotificationsLightsOut(DISPLAY_ID)
+                assertThat(flow).isEqualTo(emptyFlow<Boolean>())
+            }
+        }
+
+    @Test
+    fun ongoingActivityChip_matchesViewModel() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.ongoingActivityChip)
+
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
+
+            assertIsScreenRecordChip(latest)
+
+            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
+
+            assertThat(latest).isEqualTo(OngoingActivityChipModel.Hidden)
+
+            kosmos.fakeMediaProjectionRepository.mediaProjectionState.value =
+                MediaProjectionState.EntireScreen
+
+            assertIsMediaProjectionChip(latest)
+        }
+
+    private fun activeNotificationsStore(notifications: List<ActiveNotificationModel>) =
+        ActiveNotificationsStore.Builder()
+            .apply { notifications.forEach(::addIndividualNotif) }
+            .build()
+
+    private val testNotifications =
+        listOf(
+            activeNotificationModel(key = "notif1"),
+            activeNotificationModel(key = "notif2"),
+        )
 }

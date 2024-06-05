@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.Flow
 object SettingsProxyExt {
 
     /** Returns a flow of [Unit] that is invoked each time that content is updated. */
-    fun SettingsProxy.observerFlow(
+    fun UserSettingsProxy.observerFlow(
         @UserIdInt userId: Int,
         vararg names: String,
     ): Flow<Unit> {
@@ -39,9 +39,27 @@ object SettingsProxyExt {
                     }
                 }
 
-            names.forEach { name -> registerContentObserverForUser(name, observer, userId) }
+            names.forEach { name -> registerContentObserverForUserSync(name, observer, userId) }
 
-            awaitClose { unregisterContentObserver(observer) }
+            awaitClose { unregisterContentObserverSync(observer) }
+        }
+    }
+
+    /** Returns a flow of [Unit] that is invoked each time that content is updated. */
+    fun SettingsProxy.observerFlow(
+        vararg names: String,
+    ): Flow<Unit> {
+        return conflatedCallbackFlow {
+            val observer =
+                object : ContentObserver(null) {
+                    override fun onChange(selfChange: Boolean) {
+                        trySend(Unit)
+                    }
+                }
+
+            names.forEach { name -> registerContentObserverSync(name, observer) }
+
+            awaitClose { unregisterContentObserverSync(observer) }
         }
     }
 }

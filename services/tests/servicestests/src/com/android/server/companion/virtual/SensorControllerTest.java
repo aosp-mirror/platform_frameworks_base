@@ -23,15 +23,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
+import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.sensor.IVirtualSensorCallback;
+import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
+import android.content.AttributionSource;
 import android.hardware.Sensor;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -39,11 +44,15 @@ import android.testing.TestableLooper;
 import com.android.server.LocalServices;
 import com.android.server.sensors.SensorManagerInternal;
 
+import com.google.common.collect.Iterables;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.List;
 
 @Presubmit
 @RunWith(AndroidTestingRunner.class)
@@ -54,14 +63,17 @@ public class SensorControllerTest {
     private static final String VIRTUAL_SENSOR_NAME = "VirtualAccelerometer";
     private static final int SENSOR_HANDLE = 7;
 
+    private static final int VIRTUAL_SENSOR_TYPE = Sensor.TYPE_ACCELEROMETER;
+
     @Mock
     private SensorManagerInternal mSensorManagerInternalMock;
     @Mock
     private IVirtualSensorCallback mVirtualSensorCallback;
-    private SensorController mSensorController;
+    @Mock
+    private IVirtualDevice mVirtualDevice;
+
     private VirtualSensorEvent mSensorEvent;
     private VirtualSensorConfig mVirtualSensorConfig;
-    private IBinder mSensorToken;
 
     @Before
     public void setUp() throws Exception {
@@ -70,12 +82,10 @@ public class SensorControllerTest {
         LocalServices.removeServiceForTest(SensorManagerInternal.class);
         LocalServices.addService(SensorManagerInternal.class, mSensorManagerInternalMock);
 
-        mSensorController = new SensorController(VIRTUAL_DEVICE_ID, mVirtualSensorCallback);
         mSensorEvent = new VirtualSensorEvent.Builder(new float[] { 1f, 2f, 3f}).build();
         mVirtualSensorConfig =
-                new VirtualSensorConfig.Builder(Sensor.TYPE_ACCELEROMETER, VIRTUAL_SENSOR_NAME)
+                new VirtualSensorConfig.Builder(VIRTUAL_SENSOR_TYPE, VIRTUAL_SENSOR_NAME)
                         .build();
-        mSensorToken = new Binder("sensorToken");
     }
 
     @Test
@@ -86,62 +96,86 @@ public class SensorControllerTest {
 
         Throwable thrown = assertThrows(
                 RuntimeException.class,
-                () -> mSensorController.createSensor(mSensorToken, mVirtualSensorConfig));
+                () -> new SensorController(mVirtualDevice, VIRTUAL_DEVICE_ID,
+                        AttributionSource.myAttributionSource(),
+                        mVirtualSensorCallback, List.of(mVirtualSensorConfig)));
 
         assertThat(thrown.getCause().getMessage())
                 .contains("Received an invalid virtual sensor handle");
     }
 
     @Test
-    public void createSensor_success() {
-        doCreateSensorSuccessfully();
+    public void createSensor_success() throws Exception {
+        SensorController sensorController = doCreateSensorSuccessfully();
 
-        assertThat(mSensorController.getSensorDescriptors()).isNotEmpty();
+        assertThat(sensorController.getSensorDescriptors()).isNotEmpty();
     }
 
     @Test
-    public void sendSensorEvent_invalidToken_throwsException() {
-        doCreateSensorSuccessfully();
+    public void getSensorByHandle_success() throws Exception {
+        SensorController sensorController = doCreateSensorSuccessfully();
+
+        VirtualSensor sensor = sensorController.getSensorByHandle(SENSOR_HANDLE);
+
+        assertThat(sensor).isNotNull();
+        assertThat(sensor.getHandle()).isEqualTo(SENSOR_HANDLE);
+        assertThat(sensor.getDeviceId()).isEqualTo(VIRTUAL_DEVICE_ID);
+        assertThat(sensor.getType()).isEqualTo(VIRTUAL_SENSOR_TYPE);
+    }
+
+    @Test
+    public void getSensorByHandle_invalidHandle_returnsNull() throws Exception {
+        SensorController sensorController = doCreateSensorSuccessfully();
+        final int invalidSensorHandle = 123456;
+
+        assertThat(sensorController.getSensorByHandle(invalidSensorHandle)).isNull();
+    }
+
+    @Test
+    public void sendSensorEvent_invalidToken_throwsException() throws Exception {
+        SensorController sensorController = doCreateSensorSuccessfully();
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> mSensorController.sendSensorEvent(
+                () -> sensorController.sendSensorEvent(
                         new Binder("invalidSensorToken"), mSensorEvent));
     }
 
     @Test
-    public void sendSensorEvent_success() {
-        doCreateSensorSuccessfully();
+    public void sendSensorEvent_success() throws Exception {
+        SensorController sensorController = doCreateSensorSuccessfully();
 
-        mSensorController.sendSensorEvent(mSensorToken, mSensorEvent);
+        clearInvocations(mSensorManagerInternalMock);
+        IBinder token = Iterables.getOnlyElement(sensorController.getSensorDescriptors().keySet());
+
+        sensorController.sendSensorEvent(token, mSensorEvent);
         verify(mSensorManagerInternalMock).sendSensorEvent(
                 SENSOR_HANDLE, Sensor.TYPE_ACCELEROMETER, mSensorEvent.getTimestampNanos(),
                 mSensorEvent.getValues());
     }
 
     @Test
-    public void unregisterSensor_invalidToken_throwsException() {
-        doCreateSensorSuccessfully();
+    public void close_unregistersSensors() throws Exception {
+        SensorController sensorController = doCreateSensorSuccessfully();
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> mSensorController.unregisterSensor(new Binder("invalidSensorToken")));
-    }
-
-    @Test
-    public void unregisterSensor_success() {
-        doCreateSensorSuccessfully();
-
-        mSensorController.unregisterSensor(mSensorToken);
+        sensorController.close();
         verify(mSensorManagerInternalMock).removeRuntimeSensor(SENSOR_HANDLE);
-        assertThat(mSensorController.getSensorDescriptors()).isEmpty();
+        assertThat(sensorController.getSensorDescriptors()).isEmpty();
     }
 
-    private void doCreateSensorSuccessfully() {
+    private SensorController doCreateSensorSuccessfully() throws RemoteException {
         doReturn(SENSOR_HANDLE).when(mSensorManagerInternalMock).createRuntimeSensor(
                 anyInt(), anyInt(), anyString(), anyString(), anyFloat(), anyFloat(), anyFloat(),
                 anyInt(), anyInt(), anyInt(), any());
-        assertThat(mSensorController.createSensor(mSensorToken, mVirtualSensorConfig))
-                .isEqualTo(SENSOR_HANDLE);
+        doReturn(VIRTUAL_DEVICE_ID).when(mVirtualDevice).getDeviceId();
+
+        SensorController sensorController = new SensorController(mVirtualDevice, VIRTUAL_DEVICE_ID,
+                AttributionSource.myAttributionSource(),
+                mVirtualSensorCallback, List.of(mVirtualSensorConfig));
+
+        List<VirtualSensor> sensors = sensorController.getSensorList();
+        assertThat(sensors).hasSize(1);
+        assertThat(sensors.get(0).getHandle()).isEqualTo(SENSOR_HANDLE);
+        return sensorController;
     }
 }

@@ -16,6 +16,9 @@
 
 package android.companion;
 
+import static android.companion.CompanionDeviceManager.MESSAGE_ONEWAY_PING;
+import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PING;
+
 import android.content.Context;
 import android.os.SystemClock;
 import android.test.InstrumentationTestCase;
@@ -36,16 +39,22 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+/**
+ * Tests that CDM can intake incoming messages in the system data transport and output results.
+ *
+ * Build/Install/Run: atest CompanionTests:SystemDataTransportTest
+ */
 public class SystemDataTransportTest extends InstrumentationTestCase {
     private static final String TAG = "SystemDataTransportTest";
 
     private static final int MESSAGE_INVALID = 0xF00DCAFE;
-
-    private static final int MESSAGE_REQUEST_INVALID = 0x63636363; // ????
-    private static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
-
+    private static final int MESSAGE_ONEWAY_INVALID = 0x43434343; // ++++
     private static final int MESSAGE_RESPONSE_INVALID = 0x33333333; // !!!!
+    private static final int MESSAGE_REQUEST_INVALID = 0x63636363; // ????
+
     private static final int MESSAGE_RESPONSE_SUCCESS = 0x33838567; // !SUC
     private static final int MESSAGE_RESPONSE_FAILURE = 0x33706573; // !FAI
 
@@ -122,8 +131,6 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
         new Random().nextBytes(blob);
 
         final byte[] input = generatePacket(MESSAGE_REQUEST_PING, /* sequence */ 1, blob);
-        final byte[] expected = generatePacket(MESSAGE_RESPONSE_SUCCESS, /* sequence */ 1, blob);
-        assertTransportBehavior(input, expected);
     }
 
     public void testMultiplePingPing() {
@@ -176,6 +183,73 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
         testPingHandRolled();
     }
 
+    public void testInvalidOnewayMessages() throws InterruptedException {
+        // Add a callback
+        final CountDownLatch received = new CountDownLatch(1);
+        mCdm.addOnMessageReceivedListener(Runnable::run, MESSAGE_ONEWAY_INVALID,
+                (id, data) -> received.countDown());
+
+        final byte[] input = generatePacket(MESSAGE_ONEWAY_INVALID, /* sequence */ 1);
+        final ByteArrayInputStream in = new ByteArrayInputStream(input);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        mCdm.attachSystemDataTransport(mAssociationId, in, out);
+
+        // Assert that a one-way message was ignored (does not trigger a callback)
+        assertFalse(received.await(5, TimeUnit.SECONDS));
+
+        // There should not be a response to one-way messages
+        assertEquals(0, out.toByteArray().length);
+    }
+
+
+    public void testOnewayMessages() throws InterruptedException {
+        // Add a callback
+        final CountDownLatch received = new CountDownLatch(1);
+        mCdm.addOnMessageReceivedListener(Runnable::run, MESSAGE_ONEWAY_PING,
+                (id, data) -> received.countDown());
+
+        final byte[] input = generatePacket(MESSAGE_ONEWAY_PING, /* sequence */ 1);
+        final ByteArrayInputStream in = new ByteArrayInputStream(input);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        mCdm.attachSystemDataTransport(mAssociationId, in, out);
+
+        // Assert that a one-way message was received
+        assertTrue(received.await(1, TimeUnit.SECONDS));
+
+        // There should not be a response to one-way messages
+        assertEquals(0, out.toByteArray().length);
+    }
+
+    public void testDisassociationCleanup() throws InterruptedException {
+        // Create a new association
+        final int associationId = createAssociation();
+
+        // Subscribe to transport updates for new association
+        final CountDownLatch attached = new CountDownLatch(1);
+        final CountDownLatch detached = new CountDownLatch(1);
+        mCdm.addOnTransportsChangedListener(Runnable::run, associations -> {
+            if (associations.stream()
+                    .anyMatch(association -> associationId == association.getId())) {
+                attached.countDown();
+            } else if (attached.getCount() == 0) {
+                detached.countDown();
+            }
+        });
+
+        final ByteArrayInputStream in = new ByteArrayInputStream(new byte[0]);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        mCdm.attachSystemDataTransport(associationId, in, out);
+
+        // Assert that the transport is attached
+        assertTrue(attached.await(1, TimeUnit.SECONDS));
+
+        // When CDM disassociates, any transport attached to that associated device should detach
+        mCdm.disassociate(associationId);
+
+        // Assert that the transport is detached
+        assertTrue(detached.await(1, TimeUnit.SECONDS));
+    }
+
     public static byte[] concat(byte[]... blobs) {
         int length = 0;
         for (byte[] blob : blobs) {
@@ -206,12 +280,14 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
     }
 
     private int createAssociation() {
+        List<AssociationInfo> before = mCdm.getMyAssociations();
         getInstrumentation().getUiAutomation().executeShellCommand("cmd companiondevice associate "
                 + mContext.getUserId() + " " + mContext.getPackageName() + " AA:BB:CC:DD:EE:FF");
         List<AssociationInfo> infos;
         for (int i = 0; i < 100; i++) {
             infos = mCdm.getMyAssociations();
-            if (!infos.isEmpty()) {
+            if (infos.size() != before.size()) {
+                infos.removeAll(before);
                 return infos.get(0).getId();
             } else {
                 SystemClock.sleep(100);

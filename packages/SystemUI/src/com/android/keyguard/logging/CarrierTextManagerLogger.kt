@@ -19,7 +19,7 @@ package com.android.keyguard.logging
 import androidx.annotation.IntDef
 import com.android.keyguard.CarrierTextManager.CarrierTextCallbackInfo
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.CarrierTextManagerLog
 import javax.inject.Inject
 
@@ -38,8 +38,11 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
         buffer.log(
             TAG,
             LogLevel.VERBOSE,
-            { int1 = numSubs },
-            { "updateCarrierText: location=${location ?: "(unknown)"} numSubs=$int1" },
+            {
+                int1 = numSubs
+                str1 = location
+            },
+            { "updateCarrierText: location=${str1 ?: "(unknown)"} numSubs=$int1" },
         )
     }
 
@@ -77,6 +80,24 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
         )
     }
 
+    fun logNewSatelliteCarrierText(newSatelliteText: String?) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            { str1 = newSatelliteText },
+            { "New satellite text = $str1" },
+        )
+    }
+
+    fun logUsingSatelliteText(satelliteText: String) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            { str1 = satelliteText },
+            { "┣ updateCarrierText: using satellite text. text=$str1" },
+        )
+    }
+
     /** De-structures the info object so that we don't have to generate new strings */
     fun logCallbackSentFromUpdate(info: CarrierTextCallbackInfo) {
         buffer.log(
@@ -94,6 +115,20 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
         )
     }
 
+    fun logSimStateChangedCallback(subId: Int, slotId: Int, simState: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                // subId is always a very small int, and we've run out of integers for log buffer
+                long1 = subId.toLong()
+                int1 = slotId
+                int2 = simState
+            },
+            { "onSimStateChangedCallback: subId=$long1 slotId=$int1 simState=$int2" }
+        )
+    }
+
     /**
      * Used to log the starting point for _why_ the carrier text is updating. In order to keep us
      * from holding on to too many objects, we'll just use simple ints for reasons here
@@ -102,10 +137,37 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
         buffer.log(
             TAG,
             LogLevel.DEBUG,
-            { int1 = reason },
+            {
+                int1 = reason
+                str1 = location
+            },
             {
                 "refreshing carrier info for reason: ${reason.reasonMessage()}" +
-                    " location=${location ?: "(unknown)"}"
+                    " location=${str1 ?: "(unknown)"}"
+            }
+        )
+    }
+
+    fun logStartListeningForSatelliteCarrierText() {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { str1 = location },
+            { "Start listening for satellite carrier text. Location=${str1 ?: "(unknown)"}" }
+        )
+    }
+
+    fun logStopListeningForSatelliteCarrierText(reason: String) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = location
+                str2 = reason
+            },
+            {
+                "Stop listening for satellite carrier text. " +
+                    "Location=${str1 ?: "(unknown)"} Reason=$str2"
             }
         )
     }
@@ -113,8 +175,9 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
     companion object {
         const val REASON_REFRESH_CARRIER_INFO = 1
         const val REASON_ON_TELEPHONY_CAPABLE = 2
-        const val REASON_ON_SIM_STATE_CHANGED = 3
+        const val REASON_SIM_ERROR_STATE_CHANGED = 3
         const val REASON_ACTIVE_DATA_SUB_CHANGED = 4
+        const val REASON_SATELLITE_CHANGED = 5
 
         @Retention(AnnotationRetention.SOURCE)
         @IntDef(
@@ -122,8 +185,9 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
                 [
                     REASON_REFRESH_CARRIER_INFO,
                     REASON_ON_TELEPHONY_CAPABLE,
-                    REASON_ON_SIM_STATE_CHANGED,
+                    REASON_SIM_ERROR_STATE_CHANGED,
                     REASON_ACTIVE_DATA_SUB_CHANGED,
+                    REASON_SATELLITE_CHANGED,
                 ]
         )
         annotation class CarrierTextRefreshReason
@@ -132,8 +196,9 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
             when (this) {
                 REASON_REFRESH_CARRIER_INFO -> "REFRESH_CARRIER_INFO"
                 REASON_ON_TELEPHONY_CAPABLE -> "ON_TELEPHONY_CAPABLE"
-                REASON_ON_SIM_STATE_CHANGED -> "SIM_STATE_CHANGED"
+                REASON_SIM_ERROR_STATE_CHANGED -> "SIM_ERROR_STATE_CHANGED"
                 REASON_ACTIVE_DATA_SUB_CHANGED -> "ACTIVE_DATA_SUB_CHANGED"
+                REASON_SATELLITE_CHANGED -> "SATELLITE_CHANGED"
                 else -> "unknown"
             }
     }

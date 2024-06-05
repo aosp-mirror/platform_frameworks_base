@@ -1,8 +1,8 @@
 package com.android.systemui.statusbar.notification.stack
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
@@ -15,9 +15,10 @@ import org.junit.runner.RunWith
 
 /** Tests for {@link NotificationTargetsHelper}. */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class NotificationTargetsHelperTest : SysuiTestCase() {
+    private val featureFlags = FakeFeatureFlags()
     lateinit var notificationTestHelper: NotificationTestHelper
     private val sectionsManager: NotificationSectionsManager = mock()
     private val stackScrollLayout: NotificationStackScrollLayout = mock()
@@ -26,10 +27,10 @@ class NotificationTargetsHelperTest : SysuiTestCase() {
     fun setUp() {
         allowTestableLooperAsMainThread()
         notificationTestHelper =
-            NotificationTestHelper(mContext, mDependency, TestableLooper.get(this))
+            NotificationTestHelper(mContext, mDependency, TestableLooper.get(this), featureFlags)
     }
 
-    private fun notificationTargetsHelper() = NotificationTargetsHelper(FakeFeatureFlags())
+    private fun notificationTargetsHelper() = NotificationTargetsHelper(featureFlags)
 
     @Test
     fun targetsForFirstNotificationInGroup() {

@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Handler
+import android.os.Looper
 import android.testing.AndroidTestingRunner
 import androidx.core.util.Consumer
 import androidx.test.filters.SmallTest
@@ -36,8 +37,8 @@ import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenLis
 import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityProvider
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import junit.framework.Assert.fail
 import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
@@ -55,15 +56,19 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     @Mock private lateinit var activityTypeProvider: ActivityManagerActivityTypeProvider
 
-    @Mock private lateinit var handler: Handler
-
     @Mock private lateinit var rotationChangeProvider: RotationChangeProvider
 
     @Mock private lateinit var unfoldKeyguardVisibilityProvider: UnfoldKeyguardVisibilityProvider
 
     @Mock private lateinit var resources: Resources
 
+    @Mock private lateinit var handler: Handler
+
+    @Mock private lateinit var mainLooper: Looper
+
     @Mock private lateinit var context: Context
+
+    @Mock private lateinit var thread: Thread
 
     @Captor private lateinit var rotationListener: ArgumentCaptor<RotationListener>
 
@@ -89,21 +94,25 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
                 override val halfFoldedTimeoutMillis: Int
                     get() = HALF_OPENED_TIMEOUT_MILLIS.toInt()
             }
+        whenever(mainLooper.isCurrentThread).thenReturn(true)
+        whenever(handler.looper).thenReturn(mainLooper)
+        whenever(mainLooper.isCurrentThread).thenReturn(true)
+        whenever(mainLooper.thread).thenReturn(thread)
+        whenever(thread.name).thenReturn("backgroundThread")
         whenever(context.resources).thenReturn(resources)
         whenever(context.mainExecutor).thenReturn(mContext.mainExecutor)
 
         foldStateProvider =
             DeviceFoldStateProvider(
-                config,
-                testHingeAngleProvider,
-                screenOnStatusProvider,
-                foldProvider,
-                activityTypeProvider,
-                unfoldKeyguardVisibilityProvider,
-                rotationChangeProvider,
-                context,
-                context.mainExecutor,
-                handler
+                    config,
+                    context,
+                    screenOnStatusProvider,
+                    activityTypeProvider,
+                    unfoldKeyguardVisibilityProvider,
+                    foldProvider,
+                    testHingeAngleProvider,
+                    rotationChangeProvider,
+                    handler
             )
 
         foldStateProvider.addCallback(
@@ -140,6 +149,12 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
             null
         }
 
+        whenever(handler.post(any<Runnable>())).then { invocationOnMock ->
+            val runnable = invocationOnMock.getArgument<Runnable>(0)
+            runnable.run()
+            null
+        }
+
         // By default, we're on launcher.
         setupForegroundActivityType(isHomeActivity = true)
         setIsLargeScreen(true)
@@ -160,7 +175,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnUnfold_hingeAngleDecreasesBeforeInnerScreenAvailable_emitsOnlyStartAndInnerScreenAvailableEvents() {
+    fun onUnfold_angleDecrBeforeInnerScrAvailable_emitsOnlyStartAndInnerScrAvailableEvents() {
         setFoldState(folded = true)
         foldUpdates.clear()
 
@@ -176,7 +191,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnUnfold_hingeAngleDecreasesAfterInnerScreenAvailable_emitsStartInnerScreenAvailableAndStartClosingEvents() {
+    fun onUnfold_angleDecrAfterInnerScrAvailable_emitsStartInnerScrAvailableAndStartClosingEvnts() {
         setFoldState(folded = true)
         foldUpdates.clear()
 
@@ -435,6 +450,26 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     @Test
+    fun startOnlyOnce_whenStartTriggeredThrice_startOnlyOnce() {
+        foldStateProvider.start()
+        foldStateProvider.start()
+        foldStateProvider.start()
+
+        assertThat(foldProvider.getNumberOfCallbacks()).isEqualTo(1)
+    }
+
+    @Test(expected = AssertionError::class)
+    fun startMethod_whileNotOnMainThread_throwsException() {
+        whenever(mainLooper.isCurrentThread).thenReturn(true)
+        try {
+            foldStateProvider.start()
+            fail("Should have thrown AssertionError: should be called from the main thread.")
+        } catch (e: AssertionError) {
+            assertThat(e.message).contains("backgroundThread")
+        }
+    }
+
+    @Test
     fun startClosingEvent_whileNotOnKeyguard_triggersAfterThreshold() {
         setKeyguardVisibility(visible = false)
         setInitialHingeAngle(START_CLOSING_ON_APPS_THRESHOLD_DEGREES)
@@ -657,6 +692,10 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
         fun notifyFolded(isFolded: Boolean) {
             callbacks.forEach { it.onFoldUpdated(isFolded) }
+        }
+
+        fun getNumberOfCallbacks(): Int {
+            return callbacks.size
         }
     }
 

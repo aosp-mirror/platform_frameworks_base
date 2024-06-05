@@ -49,20 +49,20 @@ import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.pm.parsing.pkg.PackageImpl;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedActivityImpl;
+import com.android.internal.pm.pkg.component.ParsedComponentImpl;
+import com.android.internal.pm.pkg.component.ParsedInstrumentationImpl;
+import com.android.internal.pm.pkg.component.ParsedIntentInfoImpl;
+import com.android.internal.pm.pkg.component.ParsedPermission;
+import com.android.internal.pm.pkg.component.ParsedPermissionImpl;
+import com.android.internal.pm.pkg.component.ParsedProviderImpl;
+import com.android.internal.pm.pkg.component.ParsedUsesPermissionImpl;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.server.om.OverlayReferenceMapper;
-import com.android.server.pm.parsing.pkg.PackageImpl;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedActivityImpl;
-import com.android.server.pm.pkg.component.ParsedComponentImpl;
-import com.android.server.pm.pkg.component.ParsedInstrumentationImpl;
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl;
-import com.android.server.pm.pkg.component.ParsedPermission;
-import com.android.server.pm.pkg.component.ParsedPermissionImpl;
-import com.android.server.pm.pkg.component.ParsedProviderImpl;
-import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.utils.WatchableTester;
 
 import org.junit.Before;
@@ -224,7 +224,6 @@ public class AppsFilterImplTest {
 
         MockitoAnnotations.initMocks(this);
         when(mSnapshot.getPackageStates()).thenAnswer(x -> mExisting);
-        when(mSnapshot.getAllSharedUsers()).thenReturn(mSharedUserSettings);
         when(mSnapshot.getUserInfos()).thenReturn(USER_INFO_LIST);
         when(mSnapshot.getSharedUser(anyInt())).thenAnswer(invocation -> {
             final int sharedUserAppId = invocation.getArgument(0);

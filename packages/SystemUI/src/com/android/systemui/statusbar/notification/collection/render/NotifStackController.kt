@@ -26,6 +26,7 @@ interface NotifStackController {
 
 /** Data provided to the NotificationRootController whenever the pipeline runs */
 data class NotifStats(
+    // TODO(b/293167744): The count can be removed from here when we remove the FooterView flag.
     val numActiveNotifs: Int,
     val hasNonClearableAlertingNotifs: Boolean,
     val hasClearableAlertingNotifs: Boolean,
@@ -33,16 +34,15 @@ data class NotifStats(
     val hasClearableSilentNotifs: Boolean
 ) {
     companion object {
-        @JvmStatic
-        val empty = NotifStats(0, false, false, false, false)
+        @JvmStatic val empty = NotifStats(0, false, false, false, false)
     }
 }
 
 /**
  * An implementation of NotifStackController which provides default, no-op implementations of each
- * method.  This is used by ArcSystemUI so that that implementation can opt-in to overriding
- * methods, rather than forcing us to add no-op implementations in their implementation every time
- * a method is added.
+ * method. This is used by ArcSystemUI so that that implementation can opt-in to overriding methods,
+ * rather than forcing us to add no-op implementations in their implementation every time a method
+ * is added.
  */
 open class DefaultNotifStackController @Inject constructor() : NotifStackController {
     override fun setNotifStats(stats: NotifStats) {}

@@ -16,14 +16,19 @@
 
 package com.android.systemui.settings.brightness
 
-import com.android.systemui.statusbar.policy.BrightnessMirrorController
-import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener
+class BrightnessMirrorHandler(brightnessController: MirroredBrightnessController) {
 
-class BrightnessMirrorHandler(private val brightnessController: MirroredBrightnessController) {
+    var mirrorController: MirrorController? = null
+        private set
 
-    private var mirrorController: BrightnessMirrorController? = null
+    var brightnessController: MirroredBrightnessController = brightnessController
+        set(value) {
+            field = value
+            updateBrightnessMirror()
+        }
 
-    private val brightnessMirrorListener = BrightnessMirrorListener { updateBrightnessMirror() }
+    private val brightnessMirrorListener =
+            MirrorController.BrightnessMirrorListener { updateBrightnessMirror() }
 
     fun onQsPanelAttached() {
         mirrorController?.addCallback(brightnessMirrorListener)
@@ -33,7 +38,7 @@ class BrightnessMirrorHandler(private val brightnessController: MirroredBrightne
         mirrorController?.removeCallback(brightnessMirrorListener)
     }
 
-    fun setController(controller: BrightnessMirrorController) {
+    fun setController(controller: MirrorController?) {
         mirrorController?.removeCallback(brightnessMirrorListener)
         mirrorController = controller
         mirrorController?.addCallback(brightnessMirrorListener)
@@ -41,6 +46,6 @@ class BrightnessMirrorHandler(private val brightnessController: MirroredBrightne
     }
 
     private fun updateBrightnessMirror() {
-        mirrorController?.let { brightnessController.setMirror(it) }
+        brightnessController.setMirror(mirrorController)
     }
 }

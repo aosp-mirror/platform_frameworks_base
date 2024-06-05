@@ -1,0 +1,58 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_app {
+    name: "ClockworkCredentialManager",
+    defaults: ["platform_app_defaults"],
+    certificate: "platform",
+    manifest: "AndroidManifest.xml",
+    srcs: ["src/**/*.kt"],
+    resource_dirs: ["res"],
+
+    dex_preopt: {
+        profile_guided: true,
+        profile: "profile.txt.prof",
+    },
+
+    static_libs: [
+        "CredentialManagerShared",
+        "hilt_android",
+        "Horologist",
+        "PlatformComposeCore",
+        "androidx.activity_activity-compose",
+        "androidx.appcompat_appcompat",
+        "androidx.compose.foundation_foundation",
+        "androidx.compose.foundation_foundation-layout",
+        "androidx.compose.material_material-icons-core",
+        "androidx.compose.material_material-icons-extended",
+        "androidx.compose.runtime_runtime",
+        "androidx.compose.ui_ui",
+        "androidx.compose.ui_ui-tooling",
+        "androidx.core_core-ktx",
+        "androidx.hilt_hilt-navigation-compose",
+        "androidx.lifecycle_lifecycle-extensions",
+        "androidx.lifecycle_lifecycle-livedata",
+        "androidx.lifecycle_lifecycle-runtime-ktx",
+        "androidx.lifecycle_lifecycle-runtime-compose",
+        "androidx.lifecycle_lifecycle-viewmodel-compose",
+        "androidx.wear.compose_compose-foundation",
+        "androidx.wear.compose_compose-material",
+        "androidx.wear.compose_compose-navigation",
+        "kotlinx-coroutines-core",
+    ],
+
+    platform_apis: true,
+    privileged: true,
+
+    kotlincflags: ["-Xjvm-default=all"],
+
+    optimize: {
+        proguard_compatibility: false,
+    },
+}

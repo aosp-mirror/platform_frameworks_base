@@ -18,6 +18,7 @@ package android.app;
 
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
+import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
@@ -30,6 +31,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
+import android.service.dreams.Flags;
 import android.service.dreams.IDreamManager;
 
 /**
@@ -185,6 +187,22 @@ public class DreamManager {
     }
 
     /**
+     * Whether dreaming can start given user settings and the current dock/charge state.
+     *
+     * @hide
+     */
+    @UserHandleAware
+    @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE)
+    public boolean canStartDreaming(boolean isScreenOn) {
+        try {
+            return mService.canStartDreaming(isScreenOn);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /**
      * Returns whether the device is Dreaming.
      *
      * <p> This is only used for testing the dream service APIs.
@@ -200,5 +218,20 @@ public class DreamManager {
             e.rethrowFromSystemServer();
         }
         return false;
+    }
+
+    /**
+     * Sets whether the dream is obscured by something.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_DREAM_HANDLES_BEING_OBSCURED)
+    @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
+    public void setDreamIsObscured(boolean isObscured) {
+        try {
+            mService.setDreamIsObscured(isObscured);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
@@ -330,7 +331,7 @@ public final class AudioAttributes implements Parcelable {
      * @hide
      * Array of all usage types exposed in the SDK that applications can use.
      */
-    public final static int[] SDK_USAGES = {
+    public static final IntArray SDK_USAGES = IntArray.wrap(new int[] {
             USAGE_UNKNOWN,
             USAGE_MEDIA,
             USAGE_VOICE_COMMUNICATION,
@@ -347,14 +348,14 @@ public final class AudioAttributes implements Parcelable {
             USAGE_ASSISTANCE_SONIFICATION,
             USAGE_GAME,
             USAGE_ASSISTANT,
-    };
+    });
 
     /**
      * @hide
      */
     @TestApi
     public static int[] getSdkUsages() {
-        return SDK_USAGES;
+        return SDK_USAGES.toArray();
     }
 
     /**
@@ -566,6 +567,15 @@ public final class AudioAttributes implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private String mFormattedTags;
     private Bundle mBundle; // lazy-initialized, may be null
+
+    /** Array of all content types exposed in the SDK that applications can use */
+    private static final IntArray CONTENT_TYPES = IntArray.wrap(new int[]{
+            CONTENT_TYPE_UNKNOWN,
+            CONTENT_TYPE_SPEECH,
+            CONTENT_TYPE_MUSIC,
+            CONTENT_TYPE_MOVIE,
+            CONTENT_TYPE_SONIFICATION,
+    });
 
     private AudioAttributes() {
     }
@@ -875,18 +885,7 @@ public final class AudioAttributes implements Parcelable {
         /**
          * Sets the attribute describing what is the intended use of the audio signal,
          * such as alarm or ringtone.
-         * @param usage one of {@link AttributeSdkUsage#USAGE_UNKNOWN},
-         *     {@link AttributeSdkUsage#USAGE_MEDIA},
-         *     {@link AttributeSdkUsage#USAGE_VOICE_COMMUNICATION},
-         *     {@link AttributeSdkUsage#USAGE_VOICE_COMMUNICATION_SIGNALLING},
-         *     {@link AttributeSdkUsage#USAGE_ALARM}, {@link AudioAttributes#USAGE_NOTIFICATION},
-         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_RINGTONE},
-         *     {@link AttributeSdkUsage#USAGE_NOTIFICATION_EVENT},
-         *     {@link AttributeSdkUsage#USAGE_ASSISTANT},
-         *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_ACCESSIBILITY},
-         *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_NAVIGATION_GUIDANCE},
-         *     {@link AttributeSdkUsage#USAGE_ASSISTANCE_SONIFICATION},
-         *     {@link AttributeSdkUsage#USAGE_GAME}.
+         * @param usage the usage to set.
          * @return the same Builder instance.
          */
         public Builder setUsage(@AttributeSdkUsage int usage) {
@@ -1167,7 +1166,10 @@ public final class AudioAttributes implements Parcelable {
                                 streamType);
                 if (attributes != null) {
                     mUsage = attributes.mUsage;
-                    mContentType = attributes.mContentType;
+                    // on purpose ignoring the content type: stream types are deprecated for
+                    // playback, making assumptions about the content type is prone to
+                    // interpretation errors for ambiguous types such as STREAM_TTS and STREAM_MUSIC
+                    //mContentType = attributes.mContentType;
                     mFlags = attributes.getAllFlags();
                     mMuteHapticChannels = attributes.areHapticChannelsMuted();
                     mIsContentSpatialized = attributes.isContentSpatialized();
@@ -1177,49 +1179,47 @@ public final class AudioAttributes implements Parcelable {
                     mSource = attributes.mSource;
                 }
             }
-            if (mContentType == CONTENT_TYPE_UNKNOWN) {
-                switch (streamType) {
-                    case AudioSystem.STREAM_VOICE_CALL:
-                        mContentType = CONTENT_TYPE_SPEECH;
-                        break;
-                    case AudioSystem.STREAM_SYSTEM_ENFORCED:
-                        mFlags |= FLAG_AUDIBILITY_ENFORCED;
-                        // intended fall through, attributes in common with STREAM_SYSTEM
-                    case AudioSystem.STREAM_SYSTEM:
-                        mContentType = CONTENT_TYPE_SONIFICATION;
-                        break;
-                    case AudioSystem.STREAM_RING:
-                        mContentType = CONTENT_TYPE_SONIFICATION;
-                        break;
-                    case AudioSystem.STREAM_MUSIC:
-                        mContentType = CONTENT_TYPE_MUSIC;
-                        break;
-                    case AudioSystem.STREAM_ALARM:
-                        mContentType = CONTENT_TYPE_SONIFICATION;
-                        break;
-                    case AudioSystem.STREAM_NOTIFICATION:
-                        mContentType = CONTENT_TYPE_SONIFICATION;
-                        break;
-                    case AudioSystem.STREAM_BLUETOOTH_SCO:
-                        mContentType = CONTENT_TYPE_SPEECH;
-                        mFlags |= FLAG_SCO;
-                        break;
-                    case AudioSystem.STREAM_DTMF:
-                        mContentType = CONTENT_TYPE_SONIFICATION;
-                        break;
-                    case AudioSystem.STREAM_TTS:
-                        mContentType = CONTENT_TYPE_SONIFICATION;
-                        mFlags |= FLAG_BEACON;
-                        break;
-                    case AudioSystem.STREAM_ACCESSIBILITY:
-                        mContentType = CONTENT_TYPE_SPEECH;
-                        break;
-                    case AudioSystem.STREAM_ASSISTANT:
-                        mContentType = CONTENT_TYPE_SPEECH;
-                        break;
-                    default:
-                        Log.e(TAG, "Invalid stream type " + streamType + " for AudioAttributes");
-                }
+            switch (streamType) {
+                case AudioSystem.STREAM_VOICE_CALL:
+                    mContentType = CONTENT_TYPE_SPEECH;
+                    break;
+                case AudioSystem.STREAM_SYSTEM_ENFORCED:
+                    mFlags |= FLAG_AUDIBILITY_ENFORCED;
+                    // intended fall through, attributes in common with STREAM_SYSTEM
+                case AudioSystem.STREAM_SYSTEM:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    break;
+                case AudioSystem.STREAM_RING:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    break;
+                case AudioSystem.STREAM_ALARM:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    break;
+                case AudioSystem.STREAM_NOTIFICATION:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    break;
+                case AudioSystem.STREAM_BLUETOOTH_SCO:
+                    mContentType = CONTENT_TYPE_SPEECH;
+                    mFlags |= FLAG_SCO;
+                    break;
+                case AudioSystem.STREAM_DTMF:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    break;
+                case AudioSystem.STREAM_TTS:
+                    mContentType = CONTENT_TYPE_SONIFICATION;
+                    mFlags |= FLAG_BEACON;
+                    break;
+                case AudioSystem.STREAM_ACCESSIBILITY:
+                    mContentType = CONTENT_TYPE_SPEECH;
+                    break;
+                case AudioSystem.STREAM_ASSISTANT:
+                    mContentType = CONTENT_TYPE_SPEECH;
+                    break;
+                case AudioSystem.STREAM_MUSIC:
+                    // leaving as CONTENT_TYPE_UNKNOWN
+                    break;
+                default:
+                    Log.e(TAG, "Invalid stream type " + streamType + " for AudioAttributes");
             }
             if (mUsage == USAGE_UNKNOWN) {
                 mUsage = usageForStreamType(streamType);
@@ -1676,6 +1676,39 @@ public final class AudioAttributes implements Parcelable {
                 || usage == USAGE_SAFETY
                 || usage == USAGE_VEHICLE_STATUS
                 || usage == USAGE_ANNOUNCEMENT);
+    }
+
+    /**
+     * Query if the usage is a valid sdk usage
+     *
+     * @param usage one of {@link AttributeSdkUsage}
+     * @return {@code true} if the usage is valid for sdk or {@code false} otherwise
+     * @hide
+     */
+    public static boolean isSdkUsage(@AttributeSdkUsage int usage) {
+        return SDK_USAGES.contains(usage);
+    }
+
+    /**
+     * Query if the usage is a hidden (neither sdk nor SystemApi) usage
+     *
+     * @param usage the {@link android.media.AudioAttributes usage}
+     * @return {@code true} if the usage is {@link AudioAttributes#USAGE_VIRTUAL_SOURCE} or
+     *     {@code false} otherwise
+     * @hide
+     */
+    public static boolean isHiddenUsage(@AttributeUsage int usage) {
+        return usage == USAGE_VIRTUAL_SOURCE;
+    }
+
+    /**
+     * Query if the content type is a valid sdk content type
+     * @param contentType one of {@link AttributeContentType}
+     * @return {@code true} if the content type is valid for sdk or {@code false} otherwise
+     * @hide
+     */
+    public static boolean isSdkContentType(@AttributeContentType int contentType) {
+        return CONTENT_TYPES.contains(contentType);
     }
 
     /**

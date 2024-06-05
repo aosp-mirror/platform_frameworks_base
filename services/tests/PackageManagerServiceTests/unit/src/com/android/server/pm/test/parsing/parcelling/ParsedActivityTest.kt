@@ -17,8 +17,8 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.ActivityInfo
-import com.android.server.pm.pkg.component.ParsedActivity
-import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.internal.pm.pkg.component.ParsedActivity
+import com.android.internal.pm.pkg.component.ParsedActivityImpl
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
@@ -54,7 +54,8 @@ class ParsedActivityTest : ParsedMainComponentTest(
         ParsedActivity::getTheme,
         ParsedActivity::getUiOptions,
         ParsedActivity::isSupportsSizeChanges,
-        ParsedActivity::getRequiredDisplayCategory
+        ParsedActivity::getRequiredDisplayCategory,
+        ParsedActivity::getRequireContentUriPermissionFromCaller
     )
 
     override fun mainComponentSubclassExtraParams() = listOf(

@@ -2,6 +2,13 @@
 // Build FrameworksServicesTests package
 //########################################################################
 
+java_defaults {
+    name: "FrameworksServicesTests-jni-defaults",
+    jni_libs: [
+        "libservicestestjni",
+    ],
+}
+
 package {
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
@@ -13,29 +20,38 @@ package {
 
 android_test {
     name: "FrameworksServicesTests",
+    defaults: [
+        "FrameworksServicesTests-jni-defaults",
+    ],
 
     // Include all test java files.
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
 
-        "test-apps/JobTestApp/src/**/*.java",
-
         "test-apps/SuspendTestApp/src/**/*.java",
     ],
+
+    kotlincflags: [
+        "-Werror",
+    ],
     static_libs: [
+        "cts-input-lib",
         "frameworks-base-testutils",
         "services.accessibility",
         "services.appwidget",
         "services.autofill",
+        "services.contentcapture",
         "services.backup",
         "services.companion",
         "services.core",
         "services.credentials",
         "services.devicepolicy",
+        "services.flags",
         "services.net",
         "services.people",
         "services.usage",
+        "service-permission.stubs.system_server",
         "guava",
         "guava-android-testlib",
         "androidx.test.core",
@@ -46,11 +62,12 @@ android_test {
         "cts-wm-util",
         "platform-compat-test-rules",
         "mockito-target-minus-junit4",
+        "mockito-kotlin2",
         "platform-test-annotations",
         "ShortcutManagerTestUtils",
-        "truth-prebuilt",
+        "truth",
         "testables",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "platformprotosnano",
         "framework-protos",
         "hamcrest-library",
@@ -59,12 +76,17 @@ android_test {
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",
-        "truth-prebuilt",
+        "truth",
         "junit",
         "junit-params",
         "ActivityContext",
         "coretests-aidl",
         "securebox",
+        "flag-junit",
+        "ravenwood-junit",
+        "net_flags_lib",
+        "CtsVirtualDeviceCommonLib",
+        "com_android_server_accessibility_flags_lib",
     ],
 
     libs: [
@@ -109,8 +131,6 @@ android_test {
     },
 
     data: [
-        ":BstatsTestApp",
-        ":JobTestApp",
         ":SimpleServiceTestApp1",
         ":SimpleServiceTestApp2",
         ":SimpleServiceTestApp3",
@@ -127,11 +147,27 @@ android_test {
     resource_zips: [":FrameworksServicesTests_apks_as_resources"],
 }
 
+android_ravenwood_test {
+    name: "FrameworksServicesTestsRavenwood",
+    libs: [
+        "android.test.mock",
+    ],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+        "services.core",
+        "flag-junit",
+    ],
+    srcs: [
+        "src/com/android/server/uri/**/*.java",
+    ],
+    auto_gen_config: true,
+}
+
 java_library {
     name: "servicestests-core-utils",
     srcs: [
         "src/com/android/server/am/DeviceConfigSession.java",
-        "src/com/android/server/display/TestUtils.java",
         "src/com/android/server/pm/PackageSettingBuilder.java",
         "src/com/android/server/pm/parsing/TestPackageParser2.kt",
     ],
@@ -185,6 +221,16 @@ java_library {
 }
 
 java_library {
+    name: "mockito-test-utils",
+    srcs: [
+        "utils-mockito/**/*.kt",
+    ],
+    static_libs: [
+        "mockito-target-minus-junit4",
+    ],
+}
+
+java_library {
     name: "servicestests-utils-mockito-extended",
     srcs: [
         "utils/**/*.java",
@@ -223,4 +269,90 @@ java_genrule {
         "  x=$${i##*FrameworksServicesTests_}; cp $$i $(genDir)/res/raw/$${x%.apk};" +
         "done && " +
         "$(location soong_zip) -o $(out) -C $(genDir)/res -D $(genDir)/res",
+}
+
+FLAKY_AND_IGNORED = [
+    "androidx.test.filters.FlakyTest",
+    "org.junit.Ignore",
+]
+// Used by content protection TEST_MAPPING
+test_module_config {
+    name: "FrameworksServicesTests_contentprotection",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.contentprotection"],
+    exclude_annotations: FLAKY_AND_IGNORED,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_om",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.om."],
+    exclude_annotations: FLAKY_AND_IGNORED,
+}
+
+// Used by contexthub TEST_MAPPING
+test_module_config {
+    name: "FrameworksServicesTests_contexthub_presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.location.contexthub."],
+    // TODO(ron): are these right, does it run anything?
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+    exclude_annotations: FLAKY_AND_IGNORED,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_contexthub_postsubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.location.contexthub."],
+    // TODO(ron): are these right, does it run anything?
+    include_annotations: ["android.platform.test.annotations.Postsubmit"],
+    exclude_annotations: FLAKY_AND_IGNORED,
+}
+
+// Used by contentcapture
+test_module_config {
+    name: "FrameworksServicesTests_contentcapture",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.contentcapture"],
+    exclude_annotations: FLAKY_AND_IGNORED,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_recoverysystem",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.recoverysystem."],
+    exclude_annotations: ["androidx.test.filters.FlakyTest"],
+}
+
+// server pm TEST_MAPPING
+test_module_config {
+    name: "FrameworksServicesTests_pm_presubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+    include_filters: ["com.android.server.pm."],
+    exclude_annotations: FLAKY_AND_IGNORED,
+}
+
+test_module_config {
+    name: "FrameworksServicesTests_pm_postsubmit",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_annotations: ["android.platform.test.annotations.Postsubmit"],
+    include_filters: ["com.android.server.pm."],
+    exclude_annotations: FLAKY_AND_IGNORED,
+}
+
+// server os TEST_MAPPING
+test_module_config {
+    name: "FrameworksServicesTests_os",
+    base: "FrameworksServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.os."],
 }

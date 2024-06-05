@@ -38,7 +38,7 @@ import android.view.WindowInsets.Type.statusBars
 import android.view.WindowManager
 import android.widget.TextView
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 
@@ -71,15 +71,15 @@ class ChannelEditorDialogController @Inject constructor(
     private var appUid: Int? = null
     private var packageName: String? = null
     private var appName: String? = null
+    private var channel: NotificationChannel? = null
     private var onSettingsClickListener: NotificationInfo.OnSettingsClickListener? = null
 
     // Caller should set this if they care about when we dismiss
     var onFinishListener: OnChannelEditorDialogFinishedListener? = null
 
-    @VisibleForTesting
-    internal val paddedChannels = mutableListOf<NotificationChannel>()
     // Channels handed to us from NotificationInfo
-    private val providedChannels = mutableListOf<NotificationChannel>()
+    @VisibleForTesting
+    internal val channelList = mutableListOf<NotificationChannel>()
 
     // Map from NotificationChannel to importance
     private val edits = mutableMapOf<NotificationChannel, Int>()
@@ -93,14 +93,14 @@ class ChannelEditorDialogController @Inject constructor(
     private val channelGroupList = mutableListOf<NotificationChannelGroup>()
 
     /**
-     * Give the controller all of the information it needs to present the dialog
+     * Give the controller all the information it needs to present the dialog
      * for a given app. Does a bunch of querying of NoMan, but won't present anything yet
      */
     fun prepareDialogForApp(
         appName: String,
         packageName: String,
         uid: Int,
-        channels: Set<NotificationChannel>,
+        channel: NotificationChannel,
         appIcon: Drawable,
         onSettingsClickListener: NotificationInfo.OnSettingsClickListener?
     ) {
@@ -110,6 +110,7 @@ class ChannelEditorDialogController @Inject constructor(
         this.appIcon = appIcon
         this.appNotificationsEnabled = checkAreAppNotificationsOn()
         this.onSettingsClickListener = onSettingsClickListener
+        this.channel = channel
 
         // These will always start out the same
         appNotificationsCurrentlyEnabled = appNotificationsEnabled
@@ -117,9 +118,7 @@ class ChannelEditorDialogController @Inject constructor(
         channelGroupList.clear()
         channelGroupList.addAll(fetchNotificationChannelGroups())
         buildGroupNameLookup()
-        providedChannels.clear()
-        providedChannels.addAll(channels)
-        padToFourChannels(channels)
+        populateChannelList()
         initDialog()
 
         prepared = true
@@ -133,36 +132,26 @@ class ChannelEditorDialogController @Inject constructor(
         }
     }
 
-    private fun padToFourChannels(channels: Set<NotificationChannel>) {
-        paddedChannels.clear()
-        // First, add all of the given channels
-        paddedChannels.addAll(channels.asSequence().take(4))
-
-        // Then pad to 4 if we haven't been given that many
-        paddedChannels.addAll(getDisplayableChannels(channelGroupList.asSequence())
-                .filterNot { paddedChannels.contains(it) }
-                .distinct()
-                .take(4 - paddedChannels.size))
-
-        // If we only got one channel and it has the default miscellaneous tag, then we actually
-        // are looking at an app with a targetSdk <= O, and it doesn't make much sense to show the
-        // channel
-        if (paddedChannels.size == 1 && DEFAULT_CHANNEL_ID == paddedChannels[0].id) {
-            paddedChannels.clear()
+    private fun populateChannelList() {
+        channelList.clear()
+        if (DEFAULT_CHANNEL_ID != channel!!.id) {
+            channelList.add(0, channel!!)
+            channelList.addAll(getDisplayableChannels(channelGroupList.asSequence())
+                    .filterNot { it.id == channel!!.id }
+                    .distinct())
         }
     }
 
     private fun getDisplayableChannels(
         groupList: Sequence<NotificationChannelGroup>
     ): Sequence<NotificationChannel> {
-
-        // TODO (b/194833441): remove channel level settings when we move to a permission
         val channels = groupList
                 .flatMap { group ->
-                    group.channels.asSequence().filterNot { channel ->
-                        channel.importance == IMPORTANCE_NONE ||
+                    group.channels.asSequence()
+                            .sortedWith(compareBy {group.name?.toString() ?: group.id})
+                            .filterNot { channel ->
                                 channel.isImportanceLockedByCriticalDeviceFunction
-                    }
+                            }
                 }
 
         // TODO: sort these by avgSentWeekly, but for now let's just do alphabetical (why not)
@@ -196,8 +185,7 @@ class ChannelEditorDialogController @Inject constructor(
         appNotificationsCurrentlyEnabled = null
 
         edits.clear()
-        paddedChannels.clear()
-        providedChannels.clear()
+        channelList.clear()
         groupNameLookup.clear()
     }
 
@@ -231,7 +219,7 @@ class ChannelEditorDialogController @Inject constructor(
     @Suppress("unchecked_cast")
     private fun fetchNotificationChannelGroups(): List<NotificationChannelGroup> {
         return try {
-            noMan.getNotificationChannelGroupsForPackage(packageName!!, appUid!!, false)
+            noMan.getRecentBlockedNotificationChannelGroupsForPackage(packageName!!, appUid!!)
                     .list as? List<NotificationChannelGroup> ?: listOf()
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching channel groups", e)
@@ -280,7 +268,6 @@ class ChannelEditorDialogController @Inject constructor(
 
     @VisibleForTesting
     fun launchSettings(sender: View) {
-        val channel = if (providedChannels.size == 1) providedChannels[0] else null
         onSettingsClickListener?.onClick(sender, channel, appUid!!)
     }
 
@@ -301,14 +288,12 @@ class ChannelEditorDialogController @Inject constructor(
                 controller = this@ChannelEditorDialogController
                 appIcon = this@ChannelEditorDialogController.appIcon
                 appName = this@ChannelEditorDialogController.appName
-                channels = paddedChannels
+                channels = channelList
             }
 
             setOnShowListener {
-                // play a highlight animation for the given channels
-                for (channel in providedChannels) {
-                    listView?.highlightChannel(channel)
-                }
+                // play a highlight animation for the given channel
+                listView?.highlightChannel(channel!!)
             }
 
             findViewById<TextView>(R.id.done_button)?.setOnClickListener {

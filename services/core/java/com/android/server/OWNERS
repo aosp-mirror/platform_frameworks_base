@@ -1,3 +1,6 @@
+# BootReceiver / Watchdog
+per-file BootReceiver.java,Watchdog.java = gaillard@google.com
+
 # Connectivity / Networking
 per-file ConnectivityService.java,ConnectivityServiceInitializer.java,NetworkManagementService.java,NsdService.java,VpnManagerService.java = file:/services/core/java/com/android/server/net/OWNERS
 
@@ -13,20 +16,19 @@ per-file UserspaceRebootLogger.java = ioffe@google.com, dvander@google.com
 # ServiceWatcher
 per-file ServiceWatcher.java = sooniln@google.com
 
-# Health
-per-file BatteryService.java = file:platform/hardware/interfaces:/health/aidl/OWNERS
-
 per-file *Accessibility* = file:/services/accessibility/OWNERS
 per-file *Alarm* = file:/apex/jobscheduler/OWNERS
 per-file *AppOp* = file:/core/java/android/permission/OWNERS
 per-file *Battery* = file:/BATTERY_STATS_OWNERS
 per-file *BinaryTransparency* = file:/core/java/android/transparency/OWNERS
 per-file *Binder* = file:/core/java/com/android/internal/os/BINDER_OWNERS
+per-file ExplicitHealthCheckController.java = file:/services/core/java/com/android/server/crashrecovery/OWNERS
 per-file *Gnss* = file:/services/core/java/com/android/server/location/OWNERS
 per-file **IpSec* = file:/services/core/java/com/android/server/net/OWNERS
 per-file **IpSec* = file:/services/core/java/com/android/server/vcn/OWNERS
 per-file *Location* = file:/services/core/java/com/android/server/location/OWNERS
 per-file *Network* = file:/services/core/java/com/android/server/net/OWNERS
+per-file *SecurityStateManager* = file:/SECURITY_STATE_OWNERS
 per-file *SoundTrigger* = file:/media/java/android/media/soundtrigger/OWNERS
 per-file *Storage* = file:/core/java/android/os/storage/OWNERS
 per-file *TimeUpdate* = file:/services/core/java/com/android/server/timezonedetector/OWNERS
@@ -34,11 +36,15 @@ per-file DynamicSystemService.java = file:/packages/DynamicSystemInstallationSer
 per-file GestureLauncherService.java = file:platform/packages/apps/EmergencyInfo:/OWNERS
 per-file MmsServiceBroker.java = file:/telephony/OWNERS
 per-file NetIdManager.java = file:/services/core/java/com/android/server/net/OWNERS
-per-file PackageWatchdog.java, RescueParty.java = file:/services/core/java/com/android/server/rollback/OWNERS
-per-file PinnerService.java = file:/apct-tests/perftests/OWNERS
-per-file RescueParty.java = fdunlap@google.com, shuc@google.com, ancr@google.com, harshitmahajan@google.com
+per-file PackageWatchdog.java = file:/services/core/java/com/android/server/crashrecovery/OWNERS
+per-file PinnerService.java = file:/core/java/android/app/pinner/OWNERS
+per-file RescueParty.java = file:/services/core/java/com/android/server/crashrecovery/OWNERS
+per-file SensitiveContentProtectionManagerService.java = file:/core/java/android/permission/OWNERS
 per-file SystemClockTime.java = file:/services/core/java/com/android/server/timedetector/OWNERS
 per-file SystemTimeZone.java = file:/services/core/java/com/android/server/timezonedetector/OWNERS
 per-file TelephonyRegistry.java = file:/telephony/OWNERS
 per-file UiModeManagerService.java = file:/packages/SystemUI/OWNERS
 per-file VcnManagementService.java = file:/services/core/java/com/android/server/vcn/OWNERS
+
+# SystemConfig
+per-file SystemConfig.java = file:/PACKAGE_MANAGER_OWNERS

@@ -74,7 +74,8 @@ final class HsumBootUserInitializer {
         }
         return new HsumBootUserInitializer(
                 LocalServices.getService(UserManagerInternal.class),
-                am, pms, contentResolver, shouldAlwaysHaveMainUser);
+                am, pms, contentResolver,
+                shouldAlwaysHaveMainUser);
     }
 
     private HsumBootUserInitializer(UserManagerInternal umi, ActivityManagerService am,

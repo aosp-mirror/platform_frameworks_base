@@ -70,6 +70,13 @@ public final class AccessibilityUtils {
     public @interface A11yTextChangeType {
     }
 
+    /** Denotes the accessibility enabled status */
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface State {
+        int OFF = 0;
+        int ON = 1;
+    }
+
     /** Specifies no content has been changed for accessibility. */
     public static final int NONE = 0;
     /** Specifies some readable sequence has been changed. */

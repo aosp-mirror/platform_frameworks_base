@@ -20,23 +20,24 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.os.UserHandle
+import androidx.lifecycle.DefaultLifecycleObserver
 import com.android.launcher3.icons.IconFactory
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.media.MediaProjectionAppSelectorActivity
-import com.android.systemui.media.MediaProjectionAppSelectorActivity.Companion.EXTRA_HOST_APP_USER_HANDLE
-import com.android.systemui.media.MediaProjectionPermissionActivity
 import com.android.systemui.mediaprojection.appselector.data.ActivityTaskManagerLabelLoader
 import com.android.systemui.mediaprojection.appselector.data.ActivityTaskManagerThumbnailLoader
-import com.android.systemui.mediaprojection.appselector.data.AppIconLoader
-import com.android.systemui.mediaprojection.appselector.data.IconLoaderLibAppIconLoader
+import com.android.systemui.mediaprojection.appselector.data.BasicAppIconLoader
+import com.android.systemui.mediaprojection.appselector.data.BasicPackageManagerAppIconLoader
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskLabelLoader
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskListProvider
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskThumbnailLoader
 import com.android.systemui.mediaprojection.appselector.data.ShellRecentTaskListProvider
 import com.android.systemui.mediaprojection.appselector.view.MediaProjectionRecentsViewController
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider
+import com.android.systemui.mediaprojection.appselector.view.WindowMetricsProvider
+import com.android.systemui.mediaprojection.appselector.view.WindowMetricsProviderImpl
 import com.android.systemui.mediaprojection.devicepolicy.MediaProjectionDevicePolicyModule
 import com.android.systemui.mediaprojection.devicepolicy.PersonalProfile
+import com.android.systemui.mediaprojection.permission.MediaProjectionPermissionActivity
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.Binds
@@ -46,6 +47,7 @@ import dagger.Provides
 import dagger.Subcomponent
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import dagger.multibindings.IntoSet
 import javax.inject.Qualifier
 import javax.inject.Scope
 import kotlinx.coroutines.CoroutineScope
@@ -55,13 +57,15 @@ import kotlinx.coroutines.SupervisorJob
 
 @Qualifier @Retention(AnnotationRetention.BINARY) annotation class HostUserHandle
 
+@Qualifier @Retention(AnnotationRetention.BINARY) annotation class HostUid
+
 @Retention(AnnotationRetention.RUNTIME) @Scope annotation class MediaProjectionAppSelectorScope
 
 @Module(
     subcomponents = [MediaProjectionAppSelectorComponent::class],
     includes = [MediaProjectionDevicePolicyModule::class]
 )
-interface MediaProjectionModule {
+interface MediaProjectionActivitiesModule {
     @Binds
     @IntoMap
     @ClassKey(MediaProjectionAppSelectorActivity::class)
@@ -98,7 +102,15 @@ interface MediaProjectionAppSelectorModule {
 
     @Binds
     @MediaProjectionAppSelectorScope
-    fun bindAppIconLoader(impl: IconLoaderLibAppIconLoader): AppIconLoader
+    fun bindAppIconLoader(impl: BasicPackageManagerAppIconLoader): BasicAppIconLoader
+
+    @Binds
+    @IntoSet
+    fun taskPreviewSizeProviderAsLifecycleObserver(
+        impl: TaskPreviewSizeProvider
+    ): DefaultLifecycleObserver
+
+    @Binds fun windowMetricsProvider(impl: WindowMetricsProviderImpl): WindowMetricsProvider
 
     companion object {
         @Provides
@@ -110,29 +122,8 @@ interface MediaProjectionAppSelectorModule {
         @Provides
         @MediaProjectionAppSelector
         @MediaProjectionAppSelectorScope
-        fun provideCallerPackageName(activity: MediaProjectionAppSelectorActivity): String? =
-            activity.callingPackage
-
-        @Provides
-        @MediaProjectionAppSelector
-        @MediaProjectionAppSelectorScope
-        fun bindConfigurationController(
-            activity: MediaProjectionAppSelectorActivity
-        ): ConfigurationController = ConfigurationControllerImpl(activity)
-
-        @Provides
-        @HostUserHandle
-        @MediaProjectionAppSelectorScope
-        fun hostUserHandle(activity: MediaProjectionAppSelectorActivity): UserHandle {
-            val extras =
-                activity.intent.extras
-                    ?: error("MediaProjectionAppSelectorActivity should be launched with extras")
-            return extras.getParcelable(EXTRA_HOST_APP_USER_HANDLE)
-                ?: error(
-                    "MediaProjectionAppSelectorActivity should be provided with " +
-                        "$EXTRA_HOST_APP_USER_HANDLE extra"
-                )
-        }
+        fun bindConfigurationController(context: Context): ConfigurationController =
+            ConfigurationControllerImpl(context)
 
         @Provides fun bindIconFactory(context: Context): IconFactory = IconFactory.obtain(context)
 
@@ -153,9 +144,14 @@ interface MediaProjectionAppSelectorComponent {
     interface Factory {
         /** Create a factory to inject the activity into the graph */
         fun create(
-            @BindsInstance activity: MediaProjectionAppSelectorActivity,
+            @BindsInstance @HostUserHandle hostUserHandle: UserHandle,
+            @BindsInstance @HostUid hostUid: Int,
+            @BindsInstance @MediaProjectionAppSelector callingPackage: String?,
             @BindsInstance view: MediaProjectionAppSelectorView,
             @BindsInstance resultHandler: MediaProjectionAppSelectorResultHandler,
+            // Whether the app selector is starting for the first time. False when it is re-starting
+            // due to a config change.
+            @BindsInstance @MediaProjectionAppSelector isFirstStart: Boolean,
         ): MediaProjectionAppSelectorComponent
     }
 
@@ -166,4 +162,5 @@ interface MediaProjectionAppSelectorComponent {
     @get:PersonalProfile val personalProfileUserHandle: UserHandle
 
     @MediaProjectionAppSelector val configurationController: ConfigurationController
+    val lifecycleObservers: Set<DefaultLifecycleObserver>
 }

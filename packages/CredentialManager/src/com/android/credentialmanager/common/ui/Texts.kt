@@ -23,9 +23,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
+import com.android.compose.theme.LocalAndroidColorScheme
 
 /**
  * The headline for a screen. E.g. "Create a passkey for X", "Choose a saved sign-in for X".
@@ -37,9 +38,9 @@ fun HeadlineText(text: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.colorOnSurface,
+        color = LocalAndroidColorScheme.current.onSurface,
         textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.headlineSmall,
+        style = MaterialTheme.typography.headlineSmall.copy(hyphens = Hyphens.Auto),
     )
 }
 
@@ -51,8 +52,8 @@ fun BodyMediumText(text: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
-        style = MaterialTheme.typography.bodyMedium,
+        color = LocalAndroidColorScheme.current.onSurfaceVariant,
+        style = MaterialTheme.typography.bodyMedium.copy(hyphens = Hyphens.Auto),
     )
 }
 
@@ -69,8 +70,8 @@ fun BodySmallText(
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
-        style = MaterialTheme.typography.bodySmall,
+        color = LocalAndroidColorScheme.current.onSurfaceVariant,
+        style = MaterialTheme.typography.bodySmall.copy(hyphens = Hyphens.Auto),
         overflow = TextOverflow.Ellipsis,
         maxLines = if (enforceOneLine) 1 else Int.MAX_VALUE,
         onTextLayout = onTextLayout,
@@ -85,8 +86,8 @@ fun LargeTitleText(text: String, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.colorOnSurface,
-        style = MaterialTheme.typography.titleLarge,
+        color = LocalAndroidColorScheme.current.onSurface,
+        style = MaterialTheme.typography.titleLarge.copy(hyphens = Hyphens.Auto),
     )
 }
 
@@ -103,8 +104,8 @@ fun SmallTitleText(
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
-        color = LocalAndroidColorScheme.current.colorOnSurface,
-        style = MaterialTheme.typography.titleSmall,
+        color = LocalAndroidColorScheme.current.onSurface,
+        style = MaterialTheme.typography.titleSmall.copy(hyphens = Hyphens.Auto),
         overflow = TextOverflow.Ellipsis,
         maxLines = if (enforceOneLine) 1 else Int.MAX_VALUE,
         onTextLayout = onTextLayout,
@@ -120,7 +121,7 @@ fun SectionHeaderText(text: String, modifier: Modifier = Modifier, color: Color)
         modifier = modifier.wrapContentSize(),
         text = text,
         color = color,
-        style = MaterialTheme.typography.titleSmall,
+        style = MaterialTheme.typography.titleSmall.copy(hyphens = Hyphens.Auto),
     )
 }
 
@@ -133,7 +134,7 @@ fun SnackbarContentText(text: String, modifier: Modifier = Modifier) {
         modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.inverseOnSurface,
-        style = MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.bodyMedium.copy(hyphens = Hyphens.Auto),
     )
 }
 
@@ -146,7 +147,7 @@ fun SnackbarActionText(text: String, modifier: Modifier = Modifier) {
         modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.inversePrimary,
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.labelLarge.copy(hyphens = Hyphens.Auto),
     )
 }
 
@@ -159,8 +160,8 @@ fun LargeLabelTextOnSurfaceVariant(text: String, modifier: Modifier = Modifier) 
         modifier = modifier.wrapContentSize(),
         text = text,
         textAlign = TextAlign.Center,
-        color = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
-        style = MaterialTheme.typography.labelLarge,
+        color = LocalAndroidColorScheme.current.onSurfaceVariant,
+        style = MaterialTheme.typography.labelLarge.copy(hyphens = Hyphens.Auto),
     )
 }
 
@@ -173,6 +174,6 @@ fun LargeLabelText(text: String, modifier: Modifier = Modifier) {
         modifier = modifier.wrapContentSize(),
         text = text,
         textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.labelLarge.copy(hyphens = Hyphens.Auto),
     )
 }

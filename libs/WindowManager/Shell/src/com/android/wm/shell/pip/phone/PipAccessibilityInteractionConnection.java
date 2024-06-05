@@ -15,7 +15,7 @@
  */
 package com.android.wm.shell.pip.phone;
 
-import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
+import static com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_NONE;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -36,8 +36,8 @@ import androidx.annotation.BinderThread;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipSnapAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 
 import java.util.ArrayList;
@@ -383,6 +383,9 @@ public class PipAccessibilityInteractionConnection {
         }
 
         @Override
-    public void attachAccessibilityOverlayToWindow(SurfaceControl sc) {}
+        public void attachAccessibilityOverlayToWindow(
+                SurfaceControl sc,
+                int interactionId,
+                IAccessibilityInteractionConnectionCallback callback) {}
 }
 }

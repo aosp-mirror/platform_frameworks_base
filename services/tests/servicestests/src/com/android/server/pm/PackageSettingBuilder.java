@@ -19,7 +19,6 @@ package com.android.server.pm;
 import android.content.pm.SigningDetails;
 import android.util.SparseArray;
 
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageUserStateImpl;
 
@@ -159,17 +158,19 @@ public class PackageSettingBuilder {
 
     public PackageSetting build() {
         final PackageSetting packageSetting = new PackageSetting(mName, mRealName,
-                new File(mCodePath), mLegacyNativeLibraryPathString, mPrimaryCpuAbiString,
-                mSecondaryCpuAbiString, mCpuAbiOverrideString, mPVersionCode, mPkgFlags,
-                mPrivateFlags, mSharedUserId, null /* usesSdkLibraries */,
-                null /* usesSdkLibrariesVersions */, null /* usesStaticLibraries */,
-                null  /* usesStaticLibrariesVersions */, mMimeGroups, mDomainSetId);
-        packageSetting.setSignatures(mSigningDetails != null
-                ? new PackageSignatures(mSigningDetails)
-                : new PackageSignatures());
-        packageSetting.setPkg((ParsedPackage) mPkg);
-        packageSetting.setAppId(mAppId);
-        packageSetting.setVolumeUuid(this.mVolumeUuid);
+                new File(mCodePath), mPkgFlags, mPrivateFlags, mDomainSetId)
+                .setLegacyNativeLibraryPath(mLegacyNativeLibraryPathString)
+                .setPrimaryCpuAbi(mPrimaryCpuAbiString)
+                .setSecondaryCpuAbi(mSecondaryCpuAbiString)
+                .setCpuAbiOverride(mCpuAbiOverrideString)
+                .setLongVersionCode(mPVersionCode)
+                .setSharedUserAppId(mSharedUserId)
+                .setMimeGroups(mMimeGroups)
+                .setSignatures(mSigningDetails != null
+                        ? new PackageSignatures(mSigningDetails) : new PackageSignatures())
+                .setPkg(mPkg)
+                .setAppId(mAppId)
+                .setVolumeUuid(this.mVolumeUuid);
         if (mInstallSource != null) {
             packageSetting.setInstallSource(mInstallSource);
         }

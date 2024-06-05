@@ -16,6 +16,9 @@
 
 package android.database.sqlite;
 
+import android.annotation.NonNull;
+import com.android.internal.annotations.GuardedBy;
+
 import android.database.Cursor;
 import android.database.CursorWindow;
 import android.database.DatabaseUtils;
@@ -35,6 +38,7 @@ import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.Reference;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -107,8 +111,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private final int mConnectionId;
     private final boolean mIsPrimaryConnection;
     private final boolean mIsReadOnlyConnection;
-    private final PreparedStatementCache mPreparedStatementCache;
     private PreparedStatement mPreparedStatementPool;
+
+    private final PreparedStatementCache mPreparedStatementCache;
 
     // The recent operations log.
     private final OperationLog mRecentOperations;
@@ -116,7 +121,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     // The native SQLiteConnection pointer.  (FOR INTERNAL USE ONLY)
     private long mConnectionPtr;
 
+    // Restrict this connection to read-only operations.
     private boolean mOnlyAllowReadOnlyOperations;
+
+    // Allow this connection to treat updates to temporary tables as read-only operations.
+    private boolean mAllowTempTableRetry = Flags.sqliteAllowTempTables();
 
     // The number of times attachCancellationSignal has been called.
     // Because SQLite statement execution can be reentrant, we keep track of how many
@@ -137,6 +146,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private static native void nativeFinalizeStatement(long connectionPtr, long statementPtr);
     private static native int nativeGetParameterCount(long connectionPtr, long statementPtr);
     private static native boolean nativeIsReadOnly(long connectionPtr, long statementPtr);
+    private static native boolean nativeUpdatesTempOnly(long connectionPtr, long statementPtr);
     private static native int nativeGetColumnCount(long connectionPtr, long statementPtr);
     private static native String nativeGetColumnName(long connectionPtr, long statementPtr,
             int index);
@@ -167,6 +177,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private static native int nativeGetDbLookaside(long connectionPtr);
     private static native void nativeCancel(long connectionPtr);
     private static native void nativeResetCancel(long connectionPtr, boolean cancelable);
+    private static native int nativeLastInsertRowId(long connectionPtr);
+    private static native long nativeChanges(long connectionPtr);
+    private static native long nativeTotalChanges(long connectionPtr);
 
     private SQLiteConnection(SQLiteConnectionPool pool,
             SQLiteDatabaseConfiguration configuration,
@@ -379,8 +392,6 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             return;
         }
 
-        Log.i(TAG, walFile.getAbsolutePath() + " " + size + " bytes: Bigger than "
-                + threshold + "; truncating");
         try {
             executeForString("PRAGMA wal_checkpoint(TRUNCATE)", null, null);
             mConfiguration.shouldTruncateWalFile = false;
@@ -576,6 +587,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         final int oldSize = mConfiguration.perConnectionSql.size();
         final int newSize = configuration.perConnectionSql.size();
         boolean perConnectionSqlChanged = newSize > oldSize;
+        boolean journalModeChanged = !configuration.resolveJournalMode().equalsIgnoreCase(
+                mConfiguration.resolveJournalMode());
+        boolean syncModeChanged =
+                !configuration.resolveSyncMode().equalsIgnoreCase(mConfiguration.resolveSyncMode());
 
         // Update configuration parameters.
         mConfiguration.updateParametersFrom(configuration);
@@ -587,14 +602,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             setForeignKeyModeFromConfiguration();
         }
 
-        boolean journalModeChanged = !configuration.resolveJournalMode().equalsIgnoreCase(
-                mConfiguration.resolveJournalMode());
         if (journalModeChanged) {
             setJournalFromConfiguration();
         }
 
-        boolean syncModeChanged =
-                !configuration.resolveSyncMode().equalsIgnoreCase(mConfiguration.resolveSyncMode());
         if (syncModeChanged) {
             setSyncModeFromConfiguration();
         }
@@ -617,8 +628,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         mOnlyAllowReadOnlyOperations = readOnly;
     }
 
-    // Called by SQLiteConnectionPool only.
-    // Returns true if the prepared statement cache contains the specified SQL.
+    // Called by SQLiteConnectionPool only to decide if this connection has the desired statement
+    // already prepared.  Returns true if the prepared statement cache contains the specified SQL.
+    // The statement may be stale, but that will be a rare occurrence and affects performance only
+    // a tiny bit, and only when database schema changes.
     boolean isPreparedStatementInCache(String sql) {
         return mPreparedStatementCache.get(sql) != null;
     }
@@ -1052,26 +1065,44 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
     }
 
-    private PreparedStatement acquirePreparedStatement(String sql) {
+    /**
+     * Return a {@link #PreparedStatement}, possibly from the cache.
+     */
+    private PreparedStatement acquirePreparedStatementLI(String sql) {
         ++mPool.mTotalPrepareStatements;
-        PreparedStatement statement = mPreparedStatementCache.get(sql);
+        PreparedStatement statement = mPreparedStatementCache.getStatement(sql);
+        long seqNum = mPreparedStatementCache.getLastSeqNum();
+
         boolean skipCache = false;
         if (statement != null) {
             if (!statement.mInUse) {
-                return statement;
+                if (statement.mSeqNum == seqNum) {
+                    // This is a valid statement.  Claim it and return it.
+                    statement.mInUse = true;
+                    return statement;
+                } else {
+                    // This is a stale statement.  Remove it from the cache.  Treat this as if the
+                    // statement was never found, which means we should not skip the cache.
+                    mPreparedStatementCache.remove(sql);
+                    statement = null;
+                    // Leave skipCache == false.
+                }
+            } else {
+                // The statement is already in the cache but is in use (this statement appears to
+                // be not only re-entrant but recursive!).  So prepare a new copy of the statement
+                // but do not cache it.
+                skipCache = true;
             }
-            // The statement is already in the cache but is in use (this statement appears
-            // to be not only re-entrant but recursive!).  So prepare a new copy of the
-            // statement but do not cache it.
-            skipCache = true;
         }
         ++mPool.mTotalPrepareStatementCacheMiss;
-        final long statementPtr = nativePrepareStatement(mConnectionPtr, sql);
+        final long statementPtr = mPreparedStatementCache.createStatement(sql);
+        seqNum = mPreparedStatementCache.getLastSeqNum();
         try {
             final int numParameters = nativeGetParameterCount(mConnectionPtr, statementPtr);
-            final int type = DatabaseUtils.getSqlStatementType(sql);
-            final boolean readOnly = nativeIsReadOnly(mConnectionPtr, statementPtr);
-            statement = obtainPreparedStatement(sql, statementPtr, numParameters, type, readOnly);
+            final int type = DatabaseUtils.getSqlStatementTypeExtended(sql);
+            boolean readOnly = nativeIsReadOnly(mConnectionPtr, statementPtr);
+            statement = obtainPreparedStatement(sql, statementPtr, numParameters, type, readOnly,
+                    seqNum);
             if (!skipCache && isCacheable(type)) {
                 mPreparedStatementCache.put(sql, statement);
                 statement.mInCache = true;
@@ -1088,7 +1119,17 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         return statement;
     }
 
-    private void releasePreparedStatement(PreparedStatement statement) {
+    /**
+     * Return a {@link #PreparedStatement}, possibly from the cache.
+     */
+    PreparedStatement acquirePreparedStatement(String sql) {
+        return acquirePreparedStatementLI(sql);
+    }
+
+    /**
+     * Release a {@link #PreparedStatement} that was originally supplied by this connection.
+     */
+    private void releasePreparedStatementLI(PreparedStatement statement) {
         statement.mInUse = false;
         if (statement.mInCache) {
             try {
@@ -1111,9 +1152,34 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
     }
 
+    /**
+     * Release a {@link #PreparedStatement} that was originally supplied by this connection.
+     */
+    void releasePreparedStatement(PreparedStatement statement) {
+        releasePreparedStatementLI(statement);
+    }
+
     private void finalizePreparedStatement(PreparedStatement statement) {
         nativeFinalizeStatement(mConnectionPtr, statement.mStatementPtr);
         recyclePreparedStatement(statement);
+    }
+
+    /**
+     * Return a prepared statement for use by {@link SQLiteRawStatement}.  This throws if the
+     * prepared statement is incompatible with this connection.
+     */
+    PreparedStatement acquirePersistentStatement(@NonNull String sql) {
+        final int cookie = mRecentOperations.beginOperation("prepare", sql, null);
+        try {
+            final PreparedStatement statement = acquirePreparedStatement(sql);
+            throwIfStatementForbidden(statement);
+            return statement;
+        } catch (RuntimeException e) {
+            mRecentOperations.failOperation(cookie, e);
+            throw e;
+        } finally {
+            mRecentOperations.endOperation(cookie);
+        }
     }
 
     private void attachCancellationSignal(CancellationSignal cancellationSignal) {
@@ -1200,8 +1266,22 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
     }
 
-    private void throwIfStatementForbidden(PreparedStatement statement) {
+    /**
+     * Verify that the statement is read-only, if the connection only allows read-only
+     * operations.  If the connection allows updates to temporary tables, then the statement is
+     * read-only if the only updates are to temporary tables.
+     * @param statement The statement to check.
+     * @throws SQLiteException if the statement could update the database inside a read-only
+     * transaction.
+     */
+    void throwIfStatementForbidden(PreparedStatement statement) {
         if (mOnlyAllowReadOnlyOperations && !statement.mReadOnly) {
+            if (mAllowTempTableRetry) {
+                statement.mReadOnly =
+                        nativeUpdatesTempOnly(mConnectionPtr, statement.mStatementPtr);
+                if (statement.mReadOnly) return;
+            }
+
             throw new SQLiteException("Cannot execute this statement because it "
                     + "might modify the database but the connection is read-only.");
         }
@@ -1209,7 +1289,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
 
     private static boolean isCacheable(int statementType) {
         if (statementType == DatabaseUtils.STATEMENT_UPDATE
-                || statementType == DatabaseUtils.STATEMENT_SELECT) {
+            || statementType == DatabaseUtils.STATEMENT_SELECT
+            || statementType == DatabaseUtils.STATEMENT_WITH) {
             return true;
         }
         return false;
@@ -1361,7 +1442,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private PreparedStatement obtainPreparedStatement(String sql, long statementPtr,
-            int numParameters, int type, boolean readOnly) {
+            int numParameters, int type, boolean readOnly, long seqNum) {
         PreparedStatement statement = mPreparedStatementPool;
         if (statement != null) {
             mPreparedStatementPool = statement.mPoolNext;
@@ -1375,6 +1456,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         statement.mNumParameters = numParameters;
         statement.mType = type;
         statement.mReadOnly = readOnly;
+        statement.mSeqNum = seqNum;
         return statement;
     }
 
@@ -1392,6 +1474,12 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         return sql.replaceAll("[\\s]*\\n+[\\s]*", " ");
     }
 
+    // Update the database sequence number.  This number is stored in the prepared statement
+    // cache.
+    void setDatabaseSeqNum(long n) {
+        mPreparedStatementCache.setDatabaseSeqNum(n);
+    }
+
     /**
      * Holder type for a prepared statement.
      *
@@ -1401,8 +1489,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
      * In particular, closing the connection requires a guarantee of deterministic
      * resource disposal because all native statement objects must be freed before
      * the native database object can be closed.  So no finalizers here.
+     *
+     * The class is package-visible so that {@link SQLiteRawStatement} can use it.
      */
-    private static final class PreparedStatement {
+    static final class PreparedStatement {
         // Next item in pool.
         public PreparedStatement mPoolNext;
 
@@ -1425,6 +1515,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         // True if the statement is in the cache.
         public boolean mInCache;
 
+        // The database schema ID at the time this statement was created.  The ID is left zero for
+        // statements that are not cached.  This value is meaningful only if mInCache is true.
+        public long mSeqNum;
+
         // True if the statement is in use (currently executing).
         // We need this flag because due to the use of custom functions in triggers, it's
         // possible for SQLite calls to be re-entrant.  Consequently we need to prevent
@@ -1432,10 +1526,40 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         public boolean mInUse;
     }
 
-    private final class PreparedStatementCache
-            extends LruCache<String, PreparedStatement> {
+    private final class PreparedStatementCache extends LruCache<String, PreparedStatement> {
+        // The database sequence number.  This changes every time the database schema changes.
+        private long mDatabaseSeqNum = 0;
+
+        // The database sequence number from the last getStatement() or createStatement()
+        // call. The proper use of this variable depends on the caller being single threaded.
+        private long mLastSeqNum = 0;
+
         public PreparedStatementCache(int size) {
             super(size);
+        }
+
+        public synchronized void setDatabaseSeqNum(long n) {
+            mDatabaseSeqNum = n;
+        }
+
+        // Return the last database sequence number.
+        public long getLastSeqNum() {
+            return mLastSeqNum;
+        }
+
+        // Return a statement from the cache.  Save the database sequence number for the caller.
+        public synchronized PreparedStatement getStatement(String sql) {
+            mLastSeqNum = mDatabaseSeqNum;
+            return get(sql);
+        }
+
+        // Return a new native prepared statement and save the database sequence number for the
+        // caller.  This does not modify the cache in any way.  However, by being synchronized,
+        // callers are guaranteed that the sequence number did not change across the native
+        // preparation step.
+        public synchronized long createStatement(String sql) {
+            mLastSeqNum = mDatabaseSeqNum;
+            return nativePrepareStatement(mConnectionPtr, sql);
         }
 
         @Override
@@ -1741,5 +1865,44 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             return methodName;
         }
 
+    }
+
+    /**
+     * Return the ROWID of the last row to be inserted under this connection.  Returns 0 if there
+     * has never been an insert on this connection.
+     * @return The ROWID of the last row to be inserted under this connection.
+     * @hide
+     */
+    long getLastInsertRowId() {
+        try {
+            return nativeLastInsertRowId(mConnectionPtr);
+        } finally {
+            Reference.reachabilityFence(this);
+        }
+    }
+
+    /**
+     * Return the number of database changes on the current connection made by the last SQL
+     * statement
+     * @hide
+     */
+    long getLastChangedRowCount() {
+        try {
+            return nativeChanges(mConnectionPtr);
+        } finally {
+            Reference.reachabilityFence(this);
+        }
+    }
+
+    /**
+     * Return the total number of database changes made on the current connection.
+     * @hide
+     */
+    long getTotalChangedRowCount() {
+        try {
+            return nativeTotalChanges(mConnectionPtr);
+        } finally {
+            Reference.reachabilityFence(this);
+        }
     }
 }

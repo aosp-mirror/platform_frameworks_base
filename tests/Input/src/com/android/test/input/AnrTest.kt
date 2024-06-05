@@ -21,20 +21,22 @@ import androidx.test.filters.MediumTest
 
 import android.app.ActivityManager
 import android.app.ApplicationExitInfo
+import android.content.Context
 import android.graphics.Rect
+import android.hardware.display.DisplayManager
 import android.os.Build
 import android.os.IInputConstants.UNMULTIPLIED_DEFAULT_DISPATCHING_TIMEOUT_MILLIS
 import android.os.SystemClock
 import android.provider.Settings
 import android.provider.Settings.Global.HIDE_ERROR_DIALOGS
 import android.testing.PollingCheck
-import android.view.InputDevice
-import android.view.MotionEvent
 
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
+
+import com.android.cts.input.UinputTouchScreen
 
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -100,6 +102,7 @@ class AnrTest {
 
     private fun clickCloseAppOnAnrDialog() {
         // Find anr dialog and kill app
+        val timestamp = System.currentTimeMillis()
         val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
         val closeAppButton: UiObject2? =
                 uiDevice.wait(Until.findObject(By.res("android:id/aerr_close")), 20000)
@@ -107,7 +110,6 @@ class AnrTest {
             fail("Could not find anr dialog")
             return
         }
-        val initialReasons = getExitReasons()
         closeAppButton.click()
         /**
          * We must wait for the app to be fully closed before exiting this test. This is because
@@ -116,7 +118,7 @@ class AnrTest {
          * the killing logic will apply to the newly launched 'am start' instance, and the second
          * test will fail because the unresponsive activity will never be launched.
          */
-        waitForNewExitReason(initialReasons[0].timestamp)
+        waitForNewExitReasonAfter(timestamp)
     }
 
     private fun clickWaitOnAnrDialog() {
@@ -140,33 +142,39 @@ class AnrTest {
         return infos
     }
 
-    private fun waitForNewExitReason(previousExitTimestamp: Long) {
+    private fun waitForNewExitReasonAfter(timestamp: Long) {
         PollingCheck.waitFor {
-            getExitReasons()[0].timestamp > previousExitTimestamp
+            val reasons = getExitReasons()
+            !reasons.isEmpty() && reasons[0].timestamp >= timestamp
         }
         val reasons = getExitReasons()
-        assertTrue(reasons[0].timestamp > previousExitTimestamp)
+        assertTrue(reasons[0].timestamp > timestamp)
         assertEquals(ApplicationExitInfo.REASON_ANR, reasons[0].reason)
+    }
+
+    private fun clickOnObject(obj: UiObject2) {
+        val displayManager =
+            instrumentation.context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+        val display = displayManager.getDisplay(obj.getDisplayId())
+        val touchScreen = UinputTouchScreen(instrumentation, display)
+
+        val rect: Rect = obj.visibleBounds
+        val pointer = touchScreen.touchDown(rect.centerX(), rect.centerY())
+        pointer.lift()
+        touchScreen.close()
     }
 
     private fun triggerAnr() {
         startUnresponsiveActivity()
         val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
-        val obj: UiObject2? = uiDevice.wait(Until.findObject(
-                By.text("Unresponsive gesture monitor")), 10000)
+        val obj: UiObject2? = uiDevice.wait(Until.findObject(By.pkg(PACKAGE_NAME)), 10000)
 
         if (obj == null) {
             fail("Could not find unresponsive activity")
             return
         }
 
-        val rect: Rect = obj.visibleBounds
-        val downTime = SystemClock.uptimeMillis()
-        val downEvent = MotionEvent.obtain(downTime, downTime,
-                MotionEvent.ACTION_DOWN, rect.left.toFloat(), rect.top.toFloat(), 0 /* metaState */)
-        downEvent.source = InputDevice.SOURCE_TOUCHSCREEN
-
-        instrumentation.uiAutomation.injectInputEvent(downEvent, false /* sync*/)
+        clickOnObject(obj)
 
         SystemClock.sleep(DISPATCHING_TIMEOUT.toLong()) // default ANR timeout for gesture monitors
     }

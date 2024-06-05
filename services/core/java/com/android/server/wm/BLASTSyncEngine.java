@@ -95,6 +95,8 @@ class BLASTSyncEngine {
 
     interface TransactionReadyListener {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
+        default void onTransactionCommitTimeout() {}
+        default void onReadyTimeout() {}
     }
 
     /**
@@ -115,6 +117,7 @@ class BLASTSyncEngine {
      */
     class SyncGroup {
         final int mSyncId;
+        final String mSyncName;
         int mSyncMethod = METHOD_BLAST;
         final TransactionReadyListener mListener;
         final Runnable mOnTimeout;
@@ -137,6 +140,7 @@ class BLASTSyncEngine {
 
         private SyncGroup(TransactionReadyListener listener, int id, String name) {
             mSyncId = id;
+            mSyncName = name;
             mListener = listener;
             mOnTimeout = () -> {
                 Slog.w(TAG, "Sync group " + mSyncId + " timeout");
@@ -220,15 +224,20 @@ class BLASTSyncEngine {
             for (WindowContainer wc : mRootMembers) {
                 wc.waitForSyncTransactionCommit(wcAwaitingCommit);
             }
+
+            final int syncId = mSyncId;
+            final long mergedTxId = merged.getId();
+            final String syncName = mSyncName;
             class CommitCallback implements Runnable {
                 // Can run a second time if the action completes after the timeout.
                 boolean ran = false;
                 public void onCommitted(SurfaceControl.Transaction t) {
+                    // Don't wait to hold the global lock to remove the timeout runnable
+                    mHandler.removeCallbacks(this);
                     synchronized (mWm.mGlobalLock) {
                         if (ran) {
                             return;
                         }
-                        mHandler.removeCallbacks(this);
                         ran = true;
                         for (WindowContainer wc : wcAwaitingCommit) {
                             wc.onSyncTransactionCommitted(t);
@@ -245,10 +254,12 @@ class BLASTSyncEngine {
                     // a trace. Since these kind of ANRs can trigger such an issue,
                     // try and ensure we will have some visibility in both cases.
                     Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionCommitTimeout");
-                    Slog.e(TAG, "WM sent Transaction to organized, but never received" +
-                           " commit callback. Application ANR likely to follow.");
+                    Slog.e(TAG, "WM sent Transaction (#" + syncId + ", " + syncName + ", tx="
+                            + mergedTxId + ") to organizer, but never received commit callback."
+                            + " Application ANR likely to follow.");
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                     synchronized (mWm.mGlobalLock) {
+                        mListener.onTransactionCommitTimeout();
                         onCommitted(merged.mNativeObject != 0
                                 ? merged : mWm.mTransactionFactory.get());
                     }
@@ -376,8 +387,23 @@ class BLASTSyncEngine {
                 if (!wc.isSyncFinished(this)) {
                     allFinished = false;
                     Slog.i(TAG, "Unfinished container: " + wc);
+                    wc.forAllActivities(a -> {
+                        if (a.isVisibleRequested()) {
+                            if (a.isRelaunching()) {
+                                Slog.i(TAG, "  " + a + " is relaunching");
+                            }
+                            a.forAllWindows(w -> {
+                                Slog.i(TAG, "  " + w + " " + w.mWinAnimator.drawStateToString());
+                            }, true /* traverseTopToBottom */);
+                        } else if (a.mDisplayContent != null && !a.mDisplayContent
+                                .mUnknownAppVisibilityController.allResolved()) {
+                            Slog.i(TAG, "  UnknownAppVisibility: " + a.mDisplayContent
+                                    .mUnknownAppVisibilityController.getDebugMessage());
+                        }
+                    });
                 }
             }
+
             for (int i = mDependencies.size() - 1; i >= 0; --i) {
                 allFinished = false;
                 Slog.i(TAG, "Unfinished dependency: " + mDependencies.get(i).mSyncId);
@@ -385,6 +411,7 @@ class BLASTSyncEngine {
             if (allFinished && !mReady) {
                 Slog.w(TAG, "Sync group " + mSyncId + " timed-out because not ready. If you see "
                         + "this, please file a bug.");
+                mListener.onReadyTimeout();
             }
             finishNow();
             removeFromDependencies(this);

@@ -16,9 +16,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="android.perftests.surfaceflinger">
 
-    <!-- permission needed to write perfetto trace and read/write simpleperf report -->
+    <!-- permission needed to read/write simpleperf report -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- permission needed to disable tracing -->
+    <uses-permission android:name="android.permission.HARDWARE_TEST" />
 
     <application android:label="SurfaceFlingerPerfTests">
         <uses-library android:name="android.test.runner" />

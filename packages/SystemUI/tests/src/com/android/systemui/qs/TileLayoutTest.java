@@ -26,22 +26,24 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableLooper;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.qs.tileimpl.QSIconViewImpl;
+import com.android.systemui.qs.tileimpl.HeightOverrideable;
 import com.android.systemui.qs.tileimpl.QSTileViewImpl;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,14 +58,17 @@ public class TileLayoutTest extends SysuiTestCase {
     private Resources mResources;
     private int mLayoutSizeForOneTile;
     private TileLayout mTileLayout; // under test
+    private Context mSpyContext;
+
 
     @Before
     public void setUp() throws Exception {
-        Context context = Mockito.spy(mContext);
-        mResources = Mockito.spy(context.getResources());
-        Mockito.when(mContext.getResources()).thenReturn(mResources);
+        mSpyContext = Mockito.spy(
+                new ContextThemeWrapper(mContext, R.style.Theme_SystemUI_QuickSettings));
+        mResources = Mockito.spy(mSpyContext.getResources());
+        when(mSpyContext.getResources()).thenReturn(mResources);
 
-        mTileLayout = new TileLayout(context);
+        mTileLayout = new TileLayout(mSpyContext);
         // Layout needs to leave space for the tile margins. Three times the margin size is
         // sufficient for any number of columns.
         mLayoutSizeForOneTile =
@@ -73,7 +78,7 @@ public class TileLayoutTest extends SysuiTestCase {
     private QSPanelControllerBase.TileRecord createTileRecord() {
         return new QSPanelControllerBase.TileRecord(
                 mock(QSTile.class),
-                spy(new QSTileViewImpl(mContext, new QSIconViewImpl(mContext))));
+                spy(new QSTileViewImpl(mSpyContext)));
     }
 
     @Test
@@ -81,6 +86,14 @@ public class TileLayoutTest extends SysuiTestCase {
         QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
         mTileLayout.addTile(tileRecord);
         verify(tileRecord.tile, times(1)).setListening(mTileLayout, false);
+    }
+
+    @Test
+    public void testAddTile_SetsRightSquishiness() {
+        QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
+        ((HeightOverrideable) tileRecord.tileView).setSquishinessFraction(.5f);
+        mTileLayout.addTile(tileRecord);
+        assertEquals(1f, ((HeightOverrideable) tileRecord.tileView).getSquishinessFraction());
     }
 
     @Test
@@ -161,7 +174,7 @@ public class TileLayoutTest extends SysuiTestCase {
                 .layout(left2.capture(), top2.capture(), right2.capture(), bottom2.capture());
 
         // We assume two tiles will always fit side-by-side.
-        assertTrue(mContext.getResources().getInteger(R.integer.quick_settings_num_columns) > 1);
+        assertTrue(mSpyContext.getResources().getInteger(R.integer.quick_settings_num_columns) > 1);
 
         // left <= right, top <= bottom
         assertTrue(left1.getValue() <= right1.getValue());
@@ -218,16 +231,16 @@ public class TileLayoutTest extends SysuiTestCase {
 
     @Test
     public void resourcesChanged_updateResources_returnsTrue() {
-        Mockito.when(mResources.getInteger(R.integer.quick_settings_num_columns)).thenReturn(1);
+        when(mResources.getInteger(R.integer.quick_settings_num_columns)).thenReturn(1);
         mTileLayout.updateResources(); // setup with 1
-        Mockito.when(mResources.getInteger(R.integer.quick_settings_num_columns)).thenReturn(2);
+        when(mResources.getInteger(R.integer.quick_settings_num_columns)).thenReturn(2);
 
         assertEquals(true, mTileLayout.updateResources());
     }
 
     @Test
     public void resourcesSame_updateResources_returnsFalse() {
-        Mockito.when(mResources.getInteger(R.integer.quick_settings_num_columns)).thenReturn(1);
+        when(mResources.getInteger(R.integer.quick_settings_num_columns)).thenReturn(1);
         mTileLayout.updateResources(); // setup with 1
 
         assertEquals(false, mTileLayout.updateResources());
@@ -250,7 +263,7 @@ public class TileLayoutTest extends SysuiTestCase {
         QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
         mTileLayout.addTile(tileRecord);
 
-        FakeTileView tileView = new FakeTileView(mContext);
+        FakeTileView tileView = new FakeTileView(mSpyContext);
         QSTile.State state = new QSTile.State();
         state.label = "TEST LABEL";
         state.secondaryLabel = "TEST SECONDARY LABEL";
@@ -267,7 +280,7 @@ public class TileLayoutTest extends SysuiTestCase {
 
     private static class FakeTileView extends QSTileViewImpl {
         FakeTileView(Context context) {
-            super(context, new QSIconViewImpl(context), /* collapsed= */ false);
+            super(context, /* collapsed= */ false);
         }
 
         void changeState(QSTile.State state) {
@@ -276,9 +289,10 @@ public class TileLayoutTest extends SysuiTestCase {
     }
 
     private void changeFontScaling(float scale) {
-        Configuration configuration = new Configuration(mContext.getResources().getConfiguration());
+        Configuration configuration =
+                new Configuration(mSpyContext.getResources().getConfiguration());
         configuration.fontScale = scale;
         // updateConfiguration could help update on both resource configuration and displayMetrics
-        mContext.getResources().updateConfiguration(configuration, null, null);
+        mSpyContext.getResources().updateConfiguration(configuration, null, null);
     }
 }

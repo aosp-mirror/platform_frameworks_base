@@ -21,14 +21,15 @@ import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialOption;
 import android.credentials.GetCredentialRequest;
 import android.credentials.IGetCredentialCallback;
 import android.credentials.IPrepareGetCredentialCallback;
 import android.credentials.PrepareGetCredentialResponseInternal;
-import android.credentials.ui.GetCredentialProviderData;
-import android.credentials.ui.ProviderData;
-import android.credentials.ui.RequestInfo;
+import android.credentials.selection.GetCredentialProviderData;
+import android.credentials.selection.ProviderData;
+import android.credentials.selection.RequestInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
  * responses from providers, and the UX app, and updates the provider(s) state.
  */
 public class PrepareGetRequestSession extends GetRequestSession {
-    private static final String TAG = "PrepareGetRequestSession";
+    private static final String TAG = CredentialManager.TAG;
 
     private final IPrepareGetCredentialCallback mPrepareGetCredentialCallback;
 
@@ -191,8 +192,10 @@ public class PrepareGetRequestSession extends GetRequestSession {
                     RequestInfo.newGetRequestInfo(
                             mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
                             PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
-                                    Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
-                    providerDataList);
+                                    Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
+                            /*isShowAllOptionsRequested=*/ false),
+                    providerDataList,
+                    mRequestSessionMetric);
         } else {
             return null;
         }

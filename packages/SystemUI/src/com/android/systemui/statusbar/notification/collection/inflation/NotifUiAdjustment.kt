@@ -20,6 +20,8 @@ import android.app.Notification
 import android.app.RemoteInput
 import android.graphics.drawable.Icon
 import android.text.TextUtils
+import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation
+import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation
 
 /**
  * An immutable object which contains minimal state extracted from an entry that represents state
@@ -34,6 +36,8 @@ class NotifUiAdjustment internal constructor(
     val isSnoozeEnabled: Boolean,
     val isMinimized: Boolean,
     val needsRedaction: Boolean,
+    val isChildInGroup: Boolean,
+    val isGroupSummary: Boolean,
 ) {
     companion object {
         @JvmStatic
@@ -48,6 +52,10 @@ class NotifUiAdjustment internal constructor(
             oldAdjustment.needsRedaction != newAdjustment.needsRedaction -> true
             areDifferent(oldAdjustment.smartActions, newAdjustment.smartActions) -> true
             newAdjustment.smartReplies != oldAdjustment.smartReplies -> true
+            AsyncHybridViewInflation.isEnabled &&
+                    !oldAdjustment.isChildInGroup && newAdjustment.isChildInGroup -> true
+            AsyncGroupHeaderViewInflation.isEnabled &&
+                !oldAdjustment.isGroupSummary && newAdjustment.isGroupSummary -> true
             else -> false
         }
 

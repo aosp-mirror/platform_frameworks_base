@@ -82,7 +82,7 @@ import java.util.List;
  * detector. Gesture matchers are tied to a single gesture. It calls listener callback functions
  * when a gesture starts or completes.
  */
-class GestureManifold implements GestureMatcher.StateChangeListener {
+public class GestureManifold implements GestureMatcher.StateChangeListener {
 
     private static final String LOG_TAG = "GestureManifold";
 
@@ -111,7 +111,7 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
     // Shared state information.
     private TouchState mState;
 
-    GestureManifold(Context context, Listener listener, TouchState state, Handler handler) {
+    public GestureManifold(Context context, Listener listener, TouchState state, Handler handler) {
         mContext = context;
         mHandler = handler;
         mListener = listener;
@@ -222,7 +222,7 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
      * @return True if the event has been appropriately handled by the gesture manifold and related
      *     callback functions, false if it should be handled further by the calling function.
      */
-    boolean onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+    public boolean onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         if (mState.isClear()) {
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 // Validity safeguard: if touch state is clear, then matchers should always be clear

@@ -24,6 +24,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.job.Flags.FLAG_COUNT_QUOTA_FIX;
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
 import static com.android.server.job.JobSchedulerService.EXEMPTED_INDEX;
 import static com.android.server.job.JobSchedulerService.FREQUENT_INDEX;
@@ -75,11 +76,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.platform.test.annotations.LargeTest;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.SparseBooleanArray;
 
+import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ArrayUtils;
@@ -98,6 +102,7 @@ import com.android.server.usage.AppStandbyInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -154,6 +159,10 @@ public class QuotaControllerTest {
     @Mock
     private UsageStatsManagerInternal mUsageStatsManager;
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+
     private JobStore mJobStore;
 
     @Before
@@ -188,6 +197,7 @@ public class QuotaControllerTest {
                 .when(() -> LocalServices.getService(BatteryManagerInternal.class));
         doReturn(mUsageStatsManager)
                 .when(() -> LocalServices.getService(UsageStatsManagerInternal.class));
+        JobSchedulerService.sUsageStatsManagerInternal = mUsageStatsManager;
         doReturn(mPowerAllowlistInternal)
                 .when(() -> LocalServices.getService(PowerAllowlistInternal.class));
         // Used in JobStatus.
@@ -368,10 +378,15 @@ public class QuotaControllerTest {
         }
     }
 
+    private JobInfo.Builder createJobInfoBuilder(int jobId) {
+        return new JobInfo.Builder(jobId, new ComponentName(mContext, "TestQuotaJobService"));
+    }
+
     private JobStatus createJobStatus(String testTag, int jobId) {
-        JobInfo jobInfo = new JobInfo.Builder(jobId,
-                new ComponentName(mContext, "TestQuotaJobService"))
-                .build();
+        return createJobStatus(testTag, createJobInfoBuilder(jobId).build());
+    }
+
+    private JobStatus createJobStatus(String testTag, JobInfo jobInfo) {
         return createJobStatus(testTag, SOURCE_PACKAGE, CALLING_UID, jobInfo);
     }
 
@@ -395,8 +410,6 @@ public class QuotaControllerTest {
                 /* state */ true, /* allowlisted */false);
         js.setBackgroundNotRestrictedConstraintSatisfied(
                 sElapsedRealtimeClock.millis(), true, false);
-        js.setTareWealthConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
-        js.setExpeditedJobTareApproved(sElapsedRealtimeClock.millis(), true);
         js.setFlexibilityConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
         return js;
     }
@@ -1333,39 +1346,70 @@ public class QuotaControllerTest {
         mQuotaController.saveTimingSession(0, SOURCE_PACKAGE,
                 createTimingSession(sElapsedRealtimeClock.millis() - (6 * MINUTE_IN_MILLIS),
                         3 * MINUTE_IN_MILLIS, 5), false);
+        final long timeUntilQuotaConsumedMs = 7 * MINUTE_IN_MILLIS;
         JobStatus job = createJobStatus("testGetMaxJobExecutionTimeLocked", 0);
+        //noinspection deprecation
+        JobStatus jobDefIWF = createJobStatus("testGetMaxJobExecutionTimeLocked",
+                createJobInfoBuilder(1)
+                        .setImportantWhileForeground(true)
+                        .setPriority(JobInfo.PRIORITY_DEFAULT)
+                        .build());
+        JobStatus jobHigh = createJobStatus("testGetMaxJobExecutionTimeLocked",
+                createJobInfoBuilder(2).setPriority(JobInfo.PRIORITY_HIGH).build());
         setStandbyBucket(RARE_INDEX, job);
+        setStandbyBucket(RARE_INDEX, jobDefIWF);
+        setStandbyBucket(RARE_INDEX, jobHigh);
 
         setCharging();
         synchronized (mQuotaController.mLock) {
             assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                     mQuotaController.getMaxJobExecutionTimeMsLocked((job)));
+            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
+            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobHigh)));
         }
 
         setDischarging();
         setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
         synchronized (mQuotaController.mLock) {
-            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+            assertEquals(timeUntilQuotaConsumedMs,
                     mQuotaController.getMaxJobExecutionTimeMsLocked((job)));
+            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
+            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobHigh)));
         }
 
         // Top-started job
         setProcessState(ActivityManager.PROCESS_STATE_TOP);
         synchronized (mQuotaController.mLock) {
-            mQuotaController.maybeStartTrackingJobLocked(job, null);
+            trackJobs(job, jobDefIWF, jobHigh);
             mQuotaController.prepareForExecutionLocked(job);
+            mQuotaController.prepareForExecutionLocked(jobDefIWF);
+            mQuotaController.prepareForExecutionLocked(jobHigh);
         }
         setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
         synchronized (mQuotaController.mLock) {
-            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+            assertEquals(timeUntilQuotaConsumedMs,
                     mQuotaController.getMaxJobExecutionTimeMsLocked((job)));
+            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobDefIWF)));
+            assertEquals(JobSchedulerService.Constants.DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked((jobHigh)));
             mQuotaController.maybeStopTrackingJobLocked(job, null);
+            mQuotaController.maybeStopTrackingJobLocked(jobDefIWF, null);
+            mQuotaController.maybeStopTrackingJobLocked(jobHigh, null);
         }
 
         setProcessState(ActivityManager.PROCESS_STATE_RECEIVER);
         synchronized (mQuotaController.mLock) {
-            assertEquals(7 * MINUTE_IN_MILLIS,
+            assertEquals(timeUntilQuotaConsumedMs,
                     mQuotaController.getMaxJobExecutionTimeMsLocked(job));
+            assertEquals(timeUntilQuotaConsumedMs,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked(jobDefIWF));
+            assertEquals(timeUntilQuotaConsumedMs,
+                    mQuotaController.getMaxJobExecutionTimeMsLocked(jobHigh));
         }
     }
 
@@ -1943,7 +1987,7 @@ public class QuotaControllerTest {
     }
 
     @Test
-    public void testIsWithinQuotaLocked_UnderDuration_OverJobCount() {
+    public void testIsWithinQuotaLocked_UnderDuration_OverJobCountRateLimitWindow() {
         setDischarging();
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
         final int jobCount = mQcConstants.MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW;
@@ -1986,7 +2030,7 @@ public class QuotaControllerTest {
     }
 
     @Test
-    public void testIsWithinQuotaLocked_OverDuration_OverJobCount() {
+    public void testIsWithinQuotaLocked_OverDuration_OverJobCountRateLimitWindow() {
         setDischarging();
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
         final int jobCount = mQcConstants.MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW;
@@ -2128,6 +2172,74 @@ public class QuotaControllerTest {
                 assertEquals(1, mQuotaController.getExecutionStatsLocked(
                         SOURCE_USER_ID, unaffectedPkgName, i).jobCountInRateLimitingWindow);
             }
+        }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_COUNT_QUOTA_FIX)
+    public void testIsWithinQuotaLocked_UnderDuration_OverJobCountInWindow() {
+        setDischarging();
+
+        JobStatus jobRunning = createJobStatus(
+                "testIsWithinQuotaLocked_UnderDuration_OverJobCountInWindow", 1);
+        JobStatus jobPending = createJobStatus(
+                "testIsWithinQuotaLocked_UnderDuration_OverJobCountInWindow", 2);
+        setStandbyBucket(WORKING_INDEX, jobRunning, jobPending);
+
+        setDeviceConfigInt(QcConstants.KEY_MAX_JOB_COUNT_WORKING, 10);
+
+        long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        mQuotaController.saveTimingSession(SOURCE_USER_ID, SOURCE_PACKAGE,
+                createTimingSession(now - (HOUR_IN_MILLIS), 5 * MINUTE_IN_MILLIS, 9), false);
+
+        final ExecutionStats stats;
+        synchronized (mQuotaController.mLock) {
+            stats = mQuotaController.getExecutionStatsLocked(
+                    SOURCE_USER_ID, SOURCE_PACKAGE, WORKING_INDEX);
+            assertTrue(mQuotaController
+                    .isWithinQuotaLocked(SOURCE_USER_ID, SOURCE_PACKAGE, WORKING_INDEX));
+            assertEquals(10, stats.jobCountLimit);
+            assertEquals(9, stats.bgJobCountInWindow);
+        }
+
+        when(mJobSchedulerService.isCurrentlyRunningLocked(jobRunning)).thenReturn(true);
+        when(mJobSchedulerService.isCurrentlyRunningLocked(jobPending)).thenReturn(false);
+
+        InOrder inOrder = inOrder(mJobSchedulerService);
+        trackJobs(jobRunning, jobPending);
+        // UID in the background.
+        setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
+        // Start the job.
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.prepareForExecutionLocked(jobRunning);
+        }
+
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+        // Wait for some extra time to allow for job processing.
+        ArraySet<JobStatus> expected = new ArraySet<>();
+        expected.add(jobPending);
+        inOrder.verify(mJobSchedulerService, timeout(SECOND_IN_MILLIS).times(1))
+                .onControllerStateChanged(eq(expected));
+
+        synchronized (mQuotaController.mLock) {
+            assertTrue(mQuotaController.isWithinQuotaLocked(jobRunning));
+            assertTrue(jobRunning.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+            assertTrue(jobRunning.isReady());
+            assertFalse(mQuotaController.isWithinQuotaLocked(jobPending));
+            assertFalse(jobPending.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+            assertFalse(jobPending.isReady());
+            assertEquals(10, stats.bgJobCountInWindow);
+        }
+
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStopTrackingJobLocked(jobRunning, null);
+        }
+
+        synchronized (mQuotaController.mLock) {
+            assertFalse(mQuotaController
+                    .isWithinQuotaLocked(SOURCE_USER_ID, SOURCE_PACKAGE, WORKING_INDEX));
+            assertEquals(10, stats.bgJobCountInWindow);
         }
     }
 
@@ -2596,7 +2708,9 @@ public class QuotaControllerTest {
     @Test
     public void testIsWithinEJQuotaLocked_TempAllowlisting_Restricted() {
         setDischarging();
-        JobStatus js = createExpeditedJobStatus("testIsWithinEJQuotaLocked_TempAllowlisting_Restricted", 1);
+        JobStatus js =
+                createExpeditedJobStatus(
+                        "testIsWithinEJQuotaLocked_TempAllowlisting_Restricted", 1);
         setStandbyBucket(RESTRICTED_INDEX, js);
         setDeviceConfigLong(QcConstants.KEY_EJ_LIMIT_FREQUENT_MS, 10 * MINUTE_IN_MILLIS);
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
@@ -4614,7 +4728,7 @@ public class QuotaControllerTest {
         // Handler is told to check when the quota will be consumed, not when the initial
         // remaining time is over.
         verify(handler, atLeast(1)).sendMessageDelayed(
-                argThat(msg -> msg.what == QuotaController.MSG_REACHED_QUOTA),
+                argThat(msg -> msg.what == QuotaController.MSG_REACHED_TIME_QUOTA),
                 eq(10 * SECOND_IN_MILLIS));
         verify(handler, never()).sendMessageDelayed(any(), eq(remainingTimeMs));
 
@@ -6087,7 +6201,8 @@ public class QuotaControllerTest {
         Handler handler = mQuotaController.getHandler();
         spyOn(handler);
 
-        JobStatus job = createExpeditedJobStatus("testEJTimerTracking_TempAllowlisting_Restricted", 1);
+        JobStatus job =
+                createExpeditedJobStatus("testEJTimerTracking_TempAllowlisting_Restricted", 1);
         setStandbyBucket(RESTRICTED_INDEX, job);
         synchronized (mQuotaController.mLock) {
             mQuotaController.maybeStartTrackingJobLocked(job, null);
@@ -6580,7 +6695,7 @@ public class QuotaControllerTest {
         // Handler is told to check when the quota will be consumed, not when the initial
         // remaining time is over.
         verify(handler, atLeast(1)).sendMessageDelayed(
-                argThat(msg -> msg.what == QuotaController.MSG_REACHED_EJ_QUOTA),
+                argThat(msg -> msg.what == QuotaController.MSG_REACHED_EJ_TIME_QUOTA),
                 eq(10 * SECOND_IN_MILLIS));
         verify(handler, never()).sendMessageDelayed(any(), eq(remainingTimeMs));
     }

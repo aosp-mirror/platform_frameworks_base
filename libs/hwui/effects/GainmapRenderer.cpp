@@ -32,6 +32,8 @@
 #include "src/core/SkColorFilterPriv.h"
 #include "src/core/SkImageInfoPriv.h"
 #include "src/core/SkRuntimeEffectPriv.h"
+
+#include <cmath>
 #endif
 
 namespace android::uirenderer {
@@ -54,14 +56,13 @@ float getTargetHdrSdrRatio(const SkColorSpace* destColorspace) {
         return maxPQLux / GenericSdrWhiteNits;
     } else if (skcms_TransferFunction_isHLGish(&destTF)) {
         return maxHLGLux / GenericSdrWhiteNits;
-    } else {
 #ifdef __ANDROID__
+    } else if (RenderThread::isCurrent()) {
         CanvasContext* context = CanvasContext::getActiveContext();
         return context ? context->targetSdrHdrRatio() : 1.f;
-#else
-        return 1.f;
 #endif
     }
+    return 1.f;
 }
 
 void DrawGainmapBitmap(SkCanvas* c, const sk_sp<const SkImage>& image, const SkRect& src,
@@ -207,12 +208,12 @@ private:
 
     void setupGenericUniforms(const sk_sp<const SkImage>& gainmapImage,
                               const SkGainmapInfo& gainmapInfo) {
-        const SkColor4f logRatioMin({sk_float_log(gainmapInfo.fGainmapRatioMin.fR),
-                                     sk_float_log(gainmapInfo.fGainmapRatioMin.fG),
-                                     sk_float_log(gainmapInfo.fGainmapRatioMin.fB), 1.f});
-        const SkColor4f logRatioMax({sk_float_log(gainmapInfo.fGainmapRatioMax.fR),
-                                     sk_float_log(gainmapInfo.fGainmapRatioMax.fG),
-                                     sk_float_log(gainmapInfo.fGainmapRatioMax.fB), 1.f});
+        const SkColor4f logRatioMin({std::log(gainmapInfo.fGainmapRatioMin.fR),
+                                     std::log(gainmapInfo.fGainmapRatioMin.fG),
+                                     std::log(gainmapInfo.fGainmapRatioMin.fB), 1.f});
+        const SkColor4f logRatioMax({std::log(gainmapInfo.fGainmapRatioMax.fR),
+                                     std::log(gainmapInfo.fGainmapRatioMax.fG),
+                                     std::log(gainmapInfo.fGainmapRatioMax.fB), 1.f});
         const int noGamma = gainmapInfo.fGainmapGamma.fR == 1.f &&
                             gainmapInfo.fGainmapGamma.fG == 1.f &&
                             gainmapInfo.fGainmapGamma.fB == 1.f;
@@ -245,11 +246,18 @@ private:
             // This can happen if a BitmapShader is used on multiple canvas', such as a
             // software + hardware canvas, which is otherwise valid as SkShader is "immutable"
             std::lock_guard _lock(mUniformGuard);
-            const float Wunclamped = (sk_float_log(targetHdrSdrRatio) -
-                                      sk_float_log(mGainmapInfo.fDisplayRatioSdr)) /
-                                     (sk_float_log(mGainmapInfo.fDisplayRatioHdr) -
-                                      sk_float_log(mGainmapInfo.fDisplayRatioSdr));
-            const float W = std::max(std::min(Wunclamped, 1.f), 0.f);
+            // Compute the weight parameter that will be used to blend between the images.
+            float W = 0.f;
+            if (targetHdrSdrRatio > mGainmapInfo.fDisplayRatioSdr) {
+                if (targetHdrSdrRatio < mGainmapInfo.fDisplayRatioHdr) {
+                    W = (std::log(targetHdrSdrRatio) -
+                         std::log(mGainmapInfo.fDisplayRatioSdr)) /
+                        (std::log(mGainmapInfo.fDisplayRatioHdr) -
+                         std::log(mGainmapInfo.fDisplayRatioSdr));
+                } else {
+                    W = 1.f;
+                }
+            }
             mBuilder.uniform("W") = W;
             uniforms = mBuilder.uniforms();
         }

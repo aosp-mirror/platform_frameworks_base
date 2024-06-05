@@ -1,0 +1,325 @@
+// Copyright (C) 2023 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// We need this "trampoline" rule to force soong to give a host-side jar to
+// framework-minus-apex.ravenwood-base. Otherwise, soong would mix up the arch (?) and we'd get
+// a dex jar.
+java_library {
+    name: "framework-minus-apex-for-hoststubgen",
+    installable: false, // host only jar.
+    static_libs: [
+        "framework-minus-apex",
+    ],
+    sdk_version: "core_platform",
+    visibility: ["//visibility:private"],
+}
+
+// Generate the stub/impl from framework-all, with hidden APIs.
+java_genrule {
+    name: "framework-minus-apex.ravenwood-base",
+    tools: ["hoststubgen"],
+    cmd: "$(location hoststubgen) " +
+        "@$(location :ravenwood-standard-options) " +
+
+        "--debug-log $(location hoststubgen_framework-minus-apex.log) " +
+        "--stats-file $(location hoststubgen_framework-minus-apex_stats.csv) " +
+        "--supported-api-list-file $(location hoststubgen_framework-minus-apex_apis.csv) " +
+
+        "--out-impl-jar $(location ravenwood.jar) " +
+
+        "--gen-keep-all-file $(location hoststubgen_keep_all.txt) " +
+        "--gen-input-dump-file $(location hoststubgen_dump.txt) " +
+
+        "--in-jar $(location :framework-minus-apex-for-hoststubgen) " +
+        "--policy-override-file $(location :ravenwood-framework-policies) " +
+        "--annotation-allowed-classes-file $(location :ravenwood-annotation-allowed-classes) ",
+    srcs: [
+        ":framework-minus-apex-for-hoststubgen",
+        ":ravenwood-framework-policies",
+        ":ravenwood-standard-options",
+        ":ravenwood-annotation-allowed-classes",
+    ],
+    out: [
+        "ravenwood.jar",
+
+        // Following files are created just as FYI.
+        "hoststubgen_keep_all.txt",
+        "hoststubgen_dump.txt",
+
+        "hoststubgen_framework-minus-apex.log",
+        "hoststubgen_framework-minus-apex_stats.csv",
+        "hoststubgen_framework-minus-apex_apis.csv",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+// Extract the impl jar from "framework-minus-apex.ravenwood-base" for subsequent build rules.
+// Note this emits a "device side" output, so that ravenwood tests can (implicitly)
+// depend on it.
+java_genrule {
+    name: "framework-minus-apex.ravenwood",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":framework-minus-apex.ravenwood-base{ravenwood.jar}",
+    ],
+    out: [
+        "framework-minus-apex.ravenwood.jar",
+    ],
+}
+
+// Extract the stats file.
+genrule {
+    name: "framework-minus-apex.ravenwood.stats",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_stats.csv}",
+    ],
+    out: [
+        "hoststubgen_framework-minus-apex_stats.csv",
+    ],
+}
+
+genrule {
+    name: "framework-minus-apex.ravenwood.apis",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_apis.csv}",
+    ],
+    out: [
+        "hoststubgen_framework-minus-apex_apis.csv",
+    ],
+}
+
+genrule {
+    name: "framework-minus-apex.ravenwood.keep_all",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":framework-minus-apex.ravenwood-base{hoststubgen_keep_all.txt}",
+    ],
+    out: [
+        "hoststubgen_framework-minus-apex_keep_all.txt",
+    ],
+}
+
+java_library {
+    name: "services.core-for-hoststubgen",
+    installable: false, // host only jar.
+    static_libs: [
+        "services.core",
+    ],
+    sdk_version: "core_platform",
+    visibility: ["//visibility:private"],
+}
+
+java_genrule {
+    name: "services.core.ravenwood-base",
+    tools: ["hoststubgen"],
+    cmd: "$(location hoststubgen) " +
+        "@$(location :ravenwood-standard-options) " +
+
+        "--debug-log $(location hoststubgen_services.core.log) " +
+        "--stats-file $(location hoststubgen_services.core_stats.csv) " +
+        "--supported-api-list-file $(location hoststubgen_services.core_apis.csv) " +
+
+        "--out-impl-jar $(location ravenwood.jar) " +
+
+        "--gen-keep-all-file $(location hoststubgen_keep_all.txt) " +
+        "--gen-input-dump-file $(location hoststubgen_dump.txt) " +
+
+        "--in-jar $(location :services.core-for-hoststubgen) " +
+        "--policy-override-file $(location :ravenwood-services-policies) " +
+        "--annotation-allowed-classes-file $(location :ravenwood-annotation-allowed-classes) ",
+    srcs: [
+        ":services.core-for-hoststubgen",
+        ":ravenwood-services-policies",
+        ":ravenwood-standard-options",
+        ":ravenwood-annotation-allowed-classes",
+    ],
+    out: [
+        "ravenwood.jar",
+
+        // Following files are created just as FYI.
+        "hoststubgen_keep_all.txt",
+        "hoststubgen_dump.txt",
+
+        "hoststubgen_services.core.log",
+        "hoststubgen_services.core_stats.csv",
+        "hoststubgen_services.core_apis.csv",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+java_genrule {
+    name: "services.core.ravenwood",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":services.core.ravenwood-base{ravenwood.jar}",
+    ],
+    out: [
+        "services.core.ravenwood.jar",
+    ],
+}
+
+// Extract the stats file.
+genrule {
+    name: "services.core.ravenwood.stats",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":services.core.ravenwood-base{hoststubgen_services.core_stats.csv}",
+    ],
+    out: [
+        "hoststubgen_services.core_stats.csv",
+    ],
+}
+
+genrule {
+    name: "services.core.ravenwood.apis",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":services.core.ravenwood-base{hoststubgen_services.core_apis.csv}",
+    ],
+    out: [
+        "hoststubgen_services.core_apis.csv",
+    ],
+}
+
+genrule {
+    name: "services.core.ravenwood.keep_all",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":services.core.ravenwood-base{hoststubgen_keep_all.txt}",
+    ],
+    out: [
+        "hoststubgen_services.core_keep_all.txt",
+    ],
+}
+
+java_library {
+    name: "services.core.ravenwood-jarjar",
+    installable: false,
+    static_libs: [
+        "services.core.ravenwood",
+    ],
+    jarjar_rules: ":ravenwood-services-jarjar-rules",
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "services.fakes.ravenwood-jarjar",
+    installable: false,
+    srcs: [":services.fakes-sources"],
+    libs: [
+        "ravenwood-framework",
+        "services.core.ravenwood",
+    ],
+    jarjar_rules: ":ravenwood-services-jarjar-rules",
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "mockito-ravenwood-prebuilt",
+    installable: false,
+    static_libs: [
+        "mockito-robolectric-prebuilt",
+    ],
+}
+
+java_library {
+    name: "inline-mockito-ravenwood-prebuilt",
+    installable: false,
+    static_libs: [
+        "inline-mockito-robolectric-prebuilt",
+    ],
+}
+
+// Jars in "ravenwood-runtime" are set to the classpath, sorted alphabetically.
+// Rename some of the dependencies to make sure they're included in the intended order.
+java_genrule {
+    name: "100-framework-minus-apex.ravenwood",
+    cmd: "cp $(in) $(out)",
+    srcs: [":framework-minus-apex.ravenwood"],
+    out: ["100-framework-minus-apex.ravenwood.jar"],
+    visibility: ["//visibility:private"],
+}
+
+java_genrule {
+    // Use 200 to make sure it comes before the mainline stub ("all-updatable...").
+    name: "200-kxml2-android",
+    cmd: "cp $(in) $(out)",
+    srcs: [":kxml2-android"],
+    out: ["200-kxml2-android.jar"],
+    visibility: ["//visibility:private"],
+}
+
+java_genrule {
+    name: "z00-all-updatable-modules-system-stubs",
+    cmd: "cp $(in) $(out)",
+    srcs: [":all-updatable-modules-system-stubs"],
+    out: ["z00-all-updatable-modules-system-stubs.jar"],
+    visibility: ["//visibility:private"],
+}
+
+android_ravenwood_libgroup {
+    name: "ravenwood-runtime",
+    libs: [
+        "100-framework-minus-apex.ravenwood",
+        "200-kxml2-android",
+
+        "ravenwood-runtime-common-ravenwood",
+
+        "android.test.mock.ravenwood",
+        "ravenwood-helper-runtime",
+        "hoststubgen-helper-runtime.ravenwood",
+        "services.core.ravenwood-jarjar",
+        "services.fakes.ravenwood-jarjar",
+
+        // Provide runtime versions of utils linked in below
+        "junit",
+        "truth",
+        "flag-junit",
+        "ravenwood-framework",
+        "ravenwood-junit-impl",
+        "ravenwood-junit-impl-flag",
+        "mockito-ravenwood-prebuilt",
+        "inline-mockito-ravenwood-prebuilt",
+
+        // It's a stub, so it should be towards the end.
+        "z00-all-updatable-modules-system-stubs",
+    ],
+    jni_libs: [
+        "libandroid_runtime",
+        "libravenwood_runtime",
+    ],
+}
+
+android_ravenwood_libgroup {
+    name: "ravenwood-utils",
+    libs: [
+        "junit",
+        "truth",
+        "flag-junit",
+        "ravenwood-framework",
+        "ravenwood-junit",
+        "mockito-ravenwood-prebuilt",
+        "inline-mockito-ravenwood-prebuilt",
+    ],
+}

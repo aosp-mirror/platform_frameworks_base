@@ -37,22 +37,16 @@ public class BubbleDebugConfig {
 
     // Default log tag for the Bubbles package.
     public static final String TAG_BUBBLES = "Bubbles";
-
-    static final boolean DEBUG_BUBBLE_CONTROLLER = false;
-    static final boolean DEBUG_BUBBLE_DATA = false;
-    static final boolean DEBUG_BUBBLE_STACK_VIEW = false;
-    static final boolean DEBUG_BUBBLE_EXPANDED_VIEW = false;
-    static final boolean DEBUG_EXPERIMENTS = true;
-    static final boolean DEBUG_OVERFLOW = false;
-    static final boolean DEBUG_USER_EDUCATION = false;
-    static final boolean DEBUG_POSITIONER = false;
-    public static final boolean DEBUG_COLLAPSE_ANIMATOR = false;
-    static final boolean DEBUG_BUBBLE_GESTURE = false;
-    public static boolean DEBUG_EXPANDED_VIEW_DRAGGING = false;
+    public static final boolean DEBUG_USER_EDUCATION = false;
 
     private static final boolean FORCE_SHOW_USER_EDUCATION = false;
     private static final String FORCE_SHOW_USER_EDUCATION_SETTING =
             "force_show_bubbles_user_education";
+    /**
+     * When set to true, bubbles user education flow never shows up.
+     */
+    private static final String FORCE_HIDE_USER_EDUCATION_SETTING =
+            "force_hide_bubbles_user_education";
 
     /**
      * @return whether we should force show user education for bubbles. Used for debugging & demos.
@@ -63,21 +57,34 @@ public class BubbleDebugConfig {
         return FORCE_SHOW_USER_EDUCATION || forceShow;
     }
 
+    /**
+     * @return whether we should never show user education for bubbles. Used in tests.
+     */
+    static boolean neverShowUserEducation(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                FORCE_HIDE_USER_EDUCATION_SETTING, 0) != 0;
+    }
+
     static String formatBubblesString(List<Bubble> bubbles, BubbleViewProvider selected) {
         StringBuilder sb = new StringBuilder();
-        for (Bubble bubble : bubbles) {
+        for (int i = 0; i < bubbles.size(); i++) {
+            Bubble bubble = bubbles.get(i);
             if (bubble == null) {
-                sb.append("   <null> !!!!!\n");
+                sb.append("   <null> !!!!!");
             } else {
                 boolean isSelected = (selected != null
-                        && selected.getKey() != BubbleOverflow.KEY
+                        && !BubbleOverflow.KEY.equals(selected.getKey())
                         && bubble == selected);
                 String arrow = isSelected ? "=>" : "  ";
-                sb.append(String.format("%s Bubble{act=%12d, showInShade=%d, key=%s}\n",
+
+                sb.append(String.format("%s Bubble{act=%12d, showInShade=%d, key=%s}",
                         arrow,
                         bubble.getLastActivity(),
                         (bubble.showInShade() ? 1 : 0),
                         bubble.getKey()));
+            }
+            if (i != bubbles.size() - 1) {
+                sb.append("\n");
             }
         }
         return sb.toString();

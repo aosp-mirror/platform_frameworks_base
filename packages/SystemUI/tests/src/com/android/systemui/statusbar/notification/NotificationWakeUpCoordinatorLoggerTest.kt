@@ -16,19 +16,19 @@
 
 package com.android.systemui.statusbar.notification
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.LogcatEchoTracker
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.StatusBarState
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class NotificationWakeUpCoordinatorLoggerTest : SysuiTestCase() {
 
@@ -176,7 +176,6 @@ class NotificationWakeUpCoordinatorLoggerTest : SysuiTestCase() {
         val recentLogs = mutableListOf<Pair<String, LogLevel>>()
         val tracker =
             object : LogcatEchoTracker {
-                override val logInBackgroundThread: Boolean = false
                 override fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean = false
                 override fun isTagLoggable(tagName: String, level: LogLevel): Boolean {
                     recentLogs.add(tagName to level)

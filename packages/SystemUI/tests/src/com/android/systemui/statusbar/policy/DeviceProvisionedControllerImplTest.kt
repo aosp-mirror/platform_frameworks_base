@@ -28,6 +28,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.wrapper.BuildInfo
@@ -67,22 +68,24 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
 
     private lateinit var mainExecutor: FakeExecutor
     private lateinit var testableLooper: TestableLooper
-    private lateinit var settings: FakeSettings
+    private lateinit var secureSettings: FakeSettings
+    private lateinit var globalSettings: FakeGlobalSettings
+
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         mainExecutor = FakeExecutor(FakeSystemClock())
-        settings = FakeSettings()
+        secureSettings = FakeSettings()
+        globalSettings = FakeGlobalSettings()
         `when`(userTracker.userId).thenReturn(START_USER)
         whenever(buildInfo.isDebuggable).thenReturn(false)
         controller = DeviceProvisionedControllerImpl(
-                settings,
-                settings,
+                secureSettings,
+                globalSettings,
                 userTracker,
                 dumpManager,
-                buildInfo,
                 Handler(testableLooper.looper),
                 mainExecutor
         )
@@ -95,12 +98,6 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testFrpNotActiveByDefault() {
-        init()
-        assertThat(controller.isFrpActive).isFalse()
-    }
-
-    @Test
     fun testNotUserSetupByDefault() {
         init()
         assertThat(controller.isUserSetup(START_USER)).isFalse()
@@ -108,23 +105,15 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testProvisionedWhenCreated() {
-        settings.putInt(Settings.Global.DEVICE_PROVISIONED, 1)
+        globalSettings.putInt(Settings.Global.DEVICE_PROVISIONED, 1)
         init()
 
         assertThat(controller.isDeviceProvisioned).isTrue()
     }
 
     @Test
-    fun testFrpActiveWhenCreated() {
-        settings.putInt(Settings.Secure.SECURE_FRP_MODE, 1)
-        init()
-
-        assertThat(controller.isFrpActive).isTrue()
-    }
-
-    @Test
     fun testUserSetupWhenCreated() {
-        settings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, START_USER)
+        secureSettings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, START_USER)
         init()
 
         assertThat(controller.isUserSetup(START_USER))
@@ -134,27 +123,17 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
     fun testDeviceProvisionedChange() {
         init()
 
-        settings.putInt(Settings.Global.DEVICE_PROVISIONED, 1)
+        globalSettings.putInt(Settings.Global.DEVICE_PROVISIONED, 1)
         testableLooper.processAllMessages() // background observer
 
         assertThat(controller.isDeviceProvisioned).isTrue()
     }
 
     @Test
-    fun testFrpActiveChange() {
-        init()
-
-        settings.putInt(Settings.Secure.SECURE_FRP_MODE, 1)
-        testableLooper.processAllMessages() // background observer
-
-        assertThat(controller.isFrpActive).isTrue()
-    }
-
-    @Test
     fun testUserSetupChange() {
         init()
 
-        settings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, START_USER)
+        secureSettings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, START_USER)
         testableLooper.processAllMessages() // background observer
 
         assertThat(controller.isUserSetup(START_USER)).isTrue()
@@ -165,7 +144,7 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         init()
         val otherUser = 10
 
-        settings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, otherUser)
+        secureSettings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, otherUser)
         testableLooper.processAllMessages() // background observer
 
         assertThat(controller.isUserSetup(START_USER)).isFalse()
@@ -175,7 +154,7 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
     @Test
     fun testCurrentUserSetup() {
         val otherUser = 10
-        settings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, otherUser)
+        secureSettings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, otherUser)
         init()
 
         assertThat(controller.isCurrentUserSetup).isFalse()
@@ -193,7 +172,6 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         mainExecutor.runAllReady()
 
         verify(listener, never()).onDeviceProvisionedChanged()
-        verify(listener, never()).onFrpActiveChanged()
         verify(listener, never()).onUserSetupChanged()
         verify(listener, never()).onUserSwitched()
     }
@@ -211,7 +189,6 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         verify(listener).onUserSwitched()
         verify(listener, never()).onUserSetupChanged()
         verify(listener, never()).onDeviceProvisionedChanged()
-        verify(listener, never()).onFrpActiveChanged()
     }
 
     @Test
@@ -219,14 +196,13 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         init()
         controller.addCallback(listener)
 
-        settings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, START_USER)
+        secureSettings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, START_USER)
         testableLooper.processAllMessages()
         mainExecutor.runAllReady()
 
         verify(listener, never()).onUserSwitched()
         verify(listener).onUserSetupChanged()
         verify(listener, never()).onDeviceProvisionedChanged()
-        verify(listener, never()).onFrpActiveChanged()
     }
 
     @Test
@@ -234,29 +210,13 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         init()
         controller.addCallback(listener)
 
-        settings.putInt(Settings.Global.DEVICE_PROVISIONED, 1)
+        globalSettings.putInt(Settings.Global.DEVICE_PROVISIONED, 1)
         testableLooper.processAllMessages()
         mainExecutor.runAllReady()
 
         verify(listener, never()).onUserSwitched()
         verify(listener, never()).onUserSetupChanged()
-        verify(listener, never()).onFrpActiveChanged()
         verify(listener).onDeviceProvisionedChanged()
-    }
-
-    @Test
-    fun testListenerCalledOnFrpActiveChanged() {
-        init()
-        controller.addCallback(listener)
-
-        settings.putInt(Settings.Secure.SECURE_FRP_MODE, 1)
-        testableLooper.processAllMessages()
-        mainExecutor.runAllReady()
-
-        verify(listener, never()).onUserSwitched()
-        verify(listener, never()).onUserSetupChanged()
-        verify(listener, never()).onDeviceProvisionedChanged()
-        verify(listener).onFrpActiveChanged()
     }
 
     @Test
@@ -266,15 +226,13 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         controller.removeCallback(listener)
 
         switchUser(10)
-        settings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, START_USER)
-        settings.putInt(Settings.Global.DEVICE_PROVISIONED, 1)
-        settings.putInt(Settings.Secure.SECURE_FRP_MODE, 1)
+        secureSettings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, START_USER)
+        globalSettings.putInt(Settings.Global.DEVICE_PROVISIONED, 1)
 
         testableLooper.processAllMessages()
         mainExecutor.runAllReady()
 
         verify(listener, never()).onDeviceProvisionedChanged()
-        verify(listener, never()).onFrpActiveChanged()
         verify(listener, never()).onUserSetupChanged()
         verify(listener, never()).onUserSwitched()
     }

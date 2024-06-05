@@ -20,13 +20,18 @@ import android.testing.AndroidTestingRunner
 import android.view.MotionEvent
 import android.widget.SeekBar
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.settingslib.RestrictedLockUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
+import com.android.systemui.haptics.slider.SeekbarHapticPlugin
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.BrightnessMirrorController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -34,6 +39,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.isNull
@@ -59,12 +65,18 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
     private lateinit var motionEvent: MotionEvent
     @Mock
     private lateinit var listener: ToggleSlider.Listener
+    @Mock
+    private lateinit var vibratorHelper: VibratorHelper
+    @Mock
+    private lateinit var activityStarter: ActivityStarter
 
     @Captor
     private lateinit var seekBarChangeCaptor: ArgumentCaptor<SeekBar.OnSeekBarChangeListener>
     @Mock
     private lateinit var seekBar: SeekBar
+    private val uiEventLogger = UiEventLoggerFake()
     private var mFalsingManager: FalsingManagerFake = FalsingManagerFake()
+    private val systemClock = FakeSystemClock()
 
     private lateinit var mController: BrightnessSliderController
 
@@ -72,10 +84,18 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        whenever(mirrorController.toggleSlider).thenReturn(mirror)
+        whenever(mirrorController.getToggleSlider()).thenReturn(mirror)
         whenever(motionEvent.copy()).thenReturn(motionEvent)
+        whenever(vibratorHelper.getPrimitiveDurations(anyInt())).thenReturn(intArrayOf(0))
 
-        mController = BrightnessSliderController(brightnessSliderView, mFalsingManager)
+        mController =
+            BrightnessSliderController(
+                brightnessSliderView,
+                mFalsingManager,
+                uiEventLogger,
+                SeekbarHapticPlugin(vibratorHelper, systemClock),
+                activityStarter,
+            )
         mController.init()
         mController.setOnChangedListener(listener)
     }
@@ -104,12 +124,12 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
     @Test
     fun testEnforceAdminRelayed() {
         mController.setEnforcedAdmin(enforcedAdmin)
-        verify(brightnessSliderView).setEnforcedAdmin(enforcedAdmin)
+        verify(brightnessSliderView).setAdminBlocker(notNull())
     }
 
     @Test
     fun testNullMirrorNotTrackingTouch() {
-        whenever(mirrorController.toggleSlider).thenReturn(null)
+        whenever(mirrorController.getToggleSlider()).thenReturn(null)
 
         mController.setMirrorControllerAndMirror(mirrorController)
 
@@ -190,6 +210,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
     @Test
     fun testSeekBarTrackingStarted() {
         whenever(brightnessSliderView.value).thenReturn(42)
+        val event = BrightnessSliderEvent.BRIGHTNESS_SLIDER_STARTED_TRACKING_TOUCH
 
         mController.onViewAttached()
         mController.setMirrorControllerAndMirror(mirrorController)
@@ -200,11 +221,14 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
         verify(listener).onChanged(eq(true), eq(42), eq(false))
         verify(mirrorController).showMirror()
         verify(mirrorController).setLocationAndSize(brightnessSliderView)
+        assertThat(uiEventLogger.numLogs()).isEqualTo(1)
+        assertThat(uiEventLogger.eventId(0)).isEqualTo(event.id)
     }
 
     @Test
     fun testSeekBarTrackingStopped() {
         whenever(brightnessSliderView.value).thenReturn(23)
+        val event = BrightnessSliderEvent.BRIGHTNESS_SLIDER_STOPPED_TRACKING_TOUCH
 
         mController.onViewAttached()
         mController.setMirrorControllerAndMirror(mirrorController)
@@ -214,5 +238,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
 
         verify(listener).onChanged(eq(false), eq(23), eq(true))
         verify(mirrorController).hideMirror()
+        assertThat(uiEventLogger.numLogs()).isEqualTo(1)
+        assertThat(uiEventLogger.eventId(0)).isEqualTo(event.id)
     }
 }

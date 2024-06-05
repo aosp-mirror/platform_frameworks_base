@@ -231,7 +231,7 @@ public final class DomainVerificationUserState implements Parcelable {
     }
 
     /**
-     * Mapping of domain host to state, as defined by {@link DomainState}.
+     * Mapping of domain host to state, as defined by the {@code DOMAIN_STATE_*} constants
      */
     @DataClass.Generated.Member
     public @NonNull Map<String,Integer> getHostToStateMap() {

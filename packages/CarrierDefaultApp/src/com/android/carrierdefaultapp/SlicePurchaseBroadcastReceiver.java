@@ -173,7 +173,9 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
         }
 
         String purchaseUrl = intent.getStringExtra(SlicePurchaseController.EXTRA_PURCHASE_URL);
-        if (getPurchaseUrl(purchaseUrl) == null) {
+        String userData = intent.getStringExtra(SlicePurchaseController.EXTRA_USER_DATA);
+        String contentsType = intent.getStringExtra(SlicePurchaseController.EXTRA_CONTENTS_TYPE);
+        if (getPurchaseUrl(purchaseUrl, userData, TextUtils.isEmpty(contentsType)) == null) {
             loge("isIntentValid: invalid purchase URL: " + purchaseUrl);
             return false;
         }
@@ -189,9 +191,38 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
                 && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED)
                 && isPendingIntentValid(intent,
                         SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION)
+                && isPendingIntentValid(intent,
+                        SlicePurchaseController.EXTRA_INTENT_NOTIFICATIONS_DISABLED)
                 && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_SUCCESS)
                 && isPendingIntentValid(intent,
                         SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN);
+    }
+
+    /**
+     * Get the {@link URL} from the given purchase URL String and user data, if it is valid.
+     *
+     * @param purchaseUrl The purchase URL String to use to create the URL.
+     * @param userData The user data parameter from the entitlement server.
+     * @param shouldAppendUserData If this is {@code true} and the {@code userData} exists,
+     *        the {@code userData} should be appended to the {@code purchaseUrl} to create the URL.
+     *        If this is false, only the {@code purchaseUrl} should be used and the {@code userData}
+     *        will be sent as data to the POST request instead.
+     * @return The URL from the given purchase URL and user data or {@code null} if it is invalid.
+     */
+    @Nullable public static URL getPurchaseUrl(@Nullable String purchaseUrl,
+            @Nullable String userData, boolean shouldAppendUserData) {
+        if (purchaseUrl == null) {
+            return null;
+        }
+        // Only append user data if it exists, otherwise just return the purchase URL
+        if (!shouldAppendUserData || TextUtils.isEmpty(userData)) {
+            return getPurchaseUrl(purchaseUrl);
+        }
+        URL url = getPurchaseUrl(purchaseUrl + "?" + userData);
+        if (url == null) {
+            url = getPurchaseUrl(purchaseUrl);
+        }
+        return url;
     }
 
     /**
@@ -200,7 +231,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
      * @param purchaseUrl The purchase URL String to use to create the URL.
      * @return The purchase URL from the given String or {@code null} if it is invalid.
      */
-    @Nullable public static URL getPurchaseUrl(@Nullable String purchaseUrl) {
+    @Nullable private static URL getPurchaseUrl(@Nullable String purchaseUrl) {
         if (!URLUtil.isValidUrl(purchaseUrl)) {
             return null;
         }
@@ -247,6 +278,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
             case SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED: return "request failed";
             case SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION:
                 return "not default data subscription";
+            case SlicePurchaseController.EXTRA_INTENT_NOTIFICATIONS_DISABLED:
+                return "notifications disabled";
             case SlicePurchaseController.EXTRA_INTENT_SUCCESS: return "success";
             case SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN:
                 return "notification shown";
@@ -292,26 +325,45 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
     }
 
     private void onDisplayPerformanceBoostNotification(@NonNull Context context,
-            @NonNull Intent intent, boolean repeat) {
-        if (!repeat && !isIntentValid(intent)) {
+            @NonNull Intent intent, boolean localeChanged) {
+        if (!localeChanged && !isIntentValid(intent)) {
             sendSlicePurchaseAppResponse(intent,
                     SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED);
             return;
         }
 
         Resources res = getResources(context);
-        NotificationChannel channel = new NotificationChannel(
-                PERFORMANCE_BOOST_NOTIFICATION_CHANNEL_ID,
-                res.getString(R.string.performance_boost_notification_channel),
-                NotificationManager.IMPORTANCE_DEFAULT);
-        // CarrierDefaultApp notifications are unblockable by default. Make this channel blockable
-        //  to allow users to disable notifications posted to this channel without affecting other
-        //  notifications in this application.
-        channel.setBlockable(true);
-        context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        NotificationManager notificationManager =
+                context.getSystemService(NotificationManager.class);
+        NotificationChannel channel = notificationManager.getNotificationChannel(
+                PERFORMANCE_BOOST_NOTIFICATION_CHANNEL_ID);
+        if (channel == null) {
+            channel = new NotificationChannel(
+                    PERFORMANCE_BOOST_NOTIFICATION_CHANNEL_ID,
+                    res.getString(R.string.performance_boost_notification_channel),
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            // CarrierDefaultApp notifications are unblockable by default.
+            // Make this channel blockable to allow users to disable notifications posted to this
+            // channel without affecting other notifications in this application.
+            channel.setBlockable(true);
+            context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        } else if (localeChanged) {
+            // If the channel already exists but the locale has changed, update the channel name.
+            channel.setName(res.getString(R.string.performance_boost_notification_channel));
+        }
+
+        boolean channelNotificationsDisabled =
+                channel.getImportance() == NotificationManager.IMPORTANCE_NONE;
+        if (channelNotificationsDisabled || !notificationManager.areNotificationsEnabled()) {
+            // If notifications are disabled for the app or channel, fail the purchase request.
+            logd("Purchase request failed because notifications are disabled for the "
+                    + (channelNotificationsDisabled ? "channel." : "application."));
+            sendSlicePurchaseAppResponse(intent,
+                    SlicePurchaseController.EXTRA_INTENT_NOTIFICATIONS_DISABLED);
+            return;
+        }
 
         String carrier = intent.getStringExtra(SlicePurchaseController.EXTRA_CARRIER);
-
         Notification notification =
                 new Notification.Builder(context, PERFORMANCE_BOOST_NOTIFICATION_CHANNEL_ID)
                         .setContentTitle(res.getString(
@@ -340,11 +392,12 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
 
         int capability = intent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
                 SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
-        logd((repeat ? "Update" : "Display") + " the performance boost notification for capability "
+        logd((localeChanged ? "Update" : "Display")
+                + " the performance boost notification for capability "
                 + TelephonyManager.convertPremiumCapabilityToString(capability));
         context.getSystemService(NotificationManager.class).notifyAsUser(
                 PERFORMANCE_BOOST_NOTIFICATION_TAG, capability, notification, UserHandle.ALL);
-        if (!repeat) {
+        if (!localeChanged) {
             sIntents.put(capability, intent);
             sendSlicePurchaseAppResponse(intent,
                     SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN);
@@ -441,6 +494,10 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
     }
 
     private void onUserCanceled(@NonNull Context context, @NonNull Intent intent) {
+        if (!isIntentValid(intent)) {
+            loge("Ignoring onUserCanceled called with invalid intent.");
+            return;
+        }
         int capability = intent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
                 SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
         logd("onUserCanceled: " + TelephonyManager.convertPremiumCapabilityToString(capability));

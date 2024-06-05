@@ -93,11 +93,13 @@ public class BrightLineFalsingManager implements FalsingManager {
         @Override
         public void onSessionEnded() {
             mLastProximityEvent = null;
+            mHistoryTracker.removeBeliefListener(mBeliefListener);
             mClassifiers.forEach(FalsingClassifier::onSessionEnded);
         }
 
         @Override
         public void onSessionStarted() {
+            mHistoryTracker.addBeliefListener(mBeliefListener);
             mClassifiers.forEach(FalsingClassifier::onSessionStarted);
         }
     };
@@ -200,7 +202,6 @@ public class BrightLineFalsingManager implements FalsingManager {
 
         mDataProvider.addSessionListener(mSessionListener);
         mDataProvider.addGestureCompleteListener(mGestureFinalizedListener);
-        mHistoryTracker.addBeliefListener(mBeliefListener);
     }
 
     @Override
@@ -396,6 +397,8 @@ public class BrightLineFalsingManager implements FalsingManager {
                 || mDataProvider.isDocked()
                 || mAccessibilityManager.isTouchExplorationEnabled()
                 || mDataProvider.isA11yAction()
+                || mDataProvider.isFromTrackpad()
+                || mDataProvider.isFromKeyboard()
                 || (mFeatureFlags.isEnabled(Flags.FALSING_OFF_FOR_UNFOLDED)
                     && mDataProvider.isUnfolded());
     }

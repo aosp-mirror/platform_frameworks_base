@@ -191,6 +191,11 @@ abstract class HdmiCecFeatureAction {
         mService.sendCecCommand(cmd, callback);
     }
 
+    protected final void sendCommandWithoutRetries(HdmiCecMessage cmd,
+            HdmiControlService.SendMessageCallback callback) {
+        mService.sendCecCommandWithoutRetries(cmd, callback);
+    }
+
     protected final void addAndStartAction(HdmiCecFeatureAction action) {
         mSource.addAndStartAction(action);
     }
@@ -224,7 +229,13 @@ abstract class HdmiCecFeatureAction {
 
     protected final void pollDevices(DevicePollingCallback callback, int pickStrategy,
             int retryCount) {
-        mService.pollDevices(callback, getSourceAddress(), pickStrategy, retryCount);
+        pollDevices(callback, pickStrategy, retryCount, 0);
+    }
+
+    protected final void pollDevices(DevicePollingCallback callback, int pickStrategy,
+            int retryCount, long pollingMessageInterval) {
+        mService.pollDevices(
+                callback, getSourceAddress(), pickStrategy, retryCount, pollingMessageInterval);
     }
 
     /**

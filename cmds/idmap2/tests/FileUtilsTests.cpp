@@ -27,8 +27,9 @@ namespace android::idmap2::utils {
 #ifdef __ANDROID__
 TEST(FileUtilsTests, UidHasWriteAccessToPath) {
   constexpr const char* tmp_path = "/data/local/tmp/test@idmap";
-  const std::string cache_path(base::StringPrintf("%s/test@idmap", kIdmapCacheDir));
-  const std::string sneaky_cache_path(base::StringPrintf("/data/../%s/test@idmap", kIdmapCacheDir));
+  const std::string cache_path(base::StringPrintf("%s/test@idmap", kIdmapCacheDir.data()));
+  const std::string sneaky_cache_path(
+      base::StringPrintf("/data/../%s/test@idmap", kIdmapCacheDir.data()));
 
   ASSERT_TRUE(UidHasWriteAccessToPath(AID_ROOT, tmp_path));
   ASSERT_TRUE(UidHasWriteAccessToPath(AID_ROOT, cache_path));

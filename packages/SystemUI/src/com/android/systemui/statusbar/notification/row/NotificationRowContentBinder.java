@@ -20,6 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.lang.annotation.Retention;
@@ -54,8 +56,9 @@ public interface NotificationRowContentBinder {
      *
      * @param entry notification
      * @param row notification row to cancel bind on
+     * @return true if an on-going bind operation was cancelled
      */
-    void cancelBind(
+    boolean cancelBind(
             @NonNull NotificationEntry entry,
             @NonNull ExpandableNotificationRow row);
 
@@ -71,6 +74,10 @@ public interface NotificationRowContentBinder {
             @NonNull ExpandableNotificationRow row,
             @InflationFlag int contentToUnbind);
 
+    /** For testing, ensure all inflation is synchronous. */
+    @VisibleForTesting
+    void setInflateSynchronously(boolean inflateSynchronously);
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true,
             prefix = {"FLAG_CONTENT_VIEW_"},
@@ -79,6 +86,9 @@ public interface NotificationRowContentBinder {
                     FLAG_CONTENT_VIEW_EXPANDED,
                     FLAG_CONTENT_VIEW_HEADS_UP,
                     FLAG_CONTENT_VIEW_PUBLIC,
+                    FLAG_CONTENT_VIEW_SINGLE_LINE,
+                    FLAG_GROUP_SUMMARY_HEADER,
+                    FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER,
                     FLAG_CONTENT_VIEW_ALL})
     @interface InflationFlag {}
     /**
@@ -101,7 +111,22 @@ public interface NotificationRowContentBinder {
      */
     int FLAG_CONTENT_VIEW_PUBLIC = 1 << 3;
 
-    int FLAG_CONTENT_VIEW_ALL = (1 << 4) - 1;
+    /**
+     * The single line notification view. Show when the notification is shown as a child in group.
+     */
+    int FLAG_CONTENT_VIEW_SINGLE_LINE = 1 << 4;
+
+    /**
+     * The notification group summary header view
+     */
+    int FLAG_GROUP_SUMMARY_HEADER = 1 << 5;
+
+    /**
+     * The notification low-priority group summary header view
+     */
+    int FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER = 1 << 6;
+
+    int FLAG_CONTENT_VIEW_ALL = (1 << 7) - 1;
 
     /**
      * Parameters for content view binding
@@ -109,9 +134,9 @@ public interface NotificationRowContentBinder {
     class BindParams {
 
         /**
-         * Bind a low priority version of the content views.
+         * Bind a minimized version of the content views.
          */
-        public boolean isLowPriority;
+        public boolean isMinimized;
 
         /**
          * Use increased height when binding contracted view.
@@ -122,6 +147,11 @@ public interface NotificationRowContentBinder {
          * Use increased height when binding heads up views.
          */
         public boolean usesIncreasedHeadsUpHeight;
+
+        /**
+         * Is group summary notification
+         */
+        public boolean mIsGroupSummary;
     }
 
     /**

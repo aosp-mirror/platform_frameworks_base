@@ -20,6 +20,8 @@ import static android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
+import static android.view.MotionEvent.AXIS_GESTURE_SWIPE_FINGER_COUNT;
+import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -58,6 +60,12 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
     private static final int SWIPE_FROM_BOTTOM = 2;
     private static final int SWIPE_FROM_RIGHT = 3;
     private static final int SWIPE_FROM_LEFT = 4;
+
+    private static final int TRACKPAD_SWIPE_NONE = 0;
+    private static final int TRACKPAD_SWIPE_FROM_TOP = 1;
+    private static final int TRACKPAD_SWIPE_FROM_BOTTOM = 2;
+    private static final int TRACKPAD_SWIPE_FROM_RIGHT = 3;
+    private static final int TRACKPAD_SWIPE_FROM_LEFT = 4;
 
     private final Context mContext;
     private final Handler mHandler;
@@ -99,11 +107,12 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
 
     void onConfigurationChanged() {
         final Resources r = mContext.getResources();
-        final int defaultThreshold = r.getDimensionPixelSize(
+        final int startThreshold = r.getDimensionPixelSize(
                 com.android.internal.R.dimen.system_gestures_start_threshold);
-        mSwipeStartThreshold.set(defaultThreshold, defaultThreshold, defaultThreshold,
-                defaultThreshold);
-        mSwipeDistanceThreshold = defaultThreshold;
+        mSwipeStartThreshold.set(startThreshold, startThreshold, startThreshold,
+                startThreshold);
+        mSwipeDistanceThreshold = r.getDimensionPixelSize(
+                com.android.internal.R.dimen.system_gestures_distance_threshold);
 
         final Display display = DisplayManagerGlobal.getInstance()
                 .getRealDisplay(Display.DEFAULT_DISPLAY);
@@ -207,6 +216,25 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (mSwipeFireable) {
+                    int trackpadSwipe = detectTrackpadThreeFingerSwipe(event);
+                    mSwipeFireable = trackpadSwipe == TRACKPAD_SWIPE_NONE;
+                    if (!mSwipeFireable) {
+                        if (trackpadSwipe == TRACKPAD_SWIPE_FROM_TOP) {
+                            if (DEBUG) Slog.d(TAG, "Firing onSwipeFromTop from trackpad");
+                            mCallbacks.onSwipeFromTop();
+                        } else if (trackpadSwipe == TRACKPAD_SWIPE_FROM_BOTTOM) {
+                            if (DEBUG) Slog.d(TAG, "Firing onSwipeFromBottom from trackpad");
+                            mCallbacks.onSwipeFromBottom();
+                        } else if (trackpadSwipe == TRACKPAD_SWIPE_FROM_RIGHT) {
+                            if (DEBUG) Slog.d(TAG, "Firing onSwipeFromRight from trackpad");
+                            mCallbacks.onSwipeFromRight();
+                        } else if (trackpadSwipe == TRACKPAD_SWIPE_FROM_LEFT) {
+                            if (DEBUG) Slog.d(TAG, "Firing onSwipeFromLeft from trackpad");
+                            mCallbacks.onSwipeFromLeft();
+                        }
+                        break;
+                    }
+
                     final int swipe = detectSwipe(event);
                     mSwipeFireable = swipe == SWIPE_NONE;
                     if (swipe == SWIPE_FROM_TOP) {
@@ -298,6 +326,31 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
         }
         mDownPointerId[mDownPointers++] = pointerId;
         return mDownPointers - 1;
+    }
+
+    private int detectTrackpadThreeFingerSwipe(MotionEvent move) {
+        if (!isTrackpadThreeFingerSwipe(move)) {
+            return TRACKPAD_SWIPE_NONE;
+        }
+
+        float dx = move.getX() - mDownX[0];
+        float dy = move.getY() - mDownY[0];
+        if (Math.abs(dx) < Math.abs(dy)) {
+            if (Math.abs(dy) > mSwipeDistanceThreshold) {
+                return dy > 0 ? TRACKPAD_SWIPE_FROM_TOP : TRACKPAD_SWIPE_FROM_BOTTOM;
+            }
+        } else {
+            if (Math.abs(dx) > mSwipeDistanceThreshold) {
+                return dx > 0 ? TRACKPAD_SWIPE_FROM_LEFT : TRACKPAD_SWIPE_FROM_RIGHT;
+            }
+        }
+
+        return TRACKPAD_SWIPE_NONE;
+    }
+
+    private static boolean isTrackpadThreeFingerSwipe(MotionEvent event) {
+        return event.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE
+                && event.getAxisValue(AXIS_GESTURE_SWIPE_FINGER_COUNT) == 3;
     }
 
     private int detectSwipe(MotionEvent move) {

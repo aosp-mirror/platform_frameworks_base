@@ -19,14 +19,14 @@ package com.android.systemui.qs.footer.domain.interactor
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.nano.MetricsProto
 import com.android.internal.logging.testing.FakeMetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
@@ -49,7 +49,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class FooterActionsInteractorTest : SysuiTestCase() {
     private lateinit var utils: FooterActionsTestUtils
@@ -127,7 +127,7 @@ class FooterActionsInteractorTest : SysuiTestCase() {
             .startActivity(
                 intentCaptor.capture(),
                 /* dismissShade= */ eq(true),
-                nullable() as? ActivityLaunchAnimator.Controller,
+                nullable() as? ActivityTransitionAnimator.Controller,
             )
         assertThat(intentCaptor.value.action).isEqualTo(Settings.ACTION_SETTINGS)
     }

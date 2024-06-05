@@ -32,6 +32,8 @@ import android.view.View;
 public class KeyguardIndication {
     @Nullable
     private final CharSequence mMessage;
+    @Nullable
+    private final boolean mForceAccessibilityLiveRegionAssertive;
     @NonNull
     private final ColorStateList mTextColor;
     @Nullable
@@ -49,13 +51,15 @@ public class KeyguardIndication {
             Drawable icon,
             View.OnClickListener onClickListener,
             Drawable background,
-            Long minVisibilityMillis) {
+            Long minVisibilityMillis,
+            Boolean foceAssertive) {
         mMessage = message;
         mTextColor = textColor;
         mIcon = icon;
         mOnClickListener = onClickListener;
         mBackground = background;
         mMinVisibilityMillis = minVisibilityMillis;
+        mForceAccessibilityLiveRegionAssertive = foceAssertive;
     }
 
     /**
@@ -80,7 +84,7 @@ public class KeyguardIndication {
     }
 
     /**
-     * Click listener for messsage.
+     * Click listener for message.
      */
     public @Nullable View.OnClickListener getClickListener() {
         return mOnClickListener;
@@ -101,6 +105,15 @@ public class KeyguardIndication {
         return mMinVisibilityMillis;
     }
 
+
+    /**
+     * Whether to force the accessibility live region to be assertive.
+     */
+    public boolean getForceAssertiveAccessibilityLiveRegion() {
+        return mForceAccessibilityLiveRegionAssertive;
+    }
+
+
     @Override
     public String toString() {
         String str = "KeyguardIndication{";
@@ -109,6 +122,7 @@ public class KeyguardIndication {
         if (mOnClickListener != null) str += " mOnClickListener=" + mOnClickListener;
         if (mBackground != null) str += " mBackground=" + mBackground;
         if (mMinVisibilityMillis != null) str += " mMinVisibilityMillis=" + mMinVisibilityMillis;
+        if (mForceAccessibilityLiveRegionAssertive) str += "mForceAccessibilityLiveRegionAssertive";
         str += "}";
         return str;
     }
@@ -123,6 +137,7 @@ public class KeyguardIndication {
         private ColorStateList mTextColor;
         private Drawable mBackground;
         private Long mMinVisibilityMillis;
+        private boolean mForceAccessibilityLiveRegionAssertive;
 
         public Builder() { }
 
@@ -178,6 +193,14 @@ public class KeyguardIndication {
         }
 
         /**
+         * Optional. Can force the accessibility live region to be assertive for this message.
+         */
+        public Builder setForceAccessibilityLiveRegionAssertive() {
+            this.mForceAccessibilityLiveRegionAssertive = true;
+            return this;
+        }
+
+        /**
          * Build the KeyguardIndication.
          */
         public KeyguardIndication build() {
@@ -190,7 +213,7 @@ public class KeyguardIndication {
 
             return new KeyguardIndication(
                     mMessage, mTextColor, mIcon, mOnClickListener, mBackground,
-                    mMinVisibilityMillis);
+                    mMinVisibilityMillis, mForceAccessibilityLiveRegionAssertive);
         }
     }
 }

@@ -22,6 +22,7 @@ import android.annotation.NonNull;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class SparseSetArray<T> {
     private final SparseArray<ArraySet<T>> mData;
 

@@ -29,10 +29,10 @@ import android.util.Size;
 import android.view.Gravity;
 import android.view.View;
 
-import com.android.wm.shell.pip.PipBoundsAlgorithm;
-import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipDisplayLayoutState;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -76,11 +76,12 @@ public class TvPipBoundsState extends PipBoundsState {
     private Insets mPipMenuTemporaryDecorInsets = Insets.NONE;
 
     public TvPipBoundsState(@NonNull Context context,
-            @NonNull PipSizeSpecHandler pipSizeSpecHandler,
+            @NonNull SizeSpecSource sizeSpecSource,
             @NonNull PipDisplayLayoutState pipDisplayLayoutState) {
-        super(context, pipSizeSpecHandler, pipDisplayLayoutState);
+        super(context, sizeSpecSource, pipDisplayLayoutState);
         mContext = context;
         updateDefaultGravity();
+        mTvPipGravity = mDefaultGravity;
         mPreviousCollapsedGravity = mDefaultGravity;
         mIsTvExpandedPipSupported = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_EXPANDED_PICTURE_IN_PICTURE);
@@ -109,6 +110,7 @@ public class TvPipBoundsState extends PipBoundsState {
 
     @Override
     public void onConfigurationChanged() {
+        super.onConfigurationChanged();
         updateDefaultGravity();
     }
 
@@ -130,6 +132,7 @@ public class TvPipBoundsState extends PipBoundsState {
         mTvFixedPipOrientation = ORIENTATION_UNDETERMINED;
         mTvPipGravity = mDefaultGravity;
         mPreviousCollapsedGravity = mDefaultGravity;
+        mIsTvPipExpanded = false;
         mTvPipManuallyCollapsed = false;
     }
 

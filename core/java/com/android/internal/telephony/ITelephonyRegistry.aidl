@@ -60,9 +60,8 @@ interface ITelephonyRegistry {
     @UnsupportedAppUsage(maxTargetSdk = 28)
     void notifyCallForwardingChanged(boolean cfi);
     void notifyCallForwardingChangedForSubscriber(in int subId, boolean cfi);
-    @UnsupportedAppUsage(maxTargetSdk = 28)
-    void notifyDataActivity(int state);
-    void notifyDataActivityForSubscriber(in int subId, int state);
+    void notifyDataActivityForSubscriber(int subId, int state);
+    void notifyDataActivityForSubscriberWithSlot(int phoneId, int subId, int state);
     void notifyDataConnectionForSubscriber(
             int phoneId, int subId, in PreciseDataConnectionState preciseState);
     // Uses CellIdentity which is Parcelable here; will convert to CellLocation in client.
@@ -105,6 +104,7 @@ interface ITelephonyRegistry {
     void notifyAllowedNetworkTypesChanged(in int phoneId, in int subId, in int reason, in long allowedNetworkType);
     void notifyLinkCapacityEstimateChanged(in int phoneId, in int subId,
             in List<LinkCapacityEstimate> linkCapacityEstimateList);
+    void notifySimultaneousCellularCallingSubscriptionsChanged(in int[] subIds);
 
     void addCarrierPrivilegesCallback(
             int phoneId, ICarrierPrivilegesCallback callback, String pkg, String featureId);
@@ -120,4 +120,5 @@ interface ITelephonyRegistry {
 
     void notifyCallbackModeStarted(int phoneId, int subId, int type);
     void notifyCallbackModeStopped(int phoneId, int subId, int type, int reason);
+    void notifyCarrierRoamingNtnModeChanged(int subId, in boolean active);
 }

@@ -3,10 +3,11 @@ package com.android.systemui.statusbar
 import android.content.Context
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 
 /** Controls the lockscreen to shade transition for scrims. */
@@ -16,8 +17,10 @@ constructor(
     private val scrimController: ScrimController,
     context: Context,
     configurationController: ConfigurationController,
-    dumpManager: DumpManager
-) : AbstractLockscreenShadeTransitionController(context, configurationController, dumpManager) {
+    dumpManager: DumpManager,
+    splitShadeStateController: SplitShadeStateController
+) : AbstractLockscreenShadeTransitionController(context, configurationController, dumpManager,
+    splitShadeStateController) {
 
     /**
      * Distance that the full shade transition takes in order for scrim to fully transition to the

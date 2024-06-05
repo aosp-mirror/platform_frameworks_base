@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="4539824758261855508">"අක්තපත්‍ර කළමනාකරු"</string>
     <string name="string_cancel" msgid="6369133483981306063">"අවලංගු කරන්න"</string>
     <string name="string_continue" msgid="1346732695941131882">"ඉදිරියට යන්න"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"තවත් විකල්ප"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"වෙන මාර්ගයක සුරකින්න"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"තව දැන ගන්න"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"මුරපදය පෙන්වන්න"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"මුරපදය සඟවන්න"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"මුරයතුරු සමග සුරක්ෂිතයි"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"මුරයතුරු සමග, ඔබට සංකීර්ණ මුරපද තැනීමට හෝ මතක තබා ගැනීමට අවශ්‍ය නොවේ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"මුරයතුරු යනු ඔබේ ඇඟිලි සලකුණ, මුහුණ, හෝ තිර අගුල භාවිතයෙන් ඔබ තනන සංකේතාත්මක ඩිජිටල් යතුරු වේ"</string>
@@ -25,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"අපි මුරපද රහිත අනාගතයක් කරා ගමන් කරන විට, මුරයතුරු සමග මුරපද තවමත් පවතී."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ඔබේ <xliff:g id="CREATETYPES">%1$s</xliff:g> සුරැකිය යුතු ස්ථානය තෝරා ගන්න"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ඔබේ තතු සුරැකීමට සහ මීළඟ වතාවේ වේගයෙන් පුරනය වීමට මුරපද කළමනාකරුවෙකු තෝරන්න"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> සඳහා මුරයතුර තනන්න ද?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> සඳහා මුරපදය සුරකින්න ද?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> සඳහා පුරනය වීමේ තතු සුරකින්න ද?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> වෙත පුරනය වීමට මුරයතුරක් තනන්න ද?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> වෙත පුරනය වීමට මුරපදය සුරකින්න ද?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා පුරනය වීමේ තතු සුරකින්න ද?"</string>
     <string name="passkey" msgid="632353688396759522">"මුරයතුර"</string>
     <string name="password" msgid="6738570945182936667">"මුරපදය"</string>
     <string name="passkeys" msgid="5733880786866559847">"මුරයතුරු"</string>
@@ -35,10 +49,13 @@
     <string name="sign_ins" msgid="4710739369149469208">"පුරනය වීම්"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"පුරනය වීමේ තතු"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"වෙත <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> සුරකින්න"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"වෙනත් උපාංගයක මුරයතුර තනන්න ද?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"වෙනත් උපාංගයක මුරයතුර තනන්න ද?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"වෙනත් උපාංගයක මුරපදය සුරකින්න ද?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"වෙනත් උපාංගයක පුරනය වීම සුරකින්න ද?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ඔබේ සියලු පුරනය වීම් සඳහා <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> භාවිතා කරන්න ද?"</string>
-    <string name="use_provider_for_all_description" msgid="8466427781848268490">"මෙම මුරපද කළමනාකරු ඔබට පහසුවෙන් පුරනය වීමට උදවු කිරීම සඳහා ඔබේ මුරපද සහ මුරයතුරු ගබඩා කරනු ඇත"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> සඳහා මෙම මුරපද කළමනාකරු ඔබට පහසුවෙන් පුරනය වීමට උදවු කිරීම සඳහා ඔබේ මුරපද සහ මුරයතුරු ගබඩා කරනු ඇත"</string>
     <string name="set_as_default" msgid="4415328591568654603">"පෙරනිමි ලෙස සකසන්න"</string>
+    <string name="settings" msgid="6536394145760913145">"සැකසීම්"</string>
     <string name="use_once" msgid="9027366575315399714">"වරක් භාවිතා කරන්න"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"මුරපද <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>ක් • මුරයතුරු <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>ක්"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"මුරපද <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>ක්"</string>
@@ -49,21 +66,33 @@
     <string name="other_password_manager" msgid="565790221427004141">"වෙනත් මුරපද කළමනාකරුවන්"</string>
     <string name="close_sheet" msgid="1393792015338908262">"පත්‍රය වසන්න"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"පෙර පිටුවට ආපසු යන්න"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"තිරයේ පහළින් දිස්වන අක්තපත්‍ර කළමනාකරු ක්‍රියා යෝජනාව වසන්න"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ සුරැකි මුරයතුර භාවිතා කරන්න ද?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ සුරැකි පුරනය භාවිතා කරන්න ද?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා සුරැකි පුරනයක් තෝරා ගන්න"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"වසන්න"</string>
+    <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"අස් කරන්න"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ සුරැකි මුරයතුර භාවිතා කරන්න"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ සුරැකි මුරපදය භාවිතා කරන්න"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ ගිණුම භාවිතා කරන්න"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"<xliff:g id="USERNAME">%2$s</xliff:g> සමඟින් <xliff:g id="APP_NAME">%1$s</xliff:g> වෙත පුරනය වීමට ඔබේ තිර අගුල භාවිත කරන්න"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා පුරනය වීමේ විකල්ප අගුළු හරින්න"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා සුරකින ලද මුරයතුරක් තෝරන්න"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා සුරකින ලද මුරපදයක් තෝරන්න"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා සුරැකි පුරනයක් තෝරා ගන්න"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ගිණුමක් තෝරා ගන්න"</string>
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා විකල්පයක් තෝරන්නද?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g> මත මෙම තතු භාවිතා කරන්න ද?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"වෙනත් ආකාරයකින් පුරන්න"</string>
     <string name="snackbar_action" msgid="37373514216505085">"විකල්ප බලන්න"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ඉදිරියට යන්න"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"පුරනය වීමේ විකල්ප"</string>
+    <string name="button_label_view_more" msgid="3429098227286495651">"වැඩියෙන් දකින්න"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> සඳහා"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"අගුළු දැමූ මුරපද කළමනාකරුවන්"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
-    <skip />
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"අගුළු හැරීමට තට්ටු කරන්න"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"පුරනය වීමේ තතු නැත"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"<xliff:g id="SOURCE">%1$s</xliff:g> තුළ පුරනය වීමේ තතු නැත"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"පුරනය වීම් කළමනාකරණය කරන්න"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"වෙනත් උපාංගයකින්"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"වෙනස් උපාංගයක් භාවිතා කරන්න"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> විසින් ඉල්ලීම අවලංගු කරන ලදී"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"පුරනය වීමේ විකල්ප"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"තව"</string>
 </resources>

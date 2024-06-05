@@ -24,9 +24,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.os.Binder;
@@ -56,14 +58,18 @@ import org.mockito.MockitoAnnotations;
 public class WindowContextControllerTest {
     private WindowContextController mController;
     @Mock
+    private WindowTokenClientController mWindowTokenClientController;
+    @Mock
     private WindowTokenClient mMockToken;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mController = new WindowContextController(mMockToken);
+        mController = spy(new WindowContextController(mMockToken));
+        doReturn(mWindowTokenClientController).when(mController).getWindowTokenClientController();
         doNothing().when(mMockToken).onConfigurationChanged(any(), anyInt(), anyBoolean());
-        doReturn(true).when(mMockToken).attachToDisplayArea(anyInt(), anyInt(), any());
+        doReturn(true).when(mWindowTokenClientController).attachToDisplayArea(
+                eq(mMockToken), anyInt(), anyInt(), any());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -78,7 +84,7 @@ public class WindowContextControllerTest {
     public void testDetachIfNeeded_NotAttachedYet_DoNothing() {
         mController.detachIfNeeded();
 
-        verify(mMockToken, never()).detachFromWindowContainerIfNeeded();
+        verify(mWindowTokenClientController, never()).detachIfNeeded(any());
     }
 
     @Test

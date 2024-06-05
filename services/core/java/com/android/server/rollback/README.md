@@ -187,12 +187,30 @@ executed.
 
 ### Installing an App with Rollback Enabled
 
-The `adb install` command accepts the `--enable-rollback` flag to install an app
+The `adb install` command accepts the `--enable-rollback [0/1/2]` flag to install an app
 with rollback enabled. For example:
 
 ```
 $ adb install --enable-rollback FooV2.apk
 ```
+
+The default rollback data policy is `ROLLBACK_DATA_POLICY_RESTORE` (0). To use
+a different `RollbackDataPolicy`, like `ROLLBACK_DATA_POLICY_RETAIN` (1) or
+`ROLLBACK_DATA_POLICY_WIPE` (2), provide the int value after
+`--enable-rollback`. For example:
+
+```
+$ adb install --enable-rollback 1 FooV2.apk
+```
+
+### Setting Rollback Impact Level
+
+The `adb install` command accepts the `--rollback-impact-level [0/1/2]` flag to control
+when a rollback can be performed by `PackageWatchdog`.
+
+The default rollback impact level is `ROLLBACK_USER_IMPACT_LOW` (0). To use a
+different impact level, use `ROLLBACK_USER_IMPACT_HIGH` (1) or `ROLLBACK_USER_IMPACT_ONLY_MANUAL`
+(2).
 
 ### Triggering Rollback Manually
 
@@ -216,16 +234,20 @@ $ adb shell dumpsys rollback
 469808841:
   -state: committed
   -timestamp: 2019-04-23T14:57:35.944Z
+  -rollbackLifetimeMillis: 0
+  -rollbackUserImpact: 1
   -packages:
-    com.android.tests.rollback.testapp.B 2 -> 1
+    com.android.tests.rollback.testapp.B 2 -> 1 [0]
   -causePackages:
   -committedSessionId: 1845805640
 649899517:
   -state: committed
   -timestamp: 2019-04-23T12:55:21.342Z
+  -rollbackLifetimeMillis: 0
+  -rollbackUserImpact: 0
   -stagedSessionId: 343374391
   -packages:
-    com.android.tests.rollback.testapex 2 -> 1
+    com.android.tests.rollback.testapex 2 -> 1 [0]
   -causePackages:
   -committedSessionId: 2096717281
 ```
@@ -233,7 +255,8 @@ $ adb shell dumpsys rollback
 The example above shows two recently committed rollbacks. The update of
 com.android.tests.rollback.testapp.B from version 1 to version 2 was rolled
 back, and the update of com.android.tests.rollback.testapex from version 1 to
-version 2 was rolled back.
+version 2 was rolled back. For each package the value inside '[' and ']'
+indicates the `RollbackDataPolicy` for the rollback back.
 
 The state is 'available' or 'committed'. The timestamp gives the time when the
 rollback was first made available. If a stagedSessionId is present, then the

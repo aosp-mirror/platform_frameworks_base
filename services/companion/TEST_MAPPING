@@ -8,6 +8,9 @@
     },
     {
       "name": "CtsCompanionDeviceManagerNoCompanionServicesTestCases"
+    },
+    {
+      "name": "CtsCompanionDeviceManagerMultiProcessTestCases"
     }
   ]
 }

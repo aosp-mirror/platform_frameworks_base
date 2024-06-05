@@ -21,6 +21,8 @@ import android.util.CharsetUtils;
 
 import com.android.modules.utils.FastDataOutput;
 
+import dalvik.system.VMRuntime;
+
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,13 +37,14 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ArtFastDataOutput extends FastDataOutput {
     private static AtomicReference<ArtFastDataOutput> sOutCache = new AtomicReference<>();
+    private static VMRuntime sRuntime = VMRuntime.getRuntime();
 
     private final long mBufferPtr;
 
     public ArtFastDataOutput(@NonNull OutputStream out, int bufferSize) {
         super(out, bufferSize);
 
-        mBufferPtr = mRuntime.addressOf(mBuffer);
+        mBufferPtr = sRuntime.addressOf(mBuffer);
     }
 
     /**
@@ -73,6 +76,11 @@ public class ArtFastDataOutput extends FastDataOutput {
     }
 
     @Override
+    public byte[] newByteArray(int bufferSize) {
+        return (byte[]) sRuntime.newNonMovableArray(byte.class, bufferSize);
+    }
+
+    @Override
     public void writeUTF(String s) throws IOException {
         // Attempt to write directly to buffer space if there's enough room,
         // otherwise fall back to chunking into place
@@ -94,8 +102,8 @@ public class ArtFastDataOutput extends FastDataOutput {
             // Negative value indicates buffer was too small and we need to
             // allocate a temporary buffer for encoding
             len = -len;
-            final byte[] tmp = (byte[]) mRuntime.newNonMovableArray(byte.class, len + 1);
-            CharsetUtils.toModifiedUtf8Bytes(s, mRuntime.addressOf(tmp), 0, tmp.length);
+            final byte[] tmp = (byte[]) sRuntime.newNonMovableArray(byte.class, len + 1);
+            CharsetUtils.toModifiedUtf8Bytes(s, sRuntime.addressOf(tmp), 0, tmp.length);
             writeShort(len);
             write(tmp, 0, len);
         }

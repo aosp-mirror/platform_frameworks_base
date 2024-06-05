@@ -16,23 +16,16 @@
 
 package com.android.server.notification;
 
-import static android.app.NotificationManager.IMPORTANCE_HIGH;
-
 import android.app.Notification;
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteFullException;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
@@ -42,8 +35,6 @@ import org.json.JSONObject;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +54,6 @@ public class NotificationUsageStats {
     private static final String TAG = "NotificationUsageStats";
 
     private static final boolean ENABLE_AGGREGATED_IN_MEMORY_STATS = true;
-    private static final boolean ENABLE_SQLITE_LOG = true;
     private static final AggregatedStats[] EMPTY_AGGREGATED_STATS = new AggregatedStats[0];
     private static final String DEVICE_GLOBAL_STATS = "__global"; // packages start with letters
     private static final int MSG_EMIT = 1;
@@ -73,12 +63,15 @@ public class NotificationUsageStats {
     public static final int FOUR_HOURS = 1000 * 60 * 60 * 4;
     private static final long EMIT_PERIOD = DEBUG ? TEN_SECONDS : FOUR_HOURS;
 
-    // Guarded by synchronized(this).
+    @GuardedBy("this")
     private final Map<String, AggregatedStats> mStats = new HashMap<>();
+    @GuardedBy("this")
     private final ArrayDeque<AggregatedStats[]> mStatsArrays = new ArrayDeque<>();
+    @GuardedBy("this")
     private ArraySet<String> mStatExpiredkeys = new ArraySet<>();
     private final Context mContext;
     private final Handler mHandler;
+    @GuardedBy("this")
     private long mLastEmitTime;
 
     public NotificationUsageStats(Context context) {
@@ -105,11 +98,7 @@ public class NotificationUsageStats {
      */
     public synchronized float getAppEnqueueRate(String packageName) {
         AggregatedStats stats = getOrCreateAggregatedStatsLocked(packageName);
-        if (stats != null) {
-            return stats.getEnqueueRate(SystemClock.elapsedRealtime());
-        } else {
-            return 0f;
-        }
+        return stats.getEnqueueRate(SystemClock.elapsedRealtime());
     }
 
     /**
@@ -117,11 +106,7 @@ public class NotificationUsageStats {
      */
     public synchronized boolean isAlertRateLimited(String packageName) {
         AggregatedStats stats = getOrCreateAggregatedStatsLocked(packageName);
-        if (stats != null) {
-            return stats.isAlertRateLimited();
-        } else {
-            return false;
-        }
+        return stats.isAlertRateLimited();
     }
 
     /**
@@ -136,16 +121,32 @@ public class NotificationUsageStats {
     }
 
     /**
+     * Called when a notification that was enqueued by an app is effectively enqueued to be
+     * posted. This is after rate checking, to update the rate.
+     *
+     * <p>Note that if we updated the arrival estimate <em>before</em> checking it, then an app
+     * enqueueing at slightly above the acceptable rate would never get their notifications
+     * accepted; updating afterwards allows the rate to dip below the threshold and thus lets
+     * through some of them.
+     */
+    public synchronized void registerEnqueuedByAppAndAccepted(String packageName) {
+        final long now = SystemClock.elapsedRealtime();
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(packageName);
+        for (AggregatedStats stats : aggregatedStatsArray) {
+            stats.updateInterarrivalEstimate(now);
+        }
+        releaseAggregatedStatsLocked(aggregatedStatsArray);
+    }
+
+    /**
      * Called when a notification has been posted.
      */
     public synchronized void registerPostedByApp(NotificationRecord notification) {
-        final long now = SystemClock.elapsedRealtime();
-        notification.stats.posttimeElapsedMs = now;
+        notification.stats.posttimeElapsedMs = SystemClock.elapsedRealtime();
 
         AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
         for (AggregatedStats stats : aggregatedStatsArray) {
             stats.numPostedByApp++;
-            stats.updateInterarrivalEstimate(now);
             stats.countApiUse(notification);
             stats.numUndecoratedRemoteViews += (notification.hasUndecoratedRemoteView() ? 1 : 0);
         }
@@ -161,7 +162,6 @@ public class NotificationUsageStats {
         AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
         for (AggregatedStats stats : aggregatedStatsArray) {
             stats.numUpdatedByApp++;
-            stats.updateInterarrivalEstimate(SystemClock.elapsedRealtime());
             stats.countApiUse(notification);
         }
         releaseAggregatedStatsLocked(aggregatedStatsArray);
@@ -257,12 +257,20 @@ public class NotificationUsageStats {
         }
     }
 
-    // Locked by this.
+    public synchronized void registerTooOldBlocked(NotificationRecord notification) {
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
+        for (AggregatedStats stats : aggregatedStatsArray) {
+            stats.numTooOld++;
+        }
+        releaseAggregatedStatsLocked(aggregatedStatsArray);
+    }
+
+    @GuardedBy("this")
     private AggregatedStats[] getAggregatedStatsLocked(NotificationRecord record) {
         return getAggregatedStatsLocked(record.getSbn().getPackageName());
     }
 
-    // Locked by this.
+    @GuardedBy("this")
     private AggregatedStats[] getAggregatedStatsLocked(String packageName) {
         if (!ENABLE_AGGREGATED_IN_MEMORY_STATS) {
             return EMPTY_AGGREGATED_STATS;
@@ -277,7 +285,7 @@ public class NotificationUsageStats {
         return array;
     }
 
-    // Locked by this.
+    @GuardedBy("this")
     private void releaseAggregatedStatsLocked(AggregatedStats[] array) {
         for(int i = 0; i < array.length; i++) {
             array[i] = null;
@@ -285,7 +293,7 @@ public class NotificationUsageStats {
         mStatsArrays.offer(array);
     }
 
-    // Locked by this.
+    @GuardedBy("this")
     private AggregatedStats getOrCreateAggregatedStatsLocked(String key) {
         AggregatedStats result = mStats.get(key);
         if (result == null) {
@@ -405,6 +413,7 @@ public class NotificationUsageStats {
         public int numUndecoratedRemoteViews;
         public long mLastAccessTime;
         public int numImagesRemoved;
+        public int numTooOld;
 
         public AggregatedStats(Context context, String key) {
             this.key = key;
@@ -535,6 +544,7 @@ public class NotificationUsageStats {
             maybeCount("note_over_alert_rate", (numAlertViolations - previous.numAlertViolations));
             maybeCount("note_over_quota", (numQuotaViolations - previous.numQuotaViolations));
             maybeCount("note_images_removed", (numImagesRemoved - previous.numImagesRemoved));
+            maybeCount("not_too_old", (numTooOld - previous.numTooOld));
             noisyImportance.maybeCount(previous.noisyImportance);
             quietImportance.maybeCount(previous.quietImportance);
             finalImportance.maybeCount(previous.finalImportance);
@@ -570,6 +580,7 @@ public class NotificationUsageStats {
             previous.numAlertViolations = numAlertViolations;
             previous.numQuotaViolations = numQuotaViolations;
             previous.numImagesRemoved = numImagesRemoved;
+            previous.numTooOld = numTooOld;
             noisyImportance.update(previous.noisyImportance);
             quietImportance.update(previous.quietImportance);
             finalImportance.update(previous.finalImportance);
@@ -679,6 +690,8 @@ public class NotificationUsageStats {
             output.append("numQuotaViolations=").append(numQuotaViolations).append("\n");
             output.append(indentPlusTwo);
             output.append("numImagesRemoved=").append(numImagesRemoved).append("\n");
+            output.append(indentPlusTwo);
+            output.append("numTooOld=").append(numTooOld).append("\n");
             output.append(indentPlusTwo).append(noisyImportance.toString()).append("\n");
             output.append(indentPlusTwo).append(quietImportance.toString()).append("\n");
             output.append(indentPlusTwo).append(finalImportance.toString()).append("\n");
@@ -725,6 +738,7 @@ public class NotificationUsageStats {
             maybePut(dump, "notificationEnqueueRate", getEnqueueRate());
             maybePut(dump, "numAlertViolations", numAlertViolations);
             maybePut(dump, "numImagesRemoved", numImagesRemoved);
+            maybePut(dump, "numTooOld", numTooOld);
             noisyImportance.maybePut(dump, previous.noisyImportance);
             quietImportance.maybePut(dump, previous.quietImportance);
             finalImportance.maybePut(dump, previous.finalImportance);

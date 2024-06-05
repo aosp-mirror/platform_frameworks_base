@@ -60,14 +60,14 @@ jobject fromDisplayInfo(JNIEnv* env, gui::DisplayInfo displayInfo) {
     }
     ScopedLocalRef<jobject> matrixObj(env, AMatrix_newInstance(env, transformValues));
     return env->NewObject(gDisplayInfoClassInfo.clazz, gDisplayInfoClassInfo.ctor,
-                          displayInfo.displayId, displayInfo.logicalWidth,
+                          displayInfo.displayId.val(), displayInfo.logicalWidth,
                           displayInfo.logicalHeight, matrixObj.get());
 }
 
 static jobjectArray fromWindowInfos(JNIEnv* env, const std::vector<WindowInfo>& windowInfos) {
     jobjectArray jWindowHandlesArray =
             env->NewObjectArray(windowInfos.size(), gInputWindowHandleClass, nullptr);
-    for (int i = 0; i < windowInfos.size(); i++) {
+    for (size_t i = 0; i < windowInfos.size(); i++) {
         ScopedLocalRef<jobject>
                 jWindowHandle(env,
                               android_view_InputWindowHandle_fromWindowInfo(env, windowInfos[i]));
@@ -80,7 +80,7 @@ static jobjectArray fromWindowInfos(JNIEnv* env, const std::vector<WindowInfo>& 
 static jobjectArray fromDisplayInfos(JNIEnv* env, const std::vector<DisplayInfo>& displayInfos) {
     jobjectArray jDisplayInfoArray =
             env->NewObjectArray(displayInfos.size(), gDisplayInfoClassInfo.clazz, nullptr);
-    for (int i = 0; i < displayInfos.size(); i++) {
+    for (size_t i = 0; i < displayInfos.size(); i++) {
         ScopedLocalRef<jobject> jDisplayInfo(env, fromDisplayInfo(env, displayInfos[i]));
         env->SetObjectArrayElement(jDisplayInfoArray, i, jDisplayInfo.get());
     }

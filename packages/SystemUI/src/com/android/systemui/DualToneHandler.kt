@@ -20,6 +20,8 @@ import android.animation.ArgbEvaluator
 import android.content.Context
 import android.view.ContextThemeWrapper
 import com.android.settingslib.Utils
+import com.android.settingslib.flags.Flags.newStatusBarIcons
+import com.android.systemui.res.R
 
 /**
  * A color blender for `Theme.SystemUI` and other themes.
@@ -52,14 +54,26 @@ class DualToneHandler(context: Context) {
                 Utils.getThemeAttr(context, R.attr.darkIconTheme))
         val dualToneLightTheme = ContextThemeWrapper(context,
                 Utils.getThemeAttr(context, R.attr.lightIconTheme))
-        darkColor = Color(
-                Utils.getColorAttrDefaultColor(dualToneDarkTheme, R.attr.singleToneColor),
+        if (newStatusBarIcons()) {
+            darkColor = Color(
+                android.graphics.Color.BLACK,
                 Utils.getColorAttrDefaultColor(dualToneDarkTheme, R.attr.iconBackgroundColor),
                 Utils.getColorAttrDefaultColor(dualToneDarkTheme, R.attr.fillColor))
-        lightColor = Color(
-                Utils.getColorAttrDefaultColor(dualToneLightTheme, R.attr.singleToneColor),
+
+            lightColor = Color(
+                android.graphics.Color.WHITE,
                 Utils.getColorAttrDefaultColor(dualToneLightTheme, R.attr.iconBackgroundColor),
                 Utils.getColorAttrDefaultColor(dualToneLightTheme, R.attr.fillColor))
+        } else {
+            darkColor = Color(
+                    Utils.getColorAttrDefaultColor(dualToneDarkTheme, R.attr.singleToneColor),
+                    Utils.getColorAttrDefaultColor(dualToneDarkTheme, R.attr.iconBackgroundColor),
+                    Utils.getColorAttrDefaultColor(dualToneDarkTheme, R.attr.fillColor))
+            lightColor = Color(
+                    Utils.getColorAttrDefaultColor(dualToneLightTheme, R.attr.singleToneColor),
+                    Utils.getColorAttrDefaultColor(dualToneLightTheme, R.attr.iconBackgroundColor),
+                    Utils.getColorAttrDefaultColor(dualToneLightTheme, R.attr.fillColor))
+        }
     }
 
     private fun getColorForDarkIntensity(darkIntensity: Float, lightColor: Int, darkColor: Int) =

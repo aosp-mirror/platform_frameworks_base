@@ -26,7 +26,9 @@ import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -113,6 +115,11 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                         default:
                             return defVal;
                     }
+                }
+
+                @Override
+                protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                    // do nothing
                 }
             };
 
@@ -364,6 +371,30 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    public void systemAudioControlOnPowerOn_singleActionStarted() throws Exception {
+        mHdmiCecLocalDeviceAudioSystem.removeAction(SystemAudioInitiationActionFromAvr.class);
+        mHdmiCecLocalDeviceAudioSystem.systemAudioControlOnPowerOn(
+                Constants.ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON, true);
+        mHdmiCecLocalDeviceAudioSystem.systemAudioControlOnPowerOn(
+                Constants.ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON, true);
+        assertThat(
+                mHdmiCecLocalDeviceAudioSystem.getActions(
+                        SystemAudioInitiationActionFromAvr.class))
+                .hasSize(1);
+    }
+
+    @Test
+    public void onSystemAudioControlFeatureSupportChanged_singleActionStarted() throws Exception {
+        mHdmiCecLocalDeviceAudioSystem.removeAction(SystemAudioInitiationActionFromAvr.class);
+        mHdmiCecLocalDeviceAudioSystem.onSystemAudioControlFeatureSupportChanged(true);
+        mHdmiCecLocalDeviceAudioSystem.onSystemAudioControlFeatureSupportChanged(true);
+        assertThat(
+                mHdmiCecLocalDeviceAudioSystem.getActions(
+                        SystemAudioInitiationActionFromAvr.class))
+                .hasSize(1);
+    }
+
+    @Test
     public void handleActiveSource_updateActiveSource() throws Exception {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
         ActiveSource expectedActiveSource = new ActiveSource(ADDR_TV, 0x0000);
@@ -441,6 +472,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildRequestArcInitiation(ADDR_TV, ADDR_AUDIO_SYSTEM);
         mNativeWrapper.setPhysicalAddress(0x1100);
+        mHdmiControlService.onHotplug(0x1100, true);
 
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcInitiate(message))
                 .isEqualTo(Constants.ABORT_NOT_IN_CORRECT_MODE);
@@ -451,6 +483,8 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildRequestArcInitiation(ADDR_TV, ADDR_AUDIO_SYSTEM);
         mNativeWrapper.setPhysicalAddress(0x1000);
+        mHdmiControlService.onHotplug(0x1000, true);
+
         mHdmiCecLocalDeviceAudioSystem.removeAction(ArcInitiationActionFromAvr.class);
 
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcInitiate(message))

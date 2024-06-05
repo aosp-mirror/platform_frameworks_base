@@ -28,7 +28,9 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.complication.dagger.DreamClockTimeComplicationComponent;
 import com.android.systemui.condition.SelfExecutingMonitor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.shared.condition.Monitor;
@@ -38,8 +40,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import javax.inject.Provider;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -55,8 +55,10 @@ public class DreamClockTimeComplicationTest extends SysuiTestCase {
     private DreamClockTimeComplication mComplication;
 
     @Mock
-    private Provider<DreamClockTimeComplication.DreamClockTimeViewHolder>
-            mDreamClockTimeViewHolderProvider;
+    private DreamClockTimeComplicationComponent.Factory mComponentFactory;
+
+    @Mock
+    private DreamClockTimeComplicationComponent mComponent;
 
     @Mock
     private DreamClockTimeComplication.DreamClockTimeViewHolder
@@ -71,12 +73,19 @@ public class DreamClockTimeComplicationTest extends SysuiTestCase {
     @Mock
     private ComplicationLayoutParams mLayoutParams;
 
+    @Mock
+    private DreamClockTimeComplication.DreamClockTimeViewController mViewController;
+
+    @Mock
+    private UiEventLogger mUiEventLogger;
+
     private Monitor mMonitor;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(mDreamClockTimeViewHolderProvider.get()).thenReturn(mDreamClockTimeViewHolder);
+        when(mComponentFactory.create()).thenReturn(mComponent);
+        when(mComponent.getViewHolder()).thenReturn(mDreamClockTimeViewHolder);
         mMonitor = SelfExecutingMonitor.createInstance();
     }
 
@@ -100,21 +109,21 @@ public class DreamClockTimeComplicationTest extends SysuiTestCase {
     @Test
     public void testComplicationRequiredTypeAvailability() {
         final DreamClockTimeComplication complication =
-                new DreamClockTimeComplication(mDreamClockTimeViewHolderProvider);
+                new DreamClockTimeComplication(mComponentFactory);
         assertEquals(Complication.COMPLICATION_TYPE_TIME,
                 complication.getRequiredTypeAvailability());
     }
 
     /**
      * Verifies {@link DreamClockTimeComplication.DreamClockTimeViewHolder} is obtainable from its
-     * provider when the complication creates view.
+     * component when the complication creates view.
      */
     @Test
-    public void testComplicationViewHolderProviderOnCreateView() {
+    public void testComplicationViewHolderComponentOnCreateView() {
         final DreamClockTimeComplication complication =
-                new DreamClockTimeComplication(mDreamClockTimeViewHolderProvider);
+                new DreamClockTimeComplication(mComponentFactory);
         final Complication.ViewHolder viewHolder = complication.createView(mComplicationViewModel);
-        verify(mDreamClockTimeViewHolderProvider).get();
+        verify(mComponent).getViewHolder();
         assertThat(viewHolder).isEqualTo(mDreamClockTimeViewHolder);
     }
 
@@ -125,7 +134,8 @@ public class DreamClockTimeComplicationTest extends SysuiTestCase {
     @Test
     public void testComplicationViewHolderContentAccessors() {
         final DreamClockTimeComplication.DreamClockTimeViewHolder viewHolder =
-                new DreamClockTimeComplication.DreamClockTimeViewHolder(mView, mLayoutParams);
+                new DreamClockTimeComplication.DreamClockTimeViewHolder(mView, mLayoutParams,
+                        mViewController);
         assertThat(viewHolder.getView()).isEqualTo(mView);
         assertThat(viewHolder.getLayoutParams()).isEqualTo(mLayoutParams);
     }

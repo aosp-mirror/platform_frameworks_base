@@ -201,4 +201,9 @@ public final class ServiceTimeoutTest {
             return mActiveServices;
         }
     }
+
+    // TODO: [b/302724778] Remove manual JNI load
+    static {
+        System.loadLibrary("mockingservicestestjni");
+    }
 }

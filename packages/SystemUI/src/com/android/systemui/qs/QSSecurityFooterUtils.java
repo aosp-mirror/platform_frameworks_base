@@ -73,9 +73,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.jank.InteractionJankMonitor;
-import com.android.systemui.R;
 import com.android.systemui.animation.DialogCuj;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.common.shared.model.ContentDescription;
 import com.android.systemui.common.shared.model.Icon;
@@ -85,6 +84,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig;
+import com.android.systemui.res.R;
 import com.android.systemui.security.data.model.SecurityModel;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -111,7 +111,7 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
     private final ActivityStarter mActivityStarter;
     private final Handler mMainHandler;
     private final UserTracker mUserTracker;
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final DialogTransitionAnimator mDialogTransitionAnimator;
 
     private final AtomicBoolean mShouldUseSettingsButton = new AtomicBoolean(false);
 
@@ -180,7 +180,7 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
             @Application Context context, DevicePolicyManager devicePolicyManager,
             UserTracker userTracker, @Main Handler mainHandler, ActivityStarter activityStarter,
             SecurityController securityController, @Background Looper bgLooper,
-            DialogLaunchAnimator dialogLaunchAnimator) {
+            DialogTransitionAnimator dialogTransitionAnimator) {
         mContext = context;
         mDpm = devicePolicyManager;
         mUserTracker = userTracker;
@@ -188,7 +188,7 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
         mActivityStarter = activityStarter;
         mSecurityController = securityController;
         mBgHandler = new Handler(bgLooper);
-        mDialogLaunchAnimator = dialogLaunchAnimator;
+        mDialogTransitionAnimator = dialogTransitionAnimator;
     }
 
     /** Show the device monitoring dialog. */
@@ -456,12 +456,12 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
                         ? settingsButtonText : getNegativeButton(), this);
 
                 mDialog.setView(dialogView);
-                DialogLaunchAnimator.Controller controller =
-                        expandable != null ? expandable.dialogLaunchController(new DialogCuj(
+                DialogTransitionAnimator.Controller controller =
+                        expandable != null ? expandable.dialogTransitionController(new DialogCuj(
                                 InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG))
                                 : null;
                 if (controller != null) {
-                    mDialogLaunchAnimator.show(mDialog, controller);
+                    mDialogTransitionAnimator.show(mDialog, controller);
                 } else {
                     mDialog.show();
                 }

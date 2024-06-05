@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2023, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<MotionScene
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto"
+    xmlns:androidprv="http://schemas.android.com/apk/res-auto">
+
+    <Transition
+        motion:constraintSetStart="@id/single_constraints"
+        motion:constraintSetEnd="@+id/split_constraints"
+        motion:duration="0"
+        motion:autoTransition="none" />
+
+    <Transition
+        motion:constraintSetStart="@id/single_constraints"
+        motion:constraintSetEnd="@+id/half_folded_single_constraints"
+        motion:duration="@integer/material_motion_duration_short_1" />
+
+    <!-- No changes to default layout -->
+    <ConstraintSet android:id="@+id/single_constraints"/>
+
+    <ConstraintSet android:id="@+id/half_folded_single_constraints">
+
+        <Constraint
+            android:id="@+id/pin_pad_top_guideline"
+            androidprv:layout_constraintGuide_percent=
+                "@dimen/motion_layout_half_fold_bouncer_height_ratio"/>
+
+        <Constraint
+            android:id="@+id/keyguard_selector_fade_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="0dp"
+            android:layout_marginTop="@dimen/keyguard_eca_top_margin"
+            android:orientation="vertical"
+            androidprv:layout_constraintBottom_toBottomOf="parent"
+            androidprv:layout_constraintTop_toBottomOf="@+id/flow1"/>
+
+    </ConstraintSet>
+
+    <ConstraintSet android:id="@+id/split_constraints">
+
+        <Constraint
+            android:id="@+id/keyguard_bouncer_message_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            androidprv:layout_constraintEnd_toStartOf="@+id/pin_pad_center_guideline"
+            androidprv:layout_constraintStart_toStartOf="parent"
+            androidprv:layout_constraintTop_toTopOf="parent" />
+        <Constraint
+            android:id="@+id/row0"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            androidprv:layout_constraintEnd_toStartOf="@+id/pin_pad_center_guideline"
+            androidprv:layout_constraintStart_toStartOf="parent"
+            androidprv:layout_constraintTop_toBottomOf="@+id/keyguard_bouncer_message_container" />
+        <Constraint
+            android:id="@+id/flow1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            androidprv:layout_constraintBottom_toBottomOf="parent"
+            androidprv:layout_constraintEnd_toEndOf="parent"
+            androidprv:layout_constraintStart_toStartOf="@+id/pin_pad_center_guideline"
+            androidprv:layout_constraintTop_toTopOf="parent"
+            android:layout_marginBottom="0dp"
+            androidprv:flow_verticalBias="0.5" />
+        <Constraint
+            android:id="@+id/keyguard_selector_fade_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            androidprv:layout_constraintBottom_toBottomOf="parent"
+            androidprv:layout_constraintEnd_toStartOf="@+id/pin_pad_center_guideline"
+            androidprv:layout_constraintStart_toStartOf="parent"
+            android:layout_marginBottom="@dimen/keyguard_eca_bottom_margin"
+            android:layout_marginTop="@dimen/keyguard_eca_top_margin" />
+
+    </ConstraintSet>
+
+</MotionScene>

@@ -24,7 +24,7 @@ import android.view.ViewConfiguration
 import android.view.ViewPropertyAnimator
 import androidx.core.animation.CycleInterpolator
 import androidx.core.animation.ObjectAnimator
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.view.rawDistanceFrom
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
@@ -99,41 +99,7 @@ class KeyguardQuickAffordanceOnTouchListener(
                     // When not using a stylus, lifting the finger/pointer will actually cancel
                     // the long-press gesture. Calling cancel after the quick affordance was
                     // already long-press activated is a no-op, so it's safe to call from here.
-                    cancel(
-                        onAnimationEnd =
-                            if (event.eventTime - event.downTime < longPressDurationMs) {
-                                Runnable {
-                                    messageDisplayer.invoke(
-                                        R.string.keyguard_affordance_press_too_short
-                                    )
-                                    val amplitude =
-                                        view.context.resources
-                                            .getDimensionPixelSize(
-                                                R.dimen.keyguard_affordance_shake_amplitude
-                                            )
-                                            .toFloat()
-                                    val shakeAnimator =
-                                        ObjectAnimator.ofFloat(
-                                            view,
-                                            "translationX",
-                                            -amplitude / 2,
-                                            amplitude / 2,
-                                        )
-                                    shakeAnimator.duration =
-                                        KeyguardBottomAreaVibrations.ShakeAnimationDuration
-                                            .inWholeMilliseconds
-                                    shakeAnimator.interpolator =
-                                        CycleInterpolator(
-                                            KeyguardBottomAreaVibrations.ShakeAnimationCycles
-                                        )
-                                    shakeAnimator.start()
-
-                                    vibratorHelper?.vibrate(KeyguardBottomAreaVibrations.Shake)
-                                }
-                            } else {
-                                null
-                            }
-                    )
+                    cancel()
                 }
                 false
             }
@@ -168,10 +134,10 @@ class KeyguardQuickAffordanceOnTouchListener(
         view.setOnClickListener(null)
     }
 
-    fun cancel(onAnimationEnd: Runnable? = null) {
+    fun cancel() {
         longPressAnimator?.cancel()
         longPressAnimator = null
-        view.animate().scaleX(1f).scaleY(1f).withEndAction(onAnimationEnd)
+        view.animate().scaleX(1f).scaleY(1f)
     }
 
     companion object {

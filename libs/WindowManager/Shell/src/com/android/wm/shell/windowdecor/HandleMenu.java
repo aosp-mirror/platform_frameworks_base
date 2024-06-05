@@ -20,26 +20,40 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_UP;
+
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PointF;
-import android.graphics.drawable.Drawable;
+import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.window.SurfaceSyncGroup;
 
+import androidx.annotation.VisibleForTesting;
+
+import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
-import com.android.wm.shell.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer;
+import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer;
 
 /**
  * Handle menu opened when the appropriate button is clicked on.
@@ -51,48 +65,47 @@ import com.android.wm.shell.desktopmode.DesktopModeStatus;
  */
 class HandleMenu {
     private static final String TAG = "HandleMenu";
+    private static final boolean SHOULD_SHOW_MORE_ACTIONS_PILL = false;
     private final Context mContext;
-    private final WindowDecoration mParentDecor;
-    private WindowDecoration.AdditionalWindow mAppInfoPill;
-    private WindowDecoration.AdditionalWindow mWindowingPill;
-    private WindowDecoration.AdditionalWindow mMoreActionsPill;
-    private final PointF mAppInfoPillPosition = new PointF();
-    private final PointF mWindowingPillPosition = new PointF();
-    private final PointF mMoreActionsPillPosition = new PointF();
+    private final DesktopModeWindowDecoration mParentDecor;
+    @VisibleForTesting
+    AdditionalViewContainer mHandleMenuViewContainer;
+    @VisibleForTesting
+    final PointF mHandleMenuPosition = new PointF();
     private final boolean mShouldShowWindowingPill;
-    private final Drawable mAppIcon;
+    private final Bitmap mAppIconBitmap;
     private final CharSequence mAppName;
     private final View.OnClickListener mOnClickListener;
     private final View.OnTouchListener mOnTouchListener;
     private final RunningTaskInfo mTaskInfo;
+    private final DisplayController mDisplayController;
+    private final SplitScreenController mSplitScreenController;
     private final int mLayoutResId;
-    private final int mCaptionX;
-    private final int mCaptionY;
     private int mMarginMenuTop;
     private int mMarginMenuStart;
-    private int mMarginMenuSpacing;
+    private int mMenuHeight;
     private int mMenuWidth;
-    private int mAppInfoPillHeight;
-    private int mWindowingPillHeight;
-    private int mMoreActionsPillHeight;
-    private int mShadowRadius;
-    private int mCornerRadius;
+    private final int mCaptionHeight;
+    private HandleMenuAnimator mHandleMenuAnimator;
 
 
-    HandleMenu(WindowDecoration parentDecor, int layoutResId, int captionX, int captionY,
+    HandleMenu(DesktopModeWindowDecoration parentDecor, int layoutResId,
             View.OnClickListener onClickListener, View.OnTouchListener onTouchListener,
-            Drawable appIcon, CharSequence appName, boolean shouldShowWindowingPill) {
+            Bitmap appIcon, CharSequence appName, DisplayController displayController,
+            SplitScreenController splitScreenController, boolean shouldShowWindowingPill,
+            int captionHeight) {
         mParentDecor = parentDecor;
         mContext = mParentDecor.mDecorWindowContext;
         mTaskInfo = mParentDecor.mTaskInfo;
+        mDisplayController = displayController;
+        mSplitScreenController = splitScreenController;
         mLayoutResId = layoutResId;
-        mCaptionX = captionX;
-        mCaptionY = captionY;
         mOnClickListener = onClickListener;
         mOnTouchListener = onTouchListener;
-        mAppIcon = appIcon;
+        mAppIconBitmap = appIcon;
         mAppName = appName;
         mShouldShowWindowingPill = shouldShowWindowingPill;
+        mCaptionHeight = captionHeight;
         loadHandleMenuDimensions();
         updateHandleMenuPillPositions();
     }
@@ -101,193 +114,225 @@ class HandleMenu {
         final SurfaceSyncGroup ssg = new SurfaceSyncGroup(TAG);
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
 
-        createAppInfoPill(t, ssg);
-        if (mShouldShowWindowingPill) {
-            createWindowingPill(t, ssg);
-        }
-        createMoreActionsPill(t, ssg);
+        createHandleMenuViewContainer(t, ssg);
         ssg.addTransaction(t);
         ssg.markSyncReady();
         setupHandleMenu();
+        animateHandleMenu();
     }
 
-    private void createAppInfoPill(SurfaceControl.Transaction t, SurfaceSyncGroup ssg) {
-        final int x = (int) mAppInfoPillPosition.x;
-        final int y = (int) mAppInfoPillPosition.y;
-        mAppInfoPill = mParentDecor.addWindow(
-                R.layout.desktop_mode_window_decor_handle_menu_app_info_pill,
-                "Menu's app info pill",
-                t, ssg, x, y, mMenuWidth, mAppInfoPillHeight, mShadowRadius, mCornerRadius);
-    }
-
-    private void createWindowingPill(SurfaceControl.Transaction t, SurfaceSyncGroup ssg) {
-        final int x = (int) mWindowingPillPosition.x;
-        final int y = (int) mWindowingPillPosition.y;
-        mWindowingPill = mParentDecor.addWindow(
-                R.layout.desktop_mode_window_decor_handle_menu_windowing_pill,
-                "Menu's windowing pill",
-                t, ssg, x, y, mMenuWidth, mWindowingPillHeight, mShadowRadius, mCornerRadius);
-    }
-
-    private void createMoreActionsPill(SurfaceControl.Transaction t, SurfaceSyncGroup ssg) {
-        final int x = (int) mMoreActionsPillPosition.x;
-        final int y = (int) mMoreActionsPillPosition.y;
-        mMoreActionsPill = mParentDecor.addWindow(
-                R.layout.desktop_mode_window_decor_handle_menu_more_actions_pill,
-                "Menu's more actions pill",
-                t, ssg, x, y, mMenuWidth, mMoreActionsPillHeight, mShadowRadius, mCornerRadius);
+    private void createHandleMenuViewContainer(SurfaceControl.Transaction t,
+            SurfaceSyncGroup ssg) {
+        final int x = (int) mHandleMenuPosition.x;
+        final int y = (int) mHandleMenuPosition.y;
+        if (!mTaskInfo.isFreeform() && Flags.enableAdditionalWindowsAboveStatusBar()) {
+            mHandleMenuViewContainer = new AdditionalSystemViewContainer(mContext,
+                    R.layout.desktop_mode_window_decor_handle_menu, mTaskInfo.taskId,
+                    x, y, mMenuWidth, mMenuHeight);
+        } else {
+            mHandleMenuViewContainer = mParentDecor.addWindow(
+                    R.layout.desktop_mode_window_decor_handle_menu, "Handle Menu",
+                    t, ssg, x, y, mMenuWidth, mMenuHeight);
+        }
+        final View handleMenuView = mHandleMenuViewContainer.getView();
+        mHandleMenuAnimator = new HandleMenuAnimator(handleMenuView, mMenuWidth, mCaptionHeight);
     }
 
     /**
-     * Set up interactive elements and color of this handle menu
+     * Animates the appearance of the handle menu and its three pills.
+     */
+    private void animateHandleMenu() {
+        if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                || mTaskInfo.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW) {
+            mHandleMenuAnimator.animateCaptionHandleExpandToOpen();
+        } else {
+            mHandleMenuAnimator.animateOpen();
+        }
+    }
+
+    /**
+     * Set up all three pills of the handle menu: app info pill, windowing pill, & more actions
+     * pill.
      */
     private void setupHandleMenu() {
-        // App Info pill setup.
-        final View appInfoPillView = mAppInfoPill.mWindowViewHost.getView();
-        final ImageButton collapseBtn = appInfoPillView.findViewById(R.id.collapse_menu_button);
-        final ImageView appIcon = appInfoPillView.findViewById(R.id.application_icon);
-        final TextView appName = appInfoPillView.findViewById(R.id.application_name);
-        collapseBtn.setOnClickListener(mOnClickListener);
-        appInfoPillView.setOnTouchListener(mOnTouchListener);
-        appIcon.setImageDrawable(mAppIcon);
-        appName.setText(mAppName);
-
-        // Windowing pill setup.
+        final View handleMenu = mHandleMenuViewContainer.getView();
+        handleMenu.setOnTouchListener(mOnTouchListener);
+        setupAppInfoPill(handleMenu);
         if (mShouldShowWindowingPill) {
-            final View windowingPillView = mWindowingPill.mWindowViewHost.getView();
-            final ImageButton fullscreenBtn = windowingPillView.findViewById(
-                    R.id.fullscreen_button);
-            final ImageButton splitscreenBtn = windowingPillView.findViewById(
-                    R.id.split_screen_button);
-            final ImageButton floatingBtn = windowingPillView.findViewById(R.id.floating_button);
-            final ImageButton desktopBtn = windowingPillView.findViewById(R.id.desktop_button);
-            fullscreenBtn.setOnClickListener(mOnClickListener);
-            splitscreenBtn.setOnClickListener(mOnClickListener);
-            floatingBtn.setOnClickListener(mOnClickListener);
-            desktopBtn.setOnClickListener(mOnClickListener);
-            // The button corresponding to the windowing mode that the task is currently in uses a
-            // different color than the others.
-            final ColorStateList activeColorStateList = ColorStateList.valueOf(
-                    mContext.getColor(R.color.desktop_mode_caption_menu_buttons_color_active));
-            final ColorStateList inActiveColorStateList = ColorStateList.valueOf(
-                    mContext.getColor(R.color.desktop_mode_caption_menu_buttons_color_inactive));
-            fullscreenBtn.setImageTintList(
-                    mTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                            ? activeColorStateList : inActiveColorStateList);
-            splitscreenBtn.setImageTintList(
-                    mTaskInfo.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
-                            ? activeColorStateList : inActiveColorStateList);
-            floatingBtn.setImageTintList(mTaskInfo.getWindowingMode() == WINDOWING_MODE_PINNED
-                    ? activeColorStateList : inActiveColorStateList);
-            desktopBtn.setImageTintList(mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
-                    ? activeColorStateList : inActiveColorStateList);
+            setupWindowingPill(handleMenu);
         }
-
-        // More Actions pill setup.
-        final View moreActionsPillView = mMoreActionsPill.mWindowViewHost.getView();
-        final Button closeBtn = moreActionsPillView.findViewById(R.id.close_button);
-        closeBtn.setOnClickListener(mOnClickListener);
-        final Button selectBtn = moreActionsPillView.findViewById(R.id.select_button);
-        selectBtn.setOnClickListener(mOnClickListener);
+        setupMoreActionsPill(handleMenu);
     }
 
     /**
-     * Updates the handle menu pills' position variables to reflect their next positions
+     * Set up interactive elements of handle menu's app info pill.
+     */
+    private void setupAppInfoPill(View handleMenu) {
+        final HandleMenuImageButton collapseBtn =
+                handleMenu.findViewById(R.id.collapse_menu_button);
+        final ImageView appIcon = handleMenu.findViewById(R.id.application_icon);
+        final TextView appName = handleMenu.findViewById(R.id.application_name);
+        collapseBtn.setOnClickListener(mOnClickListener);
+        collapseBtn.setTaskInfo(mTaskInfo);
+        appIcon.setImageBitmap(mAppIconBitmap);
+        appName.setText(mAppName);
+    }
+
+    /**
+     * Set up interactive elements and color of handle menu's windowing pill.
+     */
+    private void setupWindowingPill(View handleMenu) {
+        final ImageButton fullscreenBtn = handleMenu.findViewById(
+                R.id.fullscreen_button);
+        final ImageButton splitscreenBtn = handleMenu.findViewById(
+                R.id.split_screen_button);
+        final ImageButton floatingBtn = handleMenu.findViewById(R.id.floating_button);
+        // TODO: Remove once implemented.
+        floatingBtn.setVisibility(View.GONE);
+
+        final ImageButton desktopBtn = handleMenu.findViewById(R.id.desktop_button);
+        fullscreenBtn.setOnClickListener(mOnClickListener);
+        splitscreenBtn.setOnClickListener(mOnClickListener);
+        floatingBtn.setOnClickListener(mOnClickListener);
+        desktopBtn.setOnClickListener(mOnClickListener);
+        // The button corresponding to the windowing mode that the task is currently in uses a
+        // different color than the others.
+        final ColorStateList[] iconColors = getWindowingIconColor();
+        final ColorStateList inActiveColorStateList = iconColors[0];
+        final ColorStateList activeColorStateList = iconColors[1];
+        final int windowingMode = mTaskInfo.getWindowingMode();
+        fullscreenBtn.setImageTintList(windowingMode == WINDOWING_MODE_FULLSCREEN
+                ? activeColorStateList : inActiveColorStateList);
+        splitscreenBtn.setImageTintList(windowingMode == WINDOWING_MODE_MULTI_WINDOW
+                ? activeColorStateList : inActiveColorStateList);
+        floatingBtn.setImageTintList(windowingMode == WINDOWING_MODE_PINNED
+                ? activeColorStateList : inActiveColorStateList);
+        desktopBtn.setImageTintList(windowingMode == WINDOWING_MODE_FREEFORM
+                ? activeColorStateList : inActiveColorStateList);
+    }
+
+    /**
+     * Set up interactive elements & height of handle menu's more actions pill
+     */
+    private void setupMoreActionsPill(View handleMenu) {
+        if (!SHOULD_SHOW_MORE_ACTIONS_PILL) {
+            handleMenu.findViewById(R.id.more_actions_pill).setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Returns array of windowing icon color based on current UI theme. First element of the
+     * array is for inactive icons and the second is for active icons.
+     */
+    private ColorStateList[] getWindowingIconColor() {
+        final int mode = mContext.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK;
+        final boolean isNightMode = (mode == Configuration.UI_MODE_NIGHT_YES);
+        final TypedArray typedArray = mContext.obtainStyledAttributes(new int[]{
+                com.android.internal.R.attr.materialColorOnSurface,
+                com.android.internal.R.attr.materialColorPrimary});
+        final int inActiveColor = typedArray.getColor(0, isNightMode ? Color.WHITE : Color.BLACK);
+        final int activeColor = typedArray.getColor(1, isNightMode ? Color.WHITE : Color.BLACK);
+        typedArray.recycle();
+        return new ColorStateList[]{ColorStateList.valueOf(inActiveColor),
+                ColorStateList.valueOf(activeColor)};
+    }
+
+    /**
+     * Updates handle menu's position variables to reflect its next position.
      */
     private void updateHandleMenuPillPositions() {
-        final int menuX, menuY;
-        final int captionWidth = mTaskInfo.getConfiguration()
-                .windowConfiguration.getBounds().width();
-        if (mLayoutResId
-                == R.layout.desktop_mode_app_controls_window_decor) {
-            // Align the handle menu to the left of the caption.
-            menuX = mCaptionX + mMarginMenuStart;
-            menuY = mCaptionY + mMarginMenuTop;
+        int menuX;
+        final int menuY;
+        if (mLayoutResId == R.layout.desktop_mode_app_header) {
+            // Align the handle menu to the left side of the caption.
+            menuX = mMarginMenuStart;
+            menuY = mMarginMenuTop;
         } else {
-            // Position the handle menu at the center of the caption.
-            menuX = mCaptionX + (captionWidth / 2) - (mMenuWidth / 2);
-            menuY = mCaptionY + mMarginMenuStart;
+            final int handleWidth = loadDimensionPixelSize(mContext.getResources(),
+                    R.dimen.desktop_mode_fullscreen_decor_caption_width);
+            final int handleOffset = (mMenuWidth / 2) - (handleWidth / 2);
+            final int captionX = mParentDecor.getCaptionX();
+            // TODO(b/343561161): This needs to be calculated differently if the task is in
+            //  top/bottom split.
+            if (Flags.enableAdditionalWindowsAboveStatusBar()) {
+                final Rect leftOrTopStageBounds = new Rect();
+                if (mSplitScreenController.getSplitPosition(mTaskInfo.taskId)
+                        == SPLIT_POSITION_BOTTOM_OR_RIGHT) {
+                    mSplitScreenController.getStageBounds(leftOrTopStageBounds, new Rect());
+                }
+                // In a focused decor, we use global coordinates for handle menu. Therefore we
+                // need to account for other factors like split stage and menu/handle width to
+                // center the menu.
+                final DisplayLayout layout = mDisplayController
+                        .getDisplayLayout(mTaskInfo.displayId);
+                menuX = captionX + handleOffset - (layout.width() / 2);
+                if (mSplitScreenController.getSplitPosition(mTaskInfo.taskId)
+                        == SPLIT_POSITION_BOTTOM_OR_RIGHT && layout.isLandscape()) {
+                    // If this task in the right stage, we need to offset by left stage's width
+                    menuX += leftOrTopStageBounds.width();
+                }
+                menuY = mMarginMenuStart - ((layout.height() - mMenuHeight) / 2);
+            } else {
+                final int captionWidth = mTaskInfo.getConfiguration()
+                        .windowConfiguration.getBounds().width();
+                menuX = (captionWidth / 2) - (mMenuWidth / 2);
+                menuY = mMarginMenuTop;
+            }
         }
-
-        // App Info pill setup.
-        final int appInfoPillY = menuY;
-        mAppInfoPillPosition.set(menuX, appInfoPillY);
-
-        final int windowingPillY, moreActionsPillY;
-        if (mShouldShowWindowingPill) {
-            windowingPillY = appInfoPillY + mAppInfoPillHeight + mMarginMenuSpacing;
-            mWindowingPillPosition.set(menuX, windowingPillY);
-            moreActionsPillY = windowingPillY + mWindowingPillHeight + mMarginMenuSpacing;
-            mMoreActionsPillPosition.set(menuX, moreActionsPillY);
-        } else {
-            // Just start after the end of the app info pill + margins.
-            moreActionsPillY = appInfoPillY + mAppInfoPillHeight + mMarginMenuSpacing;
-            mMoreActionsPillPosition.set(menuX, moreActionsPillY);
-        }
+        // Handle Menu position setup.
+        mHandleMenuPosition.set(menuX, menuY);
     }
 
     /**
      * Update pill layout, in case task changes have caused positioning to change.
-     * @param t
      */
     void relayout(SurfaceControl.Transaction t) {
-        if (mAppInfoPill != null) {
+        if (mHandleMenuViewContainer != null) {
             updateHandleMenuPillPositions();
-            t.setPosition(mAppInfoPill.mWindowSurface,
-                    mAppInfoPillPosition.x, mAppInfoPillPosition.y);
-            // Only show windowing buttons in proto2. Proto1 uses a system-level mode only.
-            final boolean shouldShowWindowingPill = DesktopModeStatus.isProto2Enabled();
-            if (shouldShowWindowingPill) {
-                t.setPosition(mWindowingPill.mWindowSurface,
-                        mWindowingPillPosition.x, mWindowingPillPosition.y);
-            }
-            t.setPosition(mMoreActionsPill.mWindowSurface,
-                    mMoreActionsPillPosition.x, mMoreActionsPillPosition.y);
+            mHandleMenuViewContainer.setPosition(t, mHandleMenuPosition.x, mHandleMenuPosition.y);
         }
     }
+
     /**
-     * Check a passed MotionEvent if a click has occurred on any button on this caption
-     * Note this should only be called when a regular onClick is not possible
+     * Check a passed MotionEvent if a click or hover has occurred on any button on this caption
+     * Note this should only be called when a regular onClick/onHover is not possible
      * (i.e. the button was clicked through status bar layer)
+     *
      * @param ev the MotionEvent to compare against.
      */
-    void checkClickEvent(MotionEvent ev) {
-        final View appInfoPill = mAppInfoPill.mWindowViewHost.getView();
-        final ImageButton collapse = appInfoPill.findViewById(R.id.collapse_menu_button);
-        // Translate the input point from display coordinates to the same space as the collapse
-        // button, meaning its parent (app info pill view).
-        final PointF inputPoint = new PointF(ev.getX() - mAppInfoPillPosition.x,
-                ev.getY() - mAppInfoPillPosition.y);
-        if (pointInView(collapse, inputPoint.x, inputPoint.y)) {
-            mOnClickListener.onClick(collapse);
+    void checkMotionEvent(MotionEvent ev) {
+        final View handleMenu = mHandleMenuViewContainer.getView();
+        final HandleMenuImageButton collapse = handleMenu.findViewById(R.id.collapse_menu_button);
+        final PointF inputPoint = translateInputToLocalSpace(ev);
+        final boolean inputInCollapseButton = pointInView(collapse, inputPoint.x, inputPoint.y);
+        final int action = ev.getActionMasked();
+        collapse.setHovered(inputInCollapseButton && action != ACTION_UP);
+        collapse.setPressed(inputInCollapseButton && action == ACTION_DOWN);
+        if (action == ACTION_UP && inputInCollapseButton) {
+            collapse.performClick();
         }
+    }
+
+    // Translate the input point from display coordinates to the same space as the handle menu.
+    private PointF translateInputToLocalSpace(MotionEvent ev) {
+        return new PointF(ev.getX() - mHandleMenuPosition.x,
+                ev.getY() - mHandleMenuPosition.y);
     }
 
     /**
      * A valid menu input is one of the following:
      * An input that happens in the menu views.
      * Any input before the views have been laid out.
+     *
      * @param inputPoint the input to compare against.
      */
     boolean isValidMenuInput(PointF inputPoint) {
         if (!viewsLaidOut()) return true;
-        final boolean pointInAppInfoPill = pointInView(
-                mAppInfoPill.mWindowViewHost.getView(),
-                inputPoint.x - mAppInfoPillPosition.x,
-                inputPoint.y - mAppInfoPillPosition.y);
-        boolean pointInWindowingPill = false;
-        if (mWindowingPill != null) {
-            pointInWindowingPill = pointInView(
-                    mWindowingPill.mWindowViewHost.getView(),
-                    inputPoint.x - mWindowingPillPosition.x,
-                    inputPoint.y - mWindowingPillPosition.y);
-        }
-        final boolean pointInMoreActionsPill = pointInView(
-                mMoreActionsPill.mWindowViewHost.getView(),
-                inputPoint.x - mMoreActionsPillPosition.x,
-                inputPoint.y - mMoreActionsPillPosition.y);
-
-        return pointInAppInfoPill || pointInWindowingPill || pointInMoreActionsPill;
+        return pointInView(
+                mHandleMenuViewContainer.getView(),
+                inputPoint.x - mHandleMenuPosition.x,
+                inputPoint.y - mHandleMenuPosition.y);
     }
 
     private boolean pointInView(View v, float x, float y) {
@@ -297,33 +342,36 @@ class HandleMenu {
 
     /**
      * Check if the views for handle menu can be seen.
-     * @return
      */
     private boolean viewsLaidOut() {
-        return mAppInfoPill.mWindowViewHost.getView().isLaidOut();
+        return mHandleMenuViewContainer.getView().isLaidOut();
     }
-
 
     private void loadHandleMenuDimensions() {
         final Resources resources = mContext.getResources();
         mMenuWidth = loadDimensionPixelSize(resources,
                 R.dimen.desktop_mode_handle_menu_width);
+        mMenuHeight = getHandleMenuHeight(resources);
         mMarginMenuTop = loadDimensionPixelSize(resources,
                 R.dimen.desktop_mode_handle_menu_margin_top);
         mMarginMenuStart = loadDimensionPixelSize(resources,
                 R.dimen.desktop_mode_handle_menu_margin_start);
-        mMarginMenuSpacing = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_pill_spacing_margin);
-        mAppInfoPillHeight = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_app_info_pill_height);
-        mWindowingPillHeight = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_windowing_pill_height);
-        mMoreActionsPillHeight = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_more_actions_pill_height);
-        mShadowRadius = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_shadow_radius);
-        mCornerRadius = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_corner_radius);
+    }
+
+    /**
+     * Determines handle menu height based on if windowing pill should be shown.
+     */
+    private int getHandleMenuHeight(Resources resources) {
+        int menuHeight = loadDimensionPixelSize(resources, R.dimen.desktop_mode_handle_menu_height);
+        if (!mShouldShowWindowingPill) {
+            menuHeight -= loadDimensionPixelSize(resources,
+                    R.dimen.desktop_mode_handle_menu_windowing_pill_height);
+        }
+        if (!SHOULD_SHOW_MORE_ACTIONS_PILL) {
+            menuHeight -= loadDimensionPixelSize(resources,
+                    R.dimen.desktop_mode_handle_menu_more_actions_pill_height);
+        }
+        return menuHeight;
     }
 
     private int loadDimensionPixelSize(Resources resources, int resourceId) {
@@ -334,29 +382,31 @@ class HandleMenu {
     }
 
     void close() {
-        mAppInfoPill.releaseView();
-        mAppInfoPill = null;
-        if (mWindowingPill != null) {
-            mWindowingPill.releaseView();
-            mWindowingPill = null;
+        final Runnable after = () -> {
+            mHandleMenuViewContainer.releaseView();
+            mHandleMenuViewContainer = null;
+        };
+        if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                || mTaskInfo.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW) {
+            mHandleMenuAnimator.animateCollapseIntoHandleClose(after);
+        } else {
+            mHandleMenuAnimator.animateClose(after);
         }
-        mMoreActionsPill.releaseView();
-        mMoreActionsPill = null;
     }
 
     static final class Builder {
-        private final WindowDecoration mParent;
+        private final DesktopModeWindowDecoration mParent;
         private CharSequence mName;
-        private Drawable mAppIcon;
+        private Bitmap mAppIcon;
         private View.OnClickListener mOnClickListener;
         private View.OnTouchListener mOnTouchListener;
         private int mLayoutId;
-        private int mCaptionX;
-        private int mCaptionY;
         private boolean mShowWindowingPill;
+        private int mCaptionHeight;
+        private DisplayController mDisplayController;
+        private SplitScreenController mSplitScreenController;
 
-
-        Builder(@NonNull WindowDecoration parent) {
+        Builder(@NonNull DesktopModeWindowDecoration parent) {
             mParent = parent;
         }
 
@@ -365,7 +415,7 @@ class HandleMenu {
             return this;
         }
 
-        Builder setAppIcon(@Nullable Drawable appIcon) {
+        Builder setAppIcon(@Nullable Bitmap appIcon) {
             mAppIcon = appIcon;
             return this;
         }
@@ -385,20 +435,30 @@ class HandleMenu {
             return this;
         }
 
-        Builder setCaptionPosition(int captionX, int captionY) {
-            mCaptionX = captionX;
-            mCaptionY = captionY;
-            return this;
-        }
-
         Builder setWindowingButtonsVisible(boolean windowingButtonsVisible) {
             mShowWindowingPill = windowingButtonsVisible;
             return this;
         }
 
+        Builder setCaptionHeight(int captionHeight) {
+            mCaptionHeight = captionHeight;
+            return this;
+        }
+
+        Builder setDisplayController(DisplayController displayController) {
+            mDisplayController = displayController;
+            return this;
+        }
+
+        Builder setSplitScreenController(SplitScreenController splitScreenController) {
+            mSplitScreenController = splitScreenController;
+            return this;
+        }
+
         HandleMenu build() {
-            return new HandleMenu(mParent, mLayoutId, mCaptionX, mCaptionY, mOnClickListener,
-                    mOnTouchListener, mAppIcon, mName, mShowWindowingPill);
+            return new HandleMenu(mParent, mLayoutId, mOnClickListener,
+                    mOnTouchListener, mAppIcon, mName, mDisplayController, mSplitScreenController,
+                    mShowWindowingPill, mCaptionHeight);
         }
     }
 }

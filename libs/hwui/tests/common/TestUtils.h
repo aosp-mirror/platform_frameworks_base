@@ -30,6 +30,7 @@
 
 #include <SkBitmap.h>
 #include <SkColor.h>
+#include <SkFont.h>
 #include <SkImageInfo.h>
 #include <SkRefCnt.h>
 
@@ -61,18 +62,10 @@ namespace uirenderer {
         ADD_FAILURE() << "ClipState not a rect";                                     \
     }
 
-#define INNER_PIPELINE_TEST(test_case_name, test_name, pipeline, functionCall) \
-    TEST(test_case_name, test_name##_##pipeline) {                             \
-        RenderPipelineType oldType = Properties::getRenderPipelineType();      \
-        Properties::overrideRenderPipelineType(RenderPipelineType::pipeline);  \
-        functionCall;                                                          \
-        Properties::overrideRenderPipelineType(oldType);                       \
-    };
-
-#define INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, pipeline) \
-    INNER_PIPELINE_TEST(test_case_name, test_name, pipeline,                  \
-                        TestUtils::runOnRenderThread(                         \
-                                test_case_name##_##test_name##_RenderThreadTest::doTheThing))
+#define INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name)                                \
+    TEST(test_case_name, test_name) {                                                              \
+        TestUtils::runOnRenderThread(test_case_name##_##test_name##_RenderThreadTest::doTheThing); \
+    }
 
 /**
  * Like gtest's TEST, but runs on the RenderThread, and 'renderThread' is passed, in top level scope
@@ -83,21 +76,7 @@ namespace uirenderer {
     public:                                                                                 \
         static void doTheThing(renderthread::RenderThread& renderThread);                   \
     };                                                                                      \
-    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL);                    \
-    /* Temporarily disabling Vulkan until we can figure out a way to stub out the driver */ \
-    /* INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); */          \
-    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(                       \
-            renderthread::RenderThread& renderThread)
-
-/**
- * Like RENDERTHREAD_TEST, but only runs with the Skia RenderPipelineTypes
- */
-#define RENDERTHREAD_SKIA_PIPELINE_TEST(test_case_name, test_name)                          \
-    class test_case_name##_##test_name##_RenderThreadTest {                                 \
-    public:                                                                                 \
-        static void doTheThing(renderthread::RenderThread& renderThread);                   \
-    };                                                                                      \
-    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL);                    \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name);                            \
     /* Temporarily disabling Vulkan until we can figure out a way to stub out the driver */ \
     /* INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); */          \
     void test_case_name##_##test_name##_RenderThreadTest::doTheThing(                       \
@@ -307,13 +286,21 @@ public:
         int destroyed = 0;
         int removeOverlays = 0;
         int glesDraw = 0;
+        int vkInitialize = 0;
+        int vkDraw = 0;
+        int vkPostDraw = 0;
     };
 
     static void expectOnRenderThread(const std::string_view& function = "unknown") {
         EXPECT_EQ(gettid(), TestUtils::getRenderThreadTid()) << "Called on wrong thread: " << function;
     }
 
-    static WebViewFunctorCallbacks createMockFunctor(RenderMode mode) {
+    static int createMockFunctor() {
+        const auto renderMode = WebViewFunctor_queryPlatformRenderMode();
+        return WebViewFunctor_create(nullptr, createMockFunctorCallbacks(renderMode), renderMode);
+    }
+
+    static WebViewFunctorCallbacks createMockFunctorCallbacks(RenderMode mode) {
         auto callbacks = WebViewFunctorCallbacks{
                 .onSync =
                         [](int functor, void* client_data, const WebViewSyncData& data) {
@@ -345,14 +332,29 @@ public:
                     sMockFunctorCounts[functor].glesDraw++;
                 };
                 break;
-            default:
-                ADD_FAILURE();
-                return WebViewFunctorCallbacks{};
+            case RenderMode::Vulkan:
+                callbacks.vk.initialize = [](int functor, void* data,
+                                             const VkFunctorInitParams& params) {
+                    expectOnRenderThread("initialize");
+                    sMockFunctorCounts[functor].vkInitialize++;
+                };
+                callbacks.vk.draw = [](int functor, void* data, const VkFunctorDrawParams& params,
+                                       const WebViewOverlayData& overlayParams) {
+                    expectOnRenderThread("draw");
+                    sMockFunctorCounts[functor].vkDraw++;
+                };
+                callbacks.vk.postDraw = [](int functor, void* data) {
+                    expectOnRenderThread("postDraw");
+                    sMockFunctorCounts[functor].vkPostDraw++;
+                };
+                break;
         }
         return callbacks;
     }
 
     static CallCounts& countsForFunctor(int functor) { return sMockFunctorCounts[functor]; }
+
+    static SkFont defaultFont();
 
 private:
     static std::unordered_map<int, CallCounts> sMockFunctorCounts;

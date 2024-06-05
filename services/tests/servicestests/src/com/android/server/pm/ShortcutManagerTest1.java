@@ -18,7 +18,6 @@ package com.android.server.pm;
 import static android.content.pm.ShortcutInfo.DISABLED_REASON_BACKUP_NOT_SUPPORTED;
 import static android.content.pm.ShortcutInfo.DISABLED_REASON_NOT_DISABLED;
 import static android.content.pm.ShortcutInfo.DISABLED_REASON_SIGNATURE_MISMATCH;
-import static android.content.pm.ShortcutInfo.DISABLED_REASON_VERSION_LOWER;
 
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.anyOrNull;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.anyStringOrNull;
@@ -78,7 +77,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
-import android.content.pm.LauncherApps.PinItemRequest;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
@@ -125,6 +123,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -550,14 +550,14 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Verify calls to UsageStatsManagerInternal#reportShortcutUsage are throttled.
         setCaller(CALLING_PACKAGE_1, USER_0);
-        for (int i = 0; i < ShortcutPackage.REPORT_USAGE_BUFFER_SIZE; i++) {
-            final ShortcutInfo si = makeShortcut("s" + i);
+        {
+            final ShortcutInfo si = makeShortcut("s0");
             mManager.pushDynamicShortcut(si);
         }
         verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
-                eq(CALLING_PACKAGE_1), eq("s1"), eq(USER_0));
+                eq(CALLING_PACKAGE_1), eq("s0"), eq(USER_0));
         Mockito.reset(mMockUsageStatsManagerInternal);
-        for (int i = ShortcutPackage.REPORT_USAGE_BUFFER_SIZE; i <= 10; i++) {
+        for (int i = 2; i <= 10; i++) {
             final ShortcutInfo si = makeShortcut("s" + i);
             mManager.pushDynamicShortcut(si);
         }
@@ -566,14 +566,14 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Verify pkg2 isn't blocked by pkg1, but consecutive calls from pkg2 are throttled as well.
         setCaller(CALLING_PACKAGE_2, USER_0);
-        for (int i = 0; i < ShortcutPackage.REPORT_USAGE_BUFFER_SIZE; i++) {
-            final ShortcutInfo si = makeShortcut("s" + i);
+        {
+            final ShortcutInfo si = makeShortcut("s1");
             mManager.pushDynamicShortcut(si);
         }
         verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
                 eq(CALLING_PACKAGE_2), eq("s1"), eq(USER_0));
         Mockito.reset(mMockUsageStatsManagerInternal);
-        for (int i = ShortcutPackage.REPORT_USAGE_BUFFER_SIZE; i <= 10; i++) {
+        for (int i = 2; i <= 10; i++) {
             final ShortcutInfo si = makeShortcut("s" + i);
             mManager.pushDynamicShortcut(si);
         }
@@ -4065,8 +4065,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         ShortcutUser user = new ShortcutUser(mService, 0);
 
-        File corruptedShortcutPackage = new File("/data/local/tmp/cts/content/",
+        File corruptedShortcutPackage = new File(getTestContext().getFilesDir(),
                 "broken_shortcut.xml");
+        Files.copy(new File("/data/local/tmp/cts/content/", "broken_shortcut.xml").toPath(),
+                corruptedShortcutPackage.toPath(), StandardCopyOption.REPLACE_EXISTING);
         assertNull(ShortcutPackage.loadFromFile(mService, user, corruptedShortcutPackage, false));
     }
 
@@ -4165,6 +4167,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     + "<user locales=\"en\" last-app-scan-time2=\"14400000");
         }
         try (Writer os = new FileWriter(mService.getUserFile(USER_10).getBaseFile())) {
+            os.write("<?xml version='1.0' encoding='utf");
+        }
+        ShortcutPackage sp = mService.getUserShortcutsLocked(USER_0).getPackageShortcutsIfExists(
+                CALLING_PACKAGE_1);
+        try (Writer os = new FileWriter(sp.getShortcutPackageItemFile().getPath())) {
             os.write("<?xml version='1.0' encoding='utf");
         }
 
@@ -4835,7 +4842,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         doReturn(expected != DISABLED_REASON_SIGNATURE_MISMATCH).when(
                 mMockPackageManagerInternal).isDataRestoreSafe(any(byte[].class), anyString());
 
-        assertEquals(expected, spi.canRestoreTo(mService, pi, anyVersionOk));
+        assertEquals(expected, spi.canRestoreTo(mService, pi, true));
     }
 
     public void testCanRestoreTo() {
@@ -4863,7 +4870,6 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         checkCanRestoreTo(DISABLED_REASON_SIGNATURE_MISMATCH, spi1, false, 10, true, "x");
         checkCanRestoreTo(DISABLED_REASON_SIGNATURE_MISMATCH, spi1, false, 10, true, "x", "y");
         checkCanRestoreTo(DISABLED_REASON_SIGNATURE_MISMATCH, spi1, false, 10, true, "x");
-        checkCanRestoreTo(DISABLED_REASON_VERSION_LOWER, spi1, false, 9, true, "sig1");
 
         // Any version okay.
         checkCanRestoreTo(DISABLED_REASON_NOT_DISABLED, spi1, true, 9, true, "sig1");
@@ -5974,14 +5980,6 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testBackupAndRestore_publisherLowerVersion() {
-        prepareForBackupTest();
-
-        addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 0); // Lower version
-
-        checkBackupAndRestore_publisherNotRestored(ShortcutInfo.DISABLED_REASON_VERSION_LOWER);
-    }
-
     public void testBackupAndRestore_publisherWrongSignature() {
         prepareForBackupTest();
 
@@ -6614,252 +6612,6 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
             assertWith(getCallerShortcuts())
                     .haveIds("s1", "ms1");
-        });
-    }
-
-
-    /**
-     * Restored to a lower version with no manifest shortcuts. All shortcuts are now invisible,
-     * and all calls from the publisher should ignore them.
-     */
-    public void testBackupAndRestore_disabledShortcutsAreIgnored() {
-        // Publish two manifest shortcuts.
-        addManifestShortcutResource(
-                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
-                R.xml.shortcut_5_altalt);
-        updatePackageVersion(CALLING_PACKAGE_1, 1);
-        mService.mPackageMonitor.onReceive(mServiceContext,
-                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
-
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertTrue(mManager.setDynamicShortcuts(list(
-                    makeShortcutWithShortLabel("s1", "original-title"),
-                    makeShortcut("s2"), makeShortcut("s3"))));
-        });
-
-        // Pin from launcher 1.
-        runWithCaller(LAUNCHER_1, USER_0, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
-                    list("ms1", "ms2", "ms3", "ms4", "s1", "s2"), HANDLE_USER_0);
-        });
-
-        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(
-                any(byte[].class), anyString());
-
-        backupAndRestore();
-
-        // Lower the version and remove the manifest shortcuts.
-        addManifestShortcutResource(
-                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
-                R.xml.shortcut_0);
-        addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 0); // Lower version
-
-        // When re-installing the app, the manifest shortcut should be re-published.
-        mService.mPackageMonitor.onReceive(mServiceContext,
-                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
-        mService.mPackageMonitor.onReceive(mServiceContext,
-                genPackageAddIntent(LAUNCHER_1, USER_0));
-
-        // No shortcuts should be visible to the publisher.
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertWith(getCallerVisibleShortcuts())
-                    .isEmpty();
-        });
-
-        final Runnable checkAllDisabledForLauncher = () -> {
-            runWithCaller(LAUNCHER_1, USER_0, () -> {
-                assertWith(getShortcutAsLauncher(USER_0))
-                        .areAllPinned()
-                        .haveIds("ms1", "ms2", "ms3", "ms4", "s1", "s2")
-                        .areAllDisabled()
-                        .areAllWithDisabledReason(ShortcutInfo.DISABLED_REASON_VERSION_LOWER)
-
-                        .forShortcutWithId("s1", si -> {
-                            assertEquals("original-title", si.getShortLabel());
-                        })
-                        .forShortcutWithId("ms1", si -> {
-                            assertEquals("string-com.android.test.1-user:0-res:"
-                                            + R.string.shortcut_title1 + "/en"
-                                    , si.getShortLabel());
-                        })
-                        .forShortcutWithId("ms2", si -> {
-                            assertEquals("string-com.android.test.1-user:0-res:"
-                                            + R.string.shortcut_title2 + "/en"
-                                    , si.getShortLabel());
-                        })
-                        .forShortcutWithId("ms3", si -> {
-                            assertEquals("string-com.android.test.1-user:0-res:"
-                                            + R.string.shortcut_title1 + "/en"
-                                    , si.getShortLabel());
-                            assertEquals("string-com.android.test.1-user:0-res:"
-                                            + R.string.shortcut_title2 + "/en"
-                                    , si.getLongLabel());
-                        })
-                        .forShortcutWithId("ms4", si -> {
-                            assertEquals("string-com.android.test.1-user:0-res:"
-                                            + R.string.shortcut_title2 + "/en"
-                                    , si.getShortLabel());
-                            assertEquals("string-com.android.test.1-user:0-res:"
-                                            + R.string.shortcut_title2 + "/en"
-                                    , si.getLongLabel());
-                        });
-            });
-        };
-
-        checkAllDisabledForLauncher.run();
-
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-
-            makeCallerForeground(); // CALLING_PACKAGE_1 is now in the foreground.
-
-            // All changing API calls should be ignored.
-
-            getManager().enableShortcuts(list("ms1", "ms2", "ms3", "ms4", "s1", "s2"));
-            checkAllDisabledForLauncher.run();
-
-            getManager().enableShortcuts(list("ms1", "ms2", "ms3", "ms4", "s1", "s2"));
-            checkAllDisabledForLauncher.run();
-
-            getManager().enableShortcuts(list("ms1", "ms2", "ms3", "ms4", "s1", "s2"));
-            checkAllDisabledForLauncher.run();
-
-            getManager().removeAllDynamicShortcuts();
-            getManager().removeDynamicShortcuts(list("ms1", "ms2", "ms3", "ms4", "s1", "s2"));
-            checkAllDisabledForLauncher.run();
-
-            getManager().updateShortcuts(list(makeShortcutWithShortLabel("s1", "new-title")));
-            checkAllDisabledForLauncher.run();
-
-
-            // Add a shortcut -- even though ms1 was immutable, it will succeed.
-            assertTrue(getManager().addDynamicShortcuts(list(
-                    makeShortcutWithShortLabel("ms1", "original-title"))));
-
-            runWithCaller(LAUNCHER_1, USER_0, () -> {
-                assertWith(getShortcutAsLauncher(USER_0))
-                        .haveIds("ms1", "ms2", "ms3", "ms4", "s1", "s2")
-
-                        .selectByIds("ms1")
-                        .areAllEnabled()
-                        .areAllDynamic()
-                        .areAllPinned()
-                        .forAllShortcuts(si -> {
-                            assertEquals("original-title", si.getShortLabel());
-                        })
-
-                        // The rest still exist and disabled.
-                        .revertToOriginalList()
-                        .selectByIds("ms2", "ms3", "ms4", "s1", "s2")
-                        .areAllDisabled()
-                        .areAllPinned()
-                ;
-            });
-
-            assertTrue(getManager().setDynamicShortcuts(list(
-                    makeShortcutWithShortLabel("ms2", "new-title-2"))));
-
-            runWithCaller(LAUNCHER_1, USER_0, () -> {
-                assertWith(getShortcutAsLauncher(USER_0))
-                        .haveIds("ms1", "ms2", "ms3", "ms4", "s1", "s2")
-
-                        .selectByIds("ms1")
-                        .areAllEnabled()
-                        .areAllNotDynamic() // ms1 was not in the list, so no longer dynamic.
-                        .areAllPinned()
-                        .areAllMutable()
-                        .forAllShortcuts(si -> {
-                            assertEquals("original-title", si.getShortLabel());
-                        })
-
-                        .revertToOriginalList()
-                        .selectByIds("ms2")
-                        .areAllEnabled()
-                        .areAllDynamic()
-                        .areAllPinned()
-                        .areAllMutable()
-                        .forAllShortcuts(si -> {
-                            assertEquals("new-title-2", si.getShortLabel());
-                        })
-
-                        // The rest still exist and disabled.
-                        .revertToOriginalList()
-                        .selectByIds("ms3", "ms4", "s1", "s2")
-                        .areAllDisabled()
-                        .areAllPinned()
-                ;
-            });
-
-            // Prepare for requestPinShortcut().
-            setDefaultLauncher(USER_0, LAUNCHER_1);
-            mPinConfirmActivityFetcher = (packageName, userId) ->
-                    new ComponentName(packageName, PIN_CONFIRM_ACTIVITY_CLASS);
-
-            mManager.requestPinShortcut(
-                    makeShortcutWithShortLabel("ms3", "new-title-3"),
-                    /*PendingIntent=*/ null);
-
-            // Note this was pinned, so it'll be accepted right away.
-            runWithCaller(LAUNCHER_1, USER_0, () -> {
-                assertWith(getShortcutAsLauncher(USER_0))
-                        .selectByIds("ms3")
-                        .areAllEnabled()
-                        .areAllNotDynamic()
-                        .areAllPinned()
-                        .areAllMutable()
-                        .forAllShortcuts(si -> {
-                            assertEquals("new-title-3", si.getShortLabel());
-                            // The new one replaces the old manifest shortcut, so the long label
-                            // should be gone now.
-                            assertNull(si.getLongLabel());
-                        });
-            });
-
-            // Now, change the launcher to launcher2, and request pin again.
-            setDefaultLauncher(USER_0, LAUNCHER_2);
-
-            reset(mServiceContext);
-
-            assertTrue(mManager.isRequestPinShortcutSupported());
-            mManager.requestPinShortcut(
-                    makeShortcutWithShortLabel("ms4", "new-title-4"),
-                    /*PendingIntent=*/ null);
-
-            // Initially there should be no pinned shortcuts for L2.
-            runWithCaller(LAUNCHER_2, USER_0, () -> {
-                assertWith(getShortcutAsLauncher(USER_0))
-                        .selectPinned()
-                        .isEmpty();
-
-                final ArgumentCaptor<Intent> intent = ArgumentCaptor.forClass(Intent.class);
-
-                verify(mServiceContext).startActivityAsUser(intent.capture(), eq(HANDLE_USER_0));
-
-                assertEquals(LauncherApps.ACTION_CONFIRM_PIN_SHORTCUT,
-                        intent.getValue().getAction());
-                assertEquals(LAUNCHER_2, intent.getValue().getComponent().getPackageName());
-
-                // Check the request object.
-                final PinItemRequest request = mLauncherApps.getPinItemRequest(intent.getValue());
-
-                assertNotNull(request);
-                assertEquals(PinItemRequest.REQUEST_TYPE_SHORTCUT, request.getRequestType());
-
-                assertWith(request.getShortcutInfo())
-                        .haveIds("ms4")
-                        .areAllOrphan()
-                        .forAllShortcuts(si -> {
-                            assertEquals("new-title-4", si.getShortLabel());
-                            // The new one replaces the old manifest shortcut, so the long label
-                            // should be gone now.
-                            assertNull(si.getLongLabel());
-                        });
-                assertTrue(request.accept());
-
-                assertWith(getShortcutAsLauncher(USER_0))
-                        .selectPinned()
-                        .haveIds("ms4")
-                        .areAllEnabled();
-            });
         });
     }
 

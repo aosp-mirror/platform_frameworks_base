@@ -32,6 +32,7 @@ import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.InputChannel;
 import android.view.MotionEvent;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
@@ -40,6 +41,7 @@ import android.view.inputmethod.InputMethodSession;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.inputmethod.CancellationGroup;
+import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.IInputMethodSession;
@@ -85,6 +87,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_UPDATE_TOOL_TYPE = 140;
     private static final int DO_REMOVE_STYLUS_HANDWRITING_WINDOW = 150;
     private static final int DO_SET_STYLUS_WINDOW_IDLE_TIMEOUT = 160;
+    private static final int DO_COMMIT_HANDWRITING_DELEGATION_TEXT_IF_AVAILABLE = 170;
+    private static final int DO_DISCARD_HANDWRITING_DELEGATION_TEXT = 180;
 
     final WeakReference<InputMethodServiceInternal> mTarget;
     final Context mContext;
@@ -265,9 +269,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 return;
             }
             case DO_CAN_START_STYLUS_HANDWRITING: {
+                final SomeArgs args = (SomeArgs) msg.obj;
                 if (isValid(inputMethod, target, "DO_CAN_START_STYLUS_HANDWRITING")) {
-                    inputMethod.canStartStylusHandwriting(msg.arg1);
+                    inputMethod.canStartStylusHandwriting(msg.arg1,
+                            (IConnectionlessHandwritingCallback) args.arg1,
+                            (CursorAnchorInfo) args.arg2, msg.arg2 != 0);
                 }
+                args.recycle();
                 return;
             }
             case DO_UPDATE_TOOL_TYPE: {
@@ -306,6 +314,19 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_SET_STYLUS_WINDOW_IDLE_TIMEOUT: {
                 if (isValid(inputMethod, target, "DO_SET_STYLUS_WINDOW_IDLE_TIMEOUT")) {
                     inputMethod.setStylusWindowIdleTimeoutForTest((long) msg.obj);
+                }
+                return;
+            }
+            case DO_COMMIT_HANDWRITING_DELEGATION_TEXT_IF_AVAILABLE: {
+                if (isValid(inputMethod, target,
+                        "DO_COMMIT_HANDWRITING_DELEGATION_TEXT_IF_AVAILABLE")) {
+                    inputMethod.commitHandwritingDelegationTextIfAvailable();
+                }
+                return;
+            }
+            case DO_DISCARD_HANDWRITING_DELEGATION_TEXT: {
+                if (isValid(inputMethod, target, "DO_DISCARD_HANDWRITING_DELEGATION_TEXT")) {
+                    inputMethod.discardHandwritingDelegationText();
                 }
                 return;
             }
@@ -432,8 +453,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void showSoftInput(IBinder showInputToken, @Nullable ImeTracker.Token statsToken,
-            int flags, ResultReceiver resultReceiver) {
+    public void showSoftInput(IBinder showInputToken, @NonNull ImeTracker.Token statsToken,
+            @InputMethod.ShowFlags int flags, ResultReceiver resultReceiver) {
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_WRAPPER);
         mCaller.executeOrSendMessage(mCaller.obtainMessageIOOO(DO_SHOW_SOFT_INPUT,
                 flags, showInputToken, resultReceiver, statsToken));
@@ -441,7 +462,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void hideSoftInput(IBinder hideInputToken, @Nullable ImeTracker.Token statsToken,
+    public void hideSoftInput(IBinder hideInputToken, @NonNull ImeTracker.Token statsToken,
             int flags, ResultReceiver resultReceiver) {
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_WRAPPER);
         mCaller.executeOrSendMessage(mCaller.obtainMessageIOOO(DO_HIDE_SOFT_INPUT,
@@ -457,10 +478,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void canStartStylusHandwriting(int requestId)
+    public void canStartStylusHandwriting(int requestId,
+            IConnectionlessHandwritingCallback connectionlessCallback,
+            CursorAnchorInfo cursorAnchorInfo, boolean isConnectionlessForDelegation)
             throws RemoteException {
-        mCaller.executeOrSendMessage(
-                mCaller.obtainMessageI(DO_CAN_START_STYLUS_HANDWRITING, requestId));
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIIOO(DO_CAN_START_STYLUS_HANDWRITING,
+                requestId, isConnectionlessForDelegation ? 1 : 0, connectionlessCallback,
+                cursorAnchorInfo));
     }
 
     @BinderThread
@@ -479,6 +503,19 @@ class IInputMethodWrapper extends IInputMethod.Stub
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageIOO(DO_START_STYLUS_HANDWRITING, requestId, channel,
                         stylusEvents));
+    }
+
+    @BinderThread
+    @Override
+    public void commitHandwritingDelegationTextIfAvailable() {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessage(DO_COMMIT_HANDWRITING_DELEGATION_TEXT_IF_AVAILABLE));
+    }
+
+    @BinderThread
+    @Override
+    public void discardHandwritingDelegationText() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_DISCARD_HANDWRITING_DELEGATION_TEXT));
     }
 
     @BinderThread

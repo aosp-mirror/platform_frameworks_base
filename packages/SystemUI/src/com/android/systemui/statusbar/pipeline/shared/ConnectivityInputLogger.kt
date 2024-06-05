@@ -20,7 +20,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.pipeline.dagger.SharedConnectivityInputLog
 import com.android.systemui.statusbar.pipeline.shared.data.model.DefaultConnectionModel
 import javax.inject.Inject

@@ -1,0 +1,33 @@
+package: "android.os.vibrator"
+container: "system"
+
+flag {
+    namespace: "haptics"
+    name: "use_vibrator_haptic_feedback"
+    description: "Enables performHapticFeedback to directly use the vibrator service instead of going through the window session"
+    bug: "295459081"
+}
+
+flag {
+    namespace: "haptics"
+    name: "haptic_feedback_vibration_oem_customization_enabled"
+    description: "Enables OEMs/devices to customize vibrations for haptic feedback"
+    # Make read only. This is because the flag is used only once, and this could happen before
+    # the read-write flag values propagate to the device.
+    is_fixed_read_only: true
+    bug: "291128479"
+}
+
+flag {
+    namespace: "haptics"
+    name: "keyboard_category_enabled"
+    description: "Enables the independent keyboard vibration settings feature"
+    bug: "289107579"
+}
+
+flag {
+    namespace: "haptics"
+    name: "adaptive_haptics_enabled"
+    description: "Enables the adaptive haptics feature"
+    bug: "305961689"
+}

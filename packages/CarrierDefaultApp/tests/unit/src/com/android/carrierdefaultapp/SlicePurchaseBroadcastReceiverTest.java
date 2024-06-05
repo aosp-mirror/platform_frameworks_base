@@ -32,6 +32,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -72,6 +73,7 @@ public class SlicePurchaseBroadcastReceiverTest {
     @Mock PendingIntent mContentIntent1;
     @Mock PendingIntent mContentIntent2;
     @Mock PendingIntent mNotificationShownIntent;
+    @Mock PendingIntent mNotificationsDisabledIntent;
     @Mock Context mContext;
     @Mock Resources mResources;
     @Mock Configuration mConfiguration;
@@ -90,6 +92,7 @@ public class SlicePurchaseBroadcastReceiverTest {
         doReturn("").when(mResources).getString(anyInt());
         doReturn(mNotificationManager).when(mContext)
                 .getSystemService(eq(NotificationManager.class));
+        doReturn(true).when(mNotificationManager).areNotificationsEnabled();
         doReturn(mApplicationInfo).when(mContext).getApplicationInfo();
         doReturn(mPackageManager).when(mContext).getPackageManager();
         doReturn(mSpiedResources).when(mContext).getResources();
@@ -160,14 +163,35 @@ public class SlicePurchaseBroadcastReceiverTest {
                 "file:///android_asset/slice_store_test.html"
         };
 
+        // test invalid URLs
         for (String url : invalidUrls) {
-            URL purchaseUrl = SlicePurchaseBroadcastReceiver.getPurchaseUrl(url);
+            URL purchaseUrl = SlicePurchaseBroadcastReceiver.getPurchaseUrl(url, null, false);
             assertNull(purchaseUrl);
         }
 
+        // test asset URL
         assertEquals(SlicePurchaseController.SLICE_PURCHASE_TEST_FILE,
                 SlicePurchaseBroadcastReceiver.getPurchaseUrl(
-                        SlicePurchaseController.SLICE_PURCHASE_TEST_FILE).toString());
+                        SlicePurchaseController.SLICE_PURCHASE_TEST_FILE, null, false).toString());
+
+        // test normal URL
+        String validUrl = "http://www.google.com";
+        assertEquals(validUrl,
+                SlicePurchaseBroadcastReceiver.getPurchaseUrl(validUrl, null, false).toString());
+
+        // test normal URL with user data but no append
+        String userData = "encryptedUserData=data";
+        assertEquals(validUrl,
+                SlicePurchaseBroadcastReceiver.getPurchaseUrl(validUrl, userData, false)
+                        .toString());
+
+        // test normal URL with user data and append
+        assertEquals(validUrl + "?" + userData,
+                SlicePurchaseBroadcastReceiver.getPurchaseUrl(validUrl, userData, true).toString());
+
+        // test normal URL without user data and append
+        assertEquals(validUrl,
+                SlicePurchaseBroadcastReceiver.getPurchaseUrl(validUrl, null, true).toString());
     }
 
     @Test
@@ -200,12 +224,10 @@ public class SlicePurchaseBroadcastReceiverTest {
         doReturn(true).when(mPendingIntent).isBroadcast();
         doReturn(mPendingIntent).when(mIntent).getParcelableExtra(
                 anyString(), eq(PendingIntent.class));
-        doReturn(TelephonyManager.PHONE_PROCESS_NAME).when(mNotificationShownIntent)
-                .getCreatorPackage();
-        doReturn(true).when(mNotificationShownIntent).isBroadcast();
-        doReturn(mNotificationShownIntent).when(mIntent).getParcelableExtra(
-                eq(SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN),
-                eq(PendingIntent.class));
+        createValidPendingIntent(mNotificationShownIntent,
+                SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN);
+        createValidPendingIntent(mNotificationsDisabledIntent,
+                SlicePurchaseController.EXTRA_INTENT_NOTIFICATIONS_DISABLED);
 
         // spy notification intents to prevent PendingIntent issues
         doReturn(mContentIntent1).when(mSlicePurchaseBroadcastReceiver).createContentIntent(
@@ -232,12 +254,18 @@ public class SlicePurchaseBroadcastReceiverTest {
         mSlicePurchaseBroadcastReceiver.onReceive(mContext, mIntent);
     }
 
+    private void createValidPendingIntent(@NonNull PendingIntent intent, @NonNull String extra) {
+        doReturn(TelephonyManager.PHONE_PROCESS_NAME).when(intent).getCreatorPackage();
+        doReturn(true).when(intent).isBroadcast();
+        doReturn(intent).when(mIntent).getParcelableExtra(eq(extra), eq(PendingIntent.class));
+    }
+
     @Test
     public void testNotificationCanceled() {
+        displayPerformanceBoostNotification();
+
         // send ACTION_NOTIFICATION_CANCELED
         doReturn("com.android.phone.slice.action.NOTIFICATION_CANCELED").when(mIntent).getAction();
-        doReturn(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY).when(mIntent).getIntExtra(
-                eq(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY), anyInt());
         mSlicePurchaseBroadcastReceiver.onReceive(mContext, mIntent);
 
         // verify notification was canceled
@@ -248,7 +276,7 @@ public class SlicePurchaseBroadcastReceiverTest {
     }
 
     @Test
-    public void testNotificationTimeout() throws Exception {
+    public void testNotificationTimeout() {
         displayPerformanceBoostNotification();
 
         // send ACTION_SLICE_PURCHASE_APP_RESPONSE_TIMEOUT
@@ -313,5 +341,23 @@ public class SlicePurchaseBroadcastReceiverTest {
         verify(mConfiguration).setLocale(captor.capture());
         clearInvocations(mConfiguration);
         return captor.getValue();
+    }
+
+    @Test
+    public void testNotificationsDisabled() throws Exception {
+        doReturn(false).when(mNotificationManager).areNotificationsEnabled();
+
+        displayPerformanceBoostNotification();
+
+        // verify notification was not shown
+        verify(mNotificationManager, never()).notifyAsUser(
+                eq(SlicePurchaseBroadcastReceiver.PERFORMANCE_BOOST_NOTIFICATION_TAG),
+                eq(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY),
+                any(Notification.class),
+                eq(UserHandle.ALL));
+        verify(mNotificationShownIntent, never()).send();
+
+        // verify SlicePurchaseController was notified that notifications are disabled
+        verify(mNotificationsDisabledIntent).send();
     }
 }

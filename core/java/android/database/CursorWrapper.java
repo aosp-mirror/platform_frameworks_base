@@ -27,6 +27,7 @@ import java.util.List;
  * Wrapper class for Cursor that delegates all calls to the actual cursor object.  The primary
  * use for this class is to extend a cursor while overriding only a subset of its methods.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class CursorWrapper implements Cursor {
     /** @hide */
     @UnsupportedAppUsage

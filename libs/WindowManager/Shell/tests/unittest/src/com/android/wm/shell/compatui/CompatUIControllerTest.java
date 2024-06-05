@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.compatui;
 
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
 import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -34,13 +34,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
-import android.app.TaskInfo.CameraCompatControlState;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.testing.AndroidTestingRunner;
 import android.view.InsetsSource;
 import android.view.InsetsState;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -58,6 +59,9 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
+import dagger.Lazy;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,8 +69,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import dagger.Lazy;
 
 /**
  * Tests for {@link CompatUIController}.
@@ -82,21 +84,39 @@ public class CompatUIControllerTest extends ShellTestCase {
 
     private CompatUIController mController;
     private ShellInit mShellInit;
-    private @Mock ShellController mMockShellController;
-    private @Mock DisplayController mMockDisplayController;
-    private @Mock DisplayInsetsController mMockDisplayInsetsController;
-    private @Mock DisplayLayout mMockDisplayLayout;
-    private @Mock DisplayImeController mMockImeController;
-    private @Mock ShellTaskOrganizer.TaskListener mMockTaskListener;
-    private @Mock SyncTransactionQueue mMockSyncQueue;
-    private @Mock ShellExecutor mMockExecutor;
-    private @Mock Lazy<Transitions> mMockTransitionsLazy;
-    private @Mock CompatUIWindowManager mMockCompatLayout;
-    private @Mock LetterboxEduWindowManager mMockLetterboxEduLayout;
-    private @Mock RestartDialogWindowManager mMockRestartDialogLayout;
-    private @Mock DockStateReader mDockStateReader;
-    private @Mock CompatUIConfiguration mCompatUIConfiguration;
-    private @Mock CompatUIShellCommandHandler mCompatUIShellCommandHandler;
+    @Mock
+    private ShellController mMockShellController;
+    @Mock
+    private DisplayController mMockDisplayController;
+    @Mock
+    private DisplayInsetsController mMockDisplayInsetsController;
+    @Mock
+    private DisplayLayout mMockDisplayLayout;
+    @Mock
+    private DisplayImeController mMockImeController;
+    @Mock
+    private ShellTaskOrganizer.TaskListener mMockTaskListener;
+    @Mock
+    private SyncTransactionQueue mMockSyncQueue;
+    @Mock
+    private ShellExecutor mMockExecutor;
+    @Mock
+    private Lazy<Transitions> mMockTransitionsLazy;
+    @Mock
+    private CompatUIWindowManager mMockCompatLayout;
+    @Mock
+    private LetterboxEduWindowManager mMockLetterboxEduLayout;
+    @Mock
+    private RestartDialogWindowManager mMockRestartDialogLayout;
+    @Mock
+    private DockStateReader mDockStateReader;
+    @Mock
+    private CompatUIConfiguration mCompatUIConfiguration;
+    @Mock
+    private CompatUIShellCommandHandler mCompatUIShellCommandHandler;
+
+    @Mock
+    private AccessibilityManager mAccessibilityManager;
 
     @Captor
     ArgumentCaptor<OnInsetsChangedListener> mOnInsetsChangedListenerCaptor;
@@ -124,7 +144,7 @@ public class CompatUIControllerTest extends ShellTestCase {
         mController = new CompatUIController(mContext, mShellInit, mMockShellController,
                 mMockDisplayController, mMockDisplayInsetsController, mMockImeController,
                 mMockSyncQueue, mMockExecutor, mMockTransitionsLazy, mDockStateReader,
-                mCompatUIConfiguration, mCompatUIShellCommandHandler) {
+                mCompatUIConfiguration, mCompatUIShellCommandHandler, mAccessibilityManager) {
             @Override
             CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
                     ShellTaskOrganizer.TaskListener taskListener) {
@@ -504,13 +524,190 @@ public class CompatUIControllerTest extends ShellTestCase {
                 .createLayout(anyBoolean());
     }
 
+    @Test
+    public void testUpdateActiveTaskInfo_newTask_visibleAndFocused_updated() {
+        // Simulate user aspect ratio button being shown for previous task
+        mController.setHasShownUserAspectRatioSettingsButton(true);
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Create new task
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ true,
+                /* isFocused */ true);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo);
+
+        // Check topActivityTaskId is updated to the taskId of the new task and
+        // hasShownUserAspectRatioSettingsButton has been reset to false
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertFalse(mController.hasShownUserAspectRatioSettingsButton());
+    }
+
+    @Test
+    public void testUpdateActiveTaskInfo_newTask_notVisibleOrFocused_notUpdated() {
+        // Create new task
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ true,
+                /* isFocused */ true);
+
+        // Simulate task being shown
+        mController.updateActiveTaskInfo(taskInfo);
+
+        // Check topActivityTaskId is updated to the taskId of the new task and
+        // hasShownUserAspectRatioSettingsButton has been reset to false
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertFalse(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Simulate user aspect ratio button being shown
+        mController.setHasShownUserAspectRatioSettingsButton(true);
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+
+        final int newTaskId = TASK_ID + 1;
+
+        // Create visible but NOT focused task
+        final TaskInfo taskInfo1 = createTaskInfo(DISPLAY_ID, newTaskId,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ true,
+                /* isFocused */ false);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo1);
+
+        // Check topActivityTaskId is NOT updated and hasShownUserAspectRatioSettingsButton
+        // remains true
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Create focused but NOT visible task
+        final TaskInfo taskInfo2 = createTaskInfo(DISPLAY_ID, newTaskId,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ false,
+                /* isFocused */ true);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo2);
+
+        // Check topActivityTaskId is NOT updated and hasShownUserAspectRatioSettingsButton
+        // remains true
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Create NOT focused but NOT visible task
+        final TaskInfo taskInfo3 = createTaskInfo(DISPLAY_ID, newTaskId,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ false,
+                /* isFocused */ false);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo3);
+
+        // Check topActivityTaskId is NOT updated and hasShownUserAspectRatioSettingsButton
+        // remains true
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+    }
+
+    @Test
+    public void testUpdateActiveTaskInfo_sameTask_notUpdated() {
+        // Create new task
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ true,
+                /* isFocused */ true);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo);
+
+        // Check topActivityTaskId is updated to the taskId of the new task and
+        // hasShownUserAspectRatioSettingsButton has been reset to false
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertFalse(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Simulate user aspect ratio button being shown
+        mController.setHasShownUserAspectRatioSettingsButton(true);
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Simulate same task being re-shown
+        mController.updateActiveTaskInfo(taskInfo);
+
+        // Check topActivityTaskId is NOT updated and hasShownUserAspectRatioSettingsButton
+        // remains true
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+    }
+
+    @Test
+    public void testUpdateActiveTaskInfo_transparentTask_notUpdated() {
+        // Create new task
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ true,
+                /* isFocused */ true);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo);
+
+        // Check topActivityTaskId is updated to the taskId of the new task and
+        // hasShownUserAspectRatioSettingsButton has been reset to false
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertFalse(mController.hasShownUserAspectRatioSettingsButton());
+
+        // Simulate user aspect ratio button being shown
+        mController.setHasShownUserAspectRatioSettingsButton(true);
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+
+        final int newTaskId = TASK_ID + 1;
+
+        // Create transparent task
+        final TaskInfo taskInfo1 = createTaskInfo(DISPLAY_ID, newTaskId,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN, /* isVisible */ true,
+                /* isFocused */ true, /* isTopActivityTransparent */ true);
+
+        // Simulate new task being shown
+        mController.updateActiveTaskInfo(taskInfo1);
+
+        // Check topActivityTaskId is NOT updated and hasShownUserAspectRatioSettingsButton
+        // remains true
+        Assert.assertEquals(TASK_ID, mController.getTopActivityTaskId());
+        Assert.assertTrue(mController.hasShownUserAspectRatioSettingsButton());
+    }
+
+    @Test
+    public void testLetterboxEduLayout_notCreatedWhenLetterboxEducationIsDisabled() {
+        TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
+                CAMERA_COMPAT_CONTROL_HIDDEN);
+        taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled = false;
+
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mController, never()).createLetterboxEduWindowManager(any(), eq(taskInfo),
+                eq(mMockTaskListener));
+    }
+
     private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,
             @CameraCompatControlState int cameraCompatControlState) {
+        return createTaskInfo(displayId, taskId, hasSizeCompat, cameraCompatControlState,
+                /* isVisible */ false, /* isFocused */ false,
+                /* isTopActivityTransparent */ false);
+    }
+
+    private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,
+            @CameraCompatControlState int cameraCompatControlState, boolean isVisible,
+            boolean isFocused) {
+        return createTaskInfo(displayId, taskId, hasSizeCompat, cameraCompatControlState,
+                isVisible, isFocused, /* isTopActivityTransparent */ false);
+    }
+
+    private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,
+            @CameraCompatControlState int cameraCompatControlState, boolean isVisible,
+            boolean isFocused, boolean isTopActivityTransparent) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
         taskInfo.displayId = displayId;
-        taskInfo.topActivityInSizeCompat = hasSizeCompat;
-        taskInfo.cameraCompatControlState = cameraCompatControlState;
+        taskInfo.appCompatTaskInfo.topActivityInSizeCompat = hasSizeCompat;
+        taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState =
+                cameraCompatControlState;
+        taskInfo.isVisible = isVisible;
+        taskInfo.isFocused = isFocused;
+        taskInfo.isTopActivityTransparent = isTopActivityTransparent;
+        taskInfo.appCompatTaskInfo.isLetterboxEducationEnabled = true;
+        taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed = true;
         return taskInfo;
     }
 }

@@ -39,16 +39,16 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.IndentingPrintWriter;
+import android.util.ArraySet;
 import android.util.MutableInt;
-import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.broadcastradio.RadioEventLogger;
 import com.android.server.broadcastradio.RadioServiceUserController;
+import com.android.server.utils.Slogf;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,12 +59,12 @@ final class RadioModule {
     private static final String TAG = "BcRadio2Srv.module";
     private static final int RADIO_EVENT_LOGGER_QUEUE_SIZE = 25;
 
-    @NonNull private final IBroadcastRadio mService;
-    @NonNull private final RadioManager.ModuleProperties mProperties;
+    private final IBroadcastRadio mService;
+    private final RadioManager.ModuleProperties mProperties;
 
     private final Object mLock = new Object();
-    @NonNull private final Handler mHandler;
-    @NonNull private final RadioEventLogger mEventLogger;
+    private final Handler mHandler;
+    private final RadioEventLogger mEventLogger;
 
     @GuardedBy("mLock")
     private ITunerSession mHalTunerSession;
@@ -111,13 +111,11 @@ final class RadioModule {
         @Override
         public void onProgramListUpdated(ProgramListChunk programListChunk) {
             fireLater(() -> {
-                android.hardware.radio.ProgramList.Chunk chunk =
-                        Convert.programListChunkFromHal(programListChunk);
                 synchronized (mLock) {
-                    mProgramInfoCache.filterAndApplyChunk(chunk);
+                    mProgramInfoCache.filterAndApplyChunk(programListChunk);
 
                     for (TunerSession tunerSession : mAidlTunerSessions) {
-                        tunerSession.onMergedProgramListUpdateFromHal(chunk);
+                        tunerSession.onMergedProgramListUpdateFromHal(programListChunk);
                     }
                 }
             });
@@ -146,7 +144,7 @@ final class RadioModule {
 
     // Collection of active AIDL tuner sessions created through openSession().
     @GuardedBy("mLock")
-    private final Set<TunerSession> mAidlTunerSessions = new HashSet<>();
+    private final Set<TunerSession> mAidlTunerSessions = new ArraySet<>();
 
     @VisibleForTesting
     RadioModule(@NonNull IBroadcastRadio service,
@@ -160,10 +158,10 @@ final class RadioModule {
     @Nullable
     static RadioModule tryLoadingModule(int idx, @NonNull String fqName) {
         try {
-            Slog.i(TAG, "Try loading module for idx " + idx + ", fqName " + fqName);
+            Slogf.i(TAG, "Try loading module for idx " + idx + ", fqName " + fqName);
             IBroadcastRadio service = IBroadcastRadio.getService(fqName);
             if (service == null) {
-                Slog.w(TAG, "No service found for fqName " + fqName);
+                Slogf.w(TAG, "No service found for fqName " + fqName);
                 return null;
             }
 
@@ -182,7 +180,7 @@ final class RadioModule {
 
             return new RadioModule(service, prop);
         } catch (RemoteException ex) {
-            Slog.e(TAG, "Failed to load module " + fqName, ex);
+            Slogf.e(TAG, "Failed to load module " + fqName, ex);
             return null;
         }
     }
@@ -258,8 +256,8 @@ final class RadioModule {
             }
 
             if (idTypes == null) {
-                idTypes = new HashSet<>(filter.getIdentifierTypes());
-                ids = new HashSet<>(filter.getIdentifiers());
+                idTypes = new ArraySet<>(filter.getIdentifierTypes());
+                ids = new ArraySet<>(filter.getIdentifiers());
                 includeCategories = filter.areCategoriesIncluded();
                 excludeModifications = filter.areModificationsExcluded();
                 continue;
@@ -307,7 +305,7 @@ final class RadioModule {
             try {
                 mHalTunerSession.stopProgramListUpdates();
             } catch (RemoteException ex) {
-                Slog.e(TAG, "mHalTunerSession.stopProgramListUpdates() failed: ", ex);
+                Slogf.e(TAG, "mHalTunerSession.stopProgramListUpdates() failed: ", ex);
             }
             return;
         }
@@ -329,7 +327,7 @@ final class RadioModule {
                     newFilter));
             Convert.throwOnError("startProgramListUpdates", halResult);
         } catch (RemoteException ex) {
-            Slog.e(TAG, "mHalTunerSession.startProgramListUpdates() failed: ", ex);
+            Slogf.e(TAG, "mHalTunerSession.startProgramListUpdates() failed: ", ex);
         }
     }
 
@@ -350,7 +348,7 @@ final class RadioModule {
             try {
                 mHalTunerSession.close();
             } catch (RemoteException ex) {
-                Slog.e(TAG, "mHalTunerSession.close() failed: ", ex);
+                Slogf.e(TAG, "mHalTunerSession.close() failed: ", ex);
             }
             mHalTunerSession = null;
         }
@@ -387,18 +385,17 @@ final class RadioModule {
                 runnable.run(tunerSession.mCallback);
             } catch (DeadObjectException ex) {
                 // The other side died without calling close(), so just purge it from our records.
-                Slog.e(TAG, "Removing dead TunerSession");
+                Slogf.e(TAG, "Removing dead TunerSession");
                 if (deadSessions == null) {
                     deadSessions = new ArrayList<>();
                 }
                 deadSessions.add(tunerSession);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to invoke ITunerCallback: ", ex);
+                Slogf.e(TAG, "Failed to invoke ITunerCallback: ", ex);
             }
         }
         if (deadSessions != null) {
-            onTunerSessionsClosedLocked(deadSessions.toArray(
-                    new TunerSession[deadSessions.size()]));
+            onTunerSessionsClosedLocked(deadSessions.toArray(new TunerSession[0]));
         }
     }
 
@@ -431,7 +428,7 @@ final class RadioModule {
                 try {
                     hwCloseHandle.value.close();
                 } catch (RemoteException ex) {
-                    Slog.e(TAG, "Failed closing announcement listener", ex);
+                    Slogf.e(TAG, "Failed closing announcement listener", ex);
                 }
                 hwCloseHandle.value = null;
             }
@@ -449,12 +446,14 @@ final class RadioModule {
             rawImage[i] = rawList.get(i);
         }
 
-        if (rawImage == null || rawImage.length == 0) return null;
+        if (rawImage.length == 0) {
+            return null;
+        }
 
         return BitmapFactory.decodeByteArray(rawImage, 0, rawImage.length);
     }
 
-    void dumpInfo(IndentingPrintWriter pw) {
+    void dumpInfo(android.util.IndentingPrintWriter pw) {
         pw.printf("RadioModule\n");
         pw.increaseIndent();
         pw.printf("BroadcastRadioService: %s\n", mService);

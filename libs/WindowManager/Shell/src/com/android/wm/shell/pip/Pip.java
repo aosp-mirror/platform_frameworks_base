@@ -18,7 +18,7 @@ package com.android.wm.shell.pip;
 
 import android.graphics.Rect;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 import java.util.function.Consumer;
 
@@ -39,7 +39,7 @@ public interface Pip {
      * @param isSysUiStateValid Is SysUI state valid or not.
      * @param flag Current SysUI state.
      */
-    default void onSystemUiStateChanged(boolean isSysUiStateValid, int flag) {
+    default void onSystemUiStateChanged(boolean isSysUiStateValid, long flag) {
     }
 
     /**
@@ -67,4 +67,11 @@ public interface Pip {
      * view hierarchy or destroyed.
      */
     default void removePipExclusionBoundsChangeListener(Consumer<Rect> listener) { }
+
+    /**
+     * @return {@link PipTransitionController} instance.
+     */
+    default PipTransitionController getPipTransitionController() {
+        return null;
+    }
 }

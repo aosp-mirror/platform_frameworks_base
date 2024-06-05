@@ -7,24 +7,39 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+java_library {
+    name: "SettingsLib-search-interface",
+    visibility: ["//visibility:private"],
+    srcs: ["interface-src/**/*.java"],
+    host_supported: true,
+}
+
 android_library {
     name: "SettingsLib-search",
+    use_resource_processor: true,
+    defaults: [
+        "SettingsLintDefaults",
+    ],
+    static_libs: [
+        "SettingsLib-search-interface",
+    ],
     srcs: ["src/**/*.java"],
 
     sdk_version: "system_current",
     min_sdk_version: "21",
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 java_plugin {
     name: "SettingsLib-annotation-processor",
     processor_class: "com.android.settingslib.search.IndexableProcessor",
     static_libs: [
+        "SettingsLib-search-interface",
         "javapoet",
     ],
-    srcs: [
-        "processor-src/**/*.java",
-        "src/com/android/settingslib/search/SearchIndexable.java",
-    ],
+    srcs: ["processor-src/**/*.java"],
     java_resource_dirs: ["resources"],
 }
 

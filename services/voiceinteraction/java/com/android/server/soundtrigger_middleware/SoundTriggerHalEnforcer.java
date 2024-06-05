@@ -27,7 +27,7 @@ import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
 import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.os.DeadObjectException;
 import android.os.IBinder;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -227,10 +227,10 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
         }
         if (e.getCause() instanceof DeadObjectException) {
             // Server is dead, no need to reboot.
-            Log.e(TAG, "HAL died");
+            Slog.e(TAG, "HAL died");
             throw new RecoverableException(Status.DEAD_OBJECT);
         }
-        Log.e(TAG, "Exception caught from HAL, rebooting HAL");
+        Slog.e(TAG, "Exception caught from HAL, rebooting HAL");
         reboot();
         throw e;
     }
@@ -257,14 +257,14 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
             synchronized (mModelStates) {
                 ModelState state = mModelStates.get(model);
                 if (state == null) {
-                    Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
+                    Slog.wtfStack(TAG, "Unexpected recognition event for model: " + model);
                     reboot();
                     return;
                 }
                 if (event.recognitionEvent.recognitionStillActive
                         && event.recognitionEvent.status != RecognitionStatus.SUCCESS
                         && event.recognitionEvent.status != RecognitionStatus.FORCED) {
-                    Log.wtfStack(TAG,
+                    Slog.wtfStack(TAG,
                             "recognitionStillActive is only allowed when the recognition status "
                                     + "is SUCCESS");
                     reboot();
@@ -283,14 +283,14 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
             synchronized (mModelStates) {
                 ModelState state = mModelStates.get(model);
                 if (state == null) {
-                    Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
+                    Slog.wtfStack(TAG, "Unexpected recognition event for model: " + model);
                     reboot();
                     return;
                 }
                 if (event.phraseRecognitionEvent.common.recognitionStillActive
                         && event.phraseRecognitionEvent.common.status != RecognitionStatus.SUCCESS
                         && event.phraseRecognitionEvent.common.status != RecognitionStatus.FORCED) {
-                    Log.wtfStack(TAG,
+                    Slog.wtfStack(TAG,
                             "recognitionStillActive is only allowed when the recognition status "
                                     + "is SUCCESS");
                     reboot();
@@ -309,13 +309,13 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
             synchronized (mModelStates) {
                 ModelState state = mModelStates.get(modelHandle);
                 if (state == null) {
-                    Log.wtfStack(TAG, "Unexpected unload event for model: " + modelHandle);
+                    Slog.wtfStack(TAG, "Unexpected unload event for model: " + modelHandle);
                     reboot();
                     return;
                 }
 
                 if (state == ModelState.ACTIVE) {
-                    Log.wtfStack(TAG, "Trying to unload an active model: " + modelHandle);
+                    Slog.wtfStack(TAG, "Trying to unload an active model: " + modelHandle);
                     reboot();
                     return;
                 }

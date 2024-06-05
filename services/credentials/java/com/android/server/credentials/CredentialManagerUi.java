@@ -22,11 +22,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
-import android.credentials.ui.DisabledProviderData;
-import android.credentials.ui.IntentFactory;
-import android.credentials.ui.ProviderData;
-import android.credentials.ui.RequestInfo;
-import android.credentials.ui.UserSelectionDialogResult;
+import android.credentials.selection.DisabledProviderData;
+import android.credentials.selection.IntentCreationResult;
+import android.credentials.selection.IntentFactory;
+import android.credentials.selection.ProviderData;
+import android.credentials.selection.RequestInfo;
+import android.credentials.selection.UserSelectionDialogResult;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -34,7 +35,8 @@ import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.service.credentials.CredentialProviderInfoFactory;
-import android.util.Slog;
+
+import com.android.server.credentials.metrics.RequestSessionMetric;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -44,7 +46,6 @@ import java.util.UUID;
 
 /** Initiates the Credential Manager UI and receives results. */
 public class CredentialManagerUi {
-    private static final String TAG = "CredentialManagerUi";
     @NonNull
     private final CredentialManagerUiCallback mCallbacks;
     @NonNull
@@ -80,8 +81,6 @@ public class CredentialManagerUi {
                         .fromResultData(resultData);
                 if (selection != null) {
                     mCallbacks.onUiSelection(selection);
-                } else {
-                    Slog.i(TAG, "No selection found in UI result");
                 }
                 break;
             case UserSelectionDialogResult.RESULT_CODE_DIALOG_USER_CANCELED:
@@ -107,8 +106,8 @@ public class CredentialManagerUi {
 
     /** Creates intent that is ot be invoked to cancel an in-progress UI session. */
     public Intent createCancelIntent(IBinder requestId, String packageName) {
-        return IntentFactory.createCancelUiIntent(requestId, /*shouldShowCancellationUi=*/ true,
-                packageName);
+        return IntentFactory.createCancelUiIntent(mContext, requestId,
+                /*shouldShowCancellationUi=*/ true, packageName);
     }
 
     /**
@@ -146,13 +145,15 @@ public class CredentialManagerUi {
 
     /**
      * Creates a {@link PendingIntent} to be used to invoke the credential manager selector UI,
-     * by the calling app process.
+     * by the calling app process. The bottom-sheet navigates to the default page when the intent
+     * is invoked.
      *
-     * @param requestInfo      the information about the request
-     * @param providerDataList the list of provider data from remote providers
+     * @param requestInfo            the information about the request
+     * @param providerDataList       the list of provider data from remote providers
      */
     public PendingIntent createPendingIntent(
-            RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
+            RequestInfo requestInfo, ArrayList<ProviderData> providerDataList,
+            RequestSessionMetric requestSessionMetric) {
         List<CredentialProviderInfo> allProviders =
                 CredentialProviderInfoFactory.getCredentialProviderServices(
                         mContext,
@@ -160,21 +161,47 @@ public class CredentialManagerUi {
                         CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY,
                         mEnabledProviders,
                         // Don't need primary providers here.
-                        new HashSet<String>());
+                        new HashSet<ComponentName>());
 
         List<DisabledProviderData> disabledProviderDataList = allProviders.stream()
                 .filter(provider -> !provider.isEnabled())
                 .map(disabledProvider -> new DisabledProviderData(
                         disabledProvider.getComponentName().flattenToString())).toList();
 
-        Intent intent = IntentFactory.createCredentialSelectorIntent(requestInfo, providerDataList,
-                        new ArrayList<>(disabledProviderDataList), mResultReceiver)
-                .setAction(UUID.randomUUID().toString());
+        IntentCreationResult intentCreationResult = IntentFactory
+                .createCredentialSelectorIntentForCredMan(mContext, requestInfo, providerDataList,
+                        new ArrayList<>(disabledProviderDataList), mResultReceiver);
+        requestSessionMetric.collectUiConfigurationResults(
+                mContext, intentCreationResult, mUserId);
+        Intent intent = intentCreationResult.getIntent();
+        intent.setAction(UUID.randomUUID().toString());
         //TODO: Create unique pending intent using request code and cancel any pre-existing pending
         // intents
         return PendingIntent.getActivityAsUser(
                 mContext, /*requestCode=*/0, intent,
-                PendingIntent.FLAG_IMMUTABLE, /*options=*/null,
+                PendingIntent.FLAG_MUTABLE, /*options=*/null,
                 UserHandle.of(mUserId));
+    }
+
+    /**
+     * Creates an {@link Intent} to be used to invoke the credential manager selector UI,
+     * by the calling app process. This intent is invoked from the Autofill flow, when the user
+     * requests to bring up the 'All Options' page of the credential bottom-sheet. When the user
+     * clicks on the pinned entry, the intent will bring up the 'All Options' page of the
+     * bottom-sheet. The provider data list is processed by the credential autofill service for
+     * each autofill id and passed in as extras in the pending intent set as authentication
+     * of the pinned entry.
+     *
+     * @param requestInfo            the information about the request
+     * @param requestSessionMetric   the metric object for logging
+     */
+    public Intent createIntentForAutofill(RequestInfo requestInfo,
+            RequestSessionMetric requestSessionMetric) {
+        IntentCreationResult intentCreationResult = IntentFactory
+                .createCredentialSelectorIntentForAutofill(mContext, requestInfo, new ArrayList<>(),
+                        mResultReceiver);
+        requestSessionMetric.collectUiConfigurationResults(
+                mContext, intentCreationResult, mUserId);
+        return intentCreationResult.getIntent();
     }
 }

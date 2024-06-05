@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
@@ -54,20 +55,20 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.testing.UiThreadTest;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -81,18 +82,15 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class NotificationInfoTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test_package";
     private static final String TEST_SYSTEM_PACKAGE_NAME = PRINT_SPOOLER_PACKAGE_NAME;
     private static final int TEST_UID = 1;
-    private static final int MULTIPLE_CHANNEL_COUNT = 2;
     private static final String TEST_CHANNEL = "test_channel";
     private static final String TEST_CHANNEL_NAME = "TEST CHANNEL NAME";
 
@@ -100,8 +98,6 @@ public class NotificationInfoTest extends SysuiTestCase {
     private NotificationInfo mNotificationInfo;
     private NotificationChannel mNotificationChannel;
     private NotificationChannel mDefaultNotificationChannel;
-    private Set<NotificationChannel> mNotificationChannelSet = new HashSet<>();
-    private Set<NotificationChannel> mDefaultNotificationChannelSet = new HashSet<>();
     private StatusBarNotification mSbn;
     private NotificationEntry mEntry;
     private UiEventLoggerFake mUiEventLogger = new UiEventLoggerFake();
@@ -146,8 +142,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 .thenReturn(packageInfo);
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = TEST_UID;  // non-zero
-        when(mMockPackageManager.getApplicationInfo(eq(TEST_PACKAGE_NAME), anyInt())).thenReturn(
-                applicationInfo);
         final PackageInfo systemPackageInfo = new PackageInfo();
         systemPackageInfo.packageName = TEST_SYSTEM_PACKAGE_NAME;
         when(mMockPackageManager.getPackageInfo(eq(TEST_SYSTEM_PACKAGE_NAME), anyInt()))
@@ -162,13 +156,13 @@ public class NotificationInfoTest extends SysuiTestCase {
         // Some test channels.
         mNotificationChannel = new NotificationChannel(
                 TEST_CHANNEL, TEST_CHANNEL_NAME, IMPORTANCE_LOW);
-        mNotificationChannelSet.add(mNotificationChannel);
         mDefaultNotificationChannel = new NotificationChannel(
                 NotificationChannel.DEFAULT_CHANNEL_ID, TEST_CHANNEL_NAME,
                 IMPORTANCE_LOW);
-        mDefaultNotificationChannelSet.add(mDefaultNotificationChannel);
+        Notification notification = new Notification();
+        notification.extras.putParcelable(EXTRA_BUILDER_APPLICATION_INFO, applicationInfo);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
-                new Notification(), UserHandle.getUserHandleForUid(TEST_UID), null, 0);
+                notification, UserHandle.getUserHandleForUid(TEST_UID), null, 0);
         mEntry = new NotificationEntryBuilder().setSbn(mSbn).build();
         when(mAssistantFeedbackController.isFeedbackEnabled()).thenReturn(false);
         when(mAssistantFeedbackController.getInlineDescriptionResource(any()))
@@ -185,7 +179,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -212,7 +205,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -235,7 +227,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -267,7 +258,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 entry,
                 null,
                 null,
@@ -291,7 +281,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -320,7 +309,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -344,7 +332,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -367,7 +354,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mDefaultNotificationChannel,
-                mDefaultNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -394,7 +380,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mDefaultNotificationChannel,
-                mDefaultNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -417,7 +402,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -441,7 +425,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 (View v, NotificationChannel c, int appUid) -> {
                     assertEquals(mNotificationChannel, c);
@@ -470,7 +453,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -494,7 +476,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 (View v, NotificationChannel c, int appUid) -> {
                     assertEquals(mNotificationChannel, c);
@@ -519,7 +500,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -536,7 +516,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 (View v, NotificationChannel c, int appUid) -> { },
                 null,
@@ -551,86 +530,6 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnClickListenerPassesNullChannelForBundle() throws Exception {
-        final CountDownLatch latch = new CountDownLatch(1);
-        mNotificationInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mOnUserInteractionCallback,
-                mChannelEditorDialogController,
-                TEST_PACKAGE_NAME, mNotificationChannel,
-                createMultipleChannelSet(MULTIPLE_CHANNEL_COUNT),
-                mEntry,
-                (View v, NotificationChannel c, int appUid) -> {
-                    assertEquals(null, c);
-                    latch.countDown();
-                },
-                null,
-                mUiEventLogger,
-                true,
-                true,
-                true,
-                mAssistantFeedbackController,
-                mMetricsLogger);
-
-        mNotificationInfo.findViewById(R.id.info).performClick();
-        // Verify that listener was triggered.
-        assertEquals(0, latch.getCount());
-    }
-
-    @Test
-    @UiThreadTest
-    public void testBindNotification_ChannelNameInvisibleWhenBundleFromDifferentChannels()
-            throws Exception {
-        mNotificationInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mOnUserInteractionCallback,
-                mChannelEditorDialogController,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                createMultipleChannelSet(MULTIPLE_CHANNEL_COUNT),
-                mEntry,
-                null,
-                null,
-                mUiEventLogger,
-                true,
-                false,
-                true,
-                mAssistantFeedbackController,
-                mMetricsLogger);
-        final TextView channelNameView =
-                mNotificationInfo.findViewById(R.id.channel_name);
-        assertEquals(GONE, channelNameView.getVisibility());
-    }
-
-    @Test
-    @UiThreadTest
-    public void testStopInvisibleIfBundleFromDifferentChannels() throws Exception {
-        mNotificationInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mOnUserInteractionCallback,
-                mChannelEditorDialogController,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                createMultipleChannelSet(MULTIPLE_CHANNEL_COUNT),
-                mEntry,
-                null,
-                null,
-                mUiEventLogger,
-                true,
-                false,
-                true,
-                mAssistantFeedbackController,
-                mMetricsLogger);
-        assertEquals(GONE, mNotificationInfo.findViewById(
-                R.id.interruptiveness_settings).getVisibility());
-        assertEquals(VISIBLE, mNotificationInfo.findViewById(
-                R.id.non_configurable_multichannel_text).getVisibility());
-    }
-
-    @Test
     public void testBindNotification_whenAppUnblockable() throws Exception {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
@@ -639,7 +538,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -683,7 +581,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -727,7 +624,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -755,7 +651,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -778,7 +673,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -803,7 +697,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -825,7 +718,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -847,7 +739,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -869,7 +760,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -893,7 +783,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -918,7 +807,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -946,7 +834,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -974,7 +861,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1003,7 +889,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1031,7 +916,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1067,7 +951,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1096,7 +979,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1138,7 +1020,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1176,7 +1057,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1209,7 +1089,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1246,7 +1125,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1285,7 +1163,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1317,7 +1194,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1356,7 +1232,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1386,7 +1261,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1418,7 +1292,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1454,7 +1327,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1488,7 +1360,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1522,7 +1393,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1549,7 +1419,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mChannelEditorDialogController,
                 TEST_PACKAGE_NAME,
                 mNotificationChannel,
-                mNotificationChannelSet,
                 mEntry,
                 null,
                 null,
@@ -1561,22 +1430,5 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mMetricsLogger);
 
         assertFalse(mNotificationInfo.willBeRemoved());
-    }
-
-    private Set<NotificationChannel> createMultipleChannelSet(int howMany) {
-        Set<NotificationChannel> multiChannelSet = new HashSet<>();
-        for (int i = 0; i < howMany; i++) {
-            if (i == 0) {
-                multiChannelSet.add(mNotificationChannel);
-                continue;
-            }
-
-            NotificationChannel channel = new NotificationChannel(
-                    TEST_CHANNEL, TEST_CHANNEL_NAME + i, IMPORTANCE_LOW);
-
-            multiChannelSet.add(channel);
-        }
-
-        return multiChannelSet;
     }
 }

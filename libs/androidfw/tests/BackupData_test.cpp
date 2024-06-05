@@ -56,10 +56,10 @@ protected:
         mFilename.append(m_external_storage);
         mFilename.append(TEST_FILENAME);
 
-        ::unlink(mFilename.string());
-        int fd = ::open(mFilename.string(), O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+        ::unlink(mFilename.c_str());
+        int fd = ::open(mFilename.c_str(), O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
         if (fd < 0) {
-            FAIL() << "Couldn't create " << mFilename.string() << " for writing";
+            FAIL() << "Couldn't create " << mFilename.c_str() << " for writing";
         }
         mKey1 = String8(KEY1);
         mKey2 = String8(KEY2);
@@ -72,7 +72,7 @@ protected:
 };
 
 TEST_F(BackupDataTest, WriteAndReadSingle) {
-  int fd = ::open(mFilename.string(), O_WRONLY);
+  int fd = ::open(mFilename.c_str(), O_WRONLY);
   BackupDataWriter* writer = new BackupDataWriter(fd);
 
   EXPECT_EQ(NO_ERROR, writer->WriteEntityHeader(mKey1, sizeof(DATA1)))
@@ -81,7 +81,7 @@ TEST_F(BackupDataTest, WriteAndReadSingle) {
           << "WriteEntityData returned an error";
 
   ::close(fd);
-  fd = ::open(mFilename.string(), O_RDONLY);
+  fd = ::open(mFilename.c_str(), O_RDONLY);
   BackupDataReader* reader = new BackupDataReader(fd);
   EXPECT_EQ(NO_ERROR, reader->Status())
           << "Reader ctor failed";
@@ -114,7 +114,7 @@ TEST_F(BackupDataTest, WriteAndReadSingle) {
 }
 
 TEST_F(BackupDataTest, WriteAndReadMultiple) {
-  int fd = ::open(mFilename.string(), O_WRONLY);
+  int fd = ::open(mFilename.c_str(), O_WRONLY);
   BackupDataWriter* writer = new BackupDataWriter(fd);
   writer->WriteEntityHeader(mKey1, sizeof(DATA1));
   writer->WriteEntityData(DATA1, sizeof(DATA1));
@@ -122,7 +122,7 @@ TEST_F(BackupDataTest, WriteAndReadMultiple) {
   writer->WriteEntityData(DATA2, sizeof(DATA2));
 
   ::close(fd);
-  fd = ::open(mFilename.string(), O_RDONLY);
+  fd = ::open(mFilename.c_str(), O_RDONLY);
   BackupDataReader* reader = new BackupDataReader(fd);
 
   bool done;
@@ -162,7 +162,7 @@ TEST_F(BackupDataTest, WriteAndReadMultiple) {
 }
 
 TEST_F(BackupDataTest, SkipEntity) {
-  int fd = ::open(mFilename.string(), O_WRONLY);
+  int fd = ::open(mFilename.c_str(), O_WRONLY);
   BackupDataWriter* writer = new BackupDataWriter(fd);
   writer->WriteEntityHeader(mKey1, sizeof(DATA1));
   writer->WriteEntityData(DATA1, sizeof(DATA1));
@@ -172,7 +172,7 @@ TEST_F(BackupDataTest, SkipEntity) {
   writer->WriteEntityData(DATA3, sizeof(DATA3));
 
   ::close(fd);
-  fd = ::open(mFilename.string(), O_RDONLY);
+  fd = ::open(mFilename.c_str(), O_RDONLY);
   BackupDataReader* reader = new BackupDataReader(fd);
 
   bool done;
@@ -217,14 +217,14 @@ TEST_F(BackupDataTest, SkipEntity) {
 }
 
 TEST_F(BackupDataTest, DeleteEntity) {
-  int fd = ::open(mFilename.string(), O_WRONLY);
+  int fd = ::open(mFilename.c_str(), O_WRONLY);
   BackupDataWriter* writer = new BackupDataWriter(fd);
   writer->WriteEntityHeader(mKey1, sizeof(DATA1));
   writer->WriteEntityData(DATA1, sizeof(DATA1));
   writer->WriteEntityHeader(mKey2, -1);
 
   ::close(fd);
-  fd = ::open(mFilename.string(), O_RDONLY);
+  fd = ::open(mFilename.c_str(), O_RDONLY);
   BackupDataReader* reader = new BackupDataReader(fd);
 
   bool done;
@@ -256,7 +256,7 @@ TEST_F(BackupDataTest, DeleteEntity) {
 }
 
 TEST_F(BackupDataTest, EneityAfterDelete) {
-  int fd = ::open(mFilename.string(), O_WRONLY);
+  int fd = ::open(mFilename.c_str(), O_WRONLY);
   BackupDataWriter* writer = new BackupDataWriter(fd);
   writer->WriteEntityHeader(mKey1, sizeof(DATA1));
   writer->WriteEntityData(DATA1, sizeof(DATA1));
@@ -265,7 +265,7 @@ TEST_F(BackupDataTest, EneityAfterDelete) {
   writer->WriteEntityData(DATA3, sizeof(DATA3));
 
   ::close(fd);
-  fd = ::open(mFilename.string(), O_RDONLY);
+  fd = ::open(mFilename.c_str(), O_RDONLY);
   BackupDataReader* reader = new BackupDataReader(fd);
 
   bool done;
@@ -317,7 +317,7 @@ TEST_F(BackupDataTest, EneityAfterDelete) {
 }
 
 TEST_F(BackupDataTest, OnlyDeleteEntities) {
-  int fd = ::open(mFilename.string(), O_WRONLY);
+  int fd = ::open(mFilename.c_str(), O_WRONLY);
   BackupDataWriter* writer = new BackupDataWriter(fd);
   writer->WriteEntityHeader(mKey1, -1);
   writer->WriteEntityHeader(mKey2, -1);
@@ -325,7 +325,7 @@ TEST_F(BackupDataTest, OnlyDeleteEntities) {
   writer->WriteEntityHeader(mKey4, -1);
 
   ::close(fd);
-  fd = ::open(mFilename.string(), O_RDONLY);
+  fd = ::open(mFilename.c_str(), O_RDONLY);
   BackupDataReader* reader = new BackupDataReader(fd);
 
   bool done;
@@ -385,13 +385,13 @@ TEST_F(BackupDataTest, OnlyDeleteEntities) {
 }
 
 TEST_F(BackupDataTest, ReadDeletedEntityData) {
-  int fd = ::open(mFilename.string(), O_WRONLY);
+  int fd = ::open(mFilename.c_str(), O_WRONLY);
   BackupDataWriter* writer = new BackupDataWriter(fd);
   writer->WriteEntityHeader(mKey1, -1);
   writer->WriteEntityHeader(mKey2, -1);
 
   ::close(fd);
-  fd = ::open(mFilename.string(), O_RDONLY);
+  fd = ::open(mFilename.c_str(), O_RDONLY);
   BackupDataReader* reader = new BackupDataReader(fd);
 
   bool done;

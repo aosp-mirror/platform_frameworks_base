@@ -181,6 +181,7 @@ please see themes_device_defaults.xml.
         <item name="windowSharedElementExitTransition">@transition/move</item>
         <item name="windowContentTransitions">false</item>
         <item name="windowActivityTransitions">true</item>
+        <item name="windowSwipeToDismiss">@empty</item>
 
         <!-- Dialog attributes -->
         <item name="dialogTheme">@style/ThemeOverlay.Material.Dialog</item>
@@ -554,6 +555,7 @@ please see themes_device_defaults.xml.
         <item name="windowSharedElementExitTransition">@transition/move</item>
         <item name="windowContentTransitions">false</item>
         <item name="windowActivityTransitions">true</item>
+        <item name="windowSwipeToDismiss">@empty</item>
 
         <!-- Dialog attributes -->
         <item name="dialogTheme">@style/ThemeOverlay.Material.Dialog</item>

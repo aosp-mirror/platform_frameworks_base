@@ -18,9 +18,11 @@ package com.android.server.power;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,6 +52,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.SystemService;
+import com.android.server.power.ThermalManagerService.TemperatureWatcher;
 import com.android.server.power.ThermalManagerService.ThermalHalWrapper;
 
 import org.junit.Before;
@@ -64,7 +68,9 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server
@@ -415,9 +421,9 @@ public class ThermalManagerServiceTest {
 
     @Test
     public void testTemperatureWatcherUpdateSevereThresholds() throws RemoteException {
-        ThermalManagerService.TemperatureWatcher watcher = mService.mTemperatureWatcher;
+        TemperatureWatcher watcher = mService.mTemperatureWatcher;
         watcher.mSevereThresholds.erase();
-        watcher.updateSevereThresholds();
+        watcher.updateThresholds();
         assertEquals(1, watcher.mSevereThresholds.size());
         assertEquals("skin1", watcher.mSevereThresholds.keyAt(0));
         Float threshold = watcher.mSevereThresholds.get("skin1");
@@ -426,9 +432,89 @@ public class ThermalManagerServiceTest {
     }
 
     @Test
+    public void testTemperatureWatcherUpdateHeadroomThreshold() {
+        TemperatureWatcher watcher = mService.mTemperatureWatcher;
+        synchronized (watcher.mSamples) {
+            Arrays.fill(watcher.mHeadroomThresholds, Float.NaN);
+        }
+        watcher.updateHeadroomThreshold(ThrottlingSeverity.LIGHT, 40, 49);
+        watcher.updateHeadroomThreshold(ThrottlingSeverity.MODERATE, 46, 49);
+        watcher.updateHeadroomThreshold(ThrottlingSeverity.SEVERE, 49, 49);
+        watcher.updateHeadroomThreshold(ThrottlingSeverity.CRITICAL, 64, 49);
+        watcher.updateHeadroomThreshold(ThrottlingSeverity.EMERGENCY, 70, 49);
+        watcher.updateHeadroomThreshold(ThrottlingSeverity.SHUTDOWN, 79, 49);
+        synchronized (watcher.mSamples) {
+            assertArrayEquals(new float[]{Float.NaN, 0.7f, 0.9f, 1.0f, 1.5f, 1.7f, 2.0f},
+                    watcher.mHeadroomThresholds, 0.01f);
+        }
+
+        // when another sensor reports different threshold, we expect to see smaller one to be used
+        watcher.updateHeadroomThreshold(ThrottlingSeverity.LIGHT, 37, 52);
+        watcher.updateHeadroomThreshold(ThrottlingSeverity.MODERATE, 46, 52);
+        watcher.updateHeadroomThreshold(ThrottlingSeverity.SEVERE, 52, 52);
+        watcher.updateHeadroomThreshold(ThrottlingSeverity.CRITICAL, 64, 52);
+        watcher.updateHeadroomThreshold(ThrottlingSeverity.EMERGENCY, 100, 52);
+        watcher.updateHeadroomThreshold(ThrottlingSeverity.SHUTDOWN, 200, 52);
+        synchronized (watcher.mSamples) {
+            assertArrayEquals(new float[]{Float.NaN, 0.5f, 0.8f, 1.0f, 1.4f, 1.7f, 2.0f},
+                    watcher.mHeadroomThresholds, 0.01f);
+        }
+    }
+
+    @Test
+    public void testGetThermalHeadroomThresholdsOnlyReadOnce() throws Exception {
+        float[] expected = new float[]{Float.NaN, 0.1f, 0.2f, 0.3f, 0.4f, Float.NaN, 0.6f};
+        when(mIThermalServiceMock.getThermalHeadroomThresholds()).thenReturn(expected);
+        Map<Integer, Float> thresholds1 = mPowerManager.getThermalHeadroomThresholds();
+        verify(mIThermalServiceMock, times(1)).getThermalHeadroomThresholds();
+        for (int status = PowerManager.THERMAL_STATUS_LIGHT;
+                status <= PowerManager.THERMAL_STATUS_SHUTDOWN; status++) {
+            if (Float.isNaN(expected[status])) {
+                assertFalse(thresholds1.containsKey(status));
+            } else {
+                assertEquals(expected[status], thresholds1.get(status), 0.01f);
+            }
+        }
+        reset(mIThermalServiceMock);
+        Map<Integer, Float> thresholds2 = mPowerManager.getThermalHeadroomThresholds();
+        verify(mIThermalServiceMock, times(0)).getThermalHeadroomThresholds();
+        assertNotSame(thresholds1, thresholds2);
+        assertEquals(thresholds1, thresholds2);
+    }
+
+    @Test
+    public void testGetThermalHeadroomThresholdsOnDefaultHalResult() throws Exception  {
+        TemperatureWatcher watcher = mService.mTemperatureWatcher;
+        ArrayList<TemperatureThreshold> thresholds = new ArrayList<>();
+        mFakeHal.mTemperatureThresholdList = thresholds;
+        watcher.updateThresholds();
+        synchronized (watcher.mSamples) {
+            assertArrayEquals(
+                    new float[]{Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN,
+                            Float.NaN},
+                    watcher.mHeadroomThresholds, 0.01f);
+        }
+        TemperatureThreshold nanThresholds = new TemperatureThreshold();
+        nanThresholds.name = "nan";
+        nanThresholds.type = Temperature.TYPE_SKIN;
+        nanThresholds.hotThrottlingThresholds = new float[ThrottlingSeverity.SHUTDOWN  + 1];
+        nanThresholds.coldThrottlingThresholds = new float[ThrottlingSeverity.SHUTDOWN  + 1];
+        Arrays.fill(nanThresholds.hotThrottlingThresholds, Float.NaN);
+        Arrays.fill(nanThresholds.coldThrottlingThresholds, Float.NaN);
+        thresholds.add(nanThresholds);
+        watcher.updateThresholds();
+        synchronized (watcher.mSamples) {
+            assertArrayEquals(
+                    new float[]{Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN,
+                            Float.NaN},
+                    watcher.mHeadroomThresholds, 0.01f);
+        }
+    }
+
+    @Test
     public void testTemperatureWatcherGetSlopeOf() throws RemoteException {
-        ThermalManagerService.TemperatureWatcher watcher = mService.mTemperatureWatcher;
-        List<ThermalManagerService.TemperatureWatcher.Sample> samples = new ArrayList<>();
+        TemperatureWatcher watcher = mService.mTemperatureWatcher;
+        List<TemperatureWatcher.Sample> samples = new LinkedList<>();
         for (int i = 0; i < 30; ++i) {
             samples.add(watcher.createSampleForTesting(i, (float) (i / 2 * 2)));
         }
@@ -437,21 +523,23 @@ public class ThermalManagerServiceTest {
 
     @Test
     public void testTemperatureWatcherNormalizeTemperature() throws RemoteException {
-        ThermalManagerService.TemperatureWatcher watcher = mService.mTemperatureWatcher;
-        assertEquals(0.5f, watcher.normalizeTemperature(25.0f, 40.0f), 0.0f);
+        assertEquals(0.5f,
+                TemperatureWatcher.normalizeTemperature(25.0f, 40.0f), 0.0f);
 
         // Temperatures more than 30 degrees below the SEVERE threshold should be clamped to 0.0f
-        assertEquals(0.0f, watcher.normalizeTemperature(0.0f, 40.0f), 0.0f);
+        assertEquals(0.0f,
+                TemperatureWatcher.normalizeTemperature(0.0f, 40.0f), 0.0f);
 
         // Temperatures above the SEVERE threshold should not be clamped
-        assertEquals(2.0f, watcher.normalizeTemperature(70.0f, 40.0f), 0.0f);
+        assertEquals(2.0f,
+                TemperatureWatcher.normalizeTemperature(70.0f, 40.0f), 0.0f);
     }
 
     @Test
     public void testTemperatureWatcherGetForecast() throws RemoteException {
-        ThermalManagerService.TemperatureWatcher watcher = mService.mTemperatureWatcher;
+        TemperatureWatcher watcher = mService.mTemperatureWatcher;
 
-        ArrayList<ThermalManagerService.TemperatureWatcher.Sample> samples = new ArrayList<>();
+        LinkedList<TemperatureWatcher.Sample> samples = new LinkedList<>();
 
         // Add a single sample
         samples.add(watcher.createSampleForTesting(0, 25.0f));
@@ -464,7 +552,7 @@ public class ThermalManagerServiceTest {
 
         // Add some time-series data
         for (int i = 1; i < 20; ++i) {
-            samples.add(0, watcher.createSampleForTesting(1000 * i, 25.0f + 0.5f * i));
+            samples.add(watcher.createSampleForTesting(1000 * i, 25.0f + 0.5f * i));
         }
 
         // Now the forecast should vary depending on how far ahead we are trying to predict
@@ -478,7 +566,7 @@ public class ThermalManagerServiceTest {
 
     @Test
     public void testTemperatureWatcherGetForecastUpdate() throws Exception {
-        ThermalManagerService.TemperatureWatcher watcher = mService.mTemperatureWatcher;
+        TemperatureWatcher watcher = mService.mTemperatureWatcher;
 
         // Reduce the inactivity threshold to speed up testing
         watcher.mInactivityThresholdMillis = 2000;
@@ -499,7 +587,7 @@ public class ThermalManagerServiceTest {
     }
 
     // Helper function to hold mSamples lock, avoid GuardedBy lint errors
-    private boolean isWatcherSamplesEmpty(ThermalManagerService.TemperatureWatcher watcher) {
+    private boolean isWatcherSamplesEmpty(TemperatureWatcher watcher) {
         synchronized (watcher.mSamples) {
             return watcher.mSamples.isEmpty();
         }

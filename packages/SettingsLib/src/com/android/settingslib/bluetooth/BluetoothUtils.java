@@ -3,17 +3,24 @@ package com.android.settingslib.bluetooth;
 import static com.android.settingslib.widget.AdaptiveOutlineDrawable.ICON_TYPE_ADVANCED;
 
 import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothCsipSetCoordinator;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothLeBroadcastReceiveState;
+import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothStatusCodes;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
@@ -23,9 +30,12 @@ import android.util.Pair;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 import androidx.core.graphics.drawable.IconCompat;
 
 import com.android.settingslib.R;
+import com.android.settingslib.flags.Flags;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
@@ -39,7 +49,7 @@ public class BluetoothUtils {
     private static final String TAG = "BluetoothUtils";
 
     public static final boolean V = false; // verbose logging
-    public static final boolean D = true;  // regular logging
+    public static final boolean D = true; // regular logging
 
     public static final int META_INT_ERROR = -1;
     public static final String BT_ADVANCED_HEADER_ENABLED = "bt_advanced_header_enabled";
@@ -80,23 +90,23 @@ public class BluetoothUtils {
     /**
      * @param context to access resources from
      * @param cachedDevice to get class from
-     * @return pair containing the drawable and the description of the Bluetooth class
-     *         of the device.
+     * @return pair containing the drawable and the description of the Bluetooth class of the
+     *     device.
      */
-    public static Pair<Drawable, String> getBtClassDrawableWithDescription(Context context,
-            CachedBluetoothDevice cachedDevice) {
+    public static Pair<Drawable, String> getBtClassDrawableWithDescription(
+            Context context, CachedBluetoothDevice cachedDevice) {
         BluetoothClass btClass = cachedDevice.getBtClass();
         if (btClass != null) {
             switch (btClass.getMajorDeviceClass()) {
                 case BluetoothClass.Device.Major.COMPUTER:
-                    return new Pair<>(getBluetoothDrawable(context,
-                            com.android.internal.R.drawable.ic_bt_laptop),
+                    return new Pair<>(
+                            getBluetoothDrawable(
+                                    context, com.android.internal.R.drawable.ic_bt_laptop),
                             context.getString(R.string.bluetooth_talkback_computer));
 
                 case BluetoothClass.Device.Major.PHONE:
                     return new Pair<>(
-                            getBluetoothDrawable(context,
-                                    com.android.internal.R.drawable.ic_phone),
+                            getBluetoothDrawable(context, com.android.internal.R.drawable.ic_phone),
                             context.getString(R.string.bluetooth_talkback_phone));
 
                 case BluetoothClass.Device.Major.PERIPHERAL:
@@ -106,13 +116,20 @@ public class BluetoothUtils {
 
                 case BluetoothClass.Device.Major.IMAGING:
                     return new Pair<>(
-                            getBluetoothDrawable(context,
-                                    com.android.internal.R.drawable.ic_settings_print),
+                            getBluetoothDrawable(
+                                    context, com.android.internal.R.drawable.ic_settings_print),
                             context.getString(R.string.bluetooth_talkback_imaging));
 
                 default:
                     // unrecognized device class; continue
             }
+        }
+
+        if (cachedDevice.isHearingAidDevice()) {
+            return new Pair<>(
+                    getBluetoothDrawable(
+                            context, com.android.internal.R.drawable.ic_bt_hearing_aid),
+                    context.getString(R.string.bluetooth_talkback_hearing_aids));
         }
 
         List<LocalBluetoothProfile> profiles = cachedDevice.getProfiles();
@@ -123,7 +140,9 @@ public class BluetoothUtils {
                 // The device should show hearing aid icon if it contains any hearing aid related
                 // profiles
                 if (profile instanceof HearingAidProfile || profile instanceof HapClientProfile) {
-                    return new Pair<>(getBluetoothDrawable(context, profileResId), null);
+                    return new Pair<>(
+                            getBluetoothDrawable(context, profileResId),
+                            context.getString(R.string.bluetooth_talkback_hearing_aids));
                 }
                 if (resId == 0) {
                     resId = profileResId;
@@ -137,42 +156,40 @@ public class BluetoothUtils {
         if (btClass != null) {
             if (doesClassMatch(btClass, BluetoothClass.PROFILE_HEADSET)) {
                 return new Pair<>(
-                        getBluetoothDrawable(context,
-                                com.android.internal.R.drawable.ic_bt_headset_hfp),
+                        getBluetoothDrawable(
+                                context, com.android.internal.R.drawable.ic_bt_headset_hfp),
                         context.getString(R.string.bluetooth_talkback_headset));
             }
             if (doesClassMatch(btClass, BluetoothClass.PROFILE_A2DP)) {
                 return new Pair<>(
-                        getBluetoothDrawable(context,
-                                com.android.internal.R.drawable.ic_bt_headphones_a2dp),
+                        getBluetoothDrawable(
+                                context, com.android.internal.R.drawable.ic_bt_headphones_a2dp),
                         context.getString(R.string.bluetooth_talkback_headphone));
             }
         }
         return new Pair<>(
-                getBluetoothDrawable(context,
-                        com.android.internal.R.drawable.ic_settings_bluetooth).mutate(),
+                getBluetoothDrawable(context, com.android.internal.R.drawable.ic_settings_bluetooth)
+                        .mutate(),
                 context.getString(R.string.bluetooth_talkback_bluetooth));
     }
 
-    /**
-     * Get bluetooth drawable by {@code resId}
-     */
+    /** Get bluetooth drawable by {@code resId} */
     public static Drawable getBluetoothDrawable(Context context, @DrawableRes int resId) {
         return context.getDrawable(resId);
     }
 
-    /**
-     * Get colorful bluetooth icon with description
-     */
-    public static Pair<Drawable, String> getBtRainbowDrawableWithDescription(Context context,
-            CachedBluetoothDevice cachedDevice) {
+    /** Get colorful bluetooth icon with description */
+    public static Pair<Drawable, String> getBtRainbowDrawableWithDescription(
+            Context context, CachedBluetoothDevice cachedDevice) {
         final Resources resources = context.getResources();
-        final Pair<Drawable, String> pair = BluetoothUtils.getBtDrawableWithDescription(context,
-                cachedDevice);
+        final Pair<Drawable, String> pair =
+                BluetoothUtils.getBtDrawableWithDescription(context, cachedDevice);
 
         if (pair.first instanceof BitmapDrawable) {
-            return new Pair<>(new AdaptiveOutlineDrawable(
-                    resources, ((BitmapDrawable) pair.first).getBitmap()), pair.second);
+            return new Pair<>(
+                    new AdaptiveOutlineDrawable(
+                            resources, ((BitmapDrawable) pair.first).getBitmap()),
+                    pair.second);
         }
 
         int hashCode;
@@ -182,15 +199,12 @@ public class BluetoothUtils {
             hashCode = cachedDevice.getAddress().hashCode();
         }
 
-        return new Pair<>(buildBtRainbowDrawable(context,
-                pair.first, hashCode), pair.second);
+        return new Pair<>(buildBtRainbowDrawable(context, pair.first, hashCode), pair.second);
     }
 
-    /**
-     * Build Bluetooth device icon with rainbow
-     */
-    private static Drawable buildBtRainbowDrawable(Context context, Drawable drawable,
-            int hashCode) {
+    /** Build Bluetooth device icon with rainbow */
+    private static Drawable buildBtRainbowDrawable(
+            Context context, Drawable drawable, int hashCode) {
         final Resources resources = context.getResources();
 
         // Deal with normal headset
@@ -206,38 +220,37 @@ public class BluetoothUtils {
         return adaptiveIcon;
     }
 
-    /**
-     * Get bluetooth icon with description
-     */
-    public static Pair<Drawable, String> getBtDrawableWithDescription(Context context,
-            CachedBluetoothDevice cachedDevice) {
-        final Pair<Drawable, String> pair = BluetoothUtils.getBtClassDrawableWithDescription(
-                context, cachedDevice);
+    /** Get bluetooth icon with description */
+    public static Pair<Drawable, String> getBtDrawableWithDescription(
+            Context context, CachedBluetoothDevice cachedDevice) {
+        final Pair<Drawable, String> pair =
+                BluetoothUtils.getBtClassDrawableWithDescription(context, cachedDevice);
         final BluetoothDevice bluetoothDevice = cachedDevice.getDevice();
-        final int iconSize = context.getResources().getDimensionPixelSize(
-                R.dimen.bt_nearby_icon_size);
+        final int iconSize =
+                context.getResources().getDimensionPixelSize(R.dimen.bt_nearby_icon_size);
         final Resources resources = context.getResources();
 
         // Deal with advanced device icon
         if (isAdvancedDetailsHeader(bluetoothDevice)) {
-            final Uri iconUri = getUriMetaData(bluetoothDevice,
-                    BluetoothDevice.METADATA_MAIN_ICON);
+            final Uri iconUri = getUriMetaData(bluetoothDevice, BluetoothDevice.METADATA_MAIN_ICON);
             if (iconUri != null) {
                 try {
-                    context.getContentResolver().takePersistableUriPermission(iconUri,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    context.getContentResolver()
+                            .takePersistableUriPermission(
+                                    iconUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 } catch (SecurityException e) {
                     Log.e(TAG, "Failed to take persistable permission for: " + iconUri, e);
                 }
                 try {
-                    final Bitmap bitmap = MediaStore.Images.Media.getBitmap(
-                            context.getContentResolver(), iconUri);
+                    final Bitmap bitmap =
+                            MediaStore.Images.Media.getBitmap(
+                                    context.getContentResolver(), iconUri);
                     if (bitmap != null) {
-                        final Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, iconSize,
-                                iconSize, false);
+                        final Bitmap resizedBitmap =
+                                Bitmap.createScaledBitmap(bitmap, iconSize, iconSize, false);
                         bitmap.recycle();
-                        return new Pair<>(new BitmapDrawable(resources,
-                                resizedBitmap), pair.second);
+                        return new Pair<>(
+                                new BitmapDrawable(resources, resizedBitmap), pair.second);
                     }
                 } catch (IOException e) {
                     Log.e(TAG, "Failed to get drawable for: " + iconUri, e);
@@ -263,9 +276,17 @@ public class BluetoothUtils {
         if (isUntetheredHeadset(bluetoothDevice)) {
             return true;
         }
+        if (Flags.enableDeterminingAdvancedDetailsHeaderWithMetadata()) {
+            // A FastPair device that use advanced details header must have METADATA_MAIN_ICON
+            if (getUriMetaData(bluetoothDevice, BluetoothDevice.METADATA_MAIN_ICON) != null) {
+                Log.d(TAG, "isAdvancedDetailsHeader is true with main icon uri");
+                return true;
+            }
+            return false;
+        }
         // The metadata is for Android S
-        String deviceType = getStringMetaData(bluetoothDevice,
-                BluetoothDevice.METADATA_DEVICE_TYPE);
+        String deviceType =
+                getStringMetaData(bluetoothDevice, BluetoothDevice.METADATA_DEVICE_TYPE);
         if (TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET)
                 || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_WATCH)
                 || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_DEFAULT)
@@ -289,12 +310,15 @@ public class BluetoothUtils {
         if (isUntetheredHeadset(bluetoothDevice)) {
             return true;
         }
-        // The metadata is for Android S
-        String deviceType = getStringMetaData(bluetoothDevice,
-                BluetoothDevice.METADATA_DEVICE_TYPE);
-        if (TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET)) {
-            Log.d(TAG, "isAdvancedUntetheredDevice: is untethered device ");
-            return true;
+        if (!Flags.enableDeterminingAdvancedDetailsHeaderWithMetadata()) {
+            // The METADATA_IS_UNTETHERED_HEADSET of an untethered FastPair headset is always true,
+            // so there's no need to check the device type.
+            String deviceType =
+                    getStringMetaData(bluetoothDevice, BluetoothDevice.METADATA_DEVICE_TYPE);
+            if (TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET)) {
+                Log.d(TAG, "isAdvancedUntetheredDevice: is untethered device");
+                return true;
+            }
         }
         return false;
     }
@@ -305,15 +329,15 @@ public class BluetoothUtils {
      * @param device Must be one of the public constants in {@link BluetoothClass.Device}
      * @return true if device class matches, false otherwise.
      */
-    public static boolean isDeviceClassMatched(@NonNull BluetoothDevice bluetoothDevice,
-            int device) {
-        return bluetoothDevice.getBluetoothClass() != null
-                && bluetoothDevice.getBluetoothClass().getDeviceClass() == device;
+    public static boolean isDeviceClassMatched(
+            @NonNull BluetoothDevice bluetoothDevice, int device) {
+        final BluetoothClass bluetoothClass = bluetoothDevice.getBluetoothClass();
+        return bluetoothClass != null && bluetoothClass.getDeviceClass() == device;
     }
 
     private static boolean isAdvancedHeaderEnabled() {
-        if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SETTINGS_UI, BT_ADVANCED_HEADER_ENABLED,
-                true)) {
+        if (!DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_SETTINGS_UI, BT_ADVANCED_HEADER_ENABLED, true)) {
             Log.d(TAG, "isAdvancedDetailsHeader: advancedEnabled is false");
             return false;
         }
@@ -329,9 +353,7 @@ public class BluetoothUtils {
         return false;
     }
 
-    /**
-     * Create an Icon pointing to a drawable.
-     */
+    /** Create an Icon pointing to a drawable. */
     public static IconCompat createIconWithDrawable(Drawable drawable) {
         Bitmap bitmap;
         if (drawable instanceof BitmapDrawable) {
@@ -339,19 +361,15 @@ public class BluetoothUtils {
         } else {
             final int width = drawable.getIntrinsicWidth();
             final int height = drawable.getIntrinsicHeight();
-            bitmap = createBitmap(drawable,
-                    width > 0 ? width : 1,
-                    height > 0 ? height : 1);
+            bitmap = createBitmap(drawable, width > 0 ? width : 1, height > 0 ? height : 1);
         }
         return IconCompat.createWithBitmap(bitmap);
     }
 
-    /**
-     * Build device icon with advanced outline
-     */
+    /** Build device icon with advanced outline */
     public static Drawable buildAdvancedDrawable(Context context, Drawable drawable) {
-        final int iconSize = context.getResources().getDimensionPixelSize(
-                R.dimen.advanced_icon_size);
+        final int iconSize =
+                context.getResources().getDimensionPixelSize(R.dimen.advanced_icon_size);
         final Resources resources = context.getResources();
 
         Bitmap bitmap = null;
@@ -360,14 +378,12 @@ public class BluetoothUtils {
         } else {
             final int width = drawable.getIntrinsicWidth();
             final int height = drawable.getIntrinsicHeight();
-            bitmap = createBitmap(drawable,
-                    width > 0 ? width : 1,
-                    height > 0 ? height : 1);
+            bitmap = createBitmap(drawable, width > 0 ? width : 1, height > 0 ? height : 1);
         }
 
         if (bitmap != null) {
-            final Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, iconSize,
-                    iconSize, false);
+            final Bitmap resizedBitmap =
+                    Bitmap.createScaledBitmap(bitmap, iconSize, iconSize, false);
             bitmap.recycle();
             return new AdaptiveOutlineDrawable(resources, resizedBitmap, ICON_TYPE_ADVANCED);
         }
@@ -375,9 +391,7 @@ public class BluetoothUtils {
         return drawable;
     }
 
-    /**
-     * Creates a drawable with specified width and height.
-     */
+    /** Creates a drawable with specified width and height. */
     public static Bitmap createBitmap(Drawable drawable, int width, int height) {
         final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(bitmap);
@@ -470,6 +484,239 @@ public class BluetoothUtils {
         return extraTagValue(KEY_HEARABLE_CONTROL_SLICE, data);
     }
 
+    /**
+     * Check if the Bluetooth device is an AvailableMediaBluetoothDevice, which means: 1) currently
+     * connected 2) is Hearing Aid or LE Audio OR 3) connected profile matches currentAudioProfile
+     *
+     * @param cachedDevice the CachedBluetoothDevice
+     * @param audioManager audio manager to get the current audio profile
+     * @return if the device is AvailableMediaBluetoothDevice
+     */
+    @WorkerThread
+    public static boolean isAvailableMediaBluetoothDevice(
+            CachedBluetoothDevice cachedDevice, AudioManager audioManager) {
+        int audioMode = audioManager.getMode();
+        int currentAudioProfile;
+
+        if (audioMode == AudioManager.MODE_RINGTONE
+                || audioMode == AudioManager.MODE_IN_CALL
+                || audioMode == AudioManager.MODE_IN_COMMUNICATION) {
+            // in phone call
+            currentAudioProfile = BluetoothProfile.HEADSET;
+        } else {
+            // without phone call
+            currentAudioProfile = BluetoothProfile.A2DP;
+        }
+
+        boolean isFilterMatched = false;
+        if (isDeviceConnected(cachedDevice)) {
+            // If device is Hearing Aid or LE Audio, it is compatible with HFP and A2DP.
+            // It would show in Available Devices group.
+            if (cachedDevice.isConnectedAshaHearingAidDevice()
+                    || cachedDevice.isConnectedLeAudioDevice()) {
+                Log.d(
+                        TAG,
+                        "isFilterMatched() device : "
+                                + cachedDevice.getName()
+                                + ", the profile is connected.");
+                return true;
+            }
+            // According to the current audio profile type,
+            // this page will show the bluetooth device that have corresponding profile.
+            // For example:
+            // If current audio profile is a2dp, show the bluetooth device that have a2dp profile.
+            // If current audio profile is headset,
+            // show the bluetooth device that have headset profile.
+            switch (currentAudioProfile) {
+                case BluetoothProfile.A2DP:
+                    isFilterMatched = cachedDevice.isConnectedA2dpDevice();
+                    break;
+                case BluetoothProfile.HEADSET:
+                    isFilterMatched = cachedDevice.isConnectedHfpDevice();
+                    break;
+            }
+        }
+        return isFilterMatched;
+    }
+
+    /** Returns if the le audio sharing is enabled. */
+    public static boolean isAudioSharingEnabled() {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        try {
+            return Flags.enableLeAudioSharing()
+                    && adapter.isLeAudioBroadcastSourceSupported()
+                            == BluetoothStatusCodes.FEATURE_SUPPORTED
+                    && adapter.isLeAudioBroadcastAssistantSupported()
+                            == BluetoothStatusCodes.FEATURE_SUPPORTED;
+        } catch (IllegalStateException e) {
+            Log.d(TAG, "LE state is on, but there is no bluetooth service.", e);
+            return false;
+        }
+    }
+
+    /** Returns if the broadcast is on-going. */
+    @WorkerThread
+    public static boolean isBroadcasting(@Nullable LocalBluetoothManager manager) {
+        if (manager == null) return false;
+        LocalBluetoothLeBroadcast broadcast =
+                manager.getProfileManager().getLeAudioBroadcastProfile();
+        return broadcast != null && broadcast.isEnabled(null);
+    }
+
+    /**
+     * Check if {@link CachedBluetoothDevice} has connected to a broadcast source.
+     *
+     * @param cachedDevice The cached bluetooth device to check.
+     * @param localBtManager The BT manager to provide BT functions.
+     * @return Whether the device has connected to a broadcast source.
+     */
+    @WorkerThread
+    public static boolean hasConnectedBroadcastSource(
+            CachedBluetoothDevice cachedDevice, LocalBluetoothManager localBtManager) {
+        if (localBtManager == null) {
+            Log.d(TAG, "Skip check hasConnectedBroadcastSource due to bt manager is null");
+            return false;
+        }
+        LocalBluetoothLeBroadcastAssistant assistant =
+                localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (assistant == null) {
+            Log.d(TAG, "Skip check hasConnectedBroadcastSource due to assistant profile is null");
+            return false;
+        }
+        List<BluetoothLeBroadcastReceiveState> sourceList =
+                assistant.getAllSources(cachedDevice.getDevice());
+        if (!sourceList.isEmpty() && sourceList.stream().anyMatch(BluetoothUtils::isConnected)) {
+            Log.d(
+                    TAG,
+                    "Lead device has connected broadcast source, device = "
+                            + cachedDevice.getDevice().getAnonymizedAddress());
+            return true;
+        }
+        // Return true if member device is in broadcast.
+        for (CachedBluetoothDevice device : cachedDevice.getMemberDevice()) {
+            List<BluetoothLeBroadcastReceiveState> list =
+                    assistant.getAllSources(device.getDevice());
+            if (!list.isEmpty() && list.stream().anyMatch(BluetoothUtils::isConnected)) {
+                Log.d(
+                        TAG,
+                        "Member device has connected broadcast source, device = "
+                                + device.getDevice().getAnonymizedAddress());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Checks the connectivity status based on the provided broadcast receive state. */
+    @WorkerThread
+    public static boolean isConnected(BluetoothLeBroadcastReceiveState state) {
+        return state.getBisSyncState().stream().anyMatch(bitmap -> bitmap != 0);
+    }
+
+    /**
+     * Checks if the Bluetooth device is an available hearing device, which means: 1) currently
+     * connected 2) is Hearing Aid 3) connected profile match hearing aid related profiles (e.g.
+     * ASHA, HAP)
+     *
+     * @param cachedDevice the CachedBluetoothDevice
+     * @return if the device is Available hearing device
+     */
+    @WorkerThread
+    public static boolean isAvailableHearingDevice(CachedBluetoothDevice cachedDevice) {
+        if (isDeviceConnected(cachedDevice) && cachedDevice.isConnectedHearingAidDevice()) {
+            Log.d(
+                    TAG,
+                    "isFilterMatched() device : "
+                            + cachedDevice.getName()
+                            + ", the profile is connected.");
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if the Bluetooth device is a ConnectedBluetoothDevice, which means: 1) currently
+     * connected 2) is not Hearing Aid or LE Audio AND 3) connected profile does not match
+     * currentAudioProfile
+     *
+     * @param cachedDevice the CachedBluetoothDevice
+     * @param audioManager audio manager to get the current audio profile
+     * @return if the device is AvailableMediaBluetoothDevice
+     */
+    @WorkerThread
+    public static boolean isConnectedBluetoothDevice(
+            CachedBluetoothDevice cachedDevice, AudioManager audioManager) {
+        int audioMode = audioManager.getMode();
+        int currentAudioProfile;
+
+        if (audioMode == AudioManager.MODE_RINGTONE
+                || audioMode == AudioManager.MODE_IN_CALL
+                || audioMode == AudioManager.MODE_IN_COMMUNICATION) {
+            // in phone call
+            currentAudioProfile = BluetoothProfile.HEADSET;
+        } else {
+            // without phone call
+            currentAudioProfile = BluetoothProfile.A2DP;
+        }
+
+        boolean isFilterMatched = false;
+        if (isDeviceConnected(cachedDevice)) {
+            // If device is Hearing Aid or LE Audio, it is compatible with HFP and A2DP.
+            // It would not show in Connected Devices group.
+            if (cachedDevice.isConnectedAshaHearingAidDevice()
+                    || cachedDevice.isConnectedLeAudioDevice()) {
+                return false;
+            }
+            // According to the current audio profile type,
+            // this page will show the bluetooth device that doesn't have corresponding profile.
+            // For example:
+            // If current audio profile is a2dp,
+            // show the bluetooth device that doesn't have a2dp profile.
+            // If current audio profile is headset,
+            // show the bluetooth device that doesn't have headset profile.
+            switch (currentAudioProfile) {
+                case BluetoothProfile.A2DP:
+                    isFilterMatched = !cachedDevice.isConnectedA2dpDevice();
+                    break;
+                case BluetoothProfile.HEADSET:
+                    isFilterMatched = !cachedDevice.isConnectedHfpDevice();
+                    break;
+            }
+        }
+        return isFilterMatched;
+    }
+
+    /**
+     * Check if the Bluetooth device is an active media device
+     *
+     * @param cachedDevice the CachedBluetoothDevice
+     * @return if the Bluetooth device is an active media device
+     */
+    public static boolean isActiveMediaDevice(CachedBluetoothDevice cachedDevice) {
+        return cachedDevice.isActiveDevice(BluetoothProfile.A2DP)
+                || cachedDevice.isActiveDevice(BluetoothProfile.HEADSET)
+                || cachedDevice.isActiveDevice(BluetoothProfile.HEARING_AID)
+                || cachedDevice.isActiveDevice(BluetoothProfile.LE_AUDIO);
+    }
+
+    /**
+     * Check if the Bluetooth device is an active LE Audio device
+     *
+     * @param cachedDevice the CachedBluetoothDevice
+     * @return if the Bluetooth device is an active LE Audio device
+     */
+    public static boolean isActiveLeAudioDevice(CachedBluetoothDevice cachedDevice) {
+        return cachedDevice.isActiveDevice(BluetoothProfile.LE_AUDIO);
+    }
+
+    private static boolean isDeviceConnected(CachedBluetoothDevice cachedDevice) {
+        if (cachedDevice == null) {
+            return false;
+        }
+        final BluetoothDevice device = cachedDevice.getDevice();
+        return device.getBondState() == BluetoothDevice.BOND_BONDED && device.isConnected();
+    }
+
     @SuppressLint("NewApi") // Hidden API made public
     private static boolean doesClassMatch(BluetoothClass btClass, int classId) {
         return btClass.doesClassMatch(classId);
@@ -497,5 +744,84 @@ public class BluetoothUtils {
 
     private static String generateExpressionWithTag(String tag, String value) {
         return getTagStart(tag) + value + getTagEnd(tag);
+    }
+
+    /**
+     * Returns the BluetoothDevice's exclusive manager ({@link
+     * BluetoothDevice.METADATA_EXCLUSIVE_MANAGER} in metadata) if it exists, otherwise null.
+     */
+    @Nullable
+    private static String getExclusiveManager(BluetoothDevice bluetoothDevice) {
+        byte[] exclusiveManagerBytes =
+                bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER);
+        if (exclusiveManagerBytes == null) {
+            Log.d(
+                    TAG,
+                    "Bluetooth device "
+                            + bluetoothDevice.getName()
+                            + " doesn't have exclusive manager");
+            return null;
+        }
+        return new String(exclusiveManagerBytes);
+    }
+
+    /** Checks if given package is installed and enabled */
+    private static boolean isPackageInstalledAndEnabled(Context context, String packageName) {
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
+            return appInfo.enabled;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d(TAG, "Package " + packageName + " is not installed/enabled");
+        }
+        return false;
+    }
+
+    /**
+     * A BluetoothDevice is exclusively managed if 1) it has field {@link
+     * BluetoothDevice.METADATA_EXCLUSIVE_MANAGER} in metadata. 2) the exclusive manager app is
+     * installed and enabled.
+     */
+    public static boolean isExclusivelyManagedBluetoothDevice(
+            @NonNull Context context, @NonNull BluetoothDevice bluetoothDevice) {
+        String exclusiveManagerName = getExclusiveManager(bluetoothDevice);
+        if (exclusiveManagerName == null) {
+            return false;
+        }
+
+        ComponentName exclusiveManagerComponent =
+                ComponentName.unflattenFromString(exclusiveManagerName);
+        String exclusiveManagerPackage = exclusiveManagerComponent != null
+                ? exclusiveManagerComponent.getPackageName() : exclusiveManagerName;
+
+        if (!isPackageInstalledAndEnabled(context, exclusiveManagerPackage)) {
+            return false;
+        } else {
+            Log.d(TAG, "Found exclusively managed app " + exclusiveManagerPackage);
+            return true;
+        }
+    }
+
+    /**
+     * Get CSIP group id for {@link CachedBluetoothDevice}.
+     *
+     * <p>If CachedBluetoothDevice#getGroupId is invalid, fetch group id from
+     * LeAudioProfile#getGroupId.
+     */
+    public static int getGroupId(@NonNull CachedBluetoothDevice cachedDevice) {
+        int groupId = cachedDevice.getGroupId();
+        String anonymizedAddress = cachedDevice.getDevice().getAnonymizedAddress();
+        if (groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+            Log.d(TAG, "getGroupId by CSIP profile for device: " + anonymizedAddress);
+            return groupId;
+        }
+        for (LocalBluetoothProfile profile : cachedDevice.getProfiles()) {
+            if (profile instanceof LeAudioProfile) {
+                Log.d(TAG, "getGroupId by LEA profile for device: " + anonymizedAddress);
+                return ((LeAudioProfile) profile).getGroupId(cachedDevice.getDevice());
+            }
+        }
+        Log.d(TAG, "getGroupId return invalid id for device: " + anonymizedAddress);
+        return BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
     }
 }

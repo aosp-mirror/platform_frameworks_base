@@ -37,7 +37,7 @@ import androidx.annotation.Nullable;
 import com.android.app.animation.Interpolators;
 import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.NotificationExpandButton;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.notification.CustomInterpolatorTransformation;
@@ -120,6 +120,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
     }
 
     @Override
+    public int getClipHeight() {
+        return mView.getHeight();
+    }
+
+    @Override
     public void applyRoundnessAndInvalidate() {
         if (mRoundnessChangedListener != null) {
             // We cannot apply the rounded corner to this View, so our parents (in drawChild()) will
@@ -186,8 +191,12 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
         updateTransformedTypes();
         addRemainingTransformTypes();
         updateCropToPaddingForImageViews();
-        Notification notification = row.getEntry().getSbn().getNotification();
-        mIcon.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
+        Notification n = row.getEntry().getSbn().getNotification();
+        if (n.shouldUseAppIcon()) {
+            mIcon.setTag(ImageTransformState.ICON_TAG, n.getAppIcon());
+        } else {
+            mIcon.setTag(ImageTransformState.ICON_TAG, n.getSmallIcon());
+        }
 
         // We need to reset all views that are no longer transforming in case a view was previously
         // transformed, but now we decided to transform its container instead.

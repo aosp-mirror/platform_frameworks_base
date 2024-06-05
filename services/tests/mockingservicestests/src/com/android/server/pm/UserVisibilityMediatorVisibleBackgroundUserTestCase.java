@@ -51,7 +51,7 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
                 onVisible(USER_ID));
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, FG,
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
         expectUserCannotBeUnassignedFromDisplay(USER_ID, DEFAULT_DISPLAY);
 
@@ -85,7 +85,7 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         startForegroundUser(previousCurrentUserId);
 
         int result = mMediator.assignUserToDisplayOnStart(currentUserId, currentUserId, FG,
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
         expectUserCannotBeUnassignedFromDisplay(currentUserId, DEFAULT_DISPLAY);
 
@@ -112,7 +112,8 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
     public final void testStartFgUser_onInvalidDisplay() throws Exception {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
-        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, FG, INVALID_DISPLAY);
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, FG, INVALID_DISPLAY,
+                false);
 
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
@@ -127,7 +128,7 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG_VISIBLE,
-                INVALID_DISPLAY);
+                INVALID_DISPLAY, false);
 
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
@@ -145,7 +146,7 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         AsyncUserVisibilityListener listener = addListenerForEvents(onVisible(USER_ID));
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG_VISIBLE,
-                SECONDARY_DISPLAY_ID);
+                SECONDARY_DISPLAY_ID, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
         expectUserCannotBeUnassignedFromDisplay(USER_ID, SECONDARY_DISPLAY_ID);
 
@@ -182,7 +183,7 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         expectUserIsNotVisibleOnDisplay("before", PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG_VISIBLE,
-                SECONDARY_DISPLAY_ID);
+                SECONDARY_DISPLAY_ID, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
 
         expectUserIsNotVisibleOnDisplay("after", PARENT_USER_ID, SECONDARY_DISPLAY_ID);
@@ -196,7 +197,7 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         startUserInSecondaryDisplay(OTHER_USER_ID, SECONDARY_DISPLAY_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG_VISIBLE,
-                SECONDARY_DISPLAY_ID);
+                SECONDARY_DISPLAY_ID, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(USER_ID);
@@ -224,7 +225,7 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         assertUserCanBeAssignedExtraDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG_VISIBLE,
-                SECONDARY_DISPLAY_ID);
+                SECONDARY_DISPLAY_ID, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE);
 
         // Run same assertions above
@@ -247,7 +248,7 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         startUserInSecondaryDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG_VISIBLE,
-                SECONDARY_DISPLAY_ID);
+                SECONDARY_DISPLAY_ID, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsVisible(USER_ID);
@@ -284,7 +285,7 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         startForegroundUser(PARENT_USER_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+                BG_VISIBLE, DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
         expectUserCannotBeUnassignedFromDisplay(PROFILE_USER_ID, DEFAULT_DISPLAY);
 
@@ -310,7 +311,7 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         startUserInSecondaryDisplay(PARENT_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+                BG_VISIBLE, DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
@@ -331,7 +332,7 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         startUserInSecondaryDisplay(PARENT_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+                BG_VISIBLE, DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
@@ -351,7 +352,7 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         startUserInSecondaryDisplay(PARENT_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, BG,
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);

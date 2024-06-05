@@ -25,20 +25,22 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.os.UserHandle;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
-import javax.inject.Inject;
-
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
+
+import javax.inject.Inject;
 
 /**
  * Manages handling of guest session persistent notification
@@ -70,14 +72,14 @@ public final class GuestResetOrExitSessionReceiver extends BroadcastReceiver {
     public AlertDialog mResetSessionDialog;
     private final UserTracker mUserTracker;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final ResetSessionDialog.Factory mResetSessionDialogFactory;
-    private final ExitSessionDialog.Factory mExitSessionDialogFactory;
+    private final ResetSessionDialogFactory mResetSessionDialogFactory;
+    private final ExitSessionDialogFactory mExitSessionDialogFactory;
 
     @Inject
     public GuestResetOrExitSessionReceiver(UserTracker userTracker,
             BroadcastDispatcher broadcastDispatcher,
-            ResetSessionDialog.Factory resetSessionDialogFactory,
-            ExitSessionDialog.Factory exitSessionDialogFactory) {
+            ResetSessionDialogFactory resetSessionDialogFactory,
+            ExitSessionDialogFactory exitSessionDialogFactory) {
         mUserTracker = userTracker;
         mBroadcastDispatcher = broadcastDispatcher;
         mResetSessionDialogFactory = resetSessionDialogFactory;
@@ -111,8 +113,8 @@ public final class GuestResetOrExitSessionReceiver extends BroadcastReceiver {
             mResetSessionDialog = mResetSessionDialogFactory.create(currentUser.id);
             mResetSessionDialog.show();
         } else if (ACTION_GUEST_EXIT.equals(action)) {
-            mExitSessionDialog = mExitSessionDialogFactory.create(currentUser.id,
-                        currentUser.isEphemeral());
+            mExitSessionDialog = mExitSessionDialogFactory.create(
+                    currentUser.isEphemeral(), currentUser.id);
             mExitSessionDialog.show();
         }
     }
@@ -132,43 +134,69 @@ public final class GuestResetOrExitSessionReceiver extends BroadcastReceiver {
     }
 
     /**
+     * Factory class to create guest reset dialog instance
+     *
      * Dialog shown when asking for confirmation before
      * reset and restart of guest user.
      */
-    public static final class ResetSessionDialog extends SystemUIDialog implements
-            DialogInterface.OnClickListener {
+    public static final class ResetSessionDialogFactory {
+        private final SystemUIDialog.Factory mDialogFactory;
+        private final Resources mResources;
+        private final ResetSessionDialogClickListener.Factory mClickListenerFactory;
 
+        @Inject
+        public ResetSessionDialogFactory(
+                SystemUIDialog.Factory dialogFactory,
+                @Main Resources resources,
+                ResetSessionDialogClickListener.Factory clickListenerFactory) {
+            mDialogFactory = dialogFactory;
+            mResources = resources;
+            mClickListenerFactory = clickListenerFactory;
+        }
+
+        /** Create a guest reset dialog instance */
+        public AlertDialog create(int userId) {
+            SystemUIDialog dialog = mDialogFactory.create();
+            ResetSessionDialogClickListener listener = mClickListenerFactory.create(
+                    userId, dialog);
+            dialog.setTitle(com.android.settingslib.R.string.guest_reset_and_restart_dialog_title);
+            dialog.setMessage(mResources.getString(
+                    com.android.settingslib.R.string.guest_reset_and_restart_dialog_message));
+            dialog.setButton(
+                    DialogInterface.BUTTON_NEUTRAL,
+                    mResources.getString(android.R.string.cancel),
+                    listener);
+            dialog.setButton(DialogInterface.BUTTON_POSITIVE,
+                    mResources.getString(
+                            com.android.settingslib.R.string.guest_reset_guest_confirm_button),
+                    listener);
+            dialog.setCanceledOnTouchOutside(false);
+            return dialog;
+        }
+    }
+
+    public static class ResetSessionDialogClickListener implements DialogInterface.OnClickListener {
         private final UserSwitcherController mUserSwitcherController;
         private final UiEventLogger mUiEventLogger;
         private final int mUserId;
+        private final DialogInterface mDialog;
 
-        /** Factory class to create guest reset dialog instance */
         @AssistedFactory
         public interface Factory {
-            /** Create a guest reset dialog instance */
-            ResetSessionDialog create(int userId);
+            ResetSessionDialogClickListener create(int userId, DialogInterface dialog);
         }
 
         @AssistedInject
-        ResetSessionDialog(Context context,
+        public ResetSessionDialogClickListener(
                 UserSwitcherController userSwitcherController,
                 UiEventLogger uiEventLogger,
-                @Assisted int userId) {
-            super(context);
-
-            setTitle(com.android.settingslib.R.string.guest_reset_and_restart_dialog_title);
-            setMessage(context.getString(
-                        com.android.settingslib.R.string.guest_reset_and_restart_dialog_message));
-            setButton(DialogInterface.BUTTON_NEUTRAL,
-                    context.getString(android.R.string.cancel), this);
-            setButton(DialogInterface.BUTTON_POSITIVE,
-                    context.getString(
-                        com.android.settingslib.R.string.guest_reset_guest_confirm_button), this);
-            setCanceledOnTouchOutside(false);
-
+                @Assisted int userId,
+                @Assisted DialogInterface dialog
+        ) {
             mUserSwitcherController = userSwitcherController;
             mUiEventLogger = uiEventLogger;
             mUserId = userId;
+            mDialog = dialog;
         }
 
         @Override
@@ -177,7 +205,7 @@ public final class GuestResetOrExitSessionReceiver extends BroadcastReceiver {
                 mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE);
                 mUserSwitcherController.removeGuestUser(mUserId, UserHandle.USER_NULL);
             } else if (which == DialogInterface.BUTTON_NEUTRAL) {
-                cancel();
+                mDialog.cancel();
             }
         }
     }
@@ -186,58 +214,93 @@ public final class GuestResetOrExitSessionReceiver extends BroadcastReceiver {
      * Dialog shown when asking for confirmation before
      * exit of guest user.
      */
-    public static final class ExitSessionDialog extends SystemUIDialog implements
-            DialogInterface.OnClickListener {
+    public static final class ExitSessionDialogFactory {
+        private final SystemUIDialog.Factory mDialogFactory;
+        private final ExitSessionDialogClickListener.Factory mClickListenerFactory;
+        private final Resources mResources;
 
+        @Inject
+        public ExitSessionDialogFactory(
+                SystemUIDialog.Factory dialogFactory,
+                ExitSessionDialogClickListener.Factory clickListenerFactory,
+                @Main Resources resources) {
+            mDialogFactory = dialogFactory;
+            mClickListenerFactory = clickListenerFactory;
+            mResources = resources;
+        }
+
+        public AlertDialog create(boolean isEphemeral, int userId) {
+            SystemUIDialog dialog = mDialogFactory.create();
+            ExitSessionDialogClickListener clickListener = mClickListenerFactory.create(
+                    isEphemeral, userId, dialog);
+            if (isEphemeral) {
+                dialog.setTitle(mResources.getString(
+                        com.android.settingslib.R.string.guest_exit_dialog_title));
+                dialog.setMessage(mResources.getString(
+                        com.android.settingslib.R.string.guest_exit_dialog_message));
+                dialog.setButton(
+                        DialogInterface.BUTTON_NEUTRAL,
+                        mResources.getString(android.R.string.cancel),
+                        clickListener);
+                dialog.setButton(
+                        DialogInterface.BUTTON_POSITIVE,
+                        mResources.getString(
+                                com.android.settingslib.R.string.guest_exit_dialog_button),
+                        clickListener);
+            } else {
+                dialog.setTitle(mResources.getString(
+                        com.android.settingslib
+                                .R.string.guest_exit_dialog_title_non_ephemeral));
+                dialog.setMessage(mResources.getString(
+                        com.android.settingslib
+                                .R.string.guest_exit_dialog_message_non_ephemeral));
+                dialog.setButton(
+                        DialogInterface.BUTTON_NEUTRAL,
+                        mResources.getString(android.R.string.cancel),
+                        clickListener);
+                dialog.setButton(
+                        DialogInterface.BUTTON_NEGATIVE,
+                        mResources.getString(
+                                com.android.settingslib.R.string.guest_exit_clear_data_button),
+                        clickListener);
+                dialog.setButton(
+                        DialogInterface.BUTTON_POSITIVE,
+                        mResources.getString(
+                                com.android.settingslib.R.string.guest_exit_save_data_button),
+                        clickListener);
+            }
+            dialog.setCanceledOnTouchOutside(false);
+
+            return dialog;
+        }
+
+    }
+
+    public static class ExitSessionDialogClickListener implements DialogInterface.OnClickListener {
         private final UserSwitcherController mUserSwitcherController;
+        private final boolean mIsEphemeral;
         private final int mUserId;
-        private boolean mIsEphemeral;
+        private final DialogInterface mDialog;
 
-        /** Factory class to create guest exit dialog instance */
         @AssistedFactory
         public interface Factory {
-            /** Create a guest exit dialog instance */
-            ExitSessionDialog create(int userId, boolean isEphemeral);
+            ExitSessionDialogClickListener create(
+                    boolean isEphemeral,
+                    int userId,
+                    DialogInterface dialog);
         }
 
         @AssistedInject
-        ExitSessionDialog(Context context,
+        public ExitSessionDialogClickListener(
                 UserSwitcherController userSwitcherController,
+                @Assisted boolean isEphemeral,
                 @Assisted int userId,
-                @Assisted boolean isEphemeral) {
-            super(context);
-
-            if (isEphemeral) {
-                setTitle(context.getString(
-                            com.android.settingslib.R.string.guest_exit_dialog_title));
-                setMessage(context.getString(
-                            com.android.settingslib.R.string.guest_exit_dialog_message));
-                setButton(DialogInterface.BUTTON_NEUTRAL,
-                        context.getString(android.R.string.cancel), this);
-                setButton(DialogInterface.BUTTON_POSITIVE,
-                        context.getString(
-                            com.android.settingslib.R.string.guest_exit_dialog_button), this);
-            } else {
-                setTitle(context.getString(
-                            com.android.settingslib
-                                .R.string.guest_exit_dialog_title_non_ephemeral));
-                setMessage(context.getString(
-                            com.android.settingslib
-                                .R.string.guest_exit_dialog_message_non_ephemeral));
-                setButton(DialogInterface.BUTTON_NEUTRAL,
-                        context.getString(android.R.string.cancel), this);
-                setButton(DialogInterface.BUTTON_NEGATIVE,
-                        context.getString(
-                            com.android.settingslib.R.string.guest_exit_clear_data_button), this);
-                setButton(DialogInterface.BUTTON_POSITIVE,
-                        context.getString(
-                            com.android.settingslib.R.string.guest_exit_save_data_button), this);
-            }
-            setCanceledOnTouchOutside(false);
-
+                @Assisted DialogInterface dialog
+        ) {
             mUserSwitcherController = userSwitcherController;
-            mUserId = userId;
             mIsEphemeral = isEphemeral;
+            mUserId = userId;
+            mDialog = dialog;
         }
 
         @Override
@@ -249,7 +312,7 @@ public final class GuestResetOrExitSessionReceiver extends BroadcastReceiver {
                     mUserSwitcherController.exitGuestUser(mUserId, UserHandle.USER_NULL, false);
                 } else if (which == DialogInterface.BUTTON_NEUTRAL) {
                     // Cancel clicked, do nothing
-                    cancel();
+                    mDialog.cancel();
                 }
             } else {
                 if (which == DialogInterface.BUTTON_POSITIVE) {
@@ -261,7 +324,7 @@ public final class GuestResetOrExitSessionReceiver extends BroadcastReceiver {
                     mUserSwitcherController.exitGuestUser(mUserId, UserHandle.USER_NULL, true);
                 } else if (which == DialogInterface.BUTTON_NEUTRAL) {
                     // Cancel clicked, do nothing
-                    cancel();
+                    mDialog.cancel();
                 }
             }
         }

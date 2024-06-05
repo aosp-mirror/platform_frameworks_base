@@ -24,6 +24,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationHistory;
 import android.app.NotificationManager;
+import android.app.ICallNotificationEventCallback;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -38,6 +39,7 @@ import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenPolicy;
 import android.app.AutomaticZenRule;
 import android.service.notification.ZenModeConfig;
 
@@ -48,8 +50,8 @@ interface INotificationManager
     void cancelAllNotifications(String pkg, int userId);
 
     void clearData(String pkg, int uid, boolean fromApp);
-    void enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration, boolean isUiContext, int displayId, @nullable ITransientNotificationCallback callback);
-    void enqueueToast(String pkg, IBinder token, ITransientNotification callback, int duration, boolean isUiContext, int displayId);
+    boolean enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration, boolean isUiContext, int displayId, @nullable ITransientNotificationCallback callback);
+    boolean enqueueToast(String pkg, IBinder token, ITransientNotification callback, int duration, boolean isUiContext, int displayId);
     void cancelToast(String pkg, IBinder token);
     void finishToken(String pkg, IBinder token);
 
@@ -98,6 +100,7 @@ interface INotificationManager
     ParceledListSlice getNotificationChannelGroupsForPackage(String pkg, int uid, boolean includeDeleted);
     NotificationChannelGroup getNotificationChannelGroupForPackage(String groupId, String pkg, int uid);
     NotificationChannelGroup getPopulatedNotificationChannelGroupForPackage(String pkg, int uid, String groupId, boolean includeDeleted);
+    ParceledListSlice getRecentBlockedNotificationChannelGroupsForPackage(String pkg, int uid);
     void updateNotificationChannelGroupForPackage(String pkg, int uid, in NotificationChannelGroup group);
     void updateNotificationChannelForPackage(String pkg, int uid, in NotificationChannel channel);
     void unlockNotificationChannel(String pkg, int uid, String channelId);
@@ -128,13 +131,16 @@ interface INotificationManager
     // INotificationListener method.
     @UnsupportedAppUsage
     StatusBarNotification[] getActiveNotifications(String callingPkg);
+    @EnforcePermission("ACCESS_NOTIFICATIONS")
     StatusBarNotification[] getActiveNotificationsWithAttribution(String callingPkg,
             String callingAttributionTag);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count, boolean includeSnoozed);
+    @EnforcePermission("ACCESS_NOTIFICATIONS")
     StatusBarNotification[] getHistoricalNotificationsWithAttribution(String callingPkg,
             String callingAttributionTag, int count, boolean includeSnoozed);
 
+    @EnforcePermission("ACCESS_NOTIFICATIONS")
     NotificationHistory getNotificationHistory(String callingPkg, String callingAttributionTag);
 
     void registerListener(in INotificationListener listener, in ComponentName component, int userid);
@@ -163,7 +169,7 @@ interface INotificationManager
     void requestInterruptionFilterFromListener(in INotificationListener token, int interruptionFilter);
     int getInterruptionFilterFromListener(in INotificationListener token);
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
-    void setInterruptionFilter(String pkg, int interruptionFilter);
+    void setInterruptionFilter(String pkg, int interruptionFilter, boolean fromUser);
 
     void updateNotificationChannelGroupFromPrivilegedListener(in INotificationListener token, String pkg, in UserHandle user, in NotificationChannelGroup group);
     void updateNotificationChannelFromPrivilegedListener(in INotificationListener token, String pkg, in UserHandle user, in NotificationChannel channel);
@@ -201,21 +207,25 @@ interface INotificationManager
     @UnsupportedAppUsage
     ZenModeConfig getZenModeConfig();
     NotificationManager.Policy getConsolidatedNotificationPolicy();
-    oneway void setZenMode(int mode, in Uri conditionId, String reason);
+    oneway void setZenMode(int mode, in Uri conditionId, String reason, boolean fromUser);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
     boolean isNotificationPolicyAccessGranted(String pkg);
     NotificationManager.Policy getNotificationPolicy(String pkg);
-    void setNotificationPolicy(String pkg, in NotificationManager.Policy policy);
+    void setNotificationPolicy(String pkg, in NotificationManager.Policy policy, boolean fromUser);
     boolean isNotificationPolicyAccessGrantedForPackage(String pkg);
     void setNotificationPolicyAccessGranted(String pkg, boolean granted);
     void setNotificationPolicyAccessGrantedForUser(String pkg, int userId, boolean granted);
+    ZenPolicy getDefaultZenPolicy();
     AutomaticZenRule getAutomaticZenRule(String id);
+    Map<String, AutomaticZenRule> getAutomaticZenRules();
+    // TODO: b/310620812 - Remove getZenRules() when MODES_API is inlined.
     List<ZenModeConfig.ZenRule> getZenRules();
-    String addAutomaticZenRule(in AutomaticZenRule automaticZenRule, String pkg);
-    boolean updateAutomaticZenRule(String id, in AutomaticZenRule automaticZenRule);
-    boolean removeAutomaticZenRule(String id);
-    boolean removeAutomaticZenRules(String packageName);
+    String addAutomaticZenRule(in AutomaticZenRule automaticZenRule, String pkg, boolean fromUser);
+    boolean updateAutomaticZenRule(String id, in AutomaticZenRule automaticZenRule, boolean fromUser);
+    boolean removeAutomaticZenRule(String id, boolean fromUser);
+    boolean removeAutomaticZenRules(String packageName, boolean fromUser);
     int getRuleInstanceCount(in ComponentName owner);
+    int getAutomaticZenRuleState(String id);
     void setAutomaticZenRuleState(String id, in Condition condition);
 
     byte[] getBackupPayload(int user);
@@ -239,4 +249,10 @@ interface INotificationManager
 
     @EnforcePermission("MANAGE_TOAST_RATE_LIMITING")
     void setToastRateLimitingEnabled(boolean enable);
+
+    @EnforcePermission(allOf={"INTERACT_ACROSS_USERS", "ACCESS_NOTIFICATIONS"})
+    void registerCallNotificationEventListener(String packageName, in UserHandle userHandle, in ICallNotificationEventCallback listener);
+    @EnforcePermission(allOf={"INTERACT_ACROSS_USERS", "ACCESS_NOTIFICATIONS"})
+    void unregisterCallNotificationEventListener(String packageName, in UserHandle userHandle, in ICallNotificationEventCallback listener);
+
 }

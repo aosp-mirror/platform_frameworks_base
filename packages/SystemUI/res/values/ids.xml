@@ -50,7 +50,6 @@
     <item type="id" name="x_animator_tag_start_value"/>
     <item type="id" name="y_animator_tag_start_value"/>
     <item type="id" name="qs_icon_tag"/>
-    <item type="id" name="qs_slash_tag"/>
     <item type="id" name="scrim"/>
     <item type="id" name="scrim_alpha_start"/>
     <item type="id" name="scrim_alpha_end"/>
@@ -172,6 +171,10 @@
     <item type="id" name="accessibility_action_move_right"/>
     <item type="id" name="accessibility_action_move_up"/>
     <item type="id" name="accessibility_action_move_down"/>
+    <item type="id" name="accessibility_action_increase_window_width"/>
+    <item type="id" name="accessibility_action_decrease_window_width"/>
+    <item type="id" name="accessibility_action_increase_window_height"/>
+    <item type="id" name="accessibility_action_decrease_window_height"/>
 
     <!-- Accessibility actions for Accessibility floating menu. -->
     <item type="id" name="action_move_top_left"/>
@@ -181,6 +184,9 @@
     <item type="id" name="action_move_to_edge_and_hide"/>
     <item type="id" name="action_move_out_edge_and_show"/>
     <item type="id" name="action_remove_menu"/>
+    <item type="id" name="action_edit"/>
+
+    <item type="id" name="accessibility_action_open_communal_hub"/>
 
     <!-- rounded corner view id -->
     <item type="id" name="rounded_corner_top_left"/>
@@ -206,5 +212,68 @@
 
     <!-- keyboard backlight indicator-->
     <item type="id" name="backlight_icon" />
-</resources>
 
+    <!-- IDs for use in the keyguard/lockscreen scene -->
+    <item type="id" name="keyguard_root_view" />
+    <item type="id" name="keyguard_indication_area" />
+    <item type="id" name="keyguard_indication_text" />
+    <item type="id" name="keyguard_indication_text_bottom" />
+    <item type="id" name="nssl_guideline" />
+    <item type="id" name="nssl_placeholder" />
+    <item type="id" name="aod_notification_icon_container" />
+    <item type="id" name="split_shade_guideline" />
+    <item type="id" name="lock_icon" />
+    <item type="id" name="lock_icon_bg" />
+    <item type="id" name="burn_in_layer" />
+    <item type="id" name="burn_in_layer_empty_view" />
+    <item type="id" name="communal_tutorial_indicator" />
+    <item type="id" name="nssl_placeholder_barrier_bottom" />
+    <item type="id" name="ambient_indication_container" />
+    <item type="id" name="status_view_media_container" />
+    <item type="id" name="smart_space_barrier_bottom" />
+    <item type="id" name="small_clock_guideline_top" />
+    <item type="id" name="weather_clock_date_and_icons_barrier_bottom" />
+    <item type="id" name="accessibility_actions_view" />
+
+    <!-- Privacy dialog -->
+    <item type="id" name="privacy_dialog_close_app_button" />
+    <item type="id" name="privacy_dialog_manage_app_button" />
+
+    <!-- Communal mode -->
+    <item type="id" name="communal_hub" />
+
+    <!-- Values assigned to the views in Biometrics Prompt -->
+    <item type="id" name="pin_pad"/>
+
+    <!--
+    Tag used to store pending intent registration listeners in NotificationTemplateViewWrapper
+    -->
+    <item type="id" name="pending_intent_listener_tag" />
+
+    <!--
+    Used to tag views programmatically added to the smartspace area so they can be more easily
+    removed later.
+    -->
+    <item type="id" name="tag_smartspace_view" />
+
+    <!-- ID of the Scene Container root Composable view -->
+    <item type='id' name="scene_container_root_composable" />
+
+    <!--
+    Ids for the device entry icon.
+        device_entry_icon_view: parent view of both device_entry_icon and device_entry_icon_bg
+        device_entry_icon_fg: fp/lock/unlock icon
+        device_entry_icon_bg: background protection behind the icon
+    -->
+    <item type="id" name="device_entry_icon_view" />
+    <item type="id" name="device_entry_icon_fg" />
+    <item type="id" name="device_entry_icon_bg" />
+
+    <!--Id for the device-entry UDFPS related views that live in the alternate bouncer. -->
+    <item type="id" name="alternate_bouncer_udfps_icon_view" />
+    <item type="id" name="alternate_bouncer_udfps_accessibility_overlay" />
+
+    <!-- Id for the udfps accessibility overlay -->
+    <item type="id" name="udfps_accessibility_overlay" />
+    <item type="id" name="udfps_accessibility_overlay_top_guideline" />
+</resources>

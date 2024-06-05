@@ -35,47 +35,79 @@ android_app {
     name: "PackageInstaller",
     defaults: ["platform_app_defaults"],
 
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
 
     certificate: "platform",
     privileged: true,
-    platform_apis: true,
+    platform_apis: false,
+    sdk_version: "system_current",
     rename_resources_package: false,
     static_libs: [
         "xz-java",
         "androidx.leanback_leanback",
         "androidx.annotation_annotation",
+        "androidx.fragment_fragment",
+        "androidx.lifecycle_lifecycle-livedata",
+        "androidx.lifecycle_lifecycle-extensions",
+        "android.content.pm.flags-aconfig-java",
+        "android.os.flags-aconfig-java",
+        "android.multiuser.flags-aconfig-java",
     ],
+
+    lint: {
+        error_checks: ["Recycle"],
+    },
 }
 
 android_app {
     name: "PackageInstaller_tablet",
     defaults: ["platform_app_defaults"],
 
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
 
     certificate: "platform",
     privileged: true,
-    platform_apis: true,
+    platform_apis: false,
+    sdk_version: "system_current",
     rename_resources_package: false,
     overrides: ["PackageInstaller"],
 
     static_libs: [
         "xz-java",
         "androidx.leanback_leanback",
+        "androidx.fragment_fragment",
+        "androidx.lifecycle_lifecycle-livedata",
+        "androidx.lifecycle_lifecycle-extensions",
+        "android.content.pm.flags-aconfig-java",
+        "android.os.flags-aconfig-java",
+        "android.multiuser.flags-aconfig-java",
     ],
     aaptflags: ["--product tablet"],
+
+    lint: {
+        error_checks: ["Recycle"],
+    },
 }
 
 android_app {
     name: "PackageInstaller_tv",
     defaults: ["platform_app_defaults"],
 
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
 
     certificate: "platform",
     privileged: true,
-    platform_apis: true,
+    platform_apis: false,
+    sdk_version: "system_current",
     rename_resources_package: false,
     overrides: ["PackageInstaller"],
 
@@ -83,6 +115,16 @@ android_app {
         "xz-java",
         "androidx.leanback_leanback",
         "androidx.annotation_annotation",
+        "androidx.fragment_fragment",
+        "androidx.lifecycle_lifecycle-livedata",
+        "androidx.lifecycle_lifecycle-extensions",
+        "android.content.pm.flags-aconfig-java",
+        "android.os.flags-aconfig-java",
+        "android.multiuser.flags-aconfig-java",
     ],
     aaptflags: ["--product tv"],
+
+    lint: {
+        error_checks: ["Recycle"],
+    },
 }

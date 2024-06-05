@@ -27,18 +27,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InOrder;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableLooper.MessageHandler;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -240,4 +240,33 @@ public class TestableLooperTest {
         inOrder.verify(handler).dispatchMessage(messageC);
     }
 
+    @Test
+    public void testProcessMessagesNonBlocking_onlyArgNumber() {
+        Handler h = new Handler(mTestableLooper.getLooper());
+        Runnable r = mock(Runnable.class);
+
+        h.post(r);
+        h.post(r);
+        h.post(r);
+
+        int processed = mTestableLooper.processMessagesNonBlocking(2);
+
+        verify(r, times(2)).run();
+        assertEquals(2, processed);
+    }
+
+    @Test
+    public void testProcessMessagesNonBlocking_lessMessagesThanArg() {
+        Handler h = new Handler(mTestableLooper.getLooper());
+        Runnable r = mock(Runnable.class);
+
+        h.post(r);
+        h.post(r);
+        h.post(r);
+
+        int processed = mTestableLooper.processMessagesNonBlocking(5);
+
+        verify(r, times(3)).run();
+        assertEquals(3, processed);
+    }
 }

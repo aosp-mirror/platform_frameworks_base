@@ -110,6 +110,9 @@
     <uses-permission android:name="android.permission.ACCESS_CONTEXT_HUB" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC_INTERNAL" />
     <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <queries>
         <package android:name="com.android.servicestests.apps.suspendtestapp" />
@@ -141,32 +144,6 @@
           </intent-filter>
           <meta-data android:name="android.accounts.AccountAuthenticator"
                android:resource="@xml/test_account_type2_authenticator"/>
-        </service>
-
-        <service
-            android:name="com.android.server.dreams.TestDreamService"
-            android:exported="false"
-            android:label="Test Dream" >
-            <intent-filter>
-                <action android:name="android.service.dreams.DreamService" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data
-                android:name="android.service.dream"
-                android:resource="@xml/test_dream_metadata" />
-        </service>
-
-        <service
-            android:name="com.android.server.dreams.TestDreamServiceWithInvalidSettings"
-            android:exported="false"
-            android:label="Test Dream" >
-            <intent-filter>
-                <action android:name="android.service.dreams.DreamService" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data
-                android:name="android.service.dream"
-                android:resource="@xml/test_dream_metadata_invalid" />
         </service>
 
         <receiver android:name="com.android.server.devicepolicy.ApplicationRestrictionsTest$AdminReceiver"

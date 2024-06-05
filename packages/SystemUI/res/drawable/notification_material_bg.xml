@@ -15,12 +15,23 @@
   ~ limitations under the License
   -->
 
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         android:color="?android:attr/colorControlHighlight">
     <item>
         <shape>
-            <solid android:color="?androidprv:attr/colorSurface" />
+            <solid android:color="?androidprv:attr/materialColorSurfaceContainerHigh" />
         </shape>
     </item>
-</ripple>
+    <item>
+        <shape>
+            <solid android:color="@color/notification_state_color_default" />
+        </shape>
+    </item>
+    <item android:id="@+id/notification_focus_overlay">
+        <shape>
+            <stroke android:width="@dimen/notification_focus_stroke_width"
+                android:color="@color/notification_focus_overlay_color"/>
+        </shape>
+    </item>
+</layer-list>

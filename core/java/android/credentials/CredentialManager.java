@@ -19,18 +19,24 @@ package android.credentials;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.Hide;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.RemoteException;
@@ -53,8 +59,14 @@ import java.util.concurrent.Executor;
  * to authenticate to the app.
  */
 @SystemService(Context.CREDENTIAL_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_CREDENTIALS)
 public final class CredentialManager {
-    private static final String TAG = "CredentialManager";
+    /** @hide **/
+    @Hide
+    public static final String TAG = "CredentialManager";
+    private static final Bundle OPTIONS_SENDER_BAL_OPTIN = ActivityOptions.makeBasic()
+            .setPendingIntentBackgroundActivityStartMode(
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
 
     /** @hide */
     @IntDef(
@@ -64,6 +76,11 @@ public final class CredentialManager {
                 PROVIDER_FILTER_ALL_PROVIDERS,
                 PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY,
                 PROVIDER_FILTER_USER_PROVIDERS_ONLY,
+                // By default the returned list of providers will not include any providers that
+                // have been hidden by device policy. However, there are some cases where we want
+                // them to show up (e.g. settings) so this will return the list of providers with
+                // the hidden ones included.
+                PROVIDER_FILTER_USER_PROVIDERS_INCLUDING_HIDDEN,
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProviderFilter {}
@@ -89,6 +106,14 @@ public final class CredentialManager {
      */
     @TestApi public static final int PROVIDER_FILTER_USER_PROVIDERS_ONLY = 2;
 
+    /**
+     * Returns user credential providers only. This will include providers that
+     * have been disabled by the device policy.
+     *
+     * @hide
+     */
+    public static final int PROVIDER_FILTER_USER_PROVIDERS_INCLUDING_HIDDEN = 3;
+
     private final Context mContext;
     private final ICredentialManager mService;
 
@@ -109,11 +134,66 @@ public final class CredentialManager {
             "enable_credential_description_api";
 
     /**
+     * @hide
+     */
+    @Hide
+    public static final String EXTRA_AUTOFILL_RESULT_RECEIVER =
+            "android.credentials.AUTOFILL_RESULT_RECEIVER";
+
+    /**
      * @hide instantiated by ContextImpl.
      */
     public CredentialManager(Context context, ICredentialManager service) {
         mContext = context;
         mService = service;
+    }
+
+    /**
+     * Returns a list of candidate credentials returned from credential manager providers
+     *
+     * @param request the request specifying type(s) of credentials to get from the
+     *                credential providers
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor the callback will take place on this {@link Executor}
+     * @param callback the callback invoked when the request succeeds or fails
+     *
+     * @hide
+     */
+    @Hide
+    public void getCandidateCredentials(
+            @NonNull GetCredentialRequest request,
+            @NonNull String callingPackage,
+            @Nullable CancellationSignal cancellationSignal,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<GetCandidateCredentialsResponse,
+                    GetCandidateCredentialsException> callback,
+            @NonNull IBinder clientCallback
+    ) {
+        requireNonNull(request, "request must not be null");
+        requireNonNull(callingPackage, "callingPackage must not be null");
+        requireNonNull(executor, "executor must not be null");
+        requireNonNull(callback, "callback must not be null");
+
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            Log.w(TAG, "getCandidateCredentials already canceled");
+            return;
+        }
+
+        ICancellationSignal cancelRemote = null;
+        try {
+            cancelRemote =
+                    mService.getCandidateCredentials(
+                            request,
+                            new GetCandidateCredentialsTransport(executor, callback),
+                            clientCallback,
+                            callingPackage);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        if (cancellationSignal != null && cancelRemote != null) {
+            cancellationSignal.setRemote(cancelRemote);
+        }
     }
 
     /**
@@ -123,7 +203,7 @@ public final class CredentialManager {
      * credential, display a picker when multiple credentials exist, etc.
      * Callers (e.g. browsers) may optionally set origin in {@link GetCredentialRequest} for an
      * app different from their own, to be able to get credentials on behalf of that app. They would
-     * need additional permission {@link CREDENTIAL_MANAGER_SET_ORIGIN}
+     * need additional permission {@code CREDENTIAL_MANAGER_SET_ORIGIN}
      * to use this functionality
      *
      * @param context the context used to launch any UI needed; use an activity context to make sure
@@ -209,9 +289,9 @@ public final class CredentialManager {
      *
      * <p>This API doesn't invoke any UI. It only performs the preparation work so that you can
      * later launch the remaining get-credential operation (involves UIs) through the {@link
-     * #getCredential(PrepareGetCredentialResponse.PendingGetCredentialHandle, Context,
+     * #getCredential(Context, PrepareGetCredentialResponse.PendingGetCredentialHandle,
      * CancellationSignal, Executor, OutcomeReceiver)} API which incurs less latency compared to
-     * the {@link #getCredential(GetCredentialRequest, Context, CancellationSignal, Executor,
+     * the {@link #getCredential(Context, GetCredentialRequest, CancellationSignal, Executor,
      * OutcomeReceiver)} API that executes the whole operation in one call.
      *
      * @param request            the request specifying type(s) of credentials to get from the user
@@ -261,7 +341,7 @@ public final class CredentialManager {
      * storing the new credential, etc.
      * Callers (e.g. browsers) may optionally set origin in {@link CreateCredentialRequest} for an
      * app different from their own, to be able to get credentials on behalf of that app. They would
-     * need additional permission {@link CREDENTIAL_MANAGER_SET_ORIGIN}
+     * need additional permission {@code CREDENTIAL_MANAGER_SET_ORIGIN}
      * to use this functionality
      *
      * @param context the context used to launch any UI needed; use an activity context to make sure
@@ -390,7 +470,14 @@ public final class CredentialManager {
      * Returns {@code true} if the calling application provides a CredentialProviderService that is
      * enabled for the current user, or {@code false} otherwise. CredentialProviderServices are
      * enabled on a per-service basis so the individual component name of the service should be
-     * passed in here.
+     * passed in here. <strong>Usage of this API is encouraged in API level 35 and above. It
+     * may throw a NullPointerException on certain devices running other API versions.</strong>
+     *
+     * @throws IllegalArgumentException if the componentName package does not match the calling
+     * package name this call will throw an exception
+     *
+     * @throws NullPointerException Usage of this API is discouraged as it is not fully
+     * functional, and may throw a NullPointerException on certain devices and/or API versions
      *
      * @param componentName the component name to check is enabled
      */
@@ -641,6 +728,44 @@ public final class CredentialManager {
         }
     }
 
+    private static class GetCandidateCredentialsTransport
+            extends IGetCandidateCredentialsCallback.Stub {
+
+        private final Executor mExecutor;
+        private final OutcomeReceiver<GetCandidateCredentialsResponse,
+                GetCandidateCredentialsException> mCallback;
+
+        private GetCandidateCredentialsTransport(
+                Executor executor,
+                OutcomeReceiver<GetCandidateCredentialsResponse,
+                        GetCandidateCredentialsException> callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResponse(GetCandidateCredentialsResponse response) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onResult(response));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void onError(String errorType, String message) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mCallback.onError(new GetCandidateCredentialsException(
+                                errorType, message)));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
     private static class GetCredentialTransport extends IGetCredentialCallback.Stub {
         // TODO: listen for cancellation to release callback.
 
@@ -660,7 +785,8 @@ public final class CredentialManager {
         @Override
         public void onPendingIntent(PendingIntent pendingIntent) {
             try {
-                mContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+                mContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0,
+                        OPTIONS_SENDER_BAL_OPTIN);
             } catch (IntentSender.SendIntentException e) {
                 Log.e(
                         TAG,
@@ -718,7 +844,8 @@ public final class CredentialManager {
         @Override
         public void onPendingIntent(PendingIntent pendingIntent) {
             try {
-                mContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+                mContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0,
+                        OPTIONS_SENDER_BAL_OPTIN);
             } catch (IntentSender.SendIntentException e) {
                 Log.e(
                         TAG,

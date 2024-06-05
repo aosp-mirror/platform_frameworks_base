@@ -1,20 +1,19 @@
 // Signature format: 2.0
-// - add-additional-overrides=no
-// - migrating=Migration in progress see b/299366704
 package android.test.mock {
 
   public class MockContext extends android.content.Context {
     method public int getDisplayId();
+    method public void updateDisplay(int);
   }
 
   @Deprecated public class MockPackageManager extends android.content.pm.PackageManager {
-    method public void addCrossProfileIntentFilter(android.content.IntentFilter, int, int, int);
-    method public void clearCrossProfileIntentFilters(int);
-    method public int getInstallReason(String, android.os.UserHandle);
-    method public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
-    method public String[] getNamesForUids(int[]);
-    method @NonNull public String getServicesSystemSharedLibraryPackageName();
-    method @NonNull public String getSharedSystemSharedLibraryPackageName();
+    method @Deprecated public void addCrossProfileIntentFilter(android.content.IntentFilter, int, int, int);
+    method @Deprecated public void clearCrossProfileIntentFilters(int);
+    method @Deprecated public int getInstallReason(String, android.os.UserHandle);
+    method @Deprecated public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
+    method @Deprecated public String[] getNamesForUids(int[]);
+    method @Deprecated @NonNull public String getServicesSystemSharedLibraryPackageName();
+    method @Deprecated @NonNull public String getSharedSystemSharedLibraryPackageName();
   }
 
 }

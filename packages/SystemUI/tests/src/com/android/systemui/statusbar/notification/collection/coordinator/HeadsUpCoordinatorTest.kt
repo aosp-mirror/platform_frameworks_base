@@ -17,11 +17,11 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.app.Notification.GROUP_ALERT_ALL
 import android.app.Notification.GROUP_ALERT_SUMMARY
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.logcatLogBuffer
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
@@ -43,8 +43,8 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.FullScreenIntentDecisionImpl
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.NotificationGroupTestHelper
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -70,7 +70,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class HeadsUpCoordinatorTest : SysuiTestCase() {
     private lateinit var coordinator: HeadsUpCoordinator
@@ -87,7 +87,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     private val notifPipeline: NotifPipeline = mock()
     private val logger = HeadsUpCoordinatorLogger(logcatLogBuffer(), verbose = true)
-    private val headsUpManager: HeadsUpManager = mock()
+    private val headsUpManager: HeadsUpManagerPhone = mock()
     private val headsUpViewBinder: HeadsUpViewBinder = mock()
     private val visualInterruptionDecisionProvider: VisualInterruptionDecisionProvider = mock()
     private val remoteInputManager: NotificationRemoteInputManager = mock()
@@ -148,7 +148,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
             verify(remoteInputManager).addActionPressListener(capture())
         }
         given(headsUpManager.allEntries).willAnswer { huns.stream() }
-        given(headsUpManager.isAlerting(anyString())).willAnswer { invocation ->
+        given(headsUpManager.isHeadsUpEntry(anyString())).willAnswer { invocation ->
             val key = invocation.getArgument<String>(0)
             huns.any { entry -> entry.key == key }
         }
@@ -435,7 +435,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     private fun addHUN(entry: NotificationEntry) {
         huns.add(entry)
-        whenever(headsUpManager.topEntry).thenReturn(entry)
+        whenever(headsUpManager.getTopEntry()).thenReturn(entry)
         onHeadsUpChangedListener.onHeadsUpStateChanged(entry, true)
         notifLifetimeExtender.cancelLifetimeExtension(entry)
     }

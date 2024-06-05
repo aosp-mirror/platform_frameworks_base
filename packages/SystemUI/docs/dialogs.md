@@ -39,7 +39,7 @@ All these calls should be made before `Dialog#create` or `Dialog#show` (which in
 
 ## Showing the dialog
 
-When showing a dialog triggered by clicking on a `View`, you should use [DialogLaunchAnimator][6] to
+When showing a dialog triggered by clicking on a `View`, you should use [DialogTransitionAnimator][6] to
 nicely animate the dialog from/to that `View`, instead of calling `Dialog.show`.
 
 This animator provides the following methods:
@@ -48,7 +48,7 @@ This animator provides the following methods:
   same view.
 * `showFromDialog`: animates the dialog show from a currently showing dialog, and the dialog
   dismissal/cancel/hide back to that dialog. The originating dialog must have been shown using
-  `DialogLaunchAnimator`.
+  `DialogTransitionAnimator`.
 * `dismissStack`: dismisses a stack of dialogs that were launched using `showFromDialog` animating
   the top-most dialog back into the view that was used in the initial `showFromView`.
 
@@ -68,7 +68,7 @@ val dialog = SystemUIDialog(context).apply {
     setNegativeButton(R.string.negative_button_text, ::onNegativeButton)
     setNeutralButton(R.string.neutral_button_text, ::onNeutralButton)
 }
-dialogLaunchAnimator.showFromView(dialog, view)
+dialogTransitionAnimator.showFromView(dialog, view)
 ```
 
 [1]: /packages/SystemUI/src/com/android/systemui/statusbar/phone/SystemUIDialog.java
@@ -76,4 +76,4 @@ dialogLaunchAnimator.showFromView(dialog, view)
 [3]: /packages/SystemUI/res/layout/alert_dialog_systemui.xml
 [4]: /packages/SystemUI/res/layout/alert_dialog_title_systemui.xml
 [5]: /packages/SystemUI/res/layout/alert_dialog_button_bar_systemui.xml
-[6]: /packages/SystemUI/animation/src/com/android/systemui/animation/DialogLaunchAnimator.kt
+[6]: /packages/SystemUI/animation/src/com/android/systemui/animation/DialogTransitionAnimator.kt

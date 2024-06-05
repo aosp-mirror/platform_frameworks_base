@@ -33,7 +33,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
-        android:elevation="@dimen/resolver_elevation"
         android:paddingTop="24dp"
         android:paddingStart="@dimen/resolver_edge_margin"
         android:paddingEnd="@dimen/resolver_edge_margin"

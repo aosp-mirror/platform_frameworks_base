@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.phone.fragment
 
 import com.android.systemui.log.dagger.CollapsedSbFragmentLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
 import javax.inject.Inject
 
@@ -33,7 +33,6 @@ class CollapsedStatusBarFragmentLogger @Inject constructor(
      * modifications that were made to the flags locally.
      *
      * @param new see [DisableFlagsLogger.getDisableFlagsString]
-     * @param newAfterLocalModification see [DisableFlagsLogger.getDisableFlagsString]
      */
     fun logDisableFlagChange(
         new: DisableFlagsLogger.DisableState,
@@ -47,8 +46,7 @@ class CollapsedStatusBarFragmentLogger @Inject constructor(
                 },
                 {
                     disableFlagsLogger.getDisableFlagsString(
-                        old = null,
-                        new = DisableFlagsLogger.DisableState(int1, int2),
+                        DisableFlagsLogger.DisableState(int1, int2),
                     )
                 }
         )
@@ -61,13 +59,13 @@ class CollapsedStatusBarFragmentLogger @Inject constructor(
             {
                 bool1 = model.showClock
                 bool2 = model.showNotificationIcons
-                bool3 = model.showOngoingCallChip
+                bool3 = model.showOngoingActivityChip
                 bool4 = model.showSystemInfo
             },
             { "New visibilities calculated internally. " +
                     "showClock=$bool1 " +
                     "showNotificationIcons=$bool2 " +
-                    "showOngoingCallChip=$bool3 " +
+                    "showOngoingActivityChip=$bool3 " +
                     "showSystemInfo=$bool4"
             }
         )

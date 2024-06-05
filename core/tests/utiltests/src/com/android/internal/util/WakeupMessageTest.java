@@ -24,11 +24,17 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -40,6 +46,8 @@ import org.mockito.stubbing.Answer;
  * Unit tests for {@link com.android.internal.util.WakeupMessage}.
  */
 @SmallTest
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = WakeupMessage.class)
 public class WakeupMessageTest {
     private static final String TEST_CMD_NAME = "TEST cmd Name";
     private static final int TEST_CMD = 18;
@@ -47,11 +55,16 @@ public class WakeupMessageTest {
     private static final int TEST_ARG2 = 182;
     private static final Object TEST_OBJ = "hello";
 
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     @Mock Context mContext;
     @Mock AlarmManager mAlarmManager;
     WakeupMessage mMessage;
     // Make a spy so that we can verify calls to it
-    @Spy MessageCapturingHandler mHandler = new MessageCapturingHandler();
+    @Spy MessageCapturingHandler mHandler;
 
     ArgumentCaptor<AlarmManager.OnAlarmListener> mListenerCaptor =
             ArgumentCaptor.forClass(AlarmManager.OnAlarmListener.class);
@@ -85,6 +98,8 @@ public class WakeupMessageTest {
      */
     @Before
     public void setUp() {
+        mHandler = new MessageCapturingHandler();
+
         MockitoAnnotations.initMocks(this);
 
         when(mContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mAlarmManager);

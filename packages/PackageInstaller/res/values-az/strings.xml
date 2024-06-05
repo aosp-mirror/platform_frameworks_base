@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Tətbiq quraşdırılıb."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Bu tətbiqi quraşdırmaq istəyirsiniz?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Bu tətbiqi güncəlləmək istəyirsiniz?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Bu tətbiq <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> mənbəyindən güncəllənsin?\n\nBu tətbiq adətən <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> mənbəyindən güncəllənmələr qəbul edir. Fərqli mənbədən güncəllədikdə telefonda istənilən mənbədən gələcəkdə güncəllənmələr qəbul edə bilərsiniz. Tətbiq funksionallığı dəyişə bilər."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Bu tətbiq &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; mənbəyindən güncəllənsin?&lt;/p&gt;&lt;p&gt;Bu tətbiq adətən &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; mənbəyindən güncəllənir. Fərqli mənbədən güncəllədikdə gələcəkdə planşetdə istənilən mənbədən güncəlləyə bilərsiniz. Tətbiq funksionallığı dəyişə bilər.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Bu tətbiq &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; mənbəyindən güncəllənsin?&lt;/p&gt;&lt;p&gt;Bu tətbiq adətən &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; mənbəyindən güncəllənir. Fərqli mənbədən güncəllədikdə gələcəkdə TV-də istənilən mənbədən güncəlləyə bilərsiniz. Tətbiq funksionallığı dəyişə bilər.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Bu tətbiq &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; mənbəyindən güncəllənsin?&lt;/p&gt;&lt;p&gt;Bu tətbiq adətən &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; mənbəyindən güncəllənir. Fərqli mənbədən güncəllədikdə gələcəkdə telefonda istənilən mənbədən güncəlləyə bilərsiniz. Tətbiq funksionallığı dəyişə bilər.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Tətbiq quraşdırılmayıb."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketin quraşdırılması blok edildi."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Bu paketin mövcud paket ilə ziddiyətinə görə tətbiq quraşdırılmadı."</string>
@@ -42,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Naməlum tətbiqlər bu istifadəçi tərəfindən quraşdırıla bilməz"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Bu istifadəçinin tətbiqi quraşdırmaq üçün icazəsi yoxdur"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="archive" msgid="4447791830199354721">"Arxivə atın"</string>
     <string name="update_anyway" msgid="8792432341346261969">"İstənilən halda güncəlləyin"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Tətbiqi idarə edin"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Boş yer yoxdur"</string>
@@ -56,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Güncəlləməni silin"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> bu tətbiqin hissəsidir:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Bu tətbiqi sistemdən silmək istəyirsiniz?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"Şəxsi məlumatlarınız yadda saxlanacaq"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Bu tətbiq bütün istifadəçilər üçün arxivə atılsın? Şəxsi məlumatlarınız yadda saxlanacaq"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Bu tətbiq iş profilində arxivə atılsın? Şəxsi məlumatlarınız yadda saxlanacaq"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Bu tətbiq <xliff:g id="USERNAME">%1$s</xliff:g> üçün arxivə atılsın? Şəxsi məlumatlarınız yadda saxlanacaq"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Bu tətbiqi şəxsi sahədən arxivə atmaq istəyirsiniz? Şəxsi məlumatlarınız yadda saxlanacaq"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Bu tətbiqi "<b>"bütün"</b>" istifadəçilər üçün silmək istəyirsiz? Tətbiq və onun datası cihazdakı "<b>"bütün"</b>" istifadəçilər üçün silinəcək."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> adlı istifadəçi üçün bu tətbiqi sistemdən silmək istəyirsiniz?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Bu tətbiqi iş profilinizdən silmək istəyirsiniz?"</string>
@@ -64,6 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Tətbiq datasının <xliff:g id="SIZE">%1$s</xliff:g> hissəsini saxlayın."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Bu tətbiq silinsin?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Bu tətbiqi sistemdən silmək istəyirsiniz? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> kopya da silinəcək."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Bu tətbiqi məxfi məkandan silmək istəyirsiniz?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"İşləyən sistemlər silinmələr"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Uğursuz olan sistemlər silinmələr"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Sistemdən silinir..."</string>
@@ -83,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"İstifadəçiləri idarə edin"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> sistemdən silinə bilməz."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Paketin təhlilində problem var idi."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Yükləmə/Sistemdən silmə fəaliyyətləri Wear\'də dəstəklənmir."</string>
     <string name="message_staging" msgid="8032722385658438567">"Tətbiq hazırlanır..."</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Naməlum"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Təhlükəsizliyiniz üçün planşetinizə bu mənbədən olan naməlum tətbiqləri quraşdırmağa icazə verilmir. Bunu Ayarlarda dəyişə bilərsiniz."</string>
@@ -95,10 +102,30 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Planşet və şəxsi data naməlum tətbiqlərin hücumuna qarşı daha həssasdır. Bu tətbiqi quraşdırmaqla planşetə dəyə biləcək zərər və ya onun istifadəsi nəticəsində baş verə biləcək data itkisinə görə məsuliyyət daşıdığınızı qəbul edirsiniz."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Tv və şəxsi data naməlum tətbiqlərin hücumuna qarşı daha həssasdır. Bu tətbiqi quraşdırmaqla Tv-yə dəyə biləcək zərər və ya onun istifadəsi nəticəsində baş verən data itkisinə görə məsuliyyət daşıdığınızı qəbul edirsiniz."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> Kopyalayın"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> arxivə atılsın?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Davam edin"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Ayarlar"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear tətbiqləri quraşdırılır/sistemdən silinir"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Tətbiq quraşdırma bildirişi"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Quraşdırıldı"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" quraşdırıldı"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="INSTALLERNAME">%2$s</xliff:g> ünvanından bərpa edilsin?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Bu tətbiq arxa fonda endirilməyə başlayacaq"</string>
+    <string name="restore" msgid="8460854736328970444">"Bərpa edin"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Oflaynsınız"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"Bu tətbiqi bərpa etmək üçün internet bağlantısını yoxlayın və yenidən cəhd edin"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Xəta oldu"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Bu tətbiqi bərpa edərkən problem oldu"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Kifayət qədər yaddaş yoxdur"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Bu tətbiqi bərpa etmək üçün bu cihazda yer boşalda bilərsiniz. Lazımi yaddaş: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Tədbir görmək tələb edilir"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Bu tətbiqi bərpa etmək üçün növbəti addımları izləyin"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> deaktiv edilib"</string>
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"Bu tətbiqi bərpa etmək üçün Ayarlarda <xliff:g id="INSTALLERNAME">%1$s</xliff:g> aktivləşdirilməlidir"</string>
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> sistemdən silinib"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Bu tətbiqi bərpa etmək üçün <xliff:g id="INSTALLERNAME">%1$s</xliff:g> quraşdırılmalıdır"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Davam edin"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Yaddaşı təmizləyin"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Ayarlar"</string>
+    <string name="close" msgid="5214897374055647996">"Bağlayın"</string>
 </resources>

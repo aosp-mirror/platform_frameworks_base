@@ -34,8 +34,9 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 import android.widget.Toast;
-
 import androidx.annotation.Nullable;
+import com.android.packageinstaller.common.EventResultPersister;
+import com.android.packageinstaller.common.UninstallEventReceiver;
 
 /**
  * Start an uninstallation, show a dialog while uninstalling and return result to the caller.
@@ -116,6 +117,7 @@ public class UninstallUninstalling extends Activity implements
 
                 int flags = allUsers ? PackageManager.DELETE_ALL_USERS : 0;
                 flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;
+                flags |= getIntent().getIntExtra(PackageInstaller.EXTRA_DELETE_FLAGS, 0);
 
                 createContextAsUser(user, 0).getPackageManager().getPackageInstaller().uninstall(
                         new VersionedPackage(mAppInfo.packageName,
@@ -190,10 +192,10 @@ public class UninstallUninstalling extends Activity implements
 
             dialogBuilder.setCancelable(false);
             if (isCloneUser) {
-                dialogBuilder.setMessage(getActivity().getString(R.string.uninstalling_cloned_app,
+                dialogBuilder.setTitle(getActivity().getString(R.string.uninstalling_cloned_app,
                         ((UninstallUninstalling) getActivity()).mLabel));
             } else {
-                dialogBuilder.setMessage(getActivity().getString(R.string.uninstalling_app,
+                dialogBuilder.setTitle(getActivity().getString(R.string.uninstalling_app,
                         ((UninstallUninstalling) getActivity()).mLabel));
             }
 

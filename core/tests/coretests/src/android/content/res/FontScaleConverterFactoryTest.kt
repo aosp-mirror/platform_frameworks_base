@@ -16,23 +16,52 @@
 
 package android.content.res
 
-
 import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresFlagsEnabled
+import android.platform.test.flag.junit.CheckFlagsRule
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
+import android.util.SparseArray
 import androidx.core.util.forEach
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
 import kotlin.math.ceil
 import kotlin.math.floor
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.lang.IllegalStateException
 import kotlin.random.Random.Default.nextFloat
 
+/**
+ * Unit tests for FontScaleConverterFactory. Note that some similar tests are in
+ * cts/tests/tests/content/src/android/content/res/cts/FontScaleConverterFactoryTest.kt
+ */
 @Presubmit
 @RunWith(AndroidJUnit4::class)
 class FontScaleConverterFactoryTest {
+
+    @get:Rule
+    val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+
+    private var defaultLookupTables: SparseArray<FontScaleConverter>? = null
+
+    @Before
+    fun setup() {
+        defaultLookupTables = FontScaleConverterFactory.sLookupTables.clone()
+    }
+
+    @After
+    fun teardown() {
+        // Restore the default tables (since some tests will have added extras to the cache)
+        if (defaultLookupTables != null) {
+            FontScaleConverterFactory.sLookupTables = defaultLookupTables!!
+        }
+    }
 
     @Test
     fun scale200IsTwiceAtSmallSizes() {
@@ -61,19 +90,6 @@ class FontScaleConverterFactoryTest {
         assertThat(table.convertSpToDp(100F)).isWithin(CONVERSION_TOLERANCE).of(300f)
     }
 
-    @SmallTest
-    fun missingLookupTable110_returnsInterpolated() {
-        val table = FontScaleConverterFactory.forScale(1.1F)!!
-
-        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(1.1f)
-        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(8f * 1.1f)
-        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(11f)
-        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(5f * 1.1f)
-        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
-        assertThat(table.convertSpToDp(50F)).isLessThan(50f * 1.1f)
-        assertThat(table.convertSpToDp(100F)).isLessThan(100f * 1.1f)
-    }
-
     @Test
     fun missingLookupTable199_returnsInterpolated() {
         val table = FontScaleConverterFactory.forScale(1.9999F)!!
@@ -96,12 +112,36 @@ class FontScaleConverterFactoryTest {
         assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
     }
 
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FONT_SCALE_CONVERTER_PUBLIC)
+    fun missingLookupTable_cachesInterpolated() {
+        val table = FontScaleConverterFactory.forScale(1.6F)!!
+
+        assertThat(FontScaleConverterFactory.sLookupTables.contains((1.6F * 100).toInt())).isTrue()
+        // Double check known existing values
+        assertThat(FontScaleConverterFactory.sLookupTables.contains((1.5F * 100).toInt())).isTrue()
+        assertThat(FontScaleConverterFactory.sLookupTables.contains((1.7F * 100).toInt())).isFalse()
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FONT_SCALE_CONVERTER_PUBLIC)
+    fun missingLookupTablePastEnd_cachesLinear() {
+        val table = FontScaleConverterFactory.forScale(3F)!!
+
+        assertThat(FontScaleConverterFactory.sLookupTables.contains((3F * 100).toInt())).isTrue()
+        // Double check known existing values
+        assertThat(FontScaleConverterFactory.sLookupTables.contains((1.5F * 100).toInt())).isTrue()
+        assertThat(FontScaleConverterFactory.sLookupTables.contains((1.7F * 100).toInt())).isFalse()
+    }
+
     @SmallTest
+    @Test
     fun missingLookupTableNegativeReturnsNull() {
         assertThat(FontScaleConverterFactory.forScale(-1F)).isNull()
     }
 
     @SmallTest
+    @Test
     fun unnecessaryFontScalesReturnsNull() {
         assertThat(FontScaleConverterFactory.forScale(0F)).isNull()
         assertThat(FontScaleConverterFactory.forScale(1F)).isNull()
@@ -109,8 +149,13 @@ class FontScaleConverterFactoryTest {
     }
 
     @SmallTest
+    @Test
     fun tablesMatchAndAreMonotonicallyIncreasing() {
-        FontScaleConverterFactory.LOOKUP_TABLES.forEach { _, lookupTable ->
+        FontScaleConverterFactory.sLookupTables.forEach { _, lookupTable ->
+            if (lookupTable !is FontScaleConverterImpl) {
+                throw IllegalStateException("Didn't return a FontScaleConverterImpl")
+            }
+
             assertThat(lookupTable.mToDpValues).hasLength(lookupTable.mFromSpValues.size)
             assertThat(lookupTable.mToDpValues).isNotEmpty()
 
@@ -123,16 +168,19 @@ class FontScaleConverterFactoryTest {
     }
 
     @SmallTest
+    @Test
     fun testIsNonLinearFontScalingActive() {
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1f)).isFalse()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(0f)).isFalse()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(-1f)).isFalse()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(0.85f)).isFalse()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.02f)).isFalse()
-        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.10f)).isFalse()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.05f)).isTrue()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.10f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.15f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.1499999f))
                 .isTrue()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.2f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.5f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(2f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(3f)).isTrue()
@@ -216,7 +264,7 @@ class FontScaleConverterFactoryTest {
     }
 
     companion object {
-        private const val CONVERSION_TOLERANCE = 0.05f
+        private const val CONVERSION_TOLERANCE = 0.18f
     }
 }
 

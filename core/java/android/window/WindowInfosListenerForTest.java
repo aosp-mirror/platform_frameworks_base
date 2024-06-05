@@ -19,7 +19,9 @@ package android.window;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.IBinder;
@@ -80,14 +82,71 @@ public class WindowInfosListenerForTest {
          */
         public final boolean isVisible;
 
+        /**
+         * Return the transform to get the bounds from display space into window space.
+         */
+        @NonNull
+        public final Matrix transform;
+
+        /**
+         * True if the window is touchable.
+         */
+        @SuppressLint("UnflaggedApi") // The API is only used for tests.
+        public final boolean isTouchable;
+
+        /**
+         * True if the window is focusable.
+         */
+        @SuppressLint("UnflaggedApi") // The API is only used for tests.
+        public final boolean isFocusable;
+
+        /**
+         * True if the window is preventing splitting
+         */
+        @SuppressLint("UnflaggedApi") // The API is only used for tests.
+        public final boolean isPreventSplitting;
+
+        /**
+         * True if the window duplicates touches received to wallpaper.
+         */
+        @SuppressLint("UnflaggedApi") // The API is only used for tests.
+        public final boolean isDuplicateTouchToWallpaper;
+
+        /**
+         * True if the window is listening for when there is a touch DOWN event
+         * occurring outside its touchable bounds. When such an event occurs,
+         * this window will receive a MotionEvent with ACTION_OUTSIDE.
+         */
+        @SuppressLint("UnflaggedApi") // The API is only used for tests.
+        public final boolean isWatchOutsideTouch;
+
         WindowInfo(@NonNull IBinder windowToken, @NonNull String name, int displayId,
-                @NonNull Rect bounds, int inputConfig) {
+                @NonNull Rect bounds, int inputConfig, @NonNull Matrix transform) {
             this.windowToken = windowToken;
             this.name = name;
             this.displayId = displayId;
             this.bounds = bounds;
             this.isTrustedOverlay = (inputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
             this.isVisible = (inputConfig & InputConfig.NOT_VISIBLE) == 0;
+            this.transform = transform;
+            this.isTouchable = (inputConfig & InputConfig.NOT_TOUCHABLE) == 0;
+            this.isFocusable = (inputConfig & InputConfig.NOT_FOCUSABLE) == 0;
+            this.isPreventSplitting = (inputConfig
+                            & InputConfig.PREVENT_SPLITTING) != 0;
+            this.isDuplicateTouchToWallpaper = (inputConfig
+                            & InputConfig.DUPLICATE_TOUCH_TO_WALLPAPER) != 0;
+            this.isWatchOutsideTouch = (inputConfig
+                            & InputConfig.WATCH_OUTSIDE_TOUCH) != 0;
+        }
+
+        @Override
+        public String toString() {
+            return name + ", displayId=" + displayId
+                    + ", frame=" + bounds
+                    + ", isVisible=" + isVisible
+                    + ", isTrustedOverlay=" + isTrustedOverlay
+                    + ", token=" + windowToken
+                    + ", transform=" + transform;
         }
     }
 
@@ -153,8 +212,7 @@ public class WindowInfosListenerForTest {
 
         var tmp = new RectF();
         for (var handle : windowHandles) {
-            var bounds = new Rect(handle.frameLeft, handle.frameTop, handle.frameRight,
-                    handle.frameBottom);
+            var bounds = new Rect(handle.frame);
 
             // Transform bounds from physical display coordinates to logical display coordinates.
             var display = displayInfoById.get(handle.displayId);
@@ -165,7 +223,7 @@ public class WindowInfosListenerForTest {
             }
 
             windowInfos.add(new WindowInfo(handle.getWindowToken(), handle.name, handle.displayId,
-                    bounds, handle.inputConfig));
+                    bounds, handle.inputConfig, handle.transform));
         }
         return windowInfos;
     }

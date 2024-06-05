@@ -31,27 +31,33 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
+import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
+import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.R
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.log.DebugLogger.debugLog
+import com.android.systemui.notetask.NoteTaskEntryPoint.QUICK_AFFORDANCE
+import com.android.systemui.notetask.NoteTaskEntryPoint.TAIL_BUTTON
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
-import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
-import com.android.systemui.util.kotlin.getOrNull
+import com.android.systemui.util.settings.SecureSettings
 import com.android.wm.shell.bubbles.Bubble
-import com.android.wm.shell.bubbles.Bubbles
 import com.android.wm.shell.bubbles.Bubbles.BubbleExpandListener
-import java.util.Optional
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Entry point for creating and managing note.
@@ -69,13 +75,16 @@ constructor(
     private val shortcutManager: ShortcutManager,
     private val resolver: NoteTaskInfoResolver,
     private val eventLogger: NoteTaskEventLogger,
-    private val optionalBubbles: Optional<Bubbles>,
+    private val noteTaskBubblesController: NoteTaskBubblesController,
     private val userManager: UserManager,
     private val keyguardManager: KeyguardManager,
     private val activityManager: ActivityManager,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
     private val devicePolicyManager: DevicePolicyManager,
     private val userTracker: UserTracker,
+    private val secureSettings: SecureSettings,
+    @Application private val applicationScope: CoroutineScope,
+    @Background private val bgCoroutineContext: CoroutineContext
 ) {
 
     @VisibleForTesting val infoReference = AtomicReference<NoteTaskInfo?>()
@@ -100,18 +109,6 @@ constructor(
         }
     }
 
-    /** Starts [LaunchNoteTaskProxyActivity] on the given [user]. */
-    fun startNoteTaskProxyActivityForUser(user: UserHandle) {
-        context.startActivityAsUser(
-            Intent().apply {
-                component =
-                    ComponentName(context, LaunchNoteTaskManagedProfileProxyActivity::class.java)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            },
-            user
-        )
-    }
-
     /** Starts the notes role setting. */
     fun startNotesRoleSetting(activityContext: Context, entryPoint: NoteTaskEntryPoint?) {
         val user =
@@ -130,23 +127,26 @@ constructor(
 
     /**
      * Returns the [UserHandle] of an android user that should handle the notes taking [entryPoint].
-     *
-     * On company owned personally enabled (COPE) devices, if the given [entryPoint] is in the
-     * [FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES] list, the default notes app in the work
-     * profile user will always be launched.
-     *
-     * On non managed devices or devices with other management modes, the current [UserHandle] is
-     * returned.
+     * 1. tail button entry point: In COPE or work profile devices, the user can select whether the
+     *    work or main profile notes app should be launched in the Settings app. In non-management
+     *    or device owner devices, the user can only select main profile notes app.
+     * 2. lock screen quick affordance: since there is no user setting, the main profile notes app
+     *    is used as default for work profile devices while the work profile notes app is used for
+     *    COPE devices.
+     * 3. Other entry point: the current user from [UserTracker.userHandle].
      */
     fun getUserForHandlingNotesTaking(entryPoint: NoteTaskEntryPoint): UserHandle =
-        if (
-            entryPoint in FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES &&
-                devicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile
-        ) {
-            userTracker.userProfiles.firstOrNull { userManager.isManagedProfile(it.id) }?.userHandle
-                ?: userTracker.userHandle
-        } else {
-            userTracker.userHandle
+        when {
+            entryPoint == TAIL_BUTTON -> secureSettings.preferredUser
+            devicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile &&
+                entryPoint == QUICK_AFFORDANCE -> {
+                userTracker.userProfiles
+                    .firstOrNull { userManager.isManagedProfile(it.id) }
+                    ?.userHandle
+                    ?: userTracker.userHandle
+            }
+            // On work profile devices, SysUI always run in the main user.
+            else -> userTracker.userHandle
         }
 
     /**
@@ -175,7 +175,21 @@ constructor(
     ) {
         if (!isEnabled) return
 
-        val bubbles = optionalBubbles.getOrNull() ?: return
+        applicationScope.launch("$TAG#showNoteTaskAsUser") {
+            awaitShowNoteTaskAsUser(entryPoint, user)
+        }
+    }
+
+    private suspend fun awaitShowNoteTaskAsUser(
+        entryPoint: NoteTaskEntryPoint,
+        user: UserHandle,
+    ) {
+        if (!isEnabled) return
+
+        if (!noteTaskBubblesController.areBubblesAvailable()) {
+            debugLog { "Bubbles not available in the system user SysUI instance" }
+            return
+        }
 
         // TODO(b/249954038): We should handle direct boot (isUserUnlocked). For now, we do nothing.
         if (!userManager.isUserUnlocked) return
@@ -210,7 +224,7 @@ constructor(
                     val intent = createNoteTaskIntent(info)
                     val icon =
                         Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
-                    bubbles.showOrHideAppBubble(intent, user, icon)
+                    noteTaskBubblesController.showOrHideAppBubble(intent, user, icon)
                     // App bubble logging happens on `onBubbleExpandChanged`.
                     debugLog { "onShowNoteTask - opened as app bubble: $info" }
                 }
@@ -264,15 +278,7 @@ constructor(
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED
             }
 
-        // If the required user matches the tracking user, the injected context is already a context
-        // of the required user. Avoid calling #createContextAsUser because creating a context for
-        // a user takes time.
-        val userContext =
-            if (user == userTracker.userHandle) {
-                context
-            } else {
-                context.createContextAsUser(user, /* flags= */ 0)
-            }
+        val userContext = context.createContextAsUser(user, /* flags= */ 0)
 
         userContext.packageManager.setComponentEnabledSetting(
             componentName,
@@ -280,12 +286,31 @@ constructor(
             PackageManager.DONT_KILL_APP,
         )
 
-        debugLog { "setNoteTaskShortcutEnabled - completed: $isEnabled" }
+        debugLog { "setNoteTaskShortcutEnabled for user $user- completed: $enabledState" }
+    }
+
+    /**
+     * Like [updateNoteTaskAsUser] but automatically apply to the current user and all its work
+     * profiles.
+     *
+     * @see updateNoteTaskAsUser
+     * @see UserTracker.userHandle
+     * @see UserTracker.userProfiles
+     */
+    fun updateNoteTaskForCurrentUserAndManagedProfiles() {
+        updateNoteTaskAsUser(userTracker.userHandle)
+        for (profile in userTracker.userProfiles) {
+            if (userManager.isManagedProfile(profile.id)) {
+                updateNoteTaskAsUser(profile.userHandle)
+            }
+        }
     }
 
     /**
      * Updates all [NoteTaskController] related information, including but not exclusively the
      * widget shortcut created by the [user] - by default it will use the current user.
+     *
+     * If the user is not current user, the update will be dispatched to run in that user's process.
      *
      * Keep in mind the shortcut API has a
      * [rate limiting](https://developer.android.com/develop/ui/views/launch/shortcuts/managing-shortcuts#rate-limiting)
@@ -293,36 +318,72 @@ constructor(
      * function during System UI initialization.
      */
     fun updateNoteTaskAsUser(user: UserHandle) {
-        val packageName = roleManager.getDefaultRoleHolderAsUser(ROLE_NOTES, user)
-        val hasNotesRoleHolder = isEnabled && !packageName.isNullOrEmpty()
+        if (!userManager.isUserUnlocked(user)) {
+            debugLog { "updateNoteTaskAsUser call but user locked: user=$user" }
+            return
+        }
 
-        setNoteTaskShortcutEnabled(hasNotesRoleHolder, user)
-
-        if (hasNotesRoleHolder) {
-            shortcutManager.enableShortcuts(listOf(SHORTCUT_ID))
-            val updatedShortcut = roleManager.createNoteShortcutInfoAsUser(context, user)
-            shortcutManager.updateShortcuts(listOf(updatedShortcut))
+        // When switched to a secondary user, the sysUI is still running in the main user, we will
+        // need to update the shortcut in the secondary user.
+        if (user == getCurrentRunningUser()) {
+            launchUpdateNoteTaskAsUser(user)
         } else {
-            shortcutManager.disableShortcuts(listOf(SHORTCUT_ID))
+            // TODO(b/278729185): Replace fire and forget service with a bounded service.
+            val intent = NoteTaskControllerUpdateService.createIntent(context)
+            try {
+                // If the user is stopped before 'startServiceAsUser' kicks-in, a
+                // 'SecurityException' will be thrown.
+                context.startServiceAsUser(intent, user)
+            } catch (e: SecurityException) {
+                debugLog(error = e) { "Unable to start 'NoteTaskControllerUpdateService'." }
+            }
+        }
+    }
+
+    @InternalNoteTaskApi
+    fun launchUpdateNoteTaskAsUser(user: UserHandle) {
+        applicationScope.launch("$TAG#launchUpdateNoteTaskAsUser", bgCoroutineContext) {
+            if (!userManager.isUserUnlocked(user)) {
+                debugLog { "updateNoteTaskAsUserInternal call but user locked: user=$user" }
+                return@launch
+            }
+
+            val packageName = roleManager.getDefaultRoleHolderAsUser(ROLE_NOTES, user)
+            val hasNotesRoleHolder = isEnabled && !packageName.isNullOrEmpty()
+
+            setNoteTaskShortcutEnabled(hasNotesRoleHolder, user)
+
+            if (hasNotesRoleHolder) {
+                shortcutManager.enableShortcuts(listOf(SHORTCUT_ID))
+                val updatedShortcut = roleManager.createNoteShortcutInfoAsUser(context, user)
+                shortcutManager.updateShortcuts(listOf(updatedShortcut))
+            } else {
+                shortcutManager.disableShortcuts(listOf(SHORTCUT_ID))
+            }
         }
     }
 
     /** @see OnRoleHoldersChangedListener */
     fun onRoleHoldersChanged(roleName: String, user: UserHandle) {
         if (roleName != ROLE_NOTES) return
-        if (!userManager.isUserUnlocked(user)) {
-            debugLog { "onRoleHoldersChanged call but user locked: role=$roleName, user=$user" }
-            return
-        }
 
-        if (user == userTracker.userHandle) {
-            updateNoteTaskAsUser(user)
-        } else {
-            // TODO(b/278729185): Replace fire and forget service with a bounded service.
-            val intent = NoteTaskControllerUpdateService.createIntent(context)
-            context.startServiceAsUser(intent, user)
-        }
+        updateNoteTaskAsUser(user)
     }
+
+    // Returns the [UserHandle] that this class is running on.
+    @VisibleForTesting internal fun getCurrentRunningUser(): UserHandle = Process.myUserHandle()
+
+    private val SecureSettings.preferredUser: UserHandle
+        get() {
+            val trackingUserId = userTracker.userHandle.identifier
+            val userId =
+                secureSettings.getIntForUser(
+                    /* name= */ Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
+                    /* def= */ trackingUserId,
+                    /* userHandle= */ trackingUserId,
+                )
+            return UserHandle.of(userId)
+        }
 
     companion object {
         val TAG = NoteTaskController::class.simpleName.orEmpty()
@@ -338,16 +399,6 @@ constructor(
          * @see com.android.launcher3.icons.IconCache.EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE
          */
         const val EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE = "extra_shortcut_badge_override_package"
-
-        /**
-         * A list of entry points which should be redirected to the work profile default notes app
-         * on company owned personally enabled (COPE) devices.
-         *
-         * Entry points in this list don't let users / admin to select the work or personal default
-         * notes app to be launched.
-         */
-        val FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES =
-            listOf(NoteTaskEntryPoint.TAIL_BUTTON, NoteTaskEntryPoint.QUICK_AFFORDANCE)
     }
 }
 

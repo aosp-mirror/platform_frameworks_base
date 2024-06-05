@@ -22,16 +22,25 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.Flags;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.os.IRemoteCallback;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 
-import java.util.HashSet;
+import java.lang.ref.WeakReference;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Helper class for monitoring the state of packages: adding, removing,
@@ -40,12 +49,6 @@ import java.util.Objects;
 public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     static final String TAG = "PackageMonitor";
 
-    final IntentFilter mPackageFilt;
-    final IntentFilter mNonDataFilt;
-    final IntentFilter mExternalFilt;
-
-    final HashSet<String> mUpdatingPackages = new HashSet<String>();
-    
     Context mRegisteredContext;
     Handler mRegisteredHandler;
     String[] mDisappearingPackages;
@@ -58,37 +61,37 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
 
     String[] mTempArray = new String[1];
 
+    PackageMonitorCallback mPackageMonitorCallback;
+
+    private Executor mExecutor;
+
+    final boolean mSupportsPackageRestartQuery;
+
     @UnsupportedAppUsage
     public PackageMonitor() {
+        // If the feature flag is enabled, set mSupportsPackageRestartQuery to false by default
+        this(!Flags.packageRestartQueryDisabledByDefault());
+    }
+
+    /**
+     * The constructor of PackageMonitor whose parameters clearly indicate whether support
+     * querying package restart event.
+     */
+    public PackageMonitor(boolean supportsPackageRestartQuery) {
+        mSupportsPackageRestartQuery = supportsPackageRestartQuery;
+    }
+
+    private IntentFilter getPackageFilter() {
         final boolean isCore = UserHandle.isCore(android.os.Process.myUid());
 
-        mPackageFilt = new IntentFilter();
-        mPackageFilt.addAction(Intent.ACTION_PACKAGE_ADDED);
-        mPackageFilt.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        mPackageFilt.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        mPackageFilt.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
-        mPackageFilt.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-        mPackageFilt.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
-        mPackageFilt.addDataScheme("package");
+        IntentFilter filter = new IntentFilter();
+        // Settings app sends the broadcast
+        filter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
+        filter.addDataScheme("package");
         if (isCore) {
-            mPackageFilt.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         }
-
-        mNonDataFilt = new IntentFilter();
-        mNonDataFilt.addAction(Intent.ACTION_UID_REMOVED);
-        mNonDataFilt.addAction(Intent.ACTION_USER_STOPPED);
-        mNonDataFilt.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
-        mNonDataFilt.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
-        if (isCore) {
-            mNonDataFilt.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        }
-
-        mExternalFilt = new IntentFilter();
-        mExternalFilt.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
-        mExternalFilt.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        if (isCore) {
-            mExternalFilt.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        }
+        return filter;
     }
 
     @UnsupportedAppUsage
@@ -99,29 +102,34 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     @UnsupportedAppUsage
     public void register(Context context, Looper thread, UserHandle user,
             boolean externalStorage) {
-        register(context, user, externalStorage,
+        register(context, user,
                 (thread == null) ? BackgroundThread.getHandler() : new Handler(thread));
     }
 
-    public void register(Context context, UserHandle user,
-        boolean externalStorage, Handler handler) {
+    /**
+     * Register for notifications of package changes such as install, removal and other events.
+     */
+    public void register(Context context, UserHandle user, Handler handler) {
         if (mRegisteredContext != null) {
             throw new IllegalStateException("Already registered");
         }
         mRegisteredContext = context;
         mRegisteredHandler = Objects.requireNonNull(handler);
-        if (user != null) {
-            context.registerReceiverAsUser(this, user, mPackageFilt, null, mRegisteredHandler);
-            context.registerReceiverAsUser(this, user, mNonDataFilt, null, mRegisteredHandler);
-            if (externalStorage) {
-                context.registerReceiverAsUser(this, user, mExternalFilt, null,
-                        mRegisteredHandler);
+        if (mSupportsPackageRestartQuery) {
+            final IntentFilter filter = getPackageFilter();
+            if (user != null) {
+                context.registerReceiverAsUser(this, user, filter, null, mRegisteredHandler);
+            } else {
+                context.registerReceiver(this, filter, null, mRegisteredHandler);
             }
-        } else {
-            context.registerReceiver(this, mPackageFilt, null, mRegisteredHandler);
-            context.registerReceiver(this, mNonDataFilt, null, mRegisteredHandler);
-            if (externalStorage) {
-                context.registerReceiver(this, mExternalFilt, null, mRegisteredHandler);
+        }
+        if (mPackageMonitorCallback == null) {
+            PackageManager pm = mRegisteredContext.getPackageManager();
+            if (pm != null) {
+                mExecutor = new HandlerExecutor(mRegisteredHandler);
+                mPackageMonitorCallback = new PackageMonitorCallback(this);
+                int userId = user != null ? user.getIdentifier() : mRegisteredContext.getUserId();
+                pm.registerPackageMonitorCallback(mPackageMonitorCallback, userId);
             }
         }
     }
@@ -135,17 +143,19 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         if (mRegisteredContext == null) {
             throw new IllegalStateException("Not registered");
         }
-        mRegisteredContext.unregisterReceiver(this);
-        mRegisteredContext = null;
-    }
-    
-    //not yet implemented
-    boolean isPackageUpdating(String packageName) {
-        synchronized (mUpdatingPackages) {
-            return mUpdatingPackages.contains(packageName);
+        if (mSupportsPackageRestartQuery) {
+            mRegisteredContext.unregisterReceiver(this);
         }
+
+        PackageManager pm = mRegisteredContext.getPackageManager();
+        if (pm != null && mPackageMonitorCallback != null) {
+            pm.unregisterPackageMonitorCallback(mPackageMonitorCallback);
+        }
+        mPackageMonitorCallback = null;
+        mRegisteredContext = null;
+        mExecutor = null;
     }
-    
+
     public void onBeginPackageChanges() {
     }
 
@@ -156,10 +166,24 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     }
 
     /**
+     * Same as {@link #onPackageAdded(String, int)}, but this callback
+     * has extras passed in.
+     */
+    public void onPackageAddedWithExtras(String packageName, int uid, Bundle extras) {
+    }
+
+    /**
      * Called when a package is really removed (and not replaced).
      */
     @UnsupportedAppUsage
     public void onPackageRemoved(String packageName, int uid) {
+    }
+
+    /**
+     * Same as {@link #onPackageRemoved(String, int)}, but this callback
+     * has extras passed in.
+     */
+    public void onPackageRemovedWithExtras(String packageName, int uid, Bundle extras) {
     }
 
     /**
@@ -169,10 +193,31 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     public void onPackageRemovedAllUsers(String packageName, int uid) {
     }
 
+    /**
+     * Same as {@link #onPackageRemovedAllUsers(String, int)}, but this callback
+     * has extras passed in.
+     */
+    public void onPackageRemovedAllUsersWithExtras(String packageName, int uid, Bundle extras) {
+    }
+
     public void onPackageUpdateStarted(String packageName, int uid) {
     }
 
+    /**
+     * Same as {@link #onPackageUpdateStarted(String, int)}, but this callback
+     * has extras passed in.
+     */
+    public void onPackageUpdateStartedWithExtras(String packageName, int uid, Bundle extras) {
+    }
+
     public void onPackageUpdateFinished(String packageName, int uid) {
+    }
+
+    /**
+     * Same as {@link #onPackageUpdateFinished(String, int)}, but this callback
+     * has extras passed in.
+     */
+    public void onPackageUpdateFinishedWithExtras(String packageName, int uid, Bundle extras) {
     }
 
     /**
@@ -203,14 +248,24 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         }
         return false;
     }
-    
+
+    /**
+     * Direct reflection of {@link Intent#ACTION_PACKAGE_CHANGED
+     * Intent.ACTION_PACKAGE_CHANGED} being received, this callback
+     * has extras passed in.
+     */
+    public void onPackageChangedWithExtras(String packageName, Bundle extras) {
+    }
+
+    public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit,
+            Bundle extras) {
+        return onHandleForceStop(intent, packages, uid, doit);
+    }
+
     public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
         return false;
     }
 
-    public void onHandleUserStop(Intent intent, int userHandle) {
-    }
-    
     public void onUidRemoved(int uid) {
     }
     
@@ -238,9 +293,22 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     }
 
     /**
+     * Called when a package disappears with extras passed in.
+     */
+    public void onPackageDisappearedWithExtras(String packageName, Bundle extras) {
+    }
+
+    /**
      * Called when a package appears for any reason.
      */
     public void onPackageAppeared(String packageName, int reason) {
+    }
+
+
+    /**
+     * Called when a package appears with extras passed in.
+     */
+    public void onPackageAppearedWithExtras(String packageName, Bundle extras) {
     }
 
     /**
@@ -248,11 +316,27 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
      */
     public void onPackageModified(@NonNull String packageName) {
     }
-    
+
+    /**
+     * Same as {@link #onPackageModified(String)}, but this callback
+     * has extras passed in.
+     */
+    public void onPackageModifiedWithExtras(@NonNull String packageName, Bundle extras) {
+    }
+
+    /**
+     * Called when a package in the stopped state is started for some reason.
+     *
+     * @param packageName Name of the package that was unstopped
+     * @param uid UID of the package that was unstopped
+     */
+    public void onPackageUnstopped(String packageName, int uid, Bundle extras) {
+    }
+
     public boolean didSomePackagesChange() {
         return mSomePackagesChanged;
     }
-    
+
     public int isPackageAppearing(String packageName) {
         if (mAppearingPackages != null) {
             for (int i=mAppearingPackages.length-1; i>=0; i--) {
@@ -337,21 +421,37 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         String pkg = uri != null ? uri.getSchemeSpecificPart() : null;
         return pkg;
     }
-    
+
     @Override
     public void onReceive(Context context, Intent intent) {
+        doHandlePackageEvent(intent);
+    }
+
+
+    private void postHandlePackageEvent(Intent intent) {
+        if (mExecutor != null) {
+            mExecutor.execute(() -> doHandlePackageEvent(intent));
+        }
+    }
+
+    /**
+     * Handle the package related event
+     * @param intent the intent that contains package related event information
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    public final void doHandlePackageEvent(Intent intent) {
         mChangeUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                 UserHandle.USER_NULL);
         if (mChangeUserId == UserHandle.USER_NULL) {
-            Slog.w("PackageMonitor", "Intent broadcast does not contain user handle: " + intent);
+            Slog.w(TAG, "Intent broadcast does not contain user handle: " + intent);
             return;
         }
         onBeginPackageChanges();
-        
+
         mDisappearingPackages = mAppearingPackages = null;
         mSomePackagesChanged = false;
         mModifiedComponents = null;
-        
+
         String action = intent.getAction();
         if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
             String pkg = getPackageName(intent);
@@ -367,17 +467,16 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                     mModifiedPackages = mTempArray;
                     mChangeType = PACKAGE_UPDATING;
                     onPackageUpdateFinished(pkg, uid);
+                    onPackageUpdateFinishedWithExtras(pkg, uid, intent.getExtras());
                     onPackageModified(pkg);
+                    onPackageModifiedWithExtras(pkg, intent.getExtras());
                 } else {
                     mChangeType = PACKAGE_PERMANENT_CHANGE;
                     onPackageAdded(pkg, uid);
+                    onPackageAddedWithExtras(pkg, uid, intent.getExtras());
                 }
+                onPackageAppearedWithExtras(pkg, intent.getExtras());
                 onPackageAppeared(pkg, mChangeType);
-                if (mChangeType == PACKAGE_UPDATING) {
-                    synchronized (mUpdatingPackages) {
-                        mUpdatingPackages.remove(pkg);
-                    }
-                }
             }
         } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
             String pkg = getPackageName(intent);
@@ -387,11 +486,15 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                 mTempArray[0] = pkg;
                 if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                     mChangeType = PACKAGE_UPDATING;
-                    synchronized (mUpdatingPackages) {
-                        //not used for now
-                        //mUpdatingPackages.add(pkg);
-                    }
                     onPackageUpdateStarted(pkg, uid);
+                    onPackageUpdateStartedWithExtras(pkg, uid, intent.getExtras());
+                    if (intent.getBooleanExtra(Intent.EXTRA_ARCHIVAL, false)) {
+                        // In case it is a removal event due to archiving, we trigger package
+                        // update event to refresh details like icons, title etc. corresponding to
+                        // the archived app.
+                        onPackageModified(pkg);
+                        onPackageModifiedWithExtras(pkg, intent.getExtras());
+                    }
                 } else {
                     mChangeType = PACKAGE_PERMANENT_CHANGE;
                     // We only consider something to have changed if this is
@@ -399,10 +502,13 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                     // it when it is re-added.
                     mSomePackagesChanged = true;
                     onPackageRemoved(pkg, uid);
+                    onPackageRemovedWithExtras(pkg, uid, intent.getExtras());
                     if (intent.getBooleanExtra(Intent.EXTRA_REMOVED_FOR_ALL_USERS, false)) {
                         onPackageRemovedAllUsers(pkg, uid);
+                        onPackageRemovedAllUsersWithExtras(pkg, uid, intent.getExtras());
                     }
                 }
+                onPackageDisappearedWithExtras(pkg, intent.getExtras());
                 onPackageDisappeared(pkg, mChangeType);
             }
         } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
@@ -417,7 +523,9 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                 if (onPackageChanged(pkg, uid, mModifiedComponents)) {
                     mSomePackagesChanged = true;
                 }
+                onPackageChangedWithExtras(pkg, intent.getExtras());
                 onPackageModified(pkg);
+                onPackageModifiedWithExtras(pkg, intent.getExtras());
             }
         } else if (Intent.ACTION_PACKAGE_DATA_CLEARED.equals(action)) {
             String pkg = getPackageName(intent);
@@ -430,19 +538,15 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
             mChangeType = PACKAGE_TEMPORARY_CHANGE;
             boolean canRestart = onHandleForceStop(intent,
                     mDisappearingPackages,
-                    intent.getIntExtra(Intent.EXTRA_UID, 0), false);
+                    intent.getIntExtra(Intent.EXTRA_UID, 0), false, intent.getExtras());
             if (canRestart) setResultCode(Activity.RESULT_OK);
         } else if (Intent.ACTION_PACKAGE_RESTARTED.equals(action)) {
             mDisappearingPackages = new String[] {getPackageName(intent)};
             mChangeType = PACKAGE_TEMPORARY_CHANGE;
             onHandleForceStop(intent, mDisappearingPackages,
-                    intent.getIntExtra(Intent.EXTRA_UID, 0), true);
+                    intent.getIntExtra(Intent.EXTRA_UID, 0), true, intent.getExtras());
         } else if (Intent.ACTION_UID_REMOVED.equals(action)) {
             onUidRemoved(intent.getIntExtra(Intent.EXTRA_UID, 0));
-        } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
-            if (intent.hasExtra(Intent.EXTRA_USER_HANDLE)) {
-                onHandleUserStop(intent, intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
-            }
         } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
             String[] pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             mAppearingPackages = pkgList;
@@ -475,6 +579,12 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
             String[] pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             mSomePackagesChanged = true;
             onPackagesUnsuspended(pkgList);
+        } else if (Intent.ACTION_PACKAGE_UNSTOPPED.equals(action)) {
+            final String pkgName = getPackageName(intent);
+            mAppearingPackages = new String[] {pkgName};
+            mChangeType = PACKAGE_TEMPORARY_CHANGE;
+            onPackageUnstopped(pkgName, intent.getIntExtra(Intent.EXTRA_UID, 0),
+                    intent.getExtras());
         }
 
         if (mSomePackagesChanged) {
@@ -483,5 +593,31 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
 
         onFinishPackageChanges();
         mChangeUserId = UserHandle.USER_NULL;
+    }
+
+    private static final class PackageMonitorCallback extends IRemoteCallback.Stub {
+        private final WeakReference<PackageMonitor> mMonitorWeakReference;
+
+        PackageMonitorCallback(PackageMonitor monitor) {
+            mMonitorWeakReference = new WeakReference<>(monitor);
+        }
+
+        @Override
+        public void sendResult(Bundle data) throws RemoteException {
+            onHandlePackageMonitorCallback(data);
+        }
+
+        private void onHandlePackageMonitorCallback(Bundle bundle) {
+            Intent intent = bundle.getParcelable(
+                    PackageManager.EXTRA_PACKAGE_MONITOR_CALLBACK_RESULT, Intent.class);
+            if (intent == null) {
+                Log.w(TAG, "No intent is set for PackageMonitorCallback");
+                return;
+            }
+            PackageMonitor monitor = mMonitorWeakReference.get();
+            if (monitor != null) {
+                monitor.postHandlePackageEvent(intent);
+            }
+        }
     }
 }

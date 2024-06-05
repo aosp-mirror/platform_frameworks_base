@@ -25,14 +25,11 @@ import static com.android.server.job.JobSchedulerService.FREQUENT_INDEX;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.verify;
 
 import android.app.AppGlobals;
 import android.app.job.JobInfo;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.BatteryManagerInternal;
@@ -49,8 +46,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
@@ -63,7 +58,6 @@ public class BatteryControllerTest {
 
     private BatteryController mBatteryController;
     private FlexibilityController mFlexibilityController;
-    private BroadcastReceiver mPowerReceiver;
     private JobSchedulerService.Constants mConstants = new JobSchedulerService.Constants();
     private int mSourceUid;
 
@@ -99,22 +93,14 @@ public class BatteryControllerTest {
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));
 
         // Initialize real objects.
-        // Capture the listeners.
-        ArgumentCaptor<BroadcastReceiver> receiverCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
-
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.hasSystemFeature(
                 PackageManager.FEATURE_AUTOMOTIVE)).thenReturn(false);
         mFlexibilityController =
                 new FlexibilityController(mJobSchedulerService, mock(PrefetchController.class));
         mBatteryController = new BatteryController(mJobSchedulerService, mFlexibilityController);
+        mBatteryController.startTrackingLocked();
 
-        verify(mContext).registerReceiver(receiverCaptor.capture(),
-                ArgumentMatchers.argThat(filter ->
-                        filter.hasAction(Intent.ACTION_POWER_CONNECTED)
-                                && filter.hasAction(Intent.ACTION_POWER_DISCONNECTED)));
-        mPowerReceiver = receiverCaptor.getValue();
         try {
             mSourceUid = AppGlobals.getPackageManager().getPackageUid(SOURCE_PACKAGE, 0, 0);
             // Need to do this since we're using a mock JS and not a real object.
@@ -158,9 +144,11 @@ public class BatteryControllerTest {
     }
 
     private void setPowerConnected(boolean connected) {
-        Intent intent = new Intent(
-                connected ? Intent.ACTION_POWER_CONNECTED : Intent.ACTION_POWER_DISCONNECTED);
-        mPowerReceiver.onReceive(mContext, intent);
+        doReturn(connected).when(mJobSchedulerService).isPowerConnected();
+        synchronized (mBatteryController.mLock) {
+            mBatteryController.onBatteryStateChangedLocked();
+        }
+        waitForNonDelayedMessagesProcessed();
     }
 
     private void setUidBias(int uid, int bias) {

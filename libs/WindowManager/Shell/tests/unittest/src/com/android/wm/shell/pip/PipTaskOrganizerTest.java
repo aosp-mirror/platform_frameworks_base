@@ -36,7 +36,6 @@ import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.RemoteException;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Rational;
@@ -45,6 +44,8 @@ import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.window.WindowContainerToken;
 
+import androidx.test.filters.SmallTest;
+
 import com.android.wm.shell.MockSurfaceControlHelper;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
@@ -52,13 +53,21 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipKeepClearAlgorithmInterface;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -87,7 +96,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     private PipBoundsState mPipBoundsState;
     private PipTransitionState mPipTransitionState;
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
-    private PipSizeSpecHandler mPipSizeSpecHandler;
+    private SizeSpecSource mSizeSpecSource;
     private PipDisplayLayoutState mPipDisplayLayoutState;
 
     private ComponentName mComponent1;
@@ -99,18 +108,19 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mComponent1 = new ComponentName(mContext, "component1");
         mComponent2 = new ComponentName(mContext, "component2");
         mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
-        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
-        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler, mPipDisplayLayoutState);
+        mSizeSpecSource = new PhoneSizeSpecSource(mContext, mPipDisplayLayoutState);
+        mPipBoundsState = new PipBoundsState(mContext, mSizeSpecSource, mPipDisplayLayoutState);
         mPipTransitionState = new PipTransitionState();
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState,
                 new PipSnapAlgorithm(), new PipKeepClearAlgorithmInterface() {},
-                mPipSizeSpecHandler);
+                mPipDisplayLayoutState, mSizeSpecSource);
         mMainExecutor = new TestShellExecutor();
         mPipTaskOrganizer = new PipTaskOrganizer(mContext, mMockSyncTransactionQueue,
                 mPipTransitionState, mPipBoundsState, mPipDisplayLayoutState,
                 mPipBoundsAlgorithm, mMockPhonePipMenuController, mMockPipAnimationController,
                 mMockPipSurfaceTransactionHelper, mMockPipTransitionController,
-                mMockPipParamsChangedForwarder, mMockOptionalSplitScreen, mMockDisplayController,
+                mMockPipParamsChangedForwarder, mMockOptionalSplitScreen,
+                Optional.empty() /* pipPerfHintControllerOptional */, mMockDisplayController,
                 mMockPipUiEventLogger, mMockShellTaskOrganizer, mMainExecutor);
         mMainExecutor.flushAll();
         preparePipTaskOrg();
@@ -276,7 +286,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         doReturn(mMockPipSurfaceTransactionHelper).when(mMockPipSurfaceTransactionHelper)
                 .round(any(), any(), anyBoolean());
         doReturn(mMockPipSurfaceTransactionHelper).when(mMockPipSurfaceTransactionHelper)
-                .scale(any(), any(), any(), any(), anyFloat());
+                .scale(any(), any(), any(), ArgumentMatchers.<Rect>any(), anyFloat());
         doReturn(mMockPipSurfaceTransactionHelper).when(mMockPipSurfaceTransactionHelper)
                 .alpha(any(), any(), anyFloat());
         doNothing().when(mMockPipSurfaceTransactionHelper).onDensityOrFontScaleChanged(any());

@@ -19,12 +19,14 @@ package android.content.pm;
 import static android.os.Build.VERSION_CODES.DONUT;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.compat.CompatChanges;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -66,8 +68,9 @@ import java.util.UUID;
  * corresponds to information collected from the AndroidManifest.xml's
  * &lt;application&gt; tag.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ApplicationInfo extends PackageItemInfo implements Parcelable {
-    private static ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
+    private static final ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
     private static final Parcelling.BuiltIn.ForStringSet sForStringSet =
             Parcelling.Cache.getOrCreate(Parcelling.BuiltIn.ForStringSet.class);
 
@@ -373,6 +376,19 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * Value for {@link #flags}: true if this application's package is in
      * the stopped state.
+     *
+     * <p>Stopped is the initial state after an app is installed, before it is launched
+     * or otherwise directly interacted with by the user. The system tries not to
+     * start it unless initiated by a user interaction (typically launching its icon
+     * from the launcher, could also include user actions like adding it as an app widget,
+     * selecting it as a live wallpaper, selecting it as a keyboard, etc). Stopped
+     * applications will not receive implicit broadcasts unless the sender specifies
+     * {@link android.content.Intent#FLAG_INCLUDE_STOPPED_PACKAGES}.
+     *
+     * <p>Applications should avoid launching activities, binding to or starting services, or
+     * otherwise causing a stopped application to run unless initiated by the user.
+     *
+     * <p>An app can also return to the stopped state by a "force stop".
      */
     public static final int FLAG_STOPPED = 1<<21;
 
@@ -1064,9 +1080,23 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * PackageManager.GET_SHARED_LIBRARY_FILES} flag was used when retrieving
      * the structure.
      *
+     * NOTE: the list also contains the result of {@link #getOptionalSharedLibraryInfos}.
+     *
      * {@hide}
      */
+    @Nullable
     public List<SharedLibraryInfo> sharedLibraryInfos;
+
+    /**
+     * List of all shared libraries this application is optionally linked against.
+     * This field is only set if the {@link PackageManager#GET_SHARED_LIBRARY_FILES
+     * PackageManager.GET_SHARED_LIBRARY_FILES} flag was used when retrieving
+     * the structure.
+     *
+     * @hide
+     */
+    @Nullable
+    public List<SharedLibraryInfo> optionalSharedLibraryInfos;
 
     /**
      * Full path to the default directory assigned to the package for its
@@ -1386,6 +1416,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @see #category
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public static CharSequence getCategoryTitle(Context context, @Category int category) {
         switch (category) {
             case ApplicationInfo.CATEGORY_GAME:
@@ -1532,6 +1563,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     @Nullable
     private Boolean requestRawExternalStorageAccess;
+
+    /**
+     * If {@code false}, this app does not allow its activities to be replaced by another app.
+     * Is set from application manifest application tag's allowCrossUidActivitySwitchFromBelow
+     * attribute.
+     * @hide
+     */
+    public boolean allowCrossUidActivitySwitchFromBelow = true;
 
     /**
      * Represents the default policy. The actual policy used will depend on other properties of
@@ -1729,6 +1768,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                         + Integer.toHexString(localeConfigRes));
             }
             pw.println(prefix + "enableOnBackInvokedCallback=" + isOnBackInvokedCallbackEnabled());
+            pw.println(prefix + "allowCrossUidActivitySwitchFromBelow="
+                    + allowCrossUidActivitySwitchFromBelow);
+
         }
         pw.println(prefix + "createTimestamp=" + createTimestamp);
         if (mKnownActivityEmbeddingCerts != null) {
@@ -1846,6 +1888,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 proto.write(ApplicationInfoProto.Detail.NATIVE_HEAP_ZERO_INIT,
                         nativeHeapZeroInitialized);
             }
+            proto.write(ApplicationInfoProto.Detail.ALLOW_CROSS_UID_ACTIVITY_SWITCH_FROM_BELOW,
+                    allowCrossUidActivitySwitchFromBelow);
             proto.end(detailToken);
         }
         if (!ArrayUtils.isEmpty(mKnownActivityEmbeddingCerts)) {
@@ -1892,7 +1936,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private final Collator   sCollator = Collator.getInstance();
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-        private PackageManager   mPM;
+        private final PackageManager mPM;
     }
 
     public ApplicationInfo() {
@@ -1935,6 +1979,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         seInfoUser = orig.seInfoUser;
         sharedLibraryFiles = orig.sharedLibraryFiles;
         sharedLibraryInfos = orig.sharedLibraryInfos;
+        optionalSharedLibraryInfos = orig.optionalSharedLibraryInfos;
         dataDir = orig.dataDir;
         deviceProtectedDataDir = orig.deviceProtectedDataDir;
         credentialProtectedDataDir = orig.credentialProtectedDataDir;
@@ -1970,6 +2015,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         nativeHeapZeroInitialized = orig.nativeHeapZeroInitialized;
         requestRawExternalStorageAccess = orig.requestRawExternalStorageAccess;
         localeConfigRes = orig.localeConfigRes;
+        allowCrossUidActivitySwitchFromBelow = orig.allowCrossUidActivitySwitchFromBelow;
         createTimestamp = SystemClock.uptimeMillis();
     }
 
@@ -2027,6 +2073,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString8(seInfoUser);
         dest.writeString8Array(sharedLibraryFiles);
         dest.writeTypedList(sharedLibraryInfos);
+        dest.writeTypedList(optionalSharedLibraryInfos);
         dest.writeString8(dataDir);
         dest.writeString8(deviceProtectedDataDir);
         dest.writeString8(credentialProtectedDataDir);
@@ -2073,6 +2120,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
         }
         dest.writeInt(localeConfigRes);
+        dest.writeInt(allowCrossUidActivitySwitchFromBelow ? 1 : 0);
+
         sForStringSet.parcel(mKnownActivityEmbeddingCerts, dest, flags);
     }
 
@@ -2127,6 +2176,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         seInfoUser = source.readString8();
         sharedLibraryFiles = source.createString8Array();
         sharedLibraryInfos = source.createTypedArrayList(SharedLibraryInfo.CREATOR);
+        optionalSharedLibraryInfos = source.createTypedArrayList(SharedLibraryInfo.CREATOR);
         dataDir = source.readString8();
         deviceProtectedDataDir = source.readString8();
         credentialProtectedDataDir = source.readString8();
@@ -2170,6 +2220,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
         }
         localeConfigRes = source.readInt();
+        allowCrossUidActivitySwitchFromBelow = source.readInt() != 0;
+
         mKnownActivityEmbeddingCerts = sForStringSet.unparcel(source);
         if (mKnownActivityEmbeddingCerts.isEmpty()) {
             mKnownActivityEmbeddingCerts = null;
@@ -2187,6 +2239,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @return Returns a CharSequence containing the application's description.
      * If there is no description, null is returned.
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public CharSequence loadDescription(PackageManager pm) {
         if (descriptionRes != 0) {
             CharSequence label = pm.getText(packageName, descriptionRes, this);
@@ -2222,6 +2275,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Environment.class)
     public void initForUser(int userId) {
         uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
 
@@ -2414,6 +2468,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     @Override
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public Drawable loadDefaultIcon(PackageManager pm) {
         if ((flags & FLAG_EXTERNAL_STORAGE) != 0
                 && isPackageUnavailable(pm)) {
@@ -2424,6 +2479,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = PackageManager.class)
     private boolean isPackageUnavailable(PackageManager pm) {
         try {
             return pm.getPackageInfo(packageName, 0) == null;
@@ -2608,6 +2664,17 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /**
+     * Checks if a changeId is enabled for the current user
+     * @param changeId The changeId to verify
+     * @return True of the changeId is enabled
+     * @hide
+     */
+    public boolean isChangeEnabled(long changeId) {
+        return CompatChanges.isChangeEnabled(changeId, packageName,
+                UserHandle.getUserHandleForUid(uid));
+    }
+
+    /**
      * @return whether the app has requested exemption from the foreground service restrictions.
      * This does not take any affect for now.
      * @hide
@@ -2633,7 +2700,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @hide
      */
-    @Override protected ApplicationInfo getApplicationInfo() {
+    @Override public ApplicationInfo getApplicationInfo() {
         return this;
     }
 
@@ -2754,6 +2821,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *  list will only be set if the {@link PackageManager#GET_SHARED_LIBRARY_FILES
      *  PackageManager.GET_SHARED_LIBRARY_FILES} flag was used when retrieving the structure.
      *
+     *  NOTE: the list also contains the result of {@link #getOptionalSharedLibraryInfos}.
+     *
      * @hide
      */
     @NonNull
@@ -2763,6 +2832,23 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             return Collections.EMPTY_LIST;
         }
         return sharedLibraryInfos;
+    }
+
+    /**
+     *  List of all shared libraries this application is optionally linked against. This
+     *  list will only be set if the {@link PackageManager#GET_SHARED_LIBRARY_FILES
+     *  PackageManager.GET_SHARED_LIBRARY_FILES} flag was used when retrieving the structure.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_SDK_LIB_INDEPENDENCE)
+    public List<SharedLibraryInfo> getOptionalSharedLibraryInfos() {
+        if (optionalSharedLibraryInfos == null) {
+            return Collections.EMPTY_LIST;
+        }
+        return optionalSharedLibraryInfos;
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
@@ -65,10 +66,10 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.notification.ConversationIconFactory;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -336,10 +337,11 @@ public class NotificationConversationInfo extends LinearLayout implements
         Drawable person =  mIconFactory.getBaseIconDrawable(mShortcutInfo);
         if (person == null) {
             person = mContext.getDrawable(R.drawable.ic_person).mutate();
-            TypedArray ta = mContext.obtainStyledAttributes(new int[]{android.R.attr.colorAccent});
-            int colorAccent = ta.getColor(0, 0);
+            TypedArray ta = mContext.obtainStyledAttributes(
+                    new int[]{com.android.internal.R.attr.materialColorPrimary});
+            int colorPrimary = ta.getColor(0, 0);
             ta.recycle();
-            person.setTint(colorAccent);
+            person.setTint(colorPrimary);
         }
         ImageView image = findViewById(R.id.conversation_icon);
         image.setImageDrawable(person);
@@ -352,18 +354,15 @@ public class NotificationConversationInfo extends LinearLayout implements
     }
 
     private void bindPackage() {
-        ApplicationInfo info;
-        try {
-            info = mPm.getApplicationInfo(
-                    mPackageName,
-                    PackageManager.MATCH_UNINSTALLED_PACKAGES
-                            | PackageManager.MATCH_DISABLED_COMPONENTS
-                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                            | PackageManager.MATCH_DIRECT_BOOT_AWARE);
-            if (info != null) {
+        // filled in if missing during notification inflation, which must have happened if
+        // we have a notification to long press on
+        ApplicationInfo info =
+                mSbn.getNotification().extras.getParcelable(EXTRA_BUILDER_APPLICATION_INFO,
+                        ApplicationInfo.class);
+        if (info != null) {
+            try {
                 mAppName = String.valueOf(mPm.getApplicationLabel(info));
-            }
-        } catch (PackageManager.NameNotFoundException e) {
+            } catch (Exception ignored) {}
         }
         ((TextView) findViewById(R.id.pkg_name)).setText(mAppName);
     }

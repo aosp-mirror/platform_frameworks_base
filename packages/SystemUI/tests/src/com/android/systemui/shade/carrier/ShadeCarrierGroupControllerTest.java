@@ -29,6 +29,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -45,14 +46,24 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.CarrierTextManager;
+import com.android.systemui.log.core.FakeLogBuffer;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
+import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
+import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
+import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger;
+import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
+import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.ShadeCarrierGroupMobileIconViewModel;
 import com.android.systemui.util.CarrierConfigTracker;
+import com.android.systemui.util.kotlin.FlowProviderKt;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.systemui.utils.os.FakeHandler;
+
+import kotlinx.coroutines.flow.MutableStateFlow;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +71,10 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -94,7 +109,23 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
     private ShadeCarrier mShadeCarrier3;
     private TestableLooper mTestableLooper;
     @Mock
-    private ShadeCarrierGroupController.OnSingleCarrierChangedListener mOnSingleCarrierChangedListener;
+    private ShadeCarrierGroupController.OnSingleCarrierChangedListener
+            mOnSingleCarrierChangedListener;
+    @Mock
+    private MobileUiAdapter mMobileUiAdapter;
+    @Mock
+    private MobileIconsViewModel mMobileIconsViewModel;
+    @Mock
+    private ShadeCarrierGroupMobileIconViewModel mShadeCarrierGroupMobileIconViewModel;
+    @Mock
+    private MobileViewLogger mMobileViewLogger;
+    @Mock
+    private MobileContextProvider mMobileContextProvider;
+    @Mock
+    private StatusBarPipelineFlags mStatusBarPipelineFlags;
+
+    private final MutableStateFlow<Boolean> mIsVisibleFlow =
+            FlowProviderKt.getMutableStateFlow(true);
 
     private FakeSlotIndexResolver mSlotIndexResolver;
     private ClickListenerTextView mNoCarrierTextView;
@@ -133,14 +164,35 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
 
         mSlotIndexResolver = new FakeSlotIndexResolver();
 
+        when(mMobileUiAdapter.getMobileIconsViewModel()).thenReturn(mMobileIconsViewModel);
+
         mShadeCarrierGroupController = new ShadeCarrierGroupController.Builder(
-                mActivityStarter, handler, TestableLooper.get(this).getLooper(),
-                mNetworkController, mCarrierTextControllerBuilder, mContext, mCarrierConfigTracker,
-                mSlotIndexResolver)
+                mActivityStarter,
+                handler,
+                TestableLooper.get(this).getLooper(),
+                new ShadeCarrierGroupControllerLogger(FakeLogBuffer.Factory.Companion.create()),
+                mNetworkController,
+                mCarrierTextControllerBuilder,
+                mContext,
+                mCarrierConfigTracker,
+                mSlotIndexResolver,
+                mMobileUiAdapter,
+                mMobileContextProvider,
+                mStatusBarPipelineFlags
+        )
                 .setShadeCarrierGroup(mShadeCarrierGroup)
                 .build();
 
         mShadeCarrierGroupController.setListening(true);
+    }
+
+    private void setupWithNewPipeline() {
+        when(mStatusBarPipelineFlags.useNewShadeCarrierGroupMobileIcons()).thenReturn(true);
+        when(mMobileContextProvider.getMobileContextForSub(anyInt(), any())).thenReturn(mContext);
+        when(mMobileIconsViewModel.getLogger()).thenReturn(mMobileViewLogger);
+        when(mShadeCarrierGroupMobileIconViewModel.isVisible()).thenReturn(mIsVisibleFlow);
+        when(mMobileIconsViewModel.viewModelForSub(anyInt(), any()))
+                .thenReturn(mShadeCarrierGroupMobileIconViewModel);
     }
 
     @Test
@@ -260,9 +312,10 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 info = new CarrierTextManager.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{""},
-                true,
+                /* anySimReady= */ true,
+                /* isInSatelliteMode= */ false,
                 new int[]{0},
-                true /* airplaneMode */);
+                /* airplaneMode= */ true);
         mCallback.updateCarrierInfo(info);
         mTestableLooper.processAllMessages();
         assertEquals(View.GONE, mShadeCarrierGroup.getNoSimTextView().getVisibility());
@@ -274,12 +327,56 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 info = new CarrierTextManager.CarrierTextCallbackInfo(
                 "",
                 new CharSequence[]{FIRST_CARRIER_NAME, ""},
-                true,
+                /* anySimReady= */ true,
+                /* isInSatelliteMode= */ false,
                 new int[]{0, 1},
-                false /* airplaneMode */);
+                /* airplaneMode= */ false);
         mCallback.updateCarrierInfo(info);
         mTestableLooper.processAllMessages();
         assertEquals(View.VISIBLE, mShadeCarrierGroupController.getShadeCarrierVisibility(0));
+    }
+
+    @Test
+    public void isInSatelliteMode_true_noSimViewShownWithText() {
+        CarrierTextManager.CarrierTextCallbackInfo
+            info = new CarrierTextManager.CarrierTextCallbackInfo(
+            "Satellite Mode Test",
+            new CharSequence[]{FIRST_CARRIER_NAME},
+            /* anySimReady= */ true,
+            /* isInSatelliteMode= */ true,
+            new int[]{1},
+            /* airplaneMode= */ false);
+
+        mCallback.updateCarrierInfo(info);
+        mTestableLooper.processAllMessages();
+
+        assertThat(mShadeCarrierGroup.getNoSimTextView().getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mShadeCarrierGroup.getNoSimTextView().getText()).isEqualTo(
+                "Satellite Mode Test");
+
+        verify(mShadeCarrier1).setVisibility(View.GONE);
+        verify(mShadeCarrier2).setVisibility(View.GONE);
+        verify(mShadeCarrier3).setVisibility(View.GONE);
+    }
+
+    @Test
+    public void isInSatelliteMode_false_normalSimViewsShown() {
+        CarrierTextManager.CarrierTextCallbackInfo
+                info = new CarrierTextManager.CarrierTextCallbackInfo(
+                "Satellite Mode Test",
+                new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
+                /* anySimReady= */ true,
+                /* isInSatelliteMode= */ false,
+                new int[]{0, 1},
+                /* airplaneMode= */ false);
+
+        mCallback.updateCarrierInfo(info);
+        mTestableLooper.processAllMessages();
+
+        assertThat(mShadeCarrierGroup.getNoSimTextView().getVisibility()).isEqualTo(View.GONE);
+
+        verify(mShadeCarrier1).setVisibility(View.VISIBLE);
+        verify(mShadeCarrier2).setVisibility(View.VISIBLE);
     }
 
     @Test
@@ -298,8 +395,7 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 SINGLE_CARRIER_TEXT,
                 new CharSequence[]{SINGLE_CARRIER_TEXT},
                 true,
-                new int[]{0},
-                false /* airplaneMode */);
+                new int[]{0});
 
         mCallback.updateCarrierInfo(info);
         mTestableLooper.processAllMessages();
@@ -317,8 +413,7 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 MULTI_CARRIER_TEXT,
                 new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 true,
-                new int[]{0, 1},
-                false /* airplaneMode */);
+                new int[]{0, 1});
 
         mCallback.updateCarrierInfo(info);
         mTestableLooper.processAllMessages();
@@ -335,16 +430,14 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 SINGLE_CARRIER_TEXT,
                 new CharSequence[]{FIRST_CARRIER_NAME},
                 true,
-                new int[]{0},
-                false /* airplaneMode */);
+                new int[]{0});
 
         CarrierTextManager.CarrierTextCallbackInfo
                 multiCarrierInfo = new CarrierTextManager.CarrierTextCallbackInfo(
                 MULTI_CARRIER_TEXT,
                 new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 true,
-                new int[]{0, 1},
-                false /* airplaneMode */);
+                new int[]{0, 1});
 
         mCallback.updateCarrierInfo(singleCarrierInfo);
         mTestableLooper.processAllMessages();
@@ -369,8 +462,7 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 SINGLE_CARRIER_TEXT,
                 new CharSequence[]{FIRST_CARRIER_NAME},
                 true,
-                new int[]{0},
-                false /* airplaneMode */);
+                new int[]{0});
 
         mCallback.updateCarrierInfo(singleCarrierInfo);
         mTestableLooper.processAllMessages();
@@ -391,8 +483,7 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 MULTI_CARRIER_TEXT,
                 new CharSequence[]{FIRST_CARRIER_NAME, SECOND_CARRIER_NAME},
                 true,
-                new int[]{0, 1},
-                false /* airplaneMode */);
+                new int[]{0, 1});
 
         mCallback.updateCarrierInfo(multiCarrierInfo);
         mTestableLooper.processAllMessages();
@@ -405,6 +496,129 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
 
         verify(mOnSingleCarrierChangedListener, never()).onSingleCarrierChanged(anyBoolean());
     }
+
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    @Test
+    public void testUpdateModernMobileIcons_addSubscription() {
+        setupWithNewPipeline();
+
+        mShadeCarrier1.setVisibility(View.GONE);
+        mShadeCarrier2.setVisibility(View.GONE);
+        mShadeCarrier3.setVisibility(View.GONE);
+
+        List<Integer> subIds = new ArrayList<>();
+        subIds.add(0);
+        mShadeCarrierGroupController.updateModernMobileIcons(subIds);
+
+        verify(mShadeCarrier1).addModernMobileView(any());
+        verify(mShadeCarrier2, never()).addModernMobileView(any());
+        verify(mShadeCarrier3, never()).addModernMobileView(any());
+
+        resetShadeCarriers();
+
+        subIds.add(1);
+        mShadeCarrierGroupController.updateModernMobileIcons(subIds);
+
+        verify(mShadeCarrier1, times(1)).removeModernMobileView();
+
+        verify(mShadeCarrier1).addModernMobileView(any());
+        verify(mShadeCarrier2).addModernMobileView(any());
+        verify(mShadeCarrier3, never()).addModernMobileView(any());
+    }
+
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    @Test
+    public void testUpdateModernMobileIcons_removeSubscription() {
+        setupWithNewPipeline();
+
+        List<Integer> subIds = new ArrayList<>();
+        subIds.add(0);
+        subIds.add(1);
+        mShadeCarrierGroupController.updateModernMobileIcons(subIds);
+
+        verify(mShadeCarrier1).addModernMobileView(any());
+        verify(mShadeCarrier2).addModernMobileView(any());
+        verify(mShadeCarrier3, never()).addModernMobileView(any());
+
+        resetShadeCarriers();
+
+        subIds.remove(1);
+        mShadeCarrierGroupController.updateModernMobileIcons(subIds);
+
+        verify(mShadeCarrier1, times(1)).removeModernMobileView();
+        verify(mShadeCarrier2, times(1)).removeModernMobileView();
+
+        verify(mShadeCarrier1).addModernMobileView(any());
+        verify(mShadeCarrier2, never()).addModernMobileView(any());
+        verify(mShadeCarrier3, never()).addModernMobileView(any());
+    }
+
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    @Test
+    public void testUpdateModernMobileIcons_removeSubscriptionOutOfOrder() {
+        setupWithNewPipeline();
+
+        List<Integer> subIds = new ArrayList<>();
+        subIds.add(0);
+        subIds.add(1);
+        subIds.add(2);
+        mShadeCarrierGroupController.updateModernMobileIcons(subIds);
+
+        verify(mShadeCarrier1).addModernMobileView(any());
+        verify(mShadeCarrier2).addModernMobileView(any());
+        verify(mShadeCarrier3).addModernMobileView(any());
+
+        resetShadeCarriers();
+
+        subIds.remove(1);
+        mShadeCarrierGroupController.updateModernMobileIcons(subIds);
+
+        verify(mShadeCarrier1).removeModernMobileView();
+        verify(mShadeCarrier2).removeModernMobileView();
+        verify(mShadeCarrier3).removeModernMobileView();
+
+        verify(mShadeCarrier1).addModernMobileView(any());
+        verify(mShadeCarrier2, never()).addModernMobileView(any());
+        verify(mShadeCarrier3).addModernMobileView(any());
+    }
+
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    @Test
+    public void testProcessSubIdList_moreSubsThanSimSlots_listLimitedToMax() {
+        setupWithNewPipeline();
+
+        List<Integer> subIds = Arrays.asList(0, 1, 2, 2);
+
+        assertThat(mShadeCarrierGroupController.processSubIdList(subIds).size()).isEqualTo(3);
+    }
+
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    @Test
+    public void testProcessSubIdList_invalidSimSlotIndexFilteredOut() {
+        setupWithNewPipeline();
+
+        List<Integer> subIds = Arrays.asList(0, 1, -1);
+
+        List<ShadeCarrierGroupController.IconData> processedSubs =
+                mShadeCarrierGroupController.processSubIdList(subIds);
+        assertThat(processedSubs).hasSize(2);
+        assertThat(processedSubs.get(0).subId).isNotEqualTo(-1);
+        assertThat(processedSubs.get(1).subId).isNotEqualTo(-1);
+    }
+
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    @Test
+    public void testProcessSubIdList_indexGreaterThanSimSlotsFilteredOut() {
+        setupWithNewPipeline();
+
+        List<Integer> subIds = Arrays.asList(0, 4);
+
+        List<ShadeCarrierGroupController.IconData> processedSubs =
+                mShadeCarrierGroupController.processSubIdList(subIds);
+        assertThat(processedSubs).hasSize(1);
+        assertThat(processedSubs.get(0).subId).isNotEqualTo(4);
+    }
+
 
     @Test
     public void testOnlyInternalViewsHaveClickableListener() {
@@ -445,6 +659,12 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 .postStartActivityDismissingKeyguard(intentCaptor.capture(), anyInt());
         assertThat(intentCaptor.getValue().getAction())
                 .isEqualTo(Settings.ACTION_WIRELESS_SETTINGS);
+    }
+
+    private void resetShadeCarriers() {
+        reset(mShadeCarrier1);
+        reset(mShadeCarrier2);
+        reset(mShadeCarrier3);
     }
 
     private class FakeSlotIndexResolver implements ShadeCarrierGroupController.SlotIndexResolver {

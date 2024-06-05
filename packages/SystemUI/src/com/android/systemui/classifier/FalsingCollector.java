@@ -16,6 +16,7 @@
 
 package com.android.systemui.classifier;
 
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 /**
@@ -29,43 +30,7 @@ public interface FalsingCollector {
     void setShowingAod(boolean showingAod);
 
     /** */
-    void onNotificationStartDraggingDown();
-
-    /** */
-    void onNotificationStopDraggingDown();
-
-    /** */
-    void setNotificationExpanded();
-
-    /** */
-    void onQsDown();
-
-    /** */
     boolean shouldEnforceBouncer();
-
-    /** */
-    void onTrackingStarted(boolean secure);
-
-    /** */
-    void onTrackingStopped();
-
-    /** */
-    void onLeftAffordanceOn();
-
-    /** */
-    void onCameraOn();
-
-    /** */
-    void onAffordanceSwipingStarted(boolean rightCorner);
-
-    /** */
-    void onAffordanceSwipingAborted();
-
-    /** */
-    void onStartExpandingFromPulse();
-
-    /** */
-    void onExpansionFromPulseStopped();
 
     /** */
     void onScreenOnFromTouch();
@@ -74,37 +39,24 @@ public interface FalsingCollector {
     boolean isReportingEnabled();
 
     /** */
-    void onUnlockHintStarted();
-
-    /** */
-    void onCameraHintStarted();
-
-    /** */
-    void onLeftAffordanceHintStarted();
-
-    /** */
     void onScreenTurningOn();
 
     /** */
     void onScreenOff();
 
     /** */
-    void onNotificationStopDismissing();
-
-    /** */
-    void onNotificationDismissed();
-
-    /** */
-    void onNotificationStartDismissing();
-
-    /** */
-    void onNotificationDoubleTap(boolean accepted, float dx, float dy);
-
-    /** */
     void onBouncerShown();
 
     /** */
     void onBouncerHidden();
+
+    /**
+     * Call this to record a KeyEvent in the {@link com.android.systemui.plugins.FalsingManager}.
+     *
+     * This may decide to only collect certain KeyEvents and ignore others. Do not assume all
+     * KeyEvents are collected.
+     */
+    void onKeyEvent(KeyEvent ev);
 
     /**
      * Call this to record a MotionEvent in the {@link com.android.systemui.plugins.FalsingManager}.
@@ -132,5 +84,8 @@ public interface FalsingCollector {
 
     /** Indicates an a11y action was made. */
     void onA11yAction();
+
+    /** Initialize the class. */
+    void init();
 }
 

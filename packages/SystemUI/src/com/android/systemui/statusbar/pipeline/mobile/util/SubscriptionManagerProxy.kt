@@ -16,15 +16,41 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.util
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 interface SubscriptionManagerProxy {
     fun getDefaultDataSubscriptionId(): Int
+    fun isValidSubscriptionId(subId: Int): Boolean
+    suspend fun getActiveSubscriptionInfo(subId: Int): SubscriptionInfo?
 }
 
 /** Injectable proxy class for [SubscriptionManager]'s static methods */
-class SubscriptionManagerProxyImpl @Inject constructor() : SubscriptionManagerProxy {
+class SubscriptionManagerProxyImpl
+@Inject
+constructor(
+    @Application private val applicationContext: Context,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
+    private val subscriptionManager: SubscriptionManager,
+) : SubscriptionManagerProxy {
     /** The system default data subscription id, or INVALID_SUBSCRIPTION_ID on error */
     override fun getDefaultDataSubscriptionId() = SubscriptionManager.getDefaultDataSubscriptionId()
+
+    override fun isValidSubscriptionId(subId: Int): Boolean {
+        return SubscriptionManager.isValidSubscriptionId(subId)
+    }
+
+    @SuppressLint("MissingPermission")
+    override suspend fun getActiveSubscriptionInfo(subId: Int): SubscriptionInfo? {
+        return withContext(backgroundDispatcher) {
+            subscriptionManager.getActiveSubscriptionInfo(subId)
+        }
+    }
 }

@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.util.lerp
 import androidx.core.math.MathUtils.clamp
+import com.android.egg.flags.Flags.flagFlag
 import java.lang.Float.max
 import kotlin.math.sqrt
 
@@ -69,16 +70,6 @@ fun ZoomedDrawScope.drawUniverse(universe: VisibleUniverse) {
     with(universe) {
         triggerDraw.value // Please recompose when this value changes.
 
-        //        star.drawZoomed(ds, zoom)
-        //        planets.forEach { p ->
-        //            p.drawZoomed(ds, zoom)
-        //            if (p == follow) {
-        //                drawCircle(Color.Red, 20f / zoom, p.pos)
-        //            }
-        //        }
-        //
-        //        ship.drawZoomed(ds, zoom)
-
         constraints.forEach {
             when (it) {
                 is Landing -> drawLanding(it)
@@ -87,13 +78,14 @@ fun ZoomedDrawScope.drawUniverse(universe: VisibleUniverse) {
         }
         drawStar(star)
         entities.forEach {
-            if (it === ship || it === star) return@forEach // draw the ship last
+            if (it === star) return@forEach // don't draw the star as a planet
             when (it) {
-                is Spacecraft -> drawSpacecraft(it)
                 is Spark -> drawSpark(it)
                 is Planet -> drawPlanet(it)
+                else -> Unit // draw these at a different time, or not at all
             }
         }
+        ship.autopilot?.let { drawAutopilot(it) }
         drawSpacecraft(ship)
     }
 }
@@ -109,15 +101,6 @@ fun ZoomedDrawScope.drawContainer(container: Container) {
                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f / zoom, 8f / zoom), 0f)
             )
     )
-    //    val path = Path().apply {
-    //        fillType = PathFillType.EvenOdd
-    //        addOval(Rect(center = Vec2.Zero, radius = container.radius))
-    //        addOval(Rect(center = Vec2.Zero, radius = container.radius + 10_000))
-    //    }
-    //    drawPath(
-    //        path = path,
-    //
-    //    )
 }
 
 fun ZoomedDrawScope.drawGravitationalField(planet: Planet) {
@@ -224,23 +207,47 @@ Z
 """
         )
     }
-val thrustPath = createPolygon(-3f, 3).also { it.translate(Vec2(-4f, 0f)) }
+val spaceshipLegs =
+    Path().apply {
+        parseSvgPathData(
+            """
+M-7   -6.5
+l-3.5  0
+l-1   -2
+l 0    4
+l 1   -2
+Z
+M-7    6.5
+l-3.5  0
+l-1   -2
+l 0    4
+l 1   -2
+Z
+"""
+        )
+    }
+val thrustPath = createPolygon(-3f, 3).also { it.translate(Vec2(-5f, 0f)) }
 
 fun ZoomedDrawScope.drawSpacecraft(ship: Spacecraft) {
     with(ship) {
         rotateRad(angle, pivot = pos) {
             translate(pos.x, pos.y) {
-                //                drawPath(
-                //                    path = createStar(200f, 100f, 3),
-                //                    color = Color.White,
-                //                    style = Stroke(width = 2f / zoom)
-                //                )
+                // new in V: little landing legs
+                ship.landing?.let {
+                    drawPath(
+                        path = spaceshipLegs,
+                        color = Color(0xFFCCCCCC),
+                        style = Stroke(width = 2f / this@drawSpacecraft.zoom)
+                    )
+                }
+                // draw the ship
                 drawPath(path = spaceshipPath, color = Colors.Eigengrau) // fauxpaque
                 drawPath(
                     path = spaceshipPath,
                     color = if (transit) Color.Black else Color.White,
                     style = Stroke(width = 2f / this@drawSpacecraft.zoom)
                 )
+                // draw thrust
                 if (thrust != Vec2.Zero) {
                     drawPath(
                         path = thrustPath,
@@ -252,35 +259,32 @@ fun ZoomedDrawScope.drawSpacecraft(ship: Spacecraft) {
                             )
                     )
                 }
-                //                drawRect(
-                //                    topLeft = Offset(-1f, -1f),
-                //                    size = Size(2f, 2f),
-                //                    color = Color.Cyan,
-                //                    style = Stroke(width = 2f / zoom)
-                //                )
-                //                drawLine(
-                //                    start = Vec2.Zero,
-                //                    end = Vec2(20f, 0f),
-                //                    color = Color.Cyan,
-                //                    strokeWidth = 2f / zoom
-                //                )
             }
         }
-        //        // DEBUG: draw velocity vector
-        //        drawLine(
-        //            start = pos,
-        //            end = pos + velocity,
-        //            color = Color.Red,
-        //            strokeWidth = 3f / zoom
-        //        )
         drawTrack(track)
     }
 }
 
 fun ZoomedDrawScope.drawLanding(landing: Landing) {
     val v = landing.planet.pos + Vec2.makeWithAngleMag(landing.angle, landing.planet.radius)
-    drawLine(Color.Red, v + Vec2(-5f, -5f), v + Vec2(5f, 5f), strokeWidth = 1f / zoom)
-    drawLine(Color.Red, v + Vec2(5f, -5f), v + Vec2(-5f, 5f), strokeWidth = 1f / zoom)
+
+    if (flagFlag()) {
+        val strokeWidth = 2f / zoom
+        val height = 80f
+        rotateRad(landing.angle, pivot = v) {
+            translate(v.x, v.y) {
+                val flagPath =
+                    Path().apply {
+                        moveTo(0f, 0f)
+                        lineTo(height, 0f)
+                        lineTo(height * 0.875f, height * 0.25f)
+                        lineTo(height * 0.75f, 0f)
+                        close()
+                    }
+                drawPath(flagPath, Colors.Flag, style = Stroke(width = strokeWidth))
+            }
+        }
+    }
 }
 
 fun ZoomedDrawScope.drawSpark(spark: Spark) {
@@ -294,10 +298,7 @@ fun ZoomedDrawScope.drawSpark(spark: Spark) {
             Spark.Style.DOT -> drawCircle(color, size, pos)
             Spark.Style.DOT_ABSOLUTE -> drawCircle(color, size, pos / zoom)
             Spark.Style.RING -> drawCircle(color, size, pos, style = Stroke(width = 1f / zoom))
-        //                drawPoints(listOf(pos), PointMode.Points, color, strokeWidth = 2f/zoom)
-        //            drawCircle(color, 2f/zoom, pos)
         }
-        //        drawCircle(Color.Gray, center = pos, radius = 1.5f / zoom)
     }
 }
 
@@ -307,19 +308,9 @@ fun ZoomedDrawScope.drawTrack(track: Track) {
             drawPoints(
                 positions,
                 pointMode = PointMode.Lines,
-                color = Color.Green,
+                color = Colors.Track,
                 strokeWidth = 1f / zoom
             )
-            //            if (positions.size < 2) return
-            //            drawPath(Path()
-            //                .apply {
-            //                    val p = positions[positions.size - 1]
-            //                    moveTo(p.x, p.y)
-            //                    positions.reversed().subList(1, positions.size).forEach { p ->
-            //                        lineTo(p.x, p.y)
-            //                    }
-            //                },
-            //                color = Color.Green, style = Stroke(1f/zoom))
         } else {
             if (positions.size < 2) return
             var prev: Vec2 = positions[positions.size - 1]
@@ -330,5 +321,45 @@ fun ZoomedDrawScope.drawTrack(track: Track) {
                 a = clamp((a - 1f / TRACK_LENGTH), 0f, 1f)
             }
         }
+    }
+}
+
+fun ZoomedDrawScope.drawAutopilot(autopilot: Autopilot) {
+    val color = Colors.Autopilot.copy(alpha = 0.5f)
+
+    autopilot.target?.let { target ->
+        val zoom = zoom
+        rotateRad(autopilot.universe.now * PI2f / 10f, target.pos) {
+            translate(target.pos.x, target.pos.y) {
+                drawPath(
+                    path =
+                        createPolygon(
+                            radius = target.radius + autopilot.brakingDistance,
+                            sides = 15 // Autopilot introduced in Android 15
+                        ),
+                    color = color,
+                    style = Stroke(1f / zoom)
+                )
+                drawCircle(
+                    color,
+                    radius = target.radius + autopilot.landingAltitude / 2,
+                    center = Vec2.Zero,
+                    alpha = 0.25f,
+                    style = Stroke(autopilot.landingAltitude)
+                )
+            }
+        }
+        drawLine(
+            color,
+            start = autopilot.ship.pos,
+            end = autopilot.leadingPos,
+            strokeWidth = 1f / zoom
+        )
+        drawCircle(
+            color,
+            radius = 5f / zoom,
+            center = autopilot.leadingPos,
+            style = Stroke(1f / zoom)
+        )
     }
 }

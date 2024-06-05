@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.screenshot
+package com.android.settingslib.spa.screenshot.util
 
+import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -43,7 +44,7 @@ class SettingsScreenshotTestRule(
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     private val screenshotRule =
         ScreenshotTestRule(
-            SettingsGoldenImagePathManager(
+            SettingsGoldenPathManager(
                 getEmulatedDevicePathConfig(emulationSpec),
                 assetsPathRelativeToBuildRoot
             )
@@ -88,4 +89,19 @@ class SettingsScreenshotTestRule(
         val view = (composeRule.onRoot().fetchSemanticsNode().root as ViewRootForTest).view
         screenshotRule.assertBitmapAgainstGolden(view.drawIntoBitmap(), goldenIdentifier, matcher)
     }
+}
+
+/** Create a [SettingsScreenshotTestRule] for settings screenshot tests. */
+fun settingsScreenshotTestRule(
+    emulationSpec: DeviceEmulationSpec,
+): SettingsScreenshotTestRule {
+    val assetPath = if (Build.FINGERPRINT.contains("robolectric")) {
+        "frameworks/base/packages/SettingsLib/Spa/screenshot/robotests/assets"
+    } else {
+        "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
+    }
+    return SettingsScreenshotTestRule(
+        emulationSpec,
+        assetPath
+    )
 }

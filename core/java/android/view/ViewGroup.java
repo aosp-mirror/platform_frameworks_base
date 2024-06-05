@@ -16,7 +16,6 @@
 
 package android.view;
 
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_CONTINUE_ON_SUBTREE;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
@@ -55,7 +54,6 @@ import android.util.Log;
 import android.util.Pools;
 import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowInsetsAnimation.Callback.DispatchMode;
 import android.view.accessibility.AccessibilityEvent;
@@ -73,6 +71,7 @@ import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.translation.TranslationCapability;
 import android.view.translation.TranslationSpec.DataFormat;
 import android.view.translation.ViewTranslationRequest;
+import android.webkit.WebView;
 import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.R;
@@ -717,10 +716,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         mGroupFlags |= FLAG_ANIMATION_DONE;
         mGroupFlags |= FLAG_ANIMATION_CACHE;
         mGroupFlags |= FLAG_ALWAYS_DRAWN_WITH_CACHE;
-
-        if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB) {
-            mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
-        }
+        mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
 
         setDescendantFocusability(FOCUS_BEFORE_DESCENDANTS);
 
@@ -2043,7 +2039,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final float x = event.getXDispatchLocation(pointerIndex);
         final float y = event.getYDispatchLocation(pointerIndex);
         if (isOnScrollbarThumb(x, y) || isDraggingScrollBar()) {
-            return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_ARROW);
+            // Return null here so that it fallbacks to the default PointerIcon for the source
+            // device. For mouse, the default PointerIcon is PointerIcon.TYPE_ARROW.
+            // For stylus, the default PointerIcon is PointerIcon.TYPE_NULL.
+            return null;
         }
         // Check what the child under the pointer says about the pointer.
         final int childrenCount = mChildrenCount;
@@ -2536,7 +2535,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int childrenCount = mChildrenCount;
         if (childrenCount != 0) {
             final float x = event.getXDispatchLocation(0);
-            final float y = event.getXDispatchLocation(0);
+            final float y = event.getYDispatchLocation(0);
 
             final ArrayList<View> preorderedList = buildOrderedChildList();
             final boolean customOrder = preorderedList == null
@@ -2647,10 +2646,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             // Check for interception.
             final boolean intercepted;
-            if (actionMasked == MotionEvent.ACTION_DOWN
-                    || mFirstTouchTarget != null) {
+            ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (actionMasked == MotionEvent.ACTION_DOWN || mFirstTouchTarget != null) {
                 final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
-                if (!disallowIntercept) {
+                final boolean isBackGestureInProgress = (viewRootImpl != null
+                        && viewRootImpl.getOnBackInvokedDispatcher().isBackGestureInProgress());
+                if (!disallowIntercept || isBackGestureInProgress) {
+                    // Allow back to intercept touch
                     intercepted = onInterceptTouchEvent(ev);
                     ev.setAction(action); // restore action in case it was changed
                 } else {
@@ -3592,48 +3594,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
             } catch (IndexOutOfBoundsException e) {
                 childIndex = i;
-                if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.M) {
-                    Log.w(TAG, "Bad getChildDrawingOrder while collecting assist @ "
-                            + i + " of " + childrenCount, e);
-                    // At least one app is failing when we call getChildDrawingOrder
-                    // at this point, so deal semi-gracefully with it by falling back
-                    // on the basic order.
-                    customOrder = false;
-                    if (i > 0) {
-                        // If we failed at the first index, there really isn't
-                        // anything to do -- we will just proceed with the simple
-                        // sequence order.
-                        // Otherwise, we failed in the middle, so need to come up
-                        // with an order for the remaining indices and use that.
-                        // Failed at the first one, easy peasy.
-                        int[] permutation = new int[childrenCount];
-                        SparseBooleanArray usedIndices = new SparseBooleanArray();
-                        // Go back and collected the indices we have done so far.
-                        for (int j = 0; j < i; j++) {
-                            permutation[j] = getChildDrawingOrder(childrenCount, j);
-                            usedIndices.put(permutation[j], true);
-                        }
-                        // Fill in the remaining indices with indices that have not
-                        // yet been used.
-                        int nextIndex = 0;
-                        for (int j = i; j < childrenCount; j++) {
-                            while (usedIndices.get(nextIndex, false)) {
-                                nextIndex++;
-                            }
-                            permutation[j] = nextIndex;
-                            nextIndex++;
-                        }
-                        // Build the final view list.
-                        preorderedList = new ArrayList<>(childrenCount);
-                        for (int j = 0; j < childrenCount; j++) {
-                            final int index = permutation[j];
-                            final View child = mChildren[index];
-                            preorderedList.add(child);
-                        }
-                    }
-                } else {
-                    throw e;
-                }
+                throw e;
             }
             final View child = getAndVerifyPreorderedView(preorderedList, mChildren,
                     childIndex);
@@ -3717,9 +3678,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return afm.shouldIncludeAllChildrenViewsWithAutofillTypeNotNoneInAssistStructure();
     }
 
-    private boolean shouldIncludeAllChildrenViews(AutofillManager afm){
+    private boolean shouldIncludeAllChildrenViews(AutofillManager afm) {
         if (afm == null) return false;
         return afm.shouldIncludeAllChildrenViewInAssistStructure();
+    }
+
+    private boolean shouldAlwaysIncludeWebview(AutofillManager afm) {
+        if (afm == null) return false;
+        return afm.shouldAlwaysIncludeWebviewInAssistStructure();
+    }
+
+    private boolean shouldIncludeInvisibleView(AutofillManager afm) {
+        if (afm == null) return false;
+        return afm.shouldIncludeInvisibleViewInAssistStructure();
     }
 
     /** @hide */
@@ -3738,11 +3709,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     ? mChildren[childIndex] : preorderedList.get(childIndex);
             if ((flags & AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
                     || child.isImportantForAutofill()
+                    || (child instanceof WebView && shouldAlwaysIncludeWebview(afm))
                     || (child.isMatchingAutofillableHeuristics()
                         && !child.isActivityDeniedForAutofillForUnimportantView())
                     || (shouldIncludeAllChildrenViewWithAutofillTypeNotNone(afm)
                         && child.getAutofillType() != AUTOFILL_TYPE_NONE)
-                    || shouldIncludeAllChildrenViews(afm)){
+                    || shouldIncludeAllChildrenViews(afm)
+                    || (shouldIncludeInvisibleView(afm)
+                    && child instanceof ViewGroup && child.getVisibility() != View.VISIBLE)) {
+                // If the child is a ViewGroup object and its visibility is not visible, include
+                // it as part of the assist structure. The children of these invisible ViewGroup
+                // objects are parsed and included in the assist structure. When the Autofill
+                // Provider determines the visibility of these children, it looks at their
+                // visibility as well as their parent's visibility. Omitting invisible parents
+                // will lead to the Autofill Provider incorrectly assuming that these children
+                // of invisible parents are actually visible.
                 list.add(child);
             } else if (child instanceof ViewGroup) {
                 ((ViewGroup) child).populateChildrenForAutofill(list, flags);
@@ -4427,7 +4408,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param drawingPosition the drawing order position.
      * @return the container position of a child for this drawing order position.
      *
-     * @see #getChildDrawingOrder(int, int)}
+     * @see #getChildDrawingOrder(int, int)
      */
     public final int getChildDrawingOrder(int drawingPosition) {
         return getChildDrawingOrder(getChildCount(), drawingPosition);
@@ -7082,12 +7063,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             } else if (childDimension == LayoutParams.MATCH_PARENT) {
                 // Child wants to be our size... find out how big it should
                 // be
-                resultSize = View.sUseZeroUnspecifiedMeasureSpec ? 0 : size;
+                resultSize = size;
                 resultMode = MeasureSpec.UNSPECIFIED;
             } else if (childDimension == LayoutParams.WRAP_CONTENT) {
                 // Child wants to determine its own size.... find out how
                 // big it should be
-                resultSize = View.sUseZeroUnspecifiedMeasureSpec ? 0 : size;
+                resultSize = size;
                 resultMode = MeasureSpec.UNSPECIFIED;
             }
             break;
@@ -7356,6 +7337,126 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (parent != null) {
             parent.subtractObscuredTouchableRegion(touchableRegion, this);
         }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean getChildLocalHitRegion(@NonNull View child, @NonNull Region region,
+            @NonNull Matrix matrix, boolean isHover) {
+        if (!child.hasIdentityMatrix()) {
+            matrix.preConcat(child.getInverseMatrix());
+        }
+
+        final int dx = child.mLeft - mScrollX;
+        final int dy = child.mTop - mScrollY;
+        matrix.preTranslate(-dx, -dy);
+
+        final int width = mRight - mLeft;
+        final int height = mBottom - mTop;
+
+        // Map the bounds of this view into the region's coordinates and clip the region.
+        final RectF rect = mAttachInfo != null ? mAttachInfo.mTmpTransformRect : new RectF();
+        rect.set(0, 0, width, height);
+        matrix.mapRect(rect);
+
+        boolean notEmpty = region.op(Math.round(rect.left), Math.round(rect.top),
+                Math.round(rect.right), Math.round(rect.bottom), Region.Op.INTERSECT);
+
+        if (isHover) {
+            HoverTarget target = mFirstHoverTarget;
+            boolean childIsHit = false;
+            while (target != null) {
+                final HoverTarget next = target.next;
+                if (target.child == child) {
+                    childIsHit = true;
+                    break;
+                }
+                target = next;
+            }
+            if (!childIsHit && mFirstHoverTarget != null) {
+                target = mFirstHoverTarget;
+                final ArrayList<View> preorderedList = buildTouchDispatchChildList();
+                while (notEmpty && target != null) {
+                    final HoverTarget next = target.next;
+                    final View hoveredView = target.child;
+
+                    if (!isOnTop(child, hoveredView, preorderedList)) {
+                        rect.set(hoveredView.mLeft, hoveredView.mTop, hoveredView.mRight,
+                                hoveredView.mBottom);
+                        matrix.mapRect(rect);
+                        notEmpty = region.op(Math.round(rect.left), Math.round(rect.top),
+                                Math.round(rect.right), Math.round(rect.bottom),
+                                Region.Op.DIFFERENCE);
+                    }
+                    target = next;
+                }
+                if (preorderedList != null) {
+                    preorderedList.clear();
+                }
+            }
+        } else {
+            TouchTarget target = mFirstTouchTarget;
+            boolean childIsHit = false;
+            while (target != null) {
+                final TouchTarget next = target.next;
+                if (target.child == child) {
+                    childIsHit = true;
+                    break;
+                }
+                target = next;
+            }
+            if (!childIsHit && mFirstTouchTarget != null) {
+                target = mFirstTouchTarget;
+                final ArrayList<View> preorderedList = buildOrderedChildList();
+                while (notEmpty && target != null) {
+                    final TouchTarget next = target.next;
+                    final View touchedView = target.child;
+
+                    if (!isOnTop(child, touchedView, preorderedList)) {
+                        rect.set(touchedView.mLeft, touchedView.mTop, touchedView.mRight,
+                                touchedView.mBottom);
+                        matrix.mapRect(rect);
+                        notEmpty = region.op(Math.round(rect.left), Math.round(rect.top),
+                                Math.round(rect.right), Math.round(rect.bottom),
+                                Region.Op.DIFFERENCE);
+                    }
+                    target = next;
+                }
+                if (preorderedList != null) {
+                    preorderedList.clear();
+                }
+            }
+        }
+
+        if (notEmpty && mParent != null) {
+            notEmpty = mParent.getChildLocalHitRegion(this, region, matrix, isHover);
+        }
+        return notEmpty;
+    }
+
+    /**
+     * Return true if the given {@code view} is drawn on top of the {@code otherView}.
+     * Both the {@code view} and {@code otherView} must be children of this ViewGroup.
+     * Otherwise, the returned value is meaningless.
+     */
+    private boolean isOnTop(View view, View otherView, ArrayList<View> preorderedList) {
+        final int childrenCount = mChildrenCount;
+        final boolean customOrder = preorderedList == null && isChildrenDrawingOrderEnabled();
+        final View[] children = mChildren;
+        for (int i = childrenCount - 1; i >= 0; i--) {
+            final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+            final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
+            if (child == view) {
+                return true;
+            }
+            if (child == otherView) {
+                return false;
+            }
+        }
+        // Can't find the view and otherView in the children list. Return value is meaningless.
+        return false;
     }
 
     private static void applyOpToRegionByBounds(Region region, View view, Region.Op op) {
@@ -8515,8 +8616,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
 
             final boolean hasRtlSupport = c.getApplicationInfo().hasRtlSupport();
-            final int targetSdkVersion = c.getApplicationInfo().targetSdkVersion;
-            if (targetSdkVersion < JELLY_BEAN_MR1 || !hasRtlSupport) {
+            if (!hasRtlSupport) {
                 mMarginFlags |= RTL_COMPATIBILITY_MODE_MASK;
             }
 

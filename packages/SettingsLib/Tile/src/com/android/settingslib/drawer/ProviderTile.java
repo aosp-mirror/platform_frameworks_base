@@ -75,7 +75,7 @@ public class ProviderTile extends Tile {
             if (infoList != null && !infoList.isEmpty()) {
                 final ProviderInfo providerInfo = infoList.get(0).providerInfo;
                 mComponentInfo = providerInfo;
-                setMetaData(TileUtils.getSwitchDataFromProvider(context, providerInfo.authority,
+                setMetaData(TileUtils.getEntryDataFromProvider(context, providerInfo.authority,
                         mKey));
             } else {
                 Log.e(TAG, "Cannot find package info for "

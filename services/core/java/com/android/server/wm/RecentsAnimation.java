@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -27,7 +28,6 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.wm.ActivityRecord.State.STOPPED;
 import static com.android.server.wm.ActivityRecord.State.STOPPING;
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
@@ -112,16 +112,20 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 mTargetActivityType);
         ActivityRecord targetActivity = getTargetActivity(targetRootTask);
         if (targetActivity != null) {
-            if (targetActivity.isVisibleRequested() || targetActivity.isTopRunningActivity()) {
-                // The activity is ready.
-                return;
-            }
             if (targetActivity.attachedToProcess()) {
+                if (targetActivity.isVisibleRequested() || targetActivity.isTopRunningActivity()) {
+                    // The activity is ready.
+                    return;
+                }
+                if (targetActivity.app.getCurrentProcState() >= PROCESS_STATE_CACHED_ACTIVITY) {
+                    Slog.v(TAG, "Skip preload recents for cached proc " + targetActivity.app);
+                    // The process may be frozen that cannot receive binder call.
+                    return;
+                }
                 // The activity may be relaunched if it cannot handle the current configuration
                 // changes. The activity will be paused state if it is relaunched, otherwise it
                 // keeps the original stopped state.
-                targetActivity.ensureActivityConfiguration(0 /* globalChanges */,
-                        false /* preserveWindow */, true /* ignoreVisibility */);
+                targetActivity.ensureActivityConfiguration(true /* ignoreVisibility */);
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Updated config=%s",
                         targetActivity.getConfiguration());
             }
@@ -156,7 +160,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
 
         // Invisible activity should be stopped. If the recents activity is alive and its doesn't
         // need to relaunch by current configuration, then it may be already in stopped state.
-        if (!targetActivity.isState(STOPPING, STOPPED)) {
+        if (!targetActivity.finishing && targetActivity.isAttached()
+                && !targetActivity.isState(STOPPING, STOPPED)) {
             // Add to stopping instead of stop immediately. So the client has the chance to perform
             // traversal in non-stopped state (ViewRootImpl.mStopped) that would initialize more
             // things (e.g. the measure can be done earlier). The actual stop will be performed when
@@ -255,7 +260,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
 
             // If we updated the launch-behind state, update the visibility of the activities after
             // we fetch the visible tasks to be controlled by the animation
-            mService.mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+            mService.mRootWindowContainer.ensureActivitiesVisible();
 
             ActivityOptions options = null;
             if (eventTime > 0) {
@@ -293,8 +298,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
             // Just to be sure end the launch hint in case the target activity was never launched.
             // However, if we're keeping the activity and making it visible, we can leave it on.
             if (reorderMode != REORDER_KEEP_IN_PLACE) {
-                mService.endLaunchPowerMode(
-                        ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+                mService.endPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
             }
 
             // Once the target is shown, prevent spurious background app switches
@@ -302,7 +306,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 mService.stopAppSwitches();
             }
 
-            mWindowManager.inSurfaceTransaction(() -> {
+            inSurfaceTransaction(() -> {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                         "RecentsAnimation#onAnimationFinished_inSurfaceTransaction");
                 mService.deferWindowLayout();
@@ -375,8 +379,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                         // transition (the target activity will be one of closing apps).
                         if (!controller.shouldDeferCancelWithScreenshot()
                                 && !targetRootTask.isFocusedRootTaskOnDisplay()) {
-                            targetRootTask.ensureActivitiesVisible(null /* starting */,
-                                    0 /* starting */, false /* preserveWindows */);
+                            targetRootTask.ensureActivitiesVisible(null /* starting */);
                         }
                         // Keep target root task in place, nothing changes, so ignore the transition
                         // logic below
@@ -384,7 +387,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                     }
 
                     mWindowManager.prepareAppTransitionNone();
-                    mService.mRootWindowContainer.ensureActivitiesVisible(null, 0, false);
+                    mService.mRootWindowContainer.ensureActivitiesVisible();
                     mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
 
                     // No reason to wait for the pausing activity in this case, as the hiding of
@@ -412,6 +415,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 }
             });
         }
+    }
+
+    // No-op wrapper to keep legacy code.
+    private static void inSurfaceTransaction(Runnable exec) {
+        exec.run();
     }
 
     /** Gives the owner of recents animation higher priority. */

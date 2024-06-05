@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * A virtual touchscreen representing a touch-based display input mechanism on a remote device.
@@ -34,8 +35,9 @@ import android.os.RemoteException;
 @SystemApi
 public class VirtualTouchscreen extends VirtualInputDevice {
     /** @hide */
-    public VirtualTouchscreen(IVirtualDevice virtualDevice, IBinder token) {
-        super(virtualDevice, token);
+    public VirtualTouchscreen(VirtualTouchscreenConfig config,
+            IVirtualDevice virtualDevice, IBinder token) {
+        super(config, virtualDevice, token);
     }
 
     /**
@@ -46,7 +48,10 @@ public class VirtualTouchscreen extends VirtualInputDevice {
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendTouchEvent(@NonNull VirtualTouchEvent event) {
         try {
-            mVirtualDevice.sendTouchEvent(mToken, event);
+            if (!mVirtualDevice.sendTouchEvent(mToken, event)) {
+                Log.w(TAG, "Failed to send touch event to virtual touchscreen "
+                        + mConfig.getInputDeviceName());
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

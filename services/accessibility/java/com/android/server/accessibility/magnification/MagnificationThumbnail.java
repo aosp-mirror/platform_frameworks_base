@@ -56,9 +56,9 @@ public class MagnificationThumbnail {
     private final Handler mHandler;
 
     @VisibleForTesting
-    public final FrameLayout mThumbnailLayout;
+    public FrameLayout mThumbnailLayout;
 
-    private final View mThumbnailView;
+    private View mThumbnailView;
     private int mThumbnailWidth;
     private int mThumbnailHeight;
 
@@ -79,13 +79,18 @@ public class MagnificationThumbnail {
         mWindowManager = windowManager;
         mHandler = handler;
         mWindowBounds =  mWindowManager.getCurrentWindowMetrics().getBounds();
+        mBackgroundParams = createLayoutParams();
+        mThumbnailWidth = 0;
+        mThumbnailHeight = 0;
+        mHandler.post(this::createThumbnailLayout);
+    }
+
+    @MainThread
+    private void createThumbnailLayout() {
         mThumbnailLayout = (FrameLayout) LayoutInflater.from(mContext)
                 .inflate(R.layout.thumbnail_background_view, /* root: */ null);
         mThumbnailView =
                 mThumbnailLayout.findViewById(R.id.accessibility_magnification_thumbnail_view);
-        mBackgroundParams = createLayoutParams();
-        mThumbnailWidth = 0;
-        mThumbnailHeight = 0;
     }
 
     /**
@@ -99,15 +104,17 @@ public class MagnificationThumbnail {
             Log.d(LOG_TAG, "setThumbnailBounds " + currentBounds);
         }
         mHandler.post(() -> {
-            mWindowBounds = currentBounds;
-            setBackgroundBounds();
+            refreshBackgroundBounds(currentBounds);
             if (mVisible) {
                 updateThumbnailMainThread(scale, centerX, centerY);
             }
         });
     }
 
-    private void setBackgroundBounds() {
+    @MainThread
+    private void refreshBackgroundBounds(Rect currentBounds) {
+        mWindowBounds = currentBounds;
+
         Point magnificationBoundary = getMagnificationThumbnailPadding(mContext);
         mThumbnailWidth = (int) (mWindowBounds.width() / BG_ASPECT_RATIO);
         mThumbnailHeight = (int) (mWindowBounds.height() / BG_ASPECT_RATIO);
@@ -117,6 +124,10 @@ public class MagnificationThumbnail {
         mBackgroundParams.height = mThumbnailHeight;
         mBackgroundParams.x = initX;
         mBackgroundParams.y = initY;
+
+        if (mVisible) {
+            mWindowManager.updateViewLayout(mThumbnailLayout, mBackgroundParams);
+        }
     }
 
     @MainThread
@@ -264,21 +275,16 @@ public class MagnificationThumbnail {
             mThumbnailView.setScaleX(scaleDown);
             mThumbnailView.setScaleY(scaleDown);
         }
-        float thumbnailWidth;
-        float thumbnailHeight;
-        if (mThumbnailView.getWidth() == 0 || mThumbnailView.getHeight() == 0) {
-            // if the thumbnail view size is not updated correctly, we just use the cached values.
-            thumbnailWidth = mThumbnailWidth;
-            thumbnailHeight = mThumbnailHeight;
-        } else {
-            thumbnailWidth = mThumbnailView.getWidth();
-            thumbnailHeight = mThumbnailView.getHeight();
-        }
-        if (!Float.isNaN(centerX)) {
+
+        if (!Float.isNaN(centerX)
+                && !Float.isNaN(centerY)
+                && mThumbnailWidth > 0
+                && mThumbnailHeight > 0
+        ) {
             var padding = mThumbnailView.getPaddingTop();
             var ratio = 1f / BG_ASPECT_RATIO;
-            var centerXScaled = centerX * ratio - (thumbnailWidth / 2f + padding);
-            var centerYScaled = centerY * ratio - (thumbnailHeight / 2f + padding);
+            var centerXScaled = centerX * ratio - (mThumbnailWidth / 2f + padding);
+            var centerYScaled = centerY * ratio - (mThumbnailHeight / 2f + padding);
 
             if (DEBUG) {
                 Log.d(

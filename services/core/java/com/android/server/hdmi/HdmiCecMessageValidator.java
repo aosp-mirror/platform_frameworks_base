@@ -99,8 +99,7 @@ public class HdmiCecMessageValidator {
         // Messages related to the physical address.
         PhysicalAddressValidator physicalAddressValidator = new PhysicalAddressValidator();
         addValidationInfo(Constants.MESSAGE_ACTIVE_SOURCE,
-                physicalAddressValidator, ADDR_ALL ^ (ADDR_RECORDER_1 | ADDR_RECORDER_2
-                        | ADDR_AUDIO_SYSTEM | ADDR_RECORDER_3), ADDR_BROADCAST);
+                physicalAddressValidator, ADDR_ALL ^ ADDR_AUDIO_SYSTEM, ADDR_BROADCAST);
         addValidationInfo(Constants.MESSAGE_INACTIVE_SOURCE,
                 physicalAddressValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS,
@@ -199,7 +198,7 @@ public class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_CEC_VERSION,
                 oneByteValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_SET_MENU_LANGUAGE,
-                new AsciiValidator(3), ADDR_NOT_UNREGISTERED, ADDR_BROADCAST);
+                new AsciiValidator(3), ADDR_TV, ADDR_BROADCAST);
 
         ParameterValidator statusRequestValidator = new MinimumOneByteRangeValidator(0x01, 0x03);
         addValidationInfo(Constants.MESSAGE_DECK_CONTROL,
@@ -270,8 +269,7 @@ public class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR,
                 oneByteValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE,
-                new MinimumOneByteRangeValidator(0x00, 0x01),
-                ADDR_NOT_UNREGISTERED, ADDR_ALL);
+                new SingleByteRangeValidator(0x00, 0x01), ADDR_AUDIO_SYSTEM, ADDR_ALL);
         addValidationInfo(Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS,
                 new SingleByteRangeValidator(0x00, 0x01), ADDR_NOT_UNREGISTERED,
                 ADDR_DIRECT);
@@ -717,7 +715,10 @@ public class HdmiCecMessageValidator {
             // Programmed
             int programedInfo = params[offset] & 0x0F;
             if (isValidProgrammedInfo(programedInfo)) {
-                if (programedInfo == 0x09 || programedInfo == 0x0B) {
+                offset = offset + 1;
+                // Duration Available (2 bytes)
+                if ((programedInfo == 0x09 || programedInfo == 0x0B)
+                        && params.length - offset >= 2) {
                     durationAvailable = true;
                 } else {
                     return true;
@@ -727,16 +728,17 @@ public class HdmiCecMessageValidator {
             // Non programmed
             int nonProgramedErrorInfo = params[offset] & 0x0F;
             if (isValidNotProgrammedErrorInfo(nonProgramedErrorInfo)) {
-                if (nonProgramedErrorInfo == 0x0E) {
+                offset = offset + 1;
+                // Duration Available (2 bytes)
+                if (nonProgramedErrorInfo == 0x0E && params.length - offset >= 2) {
                     durationAvailable = true;
                 } else {
                     return true;
                 }
             }
         }
-        offset = offset + 1;
         // Duration Available (2 bytes)
-        if (durationAvailable && params.length - offset >= 2) {
+        if (durationAvailable) {
             return (isValidDurationHours(params[offset]) && isValidMinute(params[offset + 1]));
         }
         return false;

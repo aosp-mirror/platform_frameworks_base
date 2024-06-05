@@ -33,13 +33,13 @@ import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.media.AudioManager;
 import android.media.session.MediaSessionManager;
 import android.os.PowerExemptionManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -50,13 +50,13 @@ import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.settingslib.media.BluetoothMediaDevice;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 
@@ -70,10 +70,9 @@ import org.junit.runner.RunWith;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
 
@@ -99,10 +98,12 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
     private final BroadcastSender mBroadcastSender = mock(BroadcastSender.class);
     private final LocalMediaManager mLocalMediaManager = mock(LocalMediaManager.class);
     private final MediaDevice mBluetoothMediaDevice = mock(BluetoothMediaDevice.class);
-    private final BluetoothDevice mBluetoothDevice = mock(BluetoothDevice.class);
+    private final BluetoothDevice mBluetoothFirstDevice = mock(BluetoothDevice.class);
+    private final BluetoothDevice mBluetoothSecondDevice = mock(BluetoothDevice.class);
     private final CachedBluetoothDevice mCachedBluetoothDevice = mock(CachedBluetoothDevice.class);
     private final CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
-    private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
+    private final DialogTransitionAnimator mDialogTransitionAnimator = mock(
+            DialogTransitionAnimator.class);
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
             NearbyMediaDevicesManager.class);
     private final AudioManager mAudioManager = mock(AudioManager.class);
@@ -123,11 +124,23 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
         when(mLocalBluetoothLeBroadcast.getBroadcastCode()).thenReturn(
                 BROADCAST_CODE_TEST.getBytes(StandardCharsets.UTF_8));
 
-        mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
-                mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
-                mKeyguardManager, mFlags, mUserTracker);
+        mMediaOutputController =
+                new MediaOutputController(
+                        mContext,
+                        TEST_PACKAGE,
+                        mContext.getUser(),
+                        /* token */ null,
+                        mMediaSessionManager,
+                        mLocalBluetoothManager,
+                        mStarter,
+                        mNotifCollection,
+                        mDialogTransitionAnimator,
+                        mNearbyMediaDevicesManager,
+                        mAudioManager,
+                        mPowerExemptionManager,
+                        mKeyguardManager,
+                        mFlags,
+                        mUserTracker);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputBroadcastDialog = new MediaOutputBroadcastDialog(mContext, false,
                 mBroadcastSender, mMediaOutputController);
@@ -143,20 +156,20 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void connectBroadcastWithActiveDevice_noBroadcastMetadata_failToAddSource() {
+    public void startBroadcastWithConnectedDevices_noBroadcastMetadata_failToAddSource() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
         when(mLocalBluetoothLeBroadcast.getLatestBluetoothLeBroadcastMetadata()).thenReturn(null);
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(
                 mLocalBluetoothLeBroadcastAssistant);
 
-        mMediaOutputBroadcastDialog.connectBroadcastWithActiveDevice();
+        mMediaOutputBroadcastDialog.startBroadcastWithConnectedDevices();
 
         verify(mLocalBluetoothLeBroadcastAssistant, never()).addSource(any(), any(), anyBoolean());
     }
 
     @Test
-    public void connectBroadcastWithActiveDevice_noConnectedMediaDevice_failToAddSource() {
+    public void startBroadcastWithConnectedDevices_noConnectedMediaDevice_failToAddSource() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
         when(mLocalBluetoothLeBroadcast.getLatestBluetoothLeBroadcastMetadata()).thenReturn(
@@ -165,13 +178,13 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
                 mLocalBluetoothLeBroadcastAssistant);
         when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(null);
 
-        mMediaOutputBroadcastDialog.connectBroadcastWithActiveDevice();
+        mMediaOutputBroadcastDialog.startBroadcastWithConnectedDevices();
 
         verify(mLocalBluetoothLeBroadcastAssistant, never()).addSource(any(), any(), anyBoolean());
     }
 
     @Test
-    public void connectBroadcastWithActiveDevice_hasBroadcastSource_failToAddSource() {
+    public void startBroadcastWithConnectedDevices_hasBroadcastSource_failToAddSource() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
         when(mLocalBluetoothLeBroadcast.getLatestBluetoothLeBroadcastMetadata()).thenReturn(
@@ -181,19 +194,19 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
         when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mBluetoothMediaDevice);
         when(((BluetoothMediaDevice) mBluetoothMediaDevice).getCachedDevice())
                 .thenReturn(mCachedBluetoothDevice);
-        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothFirstDevice);
         List<BluetoothLeBroadcastReceiveState> sourceList = new ArrayList<>();
         sourceList.add(mBluetoothLeBroadcastReceiveState);
-        when(mLocalBluetoothLeBroadcastAssistant.getAllSources(mBluetoothDevice)).thenReturn(
+        when(mLocalBluetoothLeBroadcastAssistant.getAllSources(mBluetoothFirstDevice)).thenReturn(
                 sourceList);
 
-        mMediaOutputBroadcastDialog.connectBroadcastWithActiveDevice();
+        mMediaOutputBroadcastDialog.startBroadcastWithConnectedDevices();
 
         verify(mLocalBluetoothLeBroadcastAssistant, never()).addSource(any(), any(), anyBoolean());
     }
 
     @Test
-    public void connectBroadcastWithActiveDevice_noBroadcastSource_failToAddSource() {
+    public void startBroadcastWithConnectedDevices_noBroadcastSource_failToAddSource() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(
@@ -204,12 +217,16 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
         when(mBluetoothMediaDevice.isBLEDevice()).thenReturn(true);
         when(((BluetoothMediaDevice) mBluetoothMediaDevice).getCachedDevice()).thenReturn(
                 mCachedBluetoothDevice);
-        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothFirstDevice);
         List<BluetoothLeBroadcastReceiveState> sourceList = new ArrayList<>();
-        when(mLocalBluetoothLeBroadcastAssistant.getAllSources(mBluetoothDevice)).thenReturn(
+        when(mLocalBluetoothLeBroadcastAssistant.getAllSources(mBluetoothFirstDevice)).thenReturn(
                 sourceList);
+        List<BluetoothDevice> connectedDevicesList = new ArrayList<>();
+        connectedDevicesList.add(mBluetoothFirstDevice);
+        when(mLocalBluetoothLeBroadcastAssistant.getConnectedDevices()).thenReturn(
+                connectedDevicesList);
 
-        mMediaOutputBroadcastDialog.connectBroadcastWithActiveDevice();
+        mMediaOutputBroadcastDialog.startBroadcastWithConnectedDevices();
 
         verify(mLocalBluetoothLeBroadcastAssistant, times(1)).addSource(any(), any(), anyBoolean());
     }
@@ -361,4 +378,32 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
 
         assertThat(broadcastErrorMessage.getVisibility()).isEqualTo(View.VISIBLE);
     }
+
+    @Test
+    public void addSourceToAllConnectedDevices() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(
+                mLocalBluetoothLeBroadcastAssistant);
+        when(mLocalBluetoothLeBroadcast.getLatestBluetoothLeBroadcastMetadata()).thenReturn(
+                mBluetoothLeBroadcastMetadata);
+        when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mBluetoothMediaDevice);
+        when(mBluetoothMediaDevice.isBLEDevice()).thenReturn(true);
+        when(((BluetoothMediaDevice) mBluetoothMediaDevice).getCachedDevice())
+                .thenReturn(mCachedBluetoothDevice);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothFirstDevice);
+        List<BluetoothLeBroadcastReceiveState> sourceList = new ArrayList<>();
+        when(mLocalBluetoothLeBroadcastAssistant.getAllSources(mBluetoothFirstDevice)).thenReturn(
+                sourceList);
+        List<BluetoothDevice> connectedDevicesList = new ArrayList<>();
+        connectedDevicesList.add(mBluetoothFirstDevice);
+        connectedDevicesList.add(mBluetoothSecondDevice);
+        when(mLocalBluetoothLeBroadcastAssistant.getConnectedDevices()).thenReturn(
+                connectedDevicesList);
+
+        mMediaOutputBroadcastDialog.startBroadcastWithConnectedDevices();
+
+        verify(mLocalBluetoothLeBroadcastAssistant, times(2)).addSource(any(), any(), anyBoolean());
+    }
+
 }

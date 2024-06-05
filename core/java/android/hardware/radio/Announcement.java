@@ -71,7 +71,7 @@ public final class Announcement implements Parcelable {
         /**
          * An event called whenever a list of active announcements change.
          *
-         * The entire list is sent each time a new announcement appears or any ends broadcasting.
+         * <p>The entire list is sent each time a new announcement appears or any ends broadcasting.
          *
          * @param activeAnnouncements a full list of active announcements
          */

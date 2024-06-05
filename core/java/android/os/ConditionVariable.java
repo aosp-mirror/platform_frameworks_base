@@ -29,6 +29,7 @@ package android.os;
  * This class uses itself as the object to wait on, so if you wait()
  * or notify() on a ConditionVariable, the results are undefined.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ConditionVariable
 {
     private volatile boolean mCondition;

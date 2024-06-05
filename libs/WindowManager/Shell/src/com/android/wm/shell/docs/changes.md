@@ -54,8 +54,8 @@ Specifically, to support calling into a controller from an external process (lik
   extend `ExternalInterfaceBinder` and implement `invalidate()` to ensure it doesn't hold long
   references to the outer controller
 - Make the controller implement `RemoteCallable<T>`, and have all incoming calls use one of
-  the `ExecutorUtils.executeRemoteCallWithTaskPermission()` calls to verify the caller's identity
-  and ensure the call happens on the main shell thread and not the binder thread
+  the `executeRemoteCallWithTaskPermission()` calls to verify the caller's identity and ensure the
+  call happens on the main shell thread and not the binder thread
 - Inject `ShellController` and add the instance of the implementation as external interface
 - In Launcher, update `TouchInteractionService` to pass the interface to `SystemUIProxy`, and then
   call the SystemUIProxy method as needed in that code
@@ -102,5 +102,5 @@ AIDL interfaces and constants.  Currently, all AIDL files, and classes under the
 Launcher uses.
 
 If the new code doesn't fall into those categories, they can be added explicitly in the Shell's
-[Android.bp](frameworks/base/libs/WindowManager/Shell/Android.bp) file under the
+[Android.bp](/libs/WindowManager/Shell/Android.bp) file under the
 `wm_shell_util-sources` filegroup.

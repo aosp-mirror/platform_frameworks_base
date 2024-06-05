@@ -201,6 +201,33 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         verify(taskChangeNotifier, never()).notifyActivityDismissingDockedRootTask();
     }
 
+    /** Verifies that the activity can be destroying after removing task. */
+    @Test
+    public void testRemoveTask() {
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity1.setVisible(false);
+        activity1.finishing = true;
+        activity1.setState(ActivityRecord.State.STOPPING, "test");
+        activity1.addToStopping(false /* scheduleIdle */, false /* idleDelayed */, "test");
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity2.setState(ActivityRecord.State.RESUMED, "test");
+        // The state can happen from ActivityRecord#makeInvisible.
+        activity2.addToStopping(false /* scheduleIdle */, false /* idleDelayed */, "test");
+        mSupervisor.removeTask(activity1.getTask(), true /* killProcess */,
+                true /* removeFromRecents */, "testRemoveTask");
+        mSupervisor.removeTask(activity2.getTask(), true /* killProcess */,
+                true /* removeFromRecents */, "testRemoveTask");
+
+        assertEquals(ActivityRecord.State.DESTROYING, activity2.getState());
+        assertEquals(ActivityRecord.State.STOPPING, activity1.getState());
+        assertTrue(mSupervisor.mStoppingActivities.contains(activity1));
+        // Assume that it is called by scheduleIdle from addToStopping. And because
+        // mStoppingActivities remembers the finishing activity, it can continue to destroy.
+        mSupervisor.processStoppingAndFinishingActivities(null /* launchedActivity */,
+                false /* processPausingActivities */, "test");
+        assertEquals(ActivityRecord.State.DESTROYING, activity1.getState());
+    }
+
     /** Ensures that the calling package name passed to client complies with package visibility. */
     @Test
     public void testFilteredReferred() {
@@ -215,7 +242,8 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         verify(activity).getFilteredReferrer(eq(activity.launchedFromPackage));
 
         activity.deliverNewIntentLocked(ActivityBuilder.DEFAULT_FAKE_UID,
-                new Intent(), null /* intentGrants */, "other.package2");
+                new Intent(), null /* intentGrants */, "other.package2",
+                /* isShareIdentityEnabled */ false, /* userId */ -1, /* recipientAppId */ -1);
         verify(activity).getFilteredReferrer(eq("other.package2"));
     }
 
@@ -296,7 +324,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW).build();
         final ActivityRecord activity1 = new ActivityBuilder(mAtm)
                 .setTask(task1).setUid(ActivityBuilder.DEFAULT_FAKE_UID + 1).build();
-        task1.setResumedActivity(activity1, "test");
+        activity1.setState(ActivityRecord.State.RESUMED, "test");
 
         final ActivityRecord activity2 = new TaskBuilder(mSupervisor)
                 .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
@@ -313,6 +341,20 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         assertEquals(activity1.getUid(), pendingTopUid[0]);
         verify(mAtm).updateOomAdj();
         verify(mAtm).setLastResumedActivityUncheckLocked(any(), eq("test"));
+    }
+
+    @Test
+    public void testUpdateTopResumed_moveToFront() {
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity2.setState(ActivityRecord.State.RESUMED, "test");
+        assertEquals(activity2.app, mAtm.mTopApp);
+        activity1.getTask().moveToFront("test");
+        // If the device is not sleeping, the app should be only set with resumed state.
+        assertEquals(activity2.app, mAtm.mTopApp);
+        activity2.setState(ActivityRecord.State.PAUSED, "test");
+        activity1.setState(ActivityRecord.State.RESUMED, "test");
+        assertEquals(activity1.app, mAtm.mTopApp);
     }
 
     /**

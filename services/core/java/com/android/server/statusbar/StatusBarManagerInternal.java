@@ -18,9 +18,11 @@ package com.android.server.statusbar;
 
 import android.annotation.Nullable;
 import android.app.ITransientNotificationCallback;
+import android.content.ComponentName;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -140,6 +142,20 @@ public interface StatusBarManagerInternal {
     boolean showShutdownUi(boolean isReboot, String requestString);
 
     /**
+     * Notify system UI the immersive prompt should be dismissed as confirmed, and the confirmed
+     * status should be saved without user clicking on the button. This could happen when a user
+     * swipe on the edge with the confirmation prompt showing.
+     */
+    void confirmImmersivePrompt();
+
+    /**
+     * Notify System UI that the system get into or exit immersive mode.
+     * @param rootDisplayAreaId The changed display area Id.
+     * @param isImmersiveMode {@code true} if the display area get into immersive mode.
+     */
+    void immersiveModeChanged(int rootDisplayAreaId, boolean isImmersiveMode);
+
+    /**
      * Show a rotation suggestion that a user may approve to rotate the screen.
      *
      * @param rotation rotation suggestion
@@ -182,10 +198,10 @@ public interface StatusBarManagerInternal {
     void hideToast(String packageName, IBinder token);
 
     /**
-     * @see com.android.internal.statusbar.IStatusBar#requestWindowMagnificationConnection(boolean
+     * @see com.android.internal.statusbar.IStatusBar#requestMagnificationConnection(boolean
      * request)
      */
-    boolean requestWindowMagnificationConnection(boolean request);
+    boolean requestMagnificationConnection(boolean request);
 
     /**
      * @see com.android.internal.statusbar.IStatusBar#setNavigationBarLumaSamplingEnabled(int,
@@ -209,22 +225,50 @@ public interface StatusBarManagerInternal {
     void showRearDisplayDialog(int currentBaseState);
 
     /**
-     * Called when requested to go to fullscreen from the active split app.
+     * Called when requested to go to fullscreen from the focused app.
+     *
+     * @param displayId of the current display.
      */
-    void goToFullscreenFromSplit();
+    void moveFocusedTaskToFullscreen(int displayId);
 
     /**
      * Enters stage split from a current running app.
      *
-     * @see com.android.internal.statusbar.IStatusBar#enterStageSplitFromRunningApp
+     * @see com.android.internal.statusbar.IStatusBar#moveFocusedTaskToStageSplit
      */
-    void enterStageSplitFromRunningApp(boolean leftOrTop);
+    void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop);
+
+    /**
+     * Change the split screen focus to the left / top app or the right / bottom app based on
+     * {@param leftOrTop}.
+     *
+     * @see com.android.internal.statusbar.IStatusBar#setSplitscreenFocus
+     */
+    void setSplitscreenFocus(boolean leftOrTop);
 
     /**
      * Shows the media output switcher dialog.
      *
-     * @param packageName of the session for which the output switcher is shown.
+     * @param targetPackageName of the session for which the output switcher is shown.
      * @see com.android.internal.statusbar.IStatusBar#showMediaOutputSwitcher
      */
-    void showMediaOutputSwitcher(String packageName);
+    void showMediaOutputSwitcher(String targetPackageName, UserHandle targetUserHandle);
+
+    /**
+     * Add a tile to the Quick Settings Panel
+     * @param tile the ComponentName of the {@link android.service.quicksettings.TileService}
+     * @param end if true, the tile will be added at the end. If false, at the beginning.
+     */
+    void addQsTileToFrontOrEnd(ComponentName tile, boolean end);
+
+    /**
+     * Remove the tile from the Quick Settings Panel
+     * @param tile the ComponentName of the {@link android.service.quicksettings.TileService}
+     */
+    void removeQsTile(ComponentName tile);
+
+    /**
+     * Called when requested to enter desktop from a focused app.
+     */
+    void moveFocusedTaskToDesktop(int displayId);
 }

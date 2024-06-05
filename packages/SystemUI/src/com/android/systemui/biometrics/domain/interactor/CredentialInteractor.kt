@@ -7,9 +7,9 @@ import android.os.UserManager
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockscreenCredential
 import com.android.internal.widget.VerifyCredentialResponse
-import com.android.systemui.R
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.res.R
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.delay
@@ -28,6 +28,9 @@ interface CredentialInteractor {
 
     /** Get the effective user id (profile owner, if one exists) */
     fun getCredentialOwnerOrSelfId(userId: Int): Int
+
+    /** Get parent user profile (if exists) */
+    fun getParentProfileIdOrSelfId(userId: Int): Int
 
     /**
      * Verifies a credential and returns a stream of results.
@@ -57,6 +60,9 @@ constructor(
 
     override fun getCredentialOwnerOrSelfId(userId: Int): Int =
         userManager.getCredentialOwnerProfile(userId)
+
+    override fun getParentProfileIdOrSelfId(userId: Int): Int =
+        userManager.getProfileParent(userId)?.id ?: userManager.getCredentialOwnerProfile(userId)
 
     override fun verifyCredential(
         request: BiometricPromptRequest.Credential,

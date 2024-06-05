@@ -94,7 +94,7 @@
         android:name="keyboard_layout_swiss_german"
         android:label="@string/keyboard_layout_swiss_german_label"
         android:keyboardLayout="@raw/keyboard_layout_swiss_german"
-        android:keyboardLocale="de-Latn-CH"
+        android:keyboardLocale="de-Latn-CH,gsw-Latn-CH"
         android:keyboardLayoutType="qwertz" />
 
     <keyboard-layout
@@ -227,13 +227,6 @@
         android:label="@string/keyboard_layout_turkish"
         android:keyboardLayout="@raw/keyboard_layout_turkish"
         android:keyboardLocale="tr-Latn"
-        android:keyboardLayoutType="qwerty" />
-
-    <keyboard-layout
-        android:name="keyboard_layout_turkish"
-        android:label="@string/keyboard_layout_turkish"
-        android:keyboardLayout="@raw/keyboard_layout_turkish"
-        android:keyboardLocale="tr-Latn"
         android:keyboardLayoutType="turkish_q" />
 
     <keyboard-layout
@@ -325,4 +318,32 @@
         android:label="@string/keyboard_layout_georgian"
         android:keyboardLayout="@raw/keyboard_layout_georgian"
         android:keyboardLocale="ka-Geor" />
+
+    <keyboard-layout
+        android:name="keyboard_layout_thai_kedmanee"
+        android:label="@string/keyboard_layout_thai_kedmanee"
+        android:keyboardLayout="@raw/keyboard_layout_thai_kedmanee"
+        android:keyboardLocale="th-Thai"
+        android:keyboardLayoutType="extended" />
+
+    <keyboard-layout
+        android:name="keyboard_layout_thai_pattachote"
+        android:label="@string/keyboard_layout_thai_pattachote"
+        android:keyboardLayout="@raw/keyboard_layout_thai_pattachote"
+        android:keyboardLocale="th-Thai"
+        android:keyboardLayoutType="extended" />
+
+    <keyboard-layout
+        android:name="keyboard_layout_serbian_latin"
+        android:label="@string/keyboard_layout_serbian_latin"
+        android:keyboardLayout="@raw/keyboard_layout_serbian_latin"
+        android:keyboardLocale="sr-Latn-RS"
+        android:keyboardLayoutType="qwertz" />
+
+    <keyboard-layout
+        android:name="keyboard_layout_montenegrin_latin"
+        android:label="@string/keyboard_layout_montenegrin_latin"
+        android:keyboardLayout="@raw/keyboard_layout_serbian_latin"
+        android:keyboardLocale="cnr-Latn-ME"
+        android:keyboardLayoutType="qwertz" />
 </keyboard-layouts>

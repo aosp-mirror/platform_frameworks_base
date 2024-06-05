@@ -30,7 +30,7 @@ import android.view.ViewGroup
 import android.widget.ListPopupWindow
 import android.widget.ListView
 import android.widget.PopupWindow
-import com.android.systemui.R
+import com.android.systemui.res.R
 import kotlin.math.max
 
 class ControlsPopupMenu(context: Context) : ListPopupWindow(context) {

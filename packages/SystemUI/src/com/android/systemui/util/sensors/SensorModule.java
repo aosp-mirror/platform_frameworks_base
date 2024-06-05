@@ -24,18 +24,18 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Dagger module for Sensor related classes.

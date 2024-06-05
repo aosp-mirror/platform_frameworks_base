@@ -1,0 +1,97 @@
+package: "android.location.flags"
+container: "system"
+
+flag {
+    name: "new_geocoder"
+    namespace: "location"
+    description: "Flag for new Geocoder APIs"
+    bug: "229872126"
+}
+
+flag {
+    name: "enable_location_bypass"
+    namespace: "location"
+    description: "Enable location bypass feature"
+    bug: "301150056"
+}
+
+flag {
+    name: "location_bypass"
+    is_exported: true
+    namespace: "location"
+    description: "Enable location bypass appops behavior"
+    bug: "329151785"
+}
+
+flag {
+    name: "fix_service_watcher"
+    namespace: "location"
+    description: "Enable null explicit services in ServiceWatcher"
+    bug: "311210517"
+}
+
+flag {
+    name: "geoid_heights_via_altitude_hal"
+    namespace: "location"
+    description: "Flag for making geoid heights available via the Altitude HAL"
+    bug: "304375846"
+}
+
+flag {
+    name: "gnss_api_navic_l1"
+    namespace: "location"
+    description: "Flag for GNSS API for NavIC L1"
+    bug: "302199306"
+}
+
+flag {
+    name: "gnss_call_stop_before_set_position_mode"
+    namespace: "location"
+    description: "Flag for calling stop() before setPositionMode()"
+    bug: "306874828"
+}
+
+flag {
+    name: "gnss_api_measurement_request_work_source"
+    namespace: "location"
+    description: "Flag for GnssMeasurementRequest WorkSource API"
+    bug: "295235160"
+}
+
+flag {
+    name: "release_supl_connection_on_timeout"
+    namespace: "location"
+    description: "Flag for releasing SUPL connection on timeout"
+    bug: "315024652"
+}
+
+flag {
+    name: "location_validation"
+    namespace: "location"
+    description: "Flag for location validation"
+    bug: "314328533"
+}
+
+flag {
+    name: "replace_future_elapsed_realtime_jni"
+    namespace: "location"
+    description: "Flag for replacing future elapsedRealtime in JNI"
+    bug: "314328533"
+}
+
+flag {
+    name: "subscriptions_changed_listener_thread"
+    namespace: "location"
+    description: "Flag for running onSubscriptionsChangedListener on FgThread"
+    bug: "332451908"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "gnss_configuration_from_resource"
+    namespace: "location"
+    description: "Flag for GNSS configuration from resource"
+    bug: "317734846"
+}

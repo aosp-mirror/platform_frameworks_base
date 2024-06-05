@@ -35,6 +35,8 @@
 #include "effects/GainmapRenderer.h"
 
 #include <SkBlendMode.h>
+#include <SkImage.h>
+#include <SkImageAndroid.h>
 
 namespace android {
 namespace uirenderer {
@@ -183,9 +185,9 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     // drawing into the offscreen surface, so we need to reset it here.
     canvas->resetMatrix();
 
-    auto functorImage = SkImage::MakeFromAHardwareBuffer(mFrameBuffer.get(), kPremul_SkAlphaType,
-                                                         canvas->imageInfo().refColorSpace(),
-                                                         kBottomLeft_GrSurfaceOrigin);
+    auto functorImage = SkImages::DeferredFromAHardwareBuffer(
+        mFrameBuffer.get(), kPremul_SkAlphaType, canvas->imageInfo().refColorSpace(),
+        kBottomLeft_GrSurfaceOrigin);
     canvas->drawImage(functorImage, 0, 0, SkSamplingOptions(), &paint);
     canvas->restore();
 }

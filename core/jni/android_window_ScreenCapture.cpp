@@ -53,7 +53,6 @@ static struct {
     jfieldID displayToken;
     jfieldID width;
     jfieldID height;
-    jfieldID useIdentityTransform;
 } gDisplayCaptureArgsClassInfo;
 
 static struct {
@@ -102,7 +101,8 @@ public:
         }
 
         if (!captureResults.fenceResult.ok() || captureResults.buffer == nullptr) {
-            env->CallVoidMethod(consumer.get(), gConsumerClassInfo.accept, nullptr);
+            env->CallVoidMethod(consumer.get(), gConsumerClassInfo.accept, nullptr,
+                                fenceStatus(captureResults.fenceResult));
             checkAndClearException(env, "accept");
             return binder::Status::ok();
         }
@@ -117,7 +117,8 @@ public:
                                             captureResults.capturedSecureLayers,
                                             captureResults.capturedHdrLayers);
         checkAndClearException(env, "builder");
-        env->CallVoidMethod(consumer.get(), gConsumerClassInfo.accept, screenshotHardwareBuffer);
+        env->CallVoidMethod(consumer.get(), gConsumerClassInfo.accept, screenshotHardwareBuffer,
+                            fenceStatus(captureResults.fenceResult));
         checkAndClearException(env, "accept");
         env->DeleteLocalRef(jhardwareBuffer);
         env->DeleteLocalRef(screenshotHardwareBuffer);
@@ -192,9 +193,6 @@ static DisplayCaptureArgs displayCaptureArgsFromObject(JNIEnv* env,
             env->GetIntField(displayCaptureArgsObject, gDisplayCaptureArgsClassInfo.width);
     captureArgs.height =
             env->GetIntField(displayCaptureArgsObject, gDisplayCaptureArgsClassInfo.height);
-    captureArgs.useIdentityTransform =
-            env->GetBooleanField(displayCaptureArgsObject,
-                                 gDisplayCaptureArgsClassInfo.useIdentityTransform);
     return captureArgs;
 }
 
@@ -213,7 +211,7 @@ static jint nativeCaptureDisplay(JNIEnv* env, jclass clazz, jobject displayCaptu
 }
 
 static jint nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerCaptureArgsObject,
-                                jlong screenCaptureListenerObject) {
+                                jlong screenCaptureListenerObject, jboolean sync) {
     LayerCaptureArgs captureArgs;
     getCaptureArgs(env, layerCaptureArgsObject, captureArgs);
 
@@ -229,7 +227,7 @@ static jint nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerCaptureA
 
     sp<gui::IScreenCaptureListener> captureListener =
             reinterpret_cast<gui::IScreenCaptureListener*>(screenCaptureListenerObject);
-    return ScreenshotClient::captureLayers(captureArgs, captureListener);
+    return ScreenshotClient::captureLayers(captureArgs, captureListener, sync);
 }
 
 static jlong nativeCreateScreenCaptureListener(JNIEnv* env, jclass clazz, jobject consumerObj) {
@@ -283,9 +281,9 @@ static const JNINativeMethod sScreenCaptureMethods[] = {
         // clang-format off
     {"nativeCaptureDisplay", "(Landroid/window/ScreenCapture$DisplayCaptureArgs;J)I",
             (void*)nativeCaptureDisplay },
-    {"nativeCaptureLayers",  "(Landroid/window/ScreenCapture$LayerCaptureArgs;J)I",
+    {"nativeCaptureLayers",  "(Landroid/window/ScreenCapture$LayerCaptureArgs;JZ)I",
             (void*)nativeCaptureLayers },
-    {"nativeCreateScreenCaptureListener", "(Ljava/util/function/Consumer;)J",
+    {"nativeCreateScreenCaptureListener", "(Ljava/util/function/ObjIntConsumer;)J",
             (void*)nativeCreateScreenCaptureListener },
     {"nativeWriteListenerToParcel", "(JLandroid/os/Parcel;)V", (void*)nativeWriteListenerToParcel },
     {"nativeReadListenerFromParcel", "(Landroid/os/Parcel;)J",
@@ -323,8 +321,6 @@ int register_android_window_ScreenCapture(JNIEnv* env) {
             GetFieldIDOrDie(env, displayCaptureArgsClazz, "mWidth", "I");
     gDisplayCaptureArgsClassInfo.height =
             GetFieldIDOrDie(env, displayCaptureArgsClazz, "mHeight", "I");
-    gDisplayCaptureArgsClassInfo.useIdentityTransform =
-            GetFieldIDOrDie(env, displayCaptureArgsClazz, "mUseIdentityTransform", "Z");
 
     jclass layerCaptureArgsClazz =
             FindClassOrDie(env, "android/window/ScreenCapture$LayerCaptureArgs");
@@ -333,8 +329,8 @@ int register_android_window_ScreenCapture(JNIEnv* env) {
     gLayerCaptureArgsClassInfo.childrenOnly =
             GetFieldIDOrDie(env, layerCaptureArgsClazz, "mChildrenOnly", "Z");
 
-    jclass consumer = FindClassOrDie(env, "java/util/function/Consumer");
-    gConsumerClassInfo.accept = GetMethodIDOrDie(env, consumer, "accept", "(Ljava/lang/Object;)V");
+    jclass consumer = FindClassOrDie(env, "java/util/function/ObjIntConsumer");
+    gConsumerClassInfo.accept = GetMethodIDOrDie(env, consumer, "accept", "(Ljava/lang/Object;I)V");
 
     jclass screenshotGraphicsBufferClazz =
             FindClassOrDie(env, "android/window/ScreenCapture$ScreenshotHardwareBuffer");

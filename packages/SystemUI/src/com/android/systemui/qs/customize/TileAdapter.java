@@ -44,7 +44,8 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.FontSizeUtils;
-import com.android.systemui.R;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.qs.QSEditEvent;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.TileLayout;
@@ -54,8 +55,8 @@ import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.dagger.QSThemedContext;
 import com.android.systemui.qs.external.CustomTile;
-import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileViewImpl;
+import com.android.systemui.res.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,12 +119,14 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     private TextView mTempTextView;
     private int mMinTileViewHeight;
+    private final boolean mIsSmallLandscapeLockscreenEnabled;
 
     @Inject
     public TileAdapter(
             @QSThemedContext Context context,
             QSHost qsHost,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            FeatureFlags featureFlags) {
         mContext = context;
         mHost = qsHost;
         mUiEventLogger = uiEventLogger;
@@ -131,7 +134,12 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mDecoration = new TileItemDecoration(context);
         mMarginDecoration = new MarginTileDecoration();
         mMinNumTiles = context.getResources().getInteger(R.integer.quick_settings_min_num_tiles);
-        mNumColumns = context.getResources().getInteger(NUM_COLUMNS_ID);
+        mIsSmallLandscapeLockscreenEnabled =
+                featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE);
+        mNumColumns = useSmallLandscapeLockscreenResources()
+                ? context.getResources().getInteger(
+                        R.integer.small_land_lockscreen_quick_settings_num_columns)
+                : context.getResources().getInteger(NUM_COLUMNS_ID);
         mAccessibilityDelegate = new TileAdapterDelegate();
         mSizeLookup.setSpanIndexCacheEnabled(true);
         mTempTextView = new TextView(context);
@@ -154,13 +162,27 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
      * @return {@code true} if the number of columns changed, {@code false} otherwise
      */
     public boolean updateNumColumns() {
-        int numColumns = mContext.getResources().getInteger(NUM_COLUMNS_ID);
+        int numColumns = useSmallLandscapeLockscreenResources()
+                ? mContext.getResources().getInteger(
+                        R.integer.small_land_lockscreen_quick_settings_num_columns)
+                : mContext.getResources().getInteger(NUM_COLUMNS_ID);
         if (numColumns != mNumColumns) {
             mNumColumns = numColumns;
             return true;
         } else {
             return false;
         }
+    }
+
+    // TODO (b/293252410) remove condition here when flag is launched
+    //  Instead update quick_settings_num_columns and quick_settings_max_rows to be the same as
+    //  the small_land_lockscreen_quick_settings_num_columns or
+    //  small_land_lockscreen_quick_settings_max_rows respectively whenever
+    //  is_small_screen_landscape is true.
+    //  Then, only use quick_settings_num_columns and quick_settings_max_rows.
+    private boolean useSmallLandscapeLockscreenResources() {
+        return mIsSmallLandscapeLockscreenEnabled
+                && mContext.getResources().getBoolean(R.bool.is_small_screen_landscape);
     }
 
     public int getNumColumns() {
@@ -297,7 +319,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         FrameLayout frame = (FrameLayout) inflater.inflate(R.layout.qs_customize_tile_frame, parent,
                 false);
-        View view = new CustomizeTileView(context, new QSIconViewImpl(context));
+        if (com.android.systemui.Flags.qsTileFocusState()) {
+            frame.setClipChildren(false);
+        }
+        View view = new CustomizeTileView(context);
         frame.addView(view);
         return new Holder(frame);
     }
@@ -305,6 +330,14 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     @Override
     public int getItemCount() {
         return mTiles.size();
+    }
+
+    public int getItemCountForAccessibility() {
+        if (mAccessibilityAction == ACTION_MOVE) {
+            return mEditIndex;
+        } else {
+            return getItemCount();
+        }
     }
 
     @Override
@@ -381,6 +414,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         } else if (selectable && mAccessibilityAction == ACTION_MOVE) {
             info.state.contentDescription = mContext.getString(
                     R.string.accessibility_qs_edit_tile_move_to_position, position);
+        } else if (!selectable && (mAccessibilityAction == ACTION_MOVE
+                || mAccessibilityAction == ACTION_ADD)) {
+            info.state.contentDescription = mContext.getString(
+                    R.string.accessibilit_qs_edit_tile_add_move_invalid_position);
         } else {
             info.state.contentDescription = info.state.label;
         }
@@ -399,14 +436,15 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         holder.mTileView.setOnClickListener(null);
         holder.mTileView.setFocusable(true);
         holder.mTileView.setFocusableInTouchMode(true);
+        holder.mTileView.setAccessibilityTraversalBefore(View.NO_ID);
 
         if (mAccessibilityAction != ACTION_NONE) {
             holder.mTileView.setClickable(selectable);
             holder.mTileView.setFocusable(selectable);
             holder.mTileView.setFocusableInTouchMode(selectable);
-            holder.mTileView.setImportantForAccessibility(selectable
-                    ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
-                    : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+//            holder.mTileView.setImportantForAccessibility(selectable
+//                    ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
+//                    : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
             if (selectable) {
                 holder.mTileView.setOnClickListener(new OnClickListener() {
                     @Override
@@ -886,4 +924,5 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         int estimatedTileViewHeight = mTempTextView.getMeasuredHeight() * 2 + padding * 2;
         mMinTileViewHeight = Math.max(minHeight, estimatedTileViewHeight);
     }
+
 }

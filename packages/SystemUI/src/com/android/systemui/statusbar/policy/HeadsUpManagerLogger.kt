@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.policy
 
 import com.android.systemui.log.dagger.NotificationHeadsUpLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.INFO
-import com.android.systemui.log.LogLevel.VERBOSE
+import com.android.systemui.log.core.LogLevel.INFO
+import com.android.systemui.log.core.LogLevel.VERBOSE
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
@@ -58,6 +58,14 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
+    fun logShowNotificationRequest(entry: NotificationEntry) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+        }, {
+            "request: show notification $str1"
+        })
+    }
+
     fun logShowNotification(entry: NotificationEntry) {
         buffer.log(TAG, INFO, {
             str1 = entry.logKey
@@ -66,12 +74,96 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
-    fun logRemoveNotification(key: String, releaseImmediately: Boolean) {
+    fun logAutoRemoveScheduled(entry: NotificationEntry, delayMillis: Long, reason: String) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            long1 = delayMillis
+            str2 = reason
+        }, {
+            "schedule auto remove of $str1 in $long1 ms reason: $str2"
+        })
+    }
+
+    fun logAutoRemoveRequest(entry: NotificationEntry, reason: String) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            str2 = reason
+        }, {
+            "request: reschedule auto remove of $str1 reason: $str2"
+        })
+    }
+
+    fun logAutoRemoveRescheduled(entry: NotificationEntry, delayMillis: Long, reason: String) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            long1 = delayMillis
+            str2 = reason
+        }, {
+            "reschedule auto remove of $str1 in $long1 ms reason: $str2"
+        })
+    }
+
+    fun logAutoRemoveCancelRequest(entry: NotificationEntry, reason: String?) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            str2 = reason ?: "unknown"
+        }, {
+            "request: cancel auto remove of $str1 reason: $str2"
+        })
+    }
+
+    fun logAutoRemoveCanceled(entry: NotificationEntry, reason: String?) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            str2 = reason ?: "unknown"
+        }, {
+            "cancel auto remove of $str1 reason: $str2"
+        })
+    }
+
+    fun logRemoveEntryRequest(key: String, reason: String, isWaiting: Boolean) {
+        buffer.log(TAG, INFO, {
+            str1 = logKey(key)
+            str2 = reason
+            bool1 = isWaiting
+        }, {
+            "request: $str2 => remove entry $str1 isWaiting: $isWaiting"
+        })
+    }
+
+    fun logRemoveEntry(key: String, reason: String, isWaiting: Boolean) {
+        buffer.log(TAG, INFO, {
+            str1 = logKey(key)
+            str2 = reason
+            bool1 = isWaiting
+        }, {
+            "$str2 => remove entry $str1 isWaiting: $isWaiting"
+        })
+    }
+
+    fun logUnpinEntryRequest(key: String) {
+        buffer.log(TAG, INFO, {
+            str1 = logKey(key)
+        }, {
+            "request: unpin entry $str1"
+        })
+    }
+
+    fun logUnpinEntry(key: String) {
+        buffer.log(TAG, INFO, {
+            str1 = logKey(key)
+        }, {
+            "unpin entry $str1"
+        })
+    }
+
+    fun logRemoveNotification(key: String, releaseImmediately: Boolean, isWaiting: Boolean) {
         buffer.log(TAG, INFO, {
             str1 = logKey(key)
             bool1 = releaseImmediately
+            bool2 = isWaiting
         }, {
-            "remove notification $str1 releaseImmediately: $bool1"
+            "remove notification $str1 releaseImmediately: $bool1 isWaiting: $bool2"
         })
     }
 
@@ -80,6 +172,16 @@ class HeadsUpManagerLogger @Inject constructor(
             str1 = entry.logKey
         }, {
             "notification removed $str1 "
+        })
+    }
+
+    fun logUpdateNotificationRequest(key: String, alert: Boolean, hasEntry: Boolean) {
+        buffer.log(TAG, INFO, {
+            str1 = logKey(key)
+            bool1 = alert
+            bool2 = hasEntry
+        }, {
+            "request: update notification $str1 alert: $bool1 hasEntry: $bool2"
         })
     }
 
@@ -93,12 +195,13 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
-    fun logUpdateEntry(entry: NotificationEntry, updatePostTime: Boolean) {
+    fun logUpdateEntry(entry: NotificationEntry, updatePostTime: Boolean, reason: String?) {
         buffer.log(TAG, INFO, {
             str1 = entry.logKey
             bool1 = updatePostTime
+            str2 = reason ?: "unknown"
         }, {
-            "update entry $str1 updatePostTime: $bool1"
+            "update entry $str1 updatePostTime: $bool1 reason: $str2"
         })
     }
 
@@ -110,12 +213,13 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
-    fun logSetEntryPinned(entry: NotificationEntry, isPinned: Boolean) {
+    fun logSetEntryPinned(entry: NotificationEntry, isPinned: Boolean, reason: String) {
         buffer.log(TAG, VERBOSE, {
             str1 = entry.logKey
             bool1 = isPinned
+            str2 = reason
         }, {
-            "set entry pinned $str1 pinned: $bool1"
+            "$str2 => set entry pinned $str1 pinned: $bool1"
         })
     }
 

@@ -15,11 +15,13 @@
 //
 
 package {
+    default_team: "trendy_team_system_ui_please_use_a_more_specific_subteam_if_possible_",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
 android_test {
     name: "AccessibilityMenuServiceTests",
+    use_resource_processor: true,
     certificate: "platform",
     libs: [
         "android.test.runner",
@@ -31,7 +33,8 @@ android_test {
         "androidx.test.ext.junit",
         "compatibility-device-util-axt",
         "platform-test-annotations",
-        "truth-prebuilt",
+        "truth",
+        "uiautomator-helpers",
     ],
     srcs: [
         "src/**/*.java",

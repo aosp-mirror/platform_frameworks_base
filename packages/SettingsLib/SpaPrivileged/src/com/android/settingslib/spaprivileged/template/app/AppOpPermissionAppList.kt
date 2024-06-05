@@ -16,22 +16,18 @@
 
 package com.android.settingslib.spaprivileged.template.app
 
-import android.app.AppOpsManager.MODE_ALLOWED
-import android.app.AppOpsManager.MODE_DEFAULT
-import android.app.AppOpsManager.MODE_ERRORED
+import android.app.AppOpsManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
-import com.android.settingslib.spa.framework.compose.stateOf
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.settingslib.spa.framework.util.asyncMapItem
 import com.android.settingslib.spa.framework.util.filterItem
-import com.android.settingslib.spaprivileged.model.app.AppOpsController
+import com.android.settingslib.spaprivileged.model.app.AppOps
+import com.android.settingslib.spaprivileged.model.app.AppOpsPermissionController
 import com.android.settingslib.spaprivileged.model.app.AppRecord
-import com.android.settingslib.spaprivileged.model.app.IAppOpsController
+import com.android.settingslib.spaprivileged.model.app.IAppOpsPermissionController
 import com.android.settingslib.spaprivileged.model.app.IPackageManagers
 import com.android.settingslib.spaprivileged.model.app.PackageManagers
 import kotlinx.coroutines.flow.Flow
@@ -42,7 +38,7 @@ data class AppOpPermissionRecord(
     override val app: ApplicationInfo,
     val hasRequestBroaderPermission: Boolean,
     val hasRequestPermission: Boolean,
-    var appOpsController: IAppOpsController,
+    var appOpsPermissionController: IAppOpsPermissionController,
 ) : AppRecord
 
 abstract class AppOpPermissionListModel(
@@ -50,8 +46,11 @@ abstract class AppOpPermissionListModel(
     private val packageManagers: IPackageManagers = PackageManagers,
 ) : TogglePermissionAppListModel<AppOpPermissionRecord> {
 
-    abstract val appOp: Int
+    abstract val appOps: AppOps
     abstract val permission: String
+
+    override val enhancedConfirmationKey: String?
+        get() = AppOpsManager.opToPublicName(appOps.op)
 
     /**
      * When set, specifies the broader permission who trumps the [permission].
@@ -68,27 +67,11 @@ abstract class AppOpPermissionListModel(
      */
     open val permissionHasAppOpFlag: Boolean = true
 
-    open val modeForNotAllowed: Int = MODE_ERRORED
-
-    /**
-     * Use AppOpsManager#setUidMode() instead of AppOpsManager#setMode() when set allowed.
-     *
-     * Security or privacy related app-ops should be set with setUidMode() instead of setMode().
-     */
-    open val setModeByUid = false
-
     /** These not changeable packages will also be hidden from app list. */
-    private val notChangeablePackages =
-        setOf("android", "com.android.systemui", context.packageName)
+    private val notChangeablePackages = setOf("com.android.systemui")
 
-    private fun createAppOpsController(app: ApplicationInfo) =
-        AppOpsController(
-            context = context,
-            app = app,
-            op = appOp,
-            setModeByUid = setModeByUid,
-            modeForNotAllowed = modeForNotAllowed,
-        )
+    private fun createAppOpsPermissionController(app: ApplicationInfo) =
+        AppOpsPermissionController(context, app, appOps, permission)
 
     private fun createRecord(
         app: ApplicationInfo,
@@ -97,10 +80,11 @@ abstract class AppOpPermissionListModel(
         with(packageManagers) {
             AppOpPermissionRecord(
                 app = app,
-                hasRequestBroaderPermission =
-                    broaderPermission?.let { app.hasRequestPermission(it) } ?: false,
+                hasRequestBroaderPermission = broaderPermission?.let {
+                    app.hasRequestPermission(it)
+                } ?: false,
                 hasRequestPermission = hasRequestPermission,
-                appOpsController = createAppOpsController(app),
+                appOpsPermissionController = createAppOpsPermissionController(app),
             )
         }
 
@@ -138,24 +122,14 @@ abstract class AppOpPermissionListModel(
      * (This means pre-M gets approval during install time; M apps gets approval during runtime).
      */
     @Composable
-    override fun isAllowed(record: AppOpPermissionRecord): State<Boolean?> {
+    override fun isAllowed(record: AppOpPermissionRecord): () -> Boolean? {
         if (record.hasRequestBroaderPermission) {
             // Broader permission trumps the specific permission.
-            return stateOf(true)
+            return { true }
         }
-
-        val mode = record.appOpsController.mode.observeAsState()
-        return remember {
-            derivedStateOf {
-                when (mode.value) {
-                    null -> null
-                    MODE_ALLOWED -> true
-                    MODE_DEFAULT ->
-                        with(packageManagers) { record.app.hasGrantPermission(permission) }
-                    else -> false
-                }
-            }
-        }
+        val isAllowed by record.appOpsPermissionController.isAllowedFlow
+            .collectAsStateWithLifecycle(initialValue = null)
+        return { isAllowed }
     }
 
     override fun isChangeable(record: AppOpPermissionRecord) =
@@ -164,6 +138,6 @@ abstract class AppOpPermissionListModel(
             record.app.packageName !in notChangeablePackages
 
     override fun setAllowed(record: AppOpPermissionRecord, newAllowed: Boolean) {
-        record.appOpsController.setAllowed(newAllowed)
+        record.appOpsPermissionController.setAllowed(newAllowed)
     }
 }

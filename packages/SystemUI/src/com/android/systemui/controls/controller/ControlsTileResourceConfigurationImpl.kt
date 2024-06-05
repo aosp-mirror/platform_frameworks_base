@@ -16,7 +16,7 @@
 
 package com.android.systemui.controls.controller
 
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 

@@ -63,6 +63,7 @@ class NativeCommandBuffer {
   std::optional<std::pair<char*, char*>> readLine(FailFn fail_fn) {
     char* result = mBuffer + mNext;
     while (true) {
+      // We have scanned up to, but not including mNext for this line's newline.
       if (mNext == mEnd) {
         if (mEnd == MAX_COMMAND_BYTES) {
           return {};
@@ -76,7 +77,7 @@ class NativeCommandBuffer {
             return {};
           }
           fail_fn(CREATE_ERROR("session socket read failed: %s", strerror(errno)));
-        } else if (nread == MAX_COMMAND_BYTES - mEnd) {
+        } else if (nread == static_cast<ssize_t>(MAX_COMMAND_BYTES - mEnd)) {
           // This is pessimistic by one character, but close enough.
           fail_fn("ZygoteCommandBuffer overflowed: command too long");
         }
@@ -89,7 +90,7 @@ class NativeCommandBuffer {
       } else {
         mNext = nl - mBuffer + 1;
         if (--mLinesLeft < 0) {
-          fail_fn("ZygoteCommandBuffer.readLine attempted to read past mEnd of command");
+          fail_fn("ZygoteCommandBuffer.readLine attempted to read past end of command");
         }
         return std::make_pair(result, nl);
       }
@@ -125,8 +126,8 @@ class NativeCommandBuffer {
     mEnd += lineLen + 1;
   }
 
-  // Clear mBuffer, start reading new command, return the number of arguments, leaving mBuffer
-  // positioned at the beginning of first argument. Return 0 on EOF.
+  // Start reading new command, return the number of arguments, leaving mBuffer positioned at the
+  // beginning of first argument. Return 0 on EOF.
   template<class FailFn>
   int getCount(FailFn fail_fn) {
     mLinesLeft = 1;
@@ -136,7 +137,7 @@ class NativeCommandBuffer {
     }
     char* countString = line.value().first;  // Newline terminated.
     long nArgs = atol(countString);
-    if (nArgs <= 0 || nArgs >= MAX_COMMAND_BYTES / 2) {
+    if (nArgs <= 0 || nArgs >= static_cast<long>(MAX_COMMAND_BYTES / 2)) {
       fail_fn(CREATE_ERROR("Unreasonable argument count %ld", nArgs));
     }
     mLinesLeft = nArgs;
@@ -153,7 +154,7 @@ class NativeCommandBuffer {
   // As a side effect, this sets mNiceName to a non-empty string, if possible.
   template<class FailFn>
   bool isSimpleForkCommand(int minUid, FailFn fail_fn) {
-    if (mLinesLeft <= 0 || mLinesLeft  >= MAX_COMMAND_BYTES / 2) {
+    if (mLinesLeft <= 0 || mLinesLeft >= static_cast<int32_t>(MAX_COMMAND_BYTES / 2)) {
       return false;
     }
     static const char* RUNTIME_ARGS = "--runtime-args";
@@ -179,14 +180,14 @@ class NativeCommandBuffer {
       if (!read_result.has_value()) {
         return false;
       }
-      auto [arg_start, arg_end] = read_result.value();
-      if (arg_end - arg_start == RA_LENGTH
-          && strncmp(arg_start, RUNTIME_ARGS, RA_LENGTH) == 0) {
+      const auto [arg_start, arg_end] = read_result.value();
+      if (static_cast<size_t>(arg_end - arg_start) == RA_LENGTH &&
+          strncmp(arg_start, RUNTIME_ARGS, RA_LENGTH) == 0) {
         saw_runtime_args = true;
         continue;
       }
-      if (arg_end - arg_start >= NN_LENGTH
-          && strncmp(arg_start, NICE_NAME, NN_LENGTH) == 0) {
+      if (static_cast<size_t>(arg_end - arg_start) >= NN_LENGTH &&
+          strncmp(arg_start, NICE_NAME, NN_LENGTH) == 0) {
         size_t name_len = arg_end - (arg_start + NN_LENGTH);
         size_t copy_len = std::min(name_len, NICE_NAME_BYTES - 1);
         memcpy(mNiceName, arg_start + NN_LENGTH, copy_len);
@@ -196,21 +197,21 @@ class NativeCommandBuffer {
         }
         continue;
       }
-      if (arg_end - arg_start == IW_LENGTH
-          && strncmp(arg_start, INVOKE_WITH, IW_LENGTH) == 0) {
+      if (static_cast<size_t>(arg_end - arg_start) == IW_LENGTH &&
+          strncmp(arg_start, INVOKE_WITH, IW_LENGTH) == 0) {
         // This also removes the need for invoke-with security checks here.
         return false;
       }
-      if (arg_end - arg_start == CZ_LENGTH
-          && strncmp(arg_start, CHILD_ZYGOTE, CZ_LENGTH) == 0) {
+      if (static_cast<size_t>(arg_end - arg_start) == CZ_LENGTH &&
+          strncmp(arg_start, CHILD_ZYGOTE, CZ_LENGTH) == 0) {
         return false;
       }
-      if (arg_end - arg_start >= CA_LENGTH
-          && strncmp(arg_start, CAPABILITIES, CA_LENGTH) == 0) {
+      if (static_cast<size_t>(arg_end - arg_start) >= CA_LENGTH &&
+          strncmp(arg_start, CAPABILITIES, CA_LENGTH) == 0) {
         return false;
       }
-      if (arg_end - arg_start >= SU_LENGTH
-          && strncmp(arg_start, SETUID, SU_LENGTH) == 0) {
+      if (static_cast<size_t>(arg_end - arg_start) >= SU_LENGTH &&
+          strncmp(arg_start, SETUID, SU_LENGTH) == 0) {
         int uid = digitsVal(arg_start + SU_LENGTH, arg_end);
         if (uid < minUid) {
           return false;
@@ -218,8 +219,8 @@ class NativeCommandBuffer {
         saw_setuid = true;
         continue;
       }
-      if (arg_end - arg_start >= SG_LENGTH
-          && strncmp(arg_start, SETGID, SG_LENGTH) == 0) {
+      if (static_cast<size_t>(arg_end - arg_start) >= SG_LENGTH &&
+          strncmp(arg_start, SETGID, SG_LENGTH) == 0) {
         int gid = digitsVal(arg_start + SG_LENGTH, arg_end);
         if (gid == -1) {
           return false;
@@ -353,6 +354,18 @@ jstring com_android_internal_os_ZygoteCommandBuffer_nativeNextArg(JNIEnv* env, j
   return result;
 }
 
+static uid_t getSocketPeerUid(int socket, const std::function<void(const std::string&)>& fail_fn) {
+  struct ucred credentials;
+  socklen_t cred_size = sizeof credentials;
+  if (getsockopt(socket, SOL_SOCKET, SO_PEERCRED, &credentials, &cred_size) == -1
+      || cred_size != sizeof credentials) {
+    fail_fn(CREATE_ERROR("Failed to get socket credentials, %s",
+                         strerror(errno)));
+  }
+
+  return credentials.uid;
+}
+
 // Read all lines from the current command into the buffer, and then reset the buffer, so
 // we will start reading again at the beginning of the command, starting with the argument
 // count. And we don't need access to the fd to do so.
@@ -412,19 +425,12 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
     fail_fn_z("Failed to retrieve session socket timeout");
   }
 
-  struct ucred credentials;
-  socklen_t cred_size = sizeof credentials;
-  if (getsockopt(n_buffer->getFd(), SOL_SOCKET, SO_PEERCRED, &credentials, &cred_size) == -1
-      || cred_size != sizeof credentials) {
-    fail_fn_1(CREATE_ERROR("ForkRepeatedly failed to get initial credentials, %s",
-                           strerror(errno)));
+  uid_t peerUid = getSocketPeerUid(session_socket, fail_fn_1);
+  if (peerUid != static_cast<uid_t>(expected_uid)) {
+    return JNI_FALSE;
   }
-
   bool first_time = true;
   do {
-    if (credentials.uid != expected_uid) {
-      return JNI_FALSE;
-    }
     n_buffer->readAllLines(first_time ? fail_fn_1 : fail_fn_n);
     n_buffer->reset();
     int pid = zygote::forkApp(env, /* no pipe FDs */ -1, -1, session_socket_fds,
@@ -451,33 +457,62 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
             (CREATE_ERROR("Write unexpectedly returned short: %d < 5", res));
       }
     }
-    // Clear buffer and get count from next command.
-    n_buffer->clear();
     for (;;) {
+      bool valid_session_socket = true;
+      // Clear buffer and get count from next command.
+      n_buffer->clear();
       // Poll isn't strictly necessary for now. But without it, disconnect is hard to detect.
       int poll_res = TEMP_FAILURE_RETRY(poll(fd_structs, 2, -1 /* infinite timeout */));
+      if (poll_res < 0) {
+        fail_fn_z(CREATE_ERROR("Poll failed: %d: %s", errno, strerror(errno)));
+      }
       if ((fd_structs[SESSION_IDX].revents & POLLIN) != 0) {
         if (n_buffer->getCount(fail_fn_z) != 0) {
           break;
-        }  // else disconnected;
+        } else {
+          // Session socket was disconnected
+          valid_session_socket = false;
+          close(session_socket);
+        }
       } else if (poll_res == 0 || (fd_structs[ZYGOTE_IDX].revents & POLLIN) == 0) {
         fail_fn_z(
             CREATE_ERROR("Poll returned with no descriptors ready! Poll returned %d", poll_res));
       }
-      // We've now seen either a disconnect or connect request.
-      close(session_socket);
-      int new_fd = TEMP_FAILURE_RETRY(accept(zygote_socket_fd, nullptr, nullptr));
+      int new_fd = -1;
+      do {
+        // We've now seen either a disconnect or connect request.
+        new_fd = TEMP_FAILURE_RETRY(accept(zygote_socket_fd, nullptr, nullptr));
+        if (new_fd == -1) {
+          fail_fn_z(CREATE_ERROR("Accept(%d) failed: %s", zygote_socket_fd, strerror(errno)));
+        }
+        uid_t newPeerUid = getSocketPeerUid(new_fd, fail_fn_1);
+        if (newPeerUid != static_cast<uid_t>(expected_uid)) {
+          ALOGW("Dropping new connection with a mismatched uid %d\n", newPeerUid);
+          close(new_fd);
+          new_fd = -1;
+        } else {
+          // If we still have a valid session socket, close it now
+          if (valid_session_socket) {
+              close(session_socket);
+          }
+          valid_session_socket = true;
+        }
+      } while (!valid_session_socket);
+
+      // At this point we either have a valid new connection (new_fd > 0), or
+      // an existing session socket we can poll on
       if (new_fd == -1) {
-        fail_fn_z(CREATE_ERROR("Accept(%d) failed: %s", zygote_socket_fd, strerror(errno)));
+        // The new connection wasn't valid, and we still have an old one; retry polling
+        continue;
       }
       if (new_fd != session_socket) {
-          // Move new_fd back to the old value, so that we don't have to change Java-level data
-          // structures to reflect a change. This implicitly closes the old one.
-          if (TEMP_FAILURE_RETRY(dup2(new_fd, session_socket)) != session_socket) {
-            fail_fn_z(CREATE_ERROR("Failed to move fd %d to %d: %s",
-                                   new_fd, session_socket, strerror(errno)));
-          }
-          close(new_fd);  //  On Linux, fd is closed even if EINTR is returned.
+        // Move new_fd back to the old value, so that we don't have to change Java-level data
+        // structures to reflect a change. This implicitly closes the old one.
+        if (TEMP_FAILURE_RETRY(dup2(new_fd, session_socket)) != session_socket) {
+          fail_fn_z(CREATE_ERROR("Failed to move fd %d to %d: %s",
+                                 new_fd, session_socket, strerror(errno)));
+        }
+        close(new_fd);  //  On Linux, fd is closed even if EINTR is returned.
       }
       // If we ever return, we effectively reuse the old Java ZygoteConnection.
       // None of its state needs to change.
@@ -488,13 +523,6 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
       if (setsockopt(session_socket, SOL_SOCKET, SO_SNDTIMEO, &timeout, timeout_size) != 0) {
         fail_fn_z(CREATE_ERROR("Failed to set send timeout for socket %d: %s",
                                session_socket, strerror(errno)));
-      }
-      if (getsockopt(session_socket, SOL_SOCKET, SO_PEERCRED, &credentials, &cred_size) == -1) {
-        fail_fn_z(CREATE_ERROR("ForkMany failed to get credentials: %s", strerror(errno)));
-      }
-      if (cred_size != sizeof credentials) {
-        fail_fn_z(CREATE_ERROR("ForkMany credential size = %d, should be %d",
-                               cred_size, static_cast<int>(sizeof credentials)));
       }
     }
     first_time = false;

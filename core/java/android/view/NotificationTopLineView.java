@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.widget.RemoteViews;
 
@@ -106,6 +107,7 @@ public class NotificationTopLineView extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Trace.beginSection("NotificationTopLineView#onMeasure");
         final int givenWidth = MeasureSpec.getSize(widthMeasureSpec);
         final int givenHeight = MeasureSpec.getSize(heightMeasureSpec);
         final boolean wrapHeight = MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST;
@@ -161,6 +163,7 @@ public class NotificationTopLineView extends ViewGroup {
                     .finish();
         }
         setMeasuredDimension(givenWidth, wrapHeight ? maxChildHeight : givenHeight);
+        Trace.endSection();
     }
 
     @Override

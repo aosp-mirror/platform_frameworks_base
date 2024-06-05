@@ -49,7 +49,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.util.List;
 
@@ -157,6 +157,7 @@ public abstract class MediaOutputBaseAdapter extends
         private String mDeviceId;
         private ValueAnimator mCornerAnimator;
         private ValueAnimator mVolumeAnimator;
+        private int mLatestUpdateVolume = -1;
 
         MediaDeviceBaseViewHolder(View view) {
             super(view);
@@ -314,7 +315,11 @@ public abstract class MediaOutputBaseAdapter extends
             mSeekBar.setMaxVolume(device.getMaxVolume());
             final int currentVolume = device.getCurrentVolume();
             if (!mIsDragging) {
-                if (mSeekBar.getVolume() != currentVolume) {
+                if (mSeekBar.getVolume() != currentVolume && (mLatestUpdateVolume == -1
+                        || currentVolume == mLatestUpdateVolume)) {
+                    // Update only if volume of device and value of volume bar doesn't match.
+                    // Check if response volume match with the latest request, to ignore obsolete
+                    // response
                     if (isCurrentSeekbarInvisible && !mIsInitVolumeFirstTime) {
                         updateTitleIcon(currentVolume == 0 ? R.drawable.media_output_icon_volume_off
                                         : R.drawable.media_output_icon_volume,
@@ -330,11 +335,15 @@ public abstract class MediaOutputBaseAdapter extends
                                 updateUnmutedVolumeIcon();
                             }
                             mSeekBar.setVolume(currentVolume);
+                            mLatestUpdateVolume = -1;
                         }
                     }
                 } else if (currentVolume == 0) {
                     mSeekBar.resetVolume();
                     updateMutedVolumeIcon();
+                }
+                if (currentVolume == mLatestUpdateVolume) {
+                    mLatestUpdateVolume = -1;
                 }
             }
             if (mIsInitVolumeFirstTime) {
@@ -360,6 +369,7 @@ public abstract class MediaOutputBaseAdapter extends
                         mStartFromMute = false;
                     }
                     if (progressToVolume != deviceVolume) {
+                        mLatestUpdateVolume = progressToVolume;
                         mController.adjustVolume(device, progressToVolume);
                     }
                 }
@@ -505,11 +515,13 @@ public abstract class MediaOutputBaseAdapter extends
             mSeekBar.setOnTouchListener((v, event) -> false);
             updateIconAreaClickListener((v) -> {
                 if (device.getCurrentVolume() == 0) {
+                    mController.logInteractionUnmuteDevice(device);
                     mSeekBar.setVolume(UNMUTE_DEFAULT_VOLUME);
                     mController.adjustVolume(device, UNMUTE_DEFAULT_VOLUME);
                     updateUnmutedVolumeIcon();
                     mIconAreaLayout.setOnTouchListener(((iconV, event) -> false));
                 } else {
+                    mController.logInteractionMuteDevice(device);
                     mSeekBar.resetVolume();
                     mController.adjustVolume(device, 0);
                     updateMutedVolumeIcon();

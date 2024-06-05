@@ -18,18 +18,19 @@ package com.android.systemui.statusbar.notification.stack
 
 import android.annotation.DimenRes
 import android.service.notification.StatusBarNotification
-import android.testing.AndroidTestingRunner
 import android.view.View.VISIBLE
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
@@ -43,7 +44,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class NotificationStackSizeCalculatorTest : SysuiTestCase() {
 
     @Mock private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
@@ -70,7 +71,8 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 statusBarStateController = sysuiStatusBarStateController,
                 lockscreenShadeTransitionController = lockscreenShadeTransitionController,
                 mediaDataManager = mediaDataManager,
-                testableResources.resources
+                testableResources.resources,
+                    ResourcesSplitShadeStateController()
             )
     }
 

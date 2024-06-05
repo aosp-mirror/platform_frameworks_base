@@ -9,9 +9,10 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.graphics.drawable.VectorDrawable
 import android.net.Uri
+import android.util.Size
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import java.io.ByteArrayInputStream
@@ -78,9 +79,16 @@ class ImageLoaderTest : SysuiTestCase() {
         }
 
     @Test
-    fun invalidIcon_returnsNull() =
+    fun invalidIcon_loadDrawable_returnsNull() =
         testScope.runTest {
             assertThat(imageLoader.loadDrawable(Icon.createWithFilePath("this is broken"))).isNull()
+        }
+
+    @Test
+    fun invalidIcon_loadSize_returnsNull() =
+        testScope.runTest {
+            assertThat(imageLoader.loadSize(Icon.createWithFilePath("this is broken"), context))
+                .isNull()
         }
 
     @Test
@@ -172,6 +180,17 @@ class ImageLoaderTest : SysuiTestCase() {
         }
 
     @Test
+    fun validBitmapIcon_loadSize_returnsNull() =
+        testScope.runTest {
+            val bitmap =
+                BitmapFactory.decodeResource(
+                    context.resources,
+                    R.drawable.dessert_zombiegingerbread
+                )
+            assertThat(imageLoader.loadSize(Icon.createWithBitmap(bitmap), context)).isNull()
+        }
+
+    @Test
     fun validUriIcon_returnsBitmapDrawable() =
         testScope.runTest {
             val bitmap =
@@ -183,6 +202,17 @@ class ImageLoaderTest : SysuiTestCase() {
                 "android.resource://${context.packageName}/${R.drawable.dessert_zombiegingerbread}"
             val loadedDrawable = imageLoader.loadDrawable(Icon.createWithContentUri(Uri.parse(uri)))
             assertBitmapEqualToDrawable(loadedDrawable, bitmap)
+        }
+
+    @Test
+    fun validUriIcon_returnsSize() =
+        testScope.runTest {
+            val drawable = context.resources.getDrawable(R.drawable.dessert_zombiegingerbread)
+            val uri =
+                "android.resource://${context.packageName}/${R.drawable.dessert_zombiegingerbread}"
+            val loadedSize =
+                imageLoader.loadSize(Icon.createWithContentUri(Uri.parse(uri)), context)
+            assertSizeEqualToDrawableSize(loadedSize, drawable)
         }
 
     @Test
@@ -205,6 +235,54 @@ class ImageLoaderTest : SysuiTestCase() {
         }
 
     @Test
+    fun validDataIcon_loadSize_returnsNull() =
+        testScope.runTest {
+            val bitmap =
+                BitmapFactory.decodeResource(
+                    context.resources,
+                    R.drawable.dessert_zombiegingerbread
+                )
+            val bos =
+                ByteArrayOutputStream(
+                    bitmap.byteCount * 2
+                ) // Compressed bitmap should be smaller than its source.
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos)
+
+            val array = bos.toByteArray()
+            assertThat(imageLoader.loadSize(Icon.createWithData(array, 0, array.size), context))
+                .isNull()
+        }
+
+    @Test
+    fun validResourceIcon_returnsBitmapDrawable() =
+        testScope.runTest {
+            val bitmap = context.resources.getDrawable(R.drawable.dessert_zombiegingerbread)
+            val loadedDrawable =
+                imageLoader.loadDrawable(
+                    Icon.createWithResource(
+                        "com.android.systemui.tests",
+                        R.drawable.dessert_zombiegingerbread
+                    )
+                )
+            assertBitmapEqualToDrawable(loadedDrawable, (bitmap as BitmapDrawable).bitmap)
+        }
+
+    @Test
+    fun validResourceIcon_loadSize_returnsNull() =
+        testScope.runTest {
+            assertThat(
+                    imageLoader.loadSize(
+                        Icon.createWithResource(
+                            "com.android.systemui.tests",
+                            R.drawable.dessert_zombiegingerbread
+                        ),
+                        context
+                    )
+                )
+                .isNull()
+        }
+
+    @Test
     fun validSystemResourceIcon_returnsBitmapDrawable() =
         testScope.runTest {
             val bitmap =
@@ -214,6 +292,18 @@ class ImageLoaderTest : SysuiTestCase() {
                     Icon.createWithResource("android", android.R.drawable.ic_dialog_alert)
                 )
             assertBitmapEqualToDrawable(loadedDrawable, (bitmap as BitmapDrawable).bitmap)
+        }
+
+    @Test
+    fun validSystemResourceIcon_loadSize_returnsNull() =
+        testScope.runTest {
+            assertThat(
+                    imageLoader.loadSize(
+                        Icon.createWithResource("android", android.R.drawable.ic_dialog_alert),
+                        context
+                    )
+                )
+                .isNull()
         }
 
     @Test
@@ -227,6 +317,20 @@ class ImageLoaderTest : SysuiTestCase() {
                     )
                 )
             assertThat(loadedDrawable).isNull()
+        }
+
+    @Test
+    fun invalidDifferentPackageResourceIcon_loadSize_returnsNull() =
+        testScope.runTest {
+            assertThat(
+                    imageLoader.loadDrawable(
+                        Icon.createWithResource(
+                            "noooope.wrong.package",
+                            R.drawable.dessert_zombiegingerbread
+                        )
+                    )
+                )
+                .isNull()
         }
 
     @Test
@@ -342,5 +446,11 @@ class ImageLoaderTest : SysuiTestCase() {
         assertThat(actual).isNotNull()
         assertThat(actual?.width).isEqualTo(expected.width)
         assertThat(actual?.height).isEqualTo(expected.height)
+    }
+
+    private fun assertSizeEqualToDrawableSize(actual: Size?, expected: Drawable) {
+        assertThat(actual).isNotNull()
+        assertThat(actual?.width).isEqualTo(expected.intrinsicWidth)
+        assertThat(actual?.height).isEqualTo(expected.intrinsicHeight)
     }
 }

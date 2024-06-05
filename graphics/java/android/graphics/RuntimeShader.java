@@ -49,11 +49,11 @@ import libcore.util.NativeAllocationRegistry;
  *  possible antialiasing logic for border pixels).</li>
  *  <li>Logic for the {@link Shader}, {@link ColorFilter}, and {@link BlendMode} on the
  *  {@link Paint}.</li>
- *  <li>Color space conversion code, as part of Android’s color management.</li>
+ *  <li>Color space conversion code, as part of Android's color management.</li>
  * </ul>
  *
  * <p>A {@link RuntimeShader}, like other {@link Shader} types, effectively contributes a function
- * to the GPU’s fragment shader.</p>
+ * to the GPU's fragment shader.</p>
  *
  * <h3>AGSL Shader Execution</h3>
  * <p>Just like a GLSL shader, an AGSL shader begins execution in a main function. Unlike GLSL, the
@@ -78,10 +78,10 @@ import libcore.util.NativeAllocationRegistry;
  * {@link ColorSpace} for an AGSL shader is defined to be the color space of the destination, which
  * in most cases is determined by {@link Window#setColorMode(int)}.</p>
  *
- * <p>When authoring an AGSL shader, you won’t know what the working color space is. For many
+ * <p>When authoring an AGSL shader, you won't know what the working color space is. For many
  * effects, this is fine because by default color inputs are automatically converted into the
  * working color space. For certain effects, it may be important to do some math in a fixed, known
- * color space. A common example is lighting – to get physically accurate lighting, math should be
+ * color space. A common example is lighting - to get physically accurate lighting, math should be
  * done in a linear color space. To help with this, AGSL provides two intrinsic functions that
  * convert colors between the working color space and the
  * {@link ColorSpace.Named#LINEAR_EXTENDED_SRGB} color space:
@@ -93,7 +93,7 @@ import libcore.util.NativeAllocationRegistry;
  * <h3>AGSL and Premultiplied Alpha</h3>
  * <p>When dealing with transparent colors, there are two (common) possible representations:
  * straight (unassociated) alpha and premultiplied (associated) alpha. In ASGL the color returned
- * by the main function is expected to be premultiplied.  AGSL’s use of premultiplied alpha
+ * by the main function is expected to be premultiplied.  AGSL's use of premultiplied alpha
  * implies:
  * </p>
  *
@@ -101,7 +101,7 @@ import libcore.util.NativeAllocationRegistry;
  *  <li>If your AGSL shader will return transparent colors, be sure to multiply the RGB by A.  The
  *  resulting color should be [R*A, G*A, B*A, A], not [R, G, B, A].</li>
  *  <li>For more complex shaders, you must understand which of your colors are premultiplied vs.
- *  straight. Many operations don’t make sense if you mix both kinds of color together.</li>
+ *  straight. Many operations don't make sense if you mix both kinds of color together.</li>
  * </ul>
  *
  * <h3>Uniforms</h3>
@@ -224,7 +224,7 @@ import libcore.util.NativeAllocationRegistry;
  * shader uniform is undefined if it is declared in the AGSL shader but not initialized.</p>
  *
  * <p>Although most {@link BitmapShader}s contain colors that should be color managed, some contain
- * data that isn’t actually colors. This includes bitmaps storing normals, material properties
+ * data that isn't actually colors. This includes bitmaps storing normals, material properties
  * (e.g. roughness), heightmaps, or any other purely mathematical data that happens to be stored in
  * a bitmap. When using these kinds of shaders in AGSL, you probably want to initialize them with
  * {@link #setInputBuffer(String, BitmapShader)}. Shaders initialized this way work much like
@@ -237,7 +237,7 @@ import libcore.util.NativeAllocationRegistry;
  *
  * <p>In addition, when sampling from a {@link BitmapShader} be aware that the shader does not use
  * normalized coordinates (like a texture in GLSL). It uses (0, 0) in the upper-left corner, and
- * (width, height) in the bottom-right corner. Normally, this is exactly what you want. If you’re
+ * (width, height) in the bottom-right corner. Normally, this is exactly what you want. If you're
  * evaluating the shader with coordinates based on the ones passed to your AGSL program, the scale
  * is correct. However, if you want to adjust those coordinates (to do some kind of re-mapping of
  * the bitmap), remember that the coordinates are local to the canvas.</p>

@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
@@ -34,6 +35,9 @@ import android.graphics.Rect;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioPresentation;
 import android.media.PlaybackParams;
+import android.media.tv.ad.TvAdManager;
+import android.media.tv.flags.Flags;
+import android.media.tv.interactive.TvInteractiveAppService;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -762,6 +766,34 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Informs the application that the video freeze state has been updated.
+         *
+         * <p>When {@code true}, the video is frozen on the last frame but audio playback remains
+         * active.
+         *
+         * @param isFrozen Whether or not the video is frozen
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void notifyVideoFreezeUpdated(boolean isFrozen) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "notifyVideoFreezeUpdated");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onVideoFreezeUpdated(isFrozen);
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "error in notifyVideoFreezeUpdated", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Sends an updated list of all audio presentations available from a Next Generation Audio
          * service. This is used by the framework to maintain the audio presentation information for
          * a given track of {@link TvTrackInfo#TYPE_AUDIO}, which in turn is used by
@@ -1230,6 +1262,37 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Sends data related to this session to corresponding linked
+         * {@link android.media.tv.ad.TvAdService} object via TvAdView.
+         *
+         * <p>Methods like {@link #notifyBroadcastInfoResponse(BroadcastInfoResponse)} sends the
+         * related data to linked {@link android.media.tv.interactive.TvInteractiveAppService}, but
+         * don't work for {@link android.media.tv.ad.TvAdService}. The method is used specifically
+         * for {@link android.media.tv.ad.TvAdService} use cases.
+         *
+         * @param type data type
+         * @param data the related data values
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
+        public void sendTvInputSessionData(
+                @NonNull @TvInputManager.SessionDataType String type, @NonNull Bundle data) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "sendTvInputSessionData");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTvInputSessionData(type, data);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in sendTvInputSessionData", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Assigns a size and position to the surface passed in {@link #onSetSurface}. The position
          * is relative to the overlay view that sits on top of this surface.
          *
@@ -1370,6 +1433,20 @@ public abstract class TvInputService extends Service {
          * @param buffer The {@link AdBuffer} that became ready for playback.
          */
         public void onAdBufferReady(@NonNull AdBuffer buffer) {
+        }
+
+
+        /**
+         * Called when data from the linked {@link android.media.tv.ad.TvAdService} is received.
+         *
+         * @param type the type of the data
+         * @param data a bundle contains the data received
+         * @see android.media.tv.ad.TvAdService.Session#sendTvAdSessionData(String, Bundle)
+         * @see android.media.tv.ad.TvAdView#setTvView(TvView)
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
+        public void onTvAdSessionData(
+                @NonNull @TvAdManager.SessionDataType String type, @NonNull Bundle data) {
         }
 
         /**
@@ -1528,6 +1605,43 @@ public abstract class TvInputService extends Service {
          */
         public void onTvMessage(@TvInputManager.TvMessageType int type,
                 @NonNull Bundle data) {
+        }
+
+        /**
+         * Called when the application requests playback of the Audio, Video, and CC streams to be
+         * stopped, but the metadata should continue to be filtered.
+         *
+         * <p>The metadata that will continue to be filtered includes the PSI
+         * (Program specific information) and SI (Service Information), part of ISO/IEC 13818-1.
+         *
+         * <p> Note that this is different form {@link #timeShiftPause()} as should release the
+         * stream, making it impossible to resume from this position again.
+         * @param mode
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onStopPlayback(@TvInteractiveAppService.PlaybackCommandStopMode int mode) {
+        }
+
+        /**
+         * Resumes playback of the Audio, Video, and CC streams.
+         *
+         * <p> Note that this is different form {@link #timeShiftResume()} as this is intended to be
+         * used after stopping playback. This is used to resume playback from the current position
+         * in the live broadcast.
+         */
+        @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+        public void onResumePlayback() {
+        }
+
+        /**
+         * Called when a request to freeze the video is received from the TV app. The audio should
+         * continue playback while the video is frozen.
+         *
+         * <p> This should freeze the video to the last frame when the state is set to {@code true}.
+         * @param isFrozen whether or not the video should be frozen.
+         * @hide
+         */
+        public void onSetVideoFrozen(boolean isFrozen) {
         }
 
         /**
@@ -1993,6 +2107,27 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Calls {@link #onStopPlayback(int)}.
+         */
+        void stopPlayback(int mode) {
+            onStopPlayback(mode);
+        }
+
+        /**
+         * Calls {@link #onResumePlayback()}.
+         */
+        void resumePlayback() {
+            onResumePlayback();
+        }
+
+        /**
+         * Calls {@link #onSetVideoFrozen(boolean)}.
+         */
+        void setVideoFrozen(boolean isFrozen) {
+            onSetVideoFrozen(isFrozen);
+        }
+
+        /**
          * Calls {@link #onTimeShiftPlay(Uri)}.
          */
         void timeShiftPlay(Uri recordedProgramUri) {
@@ -2077,6 +2212,10 @@ public abstract class TvInputService extends Service {
 
         void notifyAdBufferReady(AdBuffer buffer) {
             onAdBufferReady(buffer);
+        }
+
+        void notifyTvAdSessionData(String type, Bundle data) {
+            onTvAdSessionData(type, data);
         }
 
         void onTvMessageReceived(int type, Bundle data) {

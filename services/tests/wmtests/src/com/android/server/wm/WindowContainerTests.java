@@ -64,10 +64,19 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.clearInvocations;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Binder;
+import android.os.DeadObjectException;
+import android.os.IBinder;
+import android.os.IInterface;
+import android.os.Parcel;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.platform.test.annotations.Presubmit;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
@@ -87,8 +96,10 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.NoSuchElementException;
 
 
 /**
@@ -282,6 +293,7 @@ public class WindowContainerTests extends WindowTestsBase {
     public void testRemoveImmediatelyClearsLeash() {
         final AnimationAdapter animAdapter = mock(AnimationAdapter.class);
         final WindowToken token = createTestWindowToken(TYPE_APPLICATION_OVERLAY, mDisplayContent);
+        mWm.mAnimator.ready();
         final SurfaceControl.Transaction t = token.getPendingTransaction();
         token.startAnimation(t, animAdapter, false /* hidden */,
                 SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
@@ -289,9 +301,14 @@ public class WindowContainerTests extends WindowTestsBase {
                 ArgumentCaptor.forClass(SurfaceControl.class);
         verify(animAdapter).startAnimation(leashCaptor.capture(), eq(t), anyInt(), any());
         assertTrue(token.mSurfaceAnimator.hasLeash());
+        waitUntilWindowAnimatorIdle();
+        verify(mDisplayContent).enableHighFrameRate(true);
+
         token.removeImmediately();
         assertFalse(token.mSurfaceAnimator.hasLeash());
         verify(t).remove(eq(leashCaptor.getValue()));
+        waitUntilWindowAnimatorIdle();
+        verify(mDisplayContent).enableHighFrameRate(false);
     }
 
     @Test
@@ -548,36 +565,17 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testGetOrientation_childSpecified() {
-        testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_LANDSCAPE,
-                SCREEN_ORIENTATION_LANDSCAPE);
-        testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_UNSET,
-                SCREEN_ORIENTATION_UNSPECIFIED);
-    }
-
-    private void testGetOrientation_childSpecifiedConfig(boolean childVisible, int childOrientation,
-            int expectedOrientation) {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
-        final TestWindowContainer root = builder.setLayer(0).build();
+        final TestWindowContainer root = builder.build();
         root.setFillsParent(true);
+        assertEquals(SCREEN_ORIENTATION_UNSET, root.getOrientation());
 
-        builder.setIsVisible(childVisible);
+        final TestWindowContainer child = root.addChildWindow();
+        child.setFillsParent(true);
+        assertEquals(SCREEN_ORIENTATION_UNSET, root.getOrientation());
 
-        if (childOrientation != SCREEN_ORIENTATION_UNSET) {
-            builder.setOrientation(childOrientation);
-        }
-
-        final TestWindowContainer child1 = root.addChildWindow(builder);
-        child1.setFillsParent(true);
-
-        assertEquals(expectedOrientation, root.getOrientation());
-    }
-
-    @Test
-    public void testGetOrientation_Unset() {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
-        final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
-        // Unspecified well because we didn't specify anything...
-        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, root.getOrientation());
+        child.setOverrideOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, root.getOrientation());
     }
 
     @Test
@@ -782,6 +780,7 @@ public class WindowContainerTests extends WindowTestsBase {
         verify(child).onConfigurationChanged(any());
     }
 
+    @SuppressWarnings("SelfComparison")
     @Test
     public void testCompareTo() {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
@@ -1404,7 +1403,7 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAddLocalInsetsSourceProvider() {
+    public void testAddLocalInsetsFrameProvider() {
          /*
                 ___ rootTask _______________________________________________
                |        |                |                                  |
@@ -1435,19 +1434,20 @@ public class WindowContainerTests extends WindowTestsBase {
                 TYPE_BASE_APPLICATION);
         attrs2.setTitle("AppWindow2");
         activity2.addWindow(createWindowState(attrs2, activity2));
+        final Binder owner = new Binder();
         Rect genericOverlayInsetsRect1 = new Rect(0, 200, 1080, 700);
         Rect genericOverlayInsetsRect2 = new Rect(0, 0, 1080, 200);
         final InsetsFrameProvider provider1 =
-                new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
+                new InsetsFrameProvider(owner, 1, WindowInsets.Type.systemOverlays())
                         .setArbitraryRectangle(genericOverlayInsetsRect1);
         final InsetsFrameProvider provider2 =
-                new InsetsFrameProvider(null, 2, WindowInsets.Type.systemOverlays())
+                new InsetsFrameProvider(owner, 2, WindowInsets.Type.systemOverlays())
                         .setArbitraryRectangle(genericOverlayInsetsRect2);
         final int sourceId1 = provider1.getId();
         final int sourceId2 = provider2.getId();
 
-        rootTask.addLocalInsetsFrameProvider(provider1);
-        container.addLocalInsetsFrameProvider(provider2);
+        rootTask.addLocalInsetsFrameProvider(provider1, owner);
+        container.addLocalInsetsFrameProvider(provider2, owner);
 
         InsetsSource genericOverlayInsetsProvider1Source = new InsetsSource(
                 sourceId1, systemOverlays());
@@ -1479,7 +1479,7 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAddLocalInsetsSourceProvider_sameType_replacesInsets() {
+    public void testAddLocalInsetsFrameProvider_sameType_replacesInsets() {
          /*
                 ___ rootTask ________________________________________
                |                  |                                  |
@@ -1494,24 +1494,25 @@ public class WindowContainerTests extends WindowTestsBase {
         attrs.setTitle("AppWindow0");
         activity0.addWindow(createWindowState(attrs, activity0));
 
+        final Binder owner = new Binder();
         final Rect genericOverlayInsetsRect1 = new Rect(0, 200, 1080, 700);
         final Rect genericOverlayInsetsRect2 = new Rect(0, 0, 1080, 200);
         final InsetsFrameProvider provider1 =
-                new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
+                new InsetsFrameProvider(owner, 1, WindowInsets.Type.systemOverlays())
                         .setArbitraryRectangle(genericOverlayInsetsRect1);
         final InsetsFrameProvider provider2 =
-                new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
+                new InsetsFrameProvider(owner, 1, WindowInsets.Type.systemOverlays())
                         .setArbitraryRectangle(genericOverlayInsetsRect2);
         final int sourceId1 = provider1.getId();
         final int sourceId2 = provider2.getId();
 
-        rootTask.addLocalInsetsFrameProvider(provider1);
+        rootTask.addLocalInsetsFrameProvider(provider1, owner);
         activity0.forAllWindows(window -> {
             assertEquals(genericOverlayInsetsRect1,
                     window.getInsetsState().peekSource(sourceId1).getFrame());
         }, true);
 
-        rootTask.addLocalInsetsFrameProvider(provider2);
+        rootTask.addLocalInsetsFrameProvider(provider2, owner);
 
         activity0.forAllWindows(window -> {
             assertEquals(genericOverlayInsetsRect2,
@@ -1520,7 +1521,7 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRemoveLocalInsetsSourceProvider() {
+    public void testRemoveLocalInsetsFrameProvider() {
          /*
                 ___ rootTask _______________________________________________
                |        |                |                                  |
@@ -1554,21 +1555,22 @@ public class WindowContainerTests extends WindowTestsBase {
 
         activity2.addWindow(createWindowState(attrs2, activity2));
 
+        final Binder owner = new Binder();
         final Rect navigationBarInsetsRect1 = new Rect(0, 200, 1080, 700);
         final Rect navigationBarInsetsRect2 = new Rect(0, 0, 1080, 200);
         final InsetsFrameProvider provider1 =
-                new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
+                new InsetsFrameProvider(owner, 1, WindowInsets.Type.systemOverlays())
                         .setArbitraryRectangle(navigationBarInsetsRect1);
         final InsetsFrameProvider provider2 =
-                new InsetsFrameProvider(null, 2, WindowInsets.Type.systemOverlays())
+                new InsetsFrameProvider(owner, 2, WindowInsets.Type.systemOverlays())
                         .setArbitraryRectangle(navigationBarInsetsRect2);
         final int sourceId1 = provider1.getId();
         final int sourceId2 = provider2.getId();
 
-        rootTask.addLocalInsetsFrameProvider(provider1);
-        container.addLocalInsetsFrameProvider(provider2);
+        rootTask.addLocalInsetsFrameProvider(provider1, owner);
+        container.addLocalInsetsFrameProvider(provider2, owner);
         mDisplayContent.getInsetsStateController().onPostLayout();
-        rootTask.removeLocalInsetsFrameProvider(provider1);
+        rootTask.removeLocalInsetsFrameProvider(provider1, owner);
         mDisplayContent.getInsetsStateController().onPostLayout();
 
         activity0.forAllWindows(window -> {
@@ -1591,6 +1593,67 @@ public class WindowContainerTests extends WindowTestsBase {
                     window.getInsetsState().peekSource(sourceId2)
                             .getFrame());
         }, true);
+    }
+
+    @Test
+    public void testAddLocalInsetsFrameProvider_ownerDiesAfterAdding() {
+        final Task task = createTask(mDisplayContent);
+        final TestBinder owner = new TestBinder();
+        final InsetsFrameProvider provider =
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(new Rect());
+        task.addLocalInsetsFrameProvider(provider, owner);
+
+        assertTrue("The death recipient must exist.", owner.hasDeathRecipient());
+        assertTrue("The source must be added.", hasLocalSource(task, provider.getId()));
+
+        // The owner dies after adding the source.
+        owner.die();
+
+        assertFalse("The death recipient must be removed.", owner.hasDeathRecipient());
+        assertFalse("The source must be removed.", hasLocalSource(task, provider.getId()));
+    }
+
+    @Test
+    public void testAddLocalInsetsFrameProvider_ownerDiesBeforeAdding() {
+        final Task task = createTask(mDisplayContent);
+        final TestBinder owner = new TestBinder();
+
+        // The owner dies before adding the source.
+        owner.die();
+
+        final InsetsFrameProvider provider =
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(new Rect());
+        task.addLocalInsetsFrameProvider(provider, owner);
+
+        assertFalse("The death recipient must not exist.", owner.hasDeathRecipient());
+        assertFalse("The source must not be added.", hasLocalSource(task, provider.getId()));
+    }
+
+    @Test
+    public void testRemoveLocalInsetsFrameProvider_removeDeathRecipient() {
+        final Task task = createTask(mDisplayContent);
+        final TestBinder owner = new TestBinder();
+        final InsetsFrameProvider provider =
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(new Rect());
+        task.addLocalInsetsFrameProvider(provider, owner);
+
+        assertTrue("The death recipient must exist.", owner.hasDeathRecipient());
+        assertTrue("The source must be added.", hasLocalSource(task, provider.getId()));
+
+        task.removeLocalInsetsFrameProvider(provider, owner);
+
+        assertFalse("The death recipient must be removed.", owner.hasDeathRecipient());
+        assertFalse("The source must be removed.", hasLocalSource(task, provider.getId()));
+    }
+
+    private static boolean hasLocalSource(WindowContainer container, int sourceId) {
+        if (container.mLocalInsetsSources == null) {
+            return false;
+        }
+        return container.mLocalInsetsSources.contains(sourceId);
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
@@ -1795,6 +1858,84 @@ public class WindowContainerTests extends WindowTestsBase {
         @Override
         public void onVisibleRequestedChanged(boolean isVisibleRequested) {
             mIsVisibleRequested = isVisibleRequested;
+        }
+    }
+
+    private static class TestBinder implements IBinder {
+
+        private boolean mDead;
+        private final ArrayList<IBinder.DeathRecipient> mDeathRecipients = new ArrayList<>();
+
+        public void die() {
+            mDead = true;
+            for (int i = mDeathRecipients.size() - 1; i >= 0; i--) {
+                final DeathRecipient recipient = mDeathRecipients.get(i);
+                recipient.binderDied(this);
+            }
+        }
+
+        public boolean hasDeathRecipient() {
+            return !mDeathRecipients.isEmpty();
+        }
+
+        @Override
+        public void linkToDeath(@NonNull DeathRecipient recipient, int flags)
+                throws RemoteException {
+            if (mDead) {
+                throw new DeadObjectException();
+            }
+            mDeathRecipients.add(recipient);
+        }
+
+        @Override
+        public boolean unlinkToDeath(@NonNull DeathRecipient recipient, int flags) {
+            final boolean successes = mDeathRecipients.remove(recipient);
+            if (successes || mDead) {
+                return successes;
+            }
+            throw new NoSuchElementException("Given recipient has not been registered.");
+        }
+
+        @Override
+        public boolean isBinderAlive() {
+            return !mDead;
+        }
+
+        @Override
+        public boolean pingBinder() {
+            return !mDead;
+        }
+
+        @Nullable
+        @Override
+        public String getInterfaceDescriptor() throws RemoteException {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public IInterface queryLocalInterface(@NonNull String descriptor) {
+            return null;
+        }
+
+        @Override
+        public void dump(@NonNull FileDescriptor fd, @Nullable String[] args)
+                throws RemoteException { }
+
+        @Override
+        public void dumpAsync(@NonNull FileDescriptor fd, @Nullable String[] args)
+                throws RemoteException { }
+
+        @Override
+        public void shellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
+                @Nullable FileDescriptor err, @NonNull String[] args,
+                @Nullable ShellCallback shellCallback,
+                @NonNull ResultReceiver resultReceiver) throws RemoteException { }
+
+        @Override
+        public boolean transact(int code, @NonNull Parcel data, @Nullable Parcel reply, int flags)
+                throws RemoteException {
+            return false;
         }
     }
 }

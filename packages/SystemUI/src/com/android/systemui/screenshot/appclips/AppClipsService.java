@@ -16,6 +16,11 @@
 
 package com.android.systemui.screenshot.appclips;
 
+import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN;
+import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_FAILED;
+import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_SUCCESS;
+import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED;
+
 import static com.android.systemui.flags.Flags.SCREENSHOT_APP_CLIPS;
 
 import android.app.Activity;
@@ -25,103 +30,72 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.Intent.CaptureContentForNoteStatusCodes;
 import android.content.res.Resources;
 import android.os.IBinder;
-import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.infra.AndroidFuture;
-import com.android.internal.infra.ServiceConnector;
 import com.android.internal.statusbar.IAppClipsService;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
 /**
  * A service that communicates with {@link StatusBarManager} to support the
- * {@link StatusBarManager#canLaunchCaptureContentActivityForNote(Activity)} API.
+ * {@link StatusBarManager#canLaunchCaptureContentActivityForNote(Activity)} API. Also used by
+ * {@link AppClipsTrampolineActivity} to query if an app should be allowed to user App Clips.
+ *
+ * <p>Note: This service always runs in the SysUI process running on the system user irrespective of
+ * which user started the service. This is required so that the correct instance of {@link Bubbles}
+ * instance is injected. This is set via attribute {@code android:singleUser=”true”} in
+ * AndroidManifest.
  */
 public class AppClipsService extends Service {
 
-    private static final String TAG = AppClipsService.class.getSimpleName();
+  private static final String TAG = AppClipsService.class.getSimpleName();
 
     @Application private final Context mContext;
     private final FeatureFlags mFeatureFlags;
     private final Optional<Bubbles> mOptionalBubbles;
     private final DevicePolicyManager mDevicePolicyManager;
-    private final UserManager mUserManager;
-
     private final boolean mAreTaskAndTimeIndependentPrerequisitesMet;
-
-    @VisibleForTesting()
-    @Nullable ServiceConnector<IAppClipsService> mProxyConnectorToMainProfile;
 
     @Inject
     public AppClipsService(@Application Context context, FeatureFlags featureFlags,
-            Optional<Bubbles> optionalBubbles, DevicePolicyManager devicePolicyManager,
-            UserManager userManager) {
+            Optional<Bubbles> optionalBubbles, DevicePolicyManager devicePolicyManager) {
         mContext = context;
         mFeatureFlags = featureFlags;
         mOptionalBubbles = optionalBubbles;
         mDevicePolicyManager = devicePolicyManager;
-        mUserManager = userManager;
-
-        // The consumer of this service are apps that call through StatusBarManager API to query if
-        // it can use app clips API. Since these apps can be launched as work profile users, this
-        // service will start as work profile user. SysUI doesn't share injected instances for
-        // different users. This is why the bubbles instance injected will be incorrect. As the apps
-        // don't generally have permission to connect to a service running as different user, we
-        // start a proxy connection to communicate with the main user's version of this service.
-        if (mUserManager.isManagedProfile()) {
-            // No need to check for prerequisites in this case as those are incorrect for work
-            // profile user instance of the service and the main user version of the service will
-            // take care of this check.
-            mAreTaskAndTimeIndependentPrerequisitesMet = false;
-
-            // Get the main user so that we can connect to the main user's version of the service.
-            UserHandle mainUser = mUserManager.getMainUser();
-            if (mainUser == null) {
-                // If main user is not available there isn't much we can do, no apps can use app
-                // clips.
-                return;
-            }
-
-            // Set up the connection to be used later during onBind callback.
-            mProxyConnectorToMainProfile =
-                    new ServiceConnector.Impl<>(
-                            context,
-                            new Intent(context, AppClipsService.class),
-                            Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY
-                                    | Context.BIND_NOT_VISIBLE,
-                            mainUser.getIdentifier(),
-                            IAppClipsService.Stub::asInterface);
-            return;
-        }
 
         mAreTaskAndTimeIndependentPrerequisitesMet = checkIndependentVariables();
-        mProxyConnectorToMainProfile = null;
     }
 
     private boolean checkIndependentVariables() {
         if (!mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)) {
+            Log.d(TAG, "Feature flag disabled");
             return false;
         }
 
         if (mOptionalBubbles.isEmpty()) {
+            Log.d(TAG, "Bubbles not available");
             return false;
         }
 
-        return isComponentValid();
+        if (isComponentValid()) {
+            Log.d(TAG, "checkIndependentVariables returned true");
+            return true;
+        }
+
+        Log.d(TAG, "checkIndependentVariables returned false");
+        return false;
     }
 
     private boolean isComponentValid() {
@@ -130,12 +104,27 @@ public class AppClipsService extends Service {
             componentName = ComponentName.unflattenFromString(
                     mContext.getString(R.string.config_screenshotAppClipsActivityComponent));
         } catch (Resources.NotFoundException e) {
+            Log.d(TAG, "AppClips activity component resource not defined");
             return false;
         }
 
-        return componentName != null
-                && !componentName.getPackageName().isEmpty()
-                && !componentName.getClassName().isEmpty();
+        if (componentName == null) {
+            Log.d(TAG, "AppClips component name not defined");
+            return false;
+        }
+
+        if (componentName.getPackageName().isEmpty()) {
+            Log.d(TAG, "AppClips component package name is empty");
+            return false;
+        }
+
+        if (componentName.getClassName().isEmpty()) {
+            Log.d(TAG, "AppClips component class name is empty");
+            return false;
+        }
+
+        Log.d(TAG, "isComponentValid returned true");
+        return true;
     }
 
     @Nullable
@@ -144,40 +133,40 @@ public class AppClipsService extends Service {
         return new IAppClipsService.Stub() {
             @Override
             public boolean canLaunchCaptureContentActivityForNote(int taskId) {
-                // In case of managed profile, use the main user's instance of the service. Callers
-                // cannot directly connect to the main user's instance as they may not have the
-                // permission to interact across users.
-                if (mUserManager.isManagedProfile()) {
-                    return canLaunchCaptureContentActivityForNoteFromMainUser(taskId);
+                if (canLaunchCaptureContentActivityForNoteInternal(taskId)
+                        == CAPTURE_CONTENT_FOR_NOTE_SUCCESS) {
+                    Log.d(TAG, String.format("Can launch AppClips returned true for %d", taskId));
+                    return true;
                 }
 
+                Log.d(TAG, String.format("Can launch AppClips returned false for %d", taskId));
+                return false;
+            }
+
+            @Override
+            @CaptureContentForNoteStatusCodes
+            public int canLaunchCaptureContentActivityForNoteInternal(int taskId) {
                 if (!mAreTaskAndTimeIndependentPrerequisitesMet) {
-                    return false;
+                    Log.d(TAG,
+                        String.format("Task (%d) and time independent prereqs not met", taskId));
+                    return CAPTURE_CONTENT_FOR_NOTE_FAILED;
                 }
 
                 if (!mOptionalBubbles.get().isAppBubbleTaskId(taskId)) {
-                    return false;
+                    Log.d(TAG, String.format("Taskid %d is not app bubble task", taskId));
+                    return CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED;
                 }
 
-                return !mDevicePolicyManager.getScreenCaptureDisabled(null);
+                if (mDevicePolicyManager.getScreenCaptureDisabled(null)) {
+                    Log.d(TAG,
+                        String.format("Screen capture disabled by admin, taskId %d", taskId));
+                    return CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN;
+                }
+
+                Log.d(TAG,
+                    String.format("Can launch AppClips (internal) successful for %d", taskId));
+                return CAPTURE_CONTENT_FOR_NOTE_SUCCESS;
             }
         };
-    }
-
-    /** Returns whether the app clips API can be used by querying the service as the main user. */
-    private boolean canLaunchCaptureContentActivityForNoteFromMainUser(int taskId) {
-        if (mProxyConnectorToMainProfile == null) {
-            return false;
-        }
-
-        try {
-            AndroidFuture<Boolean> future = mProxyConnectorToMainProfile.postForResult(
-                    service -> service.canLaunchCaptureContentActivityForNote(taskId));
-            return future.get();
-        } catch (ExecutionException | InterruptedException e) {
-            Log.d(TAG, "Exception from service\n" + e);
-        }
-
-        return false;
     }
 }

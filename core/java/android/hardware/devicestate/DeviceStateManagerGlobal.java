@@ -22,9 +22,11 @@ import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Trace;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
@@ -32,7 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -45,6 +47,8 @@ import java.util.concurrent.Executor;
 @VisibleForTesting(visibility = Visibility.PACKAGE)
 public final class DeviceStateManagerGlobal {
     private static DeviceStateManagerGlobal sInstance;
+    private static final String TAG = "DeviceStateManagerGlobal";
+    private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
     /**
      * Returns an instance of {@link DeviceStateManagerGlobal}. May return {@code null} if a
@@ -86,11 +90,11 @@ public final class DeviceStateManagerGlobal {
     }
 
     /**
-     * Returns the set of supported device states.
+     * Returns {@link List} of supported {@link DeviceState}s.
      *
-     * @see DeviceStateManager#getSupportedStates()
+     * @see DeviceStateManager#getSupportedDeviceStates()
      */
-    public int[] getSupportedStates() {
+    public List<DeviceState> getSupportedDeviceStates() {
         synchronized (mLock) {
             final DeviceStateInfo currentInfo;
             if (mLastReceivedInfo != null) {
@@ -107,7 +111,7 @@ public final class DeviceStateManagerGlobal {
                 }
             }
 
-            return Arrays.copyOf(currentInfo.supportedStates, currentInfo.supportedStates.length);
+            return List.copyOf(currentInfo.supportedStates);
         }
     }
 
@@ -233,12 +237,9 @@ public final class DeviceStateManagerGlobal {
             mCallbacks.add(wrapper);
 
             if (mLastReceivedInfo != null) {
-                // Copy the array to prevent the callback from modifying the internal state.
-                final int[] supportedStates = Arrays.copyOf(mLastReceivedInfo.supportedStates,
-                        mLastReceivedInfo.supportedStates.length);
-                wrapper.notifySupportedStatesChanged(supportedStates);
-                wrapper.notifyBaseStateChanged(mLastReceivedInfo.baseState);
-                wrapper.notifyStateChanged(mLastReceivedInfo.currentState);
+                wrapper.notifySupportedDeviceStatesChanged(
+                        List.copyOf(mLastReceivedInfo.supportedStates));
+                wrapper.notifyDeviceStateChanged(mLastReceivedInfo.currentState);
             }
         }
     }
@@ -319,20 +320,13 @@ public final class DeviceStateManagerGlobal {
         final int diff = oldInfo == null ? ~0 : info.diff(oldInfo);
         if ((diff & DeviceStateInfo.CHANGED_SUPPORTED_STATES) > 0) {
             for (int i = 0; i < callbacks.size(); i++) {
-                // Copy the array to prevent callbacks from modifying the internal state.
-                final int[] supportedStates = Arrays.copyOf(info.supportedStates,
-                        info.supportedStates.length);
-                callbacks.get(i).notifySupportedStatesChanged(supportedStates);
-            }
-        }
-        if ((diff & DeviceStateInfo.CHANGED_BASE_STATE) > 0) {
-            for (int i = 0; i < callbacks.size(); i++) {
-                callbacks.get(i).notifyBaseStateChanged(info.baseState);
+                callbacks.get(i).notifySupportedDeviceStatesChanged(
+                        List.copyOf(info.supportedStates));
             }
         }
         if ((diff & DeviceStateInfo.CHANGED_CURRENT_STATE) > 0) {
             for (int i = 0; i < callbacks.size(); i++) {
-                callbacks.get(i).notifyStateChanged(info.currentState);
+                callbacks.get(i).notifyDeviceStateChanged(info.currentState);
             }
         }
     }
@@ -394,17 +388,30 @@ public final class DeviceStateManagerGlobal {
             mExecutor = executor;
         }
 
-        void notifySupportedStatesChanged(int[] newSupportedStates) {
+        void notifySupportedDeviceStatesChanged(List<DeviceState> newSupportedDeviceStates) {
             mExecutor.execute(() ->
-                    mDeviceStateCallback.onSupportedStatesChanged(newSupportedStates));
+                    mDeviceStateCallback.onSupportedStatesChanged(newSupportedDeviceStates));
         }
 
-        void notifyBaseStateChanged(int newBaseState) {
-            mExecutor.execute(() -> mDeviceStateCallback.onBaseStateChanged(newBaseState));
+        void notifyDeviceStateChanged(DeviceState newDeviceState) {
+            execute("notifyDeviceStateChanged",
+                    () -> mDeviceStateCallback.onDeviceStateChanged(newDeviceState));
         }
 
-        void notifyStateChanged(int newDeviceState) {
-            mExecutor.execute(() -> mDeviceStateCallback.onStateChanged(newDeviceState));
+        private void execute(String traceName, Runnable r) {
+            mExecutor.execute(() -> {
+                if (DEBUG) {
+                    Trace.beginSection(
+                            mDeviceStateCallback.getClass().getSimpleName() + "#" + traceName);
+                }
+                try {
+                    r.run();
+                } finally {
+                    if (DEBUG) {
+                        Trace.endSection();
+                    }
+                }
+            });
         }
     }
 

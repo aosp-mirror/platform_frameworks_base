@@ -23,14 +23,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.fuelgauge.BatteryStatus;
-import com.android.systemui.plugins.WeatherData;
+import com.android.systemui.plugins.clocks.WeatherData;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.util.annotations.WeaklyReferencedCallback;
 
 import java.util.TimeZone;
 
 /**
  * Callback for general information relevant to lock screen.
  */
+@WeaklyReferencedCallback
 public class KeyguardUpdateMonitorCallback {
 
     /**
@@ -289,9 +291,14 @@ public class KeyguardUpdateMonitorCallback {
     public void onLogoutEnabledChanged() { }
 
     /**
-     * Called when authenticated biometrics are cleared.
+     * Called when authenticated fingerprint biometrics are cleared.
      */
-    public void onBiometricsCleared() { }
+    public void onFingerprintsCleared() { }
+
+    /**
+     * Called when authenticated face biometrics have cleared.
+     */
+    public void onFacesCleared() { }
 
     /**
      * Called when the secondary lock screen requirement changes.
@@ -327,4 +334,14 @@ public class KeyguardUpdateMonitorCallback {
      * Called when the enabled trust agents associated with the specified user.
      */
     public void onEnabledTrustAgentsChanged(int userId) { }
+
+    /**
+     * On biometric enrollment state changed
+     */
+    public void onBiometricEnrollmentStateChanged(BiometricSourceType biometricSourceType) { }
+
+    /**
+     * On force is dismissible state changed.
+     */
+    public void onForceIsDismissibleChanged(boolean forceIsDismissible) { }
 }

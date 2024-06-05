@@ -484,6 +484,31 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         assertTrue(dcIgnoreOrientation.getIgnoreOrientationRequest());
     }
 
+    @Test
+    public void testDisplayRemoval() {
+        spyOn(mWm.mDisplayWindowSettings);
+        spyOn(mWm.mDisplayWindowSettingsProvider);
+
+        mPrivateDisplay.removeImmediately();
+
+        verify(mWm.mDisplayWindowSettings).onDisplayRemoved(mPrivateDisplay);
+        verify(mWm.mDisplayWindowSettingsProvider).onDisplayRemoved(
+                mPrivateDisplay.getDisplayInfo());
+    }
+
+    @Test
+    public void testClearDisplaySettings() {
+        spyOn(mWm.mDisplayWindowSettings);
+        spyOn(mWm.mDisplayWindowSettingsProvider);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        DisplayInfo info = mPrivateDisplay.getDisplayInfo();
+        wmInternal.clearDisplaySettings(info.uniqueId, info.type);
+
+        verify(mWm.mDisplayWindowSettings).clearDisplaySettings(info.uniqueId, info.type);
+        verify(mWm.mDisplayWindowSettingsProvider).clearDisplaySettings(info);
+    }
+
     public final class TestSettingsProvider implements DisplayWindowSettings.SettingsProvider {
         Map<DisplayInfo, SettingsEntry> mOverrideSettingsCache = new HashMap<>();
 
@@ -512,6 +537,16 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
             }
 
             overrideSettings.setTo(settings);
+        }
+
+        @Override
+        public void onDisplayRemoved(@NonNull DisplayInfo info) {
+            mOverrideSettingsCache.remove(info);
+        }
+
+        @Override
+        public void clearDisplaySettings(@NonNull DisplayInfo info) {
+            mOverrideSettingsCache.remove(info);
         }
     }
 }

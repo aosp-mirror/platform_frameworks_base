@@ -1,0 +1,16 @@
+package: "com.android.server.flags"
+container: "system"
+
+flag {
+    name: "pin_webview"
+    namespace: "system_performance"
+    description: "This flag controls if webview should be pinned in memory."
+    bug: "307594624"
+}
+
+flag {
+    name: "skip_home_art_pins"
+    namespace: "system_performance"
+    description: "Ablation study flag that controls if home app odex/vdex files should be pinned in memory."
+    bug: "340935152"
+}

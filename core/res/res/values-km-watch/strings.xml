@@ -21,4 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="permgrouplab_sensors" msgid="2439544173324807471">"ឧបករណ៍ចាប់សញ្ញា"</string>
+    <string name="global_action_emergency" msgid="2097576936362874627">"SOS ពេលមានអាសន្ន"</string>
+    <string name="reboot_to_update_prepare" msgid="4129802024411268230">"កំពុងរៀបចំធ្វើបច្ចុប្បន្នភាព"</string>
+    <string name="reboot_to_update_title" msgid="8043761242418682803">"បច្ចុប្បន្នភាព​ប្រព័ន្ធ Wear OS"</string>
+    <string name="select_input_method" msgid="1285150113084396451">"ជ្រើសរើសវិធីបញ្ចូល"</string>
 </resources>

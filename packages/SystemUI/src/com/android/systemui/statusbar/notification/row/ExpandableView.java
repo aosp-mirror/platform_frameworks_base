@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.Flags.notificationColorUpdateLogger;
+
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -34,10 +36,11 @@ import androidx.annotation.Nullable;
 
 import com.android.app.animation.Interpolators;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.RoundableState;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.util.Compile;
@@ -53,8 +56,8 @@ import java.util.List;
 public abstract class ExpandableView extends FrameLayout implements Dumpable, Roundable {
     private static final String TAG = "ExpandableView";
     /** whether the dump() for this class should include verbose details */
-    protected static final boolean DUMP_VERBOSE =
-            Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
+    protected static final boolean DUMP_VERBOSE = Compile.IS_DEBUG
+            && (Log.isLoggable(TAG, Log.VERBOSE) || notificationColorUpdateLogger());
 
     private RoundableState mRoundableState = null;
     protected OnHeightChangedListener mOnHeightChangedListener;
@@ -69,6 +72,9 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
     private boolean mClipToActualHeight = true;
     private boolean mChangingPosition = false;
     private ViewGroup mTransientContainer;
+
+    // Needs to be added as transient view when removed from parent, because it's in animation
+    private boolean mInRemovalAnimation;
     private boolean mInShelf;
     private boolean mTransformingInShelf;
     protected float mContentTransformationAmount;
@@ -91,6 +97,12 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
             mRoundableState = new RoundableState(this, this, 0f);
         }
         return mRoundableState;
+    }
+
+    @Override
+    public int getClipHeight() {
+        int clipHeight = Math.max(mActualHeight - mClipTopAmount - mClipBottomAmount, 0);
+        return Math.max(clipHeight, mMinimumHeightForClipping);
     }
 
     private void initDimens() {
@@ -263,15 +275,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         return getHeight();
     }
 
-    /**
-     * Sets the notification as dimmed. The default implementation does nothing.
-     *
-     * @param dimmed Whether the notification should be dimmed.
-     * @param fade Whether an animation should be played to change the state.
-     */
-    public void setDimmed(boolean dimmed, boolean fade) {
-    }
-
     public boolean isRemoved() {
         return false;
     }
@@ -359,25 +362,30 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
 
     /**
      * Perform a remove animation on this view.
-     * @param duration The duration of the remove animation.
-     * @param delay The delay of the animation
+     *
+     * @param duration             The duration of the remove animation.
+     * @param delay                The delay of the animation
      * @param translationDirection The direction value from [-1 ... 1] indicating in which the
      *                             animation should be performed. A value of -1 means that The
      *                             remove animation should be performed upwards,
      *                             such that the  child appears to be going away to the top. 1
      *                             Should mean the opposite.
-     * @param isHeadsUpAnimation Is this a headsUp animation.
-     * @param endLocation The location where the horizonal heads up disappear animation should end.
-     * @param onFinishedRunnable A runnable which should be run when the animation is finished.
-     * @param animationListener An animation listener to add to the animation.
-     *
+     * @param isHeadsUpAnimation   Is this a headsUp animation.
+     * @param onFinishedRunnable   A runnable which should be run when the animation is finished.
+     * @param animationListener    An animation listener to add to the animation.
      * @return The additional delay, in milliseconds, that this view needs to add before the
      * animation starts.
      */
     public abstract long performRemoveAnimation(long duration,
-            long delay, float translationDirection, boolean isHeadsUpAnimation, float endLocation,
+            long delay, float translationDirection, boolean isHeadsUpAnimation,
+            Runnable onStartedRunnable,
             Runnable onFinishedRunnable,
-            AnimatorListenerAdapter animationListener);
+            AnimatorListenerAdapter animationListener, ClipSide clipSide);
+
+    public enum ClipSide {
+        TOP,
+        BOTTOM
+    }
 
     public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
         performAddAnimation(delay, duration, isHeadsUpAppear, null);
@@ -391,6 +399,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
      * @param below true if it is below.
      */
     public void setBelowSpeedBump(boolean below) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
     }
 
     public int getPinnedHeadsUpHeight() {
@@ -599,6 +608,25 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
     }
 
     /**
+     * Add the view to a transient container.
+     */
+    public void addToTransientContainer(ViewGroup container, int index) {
+        container.addTransientView(this, index);
+        setTransientContainer(container);
+    }
+
+    /**
+     * @return If the view is in a process of removal animation.
+     */
+    public boolean inRemovalAnimation() {
+        return mInRemovalAnimation;
+    }
+
+    public void setInRemovalAnimation(boolean inRemovalAnimation) {
+        mInRemovalAnimation = inRemovalAnimation;
+    }
+
+    /**
      * @return true if the group's expansion state is changing, false otherwise.
      */
     public boolean isGroupExpansionChanging() {
@@ -613,6 +641,10 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
     }
 
     public boolean showingPulsing() {
+        return false;
+    }
+
+    public boolean isHeadsUpState() {
         return false;
     }
 
@@ -642,8 +674,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         mViewState.headsUpIsVisible = false;
 
         // handling reset for child notifications
-        if (this instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) this;
+        if (this instanceof ExpandableNotificationRow row) {
             List<ExpandableNotificationRow> children = row.getAttachedChildren();
             if (row.isSummaryWithChildren() && children != null) {
                 for (ExpandableNotificationRow childRow : children) {
@@ -687,6 +718,9 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         mInShelf = inShelf;
     }
 
+    /**
+     * @return true if the view is currently fully in the notification shelf.
+     */
     public boolean isInShelf() {
         return mInShelf;
     }
@@ -828,6 +862,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
                 pw.println();
             }
             if (DUMP_VERBOSE) {
+                pw.println("mInRemovalAnimation: " + mInRemovalAnimation);
                 pw.println("mClipTopAmount: " + mClipTopAmount);
                 pw.println("mClipBottomAmount " + mClipBottomAmount);
                 pw.println("mClipToActualHeight: " + mClipToActualHeight);

@@ -27,6 +27,7 @@ import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.Flags;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -174,6 +175,11 @@ class Rollback {
     @Nullable private final String mInstallerPackageName;
 
     /**
+     * Time after which rollback expires.
+     */
+    private long mRollbackLifetimeMillis = 0;
+
+    /**
      * Session ids for all packages in the install. For multi-package sessions, this is the list
      * of child session ids. For normal sessions, this list is a single element with the normal
      * session id.
@@ -210,7 +216,8 @@ class Rollback {
                 /* packages */ new ArrayList<>(),
                 /* isStaged */ isStaged,
                 /* causePackages */ new ArrayList<>(),
-                /* committedSessionId */ -1);
+                /* committedSessionId */ -1,
+                /* rollbackImpactLevel */ PackageManager.ROLLBACK_USER_IMPACT_LOW);
         mUserId = userId;
         mInstallerPackageName = installerPackageName;
         mBackupDir = backupDir;
@@ -283,6 +290,24 @@ class Rollback {
         assertInWorkerThread();
         mTimestamp = timestamp;
         RollbackStore.saveRollback(this);
+    }
+
+    /**
+     * Sets rollback lifetime in milliseconds, for purposes of expiring rollback data.
+     */
+    @WorkerThread
+    void setRollbackLifetimeMillis(long lifetimeMillis) {
+        assertInWorkerThread();
+        mRollbackLifetimeMillis = lifetimeMillis;
+    }
+
+    /**
+     * Returns rollback lifetime in milliseconds, for purposes of expiring rollback data.
+     */
+    @WorkerThread
+    long getRollbackLifetimeMillis() {
+        assertInWorkerThread();
+        return mRollbackLifetimeMillis;
     }
 
     /**
@@ -371,7 +396,8 @@ class Rollback {
      */
     @WorkerThread
     boolean enableForPackage(String packageName, long newVersion, long installedVersion,
-            boolean isApex, String sourceDir, String[] splitSourceDirs, int rollbackDataPolicy) {
+            boolean isApex, String sourceDir, String[] splitSourceDirs, int rollbackDataPolicy,
+            @PackageManager.RollbackImpactLevel int rollbackImpactLevel) {
         assertInWorkerThread();
         try {
             RollbackStore.backupPackageCodePath(this, packageName, sourceDir);
@@ -392,6 +418,10 @@ class Rollback {
                 isApex, false /* isApkInApex */, new ArrayList<>(), rollbackDataPolicy);
 
         info.getPackages().add(packageRollbackInfo);
+
+        if (info.getRollbackImpactLevel() < rollbackImpactLevel) {
+            info.setRollbackImpactLevel(rollbackImpactLevel);
+        }
         return true;
     }
 
@@ -930,6 +960,10 @@ class Rollback {
         ipw.println("-state: " + getStateAsString());
         ipw.println("-stateDescription: " + mStateDescription);
         ipw.println("-timestamp: " + getTimestamp());
+        ipw.println("-rollbackLifetimeMillis: " + getRollbackLifetimeMillis());
+        if (Flags.recoverabilityDetection()) {
+            ipw.println("-rollbackImpactLevel: " + info.getRollbackImpactLevel());
+        }
         ipw.println("-isStaged: " + isStaged());
         ipw.println("-originalSessionId: " + getOriginalSessionId());
         ipw.println("-packages:");
@@ -937,7 +971,8 @@ class Rollback {
         for (PackageRollbackInfo pkg : info.getPackages()) {
             ipw.println(pkg.getPackageName()
                     + " " + pkg.getVersionRolledBackFrom().getLongVersionCode()
-                    + " -> " + pkg.getVersionRolledBackTo().getLongVersionCode());
+                    + " -> " + pkg.getVersionRolledBackTo().getLongVersionCode()
+                    + " [" + pkg.getRollbackDataPolicy() + "]");
         }
         ipw.decreaseIndent();
         if (isCommitted()) {

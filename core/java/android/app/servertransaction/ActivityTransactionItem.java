@@ -16,14 +16,24 @@
 
 package android.app.servertransaction;
 
+import static android.app.servertransaction.TransactionExecutorHelper.getActivityName;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
+import static java.util.Objects.requireNonNull;
+
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
+import android.os.Parcel;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * An activity-targeting callback message to a client that can be scheduled and executed.
@@ -37,39 +47,107 @@ import com.android.internal.annotations.VisibleForTesting;
  * @hide
  */
 public abstract class ActivityTransactionItem extends ClientTransactionItem {
-    @Override
-    public final void execute(ClientTransactionHandler client, IBinder token,
-            PendingTransactionActions pendingActions) {
-        final ActivityClientRecord r = getActivityClientRecord(client, token);
 
+    /** Target client activity. */
+    private IBinder mActivityToken;
+
+    ActivityTransactionItem() {}
+
+    @Override
+    public final void execute(@NonNull ClientTransactionHandler client,
+            @NonNull PendingTransactionActions pendingActions) {
+        final ActivityClientRecord r = getActivityClientRecord(client);
         execute(client, r, pendingActions);
     }
 
     /**
-     * Like {@link #execute(ClientTransactionHandler, IBinder, PendingTransactionActions)},
+     * Like {@link #execute(ClientTransactionHandler, PendingTransactionActions)},
      * but take non-null {@link ActivityClientRecord} as a parameter.
      */
     @VisibleForTesting(visibility = PACKAGE)
     public abstract void execute(@NonNull ClientTransactionHandler client,
-            @NonNull ActivityClientRecord r, PendingTransactionActions pendingActions);
+            @NonNull ActivityClientRecord r, @NonNull PendingTransactionActions pendingActions);
 
     /**
-     * Gets the {@link ActivityClientRecord} instance that corresponds to the provided token.
+     * Gets the {@link ActivityClientRecord} instance that this transaction item is for.
      * @param client Target client handler.
-     * @param token Target activity token.
-     * @return The {@link ActivityClientRecord} instance that corresponds to the provided token.
+     * @return The {@link ActivityClientRecord} instance that this transaction item is for.
      */
-    @NonNull ActivityClientRecord getActivityClientRecord(
-            @NonNull ClientTransactionHandler client, IBinder token) {
-        final ActivityClientRecord r = client.getActivityClient(token);
+    @NonNull
+    final ActivityClientRecord getActivityClientRecord(@NonNull ClientTransactionHandler client) {
+        final ActivityClientRecord r = client.getActivityClient(getActivityToken());
         if (r == null) {
             throw new IllegalArgumentException("Activity client record must not be null to execute "
                     + "transaction item: " + this);
         }
-        if (client.getActivity(token) == null) {
+        if (client.getActivity(getActivityToken()) == null) {
             throw new IllegalArgumentException("Activity must not be null to execute "
                     + "transaction item: " + this);
         }
         return r;
+    }
+
+    @VisibleForTesting(visibility = PACKAGE)
+    @NonNull
+    @Override
+    public IBinder getActivityToken() {
+        return mActivityToken;
+    }
+
+    void setActivityToken(@NonNull IBinder activityToken) {
+        mActivityToken = requireNonNull(activityToken);
+    }
+
+    // To be overridden
+
+    ActivityTransactionItem(@NonNull Parcel in) {
+        mActivityToken = in.readStrongBinder();
+    }
+
+    @CallSuper
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeStrongBinder(mActivityToken);
+    }
+
+    @CallSuper
+    @Override
+    public void recycle() {
+        mActivityToken = null;
+    }
+
+    @Override
+    void dump(@NonNull String prefix, @NonNull PrintWriter pw,
+            @NonNull ClientTransactionHandler transactionHandler) {
+        super.dump(prefix, pw, transactionHandler);
+        pw.append(prefix).append("Target activity: ")
+                .println(getActivityName(mActivityToken, transactionHandler));
+    }
+
+    // Subclass must override and call super.equals to compare the mActivityToken.
+    @SuppressWarnings("EqualsGetClass")
+    @CallSuper
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ActivityTransactionItem other = (ActivityTransactionItem) o;
+        return Objects.equals(mActivityToken, other.mActivityToken);
+    }
+
+    @CallSuper
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(mActivityToken);
+    }
+
+    @CallSuper
+    @Override
+    public String toString() {
+        return "mActivityToken=" + mActivityToken;
     }
 }

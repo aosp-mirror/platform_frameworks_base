@@ -253,8 +253,8 @@ public class FrameworkParsingPackageUtils {
         if (existingSigningDetails == SigningDetails.UNKNOWN) {
             return verified;
         } else {
-            if (!Signature.areExactMatch(existingSigningDetails.getSignatures(),
-                    verified.getResult().getSignatures())) {
+            if (!Signature.areExactMatch(existingSigningDetails,
+                    verified.getResult())) {
                 return input.error(INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
                         baseCodePath + " has mismatched certificates");
             }

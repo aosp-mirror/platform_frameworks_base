@@ -25,6 +25,7 @@ import static com.android.server.wm.WindowManagerService.H.ON_POINTER_DOWN_OUTSI
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.gui.StalledTransactionInfo;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Slog;
@@ -96,7 +97,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     @Override
     public void notifyNoFocusedWindowAnr(@NonNull InputApplicationHandle applicationHandle) {
         TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchNoFocusedWindow(
-                timeoutMessage("Application does not have a focused window"));
+                timeoutMessage(OptionalInt.empty(), "Application does not have a focused window"));
         mService.mAnrController.notifyAppUnresponsive(applicationHandle, timeoutRecord);
     }
 
@@ -104,7 +105,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     public void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull OptionalInt pid,
             String reason) {
         TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchWindowUnresponsive(
-                timeoutMessage(reason));
+                timeoutMessage(pid, reason));
         mService.mAnrController.notifyWindowUnresponsive(token, pid, timeoutRecord);
     }
 
@@ -125,6 +126,21 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                 mInputDevicesReady = true;
                 mInputDevicesReadyMonitor.notifyAll();
             }
+        }
+    }
+
+    /** Notifies that the pointer location configuration has changed. */
+    @Override
+    public void notifyPointerLocationChanged(boolean pointerLocationEnabled) {
+        if (mService.mPointerLocationEnabled == pointerLocationEnabled) {
+            return;
+        }
+
+        synchronized (mService.mGlobalLock) {
+            mService.mPointerLocationEnabled = pointerLocationEnabled;
+            mService.mRoot.forAllDisplayPolicies(
+                    p -> p.setPointerLocationEnabled(mService.mPointerLocationEnabled)
+            );
         }
     }
 
@@ -151,10 +167,10 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
 
     /** {@inheritDoc} */
     @Override
-    public int interceptMotionBeforeQueueingNonInteractive(int displayId, long whenNanos,
-            int policyFlags) {
+    public int interceptMotionBeforeQueueingNonInteractive(int displayId, int source, int action,
+            long whenNanos, int policyFlags) {
         return mService.mPolicy.interceptMotionBeforeQueueingNonInteractive(
-                displayId, whenNanos, policyFlags);
+                displayId, source, action, whenNanos, policyFlags);
     }
 
     /**
@@ -259,28 +275,19 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                         + " - DisplayContent not found.");
                 return null;
             }
+            final SurfaceControl inputOverlay = dc.getInputOverlayLayer();
+            if (inputOverlay == null) {
+                Slog.e(TAG, "Failed to create a gesture monitor on display: " + displayId
+                        + " - Input overlay layer is not initialized.");
+                return null;
+            }
             return mService.makeSurfaceBuilder(dc.getSession())
                     .setContainerLayer()
                     .setName(name)
                     .setCallsite("createSurfaceForGestureMonitor")
-                    .setParent(dc.getSurfaceControl())
+                    .setParent(inputOverlay)
+                    .setCallsite("InputManagerCallback.createSurfaceForGestureMonitor")
                     .build();
-        }
-    }
-
-    @Override
-    public void notifyPointerDisplayIdChanged(int displayId, float x, float y) {
-        synchronized (mService.mGlobalLock) {
-            mService.setMousePointerDisplayId(displayId);
-            if (displayId == Display.INVALID_DISPLAY) return;
-
-            final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
-            if (dc == null) {
-                Slog.wtf(TAG, "The mouse pointer was moved to display " + displayId
-                        + " that does not have a valid DisplayContent.");
-                return;
-            }
-            mService.restorePointerIconLocked(dc, x, y);
         }
     }
 
@@ -339,11 +346,21 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         mService.mInputManager.setInputDispatchMode(mInputDispatchEnabled, mInputDispatchFrozen);
     }
 
-    private String timeoutMessage(String reason) {
-        if (reason == null) {
-            return "Input dispatching timed out";
+    private String timeoutMessage(OptionalInt pid, String reason) {
+        String message = (reason == null) ? "Input dispatching timed out."
+                : String.format("Input dispatching timed out (%s).", reason);
+        if (pid.isEmpty()) {
+            return message;
         }
-        return "Input dispatching timed out (" + reason + ")";
+        StalledTransactionInfo stalledTransactionInfo =
+                SurfaceControl.getStalledTransactionInfo(pid.getAsInt());
+        if (stalledTransactionInfo == null) {
+            return message;
+        }
+        return String.format("%s Buffer processing for the associated surface is stuck due to an "
+                + "unsignaled fence (window=%s, bufferId=0x%016X, frameNumber=%s). This "
+                + "potentially indicates a GPU hang.", message, stalledTransactionInfo.layerName,
+                stalledTransactionInfo.bufferId, stalledTransactionInfo.frameNumber);
     }
 
     void dump(PrintWriter pw, String prefix) {

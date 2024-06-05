@@ -218,6 +218,13 @@ public class HidlSupport {
     @SystemApi
     public static native int getPidIfSharable();
 
+    /**
+     * Return true if HIDL is supported on this device and false if not.
+     *
+     * @hide
+     */
+    public static native boolean isHidlSupported();
+
     /** @hide */
     public HidlSupport() {}
 }

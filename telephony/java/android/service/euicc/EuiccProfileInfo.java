@@ -43,7 +43,11 @@ import java.util.Objects;
 @SystemApi
 public final class EuiccProfileInfo implements Parcelable {
 
-    /** Profile policy rules (bit mask) */
+    /**
+     * Profile policy rules (bit mask)
+     *
+     * @removed mistakenly exposed previously
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "POLICY_RULE_" }, value = {
             POLICY_RULE_DO_NOT_DISABLE,
@@ -58,7 +62,11 @@ public final class EuiccProfileInfo implements Parcelable {
     /** This profile should be deleted after being disabled. */
     public static final int POLICY_RULE_DELETE_AFTER_DISABLING = 1 << 2;
 
-    /** Class of the profile */
+    /**
+     * Class of the profile
+     *
+     * @removed mistakenly exposed previously
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "PROFILE_CLASS_" }, value = {
             PROFILE_CLASS_TESTING,
@@ -79,7 +87,11 @@ public final class EuiccProfileInfo implements Parcelable {
      */
     public static final int PROFILE_CLASS_UNSET = -1;
 
-    /** State of the profile */
+    /**
+     * State of the profile
+     *
+     * @removed mistakenly exposed previously
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "PROFILE_STATE_" }, value = {
             PROFILE_STATE_DISABLED,

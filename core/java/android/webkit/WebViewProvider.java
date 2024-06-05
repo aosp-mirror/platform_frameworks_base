@@ -39,6 +39,7 @@ import android.util.SparseArray;
 import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.WindowInsets;
@@ -494,6 +495,15 @@ public interface WebViewProvider {
         @SuppressWarnings("unused")
         @Nullable
         default WindowInsets onApplyWindowInsets(@Nullable WindowInsets insets) {
+            return null;
+        }
+
+        /**
+         * @hide Only used by WebView.
+         */
+        @SuppressWarnings("unused")
+        @Nullable
+        default PointerIcon onResolvePointerIcon(@NonNull MotionEvent event, int pointerIndex) {
             return null;
         }
     }

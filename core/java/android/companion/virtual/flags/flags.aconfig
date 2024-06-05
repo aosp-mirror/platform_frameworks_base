@@ -1,0 +1,76 @@
+#
+# Copyright (C) 2023 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+package: "android.companion.virtualdevice.flags"
+container: "system"
+
+flag {
+     namespace: "virtual_devices"
+     name: "virtual_camera_service_discovery"
+     description: "Enable discovery of the Virtual Camera HAL without a VINTF entry"
+     bug: "305170199"
+}
+
+flag {
+     namespace: "virtual_devices"
+     name: "device_aware_record_audio_permission"
+     description: "Enable device-aware RECORD_AUDIO permission"
+     bug: "291737188"
+     is_fixed_read_only: true
+}
+
+flag {
+     namespace: "virtual_devices"
+     name: "metrics_collection"
+     description: "Enable collection of VDM-related metrics"
+     bug: "324842215"
+     is_fixed_read_only: true
+}
+
+flag {
+     namespace: "virtual_devices"
+     name: "camera_device_awareness"
+     description: "Enable device awareness in camera service"
+     bug: "305170199"
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "device_aware_drm"
+    description: "Makes MediaDrm APIs device-aware"
+    bug: "303535376"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "virtual_display_multi_window_mode_support"
+    description: "Add support for WINDOWING_MODE_MULTI_WINDOW to virtual displays by default"
+    is_fixed_read_only: true
+    bug: "341151395"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "intent_interception_action_matching_fix"
+    description: "Do not match intents without actions if the filter has actions"
+    bug: "343805037"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

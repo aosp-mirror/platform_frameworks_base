@@ -113,6 +113,56 @@ std::unique_ptr<IConfigFilter> ParseConfigFilterParameters(const std::vector<std
   return std::move(filter);
 }
 
+bool ParseFeatureFlagsParameter(StringPiece arg, android::IDiagnostics* diag,
+                                FeatureFlagValues* out_feature_flag_values) {
+  if (arg.empty()) {
+    return true;
+  }
+
+  for (StringPiece flag_and_value : util::Tokenize(arg, ',')) {
+    std::vector<std::string> parts = util::Split(flag_and_value, '=');
+    if (parts.empty()) {
+      continue;
+    }
+
+    if (parts.size() > 2) {
+      diag->Error(android::DiagMessage()
+                  << "Invalid feature flag and optional value '" << flag_and_value
+                  << "'. Must be in the format 'flag_name[=true|false]");
+      return false;
+    }
+
+    StringPiece flag_name = util::TrimWhitespace(parts[0]);
+    if (flag_name.empty()) {
+      diag->Error(android::DiagMessage() << "No name given for one or more flags in: " << arg);
+      return false;
+    }
+
+    std::optional<bool> flag_value = {};
+    if (parts.size() == 2) {
+      StringPiece str_flag_value = util::TrimWhitespace(parts[1]);
+      if (!str_flag_value.empty()) {
+        flag_value = ResourceUtils::ParseBool(parts[1]);
+        if (!flag_value.has_value()) {
+          diag->Error(android::DiagMessage() << "Invalid value for feature flag '" << flag_and_value
+                                             << "'. Value must be 'true' or 'false'");
+          return false;
+        }
+      }
+    }
+
+    if (auto [it, inserted] =
+            out_feature_flag_values->try_emplace(std::string(flag_name), flag_value);
+        !inserted) {
+      // We are allowing the same flag to appear multiple times, last value wins.
+      diag->Note(android::DiagMessage()
+                 << "Value for feature flag '" << flag_name << "' was given more than once");
+      it->second = flag_value;
+    }
+  }
+  return true;
+}
+
 // Adjust the SplitConstraints so that their SDK version is stripped if it
 // is less than or equal to the minSdk. Otherwise the resources that have had
 // their SDK version stripped due to minSdk won't ever match.
@@ -215,7 +265,7 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
   }
   std::vector<std::string> sanitized_config_names;
   for (const auto &config : constraints.configs) {
-    sanitized_config_names.push_back(MakePackageSafeName(config.toString().string()));
+    sanitized_config_names.push_back(MakePackageSafeName(config.toString().c_str()));
   }
   split_name << "config." << util::Joiner(sanitized_config_names, "_");
 

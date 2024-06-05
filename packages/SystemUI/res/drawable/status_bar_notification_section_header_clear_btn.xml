@@ -15,11 +15,12 @@
      limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:width="40dp"
     android:height="40dp"
     android:viewportWidth="40"
     android:viewportHeight="40">
     <path
-        android:fillColor="@color/notification_section_clear_all_btn_color"
+        android:fillColor="?androidprv:attr/materialColorOnSurfaceVariant"
         android:pathData="M24.6667 16.2733L23.7267 15.3333L20 19.06L16.2734 15.3333L15.3334 16.2733L19.06 20L15.3334 23.7267L16.2734 24.6667L20 20.94L23.7267 24.6667L24.6667 23.7267L20.94 20L24.6667 16.2733Z"/>
 </vector>

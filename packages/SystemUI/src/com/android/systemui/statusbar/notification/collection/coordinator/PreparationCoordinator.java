@@ -23,6 +23,7 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.IntDef;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -48,6 +49,8 @@ import com.android.systemui.statusbar.notification.collection.render.NotifViewBa
 import com.android.systemui.statusbar.notification.collection.render.NotifViewController;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager.NotifInflationErrorListener;
+import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
+import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -272,10 +275,14 @@ public class PreparationCoordinator implements Coordinator {
 
     private void inflateRequiredGroupViews(GroupEntry groupEntry) {
         NotificationEntry summary = groupEntry.getSummary();
+        if (summary != null && AsyncGroupHeaderViewInflation.isEnabled()) {
+            summary.markAsGroupSummary();
+        }
         List<NotificationEntry> children = groupEntry.getChildren();
         inflateRequiredNotifViews(summary);
         for (int j = 0; j < children.size(); j++) {
             NotificationEntry child = children.get(j);
+            if (AsyncHybridViewInflation.isEnabled()) child.markAsGroupChild();
             boolean childShouldBeBound = j < mChildBindCutoff;
             if (childShouldBeBound) {
                 inflateRequiredNotifViews(child);
@@ -342,11 +349,13 @@ public class PreparationCoordinator implements Coordinator {
     private void inflateEntry(NotificationEntry entry,
             NotifUiAdjustment newAdjustment,
             String reason) {
+        Trace.beginSection("PrepCoord.inflateEntry");
         abortInflation(entry, reason);
         mInflationAdjustments.put(entry, newAdjustment);
         mInflatingNotifs.add(entry);
         NotifInflater.Params params = getInflaterParams(newAdjustment, reason);
         mNotifInflater.inflateViews(entry, params, this::onInflationFinished);
+        Trace.endSection();
     }
 
     private void rebind(NotificationEntry entry,
@@ -359,8 +368,14 @@ public class PreparationCoordinator implements Coordinator {
     }
 
     NotifInflater.Params getInflaterParams(NotifUiAdjustment adjustment, String reason) {
-        return new NotifInflater.Params(adjustment.isMinimized(), reason,
-                adjustment.isSnoozeEnabled());
+        return new NotifInflater.Params(
+                /* isMinimized = */ adjustment.isMinimized(),
+                /* reason = */ reason,
+                /* showSnooze = */ adjustment.isSnoozeEnabled(),
+                /* isChildInGroup = */ adjustment.isChildInGroup(),
+                /* isGroupSummary = */ adjustment.isGroupSummary(),
+                /* needsRedaction = */ adjustment.getNeedsRedaction()
+        );
     }
 
     private void abortInflation(NotificationEntry entry, String reason) {

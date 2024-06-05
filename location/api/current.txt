@@ -1,0 +1,728 @@
+// Signature format: 2.0
+package android.location {
+
+  public class Address implements android.os.Parcelable {
+    ctor public Address(java.util.Locale);
+    method public void clearLatitude();
+    method public void clearLongitude();
+    method public int describeContents();
+    method public String getAddressLine(int);
+    method public String getAdminArea();
+    method public String getCountryCode();
+    method public String getCountryName();
+    method public android.os.Bundle getExtras();
+    method public String getFeatureName();
+    method public double getLatitude();
+    method public java.util.Locale getLocale();
+    method public String getLocality();
+    method public double getLongitude();
+    method public int getMaxAddressLineIndex();
+    method public String getPhone();
+    method public String getPostalCode();
+    method public String getPremises();
+    method public String getSubAdminArea();
+    method public String getSubLocality();
+    method public String getSubThoroughfare();
+    method public String getThoroughfare();
+    method public String getUrl();
+    method public boolean hasLatitude();
+    method public boolean hasLongitude();
+    method public void setAddressLine(int, String);
+    method public void setAdminArea(String);
+    method public void setCountryCode(String);
+    method public void setCountryName(String);
+    method public void setExtras(android.os.Bundle);
+    method public void setFeatureName(String);
+    method public void setLatitude(double);
+    method public void setLocality(String);
+    method public void setLongitude(double);
+    method public void setPhone(String);
+    method public void setPostalCode(String);
+    method public void setPremises(String);
+    method public void setSubAdminArea(String);
+    method public void setSubLocality(String);
+    method public void setSubThoroughfare(String);
+    method public void setThoroughfare(String);
+    method public void setUrl(String);
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.Address> CREATOR;
+  }
+
+  @Deprecated public class Criteria implements android.os.Parcelable {
+    ctor @Deprecated public Criteria();
+    ctor @Deprecated public Criteria(android.location.Criteria);
+    method @Deprecated public int describeContents();
+    method @Deprecated public int getAccuracy();
+    method @Deprecated public int getBearingAccuracy();
+    method @Deprecated public int getHorizontalAccuracy();
+    method @Deprecated public int getPowerRequirement();
+    method @Deprecated public int getSpeedAccuracy();
+    method @Deprecated public int getVerticalAccuracy();
+    method @Deprecated public boolean isAltitudeRequired();
+    method @Deprecated public boolean isBearingRequired();
+    method @Deprecated public boolean isCostAllowed();
+    method @Deprecated public boolean isSpeedRequired();
+    method @Deprecated public void setAccuracy(int);
+    method @Deprecated public void setAltitudeRequired(boolean);
+    method @Deprecated public void setBearingAccuracy(int);
+    method @Deprecated public void setBearingRequired(boolean);
+    method @Deprecated public void setCostAllowed(boolean);
+    method @Deprecated public void setHorizontalAccuracy(int);
+    method @Deprecated public void setPowerRequirement(int);
+    method @Deprecated public void setSpeedAccuracy(int);
+    method @Deprecated public void setSpeedRequired(boolean);
+    method @Deprecated public void setVerticalAccuracy(int);
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated public static final int ACCURACY_COARSE = 2; // 0x2
+    field @Deprecated public static final int ACCURACY_FINE = 1; // 0x1
+    field @Deprecated public static final int ACCURACY_HIGH = 3; // 0x3
+    field @Deprecated public static final int ACCURACY_LOW = 1; // 0x1
+    field @Deprecated public static final int ACCURACY_MEDIUM = 2; // 0x2
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.location.Criteria> CREATOR;
+    field @Deprecated public static final int NO_REQUIREMENT = 0; // 0x0
+    field @Deprecated public static final int POWER_HIGH = 3; // 0x3
+    field @Deprecated public static final int POWER_LOW = 1; // 0x1
+    field @Deprecated public static final int POWER_MEDIUM = 2; // 0x2
+  }
+
+  public final class Geocoder {
+    ctor public Geocoder(@NonNull android.content.Context);
+    ctor public Geocoder(@NonNull android.content.Context, @NonNull java.util.Locale);
+    method @Deprecated @Nullable public java.util.List<android.location.Address> getFromLocation(@FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @IntRange(from=1) int) throws java.io.IOException;
+    method public void getFromLocation(@FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @IntRange(from=1) int, @NonNull android.location.Geocoder.GeocodeListener);
+    method @Deprecated @Nullable public java.util.List<android.location.Address> getFromLocationName(@NonNull String, @IntRange(from=1) int) throws java.io.IOException;
+    method public void getFromLocationName(@NonNull String, @IntRange(from=1) int, @NonNull android.location.Geocoder.GeocodeListener);
+    method @Deprecated @Nullable public java.util.List<android.location.Address> getFromLocationName(@NonNull String, @IntRange(from=1) int, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double) throws java.io.IOException;
+    method public void getFromLocationName(@NonNull String, @IntRange(from=1) int, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @FloatRange(from=-90.0, to=90.0) double, @FloatRange(from=-180.0, to=180.0) double, @NonNull android.location.Geocoder.GeocodeListener);
+    method public static boolean isPresent();
+  }
+
+  public static interface Geocoder.GeocodeListener {
+    method public default void onError(@Nullable String);
+    method public void onGeocode(@NonNull java.util.List<android.location.Address>);
+  }
+
+  public final class GnssAntennaInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @FloatRange(from=0.0f) public double getCarrierFrequencyMHz();
+    method @NonNull public android.location.GnssAntennaInfo.PhaseCenterOffset getPhaseCenterOffset();
+    method @Nullable public android.location.GnssAntennaInfo.SphericalCorrections getPhaseCenterVariationCorrections();
+    method @Nullable public android.location.GnssAntennaInfo.SphericalCorrections getSignalGainCorrections();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssAntennaInfo> CREATOR;
+  }
+
+  public static class GnssAntennaInfo.Builder {
+    ctor @Deprecated public GnssAntennaInfo.Builder();
+    ctor public GnssAntennaInfo.Builder(double, @NonNull android.location.GnssAntennaInfo.PhaseCenterOffset);
+    ctor public GnssAntennaInfo.Builder(@NonNull android.location.GnssAntennaInfo);
+    method @NonNull public android.location.GnssAntennaInfo build();
+    method @NonNull public android.location.GnssAntennaInfo.Builder setCarrierFrequencyMHz(@FloatRange(from=0.0f) double);
+    method @NonNull public android.location.GnssAntennaInfo.Builder setPhaseCenterOffset(@NonNull android.location.GnssAntennaInfo.PhaseCenterOffset);
+    method @NonNull public android.location.GnssAntennaInfo.Builder setPhaseCenterVariationCorrections(@Nullable android.location.GnssAntennaInfo.SphericalCorrections);
+    method @NonNull public android.location.GnssAntennaInfo.Builder setSignalGainCorrections(@Nullable android.location.GnssAntennaInfo.SphericalCorrections);
+  }
+
+  public static interface GnssAntennaInfo.Listener {
+    method public void onGnssAntennaInfoReceived(@NonNull java.util.List<android.location.GnssAntennaInfo>);
+  }
+
+  public static final class GnssAntennaInfo.PhaseCenterOffset implements android.os.Parcelable {
+    ctor public GnssAntennaInfo.PhaseCenterOffset(double, double, double, double, double, double);
+    method public int describeContents();
+    method @FloatRange public double getXOffsetMm();
+    method @FloatRange public double getXOffsetUncertaintyMm();
+    method @FloatRange public double getYOffsetMm();
+    method @FloatRange public double getYOffsetUncertaintyMm();
+    method @FloatRange public double getZOffsetMm();
+    method @FloatRange public double getZOffsetUncertaintyMm();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssAntennaInfo.PhaseCenterOffset> CREATOR;
+  }
+
+  public static final class GnssAntennaInfo.SphericalCorrections implements android.os.Parcelable {
+    ctor public GnssAntennaInfo.SphericalCorrections(@NonNull double[][], @NonNull double[][]);
+    method public int describeContents();
+    method @NonNull public double[][] getCorrectionUncertaintiesArray();
+    method @NonNull public double[][] getCorrectionsArray();
+    method @FloatRange(from=0.0f, to=180.0f) public double getDeltaPhi();
+    method @FloatRange(from=0.0f, to=360.0f) public double getDeltaTheta();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssAntennaInfo.SphericalCorrections> CREATOR;
+  }
+
+  public final class GnssAutomaticGainControl implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0) public long getCarrierFrequencyHz();
+    method public int getConstellationType();
+    method @FloatRange(from=0xffffd8f0, to=10000) public double getLevelDb();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssAutomaticGainControl> CREATOR;
+  }
+
+  public static final class GnssAutomaticGainControl.Builder {
+    ctor public GnssAutomaticGainControl.Builder();
+    ctor public GnssAutomaticGainControl.Builder(@NonNull android.location.GnssAutomaticGainControl);
+    method @NonNull public android.location.GnssAutomaticGainControl build();
+    method @NonNull public android.location.GnssAutomaticGainControl.Builder setCarrierFrequencyHz(@IntRange(from=0) long);
+    method @NonNull public android.location.GnssAutomaticGainControl.Builder setConstellationType(int);
+    method @NonNull public android.location.GnssAutomaticGainControl.Builder setLevelDb(@FloatRange(from=0xffffd8f0, to=10000) double);
+  }
+
+  public final class GnssCapabilities implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.location.GnssSignalType> getGnssSignalTypes();
+    method public int hasAccumulatedDeltaRange();
+    method public boolean hasAntennaInfo();
+    method public boolean hasGeofencing();
+    method @Deprecated public boolean hasGnssAntennaInfo();
+    method public boolean hasLowPowerMode();
+    method public boolean hasMeasurementCorrections();
+    method public boolean hasMeasurementCorrectionsExcessPathLength();
+    method public boolean hasMeasurementCorrectionsForDriving();
+    method public boolean hasMeasurementCorrectionsLosSats();
+    method public boolean hasMeasurementCorrectionsReflectingPlane();
+    method public boolean hasMeasurementCorrelationVectors();
+    method public boolean hasMeasurements();
+    method public boolean hasMsa();
+    method public boolean hasMsb();
+    method public boolean hasNavigationMessages();
+    method public boolean hasOnDemandTime();
+    method public boolean hasPowerMultibandAcquisition();
+    method public boolean hasPowerMultibandTracking();
+    method public boolean hasPowerOtherModes();
+    method public boolean hasPowerSinglebandAcquisition();
+    method public boolean hasPowerSinglebandTracking();
+    method public boolean hasPowerTotal();
+    method public boolean hasSatelliteBlocklist();
+    method public boolean hasSatellitePvt();
+    method public boolean hasScheduling();
+    method public boolean hasSingleShotFix();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CAPABILITY_SUPPORTED = 1; // 0x1
+    field public static final int CAPABILITY_UNKNOWN = 0; // 0x0
+    field public static final int CAPABILITY_UNSUPPORTED = 2; // 0x2
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssCapabilities> CREATOR;
+  }
+
+  public static final class GnssCapabilities.Builder {
+    ctor public GnssCapabilities.Builder();
+    ctor public GnssCapabilities.Builder(@NonNull android.location.GnssCapabilities);
+    method @NonNull public android.location.GnssCapabilities build();
+    method @NonNull public android.location.GnssCapabilities.Builder setGnssSignalTypes(@NonNull java.util.List<android.location.GnssSignalType>);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasAccumulatedDeltaRange(int);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasAntennaInfo(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasGeofencing(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasLowPowerMode(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrections(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsExcessPathLength(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsForDriving(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsLosSats(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrectionsReflectingPlane(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurementCorrelationVectors(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMeasurements(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMsa(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasMsb(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasNavigationMessages(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasOnDemandTime(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerMultibandAcquisition(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerMultibandTracking(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerOtherModes(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerSinglebandAcquisition(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerSinglebandTracking(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasPowerTotal(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSatelliteBlocklist(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSatellitePvt(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasScheduling(boolean);
+    method @NonNull public android.location.GnssCapabilities.Builder setHasSingleShotFix(boolean);
+  }
+
+  public final class GnssClock implements android.os.Parcelable {
+    method public int describeContents();
+    method public double getBiasNanos();
+    method @FloatRange(from=0.0f) public double getBiasUncertaintyNanos();
+    method public double getDriftNanosPerSecond();
+    method @FloatRange(from=0.0f) public double getDriftUncertaintyNanosPerSecond();
+    method public long getElapsedRealtimeNanos();
+    method @FloatRange(from=0.0f) public double getElapsedRealtimeUncertaintyNanos();
+    method public long getFullBiasNanos();
+    method public int getHardwareClockDiscontinuityCount();
+    method public int getLeapSecond();
+    method @FloatRange(from=0.0) public double getReferenceCarrierFrequencyHzForIsb();
+    method @NonNull public String getReferenceCodeTypeForIsb();
+    method public int getReferenceConstellationTypeForIsb();
+    method public long getTimeNanos();
+    method @FloatRange(from=0.0f) public double getTimeUncertaintyNanos();
+    method public boolean hasBiasNanos();
+    method public boolean hasBiasUncertaintyNanos();
+    method public boolean hasDriftNanosPerSecond();
+    method public boolean hasDriftUncertaintyNanosPerSecond();
+    method public boolean hasElapsedRealtimeNanos();
+    method public boolean hasElapsedRealtimeUncertaintyNanos();
+    method public boolean hasFullBiasNanos();
+    method public boolean hasLeapSecond();
+    method public boolean hasReferenceCarrierFrequencyHzForIsb();
+    method public boolean hasReferenceCodeTypeForIsb();
+    method public boolean hasReferenceConstellationTypeForIsb();
+    method public boolean hasTimeUncertaintyNanos();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssClock> CREATOR;
+  }
+
+  public final class GnssMeasurement implements android.os.Parcelable {
+    method public int describeContents();
+    method public double getAccumulatedDeltaRangeMeters();
+    method public int getAccumulatedDeltaRangeState();
+    method public double getAccumulatedDeltaRangeUncertaintyMeters();
+    method @Deprecated public double getAutomaticGainControlLevelDb();
+    method @FloatRange(from=0, to=63) public double getBasebandCn0DbHz();
+    method @Deprecated public long getCarrierCycles();
+    method public float getCarrierFrequencyHz();
+    method @Deprecated public double getCarrierPhase();
+    method @Deprecated public double getCarrierPhaseUncertainty();
+    method @FloatRange(from=0, to=63) public double getCn0DbHz();
+    method @NonNull public String getCodeType();
+    method public int getConstellationType();
+    method public double getFullInterSignalBiasNanos();
+    method @FloatRange(from=0.0) public double getFullInterSignalBiasUncertaintyNanos();
+    method public int getMultipathIndicator();
+    method public double getPseudorangeRateMetersPerSecond();
+    method public double getPseudorangeRateUncertaintyMetersPerSecond();
+    method public long getReceivedSvTimeNanos();
+    method public long getReceivedSvTimeUncertaintyNanos();
+    method public double getSatelliteInterSignalBiasNanos();
+    method @FloatRange(from=0.0) public double getSatelliteInterSignalBiasUncertaintyNanos();
+    method public double getSnrInDb();
+    method public int getState();
+    method public int getSvid();
+    method public double getTimeOffsetNanos();
+    method @Deprecated public boolean hasAutomaticGainControlLevelDb();
+    method public boolean hasBasebandCn0DbHz();
+    method @Deprecated public boolean hasCarrierCycles();
+    method public boolean hasCarrierFrequencyHz();
+    method @Deprecated public boolean hasCarrierPhase();
+    method @Deprecated public boolean hasCarrierPhaseUncertainty();
+    method public boolean hasCodeType();
+    method public boolean hasFullInterSignalBiasNanos();
+    method public boolean hasFullInterSignalBiasUncertaintyNanos();
+    method public boolean hasSatelliteInterSignalBiasNanos();
+    method public boolean hasSatelliteInterSignalBiasUncertaintyNanos();
+    method public boolean hasSnrInDb();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ADR_STATE_CYCLE_SLIP = 4; // 0x4
+    field public static final int ADR_STATE_HALF_CYCLE_REPORTED = 16; // 0x10
+    field public static final int ADR_STATE_HALF_CYCLE_RESOLVED = 8; // 0x8
+    field public static final int ADR_STATE_RESET = 2; // 0x2
+    field public static final int ADR_STATE_UNKNOWN = 0; // 0x0
+    field public static final int ADR_STATE_VALID = 1; // 0x1
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurement> CREATOR;
+    field public static final int MULTIPATH_INDICATOR_DETECTED = 1; // 0x1
+    field public static final int MULTIPATH_INDICATOR_NOT_DETECTED = 2; // 0x2
+    field public static final int MULTIPATH_INDICATOR_UNKNOWN = 0; // 0x0
+    field public static final int STATE_2ND_CODE_LOCK = 65536; // 0x10000
+    field public static final int STATE_BDS_D2_BIT_SYNC = 256; // 0x100
+    field public static final int STATE_BDS_D2_SUBFRAME_SYNC = 512; // 0x200
+    field public static final int STATE_BIT_SYNC = 2; // 0x2
+    field public static final int STATE_CODE_LOCK = 1; // 0x1
+    field public static final int STATE_GAL_E1BC_CODE_LOCK = 1024; // 0x400
+    field public static final int STATE_GAL_E1B_PAGE_SYNC = 4096; // 0x1000
+    field public static final int STATE_GAL_E1C_2ND_CODE_LOCK = 2048; // 0x800
+    field public static final int STATE_GLO_STRING_SYNC = 64; // 0x40
+    field public static final int STATE_GLO_TOD_DECODED = 128; // 0x80
+    field public static final int STATE_GLO_TOD_KNOWN = 32768; // 0x8000
+    field public static final int STATE_MSEC_AMBIGUOUS = 16; // 0x10
+    field public static final int STATE_SBAS_SYNC = 8192; // 0x2000
+    field public static final int STATE_SUBFRAME_SYNC = 4; // 0x4
+    field public static final int STATE_SYMBOL_SYNC = 32; // 0x20
+    field public static final int STATE_TOW_DECODED = 8; // 0x8
+    field public static final int STATE_TOW_KNOWN = 16384; // 0x4000
+    field public static final int STATE_UNKNOWN = 0; // 0x0
+  }
+
+  public final class GnssMeasurementRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0) public int getIntervalMillis();
+    method public boolean isFullTracking();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurementRequest> CREATOR;
+    field public static final int PASSIVE_INTERVAL = 2147483647; // 0x7fffffff
+  }
+
+  public static final class GnssMeasurementRequest.Builder {
+    ctor public GnssMeasurementRequest.Builder();
+    ctor public GnssMeasurementRequest.Builder(@NonNull android.location.GnssMeasurementRequest);
+    method @NonNull public android.location.GnssMeasurementRequest build();
+    method @NonNull public android.location.GnssMeasurementRequest.Builder setFullTracking(boolean);
+    method @NonNull public android.location.GnssMeasurementRequest.Builder setIntervalMillis(@IntRange(from=0) int);
+  }
+
+  public final class GnssMeasurementsEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.location.GnssClock getClock();
+    method @NonNull public java.util.Collection<android.location.GnssAutomaticGainControl> getGnssAutomaticGainControls();
+    method @NonNull public java.util.Collection<android.location.GnssMeasurement> getMeasurements();
+    method public boolean hasIsFullTracking();
+    method public boolean isFullTracking();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurementsEvent> CREATOR;
+  }
+
+  public static final class GnssMeasurementsEvent.Builder {
+    ctor public GnssMeasurementsEvent.Builder();
+    ctor public GnssMeasurementsEvent.Builder(@NonNull android.location.GnssMeasurementsEvent);
+    method @NonNull public android.location.GnssMeasurementsEvent build();
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder clearIsFullTracking();
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setClock(@NonNull android.location.GnssClock);
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setGnssAutomaticGainControls(@NonNull java.util.Collection<android.location.GnssAutomaticGainControl>);
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setIsFullTracking(boolean);
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setMeasurements(@NonNull java.util.Collection<android.location.GnssMeasurement>);
+  }
+
+  public abstract static class GnssMeasurementsEvent.Callback {
+    ctor public GnssMeasurementsEvent.Callback();
+    method public void onGnssMeasurementsReceived(android.location.GnssMeasurementsEvent);
+    method @Deprecated public void onStatusChanged(int);
+    field @Deprecated public static final int STATUS_LOCATION_DISABLED = 2; // 0x2
+    field @Deprecated public static final int STATUS_NOT_ALLOWED = 3; // 0x3
+    field @Deprecated public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
+    field @Deprecated public static final int STATUS_READY = 1; // 0x1
+  }
+
+  public final class GnssNavigationMessage implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public byte[] getData();
+    method @IntRange(from=0xffffffff, to=120) public int getMessageId();
+    method public int getStatus();
+    method @IntRange(from=1) public int getSubmessageId();
+    method @IntRange(from=1, to=200) public int getSvid();
+    method public int getType();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssNavigationMessage> CREATOR;
+    field public static final int STATUS_PARITY_PASSED = 1; // 0x1
+    field public static final int STATUS_PARITY_REBUILT = 2; // 0x2
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+    field public static final int TYPE_BDS_CNAV1 = 1283; // 0x503
+    field public static final int TYPE_BDS_CNAV2 = 1284; // 0x504
+    field public static final int TYPE_BDS_D1 = 1281; // 0x501
+    field public static final int TYPE_BDS_D2 = 1282; // 0x502
+    field public static final int TYPE_GAL_F = 1538; // 0x602
+    field public static final int TYPE_GAL_I = 1537; // 0x601
+    field public static final int TYPE_GLO_L1CA = 769; // 0x301
+    field public static final int TYPE_GPS_CNAV2 = 260; // 0x104
+    field public static final int TYPE_GPS_L1CA = 257; // 0x101
+    field public static final int TYPE_GPS_L2CNAV = 258; // 0x102
+    field public static final int TYPE_GPS_L5CNAV = 259; // 0x103
+    field @FlaggedApi("android.location.flags.gnss_api_navic_l1") public static final int TYPE_IRN_L1 = 1795; // 0x703
+    field @FlaggedApi("android.location.flags.gnss_api_navic_l1") public static final int TYPE_IRN_L5 = 1794; // 0x702
+    field public static final int TYPE_IRN_L5CA = 1793; // 0x701
+    field public static final int TYPE_QZS_L1CA = 1025; // 0x401
+    field public static final int TYPE_SBS = 513; // 0x201
+    field public static final int TYPE_UNKNOWN = 0; // 0x0
+  }
+
+  public abstract static class GnssNavigationMessage.Callback {
+    ctor public GnssNavigationMessage.Callback();
+    method public void onGnssNavigationMessageReceived(android.location.GnssNavigationMessage);
+    method @Deprecated public void onStatusChanged(int);
+    field @Deprecated public static final int STATUS_LOCATION_DISABLED = 2; // 0x2
+    field @Deprecated public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
+    field @Deprecated public static final int STATUS_READY = 1; // 0x1
+  }
+
+  public final class GnssSignalType implements android.os.Parcelable {
+    method @NonNull public static android.location.GnssSignalType create(int, @FloatRange(from=0.0f, fromInclusive=false) double, @NonNull String);
+    method public int describeContents();
+    method @FloatRange(from=0.0f, fromInclusive=false) public double getCarrierFrequencyHz();
+    method @NonNull public String getCodeType();
+    method public int getConstellationType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssSignalType> CREATOR;
+  }
+
+  public final class GnssStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method @FloatRange(from=0, to=360) public float getAzimuthDegrees(@IntRange(from=0) int);
+    method @FloatRange(from=0, to=63) public float getBasebandCn0DbHz(@IntRange(from=0) int);
+    method @FloatRange(from=0) public float getCarrierFrequencyHz(@IntRange(from=0) int);
+    method @FloatRange(from=0, to=63) public float getCn0DbHz(@IntRange(from=0) int);
+    method public int getConstellationType(@IntRange(from=0) int);
+    method @FloatRange(from=0xffffffa6, to=90) public float getElevationDegrees(@IntRange(from=0) int);
+    method @IntRange(from=0) public int getSatelliteCount();
+    method @IntRange(from=1, to=206) public int getSvid(@IntRange(from=0) int);
+    method public boolean hasAlmanacData(@IntRange(from=0) int);
+    method public boolean hasBasebandCn0DbHz(@IntRange(from=0) int);
+    method public boolean hasCarrierFrequencyHz(@IntRange(from=0) int);
+    method public boolean hasEphemerisData(@IntRange(from=0) int);
+    method public boolean usedInFix(@IntRange(from=0) int);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CONSTELLATION_BEIDOU = 5; // 0x5
+    field public static final int CONSTELLATION_GALILEO = 6; // 0x6
+    field public static final int CONSTELLATION_GLONASS = 3; // 0x3
+    field public static final int CONSTELLATION_GPS = 1; // 0x1
+    field public static final int CONSTELLATION_IRNSS = 7; // 0x7
+    field public static final int CONSTELLATION_QZSS = 4; // 0x4
+    field public static final int CONSTELLATION_SBAS = 2; // 0x2
+    field public static final int CONSTELLATION_UNKNOWN = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssStatus> CREATOR;
+  }
+
+  public static final class GnssStatus.Builder {
+    ctor public GnssStatus.Builder();
+    method @NonNull public android.location.GnssStatus.Builder addSatellite(int, @IntRange(from=1, to=200) int, @FloatRange(from=0, to=63) float, @FloatRange(from=0xffffffa6, to=90) float, @FloatRange(from=0, to=360) float, boolean, boolean, boolean, boolean, @FloatRange(from=0) float, boolean, @FloatRange(from=0, to=63) float);
+    method @NonNull public android.location.GnssStatus build();
+    method @NonNull public android.location.GnssStatus.Builder clearSatellites();
+  }
+
+  public abstract static class GnssStatus.Callback {
+    ctor public GnssStatus.Callback();
+    method public void onFirstFix(int);
+    method public void onSatelliteStatusChanged(@NonNull android.location.GnssStatus);
+    method public void onStarted();
+    method public void onStopped();
+  }
+
+  @Deprecated public final class GpsSatellite {
+    method @Deprecated public float getAzimuth();
+    method @Deprecated public float getElevation();
+    method @Deprecated public int getPrn();
+    method @Deprecated public float getSnr();
+    method @Deprecated public boolean hasAlmanac();
+    method @Deprecated public boolean hasEphemeris();
+    method @Deprecated public boolean usedInFix();
+  }
+
+  @Deprecated public final class GpsStatus {
+    method @Deprecated @NonNull public static android.location.GpsStatus create(@NonNull android.location.GnssStatus, int);
+    method @Deprecated public int getMaxSatellites();
+    method @Deprecated public Iterable<android.location.GpsSatellite> getSatellites();
+    method @Deprecated public int getTimeToFirstFix();
+    field @Deprecated public static final int GPS_EVENT_FIRST_FIX = 3; // 0x3
+    field @Deprecated public static final int GPS_EVENT_SATELLITE_STATUS = 4; // 0x4
+    field @Deprecated public static final int GPS_EVENT_STARTED = 1; // 0x1
+    field @Deprecated public static final int GPS_EVENT_STOPPED = 2; // 0x2
+  }
+
+  @Deprecated public static interface GpsStatus.Listener {
+    method @Deprecated public void onGpsStatusChanged(int);
+  }
+
+  @Deprecated public static interface GpsStatus.NmeaListener {
+    method @Deprecated public void onNmeaReceived(long, String);
+  }
+
+  public interface LocationListener {
+    method public default void onFlushComplete(int);
+    method public void onLocationChanged(@NonNull android.location.Location);
+    method public default void onLocationChanged(@NonNull java.util.List<android.location.Location>);
+    method public default void onProviderDisabled(@NonNull String);
+    method public default void onProviderEnabled(@NonNull String);
+    method @Deprecated public default void onStatusChanged(String, int, android.os.Bundle);
+  }
+
+  public class LocationManager {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean addGpsStatusListener(android.location.GpsStatus.Listener);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean addNmeaListener(@NonNull android.location.GpsStatus.NmeaListener);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean addNmeaListener(@NonNull android.location.OnNmeaMessageListener);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean addNmeaListener(@NonNull android.location.OnNmeaMessageListener, @Nullable android.os.Handler);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean addNmeaListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.OnNmeaMessageListener);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void addProximityAlert(double, double, float, long, @NonNull android.app.PendingIntent);
+    method public void addTestProvider(@NonNull String, boolean, boolean, boolean, boolean, boolean, boolean, boolean, int, int);
+    method public void addTestProvider(@NonNull String, @NonNull android.location.provider.ProviderProperties);
+    method public void addTestProvider(@NonNull String, @NonNull android.location.provider.ProviderProperties, @NonNull java.util.Set<java.lang.String>);
+    method @Deprecated public void clearTestProviderEnabled(@NonNull String);
+    method @Deprecated public void clearTestProviderLocation(@NonNull String);
+    method @Deprecated public void clearTestProviderStatus(@NonNull String);
+    method @NonNull public java.util.List<java.lang.String> getAllProviders();
+    method @Deprecated @Nullable public String getBestProvider(@NonNull android.location.Criteria, boolean);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void getCurrentLocation(@NonNull String, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Location>);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void getCurrentLocation(@NonNull String, @NonNull android.location.LocationRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Location>);
+    method @Nullable public java.util.List<android.location.GnssAntennaInfo> getGnssAntennaInfos();
+    method @NonNull public android.location.GnssCapabilities getGnssCapabilities();
+    method @Nullable public String getGnssHardwareModelName();
+    method public int getGnssYearOfHardware();
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public android.location.GpsStatus getGpsStatus(@Nullable android.location.GpsStatus);
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public android.location.Location getLastKnownLocation(@NonNull String);
+    method @Deprecated @Nullable public android.location.LocationProvider getProvider(@NonNull String);
+    method @Nullable public android.location.provider.ProviderProperties getProviderProperties(@NonNull String);
+    method @NonNull public java.util.List<java.lang.String> getProviders(boolean);
+    method @Deprecated @NonNull public java.util.List<java.lang.String> getProviders(@NonNull android.location.Criteria, boolean);
+    method public boolean hasProvider(@NonNull String);
+    method public boolean isLocationEnabled();
+    method public boolean isProviderEnabled(@NonNull String);
+    method public boolean registerAntennaInfoListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssAntennaInfo.Listener);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementsEvent.Callback);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementsEvent.Callback, @Nullable android.os.Handler);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
+    method @Deprecated public boolean registerGnssNavigationMessageCallback(@NonNull android.location.GnssNavigationMessage.Callback);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssNavigationMessageCallback(@NonNull android.location.GnssNavigationMessage.Callback, @Nullable android.os.Handler);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssNavigationMessageCallback(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssNavigationMessage.Callback);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssStatusCallback(@NonNull android.location.GnssStatus.Callback);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssStatusCallback(@NonNull android.location.GnssStatus.Callback, @Nullable android.os.Handler);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssStatusCallback(@NonNull java.util.concurrent.Executor, @NonNull android.location.GnssStatus.Callback);
+    method @Deprecated public void removeGpsStatusListener(android.location.GpsStatus.Listener);
+    method @Deprecated public void removeNmeaListener(@NonNull android.location.GpsStatus.NmeaListener);
+    method public void removeNmeaListener(@NonNull android.location.OnNmeaMessageListener);
+    method @RequiresPermission(anyOf={"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}, apis="..22") public void removeProximityAlert(@NonNull android.app.PendingIntent);
+    method public void removeTestProvider(@NonNull String);
+    method @RequiresPermission(anyOf={"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"}, apis="..22") public void removeUpdates(@NonNull android.location.LocationListener);
+    method public void removeUpdates(@NonNull android.app.PendingIntent);
+    method public void requestFlush(@NonNull String, @NonNull android.location.LocationListener, int);
+    method public void requestFlush(@NonNull String, @NonNull android.app.PendingIntent, int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull String, long, float, @NonNull android.location.LocationListener);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull String, long, float, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull String, long, float, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(long, float, @NonNull android.location.Criteria, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(long, float, @NonNull android.location.Criteria, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull String, long, float, @NonNull android.app.PendingIntent);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(long, float, @NonNull android.location.Criteria, @NonNull android.app.PendingIntent);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull String, @NonNull android.location.LocationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull String, @NonNull android.location.LocationRequest, @NonNull android.app.PendingIntent);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestSingleUpdate(@NonNull String, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestSingleUpdate(@NonNull android.location.Criteria, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestSingleUpdate(@NonNull String, @NonNull android.app.PendingIntent);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestSingleUpdate(@NonNull android.location.Criteria, @NonNull android.app.PendingIntent);
+    method public boolean sendExtraCommand(@NonNull String, @NonNull String, @Nullable android.os.Bundle);
+    method public void setTestProviderEnabled(@NonNull String, boolean);
+    method public void setTestProviderLocation(@NonNull String, @NonNull android.location.Location);
+    method @Deprecated public void setTestProviderStatus(@NonNull String, int, @Nullable android.os.Bundle, long);
+    method public void unregisterAntennaInfoListener(@NonNull android.location.GnssAntennaInfo.Listener);
+    method public void unregisterGnssMeasurementsCallback(@NonNull android.location.GnssMeasurementsEvent.Callback);
+    method public void unregisterGnssNavigationMessageCallback(@NonNull android.location.GnssNavigationMessage.Callback);
+    method public void unregisterGnssStatusCallback(@NonNull android.location.GnssStatus.Callback);
+    field public static final String ACTION_GNSS_CAPABILITIES_CHANGED = "android.location.action.GNSS_CAPABILITIES_CHANGED";
+    field public static final String EXTRA_GNSS_CAPABILITIES = "android.location.extra.GNSS_CAPABILITIES";
+    field public static final String EXTRA_LOCATION_ENABLED = "android.location.extra.LOCATION_ENABLED";
+    field public static final String EXTRA_PROVIDER_ENABLED = "android.location.extra.PROVIDER_ENABLED";
+    field public static final String EXTRA_PROVIDER_NAME = "android.location.extra.PROVIDER_NAME";
+    field public static final String FUSED_PROVIDER = "fused";
+    field public static final String GPS_PROVIDER = "gps";
+    field public static final String KEY_FLUSH_COMPLETE = "flushComplete";
+    field public static final String KEY_LOCATIONS = "locations";
+    field public static final String KEY_LOCATION_CHANGED = "location";
+    field public static final String KEY_PROVIDER_ENABLED = "providerEnabled";
+    field public static final String KEY_PROXIMITY_ENTERING = "entering";
+    field @Deprecated public static final String KEY_STATUS_CHANGED = "status";
+    field public static final String MODE_CHANGED_ACTION = "android.location.MODE_CHANGED";
+    field public static final String NETWORK_PROVIDER = "network";
+    field public static final String PASSIVE_PROVIDER = "passive";
+    field public static final String PROVIDERS_CHANGED_ACTION = "android.location.PROVIDERS_CHANGED";
+  }
+
+  @Deprecated public class LocationProvider {
+    method @Deprecated public int getAccuracy();
+    method @Deprecated public String getName();
+    method @Deprecated public int getPowerRequirement();
+    method @Deprecated public boolean hasMonetaryCost();
+    method @Deprecated public boolean meetsCriteria(android.location.Criteria);
+    method @Deprecated public boolean requiresCell();
+    method @Deprecated public boolean requiresNetwork();
+    method @Deprecated public boolean requiresSatellite();
+    method @Deprecated public boolean supportsAltitude();
+    method @Deprecated public boolean supportsBearing();
+    method @Deprecated public boolean supportsSpeed();
+    field @Deprecated public static final int AVAILABLE = 2; // 0x2
+    field @Deprecated public static final int OUT_OF_SERVICE = 0; // 0x0
+    field @Deprecated public static final int TEMPORARILY_UNAVAILABLE = 1; // 0x1
+  }
+
+  public final class LocationRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=1) public long getDurationMillis();
+    method @IntRange(from=0) public long getIntervalMillis();
+    method @IntRange(from=0) public long getMaxUpdateDelayMillis();
+    method @IntRange(from=1, to=java.lang.Integer.MAX_VALUE) public int getMaxUpdates();
+    method @FloatRange(from=0, to=java.lang.Float.MAX_VALUE) public float getMinUpdateDistanceMeters();
+    method @IntRange(from=0) public long getMinUpdateIntervalMillis();
+    method public int getQuality();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.LocationRequest> CREATOR;
+    field public static final long PASSIVE_INTERVAL = 9223372036854775807L; // 0x7fffffffffffffffL
+    field public static final int QUALITY_BALANCED_POWER_ACCURACY = 102; // 0x66
+    field public static final int QUALITY_HIGH_ACCURACY = 100; // 0x64
+    field public static final int QUALITY_LOW_POWER = 104; // 0x68
+  }
+
+  public static final class LocationRequest.Builder {
+    ctor public LocationRequest.Builder(long);
+    ctor public LocationRequest.Builder(@NonNull android.location.LocationRequest);
+    method @NonNull public android.location.LocationRequest build();
+    method @NonNull public android.location.LocationRequest.Builder clearMinUpdateIntervalMillis();
+    method @NonNull public android.location.LocationRequest.Builder setDurationMillis(@IntRange(from=1) long);
+    method @NonNull public android.location.LocationRequest.Builder setIntervalMillis(@IntRange(from=0) long);
+    method @NonNull public android.location.LocationRequest.Builder setMaxUpdateDelayMillis(@IntRange(from=0) long);
+    method @NonNull public android.location.LocationRequest.Builder setMaxUpdates(@IntRange(from=1, to=java.lang.Integer.MAX_VALUE) int);
+    method @NonNull public android.location.LocationRequest.Builder setMinUpdateDistanceMeters(@FloatRange(from=0, to=java.lang.Float.MAX_VALUE) float);
+    method @NonNull public android.location.LocationRequest.Builder setMinUpdateIntervalMillis(@IntRange(from=0) long);
+    method @NonNull public android.location.LocationRequest.Builder setQuality(int);
+  }
+
+  public interface OnNmeaMessageListener {
+    method public void onNmeaMessage(String, long);
+  }
+
+  public abstract class SettingInjectorService extends android.app.Service {
+    ctor public SettingInjectorService(String);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method protected abstract boolean onGetEnabled();
+    method protected abstract String onGetSummary();
+    method public final void onStart(android.content.Intent, int);
+    method public final int onStartCommand(android.content.Intent, int, int);
+    method public static final void refreshSettings(@NonNull android.content.Context);
+    field public static final String ACTION_INJECTED_SETTING_CHANGED = "android.location.InjectedSettingChanged";
+    field public static final String ACTION_SERVICE_INTENT = "android.location.SettingInjectorService";
+    field public static final String ATTRIBUTES_NAME = "injected-location-setting";
+    field public static final String META_DATA_NAME = "android.location.SettingInjectorService";
+  }
+
+}
+
+package android.location.altitude {
+
+  public final class AltitudeConverter {
+    ctor public AltitudeConverter();
+    method @WorkerThread public void addMslAltitudeToLocation(@NonNull android.content.Context, @NonNull android.location.Location) throws java.io.IOException;
+    method @FlaggedApi("android.location.flags.geoid_heights_via_altitude_hal") public boolean tryAddMslAltitudeToLocation(@NonNull android.location.Location);
+  }
+
+}
+
+package android.location.provider {
+
+  public final class ProviderProperties implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAccuracy();
+    method public int getPowerUsage();
+    method public boolean hasAltitudeSupport();
+    method public boolean hasBearingSupport();
+    method public boolean hasCellRequirement();
+    method public boolean hasMonetaryCost();
+    method public boolean hasNetworkRequirement();
+    method public boolean hasSatelliteRequirement();
+    method public boolean hasSpeedSupport();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACCURACY_COARSE = 2; // 0x2
+    field public static final int ACCURACY_FINE = 1; // 0x1
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.provider.ProviderProperties> CREATOR;
+    field public static final int POWER_USAGE_HIGH = 3; // 0x3
+    field public static final int POWER_USAGE_LOW = 1; // 0x1
+    field public static final int POWER_USAGE_MEDIUM = 2; // 0x2
+  }
+
+  public static final class ProviderProperties.Builder {
+    ctor public ProviderProperties.Builder();
+    ctor public ProviderProperties.Builder(@NonNull android.location.provider.ProviderProperties);
+    method @NonNull public android.location.provider.ProviderProperties build();
+    method @NonNull public android.location.provider.ProviderProperties.Builder setAccuracy(int);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasAltitudeSupport(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasBearingSupport(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasCellRequirement(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasMonetaryCost(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasNetworkRequirement(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasSatelliteRequirement(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setHasSpeedSupport(boolean);
+    method @NonNull public android.location.provider.ProviderProperties.Builder setPowerUsage(int);
+  }
+
+}
+

@@ -22,12 +22,15 @@ import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
+import android.widget.flags.Flags;
 
 import com.android.internal.R;
 
@@ -37,12 +40,15 @@ import com.android.internal.R;
  * Icon.loadDrawable().
  */
 @RemoteViews.RemoteView
-public class BigPictureNotificationImageView extends ImageView {
+public class BigPictureNotificationImageView extends ImageView implements
+        NotificationDrawableConsumer {
 
     private static final String TAG = BigPictureNotificationImageView.class.getSimpleName();
 
     private final int mMaximumDrawableWidth;
     private final int mMaximumDrawableHeight;
+
+    private NotificationIconManager mIconManager;
 
     public BigPictureNotificationImageView(@NonNull Context context) {
         this(context, null, 0, 0);
@@ -69,6 +75,19 @@ public class BigPictureNotificationImageView extends ImageView {
                         : R.dimen.notification_big_picture_max_height);
     }
 
+
+    /**
+     * Sets an {@link NotificationIconManager} on this ImageView, which handles the loading of
+     * icons, instead of using the {@link LocalImageResolver} directly.
+     * If set, it overrides the behaviour of {@link #setImageIconAsync} and {@link #setImageIcon},
+     * and it expects that the content of this imageView is only updated calling these two methods.
+     *
+     * @param iconManager to be called, when the icon is updated
+     */
+    public void setIconManager(NotificationIconManager iconManager) {
+        mIconManager = iconManager;
+    }
+
     @Override
     @android.view.RemotableViewMethod(asyncImpl = "setImageURIAsync")
     public void setImageURI(@Nullable Uri uri) {
@@ -84,13 +103,38 @@ public class BigPictureNotificationImageView extends ImageView {
     @Override
     @android.view.RemotableViewMethod(asyncImpl = "setImageIconAsync")
     public void setImageIcon(@Nullable Icon icon) {
+        if (mIconManager != null) {
+            mIconManager.updateIcon(this, icon).run();
+            return;
+        }
+        // old code path
         setImageDrawable(loadImage(icon));
     }
 
     /** @hide **/
     public Runnable setImageIconAsync(@Nullable Icon icon) {
+        if (mIconManager != null) {
+            return mIconManager.updateIcon(this, icon);
+        }
+        // old code path
         final Drawable drawable = loadImage(icon);
         return () -> setImageDrawable(drawable);
+    }
+
+    @Override
+    public void setImageDrawable(@Nullable Drawable drawable) {
+        if (drawable instanceof BitmapDrawable bitmapDrawable) {
+            if (bitmapDrawable.getBitmap() == null) {
+                if (Flags.bigPictureStyleDiscardEmptyIconBitmapDrawables()) {
+                    Log.e(TAG, "discarding BitmapDrawable with null Bitmap (invalid image file?)");
+                    drawable = null;
+                } else {
+                    Log.e(TAG, "setting BitmapDrawable with null Bitmap (invalid image file?)");
+                }
+            }
+        }
+
+        super.setImageDrawable(drawable);
     }
 
     private Drawable loadImage(Uri uri) {
@@ -101,11 +145,19 @@ public class BigPictureNotificationImageView extends ImageView {
 
     private Drawable loadImage(Icon icon) {
         if (icon == null) return null;
+
         Drawable drawable = LocalImageResolver.resolveImage(icon, mContext, mMaximumDrawableWidth,
                 mMaximumDrawableHeight);
-        if (drawable == null) {
-            return icon.loadDrawable(mContext);
+        if (drawable != null) {
+            return drawable;
         }
-        return drawable;
+
+        drawable = icon.loadDrawable(mContext);
+        if (drawable != null) {
+            return drawable;
+        }
+
+        Log.e(TAG, "Couldn't load drawable for icon: " + icon);
+        return null;
     }
 }

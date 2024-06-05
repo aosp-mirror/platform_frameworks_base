@@ -1311,8 +1311,9 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         if (!node.mEnded) {
             float durationScale = ValueAnimator.getDurationScale();
             durationScale = durationScale == 0  ? 1 : durationScale;
-            node.mEnded = node.mAnimation.pulseAnimationFrame(
-                    (long) (animPlayTime * durationScale));
+            if (node.mAnimation.pulseAnimationFrame((long) (animPlayTime * durationScale))) {
+                node.mEnded = true;
+            }
         }
     }
 
@@ -1346,8 +1347,26 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         }
         // Set the child animators to the right end:
         if (mShouldResetValuesAtStart) {
-            initChildren();
-            skipToEndValue(!mReversing);
+            if (isInitialized()) {
+                skipToEndValue(!mReversing);
+            } else if (mReversing) {
+                // Reversing but haven't initialized all the children yet.
+                initChildren();
+                skipToEndValue(!mReversing);
+            } else {
+                // If not all children are initialized and play direction is forward
+                for (int i = mEvents.size() - 1; i >= 0; i--) {
+                    if (mEvents.get(i).mEvent == AnimationEvent.ANIMATION_DELAY_ENDED) {
+                        Animator anim = mEvents.get(i).mNode.mAnimation;
+                        // Only reset the animations that have been initialized to start value,
+                        // so that if they are defined without a start value, they will get the
+                        // values set at the right time (i.e. the next animation run)
+                        if (anim.isInitialized()) {
+                            anim.skipToEndValue(true);
+                        }
+                    }
+                }
+            }
         }
 
         if (mReversing || mStartDelay == 0 || mSeekState.isActive()) {
@@ -1691,7 +1710,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                     return 1;
                 }
                 // When neither event happens at INFINITE time:
-                return (int) (t1 - t2);
+                return t1 - t2 > 0 ? 1 : -1;
             }
         });
 

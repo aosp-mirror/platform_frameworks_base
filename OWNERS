@@ -16,8 +16,6 @@ narayan@google.com #{LAST_RESORT_SUGGESTION}
 ogunwale@google.com #{LAST_RESORT_SUGGESTION}
 roosa@google.com #{LAST_RESORT_SUGGESTION}
 smoreland@google.com #{LAST_RESORT_SUGGESTION}
-svetoslavganov@android.com #{LAST_RESORT_SUGGESTION}
-svetoslavganov@google.com #{LAST_RESORT_SUGGESTION}
 yamasani@google.com #{LAST_RESORT_SUGGESTION}
 
 # API changes are already covered by API-Review+1 (http://mdb/android-api-council)
@@ -30,11 +28,19 @@ per-file */TEST_MAPPING = *
 # Support bulk translation updates
 per-file */res*/values*/*.xml = byi@google.com, delphij@google.com
 
-per-file **.bp,**.mk = hansson@google.com
-per-file *.bp = file:platform/build/soong:/OWNERS #{LAST_RESORT_SUGGESTION}
-per-file Android.mk = file:platform/build/soong:/OWNERS #{LAST_RESORT_SUGGESTION}
-per-file framework-jarjar-rules.txt = file:platform/build/soong:/OWNERS #{LAST_RESORT_SUGGESTION}
+per-file **.bp,**.mk = hansson@google.com, joeo@google.com, lamontjones@google.com
 per-file TestProtoLibraries.bp = file:platform/platform_testing:/libraries/health/OWNERS
 per-file TestProtoLibraries.bp = file:platform/tools/tradefederation:/OWNERS
 
+per-file INPUT_OWNERS = file:/INPUT_OWNERS
 per-file ZYGOTE_OWNERS = file:/ZYGOTE_OWNERS
+per-file SQLITE_OWNERS = file:/SQLITE_OWNERS
+
+per-file *ravenwood* = file:ravenwood/OWNERS
+per-file *Ravenwood* = file:ravenwood/OWNERS
+
+per-file PERFORMANCE_OWNERS = file:/PERFORMANCE_OWNERS
+
+per-file PACKAGE_MANAGER_OWNERS = file:/PACKAGE_MANAGER_OWNERS
+
+per-file WEAR_OWNERS = file:/WEAR_OWNERS

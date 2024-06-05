@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.NotificationManager;
@@ -33,6 +34,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.ActivityUnitTestCase;
+import android.webkit.WebView;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -46,6 +48,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Base64;
+
 @RunWith(AndroidJUnit4.class)
 public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchaseActivity> {
     private static final String CARRIER = "Some Carrier";
@@ -53,10 +57,13 @@ public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchas
     private static final int PHONE_ID = 0;
 
     @Mock PendingIntent mPendingIntent;
+    @Mock PendingIntent mSuccessfulIntent;
     @Mock PendingIntent mCanceledIntent;
+    @Mock PendingIntent mRequestFailedIntent;
     @Mock CarrierConfigManager mCarrierConfigManager;
     @Mock NotificationManager mNotificationManager;
     @Mock PersistableBundle mPersistableBundle;
+    @Mock WebView mWebView;
 
     private SlicePurchaseActivity mSlicePurchaseActivity;
     private Context mContext;
@@ -107,25 +114,28 @@ public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchas
         doReturn(true).when(mCanceledIntent).isBroadcast();
         doReturn(mCanceledIntent).when(spiedIntent).getParcelableExtra(
                 eq(SlicePurchaseController.EXTRA_INTENT_CANCELED), eq(PendingIntent.class));
+        doReturn(TelephonyManager.PHONE_PROCESS_NAME).when(mSuccessfulIntent).getCreatorPackage();
+        doReturn(true).when(mSuccessfulIntent).isBroadcast();
+        doReturn(mSuccessfulIntent).when(spiedIntent).getParcelableExtra(
+                eq(SlicePurchaseController.EXTRA_INTENT_SUCCESS), eq(PendingIntent.class));
+        doReturn(TelephonyManager.PHONE_PROCESS_NAME).when(mRequestFailedIntent)
+                .getCreatorPackage();
+        doReturn(true).when(mRequestFailedIntent).isBroadcast();
+        doReturn(mRequestFailedIntent).when(spiedIntent).getParcelableExtra(
+                eq(SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED), eq(PendingIntent.class));
 
         mSlicePurchaseActivity = startActivity(spiedIntent, null, null);
     }
 
     @Test
     public void testOnPurchaseSuccessful() throws Exception {
-        int duration = 5 * 60 * 1000; // 5 minutes
-        int invalidDuration = -1;
-        mSlicePurchaseActivity.onPurchaseSuccessful(duration);
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mPendingIntent).send(eq(mContext), eq(0), intentCaptor.capture());
-        Intent intent = intentCaptor.getValue();
-        assertEquals(duration, intent.getLongExtra(
-                SlicePurchaseController.EXTRA_PURCHASE_DURATION, invalidDuration));
+        mSlicePurchaseActivity.onPurchaseSuccessful();
+        verify(mSuccessfulIntent).send();
     }
 
     @Test
     public void testOnPurchaseFailed() throws Exception {
-        int failureCode = SlicePurchaseController.FAILURE_CODE_SERVER_UNREACHABLE;
+        int failureCode = SlicePurchaseController.FAILURE_CODE_CARRIER_URL_UNAVAILABLE;
         String failureReason = "Server unreachable";
         mSlicePurchaseActivity.onPurchaseFailed(failureCode, failureReason);
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -141,5 +151,30 @@ public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchas
     public void testOnUserCanceled() throws Exception {
         mSlicePurchaseActivity.onDestroy();
         verify(mCanceledIntent).send();
+    }
+
+    @Test
+    public void testOnDismissFlow() throws Exception {
+        mSlicePurchaseActivity.onDismissFlow();
+        verify(mRequestFailedIntent).send();
+    }
+
+    @Test
+    public void testStartWebView() {
+        // unspecified contents type
+        SlicePurchaseActivity.startWebView(mWebView, URL, 0 /* CONTENTS_TYPE_UNSPECIFIED */, null);
+        verify(mWebView).loadUrl(eq(URL));
+
+        // specified contents type with user data
+        String userData = "userData";
+        byte[] userDataBytes = userData.getBytes();
+        SlicePurchaseActivity.startWebView(mWebView, URL, 1 /* CONTENTS_TYPE_JSON */, userData);
+        verify(mWebView).postUrl(eq(URL), eq(userDataBytes));
+
+        // specified contents type with encoded user data
+        byte[] encodedUserData = Base64.getEncoder().encode(userDataBytes);
+        userData = "encodedValue=" + new String(encodedUserData);
+        SlicePurchaseActivity.startWebView(mWebView, URL, 1 /* CONTENTS_TYPE_JSON */, userData);
+        verify(mWebView, times(2)).postUrl(eq(URL), eq(userDataBytes));
     }
 }

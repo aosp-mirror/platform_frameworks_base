@@ -19,20 +19,22 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Context
 import androidx.annotation.DimenRes
-import com.android.systemui.R
-import com.android.systemui.common.ui.data.repository.ConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.doze.util.BurnInHelperWrapper
-import com.android.systemui.util.time.SystemClock
+import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
@@ -45,23 +47,35 @@ constructor(
     private val context: Context,
     private val burnInHelperWrapper: BurnInHelperWrapper,
     @Application private val scope: CoroutineScope,
-    private val configurationRepository: ConfigurationRepository,
-    private val systemClock: SystemClock,
+    private val configurationInteractor: ConfigurationInteractor,
+    private val keyguardInteractor: KeyguardInteractor,
 ) {
-    private val _dozeTimeTick = MutableStateFlow<Long>(0)
-    val dozeTimeTick: StateFlow<Long> = _dozeTimeTick.asStateFlow()
-
-    val udfpsBurnInXOffset: StateFlow<Int> =
+    val deviceEntryIconXOffset: StateFlow<Int> =
         burnInOffsetDefinedInPixels(R.dimen.udfps_burn_in_offset_x, isXAxis = true)
-    val udfpsBurnInYOffset: StateFlow<Int> =
+            .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
+    val deviceEntryIconYOffset: StateFlow<Int> =
         burnInOffsetDefinedInPixels(R.dimen.udfps_burn_in_offset_y, isXAxis = false)
-    val udfpsBurnInProgress: StateFlow<Float> =
-        dozeTimeTick
+            .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
+    val udfpsProgress: StateFlow<Float> =
+        keyguardInteractor.dozeTimeTick
             .mapLatest { burnInHelperWrapper.burnInProgressOffset() }
-            .stateIn(scope, SharingStarted.Lazily, burnInHelperWrapper.burnInProgressOffset())
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                burnInHelperWrapper.burnInProgressOffset()
+            )
 
-    fun dozeTimeTick() {
-        _dozeTimeTick.value = systemClock.uptimeMillis()
+    /** Given the max x,y dimens, determine the current translation shifts. */
+    fun burnIn(xDimenResourceId: Int, yDimenResourceId: Int): Flow<BurnInModel> {
+        return combine(
+                burnInOffset(xDimenResourceId, isXAxis = true),
+                burnInOffset(yDimenResourceId, isXAxis = false).map {
+                    it * 2 - context.resources.getDimensionPixelSize(yDimenResourceId)
+                }
+            ) { translationX, translationY ->
+                BurnInModel(translationX, translationY, burnInHelperWrapper.burnInScale())
+            }
+            .distinctUntilChanged()
     }
 
     /**
@@ -72,21 +86,14 @@ constructor(
     private fun burnInOffset(
         @DimenRes maxBurnInOffsetResourceId: Int,
         isXAxis: Boolean,
-    ): StateFlow<Int> {
-        return configurationRepository.onAnyConfigurationChange
-            .flatMapLatest {
-                val maxBurnInOffsetPixels =
-                    context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId)
-                dozeTimeTick.mapLatest { calculateOffset(maxBurnInOffsetPixels, isXAxis) }
+    ): Flow<Int> {
+        return configurationInteractor.onAnyConfigurationChange.flatMapLatest {
+            val maxBurnInOffsetPixels =
+                context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId)
+            keyguardInteractor.dozeTimeTick.mapLatest {
+                calculateOffset(maxBurnInOffsetPixels, isXAxis)
             }
-            .stateIn(
-                scope,
-                SharingStarted.Lazily,
-                calculateOffset(
-                    context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId),
-                    isXAxis,
-                )
-            )
+        }
     }
 
     /**
@@ -97,22 +104,14 @@ constructor(
     private fun burnInOffsetDefinedInPixels(
         @DimenRes maxBurnInOffsetResourceId: Int,
         isXAxis: Boolean,
-    ): StateFlow<Int> {
-        return configurationRepository.scaleForResolution
-            .flatMapLatest { scale ->
-                val maxBurnInOffsetPixels =
-                    context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId)
-                dozeTimeTick.mapLatest { calculateOffset(maxBurnInOffsetPixels, isXAxis, scale) }
+    ): Flow<Int> {
+        return configurationInteractor.scaleForResolution.flatMapLatest { scale ->
+            val maxBurnInOffsetPixels =
+                context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId)
+            keyguardInteractor.dozeTimeTick.mapLatest {
+                calculateOffset(maxBurnInOffsetPixels, isXAxis, scale)
             }
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                calculateOffset(
-                    context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId),
-                    isXAxis,
-                    configurationRepository.getResolutionScale(),
-                )
-            )
+        }
     }
 
     private fun calculateOffset(

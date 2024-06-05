@@ -23,14 +23,8 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-android_test {
-    name: "FlickerTests",
-    srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
-    ],
-    manifest: "AndroidManifest.xml",
-    test_config: "AndroidTest.xml",
+java_defaults {
+    name: "FlickerTestsDefault",
     platform_apis: true,
     certificate: "platform",
     optimize: {
@@ -42,17 +36,13 @@ android_test {
         "androidx.test.ext.junit",
         "flickertestapplib",
         "flickerlib",
-        "flickerlib-apphelpers",
         "flickerlib-helpers",
-        "truth-prebuilt",
-        "launcher-helper-lib",
-        "launcher-aosp-tapl",
+        "flickerlib-trace_processor_shell",
         "platform-test-annotations",
-        "wm-flicker-window-extensions",
+        "wm-flicker-common-app-helpers",
+        "wm-shell-flicker-utils",
     ],
-    data: [
-        ":FlickerTestApp",
-    ],
+    data: [":FlickerTestApp"],
 }
 
 java_library {
@@ -65,48 +55,34 @@ java_library {
         "src/**/*Assertions.java",
         "src/**/*Assertions.kt",
     ],
-    exclude_srcs: [
-        "**/helpers/*",
-    ],
     static_libs: [
         "flickerlib",
         "flickerlib-helpers",
-        "truth-prebuilt",
+        "truth",
         "app-helpers-core",
     ],
-}
-
-java_library {
-    name: "wm-flicker-common-app-helpers",
-    platform_apis: true,
-    optimize: {
-        enabled: false,
-    },
-    srcs: [
-        "**/helpers/*",
-    ],
-    static_libs: [
-        "flickertestapplib",
-        "flickerlib",
-        "flickerlib-apphelpers",
-        "flickerlib-helpers",
-        "truth-prebuilt",
-        "app-helpers-core",
-        "wm-flicker-window-extensions",
-    ],
-}
-
-android_library_import {
-    name: "wm-flicker-window-extensions_nodeps",
-    aars: ["libs/window-extensions-release.aar"],
-    sdk_version: "current",
 }
 
 java_library {
     name: "wm-flicker-window-extensions",
     sdk_version: "current",
     static_libs: [
-        "wm-flicker-window-extensions_nodeps",
+        "androidx.window.extensions_extensions-nodeps",
     ],
     installable: false,
+}
+
+java_library {
+    name: "wm-flicker-window-extensions-core",
+    sdk_version: "current",
+    static_libs: [
+        "androidx.window.extensions.core_core-nodeps",
+    ],
+    installable: false,
+}
+
+java_library {
+    name: "FlickerTestsBase",
+    defaults: ["FlickerTestsDefault"],
+    srcs: ["src/**/*"],
 }

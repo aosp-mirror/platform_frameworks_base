@@ -32,7 +32,7 @@ constructor(
 ) : CoreStartable {
 
     init {
-        dumpManager.registerCriticalDumpable(FeatureFlagsRelease.TAG) { pw, args ->
+        dumpManager.registerCriticalDumpable(FeatureFlagsClassicRelease.TAG) { pw, args ->
             featureFlags.dump(pw, args)
         }
     }

@@ -23,6 +23,7 @@ package {
 
 android_test {
     name: "SettingsLibTests",
+    use_resource_processor: true,
     defaults: [
         "SettingsLibDefaults",
         "framework-wifi-test-defaults",
@@ -39,6 +40,8 @@ android_test {
         "android.test.runner",
         "telephony-common",
         "android.test.base",
+        "android.test.mock",
+        "truth",
     ],
 
     platform_apis: true,
@@ -48,12 +51,24 @@ android_test {
         "androidx.test.core",
         "androidx.test.rules",
         "androidx.test.espresso.core",
-        "mockito-target-minus-junit4",
-        "truth-prebuilt",
+        "androidx.test.ext.junit",
+        "flag-junit",
+        "kotlinx_coroutines_test",
+        "mockito-target-extended-minus-junit4",
+        "platform-test-annotations",
+        "truth",
+        "SettingsLibAvatarPicker",
         "SettingsLibDeviceStateRotationLock",
         "SettingsLibSettingsSpinner",
         "SettingsLibUsageProgressBarPreference",
+        "settingslib_media_flags_lib",
     ],
 
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libmultiplejvmtiagentsinterferenceagent",
+        "libstaticjvmtiagent",
+    ],
     dxflags: ["--multi-dex"],
+    manifest: "AndroidManifest.xml",
 }

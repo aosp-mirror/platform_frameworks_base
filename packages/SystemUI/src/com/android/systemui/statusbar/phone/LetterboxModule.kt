@@ -18,12 +18,10 @@
 package com.android.systemui.statusbar.phone
 
 import com.android.systemui.CoreStartable
-import com.android.systemui.statusbar.core.StatusBarInitializer
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
-import dagger.multibindings.IntoSet
 
 @Module
 abstract class LetterboxModule {
@@ -31,10 +29,4 @@ abstract class LetterboxModule {
     @IntoMap
     @ClassKey(LetterboxBackgroundProvider::class)
     abstract fun bindFeature(impl: LetterboxBackgroundProvider): CoreStartable
-
-    @Binds
-    @IntoSet
-    abstract fun statusBarInitializedListener(
-        letterboxAppearanceCalculator: LetterboxAppearanceCalculator
-    ): StatusBarInitializer.OnStatusBarViewInitializedListener
 }

@@ -15,6 +15,8 @@
  */
 package com.android.server.power.batterysaver;
 
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.NULL_DEFAULT;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -35,12 +37,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.PowerManager;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings.Global;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -64,6 +68,9 @@ public class BatterySaverStateMachineTest {
     private Resources mMockResources;
 
     private DevicePersistedState mPersistedState;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(NULL_DEFAULT);
 
     private class DevicePersistedState {
         // Current battery level.
@@ -171,6 +178,11 @@ public class BatterySaverStateMachineTest {
         void triggerDynamicModeNotification() {
             // Do nothing
         }
+
+        @Override
+        void triggerDynamicModeNotificationV2() {
+            // Do nothing
+        }
     }
 
     @Before
@@ -196,6 +208,9 @@ public class BatterySaverStateMachineTest {
         when(mMockResources.getBoolean(
                 com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled))
                 .thenReturn(false);
+        when(mMockResources.getBoolean(
+                com.android.internal.R.bool.config_batterySaverTurnedOffNotificationEnabled))
+                .thenReturn(true);
         when(mMockResources.getInteger(
                 com.android.internal.R.integer.config_dynamicPowerSavingsDefaultDisableThreshold))
                 .thenReturn(80);

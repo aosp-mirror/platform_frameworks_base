@@ -18,20 +18,23 @@
               xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/system_icons"
     android:layout_width="wrap_content"
-    android:layout_height="match_parent"
-    android:layout_gravity="center_vertical|end"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/status_bar_icons_padding_bottom"
+    android:paddingTop="@dimen/status_bar_icons_padding_top"
+    android:paddingStart="@dimen/status_bar_icons_padding_start"
+    android:paddingEnd="@dimen/status_bar_icons_padding_end"
     android:gravity="center_vertical">
 
     <com.android.systemui.statusbar.phone.StatusIconContainer android:id="@+id/statusIcons"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:paddingEnd="@dimen/signal_cluster_battery_padding"
         android:gravity="center_vertical"
         android:orientation="horizontal"/>
 
     <com.android.systemui.battery.BatteryMeterView android:id="@+id/battery"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:clipToPadding="false"
         android:clipChildren="false"

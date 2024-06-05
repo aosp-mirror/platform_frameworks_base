@@ -26,9 +26,8 @@ import android.util.SparseArray;
 
 import com.android.internal.util.FrameworkStatsLog;
 
-import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Function;
 
 /**
  * Represents a vibration defined by a {@link CombinedVibration} that will be performed by
@@ -38,27 +37,35 @@ final class HalVibration extends Vibration {
 
     public final SparseArray<VibrationEffect> mFallbacks = new SparseArray<>();
 
-    /** The actual effect to be played. */
-    @Nullable
-    private CombinedVibration mEffect;
+    /** A {@link CountDownLatch} to enable waiting for completion. */
+    private final CountDownLatch mCompletionLatch = new CountDownLatch(1);
+
+    /** The original effect that was requested, for debugging purposes. */
+    @NonNull
+    private final CombinedVibration mOriginalEffect;
 
     /**
-     * The original effect that was requested. Typically these two things differ because the effect
-     * was scaled based on the users vibration intensity settings.
+     * The scaled and adapted effect to be played. This should only be updated from a single thread,
+     * but can be read from different ones for debugging purposes.
      */
-    @Nullable
-    private CombinedVibration mOriginalEffect;
+    @NonNull
+    private volatile CombinedVibration mEffectToPlay;
 
     /** Vibration status. */
     private Vibration.Status mStatus;
 
-    /** A {@link CountDownLatch} to enable waiting for completion. */
-    private final CountDownLatch mCompletionLatch = new CountDownLatch(1);
+    /** Reported scale values applied to the vibration effects. */
+    private int mScaleLevel;
+    private float mAdaptiveScale;
 
-    HalVibration(@NonNull IBinder token, CombinedVibration effect, @NonNull CallerInfo callerInfo) {
+    HalVibration(@NonNull IBinder token, @NonNull CombinedVibration effect,
+            @NonNull CallerInfo callerInfo) {
         super(token, callerInfo);
-        this.mEffect = effect;
+        mOriginalEffect = effect;
+        mEffectToPlay = effect;
         mStatus = Vibration.Status.RUNNING;
+        mScaleLevel = VibrationScaler.SCALE_NONE;
+        mAdaptiveScale = VibrationScaler.ADAPTIVE_SCALE_NONE;
     }
 
     /**
@@ -101,53 +108,57 @@ final class HalVibration extends Vibration {
     }
 
     /**
-     * Applied update function to the current effect held by this vibration, and to each fallback
-     * effect added.
+     * Resolves the default vibration amplitude of {@link #getEffectToPlay()} and each fallback.
+     *
+     * @param defaultAmplitude An integer in [1,255] representing the device default amplitude to
+     *                        replace the {@link VibrationEffect#DEFAULT_AMPLITUDE}.
      */
-    public void updateEffects(Function<VibrationEffect, VibrationEffect> updateFn) {
-        CombinedVibration newEffect = transformCombinedEffect(mEffect, updateFn);
-        if (!newEffect.equals(mEffect)) {
-            if (mOriginalEffect == null) {
-                mOriginalEffect = mEffect;
-            }
-            mEffect = newEffect;
+    public void resolveEffects(int defaultAmplitude) {
+        CombinedVibration newEffect =
+                mEffectToPlay.transform(VibrationEffect::resolve, defaultAmplitude);
+        if (!Objects.equals(mEffectToPlay, newEffect)) {
+            mEffectToPlay = newEffect;
         }
         for (int i = 0; i < mFallbacks.size(); i++) {
-            mFallbacks.setValueAt(i, updateFn.apply(mFallbacks.valueAt(i)));
+            mFallbacks.setValueAt(i, mFallbacks.valueAt(i).resolve(defaultAmplitude));
         }
     }
 
     /**
-     * Creates a new {@link CombinedVibration} by applying the given transformation function
-     * to each {@link VibrationEffect}.
+     * Scales the {@link #getEffectToPlay()} and each fallback effect based on the vibration usage.
      */
-    private static CombinedVibration transformCombinedEffect(
-            CombinedVibration combinedEffect, Function<VibrationEffect, VibrationEffect> fn) {
-        if (combinedEffect instanceof CombinedVibration.Mono) {
-            VibrationEffect effect = ((CombinedVibration.Mono) combinedEffect).getEffect();
-            return CombinedVibration.createParallel(fn.apply(effect));
-        } else if (combinedEffect instanceof CombinedVibration.Stereo) {
-            SparseArray<VibrationEffect> effects =
-                    ((CombinedVibration.Stereo) combinedEffect).getEffects();
-            CombinedVibration.ParallelCombination combination =
-                    CombinedVibration.startParallel();
-            for (int i = 0; i < effects.size(); i++) {
-                combination.addVibrator(effects.keyAt(i), fn.apply(effects.valueAt(i)));
-            }
-            return combination.combine();
-        } else if (combinedEffect instanceof CombinedVibration.Sequential) {
-            List<CombinedVibration> effects =
-                    ((CombinedVibration.Sequential) combinedEffect).getEffects();
-            CombinedVibration.SequentialCombination combination =
-                    CombinedVibration.startSequential();
-            for (CombinedVibration effect : effects) {
-                combination.addNext(transformCombinedEffect(effect, fn));
-            }
-            return combination.combine();
-        } else {
-            // Unknown combination, return same effect.
-            return combinedEffect;
+    public void scaleEffects(VibrationScaler scaler) {
+        int vibrationUsage = callerInfo.attrs.getUsage();
+
+        // Save scale values for debugging purposes.
+        mScaleLevel = scaler.getScaleLevel(vibrationUsage);
+        mAdaptiveScale = scaler.getAdaptiveHapticsScale(vibrationUsage);
+        stats.reportAdaptiveScale(mAdaptiveScale);
+
+        // Scale all VibrationEffect instances in given CombinedVibration.
+        CombinedVibration newEffect = mEffectToPlay.transform(scaler::scale, vibrationUsage);
+        if (!Objects.equals(mEffectToPlay, newEffect)) {
+            mEffectToPlay = newEffect;
         }
+
+        // Scale all fallback VibrationEffect instances that can be used by VibrationThread.
+        for (int i = 0; i < mFallbacks.size(); i++) {
+            mFallbacks.setValueAt(i, scaler.scale(mFallbacks.valueAt(i), vibrationUsage));
+        }
+    }
+
+    /**
+     * Adapts the {@link #getEffectToPlay()} to the device using given vibrator adapter.
+     *
+     * @param deviceAdapter A {@link CombinedVibration.VibratorAdapter} that transforms vibration
+     *                      effects to device vibrators based on its capabilities.
+     */
+    public void adaptToDevice(CombinedVibration.VibratorAdapter deviceAdapter) {
+        CombinedVibration newEffect = mEffectToPlay.adapt(deviceAdapter);
+        if (!Objects.equals(mEffectToPlay, newEffect)) {
+            mEffectToPlay = newEffect;
+        }
+        // No need to update fallback effects, they are already configured per device.
     }
 
     /** Return true is current status is different from {@link Status#RUNNING}. */
@@ -157,21 +168,21 @@ final class HalVibration extends Vibration {
 
     @Override
     public boolean isRepeating() {
-        return mEffect.getDuration() == Long.MAX_VALUE;
+        return mOriginalEffect.getDuration() == Long.MAX_VALUE;
     }
 
     /** Return the effect that should be played by this vibration. */
-    @Nullable
-    public CombinedVibration getEffect() {
-        return mEffect;
+    public CombinedVibration getEffectToPlay() {
+        return mEffectToPlay;
     }
 
-    /**
-     * Return {@link Vibration.DebugInfo} with read-only debug information about this vibration.
-     */
+    /** Return {@link Vibration.DebugInfo} with read-only debug information about this vibration. */
     public Vibration.DebugInfo getDebugInfo() {
-        return new Vibration.DebugInfo(mStatus, stats, mEffect, mOriginalEffect, /* scale= */ 0,
-                callerInfo);
+        // Clear the original effect if it's the same as the effect that was played, for simplicity
+        CombinedVibration originalEffect =
+                Objects.equals(mOriginalEffect, mEffectToPlay) ? null : mOriginalEffect;
+        return new Vibration.DebugInfo(mStatus, stats, mEffectToPlay, originalEffect,
+                mScaleLevel, mAdaptiveScale, callerInfo);
     }
 
     /** Return {@link VibrationStats.StatsInfo} with read-only metrics about this vibration. */

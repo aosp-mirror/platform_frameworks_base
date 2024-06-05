@@ -17,39 +17,34 @@
 package com.android.server.pm.test.pkg
 
 import android.content.Intent
-import android.content.pm.overlay.OverlayPaths
 import android.content.pm.PackageManager
 import android.content.pm.PathPermission
 import android.content.pm.SharedLibraryInfo
 import android.content.pm.VersionedPackage
+import android.content.pm.overlay.OverlayPaths
 import android.os.PatternMatcher
 import android.util.ArraySet
+import com.android.internal.pm.parsing.pkg.PackageImpl
+import com.android.internal.pm.pkg.component.ParsedActivity
+import com.android.internal.pm.pkg.component.ParsedActivityImpl
+import com.android.internal.pm.pkg.component.ParsedComponentImpl
+import com.android.internal.pm.pkg.component.ParsedInstrumentation
+import com.android.internal.pm.pkg.component.ParsedIntentInfoImpl
+import com.android.internal.pm.pkg.component.ParsedPermission
+import com.android.internal.pm.pkg.component.ParsedPermissionGroup
+import com.android.internal.pm.pkg.component.ParsedPermissionImpl
+import com.android.internal.pm.pkg.component.ParsedProcess
+import com.android.internal.pm.pkg.component.ParsedProcessImpl
+import com.android.internal.pm.pkg.component.ParsedProvider
+import com.android.internal.pm.pkg.component.ParsedProviderImpl
+import com.android.internal.pm.pkg.component.ParsedService
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.PackageSettingBuilder
-import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageState
-import com.android.server.pm.pkg.PackageStateImpl
 import com.android.server.pm.pkg.PackageUserState
-import com.android.server.pm.pkg.PackageUserStateImpl
-import com.android.server.pm.pkg.component.ParsedActivity
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedComponentImpl
-import com.android.server.pm.pkg.component.ParsedInstrumentation
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
-import com.android.server.pm.pkg.component.ParsedPermission
-import com.android.server.pm.pkg.component.ParsedPermissionGroup
-import com.android.server.pm.pkg.component.ParsedPermissionImpl
-import com.android.server.pm.pkg.component.ParsedProcess
-import com.android.server.pm.pkg.component.ParsedProcessImpl
-import com.android.server.pm.pkg.component.ParsedProvider
-import com.android.server.pm.pkg.component.ParsedProviderImpl
-import com.android.server.pm.pkg.component.ParsedService
 import com.android.server.pm.test.parsing.parcelling.AndroidPackageTest
 import com.google.common.truth.Expect
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
 import kotlin.contracts.ExperimentalContracts
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -57,6 +52,9 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.starProjectedType
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
 
 class PackageStateTest {
 
@@ -125,7 +123,7 @@ class PackageStateTest {
 
         fillMissingData(packageState, pkg as PackageImpl)
 
-        visitType(seenTypes, emptyList(), PackageStateImpl.copy(packageState),
+        visitType(seenTypes, emptyList(), PackageSetting(packageState, true),
             PackageState::class.starProjectedType)
         visitType(seenTypes, emptyList(), pkg, AndroidPackage::class.starProjectedType)
         visitType(seenTypes, emptyList(), packageState.getUserStateOrDefault(0),

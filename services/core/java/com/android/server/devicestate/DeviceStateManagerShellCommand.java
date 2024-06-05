@@ -18,13 +18,14 @@ package com.android.server.devicestate;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateRequest;
 import android.os.Binder;
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -176,17 +177,18 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
     }
 
     private int runPrintStates(PrintWriter pw) {
-        DeviceState[] states = mService.getSupportedStates();
+        List<DeviceState> states = mService.getSupportedStates();
         pw.print("Supported states: [\n");
-        for (int i = 0; i < states.length; i++) {
-            pw.print("  " + states[i] + ",\n");
+        for (int i = 0; i < states.size(); i++) {
+            pw.print("  " + states.get(i) + ",\n");
         }
         pw.println("]");
         return 0;
     }
 
     private int runPrintStatesSimple(PrintWriter pw) {
-        pw.print(Arrays.stream(mService.getSupportedStates())
+        pw.print(mService.getSupportedStates()
+                .stream()
                 .map(DeviceState::getIdentifier)
                 .map(Object::toString)
                 .collect(Collectors.joining(",")));

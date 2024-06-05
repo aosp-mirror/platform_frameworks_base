@@ -23,10 +23,10 @@ import android.app.Service
 import android.app.role.RoleManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.notetask.NoteTaskBubblesController.NoteTaskBubblesService
 import com.android.systemui.notetask.quickaffordance.NoteTaskQuickAffordanceModule
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity
-import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -38,20 +38,21 @@ import dagger.multibindings.IntoMap
 interface NoteTaskModule {
 
     @[Binds IntoMap ClassKey(NoteTaskControllerUpdateService::class)]
-    fun NoteTaskControllerUpdateService.bindNoteTaskControllerUpdateService(): Service
+    fun bindNoteTaskControllerUpdateService(service: NoteTaskControllerUpdateService): Service
+
+    @[Binds IntoMap ClassKey(NoteTaskBubblesService::class)]
+    fun bindNoteTaskBubblesService(service: NoteTaskBubblesService): Service
 
     @[Binds IntoMap ClassKey(LaunchNoteTaskActivity::class)]
-    fun LaunchNoteTaskActivity.bindNoteTaskLauncherActivity(): Activity
-
-    @[Binds IntoMap ClassKey(LaunchNoteTaskManagedProfileProxyActivity::class)]
-    fun LaunchNoteTaskManagedProfileProxyActivity.bindNoteTaskLauncherProxyActivity(): Activity
+    fun bindNoteTaskLauncherActivity(activity: LaunchNoteTaskActivity): Activity
 
     @[Binds IntoMap ClassKey(LaunchNotesRoleSettingsTrampolineActivity::class)]
-    fun LaunchNotesRoleSettingsTrampolineActivity.bindLaunchNotesRoleSettingsTrampolineActivity():
-        Activity
+    fun bindLaunchNotesRoleSettingsTrampolineActivity(
+        activity: LaunchNotesRoleSettingsTrampolineActivity
+    ): Activity
 
     @[Binds IntoMap ClassKey(CreateNoteTaskShortcutActivity::class)]
-    fun CreateNoteTaskShortcutActivity.bindNoteTaskShortcutActivity(): Activity
+    fun bindNoteTaskShortcutActivity(activity: CreateNoteTaskShortcutActivity): Activity
 
     companion object {
 

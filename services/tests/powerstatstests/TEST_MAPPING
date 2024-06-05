@@ -1,0 +1,31 @@
+{
+  "presubmit": [
+    {
+      "name": "PowerStatsTests",
+      "options": [
+        {"include-filter": "com.android.server.power.stats"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    }
+  ],
+  "ravenwood-presubmit": [
+    {
+      "name": "PowerStatsTestsRavenwood",
+      "host": true,
+      "options": [
+        {"include-filter": "com.android.server.power.stats"},
+        {"exclude-annotation": "android.platform.test.annotations.DisabledOnRavenwood"}
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "PowerStatsTests",
+      "options": [
+        {"include-filter": "com.android.server.power.stats"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    }
+  ]
+}

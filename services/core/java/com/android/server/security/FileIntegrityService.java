@@ -16,6 +16,7 @@
 
 package com.android.server.security;
 
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -27,10 +28,13 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.PermissionEnforcer;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.os.storage.StorageManagerInternal;
 import android.security.IFileIntegrityService;
 import android.util.Slog;
 
@@ -54,6 +58,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * A {@link SystemService} that provides file integrity related operations.
@@ -76,7 +81,11 @@ public class FileIntegrityService extends SystemService {
         return LocalServices.getService(FileIntegrityService.class);
     }
 
-    private final IBinder mService = new IFileIntegrityService.Stub() {
+    private final class BinderService extends IFileIntegrityService.Stub {
+        BinderService(Context context) {
+            super(PermissionEnforcer.fromContext(context));
+        }
+
         @Override
         public boolean isApkVeritySupported() {
             return VerityUtils.isFsVeritySupported();
@@ -86,6 +95,13 @@ public class FileIntegrityService extends SystemService {
         public boolean isAppSourceCertificateTrusted(@Nullable byte[] certificateBytes,
                 @NonNull String packageName) {
             checkCallerPermission(packageName);
+
+            if (android.security.Flags.deprecateFsvSig()) {
+                // When deprecated, stop telling the caller that any app source certificate is
+                // trusted on the current device. This behavior is also consistent with devices
+                // without this feature support.
+                return false;
+            }
 
             try {
                 if (!VerityUtils.isFsVeritySupported()) {
@@ -112,7 +128,7 @@ public class FileIntegrityService extends SystemService {
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
-        private void checkCallerPermission(String packageName) {
+        private void checkCallerPackageName(String packageName) {
             final int callingUid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(callingUid);
             final PackageManagerInternal packageManager =
@@ -123,7 +139,10 @@ public class FileIntegrityService extends SystemService {
                 throw new SecurityException(
                         "Calling uid " + callingUid + " does not own package " + packageName);
             }
+        }
 
+        private void checkCallerPermission(String packageName) {
+            checkCallerPackageName(packageName);
             if (getContext().checkCallingPermission(android.Manifest.permission.INSTALL_PACKAGES)
                     == PackageManager.PERMISSION_GRANTED) {
                 return;
@@ -131,22 +150,67 @@ public class FileIntegrityService extends SystemService {
 
             final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
             final int mode = appOpsManager.checkOpNoThrow(
-                    AppOpsManager.OP_REQUEST_INSTALL_PACKAGES, callingUid, packageName);
+                    AppOpsManager.OP_REQUEST_INSTALL_PACKAGES, Binder.getCallingUid(), packageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
                 throw new SecurityException(
                         "Caller should have INSTALL_PACKAGES or REQUEST_INSTALL_PACKAGES");
             }
         }
-    };
+
+        @Override
+        public android.os.IInstalld.IFsveritySetupAuthToken createAuthToken(
+                ParcelFileDescriptor authFd) throws RemoteException {
+            Objects.requireNonNull(authFd);
+            try {
+                var authToken = getStorageManagerInternal().createFsveritySetupAuthToken(authFd,
+                        Binder.getCallingUid());
+                // fs-verity setup requires no writable fd to the file. Release the dup now that
+                // it's passed.
+                authFd.close();
+                return authToken;
+            } catch (IOException e) {
+                throw new RemoteException(e);
+            }
+        }
+
+        @Override
+        @EnforcePermission(android.Manifest.permission.SETUP_FSVERITY)
+        public int setupFsverity(android.os.IInstalld.IFsveritySetupAuthToken authToken,
+                String filePath, String packageName) throws RemoteException {
+            setupFsverity_enforcePermission();
+            Objects.requireNonNull(authToken);
+            Objects.requireNonNull(filePath);
+            Objects.requireNonNull(packageName);
+            checkCallerPackageName(packageName);
+
+            try {
+                return getStorageManagerInternal().enableFsverity(authToken, filePath, packageName);
+            } catch (IOException e) {
+                throw new RemoteException(e);
+            }
+        }
+    }
+    private final IBinder mService;
 
     public FileIntegrityService(final Context context) {
         super(context);
+        mService = new BinderService(context);
         try {
             sCertFactory = CertificateFactory.getInstance("X.509");
         } catch (CertificateException e) {
             Slog.wtf(TAG, "Cannot get an instance of X.509 certificate factory");
         }
+
         LocalServices.addService(FileIntegrityService.class, this);
+    }
+
+    /**
+     * Returns StorageManagerInternal as a proxy to fs-verity related calls. This is to plumb
+     * the call through the canonical Installer instance in StorageManagerService, since the
+     * Installer instance isn't directly accessible.
+     */
+    private StorageManagerInternal getStorageManagerInternal() {
+        return LocalServices.getService(StorageManagerInternal.class);
     }
 
     @Override
@@ -184,13 +248,7 @@ public class FileIntegrityService extends SystemService {
     }
 
     private void loadAllCertificates() {
-        // A better alternative to load certificates would be to read from .fs-verity kernel
-        // keyring, which fsverity_init loads to during earlier boot time from the same sources
-        // below. But since the read operation from keyring is not provided in kernel, we need to
-        // duplicate the same loading logic here.
-
         // Load certificates trusted by the device manufacturer.
-        // NB: Directories need to be synced with system/security/fsverity_init/fsverity_init.cpp.
         final String relativeDir = "etc/security/fsverity";
         loadCertificatesFromDirectory(Environment.getRootDirectory().toPath()
                 .resolve(relativeDir));

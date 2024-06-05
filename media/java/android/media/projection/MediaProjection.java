@@ -83,6 +83,7 @@ public final class MediaProjection {
         try {
             mImpl.start(new MediaProjectionCallback());
         } catch (RemoteException e) {
+            Log.e(TAG, "Content Recording: Failed to start media projection", e);
             throw new RuntimeException("Failed to start media projection", e);
         }
         mDisplayManager = displayManager;
@@ -105,11 +106,18 @@ public final class MediaProjection {
      * @see #unregisterCallback
      */
     public void registerCallback(@NonNull Callback callback, @Nullable Handler handler) {
-        final Callback c = Objects.requireNonNull(callback);
-        if (handler == null) {
-            handler = new Handler();
+        try {
+            final Callback c = Objects.requireNonNull(callback);
+            if (handler == null) {
+                handler = new Handler(mContext.getMainLooper());
+            }
+            mCallbacks.put(c, new CallbackRecord(c, handler));
+        } catch (NullPointerException e) {
+            Log.e(TAG, "Content Recording: cannot register null Callback", e);
+            throw e;
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Content Recording: failed to create new Handler to register Callback", e);
         }
-        mCallbacks.put(c, new CallbackRecord(c, handler));
     }
 
     /**
@@ -120,8 +128,13 @@ public final class MediaProjection {
      * @see #registerCallback
      */
     public void unregisterCallback(@NonNull Callback callback) {
-        final Callback c = Objects.requireNonNull(callback);
-        mCallbacks.remove(c);
+        try {
+            final Callback c = Objects.requireNonNull(callback);
+            mCallbacks.remove(c);
+        } catch (NullPointerException e) {
+            Log.d(TAG, "Content Recording: cannot unregister null Callback", e);
+            throw e;
+        }
     }
 
     /**
@@ -203,9 +216,11 @@ public final class MediaProjection {
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
         if (shouldMediaProjectionRequireCallback()) {
             if (mCallbacks.isEmpty()) {
-                throw new IllegalStateException(
+                final IllegalStateException e = new IllegalStateException(
                         "Must register a callback before starting capture, to manage resources in"
                                 + " response to MediaProjection states.");
+                Log.e(TAG, "Content Recording: no callback registered for virtual display", e);
+                throw e;
             }
         }
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
@@ -272,6 +287,7 @@ public final class MediaProjection {
      */
     public void stop() {
         try {
+            Log.d(TAG, "Content Recording: stopping projection");
             mImpl.stop();
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to stop projection", e);

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "PdfEditor"
-
 #include <sys/types.h>
 #include <unistd.h>
 

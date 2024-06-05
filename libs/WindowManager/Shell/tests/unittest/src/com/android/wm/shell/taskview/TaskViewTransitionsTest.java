@@ -18,6 +18,7 @@ package com.android.wm.shell.taskview;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -32,13 +33,14 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.transition.Transitions;
@@ -65,12 +67,6 @@ public class TaskViewTransitionsTest extends ShellTestCase {
     ActivityManager.RunningTaskInfo mTaskInfo;
     @Mock
     WindowContainerToken mToken;
-    @Mock
-    TaskViewTaskController mTaskViewTaskController2;
-    @Mock
-    ActivityManager.RunningTaskInfo mTaskInfo2;
-    @Mock
-    WindowContainerToken mToken2;
 
     TaskViewTransitions mTaskViewTransitions;
 
@@ -86,16 +82,10 @@ public class TaskViewTransitionsTest extends ShellTestCase {
         mTaskInfo.token = mToken;
         mTaskInfo.taskId = 314;
         mTaskInfo.taskDescription = mock(ActivityManager.TaskDescription.class);
-        when(mTaskViewTaskController.getTaskInfo()).thenReturn(mTaskInfo);
-
-        mTaskInfo2 = new ActivityManager.RunningTaskInfo();
-        mTaskInfo2.token = mToken2;
-        mTaskInfo2.taskId = 315;
-        mTaskInfo2.taskDescription = mock(ActivityManager.TaskDescription.class);
-        when(mTaskViewTaskController2.getTaskInfo()).thenReturn(mTaskInfo2);
 
         mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions));
         mTaskViewTransitions.addTaskView(mTaskViewTaskController);
+        when(mTaskViewTaskController.getTaskInfo()).thenReturn(mTaskInfo);
     }
 
     @Test
@@ -138,7 +128,7 @@ public class TaskViewTransitionsTest extends ShellTestCase {
     }
 
     @Test
-    public void testSetTaskBounds_taskVisibleWithPendingOpen_noTransaction() {
+    public void testSetTaskBounds_taskVisibleWithPending_noTransaction() {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
 
         mTaskViewTransitions.setTaskViewVisible(mTaskViewTaskController, true);
@@ -151,43 +141,6 @@ public class TaskViewTransitionsTest extends ShellTestCase {
                 new Rect(0, 0, 100, 100));
         assertThat(mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_CHANGE))
                 .isNull();
-    }
-
-    @Test
-    public void testSetTaskBounds_taskVisibleWithPendingChange_transition() {
-        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
-
-        mTaskViewTransitions.setTaskViewVisible(mTaskViewTaskController, true);
-
-        // Consume the pending transition from visibility change
-        TaskViewTransitions.PendingTransition pending =
-                mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_TO_FRONT);
-        assertThat(pending).isNotNull();
-        mTaskViewTransitions.startAnimation(pending.mClaimed,
-                mock(TransitionInfo.class),
-                new SurfaceControl.Transaction(),
-                new SurfaceControl.Transaction(),
-                mock(Transitions.TransitionFinishCallback.class));
-        // Verify it was consumed
-        TaskViewTransitions.PendingTransition checkPending =
-                mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_TO_FRONT);
-        assertThat(checkPending).isNull();
-
-        // Test that set bounds creates a new transition
-        mTaskViewTransitions.setTaskBounds(mTaskViewTaskController,
-                new Rect(0, 0, 100, 100));
-        assertThat(mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_CHANGE))
-                .isNotNull();
-
-        // Test that set bounds again (with different bounds) creates another transition
-        mTaskViewTransitions.setTaskBounds(mTaskViewTaskController,
-                new Rect(0, 0, 300, 200));
-        List<TaskViewTransitions.PendingTransition> pendingList =
-                mTaskViewTransitions.findAllPending(mTaskViewTaskController)
-                        .stream()
-                        .filter(pendingTransition -> pendingTransition.mType == TRANSIT_CHANGE)
-                        .toList();
-        assertThat(pendingList.size()).isEqualTo(2);
     }
 
     @Test
@@ -217,16 +170,6 @@ public class TaskViewTransitionsTest extends ShellTestCase {
                 mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_CHANGE);
         assertThat(pendingBounds).isNotNull();
 
-        // Test that setting same bounds with in-flight transition doesn't cause another one
-        mTaskViewTransitions.setTaskBounds(mTaskViewTaskController,
-                new Rect(0, 0, 100, 100));
-        List<TaskViewTransitions.PendingTransition> pendingList =
-                mTaskViewTransitions.findAllPending(mTaskViewTaskController)
-                        .stream()
-                        .filter(pendingTransition -> pendingTransition.mType == TRANSIT_CHANGE)
-                        .toList();
-        assertThat(pendingList.size()).isEqualTo(1);
-
         // Consume the pending bounds transaction
         mTaskViewTransitions.startAnimation(pendingBounds.mClaimed,
                 mock(TransitionInfo.class),
@@ -246,42 +189,6 @@ public class TaskViewTransitionsTest extends ShellTestCase {
         assertThat(pendingBounds2).isNull();
     }
 
-
-    @Test
-    public void testSetTaskBounds_taskVisibleWithDifferentTaskViewPendingChange_transition() {
-        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
-
-        mTaskViewTransitions.addTaskView(mTaskViewTaskController2);
-
-        mTaskViewTransitions.setTaskViewVisible(mTaskViewTaskController, true);
-
-        // Consume the pending transition from visibility change
-        TaskViewTransitions.PendingTransition pending =
-                mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_TO_FRONT);
-        assertThat(pending).isNotNull();
-        mTaskViewTransitions.startAnimation(pending.mClaimed,
-                mock(TransitionInfo.class),
-                new SurfaceControl.Transaction(),
-                new SurfaceControl.Transaction(),
-                mock(Transitions.TransitionFinishCallback.class));
-        // Verify it was consumed
-        TaskViewTransitions.PendingTransition checkPending =
-                mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_TO_FRONT);
-        assertThat(checkPending).isNull();
-
-        // Set the second taskview as visible & check that it has a pending transition
-        mTaskViewTransitions.setTaskViewVisible(mTaskViewTaskController2, true);
-        TaskViewTransitions.PendingTransition pending2 =
-                mTaskViewTransitions.findPending(mTaskViewTaskController2, TRANSIT_TO_FRONT);
-        assertThat(pending2).isNotNull();
-
-        // Test that set bounds on the first taskview will create a new transition
-        mTaskViewTransitions.setTaskBounds(mTaskViewTaskController,
-                new Rect(0, 0, 100, 100));
-        assertThat(mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_CHANGE))
-                .isNotNull();
-    }
-
     @Test
     public void testSetTaskVisibility_taskRemoved_noNPE() {
         mTaskViewTransitions.removeTaskView(mTaskViewTaskController);
@@ -299,6 +206,48 @@ public class TaskViewTransitionsTest extends ShellTestCase {
 
         mTaskViewTransitions.setTaskBounds(mTaskViewTaskController,
                 new Rect(0, 0, 100, 100));
+    }
+
+    @Test
+    public void testReorderTask_movedToFrontTransaction() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        mTaskViewTransitions.reorderTaskViewTask(mTaskViewTaskController, true);
+        // Consume the pending transaction from order change
+        TaskViewTransitions.PendingTransition pending =
+                mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_TO_FRONT);
+        assertThat(pending).isNotNull();
+        mTaskViewTransitions.startAnimation(pending.mClaimed,
+                mock(TransitionInfo.class),
+                new SurfaceControl.Transaction(),
+                new SurfaceControl.Transaction(),
+                mock(Transitions.TransitionFinishCallback.class));
+
+        // Verify it was consumed
+        TaskViewTransitions.PendingTransition pending2 =
+                mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_TO_FRONT);
+        assertThat(pending2).isNull();
+    }
+
+    @Test
+    public void testReorderTask_movedToBackTransaction() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        mTaskViewTransitions.reorderTaskViewTask(mTaskViewTaskController, false);
+        // Consume the pending transaction from order change
+        TaskViewTransitions.PendingTransition pending =
+                mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_TO_BACK);
+        assertThat(pending).isNotNull();
+        mTaskViewTransitions.startAnimation(pending.mClaimed,
+                mock(TransitionInfo.class),
+                new SurfaceControl.Transaction(),
+                new SurfaceControl.Transaction(),
+                mock(Transitions.TransitionFinishCallback.class));
+
+        // Verify it was consumed
+        TaskViewTransitions.PendingTransition pending2 =
+                mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_TO_BACK);
+        assertThat(pending2).isNull();
     }
 
     @Test

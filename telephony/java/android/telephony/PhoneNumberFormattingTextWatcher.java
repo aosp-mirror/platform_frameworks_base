@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.WorkerThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.text.Editable;
@@ -39,6 +40,9 @@ import java.util.Locale;
  * </ul>
  * <p>
  * The formatting will be restarted once the text is cleared.
+ *
+ * @deprecated This is a thin wrapper on a `libphonenumber` `AsYouTypeFormatter`; it is recommended
+ * to use that instead.
  */
 public class PhoneNumberFormattingTextWatcher implements TextWatcher {
 
@@ -69,6 +73,7 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
      * @param countryCode the ISO 3166-1 two-letter country code that indicates the country/region
      * where the phone number is being entered.
      */
+    @WorkerThread
     public PhoneNumberFormattingTextWatcher(String countryCode) {
         if (countryCode == null) throw new IllegalArgumentException();
         mFormatter = PhoneNumberUtil.getInstance().getAsYouTypeFormatter(countryCode);

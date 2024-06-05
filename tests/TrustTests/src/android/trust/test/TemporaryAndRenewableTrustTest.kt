@@ -102,7 +102,7 @@ class TemporaryAndRenewableTrustTest {
         trustAgentRule.agent.grantTrust(
             GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) {}
 
-        lockStateTrackingRule.assertUnlocked()
+        lockStateTrackingRule.assertUnlockedAndTrusted()
     }
 
     @Test
@@ -125,7 +125,7 @@ class TemporaryAndRenewableTrustTest {
             Log.i(TAG, "Callback received; status=${it.status}")
             result = it
         }
-        lockStateTrackingRule.assertUnlocked()
+        lockStateTrackingRule.assertUnlockedAndTrusted()
 
         wait("callback triggered") { result?.status == STATUS_UNLOCKED_BY_GRANT }
     }

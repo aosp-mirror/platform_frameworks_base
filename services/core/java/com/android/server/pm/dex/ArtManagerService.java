@@ -18,7 +18,6 @@ package com.android.server.pm.dex;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -28,7 +27,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.ArtManager.ProfileType;
 import android.content.pm.dex.ArtManagerInternal;
-import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.content.pm.dex.PackageOptimizationInfo;
 import android.os.Binder;
@@ -39,8 +37,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.os.UserHandle;
-import android.system.Os;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -53,22 +49,17 @@ import com.android.server.LocalServices;
 import com.android.server.art.ArtManagerLocal;
 import com.android.server.pm.DexOptHelper;
 import com.android.server.pm.Installer;
-import com.android.server.pm.Installer.InstallerException;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
 import com.android.server.pm.PackageManagerServiceUtils;
-import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.PackageState;
 
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -259,91 +250,27 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
 
         // All good, create the profile snapshot.
-        if (DexOptHelper.useArtService()) {
-            ParcelFileDescriptor fd;
+        ParcelFileDescriptor fd;
 
-            try (PackageManagerLocal.FilteredSnapshot snapshot =
-                            PackageManagerServiceUtils.getPackageManagerLocal()
-                                    .withFilteredSnapshot()) {
-                fd = DexOptHelper.getArtManagerLocal().snapshotAppProfile(
-                        snapshot, packageName, splitName);
-            } catch (IllegalArgumentException e) {
-                // ArtManagerLocal.snapshotAppProfile couldn't find the package or split. Since
-                // we've checked them above this can only happen due to race, i.e. the package got
-                // removed. So let's report it as SNAPSHOT_FAILED_PACKAGE_NOT_FOUND even if it was
-                // for the split.
-                // TODO(mast): Reuse the same snapshot to avoid this race.
-                postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_PACKAGE_NOT_FOUND);
-                return;
-            } catch (IllegalStateException | ArtManagerLocal.SnapshotProfileException e) {
-                postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
-                return;
-            }
-
-            postSuccess(packageName, fd, callback);
-        } else {
-            int appId = UserHandle.getAppId(info.applicationInfo.uid);
-            if (appId < 0) {
-                postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
-                Slog.wtf(TAG, "AppId is -1 for package: " + packageName);
-                return;
-            }
-
-            try {
-                createProfileSnapshot(packageName, ArtManager.getProfileName(splitName), codePath,
-                        appId, callback);
-                // Destroy the snapshot, we no longer need it.
-                destroyProfileSnapshot(packageName, ArtManager.getProfileName(splitName));
-            } catch (LegacyDexoptDisabledException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private void createProfileSnapshot(String packageName, String profileName, String classpath,
-            int appId, ISnapshotRuntimeProfileCallback callback)
-            throws LegacyDexoptDisabledException {
-        // Ask the installer to snapshot the profile.
-        try {
-            if (!mInstaller.createProfileSnapshot(appId, packageName, profileName, classpath)) {
-                postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
-                return;
-            }
-        } catch (InstallerException e) {
+        try (PackageManagerLocal.FilteredSnapshot snapshot =
+                        PackageManagerServiceUtils.getPackageManagerLocal()
+                                .withFilteredSnapshot()) {
+            fd = DexOptHelper.getArtManagerLocal().snapshotAppProfile(
+                    snapshot, packageName, splitName);
+        } catch (IllegalArgumentException e) {
+            // ArtManagerLocal.snapshotAppProfile couldn't find the package or split. Since
+            // we've checked them above this can only happen due to race, i.e. the package got
+            // removed. So let's report it as SNAPSHOT_FAILED_PACKAGE_NOT_FOUND even if it was
+            // for the split.
+            // TODO(mast): Reuse the same snapshot to avoid this race.
+            postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_PACKAGE_NOT_FOUND);
+            return;
+        } catch (IllegalStateException | ArtManagerLocal.SnapshotProfileException e) {
             postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
             return;
         }
 
-        // Open the snapshot and invoke the callback.
-        File snapshotProfile = ArtManager.getProfileSnapshotFileForName(packageName, profileName);
-
-        ParcelFileDescriptor fd = null;
-        try {
-            fd = ParcelFileDescriptor.open(snapshotProfile, ParcelFileDescriptor.MODE_READ_ONLY);
-            if (fd == null || !fd.getFileDescriptor().valid()) {
-                postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
-            } else {
-                postSuccess(packageName, fd, callback);
-            }
-        } catch (FileNotFoundException e) {
-            Slog.w(TAG, "Could not open snapshot profile for " + packageName + ":"
-                    + snapshotProfile, e);
-            postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
-        }
-    }
-
-    private void destroyProfileSnapshot(String packageName, String profileName)
-            throws LegacyDexoptDisabledException {
-        if (DEBUG) {
-            Slog.d(TAG, "Destroying profile snapshot for" + packageName + ":" + profileName);
-        }
-
-        try {
-            mInstaller.destroyProfileSnapshot(packageName, profileName);
-        } catch (InstallerException e) {
-            Slog.e(TAG, "Failed to destroy profile snapshot for " + packageName + ":" + profileName,
-                    e);
-        }
+        postSuccess(packageName, fd, callback);
     }
 
     @Override
@@ -368,42 +295,19 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     }
 
     private void snapshotBootImageProfile(ISnapshotRuntimeProfileCallback callback) {
-        if (DexOptHelper.useArtService()) {
-            ParcelFileDescriptor fd;
+        ParcelFileDescriptor fd;
 
-            try (PackageManagerLocal.FilteredSnapshot snapshot =
-                            PackageManagerServiceUtils.getPackageManagerLocal()
-                                    .withFilteredSnapshot()) {
-                fd = DexOptHelper.getArtManagerLocal().snapshotBootImageProfile(snapshot);
-            } catch (IllegalStateException | ArtManagerLocal.SnapshotProfileException e) {
-                postError(callback, BOOT_IMAGE_ANDROID_PACKAGE,
-                        ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
-                return;
-            }
-
-            postSuccess(BOOT_IMAGE_ANDROID_PACKAGE, fd, callback);
-        } else {
-            // Combine the profiles for boot classpath and system server classpath.
-            // This avoids having yet another type of profiles and simplifies the processing.
-            String classpath = String.join(
-                    ":", Os.getenv("BOOTCLASSPATH"), Os.getenv("SYSTEMSERVERCLASSPATH"));
-
-            final String standaloneSystemServerJars = Os.getenv("STANDALONE_SYSTEMSERVER_JARS");
-            if (standaloneSystemServerJars != null) {
-                classpath = String.join(":", classpath, standaloneSystemServerJars);
-            }
-
-            try {
-                // Create the snapshot.
-                createProfileSnapshot(BOOT_IMAGE_ANDROID_PACKAGE, BOOT_IMAGE_PROFILE_NAME,
-                        classpath,
-                        /*appId*/ -1, callback);
-                // Destroy the snapshot, we no longer need it.
-                destroyProfileSnapshot(BOOT_IMAGE_ANDROID_PACKAGE, BOOT_IMAGE_PROFILE_NAME);
-            } catch (LegacyDexoptDisabledException e) {
-                throw new RuntimeException(e);
-            }
+        try (PackageManagerLocal.FilteredSnapshot snapshot =
+                        PackageManagerServiceUtils.getPackageManagerLocal()
+                                .withFilteredSnapshot()) {
+            fd = DexOptHelper.getArtManagerLocal().snapshotBootImageProfile(snapshot);
+        } catch (IllegalStateException | ArtManagerLocal.SnapshotProfileException e) {
+            postError(callback, BOOT_IMAGE_ANDROID_PACKAGE,
+                    ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
+            return;
         }
+
+        postSuccess(BOOT_IMAGE_ANDROID_PACKAGE, fd, callback);
     }
 
     /**
@@ -449,152 +353,6 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                 IoUtils.closeQuietly(fd);
             }
         });
-    }
-
-    /**
-     * Prepare the application profiles.
-     * For all code paths:
-     *   - create the current primary profile to save time at app startup time.
-     *   - copy the profiles from the associated dex metadata file to the reference profile.
-     */
-    public void prepareAppProfiles(AndroidPackage pkg, @UserIdInt int user,
-            boolean updateReferenceProfileContent) throws LegacyDexoptDisabledException {
-        final int appId = UserHandle.getAppId(pkg.getUid());
-        if (user < 0) {
-            Slog.wtf(TAG, "Invalid user id: " + user);
-            return;
-        }
-        if (appId < 0) {
-            Slog.wtf(TAG, "Invalid app id: " + appId);
-            return;
-        }
-        try {
-            ArrayMap<String, String> codePathsProfileNames = getPackageProfileNames(pkg);
-            for (int i = codePathsProfileNames.size() - 1; i >= 0; i--) {
-                String codePath = codePathsProfileNames.keyAt(i);
-                String profileName = codePathsProfileNames.valueAt(i);
-                String dexMetadataPath = null;
-                // Passing the dex metadata file to the prepare method will update the reference
-                // profile content. As such, we look for the dex metadata file only if we need to
-                // perform an update.
-                if (updateReferenceProfileContent) {
-                    File dexMetadata = DexMetadataHelper.findDexMetadataForFile(new File(codePath));
-                    dexMetadataPath = dexMetadata == null ? null : dexMetadata.getAbsolutePath();
-                }
-                synchronized (mInstaller) {
-                    boolean result = mInstaller.prepareAppProfile(pkg.getPackageName(), user, appId,
-                            profileName, codePath, dexMetadataPath);
-                    if (!result) {
-                        Slog.e(TAG, "Failed to prepare profile for " +
-                                pkg.getPackageName() + ":" + codePath);
-                    }
-                }
-            }
-        } catch (InstallerException e) {
-            Slog.e(TAG, "Failed to prepare profile for " + pkg.getPackageName(), e);
-        }
-    }
-
-    /**
-     * Prepares the app profiles for a set of users. {@see ArtManagerService#prepareAppProfiles}.
-     */
-    public void prepareAppProfiles(AndroidPackage pkg, int[] user,
-            boolean updateReferenceProfileContent) throws LegacyDexoptDisabledException {
-        for (int i = 0; i < user.length; i++) {
-            prepareAppProfiles(pkg, user[i], updateReferenceProfileContent);
-        }
-    }
-
-    /**
-     * Clear the profiles for the given package.
-     */
-    public void clearAppProfiles(AndroidPackage pkg) throws LegacyDexoptDisabledException {
-        try {
-            ArrayMap<String, String> packageProfileNames = getPackageProfileNames(pkg);
-            for (int i = packageProfileNames.size() - 1; i >= 0; i--) {
-                String profileName = packageProfileNames.valueAt(i);
-                mInstaller.clearAppProfiles(pkg.getPackageName(), profileName);
-            }
-        } catch (InstallerException e) {
-            Slog.w(TAG, String.valueOf(e));
-        }
-    }
-
-    /**
-     * Dumps the profiles for the given package.
-     */
-    public void dumpProfiles(AndroidPackage pkg, boolean dumpClassesAndMethods)
-            throws LegacyDexoptDisabledException {
-        final int sharedGid = UserHandle.getSharedAppGid(pkg.getUid());
-        try {
-            ArrayMap<String, String> packageProfileNames = getPackageProfileNames(pkg);
-            for (int i = packageProfileNames.size() - 1; i >= 0; i--) {
-                String codePath = packageProfileNames.keyAt(i);
-                String profileName = packageProfileNames.valueAt(i);
-                mInstaller.dumpProfiles(sharedGid, pkg.getPackageName(), profileName, codePath,
-                                        dumpClassesAndMethods);
-            }
-        } catch (InstallerException e) {
-            Slog.w(TAG, "Failed to dump profiles", e);
-        }
-    }
-
-    /**
-     * Compile layout resources in a given package.
-     */
-    public boolean compileLayouts(@NonNull PackageState packageState, @NonNull AndroidPackage pkg) {
-        try {
-            final String packageName = pkg.getPackageName();
-            final String apkPath = pkg.getSplits().get(0).getPath();
-            // TODO(b/143971007): Use a cross-user directory
-            File dataDir = PackageInfoUtils.getDataDir(pkg, UserHandle.myUserId());
-            final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
-            if (packageState.isPrivileged() || pkg.isUseEmbeddedDex()
-                    || pkg.isDefaultToDeviceProtectedStorage()) {
-                // Privileged apps prefer to load trusted code so they don't use compiled views.
-                // If the app is not privileged but prefers code integrity, also avoid compiling
-                // views.
-                // Also disable the view compiler for protected storage apps since there are
-                // selinux permissions required for writing to user_de.
-                return false;
-            }
-            Log.i("PackageManager", "Compiling layouts in " + packageName + " (" + apkPath +
-                    ") to " + outDexFile);
-            final long callingId = Binder.clearCallingIdentity();
-            try {
-                return mInstaller.compileLayouts(apkPath, packageName, outDexFile,
-                        pkg.getUid());
-            } finally {
-                Binder.restoreCallingIdentity(callingId);
-            }
-        }
-        catch (Throwable e) {
-            Log.e("PackageManager", "Failed to compile layouts", e);
-            return false;
-        }
-    }
-
-    /**
-     * Build the profiles names for all the package code paths (excluding resource only paths).
-     * Return the map [code path -> profile name].
-     */
-    private ArrayMap<String, String> getPackageProfileNames(AndroidPackage pkg) {
-        ArrayMap<String, String> result = new ArrayMap<>();
-        if (pkg.isDeclaredHavingCode()) {
-            result.put(pkg.getBaseApkPath(), ArtManager.getProfileName(null));
-        }
-
-        String[] splitCodePaths = pkg.getSplitCodePaths();
-        int[] splitFlags = pkg.getSplitFlags();
-        String[] splitNames = pkg.getSplitNames();
-        if (!ArrayUtils.isEmpty(splitCodePaths)) {
-            for (int i = 0; i < splitCodePaths.length; i++) {
-                if ((splitFlags[i] & ApplicationInfo.FLAG_HAS_CODE) != 0) {
-                    result.put(splitCodePaths[i], ArtManager.getProfileName(splitNames[i]));
-                }
-            }
-        }
-        return result;
     }
 
     // Constants used for logging compilation filter to TRON.
@@ -827,6 +585,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                 String packageName, String activityName, long version) {
             // For example: /data/misc/iorapd/com.google.android.GoogleCamera/
             // 60092239/com.android.camera.CameraLauncher/compiled_traces/compiled_trace.pb
+            // TODO(b/258223472): Clean up iorap code.
             Path tracePath = Paths.get(IORAP_DIR,
                                        packageName,
                                        Long.toString(version),

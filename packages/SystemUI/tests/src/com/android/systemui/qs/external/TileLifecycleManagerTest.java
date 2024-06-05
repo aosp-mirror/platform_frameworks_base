@@ -15,10 +15,13 @@
  */
 package com.android.systemui.qs.external;
 
+import static android.os.PowerExemptionManager.REASON_TILE_ONCLICK;
+import static android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf;
 import static android.service.quicksettings.TileService.START_ACTIVITY_NEEDS_PENDING_INTENT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -29,12 +32,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.compat.CompatChanges;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -49,14 +55,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IDeviceIdleController;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.TileService;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.annotation.Nullable;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -68,27 +77,47 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 
+import java.util.List;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 public class TileLifecycleManagerTest extends SysuiTestCase {
-    private static final int TEST_FAIL_TIMEOUT = 5000;
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX);
+    }
 
     private final PackageManagerAdapter mMockPackageManagerAdapter =
             mock(PackageManagerAdapter.class);
     private final BroadcastDispatcher mMockBroadcastDispatcher =
             mock(BroadcastDispatcher.class);
     private final IQSTileService.Stub mMockTileService = mock(IQSTileService.Stub.class);
+    private final ActivityManager mActivityManager = mock(ActivityManager.class);
+    private final IDeviceIdleController mDeviceIdleController = mock(IDeviceIdleController.class);
+
     private ComponentName mTileServiceComponentName;
     private Intent mTileServiceIntent;
     private UserHandle mUser;
+    private FakeSystemClock mClock;
     private FakeExecutor mExecutor;
     private HandlerThread mThread;
     private Handler mHandler;
     private TileLifecycleManager mStateManager;
     private TestContextWrapper mWrappedContext;
     private MockitoSession mMockitoSession;
+
+    public TileLifecycleManagerTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -112,13 +141,16 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         mThread = new HandlerThread("TestThread");
         mThread.start();
         mHandler = Handler.createAsync(mThread.getLooper());
-        mExecutor = new FakeExecutor(new FakeSystemClock());
+        mClock = new FakeSystemClock();
+        mExecutor = new FakeExecutor(mClock);
         mStateManager = new TileLifecycleManager(mHandler, mWrappedContext,
                 mock(IQSService.class),
                 mMockPackageManagerAdapter,
                 mMockBroadcastDispatcher,
                 mTileServiceIntent,
                 mUser,
+                mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
     }
 
@@ -252,7 +284,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNoClickOfNotListeningAnymore() throws Exception {
+    @DisableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
+    public void testNoClickIfNotListeningAnymore() throws Exception {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
         mStateManager.onClick(null);
@@ -265,6 +298,42 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         mExecutor.runAllReady();
         assertFalse(mContext.isBound(mTileServiceComponentName));
         verify(mMockTileService, never()).onClick(null);
+    }
+
+    @Test
+    @EnableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
+    public void testNoClickIfNotListeningBeforeClick() throws Exception {
+        mStateManager.onTileAdded();
+        mStateManager.onStartListening();
+        mStateManager.onStopListening();
+        mStateManager.onClick(null);
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+
+        verifyBind(1);
+        mStateManager.executeSetBindService(false);
+        mExecutor.runAllReady();
+        assertFalse(mContext.isBound(mTileServiceComponentName));
+        verify(mMockTileService, never()).onClick(null);
+    }
+
+    @Test
+    @EnableFlags(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX)
+    public void testClickIfStopListeningBeforeProcessedClick() throws Exception {
+        mStateManager.onTileAdded();
+        mStateManager.onStartListening();
+        mStateManager.onClick(null);
+        mStateManager.onStopListening();
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+
+        verifyBind(1);
+        mStateManager.executeSetBindService(false);
+        mExecutor.runAllReady();
+        assertFalse(mContext.isBound(mTileServiceComponentName));
+        InOrder inOrder = Mockito.inOrder(mMockTileService);
+        inOrder.verify(mMockTileService).onClick(null);
+        inOrder.verify(mMockTileService).onStopListening();
     }
 
     @Test
@@ -294,9 +363,9 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         mStateManager.onStartListening();
         mStateManager.executeSetBindService(true);
         mExecutor.runAllReady();
-        mStateManager.setBindRetryDelay(0);
+        mStateManager.onBindingDied(mTileServiceComponentName);
         mExecutor.runAllReady();
-        mStateManager.onServiceDisconnected(mTileServiceComponentName);
+        mClock.advanceTime(5000);
         mExecutor.runAllReady();
 
         // Two calls: one for the first bind, one for the restart.
@@ -305,8 +374,91 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testKillProcessLowMemory() throws Exception {
+        doAnswer(invocation -> {
+            ActivityManager.MemoryInfo memoryInfo = invocation.getArgument(0);
+            memoryInfo.lowMemory = true;
+            return null;
+        }).when(mActivityManager).getMemoryInfo(any());
+        mStateManager.onStartListening();
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+        verify(mMockTileService, times(1)).onStartListening();
+        mStateManager.onBindingDied(mTileServiceComponentName);
+        mExecutor.runAllReady();
+
+        // Longer delay than a regular one
+        mClock.advanceTime(5000);
+        mExecutor.runAllReady();
+
+        assertFalse(mContext.isBound(mTileServiceComponentName));
+
+        mClock.advanceTime(20000);
+        mExecutor.runAllReady();
+        // Two calls: one for the first bind, one for the restart.
+        verifyBind(2);
+        verify(mMockTileService, times(2)).onStartListening();
+    }
+
+    @Test
+    public void testOnServiceDisconnectedDoesnUnbind_doesntForwardToBinder() throws Exception {
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+
+        mStateManager.onStartListening();
+        verify(mMockTileService).onStartListening();
+
+        clearInvocations(mMockTileService);
+        mStateManager.onServiceDisconnected(mTileServiceComponentName);
+        mExecutor.runAllReady();
+
+        mStateManager.onStartListening();
+        verify(mMockTileService, never()).onStartListening();
+    }
+
+    @Test
+    public void testKillProcessLowMemory_unbound_doesntBindAgain() throws Exception {
+        doAnswer(invocation -> {
+            ActivityManager.MemoryInfo memoryInfo = invocation.getArgument(0);
+            memoryInfo.lowMemory = true;
+            return null;
+        }).when(mActivityManager).getMemoryInfo(any());
+        mStateManager.onStartListening();
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+        verifyBind(1);
+        verify(mMockTileService, times(1)).onStartListening();
+
+        mStateManager.onBindingDied(mTileServiceComponentName);
+        mExecutor.runAllReady();
+
+        clearInvocations(mMockTileService);
+        mStateManager.executeSetBindService(false);
+        mExecutor.runAllReady();
+        mClock.advanceTime(30000);
+        mExecutor.runAllReady();
+
+        verifyBind(0);
+        verify(mMockTileService, never()).onStartListening();
+    }
+
+    @Test
     public void testToggleableTile() throws Exception {
         assertTrue(mStateManager.isToggleableTile());
+    }
+
+    @Test
+    public void testClickCallsDeviceIdleManager() throws Exception {
+        mStateManager.onTileAdded();
+        mStateManager.onStartListening();
+        mStateManager.onClick(null);
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+
+        verify(mMockTileService).onClick(null);
+        verify(mDeviceIdleController).addPowerSaveTempWhitelistApp(
+                mTileServiceComponentName.getPackageName(), 15000,
+                mUser.getIdentifier(), REASON_TILE_ONCLICK, "tile onclick");
     }
 
     @Test
@@ -319,6 +471,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mMockBroadcastDispatcher,
                 mTileServiceIntent,
                 mUser,
+                mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
 
         manager.executeSetBindService(true);
@@ -340,6 +494,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mMockBroadcastDispatcher,
                 mTileServiceIntent,
                 mUser,
+                mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
 
         manager.executeSetBindService(true);
@@ -361,6 +517,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mMockBroadcastDispatcher,
                 mTileServiceIntent,
                 mUser,
+                mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
 
         manager.executeSetBindService(true);
@@ -384,6 +542,8 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mMockBroadcastDispatcher,
                 mTileServiceIntent,
                 mUser,
+                mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
 
         manager.executeSetBindService(true);

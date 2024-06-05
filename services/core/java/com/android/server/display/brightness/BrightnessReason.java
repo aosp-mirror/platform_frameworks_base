@@ -39,14 +39,18 @@ public final class BrightnessReason {
     public static final int REASON_BOOST = 8;
     public static final int REASON_SCREEN_OFF_BRIGHTNESS_SENSOR = 9;
     public static final int REASON_FOLLOWER = 10;
-    public static final int REASON_MAX = REASON_FOLLOWER;
+    public static final int REASON_OFFLOAD = 11;
+    public static final int REASON_DOZE_MANUAL = 12;
+    public static final int REASON_MAX = REASON_DOZE_MANUAL;
 
     public static final int MODIFIER_DIMMED = 0x1;
     public static final int MODIFIER_LOW_POWER = 0x2;
     public static final int MODIFIER_HDR = 0x4;
     public static final int MODIFIER_THROTTLED = 0x8;
+    public static final int MODIFIER_MIN_LUX = 0x10;
+    public static final int MODIFIER_MIN_USER_SET_LOWER_BOUND = 0x20;
     public static final int MODIFIER_MASK = MODIFIER_DIMMED | MODIFIER_LOW_POWER | MODIFIER_HDR
-            | MODIFIER_THROTTLED;
+            | MODIFIER_THROTTLED | MODIFIER_MIN_LUX | MODIFIER_MIN_USER_SET_LOWER_BOUND;
 
     // ADJUSTMENT_*
     // These things can happen at any point, even if the main brightness reason doesn't
@@ -130,6 +134,12 @@ public final class BrightnessReason {
         if ((mModifier & MODIFIER_THROTTLED) != 0) {
             sb.append(" throttled");
         }
+        if ((mModifier & MODIFIER_MIN_LUX) != 0) {
+            sb.append(" lux_lower_bound");
+        }
+        if ((mModifier & MODIFIER_MIN_USER_SET_LOWER_BOUND) != 0) {
+            sb.append(" user_min_pref");
+        }
         int strlen = sb.length();
         if (sb.charAt(strlen - 1) == '[') {
             sb.setLength(strlen - 2);
@@ -196,6 +206,10 @@ public final class BrightnessReason {
                 return "screen_off_brightness_sensor";
             case REASON_FOLLOWER:
                 return "follower";
+            case REASON_OFFLOAD:
+                return "offload";
+            case REASON_DOZE_MANUAL:
+                return "doze_manual";
             default:
                 return Integer.toString(reason);
         }

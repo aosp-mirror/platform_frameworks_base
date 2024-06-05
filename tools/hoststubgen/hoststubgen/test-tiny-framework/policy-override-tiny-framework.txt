@@ -1,0 +1,42 @@
+class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	stub
+  field stub	stub
+  field keep	keep
+  # field remove	remove # Implicitly remove
+  method <init>	()V	            stub
+  method addOne	(I)I	        stub
+  method addOneInner	(I)I	keep
+  method toBeRemoved	(Ljava/lang/String;)V	remove
+  method addTwo	(I)I	        @addTwo_host
+  # method addTwo_host	(I)I	# used as a substitute
+  method nativeAddThree	(I)I	@addThree_host
+  # method addThree_host	(I)I	# used as a substitute
+  method unsupportedMethod	()Ljava/lang/String;	throw
+  method visibleButUsesUnsupportedMethod	()Ljava/lang/String;	stub
+
+# Class load hook
+class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	~com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded
+
+# Heuristics rule: Stub all the AIDL classes.
+class :aidl stubclass
+
+# Heuristics rule: Stub all the R classes.
+class :r stubclass
+
+# Default is "remove", so let's put all the base classes / interfaces in the stub first.
+class com.android.hoststubgen.test.tinyframework.subclasstest.C1 stub
+class com.android.hoststubgen.test.tinyframework.subclasstest.C2 stub
+class com.android.hoststubgen.test.tinyframework.subclasstest.C3 stub
+class com.android.hoststubgen.test.tinyframework.subclasstest.CA stub
+class com.android.hoststubgen.test.tinyframework.subclasstest.CB stub
+class com.android.hoststubgen.test.tinyframework.subclasstest.I1 stub
+class com.android.hoststubgen.test.tinyframework.subclasstest.I2 stub
+class com.android.hoststubgen.test.tinyframework.subclasstest.I3 stub
+class com.android.hoststubgen.test.tinyframework.subclasstest.IA stub
+class com.android.hoststubgen.test.tinyframework.subclasstest.IB stub
+
+# Then define inheritance based policies.
+class *com.android.hoststubgen.test.tinyframework.subclasstest.C1 keep
+class *com.android.hoststubgen.test.tinyframework.subclasstest.CA remove
+
+class *com.android.hoststubgen.test.tinyframework.subclasstest.I1 keep
+class *com.android.hoststubgen.test.tinyframework.subclasstest.IA remove

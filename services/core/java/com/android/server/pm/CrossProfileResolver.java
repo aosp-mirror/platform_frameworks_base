@@ -36,8 +36,8 @@ import java.util.function.Function;
  */
 public abstract class CrossProfileResolver {
 
-    protected ComponentResolverApi mComponentResolver;
-    protected UserManagerService mUserManager;
+    protected final ComponentResolverApi mComponentResolver;
+    protected final UserManagerService mUserManager;
 
     public CrossProfileResolver(ComponentResolverApi componentResolver,
             UserManagerService userManager) {

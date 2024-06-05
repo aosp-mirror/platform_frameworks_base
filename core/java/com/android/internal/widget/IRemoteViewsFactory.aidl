@@ -39,5 +39,6 @@ interface IRemoteViewsFactory {
     boolean hasStableIds();
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isCreated();
+    RemoteViews.RemoteCollectionItems getRemoteCollectionItems(int capSize);
 }
 

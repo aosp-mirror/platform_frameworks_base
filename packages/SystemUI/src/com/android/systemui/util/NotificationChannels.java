@@ -24,7 +24,7 @@ import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.wm.shell.pip.tv.TvPipNotificationController;
 
 import java.util.Arrays;
@@ -112,7 +112,7 @@ public class NotificationChannels implements CoreStartable {
             // priority, so it can be shown in all times.
             nm.createNotificationChannel(new NotificationChannel(
                     TVPIP,
-                    context.getString(R.string.notification_channel_tv_pip),
+                    context.getString(com.android.wm.shell.R.string.notification_channel_tv_pip),
                     NotificationManager.IMPORTANCE_MAX));
         }
     }

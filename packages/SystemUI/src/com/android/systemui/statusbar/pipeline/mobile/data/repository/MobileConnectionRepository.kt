@@ -16,12 +16,14 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
+import android.telephony.CellSignalStrength
 import android.telephony.SubscriptionInfo
 import android.telephony.TelephonyManager
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import kotlinx.coroutines.flow.StateFlow
 
@@ -42,6 +44,9 @@ interface MobileConnectionRepository {
 
     /** The carrierId for this connection. See [TelephonyManager.getSimCarrierId] */
     val carrierId: StateFlow<Int>
+
+    /** Reflects the value from the carrier config INFLATE_SIGNAL_STRENGTH for this connection */
+    val inflateSignalStrength: StateFlow<Boolean>
 
     /**
      * The table log buffer created for this connection. Will have the name "MobileConnectionLog
@@ -71,6 +76,19 @@ interface MobileConnectionRepository {
      * registration state is IN_SERVICE and NOT IWLAN.
      */
     val isInService: StateFlow<Boolean>
+
+    /**
+     * True if this subscription is actively connected to a non-terrestrial network and false
+     * otherwise. Reflects [android.telephony.ServiceState.isUsingNonTerrestrialNetwork].
+     *
+     * Notably: This value reflects that this subscription is **currently** using a non-terrestrial
+     * network, because some subscriptions can switch between terrestrial and non-terrestrial
+     * networks. [SubscriptionModel.isExclusivelyNonTerrestrial] reflects whether a subscription is
+     * configured to exclusively connect to non-terrestrial networks. [isNonTerrestrial] can change
+     * during the lifetime of a subscription but [SubscriptionModel.isExclusivelyNonTerrestrial]
+     * will stay constant.
+     */
+    val isNonTerrestrial: StateFlow<Boolean>
 
     /** True if [android.telephony.SignalStrength] told us that this connection is using GSM */
     val isGsm: StateFlow<Boolean>
@@ -115,11 +133,37 @@ interface MobileConnectionRepository {
      */
     val cdmaRoaming: StateFlow<Boolean>
 
-    /** The service provider name for this network connection, or the default name */
+    /** The service provider name for this network connection, or the default name. */
     val networkName: StateFlow<NetworkNameModel>
+
+    /**
+     * The service provider name for this network connection, or the default name.
+     *
+     * TODO(b/296600321): De-duplicate this field with [networkName] after determining the data
+     *   provided is identical
+     */
+    val carrierName: StateFlow<NetworkNameModel>
+
+    /**
+     * True if this type of connection is allowed while airplane mode is on, and false otherwise.
+     */
+    val isAllowedDuringAirplaneMode: StateFlow<Boolean>
+
+    /**
+     * True if this network has NET_CAPABILITIY_PRIORITIZE_LATENCY, and can be considered to be a
+     * network slice
+     */
+    val hasPrioritizedNetworkCapabilities: StateFlow<Boolean>
+
+    /**
+     * True if this connection is in emergency callback mode.
+     *
+     * @see [TelephonyManager.getEmergencyCallbackMode]
+     */
+    suspend fun isInEcmMode(): Boolean
 
     companion object {
         /** The default number of levels to use for [numberOfLevels]. */
-        const val DEFAULT_NUM_LEVELS = 4
+        val DEFAULT_NUM_LEVELS = CellSignalStrength.getNumSignalStrengthLevels()
     }
 }

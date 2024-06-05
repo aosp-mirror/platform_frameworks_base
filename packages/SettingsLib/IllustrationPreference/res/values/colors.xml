@@ -17,49 +17,4 @@
 
 <resources>
     <color name="settingslib_protection_color">@android:color/white</color>
-
-    <!-- Dynamic colors-->
-    <color name="settingslib_color_blue600">#1a73e8</color>
-    <color name="settingslib_color_blue400">#669df6</color>
-    <color name="settingslib_color_blue300">#8ab4f8</color>
-    <color name="settingslib_color_blue100">#d2e3fc</color>
-    <color name="settingslib_color_blue50">#e8f0fe</color>
-    <color name="settingslib_color_green600">#1e8e3e</color>
-    <color name="settingslib_color_green400">#5bb974</color>
-    <color name="settingslib_color_green100">#ceead6</color>
-    <color name="settingslib_color_green50">#e6f4ea</color>
-    <color name="settingslib_color_red600">#d93025</color>
-    <color name="settingslib_color_red400">#ee675c</color>
-    <color name="settingslib_color_red100">#fad2cf</color>
-    <color name="settingslib_color_red50">#fce8e6</color>
-    <color name="settingslib_color_yellow600">#f9ab00</color>
-    <color name="settingslib_color_yellow400">#fcc934</color>
-    <color name="settingslib_color_yellow100">#feefc3</color>
-    <color name="settingslib_color_yellow50">#fef7e0</color>
-    <color name="settingslib_color_grey900">#202124</color>
-    <color name="settingslib_color_grey800">#3c4043</color>
-    <color name="settingslib_color_grey700">#5f6368</color>
-    <color name="settingslib_color_grey600">#80868b</color>
-    <color name="settingslib_color_grey500">#9AA0A6</color>
-    <color name="settingslib_color_grey400">#bdc1c6</color>
-    <color name="settingslib_color_grey300">#dadce0</color>
-    <color name="settingslib_color_grey200">#e8eaed</color>
-    <color name="settingslib_color_grey100">#f1f3f4</color>
-    <color name="settingslib_color_grey50">#f8f9fa</color>
-    <color name="settingslib_color_orange600">#e8710a</color>
-    <color name="settingslib_color_orange400">#fa903e</color>
-    <color name="settingslib_color_orange300">#fcad70</color>
-    <color name="settingslib_color_orange100">#fedfc8</color>
-    <color name="settingslib_color_pink600">#e52592</color>
-    <color name="settingslib_color_pink400">#ff63b8</color>
-    <color name="settingslib_color_pink300">#ff8bcb</color>
-    <color name="settingslib_color_pink100">#fdcfe8</color>
-    <color name="settingslib_color_purple600">#9334e6</color>
-    <color name="settingslib_color_purple400">#af5cf7</color>
-    <color name="settingslib_color_purple300">#c58af9</color>
-    <color name="settingslib_color_purple100">#e9d2fd</color>
-    <color name="settingslib_color_cyan600">#12b5c8</color>
-    <color name="settingslib_color_cyan400">#4ecde6</color>
-    <color name="settingslib_color_cyan300">#78d9ec</color>
-    <color name="settingslib_color_cyan100">#cbf0f8</color>
 </resources>

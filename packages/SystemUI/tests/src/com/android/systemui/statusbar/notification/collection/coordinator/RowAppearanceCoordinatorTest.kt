@@ -15,8 +15,8 @@
  */
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.AssistantFeedbackController
@@ -41,7 +41,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations.initMocks
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class RowAppearanceCoordinatorTest : SysuiTestCase() {
     private lateinit var coordinator: RowAppearanceCoordinator
@@ -76,7 +76,7 @@ class RowAppearanceCoordinatorTest : SysuiTestCase() {
             verify(pipeline).addOnAfterRenderEntryListener(capture())
         }
         whenever(assistantFeedbackController.getFeedbackIcon(any())).thenReturn(FeedbackIcon(1, 2))
-        entry1 = NotificationEntryBuilder().setSection(section1).setLastAudiblyAlertedMs(17).build()
+        entry1 = NotificationEntryBuilder().setSection(section1).build()
         entry2 = NotificationEntryBuilder().setSection(section2).build()
     }
 
@@ -100,12 +100,6 @@ class RowAppearanceCoordinatorTest : SysuiTestCase() {
         verify(controller1).setSystemExpanded(eq(false))
         afterRenderEntryListener.onAfterRenderEntry(entry2, controller2)
         verify(controller2).setSystemExpanded(eq(false))
-    }
-
-    @Test
-    fun testSetLastAudiblyAlerted() {
-        afterRenderEntryListener.onAfterRenderEntry(entry1, controller1)
-        verify(controller1).setLastAudiblyAlertedMs(eq(17.toLong()))
     }
 
     @Test

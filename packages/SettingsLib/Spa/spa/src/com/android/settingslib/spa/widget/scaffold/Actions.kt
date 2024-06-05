@@ -18,18 +18,13 @@ package com.android.settingslib.spa.widget.scaffold
 
 import androidx.appcompat.R
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.FindInPage
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.LayoutDirection
 import com.android.settingslib.spa.framework.compose.LocalNavController
 
 /** Action that navigates back to last page. */
@@ -53,9 +48,8 @@ internal fun CollapseAction(onClick: () -> Unit) {
 private fun BackAction(contentDescription: String, onClick: () -> Unit) {
     IconButton(onClick) {
         Icon(
-            imageVector = Icons.Outlined.ArrowBack,
+            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
             contentDescription = contentDescription,
-            modifier = Modifier.autoMirrored(),
         )
     }
 }
@@ -79,12 +73,5 @@ internal fun ClearAction(onClick: () -> Unit) {
             imageVector = Icons.Outlined.Clear,
             contentDescription = stringResource(R.string.abc_searchview_description_clear),
         )
-    }
-}
-
-private fun Modifier.autoMirrored() = composed {
-    when (LocalLayoutDirection.current) {
-        LayoutDirection.Rtl -> scale(scaleX = -1f, scaleY = 1f)
-        else -> this
     }
 }

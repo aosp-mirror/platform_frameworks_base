@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya dengan cepat"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya dengan lambat"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Pengisian daya dioptimalkan untuk melindungi baterai"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Masalah dengan aksesori pengisian daya"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Tekan Menu untuk membuka kunci."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Pengisian daya dihentikan sementara untuk melindungi baterai"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Periksa aksesori pengisi daya"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Jaringan terkunci"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Tidak ada SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Tambahkan SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM tidak ada atau tidak dapat dibaca. Tambahkan SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM tidak dapat digunakan."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM Anda telah dinonaktifkan secara permanen.\n Hubungi penyedia layanan nirkabel Anda untuk mendapatkan SIM lain."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM dikunci."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM dikunci PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Membuka kunci SIM …"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"PIN diperlukan setelah kunci total"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Sandi diperlukan setelah kunci total"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Pola diperlukan setelah kunci total"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Update akan diinstal selama jam tidak aktif"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Update akan diinstal saat perangkat sedang tidak digunakan"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Perlu keamanan tambahan. PIN tidak digunakan selama beberapa waktu."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Perlu keamanan tambahan. Sandi tidak digunakan selama beberapa waktu."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Perlu keamanan tambahan. Pola tidak digunakan selama beberapa waktu."</string>
@@ -84,10 +80,10 @@
     <string name="kg_face_locked_out" msgid="2751559491287575">"Tidak dapat membuka kunci dengan wajah. Terlalu banyak upaya gagal."</string>
     <string name="kg_fp_locked_out" msgid="6228277682396768830">"Tidak dapat membuka kunci dengan sidik jari. Terlalu banyak upaya gagal."</string>
     <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Perangkat tepercaya tidak tersedia"</string>
-    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Terlalu banyak upaya dengan PIN yang salah"</string>
-    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Terlalu banyak upaya dengan pola yang salah"</string>
-    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Terlalu banyak upaya dengan sandi yang salah"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Coba lagi dalam # detik.}other{Coba lagi dalam # detik.}}"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Terlalu banyak pemakaian PIN yang salah"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Terlalu banyak pemakaian pola yang salah"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Terlalu banyak pemakaian sandi yang salah"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Coba lagi setelah # detik.}other{Coba lagi setelah # detik.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Masukkan PIN SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Masukkan PIN SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Nonaktifkan eSIM untuk menggunakan perangkat tanpa layanan seluler."</string>
@@ -112,9 +108,12 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Pola diperlukan setelah perangkat dimulai ulang"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"PIN diperlukan setelah perangkat dimulai ulang"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Sandi diperlukan setelah perangkat dimulai ulang"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Untuk keamanan tambahan, gunakan pola"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Untuk keamanan tambahan, gunakan PIN"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Untuk keamanan tambahan, gunakan sandi"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Agar lebih aman, gunakan pola"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Agar lebih aman, gunakan PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Agar lebih aman, gunakan sandi"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"PIN diperlukan untuk keamanan tambahan"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Pola diperlukan untuk keamanan tambahan"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Sandi diperlukan untuk keamanan tambahan"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Perangkat dikunci oleh admin"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Perangkat dikunci secara manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Tidak dikenali"</string>

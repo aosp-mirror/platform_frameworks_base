@@ -16,185 +16,158 @@
 
 package com.android.systemui.shade
 
-import android.content.ContentResolver
-import android.os.Handler
-import android.view.LayoutInflater
-import android.view.ViewStub
-import androidx.constraintlayout.motion.widget.MotionLayout
-import com.android.keyguard.LockIconView
-import com.android.systemui.CoreStartable
-import com.android.systemui.R
-import com.android.systemui.battery.BatteryMeterView
-import com.android.systemui.battery.BatteryMeterViewController
-import com.android.systemui.biometrics.AuthRippleController
-import com.android.systemui.biometrics.AuthRippleView
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.privacy.OngoingPrivacyChip
-import com.android.systemui.settings.UserTracker
-import com.android.systemui.statusbar.LightRevealScrim
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
-import com.android.systemui.statusbar.phone.StatusIconContainer
-import com.android.systemui.statusbar.phone.TapAgainView
-import com.android.systemui.statusbar.policy.BatteryController
-import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.tuner.TunerService
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.plugins.qs.QSContainerController
+import com.android.systemui.qs.ui.adapter.QSSceneAdapterImpl
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.carrier.ShadeCarrierGroupControllerLog
+import com.android.systemui.shade.data.repository.PrivacyChipRepository
+import com.android.systemui.shade.data.repository.PrivacyChipRepositoryImpl
+import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
+import com.android.systemui.shade.domain.interactor.BaseShadeInteractor
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractorImpl
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorSceneContainerImpl
+import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
+import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractorImpl
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
+import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
+import com.android.systemui.shade.domain.interactor.ShadeInteractorSceneContainerImpl
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractorImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import dagger.multibindings.ClassKey
-import dagger.multibindings.IntoMap
-import javax.inject.Named
+import javax.inject.Provider
 
 /** Module for classes related to the notification shade. */
-@Module
+@Module(includes = [StartShadeModule::class, ShadeViewProviderModule::class])
 abstract class ShadeModule {
-
-    @Binds
-    @IntoMap
-    @ClassKey(AuthRippleController::class)
-    abstract fun bindAuthRippleController(controller: AuthRippleController): CoreStartable
-
     companion object {
-        const val SHADE_HEADER = "large_screen_shade_header"
-
         @Provides
         @SysUISingleton
-        // TODO(b/277762009): Do something similar to
-        //  {@link StatusBarWindowModule.InternalWindowView} so that only
-        //  {@link NotificationShadeWindowViewController} can inject this view.
-        fun providesNotificationShadeWindowView(
-            layoutInflater: LayoutInflater,
-        ): NotificationShadeWindowView {
-            return layoutInflater.inflate(R.layout.super_notification_shade, /* root= */ null)
-                as NotificationShadeWindowView?
-                ?: throw IllegalStateException(
-                    "R.layout.super_notification_shade could not be properly inflated"
-                )
-        }
-
-        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
-        @Provides
-        @SysUISingleton
-        fun providesNotificationStackScrollLayout(
-            notificationShadeWindowView: NotificationShadeWindowView,
-        ): NotificationStackScrollLayout {
-            return notificationShadeWindowView.requireViewById(R.id.notification_stack_scroller)
-        }
-
-        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
-        @Provides
-        @SysUISingleton
-        fun providesNotificationPanelView(
-            notificationShadeWindowView: NotificationShadeWindowView,
-        ): NotificationPanelView {
-            return notificationShadeWindowView.requireViewById(R.id.notification_panel)
+        fun provideBaseShadeInteractor(
+            sceneContainerOn: Provider<ShadeInteractorSceneContainerImpl>,
+            sceneContainerOff: Provider<ShadeInteractorLegacyImpl>
+        ): BaseShadeInteractor {
+            return if (SceneContainerFlag.isEnabled) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
         }
 
         @Provides
         @SysUISingleton
-        fun providesLightRevealScrim(
-            notificationShadeWindowView: NotificationShadeWindowView,
-        ): LightRevealScrim {
-            return notificationShadeWindowView.requireViewById(R.id.light_reveal_scrim)
-        }
-
-        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
-        @Provides
-        @SysUISingleton
-        fun providesAuthRippleView(
-            notificationShadeWindowView: NotificationShadeWindowView,
-        ): AuthRippleView? {
-            return notificationShadeWindowView.requireViewById(R.id.auth_ripple)
-        }
-
-        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
-        @Provides
-        @SysUISingleton
-        fun providesLockIconView(
-            notificationShadeWindowView: NotificationShadeWindowView,
-        ): LockIconView {
-            return notificationShadeWindowView.requireViewById(R.id.lock_icon_view)
-        }
-
-        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
-        @Provides
-        @SysUISingleton
-        fun providesTapAgainView(
-            notificationPanelView: NotificationPanelView,
-        ): TapAgainView {
-            return notificationPanelView.requireViewById(R.id.shade_falsing_tap_again)
-        }
-
-        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
-        @Provides
-        @SysUISingleton
-        @Named(SHADE_HEADER)
-        fun providesShadeHeaderView(
-            notificationShadeWindowView: NotificationShadeWindowView,
-        ): MotionLayout {
-            val stub = notificationShadeWindowView.requireViewById<ViewStub>(R.id.qs_header_stub)
-            val layoutId = R.layout.combined_qs_header
-            stub.layoutResource = layoutId
-            return stub.inflate() as MotionLayout
+        fun provideShadeController(
+            sceneContainerOn: Provider<ShadeControllerSceneImpl>,
+            sceneContainerOff: Provider<ShadeControllerImpl>
+        ): ShadeController {
+            return if (SceneContainerFlag.isEnabled) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
         }
 
         @Provides
         @SysUISingleton
-        fun providesCombinedShadeHeadersConstraintManager(): CombinedShadeHeadersConstraintManager {
-            return CombinedShadeHeadersConstraintManagerImpl
-        }
-
-        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
-        @Provides
-        @SysUISingleton
-        @Named(SHADE_HEADER)
-        fun providesBatteryMeterView(@Named(SHADE_HEADER) view: MotionLayout): BatteryMeterView {
-            return view.requireViewById(R.id.batteryRemainingIcon)
-        }
-
-        @Provides
-        @SysUISingleton
-        @Named(SHADE_HEADER)
-        fun providesBatteryMeterViewController(
-            @Named(SHADE_HEADER) batteryMeterView: BatteryMeterView,
-            userTracker: UserTracker,
-            configurationController: ConfigurationController,
-            tunerService: TunerService,
-            @Main mainHandler: Handler,
-            contentResolver: ContentResolver,
-            featureFlags: FeatureFlags,
-            batteryController: BatteryController,
-        ): BatteryMeterViewController {
-            return BatteryMeterViewController(
-                batteryMeterView,
-                userTracker,
-                configurationController,
-                tunerService,
-                mainHandler,
-                contentResolver,
-                featureFlags,
-                batteryController,
-            )
+        fun provideShadeAnimationInteractor(
+            sceneContainerOn: Provider<ShadeAnimationInteractorSceneContainerImpl>,
+            sceneContainerOff: Provider<ShadeAnimationInteractorLegacyImpl>
+        ): ShadeAnimationInteractor {
+            return if (SceneContainerFlag.isEnabled) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
         }
 
         @Provides
         @SysUISingleton
-        @Named(SHADE_HEADER)
-        fun providesOngoingPrivacyChip(
-            @Named(SHADE_HEADER) header: MotionLayout,
-        ): OngoingPrivacyChip {
-            return header.requireViewById(R.id.privacy_chip)
+        fun provideShadeBackActionInteractor(
+            sceneContainerOn: Provider<ShadeBackActionInteractorImpl>,
+            sceneContainerOff: Provider<NotificationPanelViewController>
+        ): ShadeBackActionInteractor {
+            return if (SceneContainerFlag.isEnabled) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
         }
 
         @Provides
         @SysUISingleton
-        @Named(SHADE_HEADER)
-        fun providesStatusIconContainer(
-            @Named(SHADE_HEADER) header: MotionLayout,
-        ): StatusIconContainer {
-            return header.requireViewById(R.id.statusIcons)
+        fun provideShadeLockscreenInteractor(
+            sceneContainerOn: Provider<ShadeLockscreenInteractorImpl>,
+            sceneContainerOff: Provider<NotificationPanelViewController>
+        ): ShadeLockscreenInteractor {
+            return if (SceneContainerFlag.isEnabled) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providePanelExpansionInteractor(
+            sceneContainerOn: Provider<PanelExpansionInteractorImpl>,
+            sceneContainerOff: Provider<NotificationPanelViewController>
+        ): PanelExpansionInteractor {
+            return if (SceneContainerFlag.isEnabled) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun provideQuickSettingsController(
+            sceneContainerOn: Provider<QuickSettingsControllerSceneImpl>,
+            sceneContainerOff: Provider<QuickSettingsControllerImpl>,
+        ): QuickSettingsController {
+            return if (SceneContainerFlag.isEnabled) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providesQSContainerController(impl: QSSceneAdapterImpl): QSContainerController {
+            return impl
+        }
+
+        @Provides
+        @SysUISingleton
+        @ShadeCarrierGroupControllerLog
+        fun provideShadeCarrierLog(factory: LogBufferFactory): LogBuffer {
+            return factory.create("ShadeCarrierGroupControllerLog", 400)
         }
     }
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsShadeRepository(impl: ShadeRepositoryImpl): ShadeRepository
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsShadeInteractor(si: ShadeInteractorImpl): ShadeInteractor
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsShadeViewController(shadeSurface: ShadeSurface): ShadeViewController
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsPrivacyChipRepository(impl: PrivacyChipRepositoryImpl): PrivacyChipRepository
 }

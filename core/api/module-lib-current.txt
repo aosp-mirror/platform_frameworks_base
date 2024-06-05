@@ -1,6 +1,4 @@
 // Signature format: 2.0
-// - add-additional-overrides=no
-// - migrating=Migration in progress see b/299366704
 package android {
 
   public static final class Manifest.permission {
@@ -16,6 +14,7 @@ package android.app {
 
   @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public final boolean addDumpable(@NonNull android.util.Dumpable);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public final boolean isResumed();
   }
 
   public class ActivityManager {
@@ -67,6 +66,11 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
   }
 
+  public final class SystemServiceRegistry {
+    method @FlaggedApi("android.webkit.update_service_ipc_wrapper") @Nullable public static Object getSystemServiceWithNoContext(@NonNull String);
+    method @FlaggedApi("android.webkit.update_service_ipc_wrapper") public static <TServiceClass> void registerForeverStaticService(@NonNull String, @NonNull Class<TServiceClass>, @NonNull android.app.SystemServiceRegistry.StaticServiceProducerWithBinder<TServiceClass>);
+  }
+
 }
 
 package android.app.admin {
@@ -97,8 +101,8 @@ package android.content {
     method @NonNull public android.os.IBinder getProcessToken();
     method @NonNull public android.os.UserHandle getUser();
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";
-    field public static final String REMOTE_AUTH_SERVICE = "remote_auth";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
+    field @FlaggedApi("android.webkit.update_service_ipc_wrapper") public static final String WEBVIEW_UPDATE_SERVICE = "webviewupdate";
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
@@ -114,6 +118,7 @@ package android.content {
 package android.content.pm {
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    method @FlaggedApi("android.content.pm.sdk_lib_independence") @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getOptionalSharedLibraryInfos();
     method @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraryInfos();
     field public static final int HIDDEN_API_ENFORCEMENT_DEFAULT = -1; // 0xffffffff
     field public static final int HIDDEN_API_ENFORCEMENT_DISABLED = 0; // 0x0
@@ -122,11 +127,15 @@ package android.content.pm {
   }
 
   public abstract class PackageManager {
-    method @NonNull public String getPermissionControllerPackageName();
     method @NonNull public String getSdkSandboxPackageName();
     method @RequiresPermission(android.Manifest.permission.MAKE_UID_VISIBLE) public void makeUidVisible(int, int);
     field public static final String EXTRA_VERIFICATION_ROOT_HASH = "android.content.pm.extra.VERIFICATION_ROOT_HASH";
     field public static final int MATCH_STATIC_SHARED_AND_SDK_LIBRARIES = 67108864; // 0x4000000
+  }
+
+  @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") public class SignedPackage {
+    method @NonNull public byte[] getCertificateDigest();
+    method @NonNull public String getPackageName();
   }
 
 }
@@ -161,16 +170,6 @@ package android.hardware.usb {
 
 }
 
-package android.location {
-
-  public class LocationManager {
-    method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public boolean injectLocation(@NonNull android.location.Location);
-    method @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS) public boolean isAutomotiveGnssSuspended();
-    method @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS) public void setAutomotiveGnssSuspended(boolean);
-  }
-
-}
-
 package android.media {
 
   public class AudioManager {
@@ -194,6 +193,7 @@ package android.media {
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createA2dpInfo(boolean, int);
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createA2dpSinkInfo(int);
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createHearingAidInfo(boolean);
+    method @FlaggedApi("android.media.audio.sco_managed_by_audio") @NonNull public static android.media.BluetoothProfileConnectionInfo createHfpInfo();
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createLeAudioInfo(boolean, boolean);
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createLeAudioOutputInfo(boolean, int);
     method public int describeContents();
@@ -318,23 +318,7 @@ package android.net.netstats {
 
 }
 
-package android.net.wifi {
-
-  public final class WifiKeystore {
-    method @NonNull public static byte[] get(@NonNull String);
-    method @NonNull public static String[] list(@NonNull String);
-    method public static boolean put(@NonNull String, @NonNull byte[]);
-    method public static boolean remove(@NonNull String);
-  }
-
-}
-
 package android.nfc {
-
-  public class NfcFrameworkInitializer {
-    method public static void registerServiceWrappers();
-    method public static void setNfcServiceManager(@NonNull android.nfc.NfcServiceManager);
-  }
 
   public class NfcServiceManager {
     method @NonNull public android.nfc.NfcServiceManager.ServiceRegisterer getNfcManagerServiceRegisterer();
@@ -356,7 +340,9 @@ package android.nfc {
 package android.os {
 
   public class ArtModuleServiceManager {
+    method @FlaggedApi("android.content.pm.use_art_service_v2") @NonNull public android.os.ArtModuleServiceManager.ServiceRegisterer getArtdPreRebootServiceRegisterer();
     method @NonNull public android.os.ArtModuleServiceManager.ServiceRegisterer getArtdServiceRegisterer();
+    method @FlaggedApi("android.content.pm.use_art_service_v2") @NonNull public android.os.ArtModuleServiceManager.ServiceRegisterer getDexoptChrootSetupServiceRegisterer();
   }
 
   public static final class ArtModuleServiceManager.ServiceRegisterer {
@@ -390,6 +376,10 @@ package android.os {
     field public static final int DEVICE_INITIAL_SDK_INT;
   }
 
+  public class Environment {
+    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") @NonNull public static java.io.File getDataSystemDeDirectory();
+  }
+
   public class IpcDataCache<Query, Result> {
     ctor public IpcDataCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.os.IpcDataCache.QueryHandler<Query,Result>);
     method public void disableForCurrentProcess();
@@ -407,11 +397,22 @@ package android.os {
   }
 
   public class Process {
-    method public static final int getAppUidForSdkSandboxUid(int);
-    method public static final boolean isSdkSandboxUid(int);
     method public static final int toSdkSandboxUid(int);
     field public static final int NFC_UID = 1027; // 0x403
     field public static final int VPN_UID = 1016; // 0x3f8
+  }
+
+  @FlaggedApi("android.os.telemetry_apis_framework_initialization") public class ProfilingServiceManager {
+    method @NonNull public android.os.ProfilingServiceManager.ServiceRegisterer getProfilingServiceRegisterer();
+  }
+
+  public static class ProfilingServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor public ProfilingServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  public static final class ProfilingServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @Nullable public android.os.IBinder getOrThrow() throws android.os.ProfilingServiceManager.ServiceNotFoundException;
   }
 
   public final class ServiceManager {
@@ -441,6 +442,8 @@ package android.os {
 
   public class SystemConfigManager {
     method @NonNull public java.util.List<android.content.ComponentName> getEnabledComponentOverrides(@NonNull String);
+    method @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ENHANCED_CONFIRMATION_STATES) public java.util.Set<android.content.pm.SignedPackage> getEnhancedConfirmationTrustedInstallers();
+    method @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ENHANCED_CONFIRMATION_STATES) public java.util.Set<android.content.pm.SignedPackage> getEnhancedConfirmationTrustedPackages();
   }
 
   public final class Trace {
@@ -504,6 +507,7 @@ package android.provider {
   public static final class Settings.Config extends android.provider.Settings.NameValueTable {
     method @RequiresPermission(android.Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS) public static void clearMonitorCallback(@NonNull android.content.ContentResolver);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean deleteString(@NonNull String, @NonNull String);
+    method @NonNull public static java.util.Map<java.lang.String,java.lang.String> getAllStrings();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getString(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static java.util.Map<java.lang.String,java.lang.String> getStrings(@NonNull String, @NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static int getSyncDisabledMode();
@@ -534,6 +538,30 @@ package android.provider {
     field public static final String BLUETOOTH_ADDRESS = "bluetooth_address";
     field public static final String BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
     field public static final String BLUETOOTH_NAME = "bluetooth_name";
+  }
+
+}
+
+package android.se.omapi {
+
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public class SeFrameworkInitializer {
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @Nullable public static android.se.omapi.SeServiceManager getSeServiceManager();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public static void setSeServiceManager(@NonNull android.se.omapi.SeServiceManager);
+  }
+
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public class SeServiceManager {
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.se.omapi.SeServiceManager.ServiceRegisterer getSeManagerServiceRegisterer();
+  }
+
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public static class SeServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor @FlaggedApi("android.nfc.enable_nfc_mainline") public SeServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public static final class SeServiceManager.ServiceRegisterer {
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @Nullable public android.os.IBinder get();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.os.IBinder getOrThrow() throws android.se.omapi.SeServiceManager.ServiceNotFoundException;
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void register(@NonNull android.os.IBinder);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @Nullable public android.os.IBinder tryGet();
   }
 
 }
@@ -599,6 +627,47 @@ package android.util {
   public class SystemConfigFileCommitEventLogger {
     ctor public SystemConfigFileCommitEventLogger(@NonNull String);
     method public void setStartTime(long);
+  }
+
+}
+
+package android.view.accessibility {
+
+  public final class AccessibilityManager {
+    method @FlaggedApi("android.view.accessibility.flash_notification_system_api") public boolean startFlashNotificationSequence(@NonNull android.content.Context, int);
+    method @FlaggedApi("android.view.accessibility.flash_notification_system_api") public boolean stopFlashNotificationSequence(@NonNull android.content.Context);
+  }
+
+}
+
+package android.webkit {
+
+  @FlaggedApi("android.webkit.update_service_ipc_wrapper") public class WebViewBootstrapFrameworkInitializer {
+    method public static void registerServiceWrappers();
+  }
+
+  @FlaggedApi("android.webkit.update_service_ipc_wrapper") public final class WebViewProviderResponse implements android.os.Parcelable {
+    ctor public WebViewProviderResponse(@Nullable android.content.pm.PackageInfo, int);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.webkit.WebViewProviderResponse> CREATOR;
+    field public static final int STATUS_FAILED_LISTING_WEBVIEW_PACKAGES = 4; // 0x4
+    field public static final int STATUS_FAILED_OTHER = 11; // 0xb
+    field public static final int STATUS_FAILED_WAITING_FOR_RELRO = 3; // 0x3
+    field public static final int STATUS_SUCCESS = 0; // 0x0
+    field @Nullable public final android.content.pm.PackageInfo packageInfo;
+    field public final int status;
+  }
+
+  @FlaggedApi("android.webkit.update_service_ipc_wrapper") public final class WebViewUpdateManager {
+    method @Nullable @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public String changeProviderAndSetting(@NonNull String);
+    method @NonNull public android.webkit.WebViewProviderInfo[] getAllWebViewPackages();
+    method @Nullable public android.content.pm.PackageInfo getCurrentWebViewPackage();
+    method @Nullable public String getCurrentWebViewPackageName();
+    method @FlaggedApi("android.webkit.update_service_v2") @NonNull public android.webkit.WebViewProviderInfo getDefaultWebViewPackage();
+    method @Nullable public static android.webkit.WebViewUpdateManager getInstance();
+    method @NonNull public android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
+    method @NonNull public android.webkit.WebViewProviderResponse waitForAndGetProvider();
   }
 
 }

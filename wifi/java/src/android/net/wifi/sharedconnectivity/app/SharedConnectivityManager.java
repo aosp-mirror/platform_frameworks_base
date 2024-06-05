@@ -17,15 +17,18 @@
 package android.net.wifi.sharedconnectivity.app;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.net.wifi.sharedconnectivity.service.ISharedConnectivityCallback;
@@ -35,6 +38,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -67,7 +71,7 @@ import java.util.concurrent.Executor;
 @SystemApi
 public class SharedConnectivityManager {
     private static final String TAG = SharedConnectivityManager.class.getSimpleName();
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final class SharedConnectivityCallbackProxy extends
             ISharedConnectivityCallback.Stub {
@@ -81,6 +85,19 @@ public class SharedConnectivityManager {
             mCallback = callback;
         }
 
+        @Override
+        public void onServiceConnected() {
+            if (mCallback != null) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mCallback.onServiceConnected());
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
+
+        @Override
         public void onHotspotNetworksUpdated(@NonNull List<HotspotNetwork> networks) {
             if (mCallback != null) {
                 final long token = Binder.clearCallingIdentity();
@@ -117,6 +134,7 @@ public class SharedConnectivityManager {
             }
         }
 
+        @Override
         public void onHotspotNetworkConnectionStatusChanged(
                 @NonNull HotspotNetworkConnectionStatus status) {
             if (mCallback != null) {
@@ -158,6 +176,7 @@ public class SharedConnectivityManager {
     private final String mServicePackageName;
     private final String mIntentAction;
     private ServiceConnection mServiceConnection;
+    private UserManager mUserManager;
 
     /**
      * Creates a new instance of {@link SharedConnectivityManager}.
@@ -203,12 +222,14 @@ public class SharedConnectivityManager {
         mContext = context;
         mServicePackageName = servicePackageName;
         mIntentAction = serviceIntentAction;
+        mUserManager = context.getSystemService(UserManager.class);
     }
 
     private void bind() {
         mServiceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
+                if (DEBUG) Log.i(TAG, "onServiceConnected");
                 mService = ISharedConnectivityService.Stub.asInterface(service);
                 synchronized (mProxyDataLock) {
                     if (!mCallbackProxyCache.isEmpty()) {
@@ -239,9 +260,46 @@ public class SharedConnectivityManager {
             }
         };
 
-        mContext.bindService(
+        boolean result = mContext.bindService(
                 new Intent().setPackage(mServicePackageName).setAction(mIntentAction),
                 mServiceConnection, Context.BIND_AUTO_CREATE);
+        if (!result) {
+            if (DEBUG) Log.i(TAG, "bindService failed");
+            mServiceConnection = null;
+            if (mUserManager != null && !mUserManager.isUserUnlocked()) {  // In direct boot mode
+                IntentFilter intentFilter = new IntentFilter();
+                intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
+                mContext.registerReceiver(mBroadcastReceiver, intentFilter);
+            } else {
+                synchronized (mProxyDataLock) {
+                    if (!mCallbackProxyCache.isEmpty()) {
+                        mCallbackProxyCache.keySet().forEach(
+                                callback -> callback.onRegisterCallbackFailed(
+                                        new IllegalStateException(
+                                                "Failed to bind after user unlock")));
+                        mCallbackProxyCache.clear();
+                    }
+                }
+            }
+        }
+    }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            context.unregisterReceiver(mBroadcastReceiver);
+            bind();
+        }
+    };
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @FlaggedApi("com.android.wifi.flags.shared_connectivity_broadcast_receiver_test_api")
+    public BroadcastReceiver getBroadcastReceiver() {
+        return mBroadcastReceiver;
     }
 
     private void registerCallbackInternal(SharedConnectivityClientCallback callback,
@@ -251,7 +309,6 @@ public class SharedConnectivityManager {
             synchronized (mProxyDataLock) {
                 mProxyMap.put(callback, proxy);
             }
-            callback.onServiceConnected();
         } catch (RemoteException e) {
             Log.e(TAG, "Exception in registerCallback", e);
             callback.onRegisterCallbackFailed(e);
@@ -279,6 +336,7 @@ public class SharedConnectivityManager {
         if (mServiceConnection != null) {
             mContext.unbindService(mServiceConnection);
             mServiceConnection = null;
+            mService = null;
         }
     }
 
@@ -342,6 +400,13 @@ public class SharedConnectivityManager {
         if (!mProxyMap.containsKey(callback) && !mCallbackProxyCache.containsKey(callback)) {
             Log.e(TAG, "Callback not found, cannot unregister");
             return false;
+        }
+
+        // Try to unregister the broadcast receiver to guard against memory leaks.
+        try {
+            mContext.unregisterReceiver(mBroadcastReceiver);
+        } catch (IllegalArgumentException e) {
+            // This is fine, it means the receiver was never registered or was already unregistered.
         }
 
         if (mService == null) {

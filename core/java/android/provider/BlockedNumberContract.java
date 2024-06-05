@@ -558,7 +558,7 @@ public class BlockedNumberContract {
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_PAYPHONE}
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNKNOWN}
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE}
-         *        {@link #ENHANCED_SETTING_KEY_EMERGENCY_CALL_NOTIFICATION_SHOWING}
+         *        {@link #ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION}
          * @return {@code true} if the setting is enabled. {@code false} otherwise.
          */
         public static boolean getEnhancedBlockSetting(Context context, String key) {
@@ -586,7 +586,7 @@ public class BlockedNumberContract {
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_PAYPHONE}
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNKNOWN}
          *        {@link #ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE}
-         *        {@link #ENHANCED_SETTING_KEY_EMERGENCY_CALL_NOTIFICATION_SHOWING}
+         *        {@link #ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION}
          * @param value the enabled statue of the setting to set.
          */
         public static void setEnhancedBlockSetting(Context context, String key, boolean value) {

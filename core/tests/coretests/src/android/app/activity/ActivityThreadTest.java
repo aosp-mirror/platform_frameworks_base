@@ -21,7 +21,11 @@ import static android.content.Intent.ACTION_EDIT;
 import static android.content.Intent.ACTION_VIEW;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+
+import static com.android.window.flags.Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -29,19 +33,28 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.Application;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
+import android.app.PictureInPictureUiState;
 import android.app.ResourcesManager;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
+import android.app.servertransaction.ClientTransactionListenerController;
 import android.app.servertransaction.ConfigurationChangeItem;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.ResumeActivityItem;
@@ -57,10 +70,15 @@ import android.hardware.display.VirtualDisplay;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.View;
+import android.window.ActivityWindowInfo;
+import android.window.WindowContextInfo;
+import android.window.WindowTokenClientController;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -70,37 +88,62 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.content.ReferrerIntent;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
  * Test for verifying {@link android.app.ActivityThread} class.
  * Build/Install/Run:
- *  atest FrameworksCoreTests:android.app.activity.ActivityThreadTest
+ *  atest FrameworksCoreTests:ActivityThreadTest
  */
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 @Presubmit
 public class ActivityThreadTest {
+
+    private static final String TAG = "ActivityThreadTest";
+
     private static final int TIMEOUT_SEC = 10;
 
     // The first sequence number to try with. Use a large number to avoid conflicts with the first a
     // few sequence numbers the framework used to launch the test activity.
-    private static final int BASE_SEQ = 10000;
+    private static final int BASE_SEQ = 10000000;
 
-    @Rule
+    @Rule(order = 0)
     public final ActivityTestRule<TestActivity> mActivityTestRule =
             new ActivityTestRule<>(TestActivity.class, true /* initialTouchMode */,
                     false /* launchActivity */);
 
+    @Rule(order = 1)
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+
+    private ActivityWindowInfoListener mActivityWindowInfoListener;
+    private WindowTokenClientController mOriginalWindowTokenClientController;
+    private Configuration mOriginalAppConfig;
+
     private ArrayList<VirtualDisplay> mCreatedVirtualDisplays;
+
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+
+        // Keep track of the original controller, so that it can be used to restore in tearDown()
+        // when there is override in some test cases.
+        mOriginalWindowTokenClientController = WindowTokenClientController.getInstance();
+        mOriginalAppConfig = new Configuration(ActivityThread.currentActivityThread()
+                .getConfiguration());
+        mActivityWindowInfoListener = spy(new ActivityWindowInfoListener());
+    }
 
     @After
     public void tearDown() {
@@ -108,6 +151,11 @@ public class ActivityThreadTest {
             mCreatedVirtualDisplays.forEach(VirtualDisplay::release);
             mCreatedVirtualDisplays = null;
         }
+        WindowTokenClientController.overrideForTesting(mOriginalWindowTokenClientController);
+        ClientTransactionListenerController.getInstance()
+                .unregisterActivityWindowInfoChangedListener(mActivityWindowInfoListener);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> restoreConfig(ActivityThread.currentActivityThread(), mOriginalAppConfig));
     }
 
     @Test
@@ -205,9 +253,9 @@ public class ActivityThreadTest {
         CompatibilityInfo.setOverrideInvertedScale(scale);
         try {
             // Send process level config change.
-            ClientTransaction transaction = newTransaction(activityThread, null);
-            transaction.addCallback(ConfigurationChangeItem.obtain(
-                    new Configuration(newConfig), DEVICE_ID_INVALID));
+            ClientTransaction transaction = newTransaction(activityThread);
+            transaction.addTransactionItem(ConfigurationChangeItem.obtain(
+                    newConfig, DEVICE_ID_INVALID));
             appThread.scheduleTransaction(transaction);
             InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
@@ -222,9 +270,9 @@ public class ActivityThreadTest {
             // Send activity level config change.
             newConfig.seq++;
             newConfig.smallestScreenWidthDp++;
-            transaction = newTransaction(activityThread, activity.getActivityToken());
-            transaction.addCallback(ActivityConfigurationChangeItem.obtain(
-                    new Configuration(newConfig)));
+            transaction = newTransaction(activityThread);
+            transaction.addTransactionItem(ActivityConfigurationChangeItem.obtain(
+                    activity.getActivityToken(), newConfig, new ActivityWindowInfo()));
             appThread.scheduleTransaction(transaction);
             InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
@@ -232,15 +280,9 @@ public class ActivityThreadTest {
 
             // Execute a local relaunch item with current scaled config (e.g. simulate recreate),
             // the config should not be scaled again.
-            final Configuration currentConfig = activity.getResources().getConfiguration();
-            final ClientTransaction localTransaction =
-                    newTransaction(activityThread, activity.getActivityToken());
-            localTransaction.addCallback(ActivityRelaunchItem.obtain(
-                    null /* pendingResults */, null /* pendingIntents */, 0 /* configChanges */,
-                    new MergedConfiguration(currentConfig, currentConfig),
-                    true /* preserveWindow */));
             InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                    () -> activityThread.executeTransaction(localTransaction));
+                    () -> activityThread.executeTransaction(
+                            newRelaunchResumeTransaction(activity)));
 
             assertScreenScale(scale, activity, originalActivityConfig, originalActivityMetrics);
         } finally {
@@ -378,11 +420,13 @@ public class ActivityThreadTest {
             olderConfig.seq = seq + 1;
 
             final ActivityClientRecord r = getActivityClientRecord(activity);
-            activityThread.handleActivityConfigurationChanged(r, olderConfig, INVALID_DISPLAY);
+            activityThread.handleActivityConfigurationChanged(r, olderConfig, INVALID_DISPLAY,
+                    new ActivityWindowInfo());
             assertEquals(numOfConfig, activity.mNumOfConfigChanges);
             assertEquals(olderConfig.orientation, activity.mConfig.orientation);
 
-            activityThread.handleActivityConfigurationChanged(r, newerConfig, INVALID_DISPLAY);
+            activityThread.handleActivityConfigurationChanged(r, newerConfig, INVALID_DISPLAY,
+                    new ActivityWindowInfo());
             assertEquals(numOfConfig + 1, activity.mNumOfConfigChanges);
             assertEquals(newerConfig.orientation, activity.mConfig.orientation);
         });
@@ -400,7 +444,7 @@ public class ActivityThreadTest {
             config.orientation = ORIENTATION_PORTRAIT;
 
             activityThread.handleActivityConfigurationChanged(getActivityClientRecord(activity),
-                    config, INVALID_DISPLAY);
+                    config, INVALID_DISPLAY, new ActivityWindowInfo());
         });
 
         final IApplicationThread appThread = activityThread.getApplicationThread();
@@ -429,16 +473,18 @@ public class ActivityThreadTest {
         activity.mConfigLatch = new CountDownLatch(1);
         activity.mTestLatch = new CountDownLatch(1);
 
-        ClientTransaction transaction = newTransaction(activityThread, null);
-        transaction.addCallback(ConfigurationChangeItem.obtain(
+        ClientTransaction transaction = newTransaction(activityThread);
+        transaction.addTransactionItem(ConfigurationChangeItem.obtain(
                 processConfigLandscape, DEVICE_ID_INVALID));
         appThread.scheduleTransaction(transaction);
 
-        transaction = newTransaction(activityThread, activity.getActivityToken());
-        transaction.addCallback(ActivityConfigurationChangeItem.obtain(activityConfigLandscape));
-        transaction.addCallback(ConfigurationChangeItem.obtain(
+        transaction = newTransaction(activityThread);
+        transaction.addTransactionItem(ActivityConfigurationChangeItem.obtain(
+                activity.getActivityToken(), activityConfigLandscape, new ActivityWindowInfo()));
+        transaction.addTransactionItem(ConfigurationChangeItem.obtain(
                 processConfigPortrait, DEVICE_ID_INVALID));
-        transaction.addCallback(ActivityConfigurationChangeItem.obtain(activityConfigPortrait));
+        transaction.addTransactionItem(ActivityConfigurationChangeItem.obtain(
+                activity.getActivityToken(), activityConfigPortrait, new ActivityWindowInfo()));
         appThread.scheduleTransaction(transaction);
 
         activity.mTestLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
@@ -451,8 +497,10 @@ public class ActivityThreadTest {
         final Rect bounds = activity.getWindowManager().getCurrentWindowMetrics().getBounds();
         assertEquals(activityConfigPortrait.windowConfiguration.getBounds(), bounds);
 
-        // Ensure changes in window configuration bounds are reported
-        assertEquals(numOfConfig + 1, activity.mNumOfConfigChanges);
+        // Ensure that Activity#onConfigurationChanged() not be called because the changes in
+        // WindowConfiguration shouldn't be reported, and we only apply the latest Configuration
+        // update in transaction.
+        assertEquals(numOfConfig, activity.mNumOfConfigChanges);
     }
 
     @Test
@@ -467,7 +515,7 @@ public class ActivityThreadTest {
             config.orientation = ORIENTATION_PORTRAIT;
 
             activityThread.handleActivityConfigurationChanged(getActivityClientRecord(activity),
-                    config, INVALID_DISPLAY);
+                    config, INVALID_DISPLAY, new ActivityWindowInfo());
         });
 
         final int numOfConfig = activity.mNumOfConfigChanges;
@@ -549,16 +597,10 @@ public class ActivityThreadTest {
             activityThread.updatePendingConfiguration(newAppConfig);
             activityThread.handleConfigurationChanged(newAppConfig, DEVICE_ID_INVALID);
 
-            try {
-                assertEquals("Virtual display orientation must not change when process"
-                                + " configuration orientation changes.",
-                        originalVirtualDisplayOrientation,
-                        virtualDisplayContext.getResources().getConfiguration().orientation);
-            } finally {
-                // Make sure to reset the process config to prevent side effects to other
-                // tests.
-                restoreConfig(activityThread, originalAppConfig);
-            }
+            assertEquals("Virtual display orientation must not change when process"
+                            + " configuration orientation changes.",
+                    originalVirtualDisplayOrientation,
+                    virtualDisplayContext.getResources().getConfiguration().orientation);
         });
     }
 
@@ -603,7 +645,7 @@ public class ActivityThreadTest {
             activityThread.updatePendingActivityConfiguration(activity.getActivityToken(),
                     newActivityConfig);
             activityThread.handleActivityConfigurationChanged(r, newActivityConfig,
-                    INVALID_DISPLAY);
+                    INVALID_DISPLAY, new ActivityWindowInfo());
 
             assertEquals("Virtual display orientation must not change when activity"
                             + " configuration orientation changes.",
@@ -626,7 +668,8 @@ public class ActivityThreadTest {
                     new Configuration(oldAppResources.getConfiguration());
             final DisplayMetrics oldApplicationMetrics = new DisplayMetrics();
             oldApplicationMetrics.setTo(oldAppResources.getDisplayMetrics());
-            assertEquals("Process config must match the top activity config by default",
+            assertEquals("Process config must match the top activity config by default"
+                    + ", activity=" + oldActivityConfig + ", app=" + oldAppConfig,
                     0, oldActivityConfig.diffPublicOnly(oldAppConfig));
             assertEquals("Process config must match the top activity config by default",
                     oldActivityMetrics, oldApplicationMetrics);
@@ -690,6 +733,9 @@ public class ActivityThreadTest {
         final TestActivity activity = mActivityTestRule.launchActivity(startIntent);
         final ActivityThread activityThread = activity.getActivityThread();
         final ActivityClientRecord r = getActivityClientRecord(activity);
+        if (android.app.Flags.enablePipUiStateCallbackOnEntering()) {
+            activity.mPipUiStateLatch = new CountDownLatch(1);
+        }
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             activityThread.handlePictureInPictureRequested(r);
@@ -730,10 +776,148 @@ public class ActivityThreadTest {
         assertFalse(activity.enterPipSkipped());
     }
 
+    @Test
+    public void testHandleWindowContextConfigurationChanged() {
+        final Activity activity = mActivityTestRule.launchActivity(new Intent());
+        final ActivityThread activityThread = activity.getActivityThread();
+        final WindowTokenClientController windowTokenClientController =
+                mock(WindowTokenClientController.class);
+        WindowTokenClientController.overrideForTesting(windowTokenClientController);
+        final IBinder clientToken = mock(IBinder.class);
+        final Configuration configuration = new Configuration();
+        final WindowContextInfo info = new WindowContextInfo(configuration, DEFAULT_DISPLAY);
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> activityThread
+                .handleWindowContextInfoChanged(clientToken, info));
+
+        verify(windowTokenClientController).onWindowContextInfoChanged(clientToken, info);
+    }
+
+    @Test
+    public void testHandleWindowContextWindowRemoval() {
+        final Activity activity = mActivityTestRule.launchActivity(new Intent());
+        final ActivityThread activityThread = activity.getActivityThread();
+        final WindowTokenClientController windowTokenClientController =
+                mock(WindowTokenClientController.class);
+        WindowTokenClientController.overrideForTesting(windowTokenClientController);
+        final IBinder clientToken = mock(IBinder.class);
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> activityThread
+                .handleWindowContextWindowRemoval(clientToken));
+
+        verify(windowTokenClientController).onWindowContextWindowRemoved(clientToken);
+    }
+
+    @Test
+    public void testActivityWindowInfoChanged_activityLaunch() {
+        mSetFlagsRule.enableFlags(FLAG_ACTIVITY_WINDOW_INFO_FLAG);
+        ClientTransactionListenerController.getInstance().registerActivityWindowInfoChangedListener(
+                mActivityWindowInfoListener);
+
+        final Activity activity = mActivityTestRule.launchActivity(new Intent());
+        mActivityWindowInfoListener.await();
+        final ActivityClientRecord activityClientRecord = getActivityClientRecord(activity);
+
+        // In case the system change the window after launch, there can be more than one callback.
+        verify(mActivityWindowInfoListener, atLeastOnce()).accept(activityClientRecord.token,
+                activityClientRecord.getActivityWindowInfo());
+    }
+
+    @Test
+    public void testActivityWindowInfoChanged_activityRelaunch() {
+        mSetFlagsRule.enableFlags(FLAG_ACTIVITY_WINDOW_INFO_FLAG);
+        ClientTransactionListenerController.getInstance().registerActivityWindowInfoChangedListener(
+                mActivityWindowInfoListener);
+
+        final Activity activity = mActivityTestRule.launchActivity(new Intent());
+        mActivityWindowInfoListener.await();
+        final ActivityClientRecord activityClientRecord = getActivityClientRecord(activity);
+
+        // Run on main thread to avoid racing from updating from window relayout.
+        final ActivityThread activityThread = activity.getActivityThread();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // Try relaunch with the same ActivityWindowInfo
+            clearInvocations(mActivityWindowInfoListener);
+            activityThread.executeTransaction(newRelaunchResumeTransaction(activity));
+
+            // The same ActivityWindowInfo won't trigger duplicated callback.
+            verify(mActivityWindowInfoListener, never()).accept(activityClientRecord.token,
+                    activityClientRecord.getActivityWindowInfo());
+
+            // Try relaunch with different ActivityWindowInfo
+            final Configuration currentConfig = activity.getResources().getConfiguration();
+            final ActivityWindowInfo newInfo = new ActivityWindowInfo();
+            newInfo.set(true /* isEmbedded */, new Rect(0, 0, 1000, 2000),
+                    new Rect(0, 0, 1000, 1000));
+            final ActivityRelaunchItem relaunchItem = ActivityRelaunchItem.obtain(
+                    activity.getActivityToken(), null, null, 0,
+                    new MergedConfiguration(currentConfig, currentConfig),
+                    false /* preserveWindow */, newInfo);
+            final ClientTransaction transaction = newTransaction(activity);
+            transaction.addTransactionItem(relaunchItem);
+
+            clearInvocations(mActivityWindowInfoListener);
+            activityThread.executeTransaction(transaction);
+
+            // Trigger callback with a different ActivityWindowInfo
+            verify(mActivityWindowInfoListener).accept(activityClientRecord.token, newInfo);
+        });
+    }
+
+    @Test
+    public void testActivityWindowInfoChanged_activityConfigurationChanged() {
+        mSetFlagsRule.enableFlags(FLAG_ACTIVITY_WINDOW_INFO_FLAG);
+        ClientTransactionListenerController.getInstance().registerActivityWindowInfoChangedListener(
+                mActivityWindowInfoListener);
+
+        final Activity activity = mActivityTestRule.launchActivity(new Intent());
+        mActivityWindowInfoListener.await();
+
+        final ActivityThread activityThread = activity.getActivityThread();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // Trigger callback with different ActivityWindowInfo
+            final Configuration config = new Configuration(activity.getResources()
+                    .getConfiguration());
+            config.seq++;
+            final Rect taskBounds = new Rect(0, 0, 1000, 2000);
+            final Rect taskFragmentBounds = new Rect(0, 0, 1000, 1000);
+            final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
+            activityWindowInfo.set(true /* isEmbedded */, taskBounds, taskFragmentBounds);
+            final ActivityConfigurationChangeItem activityConfigurationChangeItem =
+                    ActivityConfigurationChangeItem.obtain(
+                            activity.getActivityToken(), config, activityWindowInfo);
+            final ClientTransaction transaction = newTransaction(activity);
+            transaction.addTransactionItem(activityConfigurationChangeItem);
+
+            clearInvocations(mActivityWindowInfoListener);
+            activityThread.executeTransaction(transaction);
+
+            // Trigger callback with a different ActivityWindowInfo
+            verify(mActivityWindowInfoListener).accept(activity.getActivityToken(),
+                    activityWindowInfo);
+
+            // Try callback with the same ActivityWindowInfo
+            final ActivityWindowInfo activityWindowInfo2 =
+                    new ActivityWindowInfo(activityWindowInfo);
+            config.seq++;
+            final ActivityConfigurationChangeItem activityConfigurationChangeItem2 =
+                    ActivityConfigurationChangeItem.obtain(
+                            activity.getActivityToken(), config, activityWindowInfo2);
+            final ClientTransaction transaction2 = newTransaction(activity);
+            transaction2.addTransactionItem(activityConfigurationChangeItem2);
+
+            clearInvocations(mActivityWindowInfoListener);
+            activityThread.executeTransaction(transaction);
+
+            // The same ActivityWindowInfo won't trigger duplicated callback.
+            verify(mActivityWindowInfoListener, never()).accept(any(), any());
+        });
+    }
+
     /**
      * Calls {@link ActivityThread#handleActivityConfigurationChanged(ActivityClientRecord,
-     * Configuration, int)} to try to push activity configuration to the activity for the given
-     * sequence number.
+     * Configuration, int, ActivityWindowInfo)} to try to push activity configuration to the
+     * activity for the given sequence number.
      * <p>
      * It uses orientation to push the configuration and it tries a different orientation if the
      * first attempt doesn't make through, to rule out the possibility that the previous
@@ -752,7 +936,8 @@ public class ActivityThreadTest {
         Configuration config = new Configuration();
         config.orientation = ORIENTATION_PORTRAIT;
         config.seq = seq;
-        activityThread.handleActivityConfigurationChanged(r, config, INVALID_DISPLAY);
+        activityThread.handleActivityConfigurationChanged(r, config, INVALID_DISPLAY,
+                new ActivityWindowInfo());
 
         if (activity.mNumOfConfigChanges > numOfConfig) {
             return config.seq;
@@ -761,7 +946,8 @@ public class ActivityThreadTest {
         config = new Configuration();
         config.orientation = ORIENTATION_LANDSCAPE;
         config.seq = seq + 1;
-        activityThread.handleActivityConfigurationChanged(r, config, INVALID_DISPLAY);
+        activityThread.handleActivityConfigurationChanged(r, config, INVALID_DISPLAY,
+                new ActivityWindowInfo());
 
         return config.seq;
     }
@@ -783,67 +969,88 @@ public class ActivityThreadTest {
         return thread.getActivityClient(token);
     }
 
-    private static ClientTransaction newRelaunchResumeTransaction(Activity activity) {
-        final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(null,
-                null, 0, new MergedConfiguration(), false /* preserveWindow */);
+    @NonNull
+    private static ClientTransaction newRelaunchResumeTransaction(@NonNull Activity activity) {
+        final Configuration currentConfig = activity.getResources().getConfiguration();
+        final ActivityClientRecord record = getActivityClientRecord(activity);
+        final ActivityWindowInfo activityWindowInfo;
+        if (record == null) {
+            Log.d(TAG, "The ActivityClientRecord of r=" + activity + " is not created yet. "
+                    + "Likely because this call doesn't wait until activity launch.");
+            activityWindowInfo = new ActivityWindowInfo();
+        } else {
+            activityWindowInfo = record.getActivityWindowInfo();
+        }
+        final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(
+                activity.getActivityToken(), null, null, 0,
+                new MergedConfiguration(currentConfig, currentConfig),
+                false /* preserveWindow */, activityWindowInfo);
         final ResumeActivityItem resumeStateRequest =
-                ResumeActivityItem.obtain(true /* isForward */,
+                ResumeActivityItem.obtain(activity.getActivityToken(), true /* isForward */,
                         false /* shouldSendCompatFakeFocus*/);
 
         final ClientTransaction transaction = newTransaction(activity);
-        transaction.addCallback(callbackItem);
-        transaction.setLifecycleStateRequest(resumeStateRequest);
+        transaction.addTransactionItem(callbackItem);
+        transaction.addTransactionItem(resumeStateRequest);
 
         return transaction;
     }
 
-    private static ClientTransaction newResumeTransaction(Activity activity) {
+    @NonNull
+    private static ClientTransaction newResumeTransaction(@NonNull Activity activity) {
         final ResumeActivityItem resumeStateRequest =
-                ResumeActivityItem.obtain(true /* isForward */,
+                ResumeActivityItem.obtain(activity.getActivityToken(), true /* isForward */,
                         false /* shouldSendCompatFakeFocus */);
 
         final ClientTransaction transaction = newTransaction(activity);
-        transaction.setLifecycleStateRequest(resumeStateRequest);
+        transaction.addTransactionItem(resumeStateRequest);
 
         return transaction;
     }
 
-    private static ClientTransaction newStopTransaction(Activity activity) {
-        final StopActivityItem stopStateRequest = StopActivityItem.obtain(0 /* configChanges */);
+    @NonNull
+    private static ClientTransaction newStopTransaction(@NonNull Activity activity) {
+        final StopActivityItem stopStateRequest = StopActivityItem.obtain(
+                activity.getActivityToken());
 
         final ClientTransaction transaction = newTransaction(activity);
-        transaction.setLifecycleStateRequest(stopStateRequest);
+        transaction.addTransactionItem(stopStateRequest);
 
         return transaction;
     }
 
-    private static ClientTransaction newActivityConfigTransaction(Activity activity,
-            Configuration config) {
-        final ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem.obtain(config);
+    @NonNull
+    private static ClientTransaction newActivityConfigTransaction(@NonNull Activity activity,
+            @NonNull Configuration config) {
+        final ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem.obtain(
+                activity.getActivityToken(), config, new ActivityWindowInfo());
 
         final ClientTransaction transaction = newTransaction(activity);
-        transaction.addCallback(item);
+        transaction.addTransactionItem(item);
 
         return transaction;
     }
 
-    private static ClientTransaction newNewIntentTransaction(Activity activity,
-            List<ReferrerIntent> intents, boolean resume) {
-        final NewIntentItem item = NewIntentItem.obtain(intents, resume);
+    @NonNull
+    private static ClientTransaction newNewIntentTransaction(@NonNull Activity activity,
+            @NonNull List<ReferrerIntent> intents, boolean resume) {
+        final NewIntentItem item = NewIntentItem.obtain(activity.getActivityToken(), intents,
+                resume);
 
         final ClientTransaction transaction = newTransaction(activity);
-        transaction.addCallback(item);
+        transaction.addTransactionItem(item);
 
         return transaction;
     }
 
-    private static ClientTransaction newTransaction(Activity activity) {
-        return newTransaction(activity.getActivityThread(), activity.getActivityToken());
+    @NonNull
+    private static ClientTransaction newTransaction(@NonNull Activity activity) {
+        return newTransaction(activity.getActivityThread());
     }
 
-    private static ClientTransaction newTransaction(ActivityThread activityThread,
-            @Nullable IBinder activityToken) {
-        return ClientTransaction.obtain(activityThread.getApplicationThread(), activityToken);
+    @NonNull
+    private static ClientTransaction newTransaction(@NonNull ActivityThread activityThread) {
+        return ClientTransaction.obtain(activityThread.getApplicationThread());
     }
 
     // Test activity
@@ -869,6 +1076,11 @@ public class ActivityThreadTest {
          * latch reaches 0.
          */
         volatile CountDownLatch mConfigLatch;
+        /**
+         * A latch used to notify tests that we're about to wait for the
+         * onPictureInPictureUiStateChanged callback.
+         */
+        volatile CountDownLatch mPipUiStateLatch;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -884,12 +1096,13 @@ public class ActivityThreadTest {
             mConfig.setTo(config);
             ++mNumOfConfigChanges;
 
-            if (mConfigLatch != null) {
+            final CountDownLatch configLatch = mConfigLatch;
+            if (configLatch != null) {
                 if (mTestLatch != null) {
                     mTestLatch.countDown();
                 }
                 try {
-                    mConfigLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
+                    configLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
                     throw new IllegalStateException(e);
                 }
@@ -902,12 +1115,27 @@ public class ActivityThreadTest {
             if (getIntent().getBooleanExtra(PIP_REQUESTED_OVERRIDE_ENTER, false)) {
                 enterPictureInPictureMode(new PictureInPictureParams.Builder().build());
                 mPipEntered = true;
+                // Await for onPictureInPictureUiStateChanged callback if applicable
+                if (mPipUiStateLatch != null) {
+                    try {
+                        mPipUiStateLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
                 return true;
             } else if (getIntent().getBooleanExtra(PIP_REQUESTED_OVERRIDE_SKIP, false)) {
                 mPipEnterSkipped = true;
                 return false;
             }
             return super.onPictureInPictureRequested();
+        }
+
+        @Override
+        public void onPictureInPictureUiStateChanged(PictureInPictureUiState pipState) {
+            if (mPipUiStateLatch != null && pipState.isTransitioningToPip()) {
+                mPipUiStateLatch.countDown();
+            }
         }
 
         boolean pipRequested() {
@@ -920,6 +1148,30 @@ public class ActivityThreadTest {
 
         boolean enterPipSkipped() {
             return mPipEnterSkipped;
+        }
+    }
+
+    public static class ActivityWindowInfoListener implements
+            BiConsumer<IBinder, ActivityWindowInfo> {
+
+        CountDownLatch mCallbackLatch = new CountDownLatch(1);
+
+        @Override
+        public void accept(@NonNull IBinder activityToken,
+                @NonNull ActivityWindowInfo activityWindowInfo) {
+            mCallbackLatch.countDown();
+        }
+
+        /**
+         * When the test is expecting to receive a callback, waits until the callback is triggered.
+         */
+        void await() {
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+            try {
+                mCallbackLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

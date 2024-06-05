@@ -17,36 +17,41 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"ಕಂಪ್ಯಾನಿಯನ್ ಸಾಧನ ನಿರ್ವಾಹಕರು"</string>
-    <string name="confirmation_title" msgid="8024993972587946678">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ಅನ್ನು ಪ್ರವೇಶಿಸಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಿ"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ಅನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸಬೇಕೆ?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ವೀಕ್ಷಿಸಿ"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ಮೂಲಕ ನಿರ್ವಹಿಸಬೇಕಾದ <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="summary_watch" msgid="6566922405914995759">"ನಿಮ್ಮ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಅನ್ನು ನಿರ್ವಹಿಸಲು ಆ್ಯಪ್‌ನ ಅಗತ್ಯವಿದೆ. ಕರೆ ಮಾಡುವವರ ಹೆಸರು, ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳೊಂದಿಗೆ ಸಂವಹನ ನಡೆಸಲು ಮತ್ತು ಫೋನ್, SMS, ಸಂಪರ್ಕಗಳು, ಕ್ಯಾಲೆಂಡರ್, ಕರೆ ಲಾಗ್‌ಗಳು ಮತ್ತು ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನಗಳ ದೃಢೀಕರಣಗಳಂತಹ ಮಾಹಿತಿಯನ್ನು ಸಿಂಕ್ ಮಾಡಲು <xliff:g id="APP_NAME">%2$s</xliff:g> ಗೆ ಸಾಧ್ಯವಾಗುತ್ತದೆ."</string>
-    <string name="summary_watch_single_device" msgid="7443464525873186735">"ನಿಮ್ಮ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಅನ್ನು ನಿರ್ವಹಿಸಲು ಆ್ಯಪ್‌ನ ಅಗತ್ಯವಿದೆ. ಕರೆ ಮಾಡುವವರ ಹೆಸರಿನಂತಹ ಮಾಹಿತಿಯನ್ನು ಸಿಂಕ್ ಮಾಡಲು ಮತ್ತು ಈ ಅನುಮತಿಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು <xliff:g id="APP_NAME">%2$s</xliff:g> ಗೆ ಅನುಮತಿಸಲಾಗುತ್ತದೆ:"</string>
-    <string name="profile_name_glasses" msgid="8488394059007275998">"ಗ್ಲಾಸ್‌ಗಳು"</string>
-    <string name="summary_glasses" msgid="3808267780579061241">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಅನ್ನು ನಿರ್ವಹಿಸಲು ಈ ಆ್ಯಪ್‌ನ ಅಗತ್ಯವಿದೆ. ನಿಮ್ಮ ಫೋನ್, SMS, ಸಂಪರ್ಕಗಳು, ಮೈಕ್ರೊಫೋನ್ ಮತ್ತು ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನಗಳ ಅನುಮತಿಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ಹಾಗೂ ನಿಮ್ಮ ಅಧಿಸೂಚನೆಗಳೊಂದಿಗೆ ಸಂವಹನ ನಡೆಸಲು <xliff:g id="APP_NAME">%2$s</xliff:g> ಗೆ ಅನುಮತಿಸಲಾಗುತ್ತದೆ."</string>
-    <string name="summary_glasses_single_device" msgid="7051392780285915640">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಅನ್ನು ನಿರ್ವಹಿಸಲು ಆ್ಯಪ್‌ನ ಅಗತ್ಯವಿದೆ. <xliff:g id="APP_NAME">%2$s</xliff:g> ಗೆ ಈ ಅನುಮತಿಗಳ ಜೊತೆಗೆ ಸಂವಹನ ನಡೆಸಲು ಅನುಮತಿಸಲಾಗುತ್ತದೆ:"</string>
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಮೂಲಕ ನಿರ್ವಹಿಸಬೇಕಾದ ಸಾಧನವನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"ಸೆಟಪ್ ಮಾಡಲು <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ಅನ್ನು ಆರಿಸಿ"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"ಕರೆ ಮಾಡುವವರ ಹೆಸರಿನಂತಹ ಮಾಹಿತಿಯನ್ನು ಸಿಂಕ್ ಮಾಡಲು ಮತ್ತು ಈ ಅನುಮತಿಗಳನ್ನು ನಿಮ್ಮ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ನಲ್ಲಿ ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ಈ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸಲಾಗುತ್ತದೆ"</string>
+    <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;? ನಿರ್ವಹಿಸಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"ಸಾಧನ"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"ನಿಮ್ಮ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ನಲ್ಲಿ ಈ ಅನುಮತಿಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ಈ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"ನಿಮ್ಮ ಫೋನ್ ಮೂಲಕ ಈ ಮಾಹಿತಿಯನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಿ"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿನ ಆ್ಯಪ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"ಆಡಿಯೋ, ಫೋಟೋಗಳು, ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಸಂದೇಶಗಳು ಸೇರಿದಂತೆ ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಗೋಚರಿಸುವ ಅಥವಾ ಪ್ಲೇ ಆಗುವ ಯಾವುದೇ ಕಂಟೆಂಟ್‌ಗೆ %1$s ಆ್ಯಕ್ಸೆಸ್ ಹೊಂದಿರುತ್ತದೆ.&lt;br/&gt;&lt;br/&gt;ನೀವು ಈ ಅನುಮತಿಗೆ ಇರುವ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ತೆಗೆದುಹಾಕುವವರೆಗೆ %1$s ಗೆ ಆ್ಯಪ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗುತ್ತದೆ."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"ಕ್ರಾಸ್-ಡಿವೈಸ್ ಸೇವೆಗಳು"</string>
-    <string name="helper_summary_app_streaming" msgid="5977509499890099">"ನಿಮ್ಮ ಸಾಧನಗಳ ನಡುವೆ ಆ್ಯಪ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ನಿಮ್ಮ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ನ ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಿಕೊಳ್ಳುತ್ತಿದೆ"</string>
+    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"ನಿಮ್ಮ ಸಾಧನಗಳ ನಡುವೆ ಆ್ಯಪ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ನಿಮ್ಮ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ನ ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಿಕೊಳ್ಳುತ್ತಿದೆ"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"ನಿಮ್ಮ ಸಾಧನಗಳ ನಡುವೆ ಆ್ಯಪ್‌ಗಳನ್ನು ಪ್ರದರ್ಶಿಸಲು ಮತ್ತು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ನಿಮ್ಮ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸುತ್ತಿವೆ"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"ನಿಮ್ಮ ಫೋನ್ ಮೂಲಕ ಈ ಮಾಹಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಿ"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play ಸೇವೆಗಳು"</string>
-    <string name="helper_summary_computer" msgid="9050724687678157852">"ನಿಮ್ಮ ಫೋನ್‌ನ ಫೋಟೋಗಳು, ಮೀಡಿಯಾ ಮತ್ತು ಅಧಿಸೂಚನೆಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ನಿಮ್ಮ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ನ ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಿಕೊಳ್ಳುತ್ತಿದೆ"</string>
-    <string name="title_nearby_device_streaming" msgid="179278282547719200">"ಈ ಕ್ರಿಯೆಯನ್ನು ನಿಮ್ಮ ಫೋನ್‌ನಿಂದ ನಿರ್ವಹಿಸಲು &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಿ"</string>
-    <string name="helper_title_nearby_device_streaming" msgid="6124438217620593669">"ಕ್ರಾಸ್-ಡಿವೈಸ್ ಸೇವೆಗಳು"</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="5538329403511524333">"ಕಂಟೆಂಟ್ ಅನ್ನು ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನಗಳಿಗೆ ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ನಿಮ್ಮ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ನ ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಗಾಗಿ ವಿನಂತಿಸುತ್ತಿದೆ"</string>
+    <string name="helper_summary_computer" msgid="8774832742608187072">"ನಿಮ್ಮ ಫೋನ್‌ನ ಫೋಟೋಗಳು, ಮೀಡಿಯಾ ಮತ್ತು ಅಧಿಸೂಚನೆಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ನಿಮ್ಮ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ನ ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸಿಕೊಳ್ಳುತ್ತಿದೆ"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"ಈ ಆ್ಯಕ್ಷನ್ ಅನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ಅನುಮತಿಸಬೇಕೇ?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿನ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಸಿಸ್ಟಮ್ ಫೀಚರ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"ಆಡಿಯೋ, ಫೋಟೋಗಳು, ಪಾವತಿ ಮಾಹಿತಿ, ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಸಂದೇಶಗಳು ಸೇರಿದಂತೆ ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಗೋಚರಿಸುವ ಅಥವಾ ಪ್ಲೇ ಆಗುವ ಯಾವುದೇ ಕಂಟೆಂಟ್‌ಗೆ.&lt;br/&gt;&lt;br/&gt;ನೀವು ಈ ಅನುಮತಿಗೆ ಇರುವ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ತೆಗೆದುಹಾಕುವವರೆಗೆ %1$s ಗೆ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಸಿಸ್ಟಮ್ ಫೀಚರ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗುತ್ತದೆ."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನಗಳಿಗೆ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಇತರ ಸಿಸ್ಟಂ ಫೀಚರ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ನಿಮ್ಮ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> ರ ಪರವಾಗಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನುಮತಿಯನ್ನು ವಿನಂತಿಸುತ್ತಿದೆ"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ಸಾಧನ"</string>
-    <string name="summary_generic_single_device" msgid="4735072202474939111">"ಈ ಆ್ಯಪ್, ಮೊಬೈಲ್ ಫೋನ್ ಮತ್ತು <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಸಾಧನದ ನಡುವೆ ಕರೆ ಮಾಡುವವರ ಹೆಸರಿನಂತಹ ಮಾಹಿತಿಯನ್ನು ಸಿಂಕ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗುತ್ತದೆ."</string>
-    <string name="summary_generic" msgid="4988130802522924650">"ಈ ಆ್ಯಪ್, ಮೊಬೈಲ್ ಫೋನ್ ಮತ್ತು ಆಯ್ಕೆಮಾಡಿದ ಸಾಧನದ ನಡುವೆ ಕರೆ ಮಾಡುವವರ ಹೆಸರಿನಂತಹ ಮಾಹಿತಿಯನ್ನು ಸಿಂಕ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗುತ್ತದೆ."</string>
+    <string name="summary_generic" msgid="1761976003668044801">"ಮೊಬೈಲ್ ಫೋನ್ ಮತ್ತು ಆಯ್ಕೆಮಾಡಿದ ಸಾಧನದ ನಡುವೆ, ಕರೆ ಮಾಡುವವರ ಹೆಸರಿನಂತಹ ಮಾಹಿತಿಯನ್ನು ಸಿಂಕ್ ಮಾಡಲು ಈ ಆ್ಯಪ್‌ಗೆ ಸಾಧ್ಯವಾಗುತ್ತದೆ"</string>
     <string name="consent_yes" msgid="8344487259618762872">"ಅನುಮತಿಸಿ"</string>
     <string name="consent_no" msgid="2640796915611404382">"ಅನುಮತಿಸಬೇಡಿ"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"ರದ್ದುಮಾಡಿ"</string>
     <string name="consent_back" msgid="2560683030046918882">"ಹಿಂದೆ"</string>
+    <string name="permission_expand" msgid="893185038020887411">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> ಅನ್ನು ವಿಸ್ತರಿಸಿ"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> ಅನ್ನು ಕುಗ್ಗಿಸಿ"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;/strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ನಲ್ಲಿನ ಅನುಮತಿಗಳನ್ನೇ &lt;/strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ನಲ್ಲಿನ ಆ್ಯಪ್‌ಗಳಿಗೆ ನೀಡಬೇಕೆ?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"ಇದು &lt;strong&gt;ಮೈಕ್ರೋಫೋನ್&lt;/strong&gt;, &lt;strong&gt;ಕ್ಯಾಮರಾ&lt;/strong&gt;, and &lt;strong&gt;ಸ್ಥಳದ ಆ್ಯಕ್ಸೆಸ್&lt;/strong&gt;, ಮತ್ತು &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; ನಲ್ಲಿ ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಗಾಗಿ ಇತರ ಅನುಮತಿಗಳನ್ನು ಒಳಗೊಂಡಿರಬಹುದು. &lt;br/&gt;&lt;br/&gt;ನೀವು &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; ನಲ್ಲಿನ ನಿಮ್ಮ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಈ ಅನುಮತಿಗಳನ್ನು ಯಾವಾಗ ಬೇಕಾದರೂ ಬದಲಾಯಿಸಬಹುದು."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"ಆ್ಯಪ್ ಐಕಾನ್"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"ಹೆಚ್ಚಿನ ಮಾಹಿತಿಯ ಬಟನ್"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"ಇನ್ನಷ್ಟು ಮಾಹಿತಿ"</string>
     <string name="permission_phone" msgid="2661081078692784919">"ಫೋನ್"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"ಸಂಪರ್ಕಗಳು"</string>
@@ -54,19 +59,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"ಮೈಕ್ರೊಫೋನ್"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"ಕರೆಯ ಲಾಗ್‌ಗಳು"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನಗಳು"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"ಮೀಡಿಯಾ ಔಟ್‌‌ಪುಟ್ ಬದಲಾಯಿಸಿ"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ಫೋಟೋಗಳು ಮತ್ತು ಮಾಧ್ಯಮ"</string>
-    <string name="permission_notification" msgid="693762568127741203">"ಅಧಿಸೂಚನೆಗಳು"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"ನೋಟಿಫಿಕೇಶನ್‌ಗಳು"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ಆ್ಯಪ್‌ಗಳು"</string>
-    <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನದ ಸ್ಟ್ರೀಮಿಂಗ್"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಬಹುದು ಮತ್ತು ನಿರ್ವಹಿಸಬಹುದು"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"ಪೋನ್‌ ಕರೆಯ ಲಾಗ್‌ ಅನ್ನು ಓದಬಹುದು ಮತ್ತು ಬರೆಯಬಹುದು"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಬಹುದು ಮತ್ತು ವೀಕ್ಷಿಸಬಹುದು"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಬಹುದು"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಅನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಬಹುದು"</string>
-    <string name="permission_microphone_summary" msgid="4241354865859396558">"ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ಆಡಿಯೋವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಬಹುದು"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನಗಳನ್ನು ಹುಡುಕಬಹುದು, ಅವುಗಳಿಗೆ ಕನೆಕ್ಟ್ ಆಗಬಹುದು ಮತ್ತು ಅವುಗಳ ಸಂಬಂಧಿತ ಸ್ಥಾನವನ್ನು ನಿರ್ಧರಿಸಬಹುದು"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"ಸಂಪರ್ಕಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ಫೋಟೋಗಳಂತಹ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಂತೆ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ಓದಬಹುದು"</string>
+    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"ಸ್ಟ್ರೀಮಿಂಗ್"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಿ ಹಾಗೂ ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"ಪೋನ್‌ ಕರೆಯ ಲಾಗ್‌ ಅನ್ನು ಓದಿ ಮತ್ತು ಬರೆಯಿರಿ"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಿ ಮತ್ತು ವೀಕ್ಷಿಸಿ"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಿ"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಅನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಿ"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"ಆಡಿಯೋ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನಗಳನ್ನು ಹುಡುಕಬಹುದು, ಅವುಗಳಿಗೆ ಕನೆಕ್ಟ್ ಆಗಬಹುದು ಮತ್ತು ಅವುಗಳ ಸಂಬಂಧಿತ ಸ್ಥಾನವನ್ನು ನಿರ್ಧರಿಸಬಹುದು"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"ಸಂಪರ್ಕಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ಫೋಟೋಗಳಂತಹ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಂತೆ ಎಲ್ಲಾ ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ಓದಬಹುದು"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• ಸಂಪರ್ಕಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ಫೋಟೋಗಳಂತಹ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಂತೆ ಎಲ್ಲಾ ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ಓದಿ&lt;br/&gt;• ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ಕಳುಹಿಸಿ&lt;br/&gt;&lt;br/&gt;ಈ ಆ್ಯಪ್‌ನ ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ಓದುವ ಮತ್ತು ಕಳುಹಿಸುವ ಸಾಮರ್ಥ್ಯವನ್ನು ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ನೋಟಿಫಿಕೇಶನ್‌ಗಳಲ್ಲಿ ನಿರ್ವಹಿಸಬಹುದು."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"ನಿಮ್ಮ ಫೋನ್‍ನ ಆ್ಯಪ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಿ"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="5776807830582725074">"ಕಂಟೆಂಟ್ ಅನ್ನು ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನಕ್ಕೆ ಸ್ಟ್ರೀಮ್ ಮಾಡಿ"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"ನಿಮ್ಮ ಫೋನ್‌ನಿಂದ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಇತರ ಸಿಸ್ಟಂ ಫೀಚರ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಿ"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"ಲಭ್ಯವಿರುವ ಸಾಧನಗಳ ಪಟ್ಟಿಯನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಿ ಮತ್ತು ಇತರ ಆ್ಯಪ್‌ಗಳಿಂದ ಯಾವುದು ಆಡಿಯೋ ಅಥವಾ ವೀಡಿಯೊವನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡುವುದು ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುವುದನ್ನು ಕಂಟ್ರೋಲ್ ಮಾಡಿ"</string>
+    <string name="device_type" product="default" msgid="8268703872070046263">"ಫೋನ್"</string>
+    <string name="device_type" product="tablet" msgid="5038791954983067774">"ಟ್ಯಾಬ್ಲೆಟ್"</string>
 </resources>

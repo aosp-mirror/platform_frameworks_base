@@ -15,11 +15,12 @@
  */
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -28,6 +29,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewListener
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager
 import com.android.systemui.statusbar.notification.row.NotificationGuts
+import com.android.systemui.statusbar.notification.row.NotificationGuts.GutsContent
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -36,10 +38,11 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations.initMocks
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class GutsCoordinatorTest : SysuiTestCase() {
     private lateinit var coordinator: GutsCoordinator
@@ -52,8 +55,9 @@ class GutsCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var notifGutsViewManager: NotifGutsViewManager
     @Mock private lateinit var pipeline: NotifPipeline
     @Mock private lateinit var dumpManager: DumpManager
-    @Mock private lateinit var logger: GutsCoordinatorLogger
+    private val logger = GutsCoordinatorLogger(logcatLogBuffer())
     @Mock private lateinit var lifetimeExtenderCallback: OnEndLifetimeExtensionCallback
+    @Mock private lateinit var notificationGuts: NotificationGuts
 
     @Before
     fun setUp() {
@@ -69,12 +73,13 @@ class GutsCoordinatorTest : SysuiTestCase() {
         notifLifetimeExtender.setCallback(lifetimeExtenderCallback)
         entry1 = NotificationEntryBuilder().setId(1).build()
         entry2 = NotificationEntryBuilder().setId(2).build()
+        whenever(notificationGuts.gutsContent).thenReturn(mock(GutsContent::class.java))
     }
 
     @Test
     fun testSimpleLifetimeExtension() {
         assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isFalse()
-        notifGutsViewListener.onGutsOpen(entry1, mock(NotificationGuts::class.java))
+        notifGutsViewListener.onGutsOpen(entry1, notificationGuts)
         assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isTrue()
         notifGutsViewListener.onGutsClose(entry1)
         verify(lifetimeExtenderCallback).onEndLifetimeExtension(notifLifetimeExtender, entry1)
@@ -84,9 +89,9 @@ class GutsCoordinatorTest : SysuiTestCase() {
     @Test
     fun testDoubleOpenLifetimeExtension() {
         assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isFalse()
-        notifGutsViewListener.onGutsOpen(entry1, mock(NotificationGuts::class.java))
+        notifGutsViewListener.onGutsOpen(entry1, notificationGuts)
         assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isTrue()
-        notifGutsViewListener.onGutsOpen(entry1, mock(NotificationGuts::class.java))
+        notifGutsViewListener.onGutsOpen(entry1, notificationGuts)
         assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isTrue()
         notifGutsViewListener.onGutsClose(entry1)
         verify(lifetimeExtenderCallback).onEndLifetimeExtension(notifLifetimeExtender, entry1)
@@ -97,10 +102,10 @@ class GutsCoordinatorTest : SysuiTestCase() {
     fun testTwoEntryLifetimeExtension() {
         assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isFalse()
         assertThat(notifLifetimeExtender.maybeExtendLifetime(entry2, 0)).isFalse()
-        notifGutsViewListener.onGutsOpen(entry1, mock(NotificationGuts::class.java))
+        notifGutsViewListener.onGutsOpen(entry1, notificationGuts)
         assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isTrue()
         assertThat(notifLifetimeExtender.maybeExtendLifetime(entry2, 0)).isFalse()
-        notifGutsViewListener.onGutsOpen(entry2, mock(NotificationGuts::class.java))
+        notifGutsViewListener.onGutsOpen(entry2, notificationGuts)
         assertThat(notifLifetimeExtender.maybeExtendLifetime(entry1, 0)).isTrue()
         assertThat(notifLifetimeExtender.maybeExtendLifetime(entry2, 0)).isTrue()
         notifGutsViewListener.onGutsClose(entry1)

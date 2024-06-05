@@ -17,36 +17,41 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Prateći upravitelj uređaja"</string>
-    <string name="confirmation_title" msgid="8024993972587946678">"Dopustite aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da pristupa uređaju &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"Dozvoliti aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da pristupa uređaju &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"sat"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Odaberite uređaj \"<xliff:g id="PROFILE_NAME">%1$s</xliff:g>\" kojim će upravljati aplikacija &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="summary_watch" msgid="6566922405914995759">"Aplikacija je potrebna za upravljanje vašim uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Aplikacija <xliff:g id="APP_NAME">%2$s</xliff:g> moći će sinkronizirati podatke, primjerice ime pozivatelja, stupati u interakciju s vašim obavijestima i pristupati vašim dopuštenjima za telefon, SMS-ove, kontakte, kalendar, zapisnike poziva i uređaje u blizini."</string>
-    <string name="summary_watch_single_device" msgid="7443464525873186735">"Aplikacija je potrebna za upravljanje vašim uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Aplikacija <xliff:g id="APP_NAME">%2$s</xliff:g> moći će sinkronizirati podatke, primjerice ime pozivatelja i pristupati sljedećim dopuštenjima:"</string>
-    <string name="profile_name_glasses" msgid="8488394059007275998">"naočale"</string>
-    <string name="summary_glasses" msgid="3808267780579061241">"Ta je aplikacija potrebna za upravljanje uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Aplikacija <xliff:g id="APP_NAME">%2$s</xliff:g> moći će stupati u interakciju s vašim obavijestima i pristupati vašim dopuštenjima za telefon, SMS-ove, kontakte, mikrofon i uređaje u blizini."</string>
-    <string name="summary_glasses_single_device" msgid="7051392780285915640">"Aplikacija je potrebna za upravljanje uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Aplikacija <xliff:g id="APP_NAME">%2$s</xliff:g> moći će stupati u interakciju s ovim dopuštenjima:"</string>
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"Odaberite uređaj kojim će upravljati aplikacija &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"Odaberite <xliff:g id="PROFILE_NAME">%1$s</xliff:g> da postavite"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"Aplikaciji će biti dozvoljeni sinhroniziranje informacija, kao što je ime osobe koja upućuje poziv i pristup ovim odobrenjima na uređaju <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="confirmation_title_glasses" msgid="8288346850537727333">"Dozvoliti aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da upravlja uređajem &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"uređaj"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"Aplikaciji će biti dozvoljen pristup ovim odobrenjima na uređaju <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Dozvolite da aplikacija &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; pristupa ovim informacijama s telefona"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Dozvoliti uređaju &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da prenosi aplikacije telefona?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s će imati pristup svemu što je vidljivo ili se reproducira na telefonu, uključujući zvuk, fotografije, lozinke i poruke.&lt;br/&gt;&lt;br/&gt;%1$s će moći prenositi aplikacije dok ne uklonite pristup ovom odobrenju."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Usluga na više uređaja"</string>
-    <string name="helper_summary_app_streaming" msgid="5977509499890099">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> u ime uređaja <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> zahtijeva odobrenje da prenosi aplikacije između vaših uređaja"</string>
+    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> u ime uređaja <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> zahtijeva odobrenje da prenosi aplikacije između vaših uređaja"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> traži odobrenje u ime vašeg uređaja <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> da prikazuje i prenosi aplikacije između vaših uređaja"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Dozvolite aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da pristupa ovim informacijama s vašeg telefona"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play usluge"</string>
-    <string name="helper_summary_computer" msgid="9050724687678157852">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> u ime uređaja <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> zahtijeva odobrenje da pristupi fotografijama, medijima i odobrenjima na vašem telefonu"</string>
-    <string name="title_nearby_device_streaming" msgid="179278282547719200">"Dozvolite aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da obavi ovu radnju s telefona"</string>
-    <string name="helper_title_nearby_device_streaming" msgid="6124438217620593669">"Usluga na više uređaja"</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="5538329403511524333">"<xliff:g id="APP_NAME">%1$s</xliff:g> zahtijeva odobrenje u ime uređaja <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> da prenosi sadržaj na uređajima u blizini"</string>
+    <string name="helper_summary_computer" msgid="8774832742608187072">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> u ime uređaja <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> zahtijeva odobrenje da pristupi fotografijama, medijima i obavještenjima na telefonu"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Dozvoliti uređaju &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; da poduzme ovu radnju?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Dozvoliti uređaju &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; da prenosi aplikacije telefona i funkcije sistema?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s će imati pristup svemu što je vidljivo ili se reproducira na telefonu, uključujući zvuk, fotografije, podatke o plaćanju, lozinke i poruke.&lt;br/&gt;&lt;br/&gt;%1$s će moći prenositi aplikacije i funkcije sistema dok ne uklonite pristup ovom odobrenju."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> u ime uređaja <xliff:g id="DEVICE_NAME">%2$s</xliff:g> traži odobrenje da prenosi aplikacije i druge funkcije sistema na uređajima u blizini"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"uređaj"</string>
-    <string name="summary_generic_single_device" msgid="4735072202474939111">"Ta će aplikacija moći sinkronizirati podatke između vašeg telefona i uređaja <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, primjerice ime pozivatelja."</string>
-    <string name="summary_generic" msgid="4988130802522924650">"Ta će aplikacija moći sinkronizirati podatke između vašeg telefona i odabranog uređaja, primjerice ime pozivatelja."</string>
+    <string name="summary_generic" msgid="1761976003668044801">"Ova aplikacija će moći sinhronizirati informacije, kao što je ime osobe koja upućuje poziv, između vašeg telefona i odabranog uređaja"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Dozvoli"</string>
     <string name="consent_no" msgid="2640796915611404382">"Nemoj dozvoliti"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"Otkaži"</string>
     <string name="consent_back" msgid="2560683030046918882">"Nazad"</string>
+    <string name="permission_expand" msgid="893185038020887411">"Proširivanje stavke <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"Sužavanje stavke <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Dati aplikacijama na uređaju &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ista odobrenja kao na uređaju &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"Ovo može uključivati odobrenja za pristup &lt;strong&gt;mikrofonu&lt;/strong&gt;, &lt;strong&gt;kameri&lt;/strong&gt; i &lt;strong&gt;lokaciji&lt;/strong&gt; te druga osjetljiva odobrenja na uređaju &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;Ova odobrenja možete bilo kada promijeniti u Postavkama na uređaju &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"Ikona aplikacije"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"Dugme Više informacija"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"Više informacija"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Telefon"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Kontakti"</string>
@@ -54,19 +59,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Zapisnici poziva"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Uređaji u blizini"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Promjena medijskog izlaza"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotografije i mediji"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Obavještenja"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Obavještenja"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Aplikacije"</string>
-    <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"Prijenos na uređajima u blizini"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Može uspostavljati telefonske pozive i upravljati njima"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Može čitati i zapisivati zapisnik telefonskih poziva"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Može slati i prikazivati SMS poruke"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Može pristupiti kontaktima"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Može pristupiti kalendaru"</string>
-    <string name="permission_microphone_summary" msgid="4241354865859396558">"Može snimati zvuk pomoću mikrofona"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Može pronaći uređaje u blizini, povezati se s njima i odrediti im relativan položaj"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Može čitati sva obavještenja, uključujući informacije kao što su kontakti, poruke i fotografije"</string>
+    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Prijenos"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Pozivanje i upravljanje telefonskim pozivima"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Čitanje i pisanje zapisnika telefonskih poziva"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Slanje i pregledanje SMS poruka"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Pristup vašim kontaktima"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Pristup vašem kalendaru"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Snimanje zvuka"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Pronalaženje uređaja u blizini, povezivanje s njima i određivanje njihovog relativnog položaja"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Čitanje svih obavještenja, uključujući informacije poput kontakata, poruka i fotografija"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• čitanje svih obavještenja, uključujući informacije poput kontakata, poruka i fotografija&lt;br/&gt;• slanje obavještenja&lt;br/&gt;&lt;br/&gt;Da upravljate mogućnošću ove aplikacije da čita i šalje obavještenja, idite u Postavke &gt; Obavještenja."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Prenosite aplikacije s telefona"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="5776807830582725074">"Prijenos sadržaja na uređaju u blizini"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Prijenos aplikacija i drugih funkcija sistema s vašeg telefona"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Pristupa listi dostupnih uređaja i kontrolira koji od njih prenosi ili emitira zvuk ili videozapis iz drugih aplikacija"</string>
+    <string name="device_type" product="default" msgid="8268703872070046263">"telefon"</string>
+    <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

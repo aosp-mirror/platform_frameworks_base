@@ -30,6 +30,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.text.Editable;
 import android.text.SpannedString;
@@ -44,7 +45,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.OnReceiveContentListener;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowInsets;
@@ -80,13 +80,11 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
-import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LightBarController;
-import com.android.wm.shell.animation.Interpolators;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -129,12 +127,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private ImageView mDelete;
     private ImageView mDeleteBg;
     private boolean mColorized;
-    private int mTint;
+    private int mLastBackgroundColor;
     private boolean mResetting;
-    @Nullable
-    private RevealParams mRevealParams;
     private Rect mContentBackgroundBounds;
-    private boolean mIsFocusAnimationFlagActive;
     private boolean mIsAnimatingAppearance = false;
 
     // TODO(b/193539698): move these to a Controller
@@ -180,10 +175,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditorActionHandler = new EditorActionHandler();
         mUiEventLogger = Dependency.get(UiEventLogger.class);
         TypedArray ta = getContext().getTheme().obtainStyledAttributes(new int[]{
-                com.android.internal.R.attr.colorAccent,
-                com.android.internal.R.attr.colorSurface,
+                com.android.internal.R.attr.materialColorSurfaceDim,
         });
-        mTint = ta.getColor(0, 0);
+        mLastBackgroundColor = ta.getColor(0, 0);
         ta.recycle();
     }
 
@@ -209,9 +203,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
      * @param backgroundColor colorized notification color
      */
     public void setBackgroundTintColor(final int backgroundColor, boolean colorized) {
-        if (colorized == mColorized && backgroundColor == mTint) return;
+        if (colorized == mColorized && backgroundColor == mLastBackgroundColor) return;
         mColorized = colorized;
-        mTint = backgroundColor;
+        mLastBackgroundColor = backgroundColor;
         final int editBgColor;
         final int deleteBgColor;
         final int deleteFgColor;
@@ -236,8 +230,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             hintColor = mContext.getColor(R.color.remote_input_hint);
             deleteFgColor = textColor.getDefaultColor();
             try (TypedArray ta = getContext().getTheme().obtainStyledAttributes(new int[]{
-                    com.android.internal.R.attr.colorSurfaceHighlight,
-                    com.android.internal.R.attr.colorSurfaceVariant
+                    com.android.internal.R.attr.materialColorSurfaceDim,
+                    com.android.internal.R.attr.materialColorSurfaceVariant
             })) {
                 editBgColor = ta.getColor(0, backgroundColor);
                 deleteBgColor = ta.getColor(1, Color.GRAY);
@@ -303,8 +297,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                     mEntry.mRemoteEditImeVisible = editTextRootWindowInsets != null
                             && editTextRootWindowInsets.isVisible(WindowInsets.Type.ime());
                     if (!mEntry.mRemoteEditImeVisible && !mEditText.mShowImeOnInputConnection) {
-                        // Pass null to ensure all inputs are cleared for this entry b/227115380
-                        mController.removeRemoteInput(mEntry, null);
+                            mController.removeRemoteInput(mEntry, mToken,
+                                    /* reason= */"RemoteInputView$WindowInsetAnimation#onEnd");
                     }
                 }
             }
@@ -425,14 +419,14 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     @VisibleForTesting
     void onDefocus(boolean animate, boolean logClose, @Nullable Runnable doAfterDefocus) {
-        mController.removeRemoteInput(mEntry, mToken);
+        mController.removeRemoteInput(mEntry, mToken, /* reason= */"RemoteInputView#onDefocus");
         mEntry.remoteInputText = mEditText.getText();
 
         // During removal, we get reattached and lose focus. Not hiding in that
         // case to prevent flicker.
         if (!mRemoved) {
             ViewGroup parent = (ViewGroup) getParent();
-            if (animate && parent != null && mIsFocusAnimationFlagActive) {
+            if (animate && parent != null) {
 
                 ViewGroup grandParent = (ViewGroup) parent.getParent();
                 View actionsContainer = getActionsContainerLayout();
@@ -454,6 +448,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                         setTopMargin(0);
                         if (grandParent != null) grandParent.setClipChildren(true);
                         setVisibility(GONE);
+                        setAlpha(1f);
                         if (mWrapper != null) {
                             mWrapper.setRemoteInputVisible(false);
                         }
@@ -465,20 +460,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 if (actionsContainer != null) actionsContainer.setAlpha(0f);
                 animator.start();
 
-            } else if (animate && mRevealParams != null && mRevealParams.radius > 0) {
-                android.animation.Animator reveal = mRevealParams.createCircularHideAnimator(this);
-                reveal.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
-                reveal.setDuration(StackStateAnimator.ANIMATION_DURATION_CLOSE_REMOTE_INPUT);
-                reveal.addListener(new android.animation.AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(android.animation.Animator animation) {
-                        setVisibility(GONE);
-                        if (mWrapper != null) {
-                            mWrapper.setRemoteInputVisible(false);
-                        }
-                    }
-                });
-                reveal.start();
             } else {
                 setVisibility(GONE);
                 if (doAfterDefocus != null) doAfterDefocus.run();
@@ -497,8 +478,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void setTopMargin(int topMargin) {
-        if (!(getLayoutParams() instanceof FrameLayout.LayoutParams)) return;
-        final FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) getLayoutParams();
+        if (!(getLayoutParams() instanceof FrameLayout.LayoutParams layoutParams)) return;
         layoutParams.topMargin = topMargin;
         setLayoutParams(layoutParams);
     }
@@ -535,7 +515,13 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         if (mEntry.getRow().isChangingPosition() || isTemporarilyDetached()) {
             return;
         }
-        mController.removeRemoteInput(mEntry, mToken);
+        // RemoteInputView can be detached from window before IME close event in some cases like
+        // remote input view removal with notification update. As a result of this, RemoteInputView
+        // will stop ime animation updates, which results in never removing remote input. That's why
+        // we have to set mRemoteEditImeAnimatingAway false on detach to remove remote input.
+        mEntry.mRemoteEditImeAnimatingAway = false;
+        mController.removeRemoteInput(mEntry, mToken,
+                /* reason= */"RemoteInputView#onDetachedFromWindow");
         mController.removeSpinning(mEntry.getKey(), mToken);
     }
 
@@ -602,24 +588,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     /**
-     * Sets whether the feature flag for the revised inline reply animation is active or not.
-     * @param active
-     */
-    public void setIsFocusAnimationFlagActive(boolean active) {
-        mIsFocusAnimationFlagActive = active;
-    }
-
-    /**
      * Focuses the RemoteInputView and animates its appearance
      */
     public void focusAnimated() {
-        if (!mIsFocusAnimationFlagActive && getVisibility() != VISIBLE
-                && mRevealParams != null) {
-            android.animation.Animator animator = mRevealParams.createCircularRevealAnimator(this);
-            animator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-            animator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-            animator.start();
-        } else if (mIsFocusAnimationFlagActive && getVisibility() != VISIBLE) {
+        if (getVisibility() != VISIBLE) {
             mIsAnimatingAppearance = true;
             setAlpha(0f);
             Animator focusAnimator = getFocusAnimator(getActionsContainerLayout());
@@ -654,7 +626,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setText(mEntry.remoteInputText);
         mEditText.setSelection(mEditText.length());
         mEditText.requestFocus();
-        mController.addRemoteInput(mEntry, mToken);
+        mController.addRemoteInput(mEntry, mToken, "RemoteInputView#focus");
         setAttachment(mEntry.remoteInputAttachment);
 
         updateSendButton();
@@ -674,37 +646,19 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void reset() {
-        if (mIsFocusAnimationFlagActive) {
-            mProgressBar.setVisibility(INVISIBLE);
-            mResetting = true;
-            mSending = false;
-            mController.removeSpinning(mEntry.getKey(), mToken);
-            onDefocus(true /* animate */, false /* logClose */, () -> {
-                mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
-                mEditText.getText().clear();
-                mEditText.setEnabled(isAggregatedVisible());
-                mSendButton.setVisibility(VISIBLE);
-                updateSendButton();
-                setAttachment(null);
-                mResetting = false;
-            });
-            return;
-        }
-
+        mProgressBar.setVisibility(INVISIBLE);
         mResetting = true;
         mSending = false;
-        mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
-
-        mEditText.getText().clear();
-        mEditText.setEnabled(isAggregatedVisible());
-        mSendButton.setVisibility(VISIBLE);
-        mProgressBar.setVisibility(INVISIBLE);
         mController.removeSpinning(mEntry.getKey(), mToken);
-        updateSendButton();
-        onDefocus(false /* animate */, false /* logClose */, null /* doAfterDefocus */);
-        setAttachment(null);
-
-        mResetting = false;
+        onDefocus(true /* animate */, false /* logClose */, () -> {
+            mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
+            mEditText.getText().clear();
+            mEditText.setEnabled(isAggregatedVisible());
+            mSendButton.setVisibility(VISIBLE);
+            updateSendButton();
+            setAttachment(null);
+            mResetting = false;
+        });
     }
 
     @Override
@@ -745,10 +699,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     public void setRemoved() {
         mRemoved = true;
-    }
-
-    public void setRevealParameters(@Nullable RevealParams revealParams) {
-        mRevealParams = revealParams;
     }
 
     @Override
@@ -848,7 +798,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        if (mIsFocusAnimationFlagActive) setPivotY(getMeasuredHeight());
+        setPivotY(getMeasuredHeight());
         if (mContentBackgroundBounds != null) {
             mContentBackground.setBounds(mContentBackgroundBounds);
         }
@@ -1009,9 +959,9 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
         private RemoteInputView mRemoteInputView;
         boolean mShowImeOnInputConnection;
-        private LightBarController mLightBarController;
+        private final LightBarController mLightBarController;
         private InputMethodManager mInputMethodManager;
-        private ArraySet<String> mSupportedMimes = new ArraySet<>();
+        private final ArraySet<String> mSupportedMimes = new ArraySet<>();
         UserHandle mUser;
 
         public RemoteEditText(Context context, AttributeSet attrs) {
@@ -1032,10 +982,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         }
 
         private void hideIme() {
+            Trace.beginSection("RemoteEditText#hideIme");
             final WindowInsetsController insetsController = getWindowInsetsController();
             if (insetsController != null) {
                 insetsController.hide(WindowInsets.Type.ime());
             }
+            Trace.endSection();
         }
 
         private void defocusIfNeeded(boolean animate) {
@@ -1202,25 +1154,5 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             return remainingItems;
         }
 
-    }
-
-    public static class RevealParams {
-        final int centerX;
-        final int centerY;
-        final int radius;
-
-        public RevealParams(int centerX, int centerY, int radius) {
-            this.centerX = centerX;
-            this.centerY = centerY;
-            this.radius = radius;
-        }
-
-        android.animation.Animator createCircularHideAnimator(View view) {
-            return ViewAnimationUtils.createCircularReveal(view, centerX, centerY, radius, 0);
-        }
-
-        android.animation.Animator createCircularRevealAnimator(View view) {
-            return ViewAnimationUtils.createCircularReveal(view, centerX, centerY, 0, radius);
-        }
     }
 }

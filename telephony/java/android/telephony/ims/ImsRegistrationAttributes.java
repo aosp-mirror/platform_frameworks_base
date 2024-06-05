@@ -16,6 +16,7 @@
 
 package android.telephony.ims;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -25,6 +26,8 @@ import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.ArraySet;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -46,12 +49,36 @@ public final class ImsRegistrationAttributes implements Parcelable {
      *
      */
     public static final int ATTR_EPDG_OVER_CELL_INTERNET = 1 << 0;
+    /**
+     * Attribute to specify if ims registration is of type normal or emergency.
+     * <p>
+     *     For emergency registration bit will be set.
+     *     For normal registration bit will not be set.
+     *     This flag is only applicable when listening to emergency IMS registration state updates
+     *     via the ImsMmTelManager#registerImsEmergencyRegistrationCallback API
+     * </p>
+     */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_REGISTRATION_STATE)
+    public static final int ATTR_REGISTRATION_TYPE_EMERGENCY = 1 << 1;
+    /**
+     * Attribute to specify if virtual registration is required.
+     * <p>
+     *     If emergency registration is not required for making emergency call, in such cases
+     *     bit will be set and callback will represent virtual registration status update.
+     *     This flag is only applicable when listening to emergency IMS registration state updates
+     *     via the ImsMmTelManager#registerImsEmergencyRegistrationCallback API
+     * </p>
+     */
+    @FlaggedApi(Flags.FLAG_EMERGENCY_REGISTRATION_STATE)
+    public static final int ATTR_VIRTUAL_FOR_ANONYMOUS_EMERGENCY_CALL = 1 << 2;
 
     /** @hide */
     // Defines the underlying radio technology type that we have registered for IMS over.
     @IntDef(prefix = "ATTR_",
             value = {
                     ATTR_EPDG_OVER_CELL_INTERNET,
+                    ATTR_REGISTRATION_TYPE_EMERGENCY,
+                    ATTR_VIRTUAL_FOR_ANONYMOUS_EMERGENCY_CALL,
             },
             flag = true)
     @Retention(RetentionPolicy.SOURCE)
@@ -67,6 +94,8 @@ public final class ImsRegistrationAttributes implements Parcelable {
         private Set<String> mFeatureTags = Collections.emptySet();
         private @Nullable SipDetails mSipDetails;
 
+        private @ImsAttributeFlag int mAttributeFlags;
+
         /**
          * Build a new instance of {@link ImsRegistrationAttributes}.
          *
@@ -74,6 +103,9 @@ public final class ImsRegistrationAttributes implements Parcelable {
          */
         public Builder(@ImsRegistrationImplBase.ImsRegistrationTech int registrationTech) {
             mRegistrationTech = registrationTech;
+            if (registrationTech == ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM) {
+                mAttributeFlags |= ATTR_EPDG_OVER_CELL_INTERNET;
+            }
         }
 
         /**
@@ -110,24 +142,31 @@ public final class ImsRegistrationAttributes implements Parcelable {
         }
 
         /**
+         * Set the attribute flag ATTR_REGISTRATION_TYPE_EMERGENCY.
+         */
+        @FlaggedApi(Flags.FLAG_EMERGENCY_REGISTRATION_STATE)
+        public @NonNull Builder setFlagRegistrationTypeEmergency() {
+            mAttributeFlags |= ATTR_REGISTRATION_TYPE_EMERGENCY;
+            return this;
+        }
+
+        /**
+         * Set the attribute flag ATTR_VIRTUAL_FOR_ANONYMOUS_EMERGENCY_CALL.
+         */
+        @FlaggedApi(Flags.FLAG_EMERGENCY_REGISTRATION_STATE)
+        public @NonNull Builder setFlagVirtualRegistrationForEmergencyCall() {
+            mAttributeFlags |= ATTR_VIRTUAL_FOR_ANONYMOUS_EMERGENCY_CALL;
+            return this;
+        }
+
+        /**
          * @return A new instance created from this builder.
          */
         public @NonNull ImsRegistrationAttributes build() {
             return new ImsRegistrationAttributes(mRegistrationTech,
                     RegistrationManager.getAccessType(mRegistrationTech),
-                    getAttributeFlags(mRegistrationTech),
+                    mAttributeFlags,
                     mFeatureTags, mSipDetails);
-        }
-
-        /**
-         * @return attribute flags from the registration technology.
-         */
-        private static int getAttributeFlags(int imsRadioTech) {
-            int attributes = 0;
-            if (imsRadioTech == ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM) {
-                attributes |= ATTR_EPDG_OVER_CELL_INTERNET;
-            }
-            return attributes;
         }
     }
 

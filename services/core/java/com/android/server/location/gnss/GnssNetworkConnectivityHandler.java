@@ -18,7 +18,9 @@ package com.android.server.location.gnss;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.location.flags.Flags;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -31,12 +33,14 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.PreciseCallState;
+import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.location.GpsNetInitiatedHandler;
+import com.android.server.FgThread;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -48,6 +52,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handles network connection requests and network state change updates for AGPS data download.
@@ -91,6 +96,10 @@ class GnssNetworkConnectivityHandler {
     // network with SUPL connectivity or report an error.
     private static final int SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS = 20 * 1000;
 
+    // If the chipset does not request to release a SUPL connection before the specified timeout in
+    // milliseconds, the connection will be automatically released.
+    private static final long SUPL_CONNECTION_TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(1);
+
     private static final int HASH_MAP_INITIAL_CAPACITY_TO_TRACK_CONNECTED_NETWORKS = 5;
 
     // Keeps track of networks and their state as notified by the network request callbacks.
@@ -120,6 +129,8 @@ class GnssNetworkConnectivityHandler {
     private static final String WAKELOCK_KEY = "GnssNetworkConnectivityHandler";
     private static final long WAKELOCK_TIMEOUT_MILLIS = 60 * 1000;
     private final PowerManager.WakeLock mWakeLock;
+
+    private final Object mSuplConnectionReleaseOnTimeoutToken = new Object();
 
     /**
      * Network attributes needed when updating HAL about network connectivity status changes.
@@ -192,7 +203,12 @@ class GnssNetworkConnectivityHandler {
 
         SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
         if (subManager != null) {
-            subManager.addOnSubscriptionsChangedListener(mOnSubscriptionsChangeListener);
+            if (Flags.subscriptionsChangedListenerThread()) {
+                subManager.addOnSubscriptionsChangedListener(FgThread.getExecutor(),
+                        mOnSubscriptionsChangeListener);
+            } else {
+                subManager.addOnSubscriptionsChangedListener(mOnSubscriptionsChangeListener);
+            }
         }
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -240,6 +256,7 @@ class GnssNetworkConnectivityHandler {
             SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
             TelephonyManager telManager = mContext.getSystemService(TelephonyManager.class);
             if (subManager != null && telManager != null) {
+                subManager = subManager.createForAllUserProfiles();
                 List<SubscriptionInfo> subscriptionInfoList =
                         subManager.getActiveSubscriptionInfoList();
                 HashSet<Integer> activeSubIds = new HashSet<Integer>();
@@ -458,12 +475,12 @@ class GnssNetworkConnectivityHandler {
         // capabilities.
         capabilities = networkAttributes.mCapabilities;
         Log.i(TAG, String.format(
-                "updateNetworkState, state=%s, connected=%s, network=%s, capabilities=%s"
+                "updateNetworkState, state=%s, connected=%s, network=%s, capabilityFlags=%d"
                         + ", availableNetworkCount: %d",
                 agpsDataConnStateAsString(),
                 isConnected,
                 network,
-                capabilities,
+                NetworkAttributes.getCapabilityFlags(capabilities),
                 mAvailableNetworkAttributes.size()));
 
         if (native_is_agps_ril_supported()) {
@@ -557,6 +574,10 @@ class GnssNetworkConnectivityHandler {
         }
     }
 
+    @RequiresPermission(allOf = {
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+        android.Manifest.permission.READ_PHONE_STATE
+    })
     private void handleRequestSuplConnection(int agpsType, byte[] suplIpAddr) {
         mAGpsDataConnectionIpAddr = null;
         mAGpsType = agpsType;
@@ -590,6 +611,19 @@ class GnssNetworkConnectivityHandler {
         NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
         networkRequestBuilder.addCapability(getNetworkCapability(mAGpsType));
         networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+
+        if (com.android.internal.telephony.flags.Flags.satelliteInternet()) {
+            // Add transport type NetworkCapabilities.TRANSPORT_SATELLITE on satellite network.
+            TelephonyManager telephonyManager = mContext.getSystemService(TelephonyManager.class);
+            if (telephonyManager != null) {
+                ServiceState state = telephonyManager.getServiceState();
+                if (state != null && state.isUsingNonTerrestrialNetwork()) {
+                    networkRequestBuilder.removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
+                    networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_SATELLITE);
+                }
+            }
+        }
+
         // During an emergency call, and when we have cached the Active Sub Id, we set the
         // Network Specifier so that the network request goes to the correct Sub Id
         if (mNiHandler.getInEmergency() && mActiveSubId >= 0) {
@@ -609,6 +643,13 @@ class GnssNetworkConnectivityHandler {
                     mSuplConnectivityCallback,
                     mHandler,
                     SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
+            if (Flags.releaseSuplConnectionOnTimeout()) {
+                // Schedule to release the SUPL connection after timeout
+                mHandler.removeCallbacksAndMessages(mSuplConnectionReleaseOnTimeoutToken);
+                mHandler.postDelayed(() -> handleReleaseSuplConnection(GPS_RELEASE_AGPS_DATA_CONN),
+                        mSuplConnectionReleaseOnTimeoutToken,
+                        SUPL_CONNECTION_TIMEOUT_MILLIS);
+            }
         } catch (RuntimeException e) {
             Log.e(TAG, "Failed to request network.", e);
             mSuplConnectivityCallback = null;
@@ -639,6 +680,10 @@ class GnssNetworkConnectivityHandler {
             Log.d(TAG, message);
         }
 
+        if (Flags.releaseSuplConnectionOnTimeout()) {
+            // Remove pending task to avoid releasing an incorrect connection
+            mHandler.removeCallbacksAndMessages(mSuplConnectionReleaseOnTimeoutToken);
+        }
         if (mAGpsDataConnectionState == AGPS_DATA_CONNECTION_CLOSED) {
             return;
         }

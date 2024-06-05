@@ -126,6 +126,11 @@
     <item msgid="8259411607272330225">"ጠፍቷል"</item>
     <item msgid="578444932039713369">"በርቷል"</item>
   </string-array>
+  <string-array name="tile_states_record_issue">
+    <item msgid="1727196795383575383">"አይገኝም"</item>
+    <item msgid="9061144428113385092">"አጥፋ"</item>
+    <item msgid="2984256114867200368">"አብራ"</item>
+  </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"አይገኝም"</item>
     <item msgid="8707481475312432575">"ጠፍቷል"</item>
@@ -180,5 +185,10 @@
     <item msgid="3173069902082305985">"አይገኝም"</item>
     <item msgid="2478289035899842865">"ጠፍቷል"</item>
     <item msgid="5137565285664080143">"በርቷል"</item>
+  </string-array>
+  <string-array name="tile_states_hearing_devices">
+    <item msgid="1235334096484287173">"አይገኝም"</item>
+    <item msgid="3079622119444911877">"አጥፋ"</item>
+    <item msgid="3028994095749238254">"አብራ"</item>
   </string-array>
 </resources>

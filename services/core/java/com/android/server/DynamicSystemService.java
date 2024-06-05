@@ -44,7 +44,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
     private static final String TAG = "DynamicSystemService";
     private static final long MINIMUM_SD_MB = (30L << 10);
     private static final int GSID_ROUGH_TIMEOUT_MS = 8192;
-    private static final String PATH_DEFAULT = "/data/gsi/";
+    private static final String PATH_DEFAULT = "/data/gsi/dsu/";
     private Context mContext;
     private String mInstallPath, mDsuSlot;
     private volatile IGsiService mGsiService;
@@ -226,9 +226,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
         IGsiService gsiService = getGsiService();
         if (enable) {
             try {
-                if (mDsuSlot == null) {
-                    mDsuSlot = gsiService.getActiveDsuSlot();
-                }
+                getActiveDsuSlot();
                 GsiServiceCallback callback = new GsiServiceCallback();
                 synchronized (callback) {
                     gsiService.enableGsiAsync(oneShot, mDsuSlot, callback);
@@ -286,5 +284,16 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
         super.suggestScratchSize_enforcePermission();
 
         return getGsiService().suggestScratchSize();
+    }
+
+    @Override
+    @EnforcePermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public String getActiveDsuSlot() throws RemoteException {
+        super.getActiveDsuSlot_enforcePermission();
+
+        if (mDsuSlot == null) {
+            mDsuSlot = getGsiService().getActiveDsuSlot();
+        }
+        return mDsuSlot;
     }
 }

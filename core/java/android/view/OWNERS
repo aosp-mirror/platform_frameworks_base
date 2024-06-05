@@ -1,7 +1,6 @@
 # Bug component: 25700
 
 romainguy@google.com
-alanv@google.com
 adamp@google.com
 aurimas@google.com
 nduca@google.com
@@ -11,6 +10,7 @@ jjaggi@google.com
 roosa@google.com
 jreck@google.com
 siyamed@google.com
+mount@google.com
 
 # Autofill
 per-file ViewStructure.java = file:/core/java/android/service/autofill/OWNERS
@@ -74,12 +74,14 @@ per-file View.java = file:/graphics/java/android/graphics/OWNERS
 per-file View.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file View.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file View.java = file:/core/java/android/view/inputmethod/OWNERS
+per-file View.java = file:/core/java/android/text/OWNERS
 per-file ViewRootImpl.java = file:/services/accessibility/OWNERS
 per-file ViewRootImpl.java = file:/core/java/android/service/autofill/OWNERS
 per-file ViewRootImpl.java = file:/graphics/java/android/graphics/OWNERS
 per-file ViewRootImpl.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file ViewRootImpl.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file ViewRootImpl.java = file:/core/java/android/view/inputmethod/OWNERS
+per-file ViewRootImpl.java = file:/core/java/android/text/OWNERS
 per-file AccessibilityInteractionController.java = file:/services/accessibility/OWNERS
 per-file OnReceiveContentListener.java = file:/core/java/android/service/autofill/OWNERS
 per-file OnReceiveContentListener.java = file:/core/java/android/widget/OWNERS
@@ -101,6 +103,7 @@ per-file ISurfaceControlViewHost*.aidl = file:/services/core/java/com/android/se
 per-file IWindow*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file RemoteAnimation*.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file RemoteAnimation*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ScreenRecordingCallbacks.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *SurfaceControl*.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file SurfaceControl*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file SurfaceSession.java = file:/services/core/java/com/android/server/wm/OWNERS

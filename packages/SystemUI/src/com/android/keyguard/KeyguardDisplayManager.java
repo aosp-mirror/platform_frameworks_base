@@ -15,15 +15,14 @@
  */
 package com.android.keyguard;
 
+import android.annotation.NonNull;
 import android.app.Presentation;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Rect;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.DisplayManager;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
-import android.os.Bundle;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.Log;
@@ -31,15 +30,11 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayInfo;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.keyguard.dagger.KeyguardStatusViewComponent;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -48,11 +43,11 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import dagger.Lazy;
+
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 @SysUISingleton
 public class KeyguardDisplayManager {
@@ -63,7 +58,8 @@ public class KeyguardDisplayManager {
     private final DisplayManager mDisplayService;
     private final DisplayTracker mDisplayTracker;
     private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
-    private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
+    private final ConnectedDisplayKeyguardPresentation.Factory
+            mConnectedDisplayKeyguardPresentationFactory;
     private final Context mContext;
 
     private boolean mShowing;
@@ -100,21 +96,22 @@ public class KeyguardDisplayManager {
     @Inject
     public KeyguardDisplayManager(Context context,
             Lazy<NavigationBarController> navigationBarControllerLazy,
-            KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
             DisplayTracker displayTracker,
             @Main Executor mainExecutor,
             @UiBackground Executor uiBgExecutor,
             DeviceStateHelper deviceStateHelper,
-            KeyguardStateController keyguardStateController) {
+            KeyguardStateController keyguardStateController,
+            ConnectedDisplayKeyguardPresentation.Factory
+                    connectedDisplayKeyguardPresentationFactory) {
         mContext = context;
         mNavigationBarControllerLazy = navigationBarControllerLazy;
-        mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         uiBgExecutor.execute(() -> mMediaRouter = mContext.getSystemService(MediaRouter.class));
         mDisplayService = mContext.getSystemService(DisplayManager.class);
         mDisplayTracker = displayTracker;
         mDisplayTracker.addDisplayChangeCallback(mDisplayCallback, mainExecutor);
         mDeviceStateHelper = deviceStateHelper;
         mKeyguardStateController = keyguardStateController;
+        mConnectedDisplayKeyguardPresentationFactory = connectedDisplayKeyguardPresentationFactory;
     }
 
     private boolean isKeyguardShowable(Display display) {
@@ -185,8 +182,8 @@ public class KeyguardDisplayManager {
         return false;
     }
 
-    KeyguardPresentation createPresentation(Display display) {
-        return new KeyguardPresentation(mContext, display, mKeyguardStatusViewComponentFactory);
+    Presentation createPresentation(Display display) {
+        return mConnectedDisplayKeyguardPresentationFactory.create(display);
     }
 
     /**
@@ -319,105 +316,17 @@ public class KeyguardDisplayManager {
         }
 
         @Override
-        public void onStateChanged(int state) {
+        public void onDeviceStateChanged(@NonNull DeviceState state) {
             // When concurrent state ends, the display also turns off. This is enforced in various
             // ExtensionRearDisplayPresentationTest CTS tests. So, we don't need to invoke
             // hide() since that will happen through the onDisplayRemoved callback.
-            mIsInConcurrentDisplayState = state == mConcurrentState;
+            mIsInConcurrentDisplayState = state.getIdentifier() == mConcurrentState;
         }
 
         boolean isConcurrentDisplayActive(Display display) {
             return mIsInConcurrentDisplayState
                     && mRearDisplayPhysicalAddress != null
                     && mRearDisplayPhysicalAddress.equals(display.getAddress());
-        }
-    }
-
-
-    @VisibleForTesting
-    static final class KeyguardPresentation extends Presentation {
-        private static final int VIDEO_SAFE_REGION = 80; // Percentage of display width & height
-        private static final int MOVE_CLOCK_TIMEOUT = 10000; // 10s
-        private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
-        private KeyguardClockSwitchController mKeyguardClockSwitchController;
-        private View mClock;
-        private int mUsableWidth;
-        private int mUsableHeight;
-        private int mMarginTop;
-        private int mMarginLeft;
-        Runnable mMoveTextRunnable = new Runnable() {
-            @Override
-            public void run() {
-                int x = mMarginLeft + (int) (Math.random() * (mUsableWidth - mClock.getWidth()));
-                int y = mMarginTop + (int) (Math.random() * (mUsableHeight - mClock.getHeight()));
-                mClock.setTranslationX(x);
-                mClock.setTranslationY(y);
-                mClock.postDelayed(mMoveTextRunnable, MOVE_CLOCK_TIMEOUT);
-            }
-        };
-
-        KeyguardPresentation(Context context, Display display,
-                KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory) {
-            super(context, display, R.style.Theme_SystemUI_KeyguardPresentation,
-                    WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-            mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
-            setCancelable(false);
-        }
-
-        @Override
-        public void cancel() {
-            // Do not allow anything to cancel KeyguardPresentation except KeyguardDisplayManager.
-        }
-
-        @Override
-        public void onDetachedFromWindow() {
-            mClock.removeCallbacks(mMoveTextRunnable);
-        }
-
-        @Override
-        public void onDisplayChanged() {
-            updateBounds();
-            getWindow().getDecorView().requestLayout();
-        }
-
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            updateBounds();
-
-            setContentView(LayoutInflater.from(getContext())
-                    .inflate(R.layout.keyguard_presentation, null));
-
-            // Logic to make the lock screen fullscreen
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            getWindow().getAttributes().setFitInsetsTypes(0 /* types */);
-            getWindow().setNavigationBarContrastEnforced(false);
-            getWindow().setNavigationBarColor(Color.TRANSPARENT);
-
-            mClock = findViewById(R.id.clock);
-
-            // Avoid screen burn in
-            mClock.post(mMoveTextRunnable);
-
-            mKeyguardClockSwitchController = mKeyguardStatusViewComponentFactory
-                    .build(findViewById(R.id.clock))
-                    .getKeyguardClockSwitchController();
-
-            mKeyguardClockSwitchController.setOnlyClock(true);
-            mKeyguardClockSwitchController.init();
-        }
-
-        private void updateBounds() {
-            final Rect bounds = getWindow().getWindowManager().getMaximumWindowMetrics()
-                    .getBounds();
-            mUsableWidth = VIDEO_SAFE_REGION * bounds.width() / 100;
-            mUsableHeight = VIDEO_SAFE_REGION * bounds.height() / 100;
-            mMarginLeft = (100 - VIDEO_SAFE_REGION) * bounds.width() / 200;
-            mMarginTop = (100 - VIDEO_SAFE_REGION) * bounds.height() / 200;
         }
     }
 }

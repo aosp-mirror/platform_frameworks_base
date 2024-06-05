@@ -59,6 +59,8 @@ import android.util.apk.SourceStampVerifier;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.PackageParser2;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -66,8 +68,7 @@ import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.integrity.model.RuleMetadata;
 import com.android.server.pm.PackageManagerServiceUtils;
-import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.pm.parsing.PackageParserUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -141,7 +142,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         return new AppIntegrityManagerServiceImpl(
                 context,
                 LocalServices.getService(PackageManagerInternal.class),
-                PackageParser2::forParsingFileWithDefaults,
+                PackageParserUtils::forParsingFileWithDefaults,
                 RuleEvaluationEngine.getRuleEvaluationEngine(),
                 IntegrityFileManager.getInstance(),
                 handlerThread.getThreadHandler());
@@ -513,6 +514,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 List<String> apkFiles =
                         filesList
                                 .map(path -> path.toAbsolutePath().toString())
+                                .filter(str -> str.endsWith(".apk"))
                                 .collect(Collectors.toList());
                 sourceStampVerificationResult = SourceStampVerifier.verify(apkFiles);
             } catch (IOException e) {
@@ -710,7 +712,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     private String getCallingRulePusherPackageName(int callingUid) {
-        // Obtain the system apps that are whitelisted in config_integrityRuleProviderPackages.
+        // Obtain the system apps that are allowlisted in config_integrityRuleProviderPackages.
         List<String> allowedRuleProviders = getAllowedRuleProviderSystemApps();
         if (DEBUG_INTEGRITY_COMPONENT) {
             Slog.i(

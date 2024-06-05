@@ -18,28 +18,22 @@
 package com.android.internal.systemui.lint
 
 import com.android.tools.lint.checks.infrastructure.TestFile
+import com.android.tools.lint.checks.infrastructure.TestFiles
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
-@Suppress("UnstableApiUsage")
 class TestFunctionNameViolationDetectorTest : SystemUILintDetectorTest() {
-    override fun getDetector(): Detector {
-        return TestFunctionNameViolationDetector()
-    }
+    override fun getDetector(): Detector = TestFunctionNameViolationDetector()
 
-    override fun getIssues(): List<Issue> {
-        return listOf(
-            TestFunctionNameViolationDetector.ISSUE,
-        )
-    }
+    override fun getIssues(): List<Issue> = listOf(TestFunctionNameViolationDetector.ISSUE)
 
     @Test
     fun violations() {
         lint()
             .files(
-                kotlin(
-                    """
+                TestFiles.kotlin(
+                        """
                     package test.pkg.name
 
                     import org.junit.Test
@@ -64,13 +58,11 @@ class TestFunctionNameViolationDetectorTest : SystemUILintDetectorTest() {
                         }
                     }
                 """
-                        .trimIndent()
-                ),
-                testAnnotationStub,
+                    )
+                    .indented(),
+                testAnnotationStub
             )
-            .issues(
-                TestFunctionNameViolationDetector.ISSUE,
-            )
+            .issues(TestFunctionNameViolationDetector.ISSUE)
             .run()
             .expectWarningCount(0)
             .expect(

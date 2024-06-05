@@ -25,12 +25,17 @@
                 value="/data/local/tmp/cts/content/broken_shortcut.xml" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
+        <option name="force-skip-system-props" value="true" />
+        <option name="set-global-setting" key="verifier_engprod" value="1" />
+        <option name="set-global-setting" key="verifier_verify_adb_installs" value="0" />
+        <option name="restore-settings" value="true" />
+    </target_preparer>
+
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true" />
         <option name="install-arg" value="-t" />
-        <option name="test-file-name" value="BstatsTestApp.apk" />
         <option name="test-file-name" value="FrameworksServicesTests.apk" />
-        <option name="test-file-name" value="JobTestApp.apk" />
         <option name="test-file-name" value="SuspendTestApp.apk" />
         <option name="test-file-name" value="SimpleServiceTestApp1.apk" />
         <option name="test-file-name" value="SimpleServiceTestApp2.apk" />

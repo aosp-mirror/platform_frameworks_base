@@ -21,6 +21,9 @@ import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COM
 import static android.view.View.SYSTEM_UI_LAYOUT_FLAGS;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.WindowInsetsController.APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
@@ -31,8 +34,10 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATIO
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,9 +45,15 @@ import android.annotation.UiContext;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.SearchManager;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
@@ -62,6 +73,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.transition.Scene;
@@ -123,6 +135,7 @@ import com.android.internal.view.menu.MenuHelper;
 import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
 import com.android.internal.widget.DecorContentParent;
+import com.android.window.flags.Flags;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -162,6 +175,23 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private final static int DEFAULT_BACKGROUND_FADE_DURATION_MS = 300;
 
+    /**
+     * Make app go edge-to-edge by default if the target SDK is
+     * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} or above.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    private static final long ENFORCE_EDGE_TO_EDGE = 309578419;
+
+    /**
+     * Override the layout in display cutout mode behavior. This will only apply if the edge to edge
+     * is not enforced.
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    private static final long OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE = 332679525L;
+
     private static final int CUSTOM_TITLE_COMPATIBLE_FEATURES = DEFAULT_FEATURES |
             (1 << FEATURE_CUSTOM_TITLE) |
             (1 << FEATURE_CONTENT_TRANSITIONS) |
@@ -169,6 +199,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             (1 << FEATURE_ACTION_MODE_OVERLAY);
 
     private static final Transition USE_DEFAULT_TRANSITION = new TransitionSet();
+
+    /**
+     * Since which target SDK version this window is enforced to go edge-to-edge.
+     */
+    private static final int ENFORCE_EDGE_TO_EDGE_SDK_VERSION =
+            SystemProperties.getInt("persist.wm.debug.default_e2e_since_sdk", Integer.MAX_VALUE);
 
     /**
      * Simple callback used by the context menu and its submenus. The options
@@ -274,9 +310,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private int mFrameResource = 0;
 
     private int mTextColor = 0;
-    int mStatusBarColor = 0;
-    int mNavigationBarColor = 0;
-    int mNavigationBarDividerColor = 0;
+    int mStatusBarColor = Color.TRANSPARENT;
+    int mNavigationBarColor = Color.TRANSPARENT;
+    int mNavigationBarDividerColor = Color.TRANSPARENT;
+    boolean mNavigationBarColorSpecified = false;
     private boolean mForcedStatusBarColor = false;
     private boolean mForcedNavigationBarColor = false;
 
@@ -333,10 +370,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private long mBackgroundFadeDurationMillis = -1;
     private Boolean mSharedElementsUseOverlay;
 
+    private Boolean mAllowFloatingWindowsFillScreen;
+
     private boolean mIsStartingWindow;
     private int mTheme = -1;
-
-    private int mDecorCaptionShade = DECOR_CAPTION_SHADE_AUTO;
 
     private boolean mUseDecorContext = false;
 
@@ -344,6 +381,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private ActivityConfigCallback mActivityConfigCallback;
 
     boolean mDecorFitsSystemWindows = true;
+
+    boolean mEdgeToEdgeEnforced;
 
     private final ProxyOnBackInvokedDispatcher mProxyOnBackInvokedDispatcher;
 
@@ -361,6 +400,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mRenderShadowsInCompositor = Settings.Global.getInt(context.getContentResolver(),
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
         mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(context);
+        mAllowFloatingWindowsFillScreen = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowFloatingWindowsFillScreen);
     }
 
     /**
@@ -377,6 +418,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mElevation = preservedWindow.getElevation();
             mLoadElevation = false;
             mForceDecorInstall = true;
+            setSystemBarAppearance(preservedWindow.getSystemBarAppearance());
             // If we're preserving window, carry over the app token from the preserved
             // window, as we'll be skipping the addView in handleResumeActivity(), and
             // the token will not be updated as for a new window.
@@ -395,6 +437,25 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mSupportsPictureInPicture = forceResizable || context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_PICTURE_IN_PICTURE);
         mActivityConfigCallback = activityConfigCallback;
+    }
+
+    /**
+     * Returns whether the given application is enforced to go edge-to-edge.
+     *
+     * @param info The application to query.
+     * @param local Whether this is called from the process of the given application.
+     * @param windowStyle The style of the window.
+     * @return {@code true} if edge-to-edge is enforced. Otherwise, {@code false}.
+     */
+    public static boolean isEdgeToEdgeEnforced(ApplicationInfo info, boolean local,
+            TypedArray windowStyle) {
+        return !windowStyle.getBoolean(R.styleable.Window_windowOptOutEdgeToEdgeEnforcement, false)
+                && (info.targetSdkVersion >= ENFORCE_EDGE_TO_EDGE_SDK_VERSION
+                        || (Flags.enforceEdgeToEdge() && (local
+                                // Calling this doesn't require a permission.
+                                ? CompatChanges.isChangeEnabled(ENFORCE_EDGE_TO_EDGE)
+                                // Calling this requires permissions.
+                                : info.isChangeEnabled(ENFORCE_EDGE_TO_EDGE))));
     }
 
     @Override
@@ -2408,6 +2469,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // Apply data from current theme.
 
         TypedArray a = getWindowStyle();
+        WindowManager.LayoutParams params = getAttributes();
 
         if (false) {
             System.out.println("From style:");
@@ -2419,16 +2481,28 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             System.out.println(s);
         }
 
+        mEdgeToEdgeEnforced = isEdgeToEdgeEnforced(
+                getContext().getApplicationInfo(), true /* local */, a);
+        if (mEdgeToEdgeEnforced) {
+            getAttributes().privateFlags |= PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
+            mDecorFitsSystemWindows = false;
+        }
+        if (CompatChanges.isChangeEnabled(OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE)
+                && !a.getBoolean(R.styleable.Window_windowOptOutEdgeToEdgeEnforcement,
+                false /* defValue */)) {
+            getAttributes().privateFlags |= PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE;
+        }
+
         mIsFloating = a.getBoolean(R.styleable.Window_windowIsFloating, false);
         int flagsToUpdate = (FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR)
                 & (~getForcedWindowFlags());
-        if (mIsFloating) {
+        if (mIsFloating && !mAllowFloatingWindowsFillScreen) {
             setLayout(WRAP_CONTENT, WRAP_CONTENT);
             setFlags(0, flagsToUpdate);
         } else {
             setFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR, flagsToUpdate);
-            getAttributes().setFitInsetsSides(0);
-            getAttributes().setFitInsetsTypes(0);
+            params.setFitInsetsSides(0);
+            params.setFitInsetsTypes(0);
         }
 
         if (a.getBoolean(R.styleable.Window_windowNoTitle, false)) {
@@ -2502,6 +2576,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (a.getBoolean(R.styleable.Window_windowActivityTransitions, false)) {
             requestFeature(FEATURE_ACTIVITY_TRANSITIONS);
         }
+        if (a.hasValue(R.styleable.Window_windowIsFrameRatePowerSavingsBalanced)) {
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                setFrameRatePowerSavingsBalanced(
+                        a.getBoolean(R.styleable.Window_windowIsFrameRatePowerSavingsBalanced,
+                                true));
+            }
+        }
 
         mIsTranslucent = a.getBoolean(R.styleable.Window_windowIsTranslucent, false);
 
@@ -2510,7 +2591,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final boolean targetPreL = targetSdk < android.os.Build.VERSION_CODES.LOLLIPOP;
         final boolean targetPreQ = targetSdk < Build.VERSION_CODES.Q;
 
-        if (!mForcedStatusBarColor) {
+        if (!mForcedStatusBarColor && !mEdgeToEdgeEnforced) {
             mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, Color.BLACK);
         }
         if (!mForcedNavigationBarColor) {
@@ -2518,16 +2599,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             final int navBarDefaultColor = context.getColor(R.color.navigation_bar_default);
             final int navBarColor = a.getColor(R.styleable.Window_navigationBarColor,
                     navBarDefaultColor);
+            final boolean navigationBarColorSpecified = navBarColor != navBarDefaultColor;
 
             mNavigationBarColor =
-                    navBarColor == navBarDefaultColor
+                    !navigationBarColorSpecified
+                            && !mEdgeToEdgeEnforced
                             && !context.getResources().getBoolean(
                                     R.bool.config_navBarDefaultTransparent)
                     ? navBarCompatibleColor
                     : navBarColor;
 
-            mNavigationBarDividerColor = a.getColor(R.styleable.Window_navigationBarDividerColor,
-                    Color.TRANSPARENT);
+            mNavigationBarColorSpecified |= navigationBarColorSpecified;
+
+            if (!mEdgeToEdgeEnforced) {
+                mNavigationBarDividerColor = a.getColor(
+                        R.styleable.Window_navigationBarDividerColor, Color.TRANSPARENT);
+            }
         }
         if (!targetPreQ) {
             mEnsureStatusBarContrastWhenTransparent = a.getBoolean(
@@ -2535,8 +2622,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mEnsureNavigationBarContrastWhenTransparent = a.getBoolean(
                     R.styleable.Window_enforceNavigationBarContrast, true);
         }
-
-        WindowManager.LayoutParams params = getAttributes();
 
         // Non-floating windows on high end devices must put up decor beneath the system bars and
         // therefore must know about visibility changes of those.
@@ -2557,15 +2642,24 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 false)) {
             params.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
         }
-        final int sysUiVis = decor.getSystemUiVisibility();
-        final int statusLightFlag = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-        final int statusFlag = a.getBoolean(R.styleable.Window_windowLightStatusBar, false)
-                ? statusLightFlag : 0;
-        final int navLightFlag = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        final int navFlag = a.getBoolean(R.styleable.Window_windowLightNavigationBar, false)
-                ? navLightFlag : 0;
+
+        final boolean lightStatus = a.getBoolean(R.styleable.Window_windowLightStatusBar, false);
+        final boolean lightNav = a.getBoolean(R.styleable.Window_windowLightNavigationBar, false);
+
+        // Here still sets the light bar flags via setSystemUiVisibility (even it is deprecated) to
+        // make the light bar state be able to be read from the legacy method.
         decor.setSystemUiVisibility(
-                (sysUiVis & ~(statusLightFlag | navLightFlag)) | (statusFlag | navFlag));
+                (decor.getSystemUiVisibility()
+                        & ~(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                                | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR))
+                | (lightStatus ? View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR : 0)
+                | (lightNav ? View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR : 0));
+
+        decor.getWindowInsetsController().setSystemBarsAppearanceFromResource(
+                (lightStatus ? APPEARANCE_LIGHT_STATUS_BARS : 0)
+                        | (lightNav ? APPEARANCE_LIGHT_NAVIGATION_BARS : 0),
+                APPEARANCE_LIGHT_STATUS_BARS | APPEARANCE_LIGHT_NAVIGATION_BARS);
+
         if (a.hasValue(R.styleable.Window_windowLayoutInDisplayCutoutMode)) {
             int mode = a.getInt(R.styleable.Window_windowLayoutInDisplayCutoutMode, -1);
             if (mode < LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
@@ -3855,6 +3949,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setStatusBarColor(int color) {
+        if (mEdgeToEdgeEnforced) {
+            return;
+        }
+        if (mStatusBarColor == color && mForcedStatusBarColor) {
+            return;
+        }
         mStatusBarColor = color;
         mForcedStatusBarColor = true;
         if (mDecor != null) {
@@ -3868,15 +3968,27 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public int getNavigationBarColor() {
+        if (mEdgeToEdgeEnforced) {
+            return Color.TRANSPARENT;
+        }
         return mNavigationBarColor;
     }
 
     @Override
     public void setNavigationBarColor(int color) {
+        if (mNavigationBarColor == color && mForcedNavigationBarColor) {
+            return;
+        }
         mNavigationBarColor = color;
         mForcedNavigationBarColor = true;
+        mNavigationBarColorSpecified = true;
         if (mDecor != null) {
+            mDecor.getWindowInsetsController().setSystemBarsAppearance(
+                    0, APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS);
             mDecor.updateColorViews(null, false /* animate */);
+        }
+        if (mEdgeToEdgeEnforced) {
+            return;
         }
         final WindowControllerCallback callback = getWindowControllerCallback();
         if (callback != null) {
@@ -3886,6 +3998,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setNavigationBarDividerColor(int navigationBarDividerColor) {
+        if (mEdgeToEdgeEnforced) {
+            return;
+        }
         mNavigationBarDividerColor = navigationBarDividerColor;
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);
@@ -3940,19 +4055,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setResizingCaptionDrawable(Drawable drawable) {
-        mDecor.setUserCaptionBackgroundDrawable(drawable);
+        // TODO(b/333724879): Deprecate this public API. The new caption in WM shell allows the app
+        // content to draw behind it directly if requested.
     }
 
     @Override
     public void setDecorCaptionShade(int decorCaptionShade) {
-        mDecorCaptionShade = decorCaptionShade;
-        if (mDecor != null) {
-            mDecor.updateDecorCaptionShade();
-        }
-    }
-
-    int getDecorCaptionShade() {
-        return mDecorCaptionShade;
+        // TODO(b/328668781): Make proper treatment to this public API per the outcome of the bug.
     }
 
     @Override
@@ -3981,6 +4090,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setDecorFitsSystemWindows(boolean decorFitsSystemWindows) {
+        if (mEdgeToEdgeEnforced) {
+            return;
+        }
         mDecorFitsSystemWindows = decorFitsSystemWindows;
         applyDecorFitsSystemWindows();
     }

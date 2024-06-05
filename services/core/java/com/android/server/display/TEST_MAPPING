@@ -1,34 +1,20 @@
 {
     "presubmit": [
         {
-            "name": "FrameworksMockingServicesTests",
+            "name": "DisplayServiceTests",
             "options": [
                 {"include-filter": "com.android.server.display"},
-                {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
-                {"exclude-annotation": "androidx.test.filters.FlakyTest"}
-            ]
-        },
-        {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {"include-filter": "com.android.server.display"},
-                {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
                 {"exclude-annotation": "androidx.test.filters.FlakyTest"},
                 {"exclude-annotation": "org.junit.Ignore"}
             ]
-        },
+        }
+    ],
+    "postsubmit": [
         {
-            "name": "CtsMediaProjectionTestCases",
+            "name": "DisplayServiceTests",
             "options": [
-                {
-                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                }
+                {"include-filter": "com.android.server.display"},
+                {"exclude-annotation": "org.junit.Ignore"}
             ]
         }
     ]

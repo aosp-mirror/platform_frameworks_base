@@ -33,7 +33,8 @@ import androidx.annotation.VisibleForTesting;
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.FontSizeUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
+import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernShadeCarrierGroupMobileView;
 import com.android.systemui.util.LargeScreenUtils;
 
 import java.util.Objects;
@@ -44,6 +45,7 @@ public class ShadeCarrier extends LinearLayout {
     private TextView mCarrierText;
     private ImageView mMobileSignal;
     private ImageView mMobileRoaming;
+    private ModernShadeCarrierGroupMobileView mModernMobileView;
     private View mSpacer;
     @Nullable
     private CellSignalState mLastSignalState;
@@ -75,6 +77,23 @@ public class ShadeCarrier extends LinearLayout {
         mCarrierText = findViewById(R.id.shade_carrier_text);
         mSpacer = findViewById(R.id.spacer);
         updateResources();
+    }
+
+    /** Removes a ModernStatusBarMobileView from the ViewGroup. */
+    public void removeModernMobileView() {
+        if (mModernMobileView != null) {
+            removeView(mModernMobileView);
+            mModernMobileView = null;
+        }
+    }
+
+    /** Adds a ModernStatusBarMobileView to the ViewGroup. */
+    public void addModernMobileView(ModernShadeCarrierGroupMobileView mobileView) {
+        mModernMobileView = mobileView;
+        mMobileGroup.setVisibility(View.GONE);
+        mSpacer.setVisibility(View.GONE);
+        mCarrierText.setVisibility(View.GONE);
+        addView(mobileView);
     }
 
     /**

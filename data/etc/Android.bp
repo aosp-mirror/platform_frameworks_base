@@ -60,6 +60,24 @@ prebuilt_etc {
     src: "preinstalled-packages-asl-files.xml",
 }
 
+prebuilt_etc {
+    name: "preinstalled-packages-strict-signature.xml",
+    sub_dir: "sysconfig",
+    src: "preinstalled-packages-strict-signature.xml",
+}
+
+prebuilt_etc {
+    name: "enhanced-confirmation.xml",
+    sub_dir: "sysconfig",
+    src: "enhanced-confirmation.xml",
+}
+
+prebuilt_etc {
+    name: "package-shareduid-allowlist.xml",
+    sub_dir: "sysconfig",
+    src: "package-shareduid-allowlist.xml",
+}
+
 // Privapp permission whitelist files
 
 prebuilt_etc {
@@ -181,9 +199,4 @@ prebuilt_etc {
     sub_dir: "permissions",
     src: "com.android.systemui.xml",
     filename_from_src: true,
-}
-
-filegroup {
-    name: "services.core.protolog.json",
-    srcs: ["services.core.protolog.json"],
 }

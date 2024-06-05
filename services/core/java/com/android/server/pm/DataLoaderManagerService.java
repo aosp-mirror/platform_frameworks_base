@@ -47,19 +47,19 @@ import java.util.List;
 public class DataLoaderManagerService extends SystemService {
     private static final String TAG = "DataLoaderManager";
     private final Context mContext;
-    private final HandlerThread mThread;
     private final Handler mHandler;
     private final DataLoaderManagerBinderService mBinderService;
-    private SparseArray<DataLoaderServiceConnection> mServiceConnections = new SparseArray<>();
+    private final SparseArray<DataLoaderServiceConnection> mServiceConnections =
+            new SparseArray<>();
 
     public DataLoaderManagerService(Context context) {
         super(context);
         mContext = context;
 
-        mThread = new HandlerThread(TAG);
-        mThread.start();
+        HandlerThread thread = new HandlerThread(TAG);
+        thread.start();
 
-        mHandler = new Handler(mThread.getLooper());
+        mHandler = new Handler(thread.getLooper());
 
         mBinderService = new DataLoaderManagerBinderService();
     }

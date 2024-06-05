@@ -1,6 +1,4 @@
 # Bug component: 554432
-alexbuy@google.com
-schfan@google.com
-toddke@google.com
+include /PACKAGE_MANAGER_OWNERS
+
 zyy@google.com
-patb@google.com

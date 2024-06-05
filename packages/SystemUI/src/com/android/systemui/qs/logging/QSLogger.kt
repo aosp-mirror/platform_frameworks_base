@@ -19,14 +19,17 @@ package com.android.systemui.qs.logging
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.content.res.Configuration.Orientation
+import android.content.res.Configuration.SCREENLAYOUT_LONG_NO
+import android.content.res.Configuration.SCREENLAYOUT_LONG_YES
 import android.service.quicksettings.Tile
 import android.view.View
 import com.android.systemui.log.ConstantStringsLogger
 import com.android.systemui.log.ConstantStringsLoggerImpl
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.ERROR
-import com.android.systemui.log.LogLevel.VERBOSE
+import com.android.systemui.log.core.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.ERROR
+import com.android.systemui.log.core.LogLevel.INFO
+import com.android.systemui.log.core.LogLevel.VERBOSE
 import com.android.systemui.log.dagger.QSConfigLog
 import com.android.systemui.log.dagger.QSLog
 import com.android.systemui.plugins.qs.QSTile
@@ -53,6 +56,9 @@ constructor(
 
     fun d(@CompileTimeConstant msg: String, arg: Any) {
         buffer.log(TAG, DEBUG, { str1 = arg.toString() }, { "$msg: $str1" })
+    }
+    fun i(@CompileTimeConstant msg: String, arg: Any) {
+        buffer.log(TAG, INFO, { str1 = arg.toString() }, { "$msg: $str1" })
     }
 
     fun logTileAdded(tileSpec: String) {
@@ -222,16 +228,8 @@ constructor(
                 str2 = state.label?.toString()
                 str3 = state.icon?.toString()
                 int1 = state.state
-                if (state is QSTile.SignalState) {
-                    bool1 = true
-                    bool2 = state.activityIn
-                    bool3 = state.activityOut
-                }
             },
-            {
-                "[$str1] Tile updated. Label=$str2. State=$int1. Icon=$str3." +
-                    if (bool1) " Activity in/out=$bool2/$bool3" else ""
-            }
+            { "[$str1] Tile updated. Label=$str2. State=$int1. Icon=$str3." }
         )
     }
 
@@ -274,8 +272,10 @@ constructor(
     fun logOnConfigurationChanged(
         @Orientation oldOrientation: Int,
         @Orientation newOrientation: Int,
-        newShouldUseSplitShade: Boolean,
         oldShouldUseSplitShade: Boolean,
+        newShouldUseSplitShade: Boolean,
+        oldScreenLayout: Int,
+        newScreenLayout: Int,
         containerName: String
     ) {
         configChangedBuffer.log(
@@ -285,6 +285,8 @@ constructor(
                 str1 = containerName
                 int1 = oldOrientation
                 int2 = newOrientation
+                long1 = oldScreenLayout.toLong()
+                long2 = newScreenLayout.toLong()
                 bool1 = oldShouldUseSplitShade
                 bool2 = newShouldUseSplitShade
             },
@@ -292,6 +294,8 @@ constructor(
                 "config change: " +
                     "$str1 orientation=${toOrientationString(int2)} " +
                     "(was ${toOrientationString(int1)}), " +
+                    "screen layout=${toScreenLayoutString(long1.toInt())} " +
+                    "(was ${toScreenLayoutString(long2.toInt())}), " +
                     "splitShade=$bool2 (was $bool1)"
             }
         )
@@ -375,6 +379,14 @@ private inline fun toOrientationString(@Orientation orientation: Int): String {
     return when (orientation) {
         ORIENTATION_LANDSCAPE -> "land"
         ORIENTATION_PORTRAIT -> "port"
+        else -> "undefined"
+    }
+}
+
+private inline fun toScreenLayoutString(screenLayout: Int): String {
+    return when (screenLayout) {
+        SCREENLAYOUT_LONG_YES -> "long"
+        SCREENLAYOUT_LONG_NO -> "notlong"
         else -> "undefined"
     }
 }

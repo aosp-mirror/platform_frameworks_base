@@ -31,11 +31,10 @@ import android.util.DisplayMetrics;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.om.OverlayConfig;
+import com.android.internal.pm.parsing.PackageParser2;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DynamicCodeLogger;
-import com.android.server.pm.dex.ViewCompiler;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 
@@ -61,11 +60,12 @@ public final class PackageManagerServiceTestParams {
     public IncrementalManager incrementalManager;
     public PackageInstallerService installerService;
     public InstantAppRegistry instantAppRegistry;
-    public ChangedPackagesTracker changedPackagesTracker = new ChangedPackagesTracker();
+    public final ChangedPackagesTracker changedPackagesTracker = new ChangedPackagesTracker();
     public InstantAppResolverConnection instantAppResolverConnection;
     public ComponentName instantAppResolverSettingsComponent;
     public boolean isPreNmr1Upgrade;
     public boolean isPreQupgrade;
+    public int priorSdkVersion = -1;
     public boolean isUpgrade;
     public LegacyPermissionManagerInternal legacyPermissionManagerInternal;
     public DisplayMetrics Metrics;
@@ -93,21 +93,18 @@ public final class PackageManagerServiceTestParams {
     public @Nullable String systemTextClassifierPackage;
     public @Nullable String overlayConfigSignaturePackage;
     public @NonNull String requiredSdkSandboxPackage;
-    public ViewCompiler viewCompiler;
     public @Nullable String retailDemoPackage;
     public @Nullable String recentsPackage;
     public @Nullable String ambientContextDetectionPackage;
     public @Nullable String wearableSensingPackage;
     public ComponentName resolveComponentName;
     public ArrayMap<String, AndroidPackage> packages;
-    public boolean enableFreeCacheV2;
     public int sdkVersion;
     public File appInstallDir;
     public File appLib32InstallDir;
     public boolean isEngBuild;
     public boolean isUserDebugBuild;
     public int sdkInt = Build.VERSION.SDK_INT;
-    public @Nullable BackgroundDexOptService backgroundDexOptService;
     public final String incrementalVersion = Build.VERSION.INCREMENTAL;
     public BroadcastHelper broadcastHelper;
     public AppDataHelper appDataHelper;
@@ -121,6 +118,8 @@ public final class PackageManagerServiceTestParams {
     public SuspendPackageHelper suspendPackageHelper;
     public DistractingPackageHelper distractingPackageHelper;
     public StorageEventHelper storageEventHelper;
-    public Set<String> initialNonStoppedSystemPackages = new ArraySet<>();
+    public final Set<String> initialNonStoppedSystemPackages = new ArraySet<>();
     public boolean shouldStopSystemPackagesByDefault;
+    public FreeStorageHelper freeStorageHelper;
+    public PackageMonitorCallbackHelper packageMonitorCallbackHelper;
 }

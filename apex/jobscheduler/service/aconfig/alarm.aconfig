@@ -1,0 +1,19 @@
+package: "com.android.server.alarm"
+container: "system"
+
+flag {
+    name: "use_frozen_state_to_drop_listener_alarms"
+    namespace: "backstage_power"
+    description: "Use frozen state callback to drop listener alarms for cached apps"
+    bug: "324470945"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "start_user_before_scheduled_alarms"
+    namespace: "multiuser"
+    description: "Persist list of users with alarms scheduled and wakeup stopped users before alarms are due"
+    bug: "314907186"
+}

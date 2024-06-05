@@ -18,6 +18,7 @@ package com.android.wm.shell.common.bubbles;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Point;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -33,8 +34,10 @@ public class BubbleBarUpdate implements Parcelable {
 
     public static final String BUNDLE_KEY = "update";
 
+    public final boolean initialState;
     public boolean expandedChanged;
     public boolean expanded;
+    public boolean shouldShowEducation;
     @Nullable
     public String selectedBubbleKey;
     @Nullable
@@ -45,6 +48,12 @@ public class BubbleBarUpdate implements Parcelable {
     public String suppressedBubbleKey;
     @Nullable
     public String unsupressedBubbleKey;
+    @Nullable
+    public BubbleBarLocation bubbleBarLocation;
+    @Nullable
+    public Point expandedViewDropTargetSize;
+    public boolean showOverflowChanged;
+    public boolean showOverflow;
 
     // This is only populated if bubbles have been removed.
     public List<RemovedBubble> removedBubbles = new ArrayList<>();
@@ -55,12 +64,20 @@ public class BubbleBarUpdate implements Parcelable {
     // This is only populated the first time a listener is connected so it gets the current state.
     public List<BubbleInfo> currentBubbleList = new ArrayList<>();
 
+
     public BubbleBarUpdate() {
+        this(false);
+    }
+
+    private BubbleBarUpdate(boolean initialState) {
+        this.initialState = initialState;
     }
 
     public BubbleBarUpdate(Parcel parcel) {
+        initialState = parcel.readBoolean();
         expandedChanged = parcel.readBoolean();
         expanded = parcel.readBoolean();
+        shouldShowEducation = parcel.readBoolean();
         selectedBubbleKey = parcel.readString();
         addedBubble = parcel.readParcelable(BubbleInfo.class.getClassLoader(),
                 BubbleInfo.class);
@@ -69,10 +86,16 @@ public class BubbleBarUpdate implements Parcelable {
         suppressedBubbleKey = parcel.readString();
         unsupressedBubbleKey = parcel.readString();
         removedBubbles = parcel.readParcelableList(new ArrayList<>(),
-                RemovedBubble.class.getClassLoader());
+                RemovedBubble.class.getClassLoader(), RemovedBubble.class);
         parcel.readStringList(bubbleKeysInOrder);
         currentBubbleList = parcel.readParcelableList(new ArrayList<>(),
-                BubbleInfo.class.getClassLoader());
+                BubbleInfo.class.getClassLoader(), BubbleInfo.class);
+        bubbleBarLocation = parcel.readParcelable(BubbleBarLocation.class.getClassLoader(),
+                BubbleBarLocation.class);
+        expandedViewDropTargetSize = parcel.readParcelable(Point.class.getClassLoader(),
+                Point.class);
+        showOverflowChanged = parcel.readBoolean();
+        showOverflow = parcel.readBoolean();
     }
 
     /**
@@ -87,14 +110,20 @@ public class BubbleBarUpdate implements Parcelable {
                 || !bubbleKeysInOrder.isEmpty()
                 || suppressedBubbleKey != null
                 || unsupressedBubbleKey != null
-                || !currentBubbleList.isEmpty();
+                || !currentBubbleList.isEmpty()
+                || bubbleBarLocation != null
+                || showOverflowChanged;
     }
 
+    @NonNull
     @Override
     public String toString() {
-        return "BubbleBarUpdate{ expandedChanged=" + expandedChanged
+        return "BubbleBarUpdate{"
+                + " initialState=" + initialState
+                + " expandedChanged=" + expandedChanged
                 + " expanded=" + expanded
                 + " selectedBubbleKey=" + selectedBubbleKey
+                + " shouldShowEducation=" + shouldShowEducation
                 + " addedBubble=" + addedBubble
                 + " updatedBubble=" + updatedBubble
                 + " suppressedBubbleKey=" + suppressedBubbleKey
@@ -102,6 +131,10 @@ public class BubbleBarUpdate implements Parcelable {
                 + " removedBubbles=" + removedBubbles
                 + " bubbles=" + bubbleKeysInOrder
                 + " currentBubbleList=" + currentBubbleList
+                + " bubbleBarLocation=" + bubbleBarLocation
+                + " expandedViewDropTargetSize=" + expandedViewDropTargetSize
+                + " showOverflowChanged=" + showOverflowChanged
+                + " showOverflow=" + showOverflow
                 + " }";
     }
 
@@ -112,8 +145,10 @@ public class BubbleBarUpdate implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeBoolean(initialState);
         parcel.writeBoolean(expandedChanged);
         parcel.writeBoolean(expanded);
+        parcel.writeBoolean(shouldShowEducation);
         parcel.writeString(selectedBubbleKey);
         parcel.writeParcelable(addedBubble, flags);
         parcel.writeParcelable(updatedBubble, flags);
@@ -122,14 +157,28 @@ public class BubbleBarUpdate implements Parcelable {
         parcel.writeParcelableList(removedBubbles, flags);
         parcel.writeStringList(bubbleKeysInOrder);
         parcel.writeParcelableList(currentBubbleList, flags);
+        parcel.writeParcelable(bubbleBarLocation, flags);
+        parcel.writeParcelable(expandedViewDropTargetSize, flags);
+        parcel.writeBoolean(showOverflowChanged);
+        parcel.writeBoolean(showOverflow);
+    }
+
+    /**
+     * Create update for initial set of values.
+     * <p>
+     * Used when bubble bar is newly created.
+     */
+    public static BubbleBarUpdate createInitialState() {
+        return new BubbleBarUpdate(true);
     }
 
     @NonNull
     public static final Creator<BubbleBarUpdate> CREATOR =
-            new Creator<BubbleBarUpdate>() {
+            new Creator<>() {
                 public BubbleBarUpdate createFromParcel(Parcel source) {
                     return new BubbleBarUpdate(source);
                 }
+
                 public BubbleBarUpdate[] newArray(int size) {
                     return new BubbleBarUpdate[size];
                 }

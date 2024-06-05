@@ -27,11 +27,12 @@ option java_multiple_files = true;
  * Represents a {@link android.view.InsetsSourceConsumer} object.
  */
 message InsetsSourceConsumerProto {
-    optional string internal_insets_type = 1;
+    optional string internal_insets_type = 1 [deprecated=true];
     optional bool has_window_focus = 2;
     optional bool is_requested_visible = 3;
     optional InsetsSourceControlProto source_control = 4;
     optional .android.graphics.RectProto pending_frame = 5;
     optional .android.graphics.RectProto pending_visible_frame = 6;
     optional int32 animation_state = 7;
+    optional int32 type_number = 8;
 }

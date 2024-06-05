@@ -19,10 +19,19 @@ package com.android.systemui.unfold
 import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
 import android.os.SystemProperties
+import com.android.internal.foldables.FoldLockSettingAvailabilityProvider
+import com.android.systemui.CoreStartable
+import com.android.systemui.Flags
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.LifecycleScreenStatusProvider
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
+import com.android.systemui.unfold.dagger.UnfoldBgProgressFlag
+import com.android.systemui.unfold.dagger.UnfoldMain
+import com.android.systemui.unfold.data.repository.FoldStateRepository
+import com.android.systemui.unfold.data.repository.FoldStateRepositoryImpl
+import com.android.systemui.unfold.data.repository.UnfoldTransitionRepository
+import com.android.systemui.unfold.data.repository.UnfoldTransitionRepositoryImpl
 import com.android.systemui.unfold.system.SystemUnfoldSharedModule
 import com.android.systemui.unfold.updates.FoldProvider
 import com.android.systemui.unfold.updates.FoldStateProvider
@@ -34,19 +43,34 @@ import com.android.systemui.unfold.util.UnfoldOnlyProgressProvider
 import com.android.systemui.unfold.util.UnfoldTransitionATracePrefix
 import com.android.systemui.util.time.SystemClockImpl
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider
+import dagger.Binds
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 
-@Module(includes = [UnfoldSharedModule::class, SystemUnfoldSharedModule::class])
+@Module(
+    includes =
+        [
+            UnfoldSharedModule::class,
+            SystemUnfoldSharedModule::class,
+            UnfoldTransitionModule.Bindings::class
+        ]
+)
 class UnfoldTransitionModule {
 
     @Provides @UnfoldTransitionATracePrefix fun tracingTagPrefix() = "systemui"
+
+    @Provides
+    @UnfoldBgProgressFlag
+    @Singleton
+    fun unfoldBgProgressFlag() = Flags.unfoldAnimationBackgroundProgress()
 
     /** A globally available FoldStateListener that allows one to query the fold state. */
     @Provides
@@ -87,7 +111,7 @@ class UnfoldTransitionModule {
     @Singleton
     fun provideNaturalRotationProgressProvider(
         context: Context,
-        rotationChangeProvider: RotationChangeProvider,
+        @UnfoldMain rotationChangeProvider: RotationChangeProvider,
         unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider>
     ): Optional<NaturalRotationUnfoldProgressProvider> =
         unfoldTransitionProgressProvider.map { provider ->
@@ -118,6 +142,7 @@ class UnfoldTransitionModule {
     @Singleton
     fun provideShellProgressProvider(
         config: UnfoldTransitionConfig,
+        foldProvider: FoldProvider,
         provider: Provider<Optional<UnfoldTransitionProgressProvider>>,
         @Named(UNFOLD_ONLY_PROVIDER)
         unfoldOnlyProvider: Provider<Optional<UnfoldTransitionProgressProvider>>
@@ -135,12 +160,40 @@ class UnfoldTransitionModule {
                 null
             }
 
-        return resultingProvider?.get()?.orElse(null)?.let(::UnfoldProgressProvider)
+        return resultingProvider?.get()?.orElse(null)?.let { unfoldProgressProvider ->
+            UnfoldProgressProvider(unfoldProgressProvider, foldProvider)
+        }
             ?: ShellUnfoldProgressProvider.NO_PROVIDER
     }
 
     @Provides
     fun screenStatusProvider(impl: LifecycleScreenStatusProvider): ScreenStatusProvider = impl
+
+    @Provides
+    @Singleton
+    fun provideDisplaySwitchLatencyLogger(): DisplaySwitchLatencyLogger =
+        DisplaySwitchLatencyLogger()
+
+    @Provides
+    @Singleton
+    fun provideFoldLockSettingAvailabilityProvider(
+        context: Context
+    ): FoldLockSettingAvailabilityProvider = FoldLockSettingAvailabilityProvider(context.resources)
+
+    @Module
+    interface Bindings {
+        @Binds fun bindRepository(impl: UnfoldTransitionRepositoryImpl): UnfoldTransitionRepository
+
+        @Binds fun bindFoldStateRepository(impl: FoldStateRepositoryImpl): FoldStateRepository
+    }
+
+    @Module
+    interface Startables {
+        @Binds
+        @IntoMap
+        @ClassKey(UnfoldTraceLogger::class)
+        fun bindUnfoldTraceLogger(impl: UnfoldTraceLogger): CoreStartable
+    }
 }
 
 const val UNFOLD_STATUS_BAR = "unfold_status_bar"

@@ -66,6 +66,8 @@ interface ISub {
      *
      * @param callingPackage The package maing the call.
      * @param callingFeatureId The feature in the package
+     * @param isForAllProfiles whether the caller intends to see all subscriptions regardless
+     *                      association.
      * @return Sorted list of the currently {@link SubscriptionInfo} records available on the device.
      * <ul>
      * <li>
@@ -83,14 +85,17 @@ interface ISub {
      * </ul>
      */
     List<SubscriptionInfo> getActiveSubscriptionInfoList(String callingPackage,
-            String callingFeatureId);
+            String callingFeatureId, boolean isForAllProfiles);
 
     /**
      * @param callingPackage The package making the call.
      * @param callingFeatureId The feature in the package.
+     * @param isForAllProfile whether the caller intends to see all subscriptions regardless
+     *                      association.
      * @return the number of active subscriptions
      */
-    int getActiveSubInfoCount(String callingPackage, String callingFeatureId);
+    int getActiveSubInfoCount(String callingPackage, String callingFeatureId,
+            boolean isForAllProfile);
 
     /**
      * @return the maximum number of subscriptions this device will support at any one time.
@@ -239,6 +244,7 @@ interface ISub {
     int getSubId(int slotIndex);
 
     int getDefaultSubId();
+    int getDefaultSubIdAsUser(int userId);
 
     int getPhoneId(int subId);
 
@@ -251,10 +257,12 @@ interface ISub {
     void setDefaultDataSubId(int subId);
 
     int getDefaultVoiceSubId();
+    int getDefaultVoiceSubIdAsUser(int userId);
 
     void setDefaultVoiceSubId(int subId);
 
     int getDefaultSmsSubId();
+    int getDefaultSmsSubIdAsUser(int userId);
 
     void setDefaultSmsSubId(int subId);
 
@@ -301,6 +309,18 @@ interface ISub {
      */
     int setUsageSetting(int usageSetting, int subId, String callingPackage);
 
+    /**
+      * Set owner for this subscription.
+      *
+      * @param subId the unique SubscriptionInfo index in database
+      * @param groupOwner The group owner to assign to the subscription
+      *
+      * @throws SecurityException if caller is not authorized.
+      *
+      * @hide
+      */
+     void setGroupOwner(int subId, String groupOwner);
+
      /**
       * Set userHandle for this subscription.
       *
@@ -323,49 +343,68 @@ interface ISub {
      */
      UserHandle getSubscriptionUserHandle(int subId);
 
-     /**
-      * Check if subscription and user are associated with each other.
-      *
-      * @param subscriptionId the subId of the subscription
-      * @param userHandle user handle of the user
-      * @return {@code true} if subscription is associated with user
-      * {code true} if there are no subscriptions on device
-      * else {@code false} if subscription is not associated with user.
-      *
-      * @throws IllegalArgumentException if subscription is invalid.
-      * @throws SecurityException if the caller doesn't have permissions required.
-      * @throws IllegalStateException if subscription service is not available.
-      *
-      * @hide
-      */
-      boolean isSubscriptionAssociatedWithUser(int subscriptionId, in UserHandle userHandle);
+    /**
+     * Returns whether the given subscription is associated with the calling user.
+     *
+     * @param subscriptionId the subscription ID of the subscription
+     * @return {@code true} if the subscription is associated with the user that the current process
+     *         is running in; {@code false} otherwise.
+     *
+     * @throws IllegalArgumentException if subscription doesn't exist.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     */
+    boolean isSubscriptionAssociatedWithCallingUser(int subscriptionId);
 
-      /**
-       * Get list of subscriptions associated with user.
-       *
-       * @param userHandle user handle of the user
-       * @return list of subscriptionInfo associated with the user.
-       *
-       * @throws SecurityException if the caller doesn't have permissions required.
-       * @throws IllegalStateException if subscription service is not available.
-       *
-       * @hide
-       */
-       List<SubscriptionInfo> getSubscriptionInfoListAssociatedWithUser(in UserHandle userHandle);
+    /**
+     * Check if subscription and user are associated with each other.
+     *
+     * @param subscriptionId the subId of the subscription
+     * @param userHandle user handle of the user
+     * @return {@code true} if subscription is associated with user
+     * else {@code false} if subscription is not associated with user.
+     *
+     * @throws IllegalArgumentException if subscription is invalid.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     * @throws IllegalStateException if subscription service is not available.
+     *
+     * @hide
+     */
+    boolean isSubscriptionAssociatedWithUser(int subscriptionId, in UserHandle userHandle);
 
-      /**
-       * Called during setup wizard restore flow to attempt to restore the backed up sim-specific
-       * configs to device for all existing SIMs in the subscription database
-       * {@link Telephony.SimInfo}. Internally, it will store the backup data in an internal file.
-       * This file will persist on device for device's lifetime and will be used later on when a SIM
-       * is inserted to restore that specific SIM's settings. End result is subscription database is
-       * modified to match any backed up configs for the appropriate inserted SIMs.
-       *
-       * <p>
-       * The {@link Uri} {@link #SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI} is notified if any
-       * {@link Telephony.SimInfo} entry is updated as the result of this method call.
-       *
-       * @param data with the sim specific configs to be backed up.
-       */
-       void restoreAllSimSpecificSettingsFromBackup(in byte[] data);
+    /**
+     * Get list of subscriptions associated with user.
+     *
+     * @param userHandle user handle of the user
+     * @return list of subscriptionInfo associated with the user.
+     *
+     * @throws SecurityException if the caller doesn't have permissions required.
+     * @throws IllegalStateException if subscription service is not available.
+     *
+     * @hide
+     */
+    List<SubscriptionInfo> getSubscriptionInfoListAssociatedWithUser(in UserHandle userHandle);
+
+    /**
+     * Called during setup wizard restore flow to attempt to restore the backed up sim-specific
+     * configs to device for all existing SIMs in the subscription database
+     * {@link Telephony.SimInfo}. Internally, it will store the backup data in an internal file.
+     * This file will persist on device for device's lifetime and will be used later on when a SIM
+     * is inserted to restore that specific SIM's settings. End result is subscription database is
+     * modified to match any backed up configs for the appropriate inserted SIMs.
+     *
+     * <p>
+     * The {@link Uri} {@link #SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI} is notified if any
+     * {@link Telephony.SimInfo} entry is updated as the result of this method call.
+     *
+     * @param data with the sim specific configs to be backed up.
+     */
+    void restoreAllSimSpecificSettingsFromBackup(in byte[] data);
+
+    /**
+     * Set the transfer status of the subscriptionInfo that corresponds to subId.
+     * @param subId The unique SubscriptionInfo key in database.
+     * @param status The transfer status to change. This value must be one of the following.
+     */
+    @EnforcePermission("WRITE_EMBEDDED_SUBSCRIPTIONS")
+    void setTransferStatus(int subId, int status);
 }

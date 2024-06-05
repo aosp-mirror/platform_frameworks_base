@@ -16,9 +16,7 @@
 
 package com.android.server.companion.transport;
 
-import static android.Manifest.permission.DELIVER_COMPANION_MESSAGES;
-
-import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_PERMISSION_RESTORE;
+import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PERMISSION_RESTORE;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -34,10 +32,11 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.companion.AssociationStore;
+import com.android.server.companion.association.AssociationStore;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,6 @@ import java.util.concurrent.Future;
 @SuppressLint("LongLogTag")
 public class CompanionTransportManager {
     private static final String TAG = "CDM_CompanionTransportManager";
-    private static final boolean DEBUG = false;
 
     private boolean mSecureTransportEnabled = true;
 
@@ -58,6 +56,7 @@ public class CompanionTransportManager {
     @GuardedBy("mTransports")
     private final SparseArray<Transport> mTransports = new SparseArray<>();
     @NonNull
+    @GuardedBy("mTransportsListeners")
     private final RemoteCallbackList<IOnTransportsChangedListener> mTransportsListeners =
             new RemoteCallbackList<>();
     /** Message type -> IOnMessageReceivedListener */
@@ -86,34 +85,28 @@ public class CompanionTransportManager {
      */
     public void addListener(IOnTransportsChangedListener listener) {
         Slog.i(TAG, "Registering OnTransportsChangedListener");
-        mTransportsListeners.register(listener);
-        List<AssociationInfo> associations = new ArrayList<>();
-        synchronized (mTransports) {
-            for (int i = 0; i < mTransports.size(); i++) {
-                AssociationInfo association = mAssociationStore.getAssociationById(
-                        mTransports.keyAt(i));
-                if (association != null) {
-                    associations.add(association);
+        synchronized (mTransportsListeners) {
+            mTransportsListeners.register(listener);
+            mTransportsListeners.broadcast(listener1 -> {
+                // callback to the current listener with all the associations of the transports
+                // immediately
+                if (listener1 == listener) {
+                    try {
+                        listener.onTransportsChanged(getAssociationsWithTransport());
+                    } catch (RemoteException ignored) {
+                    }
                 }
-            }
+            });
         }
-        mTransportsListeners.broadcast(listener1 -> {
-            // callback to the current listener with all the associations of the transports
-            // immediately
-            if (listener1 == listener) {
-                try {
-                    listener.onTransportsChanged(associations);
-                } catch (RemoteException ignored) {
-                }
-            }
-        });
     }
 
     /**
      * Remove the listener for receiving callbacks when any of the transports is changed
      */
     public void removeListener(IOnTransportsChangedListener listener) {
-        mTransportsListeners.unregister(listener);
+        synchronized (mTransportsListeners) {
+            mTransportsListeners.unregister(listener);
+        }
     }
 
     /**
@@ -127,23 +120,28 @@ public class CompanionTransportManager {
      * Send a message to remote devices through the transports
      */
     public void sendMessage(int message, byte[] data, int[] associationIds) {
-        Slog.i(TAG, "Sending message 0x" + Integer.toHexString(message)
+        Slog.d(TAG, "Sending message 0x" + Integer.toHexString(message)
                 + " data length " + data.length);
         synchronized (mTransports) {
             for (int i = 0; i < associationIds.length; i++) {
                 if (mTransports.contains(associationIds[i])) {
-                    mTransports.get(associationIds[i]).requestForResponse(message, data);
+                    mTransports.get(associationIds[i]).sendMessage(message, data);
                 }
             }
         }
     }
 
-    public void attachSystemDataTransport(String packageName, int userId, int associationId,
-            ParcelFileDescriptor fd) {
-        mContext.enforceCallingOrSelfPermission(DELIVER_COMPANION_MESSAGES, TAG);
+    /**
+     * Attach transport.
+     */
+    public void attachSystemDataTransport(int associationId, ParcelFileDescriptor fd) {
+        Slog.i(TAG, "Attaching transport for association id=[" + associationId + "]...");
+
+        mAssociationStore.getAssociationWithCallerChecks(associationId);
+
         synchronized (mTransports) {
             if (mTransports.contains(associationId)) {
-                detachSystemDataTransport(packageName, userId, associationId);
+                detachSystemDataTransport(associationId);
             }
 
             // TODO: Implement new API to pass a PSK
@@ -151,22 +149,32 @@ public class CompanionTransportManager {
 
             notifyOnTransportsChanged();
         }
+
+        Slog.i(TAG, "Transport attached.");
     }
 
-    public void detachSystemDataTransport(String packageName, int userId, int associationId) {
-        mContext.enforceCallingOrSelfPermission(DELIVER_COMPANION_MESSAGES, TAG);
+    /**
+     * Detach transport.
+     */
+    public void detachSystemDataTransport(int associationId) {
+        Slog.i(TAG, "Detaching transport for association id=[" + associationId + "]...");
+
+        mAssociationStore.getAssociationWithCallerChecks(associationId);
+
         synchronized (mTransports) {
-            final Transport transport = mTransports.get(associationId);
-            if (transport != null) {
-                mTransports.delete(associationId);
-                transport.stop();
+            final Transport transport = mTransports.removeReturnOld(associationId);
+            if (transport == null) {
+                return;
             }
 
+            transport.stop();
             notifyOnTransportsChanged();
         }
+
+        Slog.i(TAG, "Transport detached.");
     }
 
-    private void notifyOnTransportsChanged() {
+    private List<AssociationInfo> getAssociationsWithTransport() {
         List<AssociationInfo> associations = new ArrayList<>();
         synchronized (mTransports) {
             for (int i = 0; i < mTransports.size(); i++) {
@@ -177,12 +185,18 @@ public class CompanionTransportManager {
                 }
             }
         }
-        mTransportsListeners.broadcast(listener -> {
-            try {
-                listener.onTransportsChanged(associations);
-            } catch (RemoteException ignored) {
-            }
-        });
+        return associations;
+    }
+
+    private void notifyOnTransportsChanged() {
+        synchronized (mTransportsListeners) {
+            mTransportsListeners.broadcast(listener -> {
+                try {
+                    listener.onTransportsChanged(getAssociationsWithTransport());
+                } catch (RemoteException ignored) {
+                }
+            });
+        }
     }
 
     private void initializeTransport(int associationId,
@@ -224,7 +238,26 @@ public class CompanionTransportManager {
             if (transport == null) {
                 return CompletableFuture.failedFuture(new IOException("Missing transport"));
             }
-            return transport.requestForResponse(MESSAGE_REQUEST_PERMISSION_RESTORE, data);
+            return transport.sendMessage(MESSAGE_REQUEST_PERMISSION_RESTORE, data);
+        }
+    }
+
+    /**
+     * Dumps current list of active transports.
+     */
+    public void dump(@NonNull PrintWriter out) {
+        synchronized (mTransports) {
+            out.append("System Data Transports: ");
+            if (mTransports.size() == 0) {
+                out.append("<empty>\n");
+            } else {
+                out.append("\n");
+                for (int i = 0; i < mTransports.size(); i++) {
+                    final int associationId = mTransports.keyAt(i);
+                    final Transport transport = mTransports.get(associationId);
+                    out.append("  ").append(transport.toString()).append('\n');
+                }
+            }
         }
     }
 
@@ -278,9 +311,7 @@ public class CompanionTransportManager {
     }
 
     private boolean isSecureTransportEnabled() {
-        boolean enabled = !Build.IS_DEBUGGABLE || mSecureTransportEnabled;
-
-        return enabled;
+        return mSecureTransportEnabled;
     }
 
     private void addMessageListenersToTransport(Transport transport) {
@@ -293,8 +324,7 @@ public class CompanionTransportManager {
         int associationId = transport.mAssociationId;
         AssociationInfo association = mAssociationStore.getAssociationById(associationId);
         if (association != null) {
-            detachSystemDataTransport(association.getPackageName(),
-                    association.getUserId(),
+            detachSystemDataTransport(
                     association.getId());
         }
     }

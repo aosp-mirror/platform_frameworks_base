@@ -16,6 +16,8 @@ per-file system_fonts.cpp = file:/graphics/java/android/graphics/fonts/OWNERS
 per-file native_window_jni.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 per-file native_activity.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 per-file surface_control.cpp = file:/services/core/java/com/android/server/wm/OWNERS
+per-file surface_control_input_receiver.cpp = file:/services/core/java/com/android/server/wm/OWNERS
+per-file input_transfer_token.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 
 # Graphics
 per-file choreographer.cpp = file:/graphics/java/android/graphics/OWNERS
@@ -26,3 +28,6 @@ per-file surface_texture.cpp = file:/graphics/java/android/graphics/OWNERS
 
 # Input
 per-file input.cpp = file:/INPUT_OWNERS
+
+# PerformanceHint
+per-file performance_hint.cpp = file:/ADPF_OWNERS

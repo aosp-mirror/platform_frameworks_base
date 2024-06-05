@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.content.pm.ActivityInfo;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -79,10 +80,16 @@ public final class StartingWindowInfo implements Parcelable {
 
     /**
      * The {@link TaskInfo} from this task.
-     *  @hide
+     * <p>Note that the configuration of this taskInfo could be from the top activity of its task.
+     * Because only activity contains persisted configuration (e.g. night mode, language). Besides,
+     * it can also be used for activity level snapshot.
      */
     @NonNull
     public ActivityManager.RunningTaskInfo taskInfo;
+
+    /** The bounds of the target task. */
+    @NonNull
+    public final Rect taskBounds = new Rect();
 
     /**
      * The {@link ActivityInfo} of the target activity which to create the starting window.
@@ -163,6 +170,13 @@ public final class StartingWindowInfo implements Parcelable {
      * Windowless surface
      */
     public static final int TYPE_PARAMETER_WINDOWLESS = 0x00000100;
+
+    /**
+     * Application has set Window_windowSplashScreenBehavior to
+     * SPLASH_SCREEN_BEHAVIOR_ICON_PREFERRED.
+     * @hide
+     */
+    public static final int TYPE_PARAMETER_APP_PREFERS_ICON = 0x00000200;
 
     /**
      * Application is allowed to use the legacy splash screen
@@ -246,6 +260,7 @@ public final class StartingWindowInfo implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedObject(taskInfo, flags);
+        taskBounds.writeToParcel(dest, flags);
         dest.writeTypedObject(targetActivityInfo, flags);
         dest.writeInt(startingWindowTypeParameter);
         dest.writeTypedObject(topOpaqueWindowInsetsState, flags);
@@ -262,6 +277,7 @@ public final class StartingWindowInfo implements Parcelable {
 
     void readFromParcel(@NonNull Parcel source) {
         taskInfo = source.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
+        taskBounds.readFromParcel(source);
         targetActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         startingWindowTypeParameter = source.readInt();
         topOpaqueWindowInsetsState = source.readTypedObject(InsetsState.CREATOR);

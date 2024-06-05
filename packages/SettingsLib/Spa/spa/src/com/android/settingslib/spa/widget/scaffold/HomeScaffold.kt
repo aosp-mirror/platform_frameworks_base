@@ -28,13 +28,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.framework.theme.settingsBackground
 
 @Composable
 fun HomeScaffold(title: String, content: @Composable () -> Unit) {
     Column(
         Modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = MaterialTheme.colorScheme.settingsBackground)
             .systemBarsPadding()
             .verticalScroll(rememberScrollState()),
     ) {

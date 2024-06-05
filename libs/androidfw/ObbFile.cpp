@@ -217,7 +217,7 @@ bool ObbFile::parseObbFile(int fd)
     free(scanBuf);
 
 #ifdef DEBUG
-    ALOGI("Obb scan succeeded: packageName=%s, version=%d\n", mPackageName.string(), mVersion);
+    ALOGI("Obb scan succeeded: packageName=%s, version=%d\n", mPackageName.c_str(), mVersion);
 #endif
 
     return true;
@@ -288,7 +288,7 @@ bool ObbFile::writeTo(int fd)
         return false;
     }
 
-    if (write(fd, mPackageName.string(), packageNameLen) != (ssize_t)packageNameLen) {
+    if (write(fd, mPackageName.c_str(), packageNameLen) != (ssize_t)packageNameLen) {
         ALOGW("couldn't write package name: %s\n", strerror(errno));
         return false;
     }

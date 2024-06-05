@@ -47,15 +47,16 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.common.pip.PipAppOpsListener;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipMediaController;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
-import com.android.wm.shell.pip.PipAppOpsListener;
-import com.android.wm.shell.pip.PipDisplayLayoutState;
-import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellController;
@@ -122,6 +123,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     private final PipDisplayLayoutState mPipDisplayLayoutState;
     private final TvPipBoundsAlgorithm mTvPipBoundsAlgorithm;
     private final TvPipBoundsController mTvPipBoundsController;
+    private final PipTransitionState mPipTransitionState;
     private final PipAppOpsListener mAppOpsListener;
     private final PipTaskOrganizer mPipTaskOrganizer;
     private final PipMediaController mPipMediaController;
@@ -157,6 +159,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             PipDisplayLayoutState pipDisplayLayoutState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
+            PipTransitionState pipTransitionState,
             PipAppOpsListener pipAppOpsListener,
             PipTaskOrganizer pipTaskOrganizer,
             PipTransitionController pipTransitionController,
@@ -177,6 +180,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 pipDisplayLayoutState,
                 tvPipBoundsAlgorithm,
                 tvPipBoundsController,
+                pipTransitionState,
                 pipAppOpsListener,
                 pipTaskOrganizer,
                 pipTransitionController,
@@ -199,6 +203,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             PipDisplayLayoutState pipDisplayLayoutState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
+            PipTransitionState pipTransitionState,
             PipAppOpsListener pipAppOpsListener,
             PipTaskOrganizer pipTaskOrganizer,
             PipTransitionController pipTransitionController,
@@ -212,15 +217,15 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             Handler mainHandler,
             ShellExecutor mainExecutor) {
         mContext = context;
+        mPipTransitionState = pipTransitionState;
         mMainHandler = mainHandler;
         mMainExecutor = mainExecutor;
         mShellController = shellController;
         mDisplayController = displayController;
 
-        DisplayLayout layout = new DisplayLayout(context, context.getDisplay());
-
         mTvPipBoundsState = tvPipBoundsState;
 
+        DisplayLayout layout = new DisplayLayout(context, context.getDisplay());
         mPipDisplayLayoutState = pipDisplayLayoutState;
         mPipDisplayLayoutState.setDisplayLayout(layout);
         mPipDisplayLayoutState.setDisplayId(context.getDisplayId());
@@ -285,12 +290,31 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mPipNotificationController.onConfigurationChanged();
         mTvPipBoundsAlgorithm.onConfigurationChanged(mContext);
         mTvPipBoundsState.onConfigurationChanged();
+        mPipDisplayLayoutState.onConfigurationChanged();
 
         int defaultGravityX = mTvPipBoundsState.getDefaultGravity()
                 & Gravity.HORIZONTAL_GRAVITY_MASK;
         if (isPipShown() && previousDefaultGravityX != defaultGravityX) {
             movePipToOppositeSide();
         }
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: onDensityOrFontScaleChanged()", TAG);
+        updatePinnedStackBounds();
+        mTvPipMenuController.reloadMenu();
+    }
+
+    @Override
+    public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: onDisplayConfigurationChanged(), displayId %d, saved display id %d",
+                TAG, displayId, mPipDisplayLayoutState.getDisplayId());
+        mPipDisplayLayoutState.setDisplayLayout(
+                new DisplayLayout(mContext, mContext.getDisplay()));
+        mPipDisplayLayoutState.setDisplayId(mContext.getDisplayId());
     }
 
     private void reloadResources() {
@@ -365,7 +389,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 "%s: movePipToFullscreen(), state=%s", TAG, stateToName(mState));
 
         mPipTaskOrganizer.exitPip(mResizeAnimationDuration, false /* requestEnterSplit */);
-        onPipDisappeared();
     }
 
     private void togglePipExpansion() {
@@ -420,6 +443,11 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     @Override
     public void onPipTargetBoundsChange(Rect targetBounds, int animationDuration) {
+        if (!mPipTransitionState.hasEnteredPip()) {
+            // Do not schedule a move animation while we're still transitioning into/out of PiP
+            return;
+        }
+
         mPipTaskOrganizer.scheduleAnimateResizePip(targetBounds,
                 animationDuration, null);
         mTvPipMenuController.onPipTransitionToTargetBoundsStarted(targetBounds);
@@ -447,7 +475,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             return;
         }
         mPipTaskOrganizer.removePip();
-        onPipDisappeared();
+        mTvPipMenuController.closeMenu();
     }
 
     @Override
@@ -477,7 +505,8 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mPipNotificationController.dismiss();
         mActionBroadcastReceiver.unregister();
 
-        mTvPipMenuController.closeMenu();
+        mTvPipMenuController.detach();
+        mTvPipActionsProvider.reset();
         mTvPipBoundsState.resetTvPipState();
         mTvPipBoundsController.reset();
         setState(STATE_NO_PIP);
@@ -500,8 +529,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     public void onPipTransitionCanceled(int direction) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: onPipTransition_Canceled(), state=%s", TAG, stateToName(mState));
-        mTvPipMenuController.onPipTransitionFinished(
-                PipAnimationController.isInPipDirection(direction));
         mTvPipActionsProvider.updatePipExpansionState(mTvPipBoundsState.isTvPipExpanded());
     }
 

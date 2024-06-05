@@ -57,9 +57,15 @@ android_robolectric_test {
     ],
     static_libs: [
         "androidx.test.ext.truth",
+        "Settings-robo-testutils",
+        "SettingsLib-robo-testutils",
     ],
 
     instrumentation_for: "FrameworksServicesLib",
+
+    upstream: true,
+
+    strict_mode: false,
 }
 
 filegroup {

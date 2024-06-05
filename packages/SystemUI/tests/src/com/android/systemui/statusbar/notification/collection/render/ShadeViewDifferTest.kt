@@ -16,13 +16,13 @@
 package com.android.systemui.statusbar.notification.collection.render
 
 import android.content.Context
-import android.testing.AndroidTestingRunner
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.log.logcatLogBuffer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -30,10 +30,11 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.matches
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ShadeViewDifferTest : SysuiTestCase() {
     private lateinit var differ: ShadeViewDiffer
     private val rootController = FakeController(mContext, "RootController")
@@ -44,7 +45,7 @@ class ShadeViewDifferTest : SysuiTestCase() {
     private val controller5 = FakeController(mContext, "Controller5")
     private val controller6 = FakeController(mContext, "Controller6")
     private val controller7 = FakeController(mContext, "Controller7")
-    private val logger: ShadeViewDifferLogger = mock()
+    private val logger = spy(ShadeViewDifferLogger(logcatLogBuffer()))
 
     @Before
     fun setUp() {

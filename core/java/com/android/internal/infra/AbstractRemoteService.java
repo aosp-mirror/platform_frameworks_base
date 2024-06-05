@@ -355,9 +355,10 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
                 obtainMessage(AbstractRemoteService::handleFinishRequest, this, finshedRequest));
     }
 
-    private void handleFinishRequest(@NonNull BasePendingRequest<S, I> finshedRequest) {
-        mUnfinishedRequests.remove(finshedRequest);
-
+    private void handleFinishRequest(@NonNull BasePendingRequest<S, I> finishedRequest) {
+        synchronized (mUnfinishedRequests) {
+            mUnfinishedRequests.remove(finishedRequest);
+        }
         if (mUnfinishedRequests.isEmpty()) {
             scheduleUnbind();
         }
@@ -460,7 +461,9 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         } else {
             if (mVerbose) Slog.v(mTag, "handlePendingRequest(): " + pendingRequest);
 
-            mUnfinishedRequests.add(pendingRequest);
+            synchronized (mUnfinishedRequests) {
+                mUnfinishedRequests.add(pendingRequest);
+            }
             cancelScheduledUnbind();
 
             pendingRequest.run();

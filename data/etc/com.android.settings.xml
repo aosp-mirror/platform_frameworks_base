@@ -37,6 +37,7 @@
         <permission name="android.permission.MANAGE_USER_OEM_UNLOCK_STATE" />
         <permission name="android.permission.MASTER_CLEAR"/>
         <permission name="android.permission.MEDIA_CONTENT_CONTROL"/>
+        <permission name="android.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED" />
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.MOVE_PACKAGE"/>
@@ -47,6 +48,8 @@
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.READ_SEARCH_INDEXABLES"/>
         <permission name="android.permission.REBOOT"/>
+        <permission name="android.permission.RECOVERY"/>
+        <permission name="android.permission.SCHEDULE_EXACT_ALARM"/>
         <permission name="android.permission.STATUS_BAR"/>
         <permission name="android.permission.SUGGEST_MANUAL_TIME_AND_ZONE"/>
         <permission name="android.permission.TETHER_PRIVILEGED"/>
@@ -64,5 +67,7 @@
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
         <permission name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
         <permission name="android.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS" />
+        <permission name="android.permission.SATELLITE_COMMUNICATION" />
+        <permission name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER" />
     </privapp-permissions>
 </permissions>

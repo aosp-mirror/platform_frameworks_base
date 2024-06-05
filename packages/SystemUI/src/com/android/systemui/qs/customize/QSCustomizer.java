@@ -33,11 +33,11 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSUtils;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.LightBarController;
 
 /**
@@ -58,26 +58,29 @@ public class QSCustomizer extends LinearLayout {
     private final RecyclerView mRecyclerView;
     private boolean mCustomizing;
     private QSContainerController mQsContainerController;
+    private final Toolbar mToolbar;
     private QS mQs;
     private int mX;
     private int mY;
     private boolean mOpening;
     private boolean mIsShowingNavBackdrop;
 
+    private boolean mSceneContainerEnabled;
+
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         LayoutInflater.from(getContext()).inflate(R.layout.qs_customize_panel_content, this);
         mClipper = new QSDetailClipper(findViewById(R.id.customize_container));
-        Toolbar toolbar = findViewById(com.android.internal.R.id.action_bar);
+        mToolbar = findViewById(com.android.internal.R.id.action_bar);
         TypedValue value = new TypedValue();
         mContext.getTheme().resolveAttribute(android.R.attr.homeAsUpIndicator, value, true);
-        toolbar.setNavigationIcon(
+        mToolbar.setNavigationIcon(
                 getResources().getDrawable(value.resourceId, mContext.getTheme()));
 
-        toolbar.getMenu().add(Menu.NONE, MENU_RESET, 0, com.android.internal.R.string.reset)
+        mToolbar.getMenu().add(Menu.NONE, MENU_RESET, 0, com.android.internal.R.string.reset)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        toolbar.setTitle(R.string.qs_edit);
+        mToolbar.setTitle(R.string.qs_edit);
         mRecyclerView = findViewById(android.R.id.list);
         mTransparentView = findViewById(R.id.customizer_transparent_view);
         DefaultItemAnimator animator = new DefaultItemAnimator();
@@ -85,6 +88,28 @@ public class QSCustomizer extends LinearLayout {
         mRecyclerView.setItemAnimator(animator);
 
         updateTransparentViewHeight();
+    }
+
+    void applyBottomNavBarToPadding(int padding) {
+        mRecyclerView.setPadding(
+                /* left= */ mRecyclerView.getPaddingLeft(),
+                /* top= */ mRecyclerView.getPaddingTop(),
+                /* right= */ mRecyclerView.getPaddingRight(),
+                /* bottom= */ padding
+        );
+    }
+
+    void setSceneContainerEnabled(boolean enabled) {
+        if (enabled != mSceneContainerEnabled) {
+            mSceneContainerEnabled = enabled;
+            updateTransparentViewHeight();
+            if (mSceneContainerEnabled) {
+                findViewById(R.id.nav_bar_background).setVisibility(View.GONE);
+            } else {
+                findViewById(R.id.nav_bar_background)
+                        .setVisibility(mIsShowingNavBackdrop ? View.VISIBLE : View.GONE);
+            }
+        }
     }
 
     void updateResources() {
@@ -97,7 +122,8 @@ public class QSCustomizer extends LinearLayout {
         mIsShowingNavBackdrop = newConfig.smallestScreenWidthDp >= 600
                 || newConfig.orientation != Configuration.ORIENTATION_LANDSCAPE;
         if (navBackdrop != null) {
-            navBackdrop.setVisibility(mIsShowingNavBackdrop ? View.VISIBLE : View.GONE);
+            navBackdrop.setVisibility(
+                    mIsShowingNavBackdrop && !mSceneContainerEnabled ? View.VISIBLE : View.GONE);
         }
         updateNavColors(lightBarController);
     }
@@ -135,8 +161,10 @@ public class QSCustomizer extends LinearLayout {
             setVisibility(View.VISIBLE);
             long duration = mClipper.animateCircularClip(
                     mX, mY, true, new ExpandAnimatorListener(tileAdapter));
-            mQsContainerController.setCustomizerAnimating(true);
-            mQsContainerController.setCustomizerShowing(true, duration);
+            if (mQsContainerController != null) {
+                mQsContainerController.setCustomizerAnimating(true);
+                mQsContainerController.setCustomizerShowing(true, duration);
+            }
         }
     }
 
@@ -150,8 +178,10 @@ public class QSCustomizer extends LinearLayout {
             mClipper.showBackground();
             isShown = true;
             setCustomizing(true);
-            mQsContainerController.setCustomizerAnimating(false);
-            mQsContainerController.setCustomizerShowing(true);
+            if (mQsContainerController != null) {
+                mQsContainerController.setCustomizerAnimating(false);
+                mQsContainerController.setCustomizerShowing(true);
+            }
         }
     }
 
@@ -169,8 +199,10 @@ public class QSCustomizer extends LinearLayout {
             } else {
                 setVisibility(View.GONE);
             }
-            mQsContainerController.setCustomizerAnimating(animate);
-            mQsContainerController.setCustomizerShowing(false, duration);
+            if (mQsContainerController != null) {
+                mQsContainerController.setCustomizerAnimating(animate);
+                mQsContainerController.setCustomizerShowing(false, duration);
+            }
         }
     }
 
@@ -178,9 +210,19 @@ public class QSCustomizer extends LinearLayout {
         return isShown;
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mToolbar.setTitleTextAppearance(mContext,
+                android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
+        updateToolbarMenuFontSize();
+    }
+
     void setCustomizing(boolean customizing) {
         mCustomizing = customizing;
-        mQs.notifyCustomizeChanged();
+        if (mQs != null) {
+            mQs.notifyCustomizeChanged();
+        }
     }
 
     public boolean isCustomizing() {
@@ -208,15 +250,21 @@ public class QSCustomizer extends LinearLayout {
                 setCustomizing(true);
             }
             mOpening = false;
-            mQsContainerController.setCustomizerAnimating(false);
+            if (mQsContainerController != null) {
+                mQsContainerController.setCustomizerAnimating(false);
+            }
             mRecyclerView.setAdapter(mTileAdapter);
         }
 
         @Override
         public void onAnimationCancel(Animator animation) {
             mOpening = false;
-            mQs.notifyCustomizeChanged();
-            mQsContainerController.setCustomizerAnimating(false);
+            if (mQs != null) {
+                mQs.notifyCustomizeChanged();
+            }
+            if (mQsContainerController != null) {
+                mQsContainerController.setCustomizerAnimating(false);
+            }
         }
     }
 
@@ -226,7 +274,9 @@ public class QSCustomizer extends LinearLayout {
             if (!isShown) {
                 setVisibility(View.GONE);
             }
-            mQsContainerController.setCustomizerAnimating(false);
+            if (mQsContainerController != null) {
+                mQsContainerController.setCustomizerAnimating(false);
+            }
         }
 
         @Override
@@ -234,7 +284,9 @@ public class QSCustomizer extends LinearLayout {
             if (!isShown) {
                 setVisibility(View.GONE);
             }
-            mQsContainerController.setCustomizerAnimating(false);
+            if (mQsContainerController != null) {
+                mQsContainerController.setCustomizerAnimating(false);
+            }
         }
     };
 
@@ -248,7 +300,14 @@ public class QSCustomizer extends LinearLayout {
 
     private void updateTransparentViewHeight() {
         LayoutParams lp = (LayoutParams) mTransparentView.getLayoutParams();
-        lp.height = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
+        lp.height = mSceneContainerEnabled ? 0 : QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
         mTransparentView.setLayoutParams(lp);
+    }
+
+    private void updateToolbarMenuFontSize() {
+        // Clearing and re-adding the toolbar action force updates the font size
+        mToolbar.getMenu().clear();
+        mToolbar.getMenu().add(Menu.NONE, MENU_RESET, 0, com.android.internal.R.string.reset)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
     }
 }

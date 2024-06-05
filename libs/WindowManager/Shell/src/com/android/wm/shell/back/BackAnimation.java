@@ -20,7 +20,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.window.BackEvent;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 /**
  * Interface for external process to get access to the Back animation related methods.
@@ -47,6 +47,11 @@ public interface BackAnimation {
             float velocityY,
             int keyAction,
             @BackEvent.SwipeEdge int swipeEdge);
+
+    /**
+     * Called when the back swipe threshold is crossed.
+     */
+    void onThresholdCrossed();
 
     /**
      * Sets whether the back gesture is past the trigger threshold or not.
@@ -96,4 +101,10 @@ public interface BackAnimation {
      * @param customizer the controller to control system bar color.
      */
     void setStatusBarCustomizer(StatusBarCustomizer customizer);
+
+    /**
+     * Set a callback to pilfer pointers.
+     * @param pilferCallback the callback to pilfer pointers.
+     */
+    void setPilferPointerCallback(Runnable pilferCallback);
 }

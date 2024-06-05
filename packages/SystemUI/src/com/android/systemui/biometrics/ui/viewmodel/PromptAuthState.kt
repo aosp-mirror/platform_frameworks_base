@@ -16,7 +16,7 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
-import com.android.systemui.biometrics.domain.model.BiometricModality
+import com.android.systemui.biometrics.shared.model.BiometricModality
 
 /**
  * The authenticated state with the [authenticatedModality] (when [isAuthenticated]) with an
@@ -29,9 +29,15 @@ data class PromptAuthState(
     val needsUserConfirmation: Boolean = false,
     val delay: Long = 0,
 ) {
+    private var wasConfirmed = false
+
     /** If authentication was successful and the user has confirmed (or does not need to). */
     val isAuthenticatedAndConfirmed: Boolean
         get() = isAuthenticated && !needsUserConfirmation
+
+    /** Same as [isAuthenticatedAndConfirmed] but only true if the user clicked a confirm button. */
+    val isAuthenticatedAndExplicitlyConfirmed: Boolean
+        get() = isAuthenticated && wasConfirmed
 
     /** If a successful authentication has not occurred. */
     val isNotAuthenticated: Boolean
@@ -45,12 +51,16 @@ data class PromptAuthState(
     val isAuthenticatedByFingerprint: Boolean
         get() = isAuthenticated && authenticatedModality == BiometricModality.Fingerprint
 
-    /** Copies this state, but toggles [needsUserConfirmation] to false. */
-    fun asConfirmed(): PromptAuthState =
+    /**
+     * Copies this state, but toggles [needsUserConfirmation] to false and ensures that
+     * [isAuthenticatedAndExplicitlyConfirmed] is true.
+     */
+    fun asExplicitlyConfirmed(): PromptAuthState =
         PromptAuthState(
-            isAuthenticated = isAuthenticated,
-            authenticatedModality = authenticatedModality,
-            needsUserConfirmation = false,
-            delay = delay,
-        )
+                isAuthenticated = isAuthenticated,
+                authenticatedModality = authenticatedModality,
+                needsUserConfirmation = false,
+                delay = delay,
+            )
+            .apply { wasConfirmed = true }
 }

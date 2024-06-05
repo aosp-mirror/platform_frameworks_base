@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.os.SystemClock;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.KeyEvent;
@@ -37,12 +38,13 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardAbsKeyInputView.KeyDownListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.R;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
+import com.android.systemui.res.R;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,6 +83,8 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     private EmergencyButtonController mEmergencyButtonController;
 
     private FakeFeatureFlags mFeatureFlags;
+    @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
     private KeyguardAbsKeyInputViewController mKeyguardAbsKeyInputViewController;
 
     @Before
@@ -95,7 +99,6 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
                 .thenReturn(mKeyguardMessageArea);
         when(mAbsKeyInputView.getResources()).thenReturn(getContext().getResources());
         mFeatureFlags = new FakeFeatureFlags();
-        mFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, false);
         mKeyguardAbsKeyInputViewController = createTestObject();
         mKeyguardAbsKeyInputViewController.init();
         reset(mKeyguardMessageAreaController);  // Clear out implicit call to init.
@@ -105,7 +108,7 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
         return new KeyguardAbsKeyInputViewController(mAbsKeyInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mFalsingCollector,
-                mEmergencyButtonController, mFeatureFlags) {
+                mEmergencyButtonController, mFeatureFlags, mSelectedUserInteractor) {
             @Override
             void resetState() {
             }
@@ -123,8 +126,8 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES)
     public void withFeatureFlagOn_oldMessage_isHidden() {
-        mFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true);
         KeyguardAbsKeyInputViewController underTest = createTestObject();
 
         underTest.init();
@@ -180,8 +183,9 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testResume() {
-        mKeyguardAbsKeyInputViewController.onResume(KeyguardSecurityView.VIEW_REVEALED);
+    public void testOnViewAttached() {
+        reset(mLockPatternUtils);
+        mKeyguardAbsKeyInputViewController.onViewAttached();
         verify(mLockPatternUtils).getLockoutAttemptDeadline(anyInt());
     }
 

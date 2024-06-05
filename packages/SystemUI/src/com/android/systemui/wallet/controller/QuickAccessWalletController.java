@@ -17,9 +17,13 @@
 package com.android.systemui.wallet.controller;
 
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE;
+import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_WALLET_APP_CHANGE;
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE;
 
+import android.annotation.WorkerThread;
 import android.app.PendingIntent;
+import android.app.role.OnRoleHoldersChangedListener;
+import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
@@ -30,12 +34,12 @@ import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.QuickAccessWalletClientImpl;
 import android.util.Log;
 
-import com.android.systemui.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallet.ui.WalletActivity;
@@ -57,6 +61,7 @@ public class QuickAccessWalletController {
      */
     public enum WalletChangeEvent {
         DEFAULT_PAYMENT_APP_CHANGE,
+        DEFAULT_WALLET_APP_CHANGE,
         WALLET_PREFERENCE_CHANGE,
     }
 
@@ -70,9 +75,12 @@ public class QuickAccessWalletController {
 
     private QuickAccessWalletClient mQuickAccessWalletClient;
     private ContentObserver mWalletPreferenceObserver;
+    private RoleManager mRoleManager;
+    private OnRoleHoldersChangedListener mDefaultWalletAppObserver;
     private ContentObserver mDefaultPaymentAppObserver;
     private int mWalletPreferenceChangeEvents = 0;
     private int mDefaultPaymentAppChangeEvents = 0;
+    private int mDefaultWalletAppChangeEvents = 0;
     private boolean mWalletEnabled = false;
     private long mQawClientCreatedTimeMillis;
 
@@ -83,14 +91,20 @@ public class QuickAccessWalletController {
             @Background Executor bgExecutor,
             SecureSettings secureSettings,
             QuickAccessWalletClient quickAccessWalletClient,
-            SystemClock clock) {
+            SystemClock clock,
+            RoleManager roleManager) {
         mContext = context;
         mExecutor = executor;
         mBgExecutor = bgExecutor;
         mSecureSettings = secureSettings;
+        mRoleManager = roleManager;
         mQuickAccessWalletClient = quickAccessWalletClient;
         mClock = clock;
         mQawClientCreatedTimeMillis = mClock.elapsedRealtime();
+    }
+
+    public boolean isWalletRoleAvailable() {
+        return mRoleManager.isRoleAvailable(RoleManager.ROLE_WALLET);
     }
 
     /**
@@ -121,6 +135,8 @@ public class QuickAccessWalletController {
                 setupWalletPreferenceObserver();
             } else if (event == DEFAULT_PAYMENT_APP_CHANGE) {
                 setupDefaultPaymentAppObserver(cardsRetriever);
+            } else if (event == DEFAULT_WALLET_APP_CHANGE) {
+                setupDefaultWalletAppObserver(cardsRetriever);
             }
         }
     }
@@ -133,12 +149,18 @@ public class QuickAccessWalletController {
             if (event == WALLET_PREFERENCE_CHANGE && mWalletPreferenceObserver != null) {
                 mWalletPreferenceChangeEvents--;
                 if (mWalletPreferenceChangeEvents == 0) {
-                    mSecureSettings.unregisterContentObserver(mWalletPreferenceObserver);
+                    mSecureSettings.unregisterContentObserverSync(mWalletPreferenceObserver);
                 }
             } else if (event == DEFAULT_PAYMENT_APP_CHANGE && mDefaultPaymentAppObserver != null) {
                 mDefaultPaymentAppChangeEvents--;
                 if (mDefaultPaymentAppChangeEvents == 0) {
-                    mSecureSettings.unregisterContentObserver(mDefaultPaymentAppObserver);
+                    mSecureSettings.unregisterContentObserverSync(mDefaultPaymentAppObserver);
+                }
+            } else if (event == DEFAULT_WALLET_APP_CHANGE && mDefaultWalletAppObserver != null) {
+                mDefaultWalletAppChangeEvents--;
+                if (mDefaultWalletAppChangeEvents == 0) {
+                    mRoleManager.removeOnRoleHoldersChangedListenerAsUser(mDefaultWalletAppObserver,
+                            UserHandle.ALL);
                 }
             }
         }
@@ -146,7 +168,9 @@ public class QuickAccessWalletController {
 
     /**
      * Update the "show wallet" preference.
+     * This should not be called on the main thread.
      */
+    @WorkerThread
     public void updateWalletPreference() {
         mWalletEnabled = mQuickAccessWalletClient.isWalletServiceAvailable()
                 && mQuickAccessWalletClient.isWalletFeatureAvailable()
@@ -155,11 +179,14 @@ public class QuickAccessWalletController {
 
     /**
      * Query the wallet cards from {@link QuickAccessWalletClient}.
+     * This should not be called on the main thread.
      *
      * @param cardsRetriever a callback to retrieve wallet cards.
+     * @param maxCards the maximum number of cards requested from the QuickAccessWallet
      */
+    @WorkerThread
     public void queryWalletCards(
-            QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever) {
+            QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever, int maxCards) {
         if (mClock.elapsedRealtime() - mQawClientCreatedTimeMillis
                 > RECREATION_TIME_WINDOW) {
             Log.i(TAG, "Re-creating the QAW client to avoid stale.");
@@ -175,9 +202,22 @@ public class QuickAccessWalletController {
                 mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_height);
         int iconSizePx = mContext.getResources().getDimensionPixelSize(R.dimen.wallet_icon_size);
         GetWalletCardsRequest request =
-                new GetWalletCardsRequest(cardWidth, cardHeight, iconSizePx, /* maxCards= */ 1);
+                new GetWalletCardsRequest(cardWidth, cardHeight, iconSizePx, maxCards);
         mQuickAccessWalletClient.getWalletCards(mBgExecutor, request, cardsRetriever);
     }
+
+    /**
+     * Query the wallet cards from {@link QuickAccessWalletClient}.
+     * This should not be called on the main thread.
+     *
+     * @param cardsRetriever a callback to retrieve wallet cards.
+     */
+    @WorkerThread
+    public void queryWalletCards(
+            QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever) {
+        queryWalletCards(cardsRetriever, /* maxCards= */ 1);
+    }
+
 
     /**
      * Re-create the {@link QuickAccessWalletClient} of the controller.
@@ -201,12 +241,12 @@ public class QuickAccessWalletController {
      * that too is null, then fall back to {@link WalletActivity}.
      *
      * @param activityStarter an {@link ActivityStarter} to launch the Intent or PendingIntent.
-     * @param animationController an {@link ActivityLaunchAnimator.Controller} to provide a
+     * @param animationController an {@link ActivityTransitionAnimator.Controller} to provide a
      *                            smooth animation for the activity launch.
      * @param hasCard whether the service returns any cards.
      */
     public void startQuickAccessUiIntent(ActivityStarter activityStarter,
-            ActivityLaunchAnimator.Controller animationController,
+            ActivityTransitionAnimator.Controller animationController,
             boolean hasCard) {
         mQuickAccessWalletClient.getWalletPendingIntent(mExecutor,
                 walletPendingIntent -> {
@@ -236,7 +276,7 @@ public class QuickAccessWalletController {
     private void startQuickAccessViaIntent(Intent intent,
             boolean hasCard,
             ActivityStarter activityStarter,
-            ActivityLaunchAnimator.Controller animationController) {
+            ActivityTransitionAnimator.Controller animationController) {
         if (hasCard) {
             activityStarter.startActivity(intent, true /* dismissShade */,
                     animationController, true /* showOverLockscreenWhenLocked */);
@@ -250,7 +290,7 @@ public class QuickAccessWalletController {
 
     private void startQuickAccessViaPendingIntent(PendingIntent pendingIntent,
             ActivityStarter activityStarter,
-            ActivityLaunchAnimator.Controller animationController) {
+            ActivityTransitionAnimator.Controller animationController) {
         activityStarter.postStartActivityDismissingKeyguard(
                 pendingIntent,
                 animationController);
@@ -272,13 +312,32 @@ public class QuickAccessWalletController {
                 }
             };
 
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,
                     false /* notifyForDescendants */,
                     mDefaultPaymentAppObserver,
                     UserHandle.USER_ALL);
         }
         mDefaultPaymentAppChangeEvents++;
+    }
+
+    private void setupDefaultWalletAppObserver(
+            QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever) {
+        if (mDefaultWalletAppObserver == null) {
+            mDefaultWalletAppObserver = (roleName, user) -> {
+                if (!roleName.equals(RoleManager.ROLE_WALLET)) {
+                    return;
+                }
+                mExecutor.execute(() -> {
+                    reCreateWalletClient();
+                    updateWalletPreference();
+                    queryWalletCards(cardsRetriever);
+                });
+            };
+            mRoleManager.addOnRoleHoldersChangedListenerAsUser(mExecutor,
+                    mDefaultWalletAppObserver, UserHandle.ALL);
+        }
+        mDefaultWalletAppChangeEvents++;
     }
 
     private void setupWalletPreferenceObserver() {
@@ -292,7 +351,7 @@ public class QuickAccessWalletController {
                 }
             };
 
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     QuickAccessWalletClientImpl.SETTING_KEY,
                     false /* notifyForDescendants */,
                     mWalletPreferenceObserver,

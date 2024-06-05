@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 
-import com.android.server.PersistentDataBlockManagerInternal;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -35,6 +35,7 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
     public final File mStorageDir;
     public PersistentDataBlockManagerInternal mPersistentDataBlockManager;
     private byte[] mPersistentData;
+    private boolean mIsFactoryResetProtectionActive = false;
 
     public LockSettingsStorageTestable(Context context, File storageDir) {
         super(context);
@@ -63,6 +64,10 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
         }).when(mPersistentDataBlockManager).getFrpCredentialHandle();
     }
 
+    void setTestFactoryResetProtectionState(boolean active) {
+        mIsFactoryResetProtectionActive = active;
+    }
+
     @Override
     File getChildProfileLockFile(int userId) {
         return remapToStorageDir(super.getChildProfileLockFile(userId));
@@ -84,6 +89,11 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
     }
 
     @Override
+    File getRepairModePersistentDataFile() {
+        return remapToStorageDir(super.getRepairModePersistentDataFile());
+    }
+
+    @Override
     PersistentDataBlockManagerInternal getPersistentDataBlockManager() {
         return mPersistentDataBlockManager;
     }
@@ -95,5 +105,10 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
         File mappedPath = new File(mStorageDir, origPath.toString());
         mappedPath.getParentFile().mkdirs();
         return mappedPath;
+    }
+
+    @Override
+    public boolean isFactoryResetProtectionActive() {
+        return mIsFactoryResetProtectionActive;
     }
 }

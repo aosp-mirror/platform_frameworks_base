@@ -109,7 +109,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
                 device.refresh();
             }
 
-            // Check current list of CachedDevices to see if any are Hearing Aid devices.
+            // Check current list of CachedDevices to see if any are hearing aid devices.
             mDeviceManager.updateHearingAidsDevices();
             mIsProfileReady = true;
             mProfileManager.callServiceConnectedListeners();
@@ -231,19 +231,19 @@ public class HearingAidProfile implements LocalBluetoothProfile {
 
     @Override
     public boolean setEnabled(BluetoothDevice device, boolean enabled) {
-        boolean isEnabled = false;
+        boolean isSuccessful = false;
         if (mService == null || device == null) {
             return false;
         }
         if (enabled) {
             if (mService.getConnectionPolicy(device) < CONNECTION_POLICY_ALLOWED) {
-                isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
+                isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
             }
         } else {
-            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
+            isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
 
-        return isEnabled;
+        return isSuccessful;
     }
 
     /**

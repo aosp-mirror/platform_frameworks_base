@@ -189,6 +189,8 @@ public final class InputMethodDebug {
      */
     public static String softInputDisplayReasonToString(@SoftInputShowHideReason int reason) {
         switch (reason) {
+            case SoftInputShowHideReason.NOT_SET:
+                return "NOT_SET";
             case SoftInputShowHideReason.SHOW_SOFT_INPUT:
                 return "SHOW_SOFT_INPUT";
             case SoftInputShowHideReason.ATTACH_NEW_INPUT:
@@ -261,6 +263,42 @@ public final class InputMethodDebug {
                 return "REMOVE_IME_SCREENSHOT_FROM_IMMS";
             case SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE:
                 return "HIDE_WHEN_INPUT_TARGET_INVISIBLE";
+            case SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION:
+                return "HIDE_SOFT_INPUT_CLOSE_CURRENT_SESSION";
+            case SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW:
+                return "HIDE_SOFT_INPUT_FROM_VIEW";
+            case SoftInputShowHideReason.SHOW_SOFT_INPUT_LEGACY_DIRECT:
+                return "SHOW_SOFT_INPUT_LEGACY_DIRECT";
+            case SoftInputShowHideReason.HIDE_SOFT_INPUT_LEGACY_DIRECT:
+                return "HIDE_SOFT_INPUT_LEGACY_DIRECT";
+            case SoftInputShowHideReason.SHOW_WINDOW_LEGACY_DIRECT:
+                return "SHOW_WINDOW_LEGACY_DIRECT";
+            case SoftInputShowHideReason.HIDE_WINDOW_LEGACY_DIRECT:
+                return "HIDE_WINDOW_LEGACY_DIRECT";
+            case SoftInputShowHideReason.RESET_NEW_CONFIGURATION:
+                return "RESET_NEW_CONFIGURATION";
+            case SoftInputShowHideReason.UPDATE_CANDIDATES_VIEW_VISIBILITY:
+                return "UPDATE_CANDIDATES_VIEW_VISIBILITY";
+            case SoftInputShowHideReason.CONTROLS_CHANGED:
+                return "CONTROLS_CHANGED";
+            case SoftInputShowHideReason.DISPLAY_CONFIGURATION_CHANGED:
+                return "DISPLAY_CONFIGURATION_CHANGED";
+            case SoftInputShowHideReason.DISPLAY_INSETS_CHANGED:
+                return "DISPLAY_INSETS_CHANGED";
+            case SoftInputShowHideReason.DISPLAY_CONTROLS_CHANGED:
+                return "DISPLAY_CONTROLS_CHANGED";
+            case SoftInputShowHideReason.UNBIND_CURRENT_METHOD:
+                return "UNBIND_CURRENT_METHOD";
+            case SoftInputShowHideReason.HIDE_SOFT_INPUT_ON_ANIMATION_STATE_CHANGED:
+                return "HIDE_SOFT_INPUT_ON_ANIMATION_STATE_CHANGED";
+            case SoftInputShowHideReason.HIDE_SOFT_INPUT_REQUEST_HIDE_WITH_CONTROL:
+                return "HIDE_SOFT_INPUT_REQUEST_HIDE_WITH_CONTROL";
+            case SoftInputShowHideReason.SHOW_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT:
+                return "SHOW_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT";
+            case SoftInputShowHideReason.SHOW_SOFT_INPUT_IMM_DEPRECATION:
+                return "SHOW_SOFT_INPUT_IMM_DEPRECATION";
+            case SoftInputShowHideReason.CONTROL_WINDOW_INSETS_ANIMATION:
+                return "CONTROL_WINDOW_INSETS_ANIMATION";
             default:
                 return "Unknown=" + reason;
         }

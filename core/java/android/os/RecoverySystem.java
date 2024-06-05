@@ -18,8 +18,6 @@ package android.os;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -47,16 +45,15 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Display;
 
-import libcore.io.Streams;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.SignatureException;
@@ -73,7 +70,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 import sun.security.pkcs.PKCS7;
 import sun.security.pkcs.SignerInfo;
@@ -166,6 +162,7 @@ public class RecoverySystem {
             RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED,
             RESUME_ON_REBOOT_REBOOT_ERROR_SLOT_MISMATCH,
             RESUME_ON_REBOOT_REBOOT_ERROR_PROVIDER_PREPARATION_FAILURE})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface ResumeOnRebootRebootErrorCode {}
 
     /**
@@ -423,72 +420,43 @@ public class RecoverySystem {
         } finally {
             raf.close();
         }
-
-        // Additionally verify the package compatibility.
-        if (!readAndVerifyPackageCompatibilityEntry(packageFile)) {
-            throw new SignatureException("package compatibility verification failed");
-        }
     }
 
     /**
      * Verifies the compatibility entry from an {@link InputStream}.
      *
-     * @return the verification result.
+     * @param inputStream The stream that contains the package compatibility info.
+     * @throws IOException Never.
+     * @return {@code true}.
+     * @deprecated This function no longer checks {@code inputStream} and
+     *   unconditionally returns true. Instead, check compatibility when the
+     *   OTA package is generated.
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(
+            publicAlternatives = "Use {@code true} directly",
+            maxTargetSdk = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     private static boolean verifyPackageCompatibility(InputStream inputStream) throws IOException {
-        ArrayList<String> list = new ArrayList<>();
-        ZipInputStream zis = new ZipInputStream(inputStream);
-        ZipEntry entry;
-        while ((entry = zis.getNextEntry()) != null) {
-            long entrySize = entry.getSize();
-            if (entrySize > Integer.MAX_VALUE || entrySize < 0) {
-                throw new IOException(
-                        "invalid entry size (" + entrySize + ") in the compatibility file");
-            }
-            byte[] bytes = new byte[(int) entrySize];
-            Streams.readFully(zis, bytes);
-            list.add(new String(bytes, UTF_8));
-        }
-        if (list.isEmpty()) {
-            throw new IOException("no entries found in the compatibility file");
-        }
-        return (VintfObject.verify(list.toArray(new String[list.size()])) == 0);
-    }
-
-    /**
-     * Reads and verifies the compatibility entry in an OTA zip package. The compatibility entry is
-     * a zip file (inside the OTA package zip).
-     *
-     * @return {@code true} if the entry doesn't exist or verification passes.
-     */
-    private static boolean readAndVerifyPackageCompatibilityEntry(File packageFile)
-            throws IOException {
-        try (ZipFile zip = new ZipFile(packageFile)) {
-            ZipEntry entry = zip.getEntry("compatibility.zip");
-            if (entry == null) {
-                return true;
-            }
-            InputStream inputStream = zip.getInputStream(entry);
-            return verifyPackageCompatibility(inputStream);
-        }
+        return true;
     }
 
     /**
      * Verifies the package compatibility info against the current system.
      *
      * @param compatibilityFile the {@link File} that contains the package compatibility info.
-     * @throws IOException if there were any errors reading the compatibility file.
-     * @return the compatibility verification result.
+     * @throws IOException Never.
+     * @return {@code true}
+     * @deprecated This function no longer checks {@code compatibilityFile} and
+     *   unconditionally returns true. Instead, check compatibility when the
+     *   OTA package is generated.
      *
      * {@hide}
      */
+    @Deprecated
     @SystemApi
     @SuppressLint("RequiresPermission")
     public static boolean verifyPackageCompatibility(File compatibilityFile) throws IOException {
-        try (InputStream inputStream = new FileInputStream(compatibilityFile)) {
-            return verifyPackageCompatibility(inputStream);
-        }
+        return true;
     }
 
     /**
@@ -933,6 +901,12 @@ public class RecoverySystem {
         rebootWipeUserData(context, shutdown, reason, force, false /* wipeEuicc */);
     }
 
+    /** {@hide} */
+    public static void rebootWipeUserData(Context context, boolean shutdown, String reason,
+            boolean force, boolean wipeEuicc) throws IOException {
+        rebootWipeUserData(context, shutdown, reason, force, wipeEuicc, false /* keepMemtagMode */);
+    }
+
     /**
      * Reboots the device and wipes the user data and cache
      * partitions.  This is sometimes called a "factory reset", which
@@ -948,6 +922,7 @@ public class RecoverySystem {
      * @param force     whether the {@link UserManager.DISALLOW_FACTORY_RESET} user restriction
      *                  should be ignored
      * @param wipeEuicc whether wipe the euicc data
+     * @param keepMemtagMode whether to tell recovery to keep currently configured memtag mode
      *
      * @throws IOException  if writing the recovery command file
      * fails, or if the reboot itself fails.
@@ -956,7 +931,7 @@ public class RecoverySystem {
      * @hide
      */
     public static void rebootWipeUserData(Context context, boolean shutdown, String reason,
-            boolean force, boolean wipeEuicc) throws IOException {
+            boolean force, boolean wipeEuicc, boolean keepMemtagMode) throws IOException {
         UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
         if (!force && um.hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET)) {
             throw new SecurityException("Wiping data is not allowed for this user.");
@@ -996,8 +971,13 @@ public class RecoverySystem {
             reasonArg = "--reason=" + sanitizeArg(reason + "," + timeStamp);
         }
 
+        String memtagArg = null;
+        if (keepMemtagMode) {
+            memtagArg = "--keep_memtag_mode";
+        }
+
         final String localeArg = "--locale=" + Locale.getDefault().toLanguageTag() ;
-        bootCommand(context, shutdownArg, "--wipe_data", reasonArg, localeArg);
+        bootCommand(context, shutdownArg, "--wipe_data", reasonArg, localeArg, memtagArg);
     }
 
     /**
@@ -1279,6 +1259,24 @@ public class RecoverySystem {
     }
 
     /**
+     * Reboot into recovery and wipe the data partition with ext4
+     *
+     * @throws IOException if something goes wrong.
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.RECOVERY,
+            android.Manifest.permission.REBOOT
+    })
+    public void wipePartitionToExt4()
+            throws IOException {
+        // Reformat /data partition with ext4
+        String command = "--wipe_data\n--reformat_data=ext4";
+        rebootRecoveryWithCommand(command);
+    }
+
+    /**
      * Reboot into the recovery system with the supplied argument.
      * @param args to pass to the recovery utility.
      * @throws IOException if something goes wrong.
@@ -1438,8 +1436,11 @@ public class RecoverySystem {
      * @throws IOException if the recovery system service could not be contacted
      */
     private boolean requestLskf(String packageName, IntentSender sender) throws IOException {
+        Log.i(TAG, TextUtils.formatSimple("Package<%s> requesting LSKF", packageName));
         try {
-            return mService.requestLskf(packageName, sender);
+            boolean validRequest = mService.requestLskf(packageName, sender);
+            Log.i(TAG, TextUtils.formatSimple("LSKF Request isValid = %b", validRequest));
+            return validRequest;
         } catch (RemoteException | SecurityException e) {
             throw new IOException("could not request LSKF capture", e);
         }

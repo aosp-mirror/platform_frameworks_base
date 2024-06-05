@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_system_ui_please_use_a_more_specific_subteam_if_possible_",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_packages_SystemUI_license"
@@ -23,25 +24,30 @@ package {
 
 android_library {
     name: "SystemUICustomizationLib",
+    use_resource_processor: true,
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
         "src/**/*.aidl",
     ],
     static_libs: [
+        "PlatformAnimationLib",
         "PluginCoreLib",
-        "SystemUIAnimationLib",
         "SystemUIPluginLib",
         "SystemUIUnfoldLib",
-        "androidx.dynamicanimation_dynamicanimation",
+        "kotlinx_coroutines",
+        "dagger2",
+        "jsr330",
+    ],
+    libs: [
+        // Keep android-specific libraries as libs instead of static_libs, so that they don't break
+        // things when included as transitive dependencies in robolectric targets.
         "androidx.concurrent_concurrent-futures",
+        "androidx.dynamicanimation_dynamicanimation",
         "androidx.lifecycle_lifecycle-runtime-ktx",
         "androidx.lifecycle_lifecycle-viewmodel-ktx",
         "androidx.recyclerview_recyclerview",
         "kotlinx_coroutines_android",
-        "kotlinx_coroutines",
-        "dagger2",
-        "jsr330",
     ],
     resource_dirs: [
         "res",

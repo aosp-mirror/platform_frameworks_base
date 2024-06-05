@@ -18,12 +18,12 @@
 
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
+#include "androidfw/BigBufferStream.h"
 #include "format/Archive.h"
 #include "format/binary/TableFlattener.h"
 #include "format/binary/XmlFlattener.h"
 #include "format/proto/ProtoDeserialize.h"
 #include "format/proto/ProtoSerialize.h"
-#include "io/BigBufferStream.h"
 #include "io/Util.h"
 #include "xml/XmlDom.h"
 
@@ -48,7 +48,7 @@ static ApkFormat DetermineApkFormat(io::IFileCollection* apk) {
     }
 
     // First try in proto format.
-    std::unique_ptr<io::InputStream> manifest_in = manifest_file->OpenInputStream();
+    std::unique_ptr<android::InputStream> manifest_in = manifest_file->OpenInputStream();
     if (manifest_in != nullptr) {
       pb::XmlNode pb_node;
       io::ProtoInputStreamReader proto_reader(manifest_in.get());
@@ -102,7 +102,7 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
   io::IFile* table_file = collection->FindFile(kProtoResourceTablePath);
   if (table_file != nullptr) {
     pb::ResourceTable pb_table;
-    std::unique_ptr<io::InputStream> in = table_file->OpenInputStream();
+    std::unique_ptr<android::InputStream> in = table_file->OpenInputStream();
     if (in == nullptr) {
       diag->Error(android::DiagMessage(source) << "failed to open " << kProtoResourceTablePath);
       return {};
@@ -129,7 +129,7 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
     return {};
   }
 
-  std::unique_ptr<io::InputStream> manifest_in = manifest_file->OpenInputStream();
+  std::unique_ptr<android::InputStream> manifest_in = manifest_file->OpenInputStream();
   if (manifest_in == nullptr) {
     diag->Error(android::DiagMessage(source) << "failed to open " << kAndroidManifestPath);
     return {};
@@ -262,7 +262,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
         return false;
       }
 
-      io::BigBufferInputStream input_stream(&buffer);
+      android::BigBufferInputStream input_stream(&buffer);
       if (!io::CopyInputStreamToArchive(context,
                                         &input_stream,
                                         path,
@@ -296,7 +296,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
       }
 
       uint32_t compression_flags = file->WasCompressed() ? ArchiveEntry::kCompress : 0u;
-      io::BigBufferInputStream manifest_buffer_in(&buffer);
+      android::BigBufferInputStream manifest_buffer_in(&buffer);
       if (!io::CopyInputStreamToArchive(context, &manifest_buffer_in, path, compression_flags,
                                         writer)) {
         return false;
@@ -321,7 +321,7 @@ std::unique_ptr<xml::XmlResource> LoadedApk::LoadXml(const std::string& file_pat
 
   std::unique_ptr<xml::XmlResource> doc;
   if (format_ == ApkFormat::kProto) {
-    std::unique_ptr<io::InputStream> in = file->OpenInputStream();
+    std::unique_ptr<android::InputStream> in = file->OpenInputStream();
     if (!in) {
       diag->Error(android::DiagMessage() << "failed to open file");
       return nullptr;

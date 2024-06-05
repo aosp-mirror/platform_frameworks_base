@@ -30,34 +30,42 @@
 
         <FrameLayout
             android:id="@+id/inout_container"
-            android:layout_height="17dp"
+            android:layout_height="@dimen/status_bar_mobile_inout_container_size"
             android:layout_width="wrap_content"
             android:layout_gravity="center_vertical">
             <ImageView
                 android:id="@+id/mobile_in"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/status_bar_mobile_signal_size"
+                android:adjustViewBounds="true"
                 android:layout_width="wrap_content"
                 android:src="@drawable/ic_activity_down"
-                android:visibility="gone"
                 android:paddingEnd="2dp"
                 />
             <ImageView
                 android:id="@+id/mobile_out"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/status_bar_mobile_signal_size"
+                android:adjustViewBounds="true"
                 android:layout_width="wrap_content"
                 android:src="@drawable/ic_activity_up"
                 android:paddingEnd="2dp"
-                android:visibility="gone"
                 />
         </FrameLayout>
-        <ImageView
-            android:id="@+id/mobile_type"
-            android:layout_height="wrap_content"
+        <FrameLayout
+            android:id="@+id/mobile_type_container"
+            android:layout_height="@dimen/status_bar_mobile_container_height"
             android:layout_width="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:paddingStart="2.5dp"
-            android:paddingEnd="1dp"
-            android:visibility="gone" />
+            android:layout_marginStart="2.5sp"
+            android:layout_marginEnd="1sp"
+            android:visibility="gone"
+            >
+            <ImageView
+                android:id="@+id/mobile_type"
+                android:layout_height="@dimen/status_bar_mobile_type_size"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:adjustViewBounds="true"
+                />
+        </FrameLayout>
         <Space
             android:id="@+id/mobile_roaming_space"
             android:layout_height="match_parent"
@@ -70,14 +78,16 @@
             android:layout_gravity="center_vertical">
             <com.android.systemui.statusbar.AnimatedImageView
                 android:id="@+id/mobile_signal"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/status_bar_mobile_signal_size"
                 android:layout_width="wrap_content"
+                android:adjustViewBounds="true"
                 systemui:hasOverlappingRendering="false"
                 />
             <ImageView
                 android:id="@+id/mobile_roaming"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/status_bar_mobile_roam_size"
+                android:adjustViewBounds="true"
                 android:layout_gravity="top|start"
                 android:src="@drawable/stat_sys_roaming"
                 android:contentDescription="@string/data_connection_roaming"

@@ -63,6 +63,10 @@ public final class AutofillServiceInfo {
     private static final String TAG_AUTOFILL_SERVICE = "autofill-service";
     private static final String TAG_COMPATIBILITY_PACKAGE = "compatibility-package";
 
+    private static final ComponentName CREDMAN_SERVICE_COMPONENT_NAME =
+            new ComponentName("com.android.credentialmanager",
+                    "com.android.credentialmanager.autofill.CredentialAutofillService");
+
     private static ServiceInfo getServiceInfoOrThrow(ComponentName comp, int userHandle)
             throws PackageManager.NameNotFoundException {
         try {
@@ -307,6 +311,12 @@ public final class AutofillServiceInfo {
         for (ResolveInfo resolveInfo : resolveInfos) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             try {
+                if (serviceInfo != null && isCredentialManagerAutofillService(
+                        context,
+                        serviceInfo.getComponentName())) {
+                    // Skip this service as it is for internal use only
+                    continue;
+                }
                 services.add(new AutofillServiceInfo(context, serviceInfo));
             } catch (SecurityException e) {
                 // Service does not declare the proper permission, ignore it.
@@ -314,6 +324,25 @@ public final class AutofillServiceInfo {
             }
         }
         return services;
+    }
+
+    private static boolean isCredentialManagerAutofillService(Context context,
+            ComponentName componentName) {
+        if (componentName == null) {
+            return false;
+        }
+        ComponentName credAutofillService = null;
+        String credentialManagerAutofillCompName = context.getResources().getString(
+                R.string.config_defaultCredentialManagerAutofillService);
+        if (credentialManagerAutofillCompName != null && !credentialManagerAutofillCompName
+                .isEmpty()) {
+            credAutofillService = ComponentName.unflattenFromString(
+                    credentialManagerAutofillCompName);
+        } else {
+            Log.w(TAG, "Invalid CredentialAutofillService");
+        }
+
+        return componentName.equals(credAutofillService);
     }
 
     @Override

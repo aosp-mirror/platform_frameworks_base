@@ -37,6 +37,7 @@ import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
+import android.util.Log;
 
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.slice.Slice;
@@ -48,9 +49,10 @@ import androidx.slice.builders.SliceAction;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.R;
-import com.android.systemui.SystemUIAppComponentFactory;
+import com.android.systemui.SystemUIAppComponentFactoryBase;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
@@ -72,13 +74,13 @@ import javax.inject.Inject;
 /**
  * Simple Slice provider that shows the current date.
  *
- * Injection is handled by {@link SystemUIAppComponentFactory} +
+ * Injection is handled by {@link SystemUIAppComponentFactoryBase} +
  * {@link com.android.systemui.dagger.GlobalRootComponent#inject(KeyguardSliceProvider)}.
  */
 public class KeyguardSliceProvider extends SliceProvider implements
         NextAlarmController.NextAlarmChangeCallback, ZenModeController.Callback,
         NotificationMediaManager.MediaListener, StatusBarStateController.StateListener,
-        SystemUIAppComponentFactory.ContextInitializer {
+        SystemUIAppComponentFactoryBase.ContextInitializer {
 
     private static final String TAG = "KgdSliceProvider";
 
@@ -148,9 +150,12 @@ public class KeyguardSliceProvider extends SliceProvider implements
     protected boolean mDozing;
     private int mStatusBarState;
     private boolean mMediaIsVisible;
-    private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
+    private SystemUIAppComponentFactoryBase.ContextAvailableCallback mContextAvailableCallback;
     @Inject
     WakeLockLogger mWakeLockLogger;
+    @Inject
+    @Background
+    Handler mBgHandler;
 
     /**
      * Receiver responsible for time ticking and updating the date format.
@@ -208,21 +213,27 @@ public class KeyguardSliceProvider extends SliceProvider implements
     @AnyThread
     @Override
     public Slice onBindSlice(Uri sliceUri) {
-        Trace.beginSection("KeyguardSliceProvider#onBindSlice");
-        Slice slice;
-        synchronized (this) {
-            ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
-            if (needsMediaLocked()) {
-                addMediaLocked(builder);
-            } else {
-                builder.addRow(new RowBuilder(mDateUri).setTitle(mLastText));
+        Slice slice = null;
+        try {
+            Trace.beginSection("KeyguardSliceProvider#onBindSlice");
+            synchronized (this) {
+                ListBuilder builder = new ListBuilder(getContext(), mSliceUri,
+                        ListBuilder.INFINITY);
+                if (needsMediaLocked()) {
+                    addMediaLocked(builder);
+                } else {
+                    builder.addRow(new RowBuilder(mDateUri).setTitle(mLastText));
+                }
+                addNextAlarmLocked(builder);
+                addZenModeLocked(builder);
+                addPrimaryActionLocked(builder);
+                slice = builder.build();
             }
-            addNextAlarmLocked(builder);
-            addZenModeLocked(builder);
-            addPrimaryActionLocked(builder);
-            slice = builder.build();
+        } catch (IllegalStateException e) {
+            Log.w(TAG, "Could not initialize slice", e);
+        } finally {
+            Trace.endSection();
         }
-        Trace.endSection();
         return slice;
     }
 
@@ -393,8 +404,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_DATE_CHANGED);
             filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-            getContext().registerReceiver(mIntentReceiver, filter, null /* permission*/,
-                    null /* scheduler */);
+            mBgHandler.post(() -> {
+                getContext().registerReceiver(mIntentReceiver, filter, null /* permission*/,
+                        null /* scheduler */);
+            });
             mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
             mRegistered = true;
         }
@@ -502,7 +515,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     }
 
     protected void notifyChange() {
-        mContentResolver.notifyChange(mSliceUri, null /* observer */);
+        mBgHandler.post(() -> mContentResolver.notifyChange(mSliceUri, null /* observer */));
     }
 
     @Override
@@ -533,7 +546,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     @Override
     public void setContextAvailableCallback(
-            SystemUIAppComponentFactory.ContextAvailableCallback callback) {
+            SystemUIAppComponentFactoryBase.ContextAvailableCallback callback) {
         mContextAvailableCallback = callback;
     }
 }

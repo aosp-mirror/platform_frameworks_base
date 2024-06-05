@@ -50,6 +50,14 @@ public final class AudioProductStrategy implements Parcelable {
 
     private static final String TAG = "AudioProductStrategy";
 
+    /**
+     * The audio flags that will affect product strategy selection.
+     */
+    private static final int AUDIO_FLAGS_AFFECT_STRATEGY_SELECTION =
+            AudioAttributes.FLAG_AUDIBILITY_ENFORCED
+                    | AudioAttributes.FLAG_SCO
+                    | AudioAttributes.FLAG_BEACON;
+
     private final AudioAttributesGroup[] mAudioAttributesGroups;
     private final String mName;
     /**
@@ -134,9 +142,11 @@ public final class AudioProductStrategy implements Parcelable {
 
     /**
      * @hide
-     * @param audioAttributes to identify AudioProductStrategy with
-     * @return legacy stream type associated with matched AudioProductStrategy
-     *              Defaults to STREAM_MUSIC if no match is found, or if matches is STREAM_DEFAULT
+     * @param audioAttributes to identify {@link AudioProductStrategy} with
+     * @return legacy stream type associated with matched {@link AudioProductStrategy}. If no
+     *              strategy found or found {@link AudioProductStrategy} does not have associated
+     *              legacy stream (i.e. associated with {@link AudioSystem#STREAM_DEFAULT}) defaults
+     *              to {@link AudioSystem#STREAM_MUSIC}
      */
     public static int getLegacyStreamTypeForStrategyWithAudioAttributes(
             @NonNull AudioAttributes audioAttributes) {
@@ -147,9 +157,9 @@ public final class AudioProductStrategy implements Parcelable {
                 int streamType = productStrategy.getLegacyStreamTypeForAudioAttributes(
                         audioAttributes);
                 if (streamType == AudioSystem.STREAM_DEFAULT) {
-                    Log.w(TAG, "Attributes " + audioAttributes.toString() + " ported by strategy "
-                            + productStrategy.getId() + " has no stream type associated, "
-                            + "DO NOT USE STREAM TO CONTROL THE VOLUME");
+                    Log.w(TAG, "Attributes " + audioAttributes + " supported by strategy "
+                            + productStrategy.getId() + " have no associated stream type, "
+                            + "therefore falling back to STREAM_MUSIC");
                     return AudioSystem.STREAM_MUSIC;
                 }
                 if (streamType < AudioSystem.getNumStreamTypes()) {
@@ -436,8 +446,8 @@ public final class AudioProductStrategy implements Parcelable {
                 || (attr.getSystemUsage() == refAttr.getSystemUsage()))
             && ((refAttr.getContentType() == AudioAttributes.CONTENT_TYPE_UNKNOWN)
                 || (attr.getContentType() == refAttr.getContentType()))
-            && ((refAttr.getAllFlags() == 0)
-                || (attr.getAllFlags() != 0
+            && (((refAttr.getAllFlags() & AUDIO_FLAGS_AFFECT_STRATEGY_SELECTION) == 0)
+                || ((attr.getAllFlags() & AUDIO_FLAGS_AFFECT_STRATEGY_SELECTION) != 0
                 && (attr.getAllFlags() & refAttr.getAllFlags()) == refAttr.getAllFlags()))
             && ((refFormattedTags.length() == 0) || refFormattedTags.equals(cliFormattedTags));
     }

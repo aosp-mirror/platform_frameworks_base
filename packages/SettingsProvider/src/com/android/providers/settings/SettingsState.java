@@ -18,6 +18,9 @@ package com.android.providers.settings;
 
 import static android.os.Process.FIRST_APPLICATION_UID;
 
+import android.aconfig.Aconfig.flag_state;
+import android.aconfig.Aconfig.parsed_flag;
+import android.aconfig.Aconfig.parsed_flags;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -61,18 +64,37 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
+// FOR ACONFIGD TEST MISSION AND ROLLOUT
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import android.util.proto.ProtoInputStream;
+import android.aconfigd.Aconfigd.StorageRequestMessage;
+import android.aconfigd.Aconfigd.StorageRequestMessages;
+import android.aconfigd.Aconfigd.StorageReturnMessage;
+import android.aconfigd.Aconfigd.StorageReturnMessages;
+import android.aconfigd.AconfigdClientSocket;
+import android.aconfigd.AconfigdFlagInfo;
+import android.aconfigd.AconfigdJavaUtils;
+import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
 /**
  * This class contains the state for one type of settings. It is responsible
  * for saving the state asynchronously to an XML file after a mutation and
@@ -94,6 +116,9 @@ final class SettingsState {
 
     static final int SETTINGS_VERSION_NEW_ENCODING = 121;
 
+    // LINT.IfChange
+    public static final int MAX_LENGTH_PER_STRING = 32768;
+    // LINT.ThenChange(/services/core/java/com/android/server/audio/AudioDeviceInventory.java:settings_max_length_per_string)
     private static final long WRITE_SETTINGS_DELAY_MILLIS = 200;
     private static final long MAX_WRITE_SETTINGS_DELAY_MILLIS = 2000;
 
@@ -135,6 +160,32 @@ final class SettingsState {
      */
     private static final String ATTR_VALUE_BASE64 = "valueBase64";
     private static final String ATTR_DEFAULT_VALUE_BASE64 = "defaultValueBase64";
+
+    /**
+     * In the config table, there are special flags of the form {@code staged/namespace*flagName}.
+     * On boot, when the XML file is initially parsed, these transform into
+     * {@code namespace/flagName}, and the special staged flags are deleted.
+     */
+    private static final String CONFIG_STAGED_PREFIX = "staged/";
+
+    private static final List<String> sAconfigTextProtoFilesOnDevice = List.of(
+            "/system/etc/aconfig_flags.pb",
+            "/system_ext/etc/aconfig_flags.pb",
+            "/product/etc/aconfig_flags.pb",
+            "/vendor/etc/aconfig_flags.pb");
+
+    private static final String APEX_DIR = "/apex";
+    private static final String APEX_ACONFIG_PATH_SUFFIX = "/etc/aconfig_flags.pb";
+
+    private static final String STORAGE_MIGRATION_FLAG =
+            "core_experiments_team_internal/com.android.providers.settings.storage_test_mission_1";
+    private static final String STORAGE_MIGRATION_MARKER_FILE =
+            "/metadata/aconfig_test_missions/mission_1";
+
+    /**
+     * This tag is applied to all aconfig default value-loaded flags.
+     */
+    private static final String BOOT_LOADED_DEFAULT_TAG = "BOOT_LOADED_DEFAULT";
 
     // This was used in version 120 and before.
     private static final String NULL_VALUE_OLD_STYLE = "null";
@@ -211,6 +262,14 @@ final class SettingsState {
     @GuardedBy("mLock")
     private int mNextHistoricalOpIdx;
 
+    @GuardedBy("mLock")
+    @NonNull
+    private Map<String, Map<String, String>> mNamespaceDefaults;
+
+    // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
+    @NonNull
+    private Map<String, AconfigdFlagInfo> mAconfigDefaultFlags;
+
     public static final int SETTINGS_TYPE_GLOBAL = 0;
     public static final int SETTINGS_TYPE_SYSTEM = 1;
     public static final int SETTINGS_TYPE_SECURE = 2;
@@ -280,8 +339,13 @@ final class SettingsState {
                 + settingTypeToString(getTypeFromKey(key)) + "]";
     }
 
-    public SettingsState(Context context, Object lock, File file, int key,
-            int maxBytesPerAppPackage, Looper looper) {
+    public SettingsState(
+            Context context,
+            Object lock,
+            File file,
+            int key,
+            int maxBytesPerAppPackage,
+            Looper looper) {
         // It is important that we use the same lock as the settings provider
         // to ensure multiple mutations on this state are atomically persisted
         // as the async persistence should be blocked while we make changes.
@@ -299,11 +363,325 @@ final class SettingsState {
             mPackageToMemoryUsage = null;
         }
 
-        mHistoricalOperations = Build.IS_DEBUGGABLE
-                ? new ArrayList<>(HISTORICAL_OPERATION_COUNT) : null;
+        mHistoricalOperations =
+                Build.IS_DEBUGGABLE ? new ArrayList<>(HISTORICAL_OPERATION_COUNT) : null;
+
+        mNamespaceDefaults = new HashMap<>();
+        mAconfigDefaultFlags = new HashMap<>();
+
+        ProtoOutputStream requests = null;
+        Map<String, AconfigdFlagInfo> aconfigFlagMap = new HashMap<>();
 
         synchronized (mLock) {
             readStateSyncLocked();
+
+            if (Flags.loadAconfigDefaults()) {
+                if (isConfigSettingsKey(mKey)) {
+                    loadAconfigDefaultValuesLocked(sAconfigTextProtoFilesOnDevice);
+                }
+            }
+
+            if (Flags.loadApexAconfigProtobufs()) {
+                if (isConfigSettingsKey(mKey)) {
+                    List<String> apexProtoPaths = listApexProtoPaths();
+                    loadAconfigDefaultValuesLocked(apexProtoPaths);
+                }
+            }
+
+            if (enableAconfigStorageDaemon()) {
+                if (isConfigSettingsKey(mKey)) {
+                    aconfigFlagMap = getAllAconfigFlagsFromSettings();
+                }
+            }
+
+            if (isConfigSettingsKey(mKey)) {
+                requests = handleBulkSyncToNewStorage(aconfigFlagMap);
+            }
+        }
+
+        if (enableAconfigStorageDaemon()) {
+            if (isConfigSettingsKey(mKey)){
+                AconfigdClientSocket localSocket = AconfigdJavaUtils.getAconfigdClientSocket();
+                if (requests != null) {
+                    InputStream res = localSocket.send(requests.getBytes());
+                    if (res == null) {
+                        Slog.w(LOG_TAG, "Bulk sync request to acongid failed.");
+                    }
+                }
+                // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
+                if (mSettings.get("aconfigd_marker/bulk_synced").value.equals("true")
+                        && requests == null) {
+                    Map<String, AconfigdFlagInfo> aconfigdFlagMap =
+                            AconfigdJavaUtils.listFlagsValueInNewStorage(localSocket);
+                    compareFlagValueInNewStorage(
+                            aconfigFlagMap,
+                            mAconfigDefaultFlags,
+                            aconfigdFlagMap);
+                }
+            }
+        }
+    }
+
+    // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
+    public int compareFlagValueInNewStorage(
+            Map<String, AconfigdFlagInfo> settingFlagMap,
+            Map<String, AconfigdFlagInfo> defaultFlagMap,
+            Map<String, AconfigdFlagInfo> aconfigdFlagMap) {
+
+        // Get all defaults from the default map. The mSettings may not contain
+        // all flags, since it only contains updated flags.
+        int diffNum = 0;
+        for (Map.Entry<String, AconfigdFlagInfo> entry : defaultFlagMap.entrySet()) {
+            String key = entry.getKey();
+            AconfigdFlagInfo flag = entry.getValue();
+            if (settingFlagMap.containsKey(key)) {
+                flag.merge(settingFlagMap.get(key));
+            }
+
+            AconfigdFlagInfo aconfigdFlag = aconfigdFlagMap.get(key);
+            if (aconfigdFlag == null) {
+                Slog.w(LOG_TAG, String.format("Flag %s is missing from aconfigd", key));
+                diffNum++;
+                continue;
+            }
+            String diff = flag.dumpDiff(aconfigdFlag);
+            if (!diff.isEmpty()) {
+                Slog.w(
+                        LOG_TAG,
+                        String.format(
+                                "Flag %s is different in Settings and aconfig: %s", key, diff));
+                diffNum++;
+            }
+        }
+
+        for (String key : aconfigdFlagMap.keySet()) {
+            if (defaultFlagMap.containsKey(key)) continue;
+            Slog.w(LOG_TAG, String.format("Flag %s is missing from Settings", key));
+            diffNum++;
+        }
+
+        if (diffNum == 0) {
+            Slog.i(LOG_TAG, "Settings and new storage have same flags.");
+        }
+        return diffNum;
+    }
+
+    @GuardedBy("mLock")
+    public Map<String, AconfigdFlagInfo> getAllAconfigFlagsFromSettings() {
+        Map<String, AconfigdFlagInfo> ret = new HashMap<>();
+        int numSettings = mSettings.size();
+        int num_requests = 0;
+        for (int i = 0; i < numSettings; i++) {
+            String name = mSettings.keyAt(i);
+            Setting setting = mSettings.valueAt(i);
+            AconfigdFlagInfo flag =
+                    getFlagOverrideToSync(name, setting.getValue());
+            if (flag == null) {
+                continue;
+            }
+            String fullFlagName = flag.getFullFlagName();
+            AconfigdFlagInfo prev = ret.putIfAbsent(fullFlagName,flag);
+            if (prev != null) {
+                prev.merge(flag);
+            }
+            ++num_requests;
+        }
+        Slog.i(LOG_TAG, num_requests + " flag override requests created");
+        return ret;
+    }
+
+    // TODO(b/341764371): migrate aconfig flag push to GMS core
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    public AconfigdFlagInfo getFlagOverrideToSync(String name, String value) {
+        int slashIdx = name.indexOf("/");
+        if (slashIdx <= 0 || slashIdx >= name.length() - 1) {
+            Slog.e(LOG_TAG, "invalid flag name " + name);
+            return null;
+        }
+
+        String namespace = name.substring(0, slashIdx);
+        String fullFlagName = name.substring(slashIdx + 1);
+        boolean isLocal = false;
+
+        // get actual fully qualified flag name <package>.<flag>, note this is done
+        // after staged flag is applied, so no need to check staged flags
+        if (namespace.equals("device_config_overrides")) {
+            int colonIdx = fullFlagName.indexOf(":");
+            if (colonIdx == -1) {
+                Slog.e(LOG_TAG, "invalid local override flag name " + name);
+                return null;
+            }
+            namespace = fullFlagName.substring(0, colonIdx);
+            fullFlagName = fullFlagName.substring(colonIdx + 1);
+            isLocal = true;
+        }
+
+        String aconfigName = namespace + "/" + fullFlagName;
+        boolean isAconfig =
+                mNamespaceDefaults.containsKey(namespace)
+                        && mNamespaceDefaults.get(namespace).containsKey(aconfigName);
+        if (!isAconfig) {
+            return null;
+        }
+
+        // get package name and flag name
+        int dotIdx = fullFlagName.lastIndexOf(".");
+        if (dotIdx == -1) {
+            Slog.e(LOG_TAG, "invalid override flag name " + name);
+            return null;
+        }
+
+        AconfigdFlagInfo.Builder builder = AconfigdFlagInfo.newBuilder()
+                        .setPackageName(fullFlagName.substring(0, dotIdx))
+                        .setFlagName(fullFlagName.substring(dotIdx + 1))
+                        .setDefaultFlagValue(mNamespaceDefaults.get(namespace).get(aconfigName));
+
+        if (isLocal) {
+            builder.setHasLocalOverride(isLocal).setBootFlagValue(value).setLocalFlagValue(value);
+        } else {
+            builder.setHasServerOverride(true).setServerFlagValue(value).setBootFlagValue(value);
+        }
+        return builder.build();
+    }
+
+
+    // TODO(b/341764371): migrate aconfig flag push to GMS core
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    public ProtoOutputStream handleBulkSyncToNewStorage(
+            Map<String, AconfigdFlagInfo> aconfigFlagMap) {
+        // get marker or add marker if it does not exist
+        final String bulkSyncMarkerName = new String("aconfigd_marker/bulk_synced");
+        Setting markerSetting = mSettings.get(bulkSyncMarkerName);
+        if (markerSetting == null) {
+            markerSetting = new Setting(bulkSyncMarkerName, "false", false, "aconfig", "aconfig");
+            mSettings.put(bulkSyncMarkerName, markerSetting);
+        }
+
+        if (enableAconfigStorageDaemon()) {
+            if (markerSetting.value.equals("true")) {
+                // CASE 1, flag is on, bulk sync marker true, nothing to do
+                return null;
+            } else {
+                // CASE 2, flag is on, bulk sync marker false. Do following two tasks
+                // (1) Do bulk sync here.
+                // (2) After bulk sync, set marker to true.
+
+                // first add storage reset request
+                ProtoOutputStream requests = new ProtoOutputStream();
+                AconfigdJavaUtils.writeResetStorageRequest(requests);
+
+                // loop over all settings and add flag override requests
+                for (AconfigdFlagInfo flag : aconfigFlagMap.values()) {
+                    String value =
+                            flag.getHasLocalOverride()
+                                    ? flag.getLocalFlagValue()
+                                    : flag.getServerFlagValue();
+                    AconfigdJavaUtils.writeFlagOverrideRequest(
+                            requests,
+                            flag.getPackageName(),
+                            flag.getFlagName(),
+                            value,
+                            flag.getHasLocalOverride());
+                }
+
+                // mark sync has been done
+                markerSetting.value = "true";
+                scheduleWriteIfNeededLocked();
+                return requests;
+            }
+        } else {
+            if (markerSetting.value.equals("true")) {
+                // CASE 3, flag is off, bulk sync marker true, clear the marker
+                markerSetting.value = "false";
+                scheduleWriteIfNeededLocked();
+                return null;
+            } else {
+                // CASE 4, flag is off, bulk sync marker false, nothing to do
+                return null;
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void loadAconfigDefaultValuesLocked(List<String> filePaths) {
+        for (String fileName : filePaths) {
+            try (FileInputStream inputStream = new FileInputStream(fileName)) {
+                loadAconfigDefaultValues(
+                        inputStream.readAllBytes(), mNamespaceDefaults, mAconfigDefaultFlags);
+            } catch (IOException e) {
+                Slog.e(LOG_TAG, "failed to read protobuf", e);
+            }
+        }
+    }
+
+    private List<String> listApexProtoPaths() {
+        LinkedList<String> paths = new LinkedList();
+
+        File apexDirectory = new File(APEX_DIR);
+        if (!apexDirectory.isDirectory()) {
+            return paths;
+        }
+
+        File[] subdirs = apexDirectory.listFiles();
+        if (subdirs == null) {
+            return paths;
+        }
+
+        for (File prefix : subdirs) {
+            // For each mainline modules, there are two directories, one <modulepackage>/,
+            // and one <modulepackage>@<versioncode>/. Just read the former.
+            if (prefix.getAbsolutePath().contains("@")) {
+                continue;
+            }
+
+            File protoPath = new File(prefix + APEX_ACONFIG_PATH_SUFFIX);
+            if (!protoPath.exists()) {
+                continue;
+            }
+
+            paths.add(protoPath.getAbsolutePath());
+        }
+        return paths;
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    public void addAconfigDefaultValuesFromMap(
+            @NonNull Map<String, Map<String, String>> defaultMap) {
+        mNamespaceDefaults.putAll(defaultMap);
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    public static void loadAconfigDefaultValues(
+            byte[] fileContents,
+            @NonNull Map<String, Map<String, String>> defaultMap,
+            @NonNull Map<String, AconfigdFlagInfo> flagInfoDefault) {
+        try {
+            parsed_flags parsedFlags = parsed_flags.parseFrom(fileContents);
+            for (parsed_flag flag : parsedFlags.getParsedFlagList()) {
+                if (!defaultMap.containsKey(flag.getNamespace())) {
+                    Map<String, String> defaults = new HashMap<>();
+                    defaultMap.put(flag.getNamespace(), defaults);
+                }
+                String fullFlagName = flag.getPackage() + "." + flag.getName();
+                String flagName = flag.getNamespace() + "/" + fullFlagName;
+                String flagValue = flag.getState() == flag_state.ENABLED ? "true" : "false";
+                defaultMap.get(flag.getNamespace()).put(flagName, flagValue);
+                if (!flagInfoDefault.containsKey(fullFlagName)) {
+                    flagInfoDefault.put(
+                            fullFlagName,
+                            AconfigdFlagInfo.newBuilder()
+                                    .setPackageName(flag.getPackage())
+                                    .setFlagName(flag.getName())
+                                    .setDefaultFlagValue(flagValue)
+                                    .build());
+                }
+            }
+        } catch (IOException e) {
+            Slog.e(LOG_TAG, "failed to parse protobuf", e);
         }
     }
 
@@ -363,6 +741,13 @@ final class SettingsState {
             names.add(name);
         }
         return names;
+    }
+
+    @NonNull
+    public Map<String, Map<String, String>> getAconfigDefaultValues() {
+        synchronized (mLock) {
+            return mNamespaceDefaults;
+        }
     }
 
     // The settings provider must hold its lock when calling here.
@@ -430,15 +815,61 @@ final class SettingsState {
             return false;
         }
 
+        // Aconfig flags are always boot stable, so we anytime we write one, we stage it to be
+        // applied on reboot.
+        if (Flags.stageAllAconfigFlags()) {
+            int slashIndex = name.indexOf("/");
+            boolean stageFlag = isConfigSettingsKey(mKey)
+                    && slashIndex != -1
+                    && slashIndex != 0
+                    && slashIndex != name.length();
+
+            if (stageFlag) {
+                String namespace = name.substring(0, slashIndex);
+                String flag = name.substring(slashIndex + 1);
+
+                boolean isAconfig = mNamespaceDefaults.containsKey(namespace)
+                        && mNamespaceDefaults.get(namespace).containsKey(name);
+
+                if (isAconfig) {
+                    name = "staged/" + namespace + "*" + flag;
+                }
+            }
+        }
+
+        final boolean isNameTooLong = name.length() > SettingsState.MAX_LENGTH_PER_STRING;
+        final boolean isValueTooLong =
+                value != null && value.length() > SettingsState.MAX_LENGTH_PER_STRING;
+        if (isNameTooLong || isValueTooLong) {
+            // only print the first few bytes of the name in case it is long
+            final String errorMessage = "The " + (isNameTooLong ? "name" : "value")
+                    + " of your setting ["
+                    + (name.length() > 20 ? (name.substring(0, 20) + "...") : name)
+                    + "] is too long. The max length allowed for the string is "
+                    + MAX_LENGTH_PER_STRING + ".";
+            throw new IllegalArgumentException(errorMessage);
+        }
+
         Setting oldState = mSettings.get(name);
+        String previousOwningPackage = (oldState != null) ? oldState.packageName : null;
+        // If the old state doesn't exist, no need to handle the owning package change
+        final boolean owningPackageChanged = previousOwningPackage != null
+                && !previousOwningPackage.equals(packageName);
+
         String oldValue = (oldState != null) ? oldState.value : null;
         String oldDefaultValue = (oldState != null) ? oldState.defaultValue : null;
         String newDefaultValue = makeDefault ? value : oldDefaultValue;
 
-        int newSize = getNewMemoryUsagePerPackageLocked(packageName,
-                oldValue == null ? name.length() : 0 /* deltaKeySize */,
-                oldValue, value, oldDefaultValue, newDefaultValue);
-        checkNewMemoryUsagePerPackageLocked(packageName, newSize);
+        int newSizeForCurrentPackage = getNewMemoryUsagePerPackageLocked(packageName,
+                /* deltaKeyLength= */ (oldState == null || owningPackageChanged) ? name.length() : 0,
+                /* oldValue= */ owningPackageChanged ? null : oldValue,
+                /* newValue= */ value,
+                /* oldDefaultValue= */ owningPackageChanged ? null : oldDefaultValue,
+                /* newDefaultValue = */ newDefaultValue);
+        // Only check the memory usage for the current package. Even if the owning package
+        // has changed, the previous owning package will only have a reduced memory usage, so
+        // there is no need to check its memory usage.
+        checkNewMemoryUsagePerPackageLocked(packageName, newSizeForCurrentPackage);
 
         Setting newState;
 
@@ -460,7 +891,17 @@ final class SettingsState {
 
         addHistoricalOperationLocked(HISTORICAL_OPERATION_UPDATE, newState);
 
-        updateMemoryUsagePerPackageLocked(packageName, newSize);
+        updateMemoryUsagePerPackageLocked(packageName, newSizeForCurrentPackage);
+
+        if (owningPackageChanged) {
+            int newSizeForPreviousPackage = getNewMemoryUsagePerPackageLocked(previousOwningPackage,
+                    /* deltaKeyLength= */ -name.length(),
+                    /* oldValue= */ oldValue,
+                    /* newValue= */ null,
+                    /* oldDefaultValue= */ oldDefaultValue,
+                    /* newDefaultValue = */ null);
+            updateMemoryUsagePerPackageLocked(previousOwningPackage, newSizeForPreviousPackage);
+        }
 
         scheduleWriteIfNeededLocked();
 
@@ -519,12 +960,19 @@ final class SettingsState {
             String packageName) {
         List<String> changedKeys = new ArrayList<>();
         final Iterator<Map.Entry<String, Setting>> iterator = mSettings.entrySet().iterator();
+        int index = prefix.lastIndexOf('/');
+        String namespace = index < 0 ? "" : prefix.substring(0, index);
+        Map<String, String> trunkFlagMap = (mNamespaceDefaults == null)
+                ? null : mNamespaceDefaults.get(namespace);
         // Delete old keys with the prefix that are not part of the new set.
+        // trunk flags will not be configured with restricted propagation
+        // trunk flags will be explicitly set, so not removing them here
         while (iterator.hasNext()) {
             Map.Entry<String, Setting> entry = iterator.next();
             final String key = entry.getKey();
             final Setting oldState = entry.getValue();
-            if (key != null && key.startsWith(prefix) && !keyValues.containsKey(key)) {
+            if (key != null && (trunkFlagMap == null || !trunkFlagMap.containsKey(key))
+                    && key.startsWith(prefix) && !keyValues.containsKey(key)) {
                 iterator.remove();
 
                 FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, key,
@@ -538,23 +986,36 @@ final class SettingsState {
         // Update/add new keys
         for (String key : keyValues.keySet()) {
             String value = keyValues.get(key);
+
+            // Rename key if it's an aconfig flag.
+            String flagName = key;
+            if (Flags.stageAllAconfigFlags() && isConfigSettingsKey(mKey)) {
+                int slashIndex = flagName.indexOf("/");
+                boolean stageFlag = slashIndex > 0 && slashIndex != flagName.length();
+                boolean isAconfig = trunkFlagMap != null && trunkFlagMap.containsKey(flagName);
+                if (stageFlag && isAconfig) {
+                    String flagWithoutNamespace = flagName.substring(slashIndex + 1);
+                    flagName = "staged/" + namespace + "*" + flagWithoutNamespace;
+                }
+            }
+
             String oldValue = null;
-            Setting state = mSettings.get(key);
+            Setting state = mSettings.get(flagName);
             if (state == null) {
-                state = new Setting(key, value, false, packageName, null);
-                mSettings.put(key, state);
-                changedKeys.add(key); // key was added
+                state = new Setting(flagName, value, false, packageName, null);
+                mSettings.put(flagName, state);
+                changedKeys.add(flagName); // key was added
             } else if (state.value != value) {
                 oldValue = state.value;
                 state.update(value, false, packageName, null, true,
                         /* overrideableByRestore */ false);
-                changedKeys.add(key); // key was updated
+                changedKeys.add(flagName); // key was updated
             } else {
                 // this key/value already exists, no change and no logging necessary
                 continue;
             }
 
-            FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, key, value, state.value,
+            FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, flagName, value, state.value,
                     oldValue, /* tag */ null, /* make default */ false,
                     getUserIdFromKey(mKey), FrameworkStatsLog.SETTING_CHANGED__REASON__UPDATED);
             addHistoricalOperationLocked(HISTORICAL_OPERATION_UPDATE, state);
@@ -568,9 +1029,10 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
-    public void persistSyncLocked() {
+    public void persistSettingsLocked() {
         mHandler.removeMessages(MyHandler.MSG_PERSIST_SETTINGS);
-        doWriteState();
+        // schedule a write operation right away
+        mHandler.obtainMessage(MyHandler.MSG_PERSIST_SETTINGS).sendToTarget();
     }
 
     // The settings provider must hold its lock when calling here.
@@ -831,6 +1293,7 @@ final class SettingsState {
 
     private void doWriteState() {
         boolean wroteState = false;
+        String settingFailedToBePersisted = null;
         final int version;
         final ArrayMap<String, Setting> settings;
         final ArrayMap<String, String> namespaceBannedHashes;
@@ -860,7 +1323,6 @@ final class SettingsState {
 
                 final int settingCount = settings.size();
                 for (int i = 0; i < settingCount; i++) {
-
                     Setting setting = settings.valueAt(i);
                     if (setting.isTransient()) {
                         if (DEBUG_PERSISTENCE) {
@@ -869,14 +1331,27 @@ final class SettingsState {
                         continue;
                     }
 
-                    if (writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
-                            setting.getValue(), setting.getDefaultValue(), setting.getPackageName(),
-                            setting.getTag(), setting.isDefaultFromSystem(),
-                            setting.isValuePreservedInRestore())) {
-                        if (DEBUG_PERSISTENCE) {
-                            Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "="
-                                    + setting.getValue());
+                    try {
+                        if (writeSingleSetting(mVersion, serializer, setting.getId(),
+                                setting.getName(),
+                                setting.getValue(), setting.getDefaultValue(),
+                                setting.getPackageName(),
+                                setting.getTag(), setting.isDefaultFromSystem(),
+                                setting.isValuePreservedInRestore())) {
+                            if (DEBUG_PERSISTENCE) {
+                                Slog.i(LOG_TAG, "[PERSISTED]" + setting.getName() + "="
+                                        + setting.getValue());
+                            }
                         }
+                    } catch (IOException ex) {
+                        Slog.e(LOG_TAG, "[ABORT PERSISTING]" + setting.getName()
+                                + " due to error writing to disk", ex);
+                        // A setting failed to be written. Abort the serialization to avoid leaving
+                        // a partially serialized setting on disk, which can cause parsing errors.
+                        // Note down the problematic setting, so that we can delete it before trying
+                        // again to persist the rest of the settings.
+                        settingFailedToBePersisted = setting.getName();
+                        throw ex;
                     }
                 }
                 serializer.endTag(null, TAG_SETTINGS);
@@ -902,14 +1377,14 @@ final class SettingsState {
                     Slog.i(LOG_TAG, "[PERSIST END]");
                 }
             } catch (Throwable t) {
-                Slog.wtf(LOG_TAG, "Failed to write settings, restoring backup", t);
+                Slog.e(LOG_TAG, "Failed to write settings, restoring old file", t);
                 if (t instanceof IOException) {
-                    if (DEBUG) {
-                        // we failed to create a directory, so log the permissions and existence
-                        // state for the settings file and directory
-                        logSettingsDirectoryInformation(destination.getBaseFile());
-                    }
                     if (t.getMessage().contains("Couldn't create directory")) {
+                        if (DEBUG) {
+                            // we failed to create a directory, so log the permissions and existence
+                            // state for the settings file and directory
+                            logSettingsDirectoryInformation(destination.getBaseFile());
+                        }
                         // attempt to create the directory with Files.createDirectories, which
                         // throws more informative errors than File.mkdirs.
                         Path parentPath = destination.getBaseFile().getParentFile().toPath();
@@ -930,7 +1405,15 @@ final class SettingsState {
             }
         }
 
-        if (wroteState) {
+        if (!wroteState) {
+            if (settingFailedToBePersisted != null) {
+                synchronized (mLock) {
+                    // Delete the problematic setting. This will schedule a write as well.
+                    deleteSettingLocked(settingFailedToBePersisted);
+                }
+            }
+        } else {
+            // success
             synchronized (mLock) {
                 addHistoricalOperationLocked(HISTORICAL_OPERATION_PERSIST, null);
             }
@@ -1090,7 +1573,10 @@ final class SettingsState {
         } catch (FileNotFoundException fnfe) {
             final String message = "No fallback file found for: " + mStatePersistFile;
             Slog.wtf(LOG_TAG, message);
-            throw new IllegalStateException(message);
+            if (!isConfigSettingsKey(mKey)) {
+                // Allow partially deserialized config settings because they can be updated later
+                throw new IllegalStateException(message);
+            }
         }
         if (parseStateFromXmlStreamLocked(in)) {
             // Parsed state from fallback file. Restore original file with fallback file
@@ -1102,7 +1588,10 @@ final class SettingsState {
         } else {
             final String message = "Failed parsing settings file: " + mStatePersistFile;
             Slog.wtf(LOG_TAG, message);
-            throw new IllegalStateException(message);
+            if (!isConfigSettingsKey(mKey)) {
+                // Allow partially deserialized config settings because they can be updated later
+                throw new IllegalStateException(message);
+            }
         }
     }
 
@@ -1150,6 +1639,42 @@ final class SettingsState {
         }
     }
 
+    /**
+     * Transforms a staged flag name to its real flag name.
+     *
+     * Staged flags take the form {@code staged/namespace*flagName}. If
+     * {@code stagedFlagName} takes the proper form, returns
+     * {@code namespace/flagName}. Otherwise, returns {@code stagedFlagName}
+     * unmodified, and logs an error message.
+     *
+     */
+    @VisibleForTesting
+    public static String createRealFlagName(String stagedFlagName) {
+        int slashIndex = stagedFlagName.indexOf("/");
+        if (slashIndex == -1 || slashIndex == stagedFlagName.length() - 1
+                || slashIndex == 0) {
+            Slog.w(LOG_TAG, "invalid staged flag, not applying: " + stagedFlagName);
+            return stagedFlagName;
+        }
+
+        String namespaceAndFlag =
+                stagedFlagName.substring(slashIndex + 1);
+
+        int starIndex = namespaceAndFlag.indexOf("*");
+        if (starIndex == -1 || starIndex == namespaceAndFlag.length() - 1
+                || starIndex == 0) {
+            Slog.w(LOG_TAG, "invalid staged flag, not applying: " + stagedFlagName);
+            return stagedFlagName;
+        }
+
+        String namespace =
+                namespaceAndFlag.substring(0, starIndex);
+        String flagName =
+                namespaceAndFlag.substring(starIndex + 1);
+
+        return namespace + "/" + flagName;
+    }
+
     @GuardedBy("mLock")
     private void parseSettingsLocked(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
@@ -1158,6 +1683,7 @@ final class SettingsState {
 
         final int outerDepth = parser.getDepth();
         int type;
+        HashSet<String> flagsWithStagedValueApplied = new HashSet<String>();
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                 && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
             if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -1180,6 +1706,44 @@ final class SettingsState {
                     fromSystem = parser.getAttributeBoolean(null, ATTR_DEFAULT_SYS_SET, false);
                     tag = getValueAttribute(parser, ATTR_TAG, ATTR_TAG_BASE64);
                 }
+
+                if (isConfigSettingsKey(mKey)) {
+                    if (flagsWithStagedValueApplied.contains(name)) {
+                        continue;
+                    }
+
+                    if (name.startsWith(CONFIG_STAGED_PREFIX)) {
+                        name = createRealFlagName(name);
+                        flagsWithStagedValueApplied.add(name);
+                    }
+                }
+
+                if (isConfigSettingsKey(mKey) && name != null
+                        && name.equals(STORAGE_MIGRATION_FLAG)) {
+                    if (value.equals("true")) {
+                        Path path = Paths.get(STORAGE_MIGRATION_MARKER_FILE);
+                        if (!Files.exists(path)) {
+                            Files.createFile(path);
+                        }
+
+                        Set<PosixFilePermission> perms =
+                                Files.readAttributes(path, PosixFileAttributes.class).permissions();
+                        perms.add(PosixFilePermission.OWNER_WRITE);
+                        perms.add(PosixFilePermission.OWNER_READ);
+                        perms.add(PosixFilePermission.GROUP_READ);
+                        perms.add(PosixFilePermission.OTHERS_READ);
+                        try {
+                            Files.setPosixFilePermissions(path, perms);
+                        } catch (Exception e) {
+                            Slog.e(LOG_TAG, "failed to set permissions on migration marker", e);
+                        }
+                    } else {
+                        java.nio.file.Path path = Paths.get(STORAGE_MIGRATION_MARKER_FILE);
+                        if (Files.exists(path)) {
+                            Files.delete(path);
+                        }
+                    }
+                }
                 mSettings.put(name, new Setting(name, value, defaultValue, packageName, tag,
                         fromSystem, id, isPreservedInRestore));
 
@@ -1187,6 +1751,16 @@ final class SettingsState {
                     Slog.i(LOG_TAG, "[RESTORED] " + name + "=" + value);
                 }
             }
+        }
+
+        if (isConfigSettingsKey(mKey) && !flagsWithStagedValueApplied.isEmpty()) {
+            // On boot, the config table XML file includes special staged flags. On the initial
+            // boot XML -> HashMap parse, these staged flags get transformed into real flags.
+            // After this, the HashMap contains no special staged flags (only the transformed
+            // real flags), but the XML still does. We then have no need for the special staged
+            // flags in the XML, so we overwrite the XML with the latest contents of the
+            // HashMap.
+            writeStateAsyncLocked();
         }
     }
 
@@ -1616,6 +2190,22 @@ final class SettingsState {
     public int getMemoryUsage(String packageName) {
         synchronized (mLock) {
             return mPackageToMemoryUsage.getOrDefault(packageName, 0);
+        }
+    }
+
+    /**
+     * Allow tests to wait for the handler to finish handling all the remaining messages
+     */
+    @VisibleForTesting
+    public void waitForHandler() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        synchronized (mLock) {
+            mHandler.post(latch::countDown);
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            // ignored
         }
     }
 }

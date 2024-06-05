@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package com.android.settingslib.spa.widget.preference
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,11 +29,11 @@ import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.compose.toState
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.fail
 import org.junit.Rule
@@ -65,7 +64,7 @@ class PreferenceTest {
             Box(Modifier.width(BOX_WIDTH)) {
                 Preference(object : PreferenceModel {
                     override val title = TITLE
-                    override val summary = LONG_SUMMARY.toState()
+                    override val summary = { LONG_SUMMARY }
                 })
             }
             lineHeightDp = with(LocalDensity.current) {
@@ -85,7 +84,7 @@ class PreferenceTest {
                 Preference(
                     model = object : PreferenceModel {
                         override val title = TITLE
-                        override val summary = LONG_SUMMARY.toState()
+                        override val summary = { LONG_SUMMARY }
                     },
                     singleLineSummary = true,
                 )
@@ -95,11 +94,10 @@ class PreferenceTest {
             }
         }
 
-        val summaryNode = composeTestRule.onNodeWithText(LONG_SUMMARY)
         try {
             // There is no assertHeightIsAtMost, so use the assertHeightIsAtLeast and catch the
             // expected exception.
-            summaryNode.assertHeightIsAtLeast(lineHeightDp.times(2))
+            composeTestRule.onRoot().assertHeightIsAtLeast(lineHeightDp.times(5))
         } catch (e: AssertionError) {
             assertThat(e).hasMessageThat().contains("height")
             return
@@ -113,7 +111,7 @@ class PreferenceTest {
             var count by remember { mutableStateOf(0) }
             Preference(object : PreferenceModel {
                 override val title = TITLE
-                override val summary = derivedStateOf { count.toString() }
+                override val summary = { count.toString() }
                 override val onClick: (() -> Unit) = { count++ }
             })
         }
@@ -128,8 +126,8 @@ class PreferenceTest {
             var count by remember { mutableStateOf(0) }
             Preference(object : PreferenceModel {
                 override val title = TITLE
-                override val summary = derivedStateOf { count.toString() }
-                override val enabled = false.toState()
+                override val summary = { count.toString() }
+                override val enabled = { false }
                 override val onClick: (() -> Unit) = { count++ }
             })
         }

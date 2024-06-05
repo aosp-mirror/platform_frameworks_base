@@ -33,6 +33,11 @@ import static android.app.ActivityOptions.ANIM_UNDEFINED;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+import static android.app.CameraCompatTaskInfo.cameraCompatControlStateToString;
 import static android.app.WaitResult.INVALID_DELAY;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
@@ -46,9 +51,11 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
+import static android.app.WindowConfiguration.isFloating;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.PROFILE_SWITCH_ANIMATION;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.OUTLINE;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
+import static android.content.Context.CONTEXT_RESTRICTED;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_HOME;
 import static android.content.Intent.CATEGORY_LAUNCHER;
@@ -70,6 +77,7 @@ import static android.content.pm.ActivityInfo.FLAG_NO_HISTORY;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.FLAG_STATE_NOT_NEEDED;
 import static android.content.pm.ActivityInfo.FLAG_TURN_SCREEN_ON;
+import static android.content.pm.ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
@@ -78,6 +86,7 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
+import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_MEDIUM;
@@ -108,21 +117,24 @@ import static android.os.Build.VERSION_CODES.O;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.view.Display.COLOR_MODE_DEFAULT;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
-import static android.view.SurfaceControl.getGlobalTransaction;
+import static android.view.WindowManager.ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15;
+import static android.view.WindowManager.ENABLE_ACTIVITY_EMBEDDING_FOR_ANDROID_15;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED;
+import static android.view.WindowManager.PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
+import static android.view.WindowManager.hasWindowExtensionsEnabled;
+import static android.window.TransitionInfo.FLAGS_IS_OCCLUDED_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
@@ -138,6 +150,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SWITCH;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
@@ -165,6 +178,7 @@ import static com.android.server.wm.ActivityRecordProto.FILLS_PARENT;
 import static com.android.server.wm.ActivityRecordProto.FRONT_OF_TASK;
 import static com.android.server.wm.ActivityRecordProto.IN_SIZE_COMPAT_MODE;
 import static com.android.server.wm.ActivityRecordProto.IS_ANIMATING;
+import static com.android.server.wm.ActivityRecordProto.IS_USER_FULLSCREEN_OVERRIDE_ENABLED;
 import static com.android.server.wm.ActivityRecordProto.IS_WAITING_FOR_TRANSITION_START;
 import static com.android.server.wm.ActivityRecordProto.LAST_ALL_DRAWN;
 import static com.android.server.wm.ActivityRecordProto.LAST_DROP_INPUT_MODE;
@@ -179,7 +193,11 @@ import static com.android.server.wm.ActivityRecordProto.PROC_ID;
 import static com.android.server.wm.ActivityRecordProto.PROVIDES_MAX_BOUNDS;
 import static com.android.server.wm.ActivityRecordProto.REPORTED_DRAWN;
 import static com.android.server.wm.ActivityRecordProto.REPORTED_VISIBLE;
+import static com.android.server.wm.ActivityRecordProto.SHOULD_ENABLE_USER_ASPECT_RATIO_SETTINGS;
 import static com.android.server.wm.ActivityRecordProto.SHOULD_FORCE_ROTATE_FOR_CAMERA_COMPAT;
+import static com.android.server.wm.ActivityRecordProto.SHOULD_IGNORE_ORIENTATION_REQUEST_LOOP;
+import static com.android.server.wm.ActivityRecordProto.SHOULD_OVERRIDE_FORCE_RESIZE_APP;
+import static com.android.server.wm.ActivityRecordProto.SHOULD_OVERRIDE_MIN_ASPECT_RATIO;
 import static com.android.server.wm.ActivityRecordProto.SHOULD_REFRESH_ACTIVITY_FOR_CAMERA_COMPAT;
 import static com.android.server.wm.ActivityRecordProto.SHOULD_REFRESH_ACTIVITY_VIA_PAUSE_FOR_CAMERA_COMPAT;
 import static com.android.server.wm.ActivityRecordProto.SHOULD_SEND_COMPAT_FAKE_FOCUS;
@@ -219,13 +237,15 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_F
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutMillisLocked;
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.LetterboxConfiguration.DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW;
 import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+import static com.android.server.wm.StartingData.AFTER_TRANSACTION_COPY_TO_CLIENT;
+import static com.android.server.wm.StartingData.AFTER_TRANSACTION_REMOVE_DIRECTLY;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
@@ -256,22 +276,21 @@ import android.annotation.Size;
 import android.app.Activity;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
+import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.ICompatCameraControlCallback;
 import android.app.IScreenCaptureObserver;
 import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.ResultInfo;
-import android.app.TaskInfo;
-import android.app.TaskInfo.CameraCompatControlState;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.ActivityId;
+import android.app.compat.CompatChanges;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ActivityResultItem;
-import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.MoveToDisplayItem;
@@ -291,9 +310,12 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConstrainDisplayApisConfig;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
+import android.content.pm.UserProperties;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -318,10 +340,10 @@ import android.service.contentcapture.ActivityEvent;
 import android.service.dreams.DreamActivity;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.MergedConfiguration;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -335,11 +357,13 @@ import android.view.RemoteAnimationTarget;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
+import android.window.ActivityWindowInfo;
 import android.window.ITaskFragmentOrganizer;
 import android.window.RemoteTransition;
 import android.window.SizeConfigurationBuckets;
@@ -349,6 +373,7 @@ import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
 import android.window.TransitionInfo.AnimationOptions;
 import android.window.WindowContainerToken;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -367,12 +392,15 @@ import com.android.server.am.AppTimeTracker;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.display.color.ColorDisplayService;
+import com.android.server.pm.UserManagerInternal;
+import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityMetricsLogger.TransitionInfoSnapshot;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.WindowManagerService.H;
 import com.android.server.wm.utils.InsetUtils;
+import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -421,6 +449,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private static final String ATTR_LAUNCHEDFROMFEATURE = "launched_from_feature";
     private static final String ATTR_RESOLVEDTYPE = "resolved_type";
     private static final String ATTR_COMPONENTSPECIFIED = "component_specified";
+    private static final String TAG_INITIAL_CALLER_INFO = "initial_caller_info";
     static final String ACTIVITY_ICON_SUFFIX = "_activity_icon_";
 
     // How many activities have to be scheduled to stop to force a stop pass.
@@ -457,6 +486,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private static final float ASPECT_RATIO_ROUNDING_TOLERANCE = 0.005f;
 
     final ActivityTaskManagerService mAtmService;
+    final ActivityCallerState mCallerState;
     @NonNull
     final ActivityInfo info; // activity info provided by developer in AndroidManifest
     // Which user is this running for?
@@ -488,10 +518,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private final boolean componentSpecified;  // did caller specify an explicit component?
     final boolean rootVoiceInteraction;  // was this the root activity of a voice interaction?
 
-    private CharSequence nonLocalizedLabel;  // the label information from the package mgr.
-    private int labelRes;           // the label information from the package mgr.
-    private int icon;               // resource identifier of activity's icon.
-    private int theme;              // resource identifier of activity's theme.
+    private final int theme;        // resource identifier of activity's theme.
     private Task task;              // the task this is in.
     private long createTime = System.currentTimeMillis();
     long lastVisibleTime;         // last time this activity became visible
@@ -499,10 +526,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     long launchTickTime;          // base time for launch tick messages
     long topResumedStateLossTime; // last time we reported top resumed state loss to an activity
     // Last configuration reported to the activity in the client process.
-    private MergedConfiguration mLastReportedConfiguration;
+    private final MergedConfiguration mLastReportedConfiguration;
     private int mLastReportedDisplayId;
     boolean mLastReportedMultiWindowMode;
     boolean mLastReportedPictureInPictureMode;
+    private final ActivityWindowInfo mLastReportedActivityWindowInfo = new ActivityWindowInfo();
     ActivityRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
     final int requestCode;  // code given by requester (resultTo)
@@ -535,10 +563,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
     boolean delayedResume;  // not yet resumed because of stopped app switches?
     boolean finishing;      // activity in pending finish list?
-    boolean deferRelaunchUntilPaused;   // relaunch of activity is being deferred until pause is
-                                        // completed
-    boolean preserveWindowOnDeferredRelaunch; // activity windows are preserved on deferred relaunch
-    int configChangeFlags;  // which config values have changed
     private boolean keysPaused;     // has key dispatching been paused for it?
     int launchMode;         // the launch mode activity attribute.
     int lockTaskLaunchMode; // the lockTaskMode manifest attribute, subject to override
@@ -557,13 +581,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean mClientVisibilityDeferred;// was the visibility change message to client deferred?
     boolean idle;           // has the activity gone idle?
     boolean hasBeenLaunched;// has this activity ever been launched?
-    boolean frozenBeforeDestroy;// has been frozen but not yet destroyed.
     boolean immersive;      // immersive mode (don't interrupt if possible)
-    boolean forceNewConfig; // force re-create with new config next time
     boolean supportsEnterPipOnTaskSwitch;  // This flag is set by the system to indicate that the
         // activity can enter picture in picture while pausing (only when switching to another task)
+    // The PiP params used when deferring the entering of picture-in-picture.
     PictureInPictureParams pictureInPictureArgs = new PictureInPictureParams.Builder().build();
-        // The PiP params used when deferring the entering of picture-in-picture.
     boolean shouldDockBigOverlays;
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last launch of this activity
@@ -579,19 +601,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Tracking splash screen status from previous activity
     boolean mSplashScreenStyleSolidColor = false;
 
-    Drawable mEnterpriseThumbnailDrawable;
-
     boolean mPauseSchedulePendingForPip = false;
 
     // Gets set to indicate that the activity is currently being auto-pipped.
     boolean mAutoEnteringPip = false;
-
-    private void updateEnterpriseThumbnailDrawable(Context context) {
-        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        mEnterpriseThumbnailDrawable = dpm.getResources().getDrawable(
-                WORK_PROFILE_ICON, OUTLINE, PROFILE_SWITCH_ANIMATION,
-                () -> context.getDrawable(R.drawable.ic_corp_badge));
-    }
 
     static final int LAUNCH_SOURCE_TYPE_SYSTEM = 1;
     static final int LAUNCH_SOURCE_TYPE_HOME = 2;
@@ -648,6 +661,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private CompatDisplayInsets mCompatDisplayInsets;
 
+    private final TaskFragment.ConfigOverrideHint mResolveConfigHint;
+
+    private final boolean mOptOutEdgeToEdge;
+
     private static ConstrainDisplayApisConfig sConstrainDisplayApisConfig;
 
     boolean pendingVoiceInteractionStart;   // Waiting for activity-invoked voice session
@@ -655,7 +672,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean mVoiceInteraction;
 
-    private int mPendingRelaunchCount;
+    int mPendingRelaunchCount;
     long mRelaunchStartTime;
 
     // True if we are current in the process of removing this app token from the display
@@ -669,6 +686,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // due to picture-in-picture. This gets cleared whenever this activity or the Task
     // it references to gets removed. This should also be cleared when we move out of pip.
     private Task mLastParentBeforePip;
+
+    // The token of the previous TaskFragment parent of this embedded ActivityRecord when it is
+    // reparented to a new Task due to picture-in-picture.
+    // Note that the TaskFragment may be finished and no longer attached in WM hierarchy.
+    @Nullable
+    private IBinder mLastEmbeddedParentTfTokenBeforePip;
 
     // Only set if this instance is a launch-into-pip Activity, points to the
     // host Activity the launch-into-pip Activity is originated from.
@@ -687,6 +710,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private final WindowState.UpdateReportedVisibilityResults mReportedVisibilityResults =
             new WindowState.UpdateReportedVisibilityResults();
 
+    // TODO(b/317000737): Replace it with visibility states lookup.
     int mTransitionChangeFlags;
 
     /** Whether we need to setup the animation to animate only within the letterbox. */
@@ -698,7 +722,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean mCurrentLaunchCanTurnScreenOn = true;
 
     /** Whether our surface was set to be showing in the last call to {@link #prepareSurfaces} */
-    private boolean mLastSurfaceShowing;
+    boolean mLastSurfaceShowing;
 
     /**
      * The activity is opaque and fills the entire space of this task.
@@ -722,10 +746,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean mInheritShownWhenLocked;
     private boolean mTurnScreenOn;
 
-    /** Allow activity launches which would otherwise be blocked by
-     * {@link ActivityTransitionSecurityController#checkActivityAllowedToStart}
+    /**
+     * Whether the user is always-visible (e.g. a communal profile). Activities for such users
+     * are treated as visible regardless of what user is in the foreground, and can appear
+     * over the lockscreen.
      */
-    private boolean mAllowCrossUidActivitySwitchFromBelow;
+    private final boolean mIsUserAlwaysVisible;
+
+    /** Allow activity launches which would otherwise be blocked by
+     * {@link BackgroundActivityStartController#checkActivityAllowedToStart}
+     */
+    boolean mAllowCrossUidActivitySwitchFromBelow;
 
     /** Have we been asked to have this token keep the screen frozen? */
     private boolean mFreezingScreen;
@@ -801,6 +832,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Nullable
     private Rect mLetterboxBoundsForFixedOrientationAndAspectRatio;
 
+    // Bounds populated in resolveAspectRatioRestriction when this activity is letterboxed for
+    // aspect ratio. If not null, they are used as parent container in
+    // resolveSizeCompatModeConfiguration and in a constructor of CompatDisplayInsets.
+    @Nullable
+    private Rect mLetterboxBoundsForAspectRatio;
+
     // Whether the activity is eligible to be letterboxed for fixed orientation with respect to its
     // requested orientation, even when it's letterbox for another reason (e.g., size compat mode)
     // and therefore #isLetterboxedForFixedOrientationAndAspectRatio returns false.
@@ -809,7 +846,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // State of the Camera app compat control which is used to correct stretched viewfinder
     // in apps that don't handle all possible configurations and changes between them correctly.
     @CameraCompatControlState
-    private int mCameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+    private int mCameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
 
 
     // The callback that allows to ask the calling View to apply the treatment for stretched
@@ -912,7 +949,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean mEnteringAnimation;
     boolean mOverrideTaskTransition;
-    boolean mDismissKeyguard;
+    boolean mDismissKeyguardIfInsecure;
     boolean mShareIdentity;
 
     /** True if the activity has reported stopped; False if the activity becomes visible. */
@@ -944,10 +981,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private int mConfigurationSeq;
 
     /**
-     * Temp configs used in {@link #ensureActivityConfiguration(int, boolean)}
+     * Temp configs used in {@link #ensureActivityConfiguration()}
      */
     private final Configuration mTmpConfig = new Configuration();
     private final Rect mTmpBounds = new Rect();
+    private final ActivityWindowInfo mTmpActivityWindowInfo = new ActivityWindowInfo();
 
     // Token for targeting this activity for assist purposes.
     final Binder assistToken = new Binder();
@@ -955,6 +993,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // A reusable token for other purposes, e.g. content capture, translation. It shouldn't be used
     // without security checks
     final Binder shareableActivityToken = new Binder();
+
+    // Token for accessing the initial caller who started the activity.
+    final IBinder initialCallerInfoAccessToken = new Binder();
 
     // Tracking cookie for the launch of this activity and it's task.
     IBinder mLaunchCookie;
@@ -967,6 +1008,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean mWaitForEnteringPinnedMode;
 
     final ActivityRecordInputSink mActivityRecordInputSink;
+    // System activities with INTERNAL_SYSTEM_WINDOW can disable ActivityRecordInputSink.
+    boolean mActivityRecordInputSinkEnabled = true;
 
     // Activities with this uid are allowed to not create an input sink while being in the same
     // task and directly above this ActivityRecord. This field is updated whenever a new activity
@@ -974,13 +1017,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     int mAllowedTouchUid;
     // Whether client has requested a scene transition when exiting.
     final boolean mHasSceneTransition;
+    // Whether the app has opt-in enableOnBackInvokedCallback.
+    final boolean mOptInOnBackInvoked;
 
     // Whether the ActivityEmbedding is enabled on the app.
     private final boolean mAppActivityEmbeddingSplitsEnabled;
 
+    // Whether the Activity allows state sharing in untrusted embedding
+    private final boolean mAllowUntrustedEmbeddingStateSharing;
+
     // Records whether client has overridden the WindowAnimation_(Open/Close)(Enter/Exit)Animation.
     private CustomAppTransition mCustomOpenTransition;
     private CustomAppTransition mCustomCloseTransition;
+
+    /** Non-zero to pause dispatching configuration changes to the client. */
+    int mPauseConfigurationDispatchCount = 0;
 
     private final Runnable mPauseTimeoutRunnable = new Runnable() {
         @Override
@@ -1050,17 +1101,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         pw.print(prefix); pw.print("taskAffinity="); pw.println(taskAffinity);
         pw.print(prefix); pw.print("mActivityComponent=");
                 pw.println(mActivityComponent.flattenToShortString());
-        if (info != null && info.applicationInfo != null) {
-            final ApplicationInfo appInfo = info.applicationInfo;
-            pw.print(prefix); pw.print("baseDir="); pw.println(appInfo.sourceDir);
-            if (!Objects.equals(appInfo.sourceDir, appInfo.publicSourceDir)) {
-                pw.print(prefix); pw.print("resDir="); pw.println(appInfo.publicSourceDir);
-            }
-            pw.print(prefix); pw.print("dataDir="); pw.println(appInfo.dataDir);
-            if (appInfo.splitSourceDirs != null) {
-                pw.print(prefix); pw.print("splitDir=");
-                        pw.println(Arrays.toString(appInfo.splitSourceDirs));
-            }
+        final ApplicationInfo appInfo = info.applicationInfo;
+        pw.print(prefix); pw.print("baseDir="); pw.println(appInfo.sourceDir);
+        if (!Objects.equals(appInfo.sourceDir, appInfo.publicSourceDir)) {
+            pw.print(prefix); pw.print("resDir="); pw.println(appInfo.publicSourceDir);
+        }
+        pw.print(prefix); pw.print("dataDir="); pw.println(appInfo.dataDir);
+        if (appInfo.splitSourceDirs != null) {
+            pw.print(prefix); pw.print("splitDir=");
+            pw.println(Arrays.toString(appInfo.splitSourceDirs));
         }
         pw.print(prefix); pw.print("stateNotNeeded="); pw.print(stateNotNeeded);
                 pw.print(" componentSpecified="); pw.print(componentSpecified);
@@ -1071,11 +1120,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         pw.print(prefix); pw.print("compat=");
         pw.print(mAtmService.compatibilityInfoForPackageLocked(info.applicationInfo));
-                pw.print(" labelRes=0x"); pw.print(Integer.toHexString(labelRes));
-                pw.print(" icon=0x"); pw.print(Integer.toHexString(icon));
                 pw.print(" theme=0x"); pw.println(Integer.toHexString(theme));
         pw.println(prefix + "mLastReportedConfigurations:");
         mLastReportedConfiguration.dump(pw, prefix + "  ");
+
+        if (Flags.activityWindowInfoFlag()) {
+            pw.print(prefix);
+            pw.print("mLastReportedActivityWindowInfo=");
+            pw.println(mLastReportedActivityWindowInfo);
+        }
 
         pw.print(prefix); pw.print("CurrentConfiguration="); pw.println(getConfiguration());
         if (!getRequestedOverrideConfiguration().equals(EMPTY)) {
@@ -1196,8 +1249,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.print(" noDisplay="); pw.print(noDisplay);
                 pw.print(" immersive="); pw.print(immersive);
                 pw.print(" launchMode="); pw.println(launchMode);
-        pw.print(prefix); pw.print("frozenBeforeDestroy="); pw.print(frozenBeforeDestroy);
-                pw.print(" forceNewConfig="); pw.println(forceNewConfig);
         pw.print(prefix); pw.print("mActivityType=");
                 pw.println(activityTypeToString(getActivityType()));
         pw.print(prefix); pw.print("mImeInsetsFrozenUntilStartInput=");
@@ -1269,12 +1320,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mDeferHidingClient) {
             pw.println(prefix + "mDeferHidingClient=" + mDeferHidingClient);
         }
-        if (deferRelaunchUntilPaused || configChangeFlags != 0) {
-            pw.print(prefix); pw.print("deferRelaunchUntilPaused=");
-                    pw.print(deferRelaunchUntilPaused);
-                    pw.print(" configChangeFlags=");
-                    pw.println(Integer.toHexString(configChangeFlags));
-        }
         if (mServiceConnectionsHolder != null) {
             pw.print(prefix); pw.print("connections="); pw.println(mServiceConnectionsHolder);
         }
@@ -1286,6 +1331,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.println(prefix + "supportsPictureInPicture=" + info.supportsPictureInPicture());
                 pw.println(prefix + "supportsEnterPipOnTaskSwitch: "
                         + supportsEnterPipOnTaskSwitch);
+                pw.println(prefix + "mPauseSchedulePendingForPip=" + mPauseSchedulePendingForPip);
             }
             if (getMaxAspectRatio() != 0) {
                 pw.println(prefix + "maxAspectRatio=" + getMaxAspectRatio());
@@ -1315,11 +1361,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mLaunchIntoPipHostActivity != null) {
             pw.println(prefix + "launchIntoPipHostActivity=" + mLaunchIntoPipHostActivity);
         }
+        if (mWaitForEnteringPinnedMode) {
+            pw.print(prefix); pw.println("mWaitForEnteringPinnedMode=true");
+        }
 
         mLetterboxUiController.dump(pw, prefix);
 
         pw.println(prefix + "mCameraCompatControlState="
-                + TaskInfo.cameraCompatControlStateToString(mCameraCompatControlState));
+                + cameraCompatControlStateToString(mCameraCompatControlState));
         pw.println(prefix + "mCameraCompatControlEnabled=" + mCameraCompatControlEnabled);
     }
 
@@ -1429,7 +1478,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mSizeConfigurations = sizeConfigurations;
     }
 
-    private void scheduleActivityMovedToDisplay(int displayId, Configuration config) {
+    private void scheduleActivityMovedToDisplay(int displayId, @NonNull Configuration config,
+            @NonNull ActivityWindowInfo activityWindowInfo) {
         if (!attachedToProcess()) {
             ProtoLog.w(WM_DEBUG_SWITCH, "Can't report activity moved "
                     + "to display - client not running, activityRecord=%s, displayId=%d",
@@ -1441,14 +1491,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     + "display, activityRecord=%s, displayId=%d, config=%s", this, displayId,
                     config);
 
-            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                    MoveToDisplayItem.obtain(displayId, config));
+            mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
+                    MoveToDisplayItem.obtain(token, displayId, config, activityWindowInfo));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
     }
 
-    private void scheduleConfigurationChanged(Configuration config) {
+    private void scheduleConfigurationChanged(@NonNull Configuration config,
+            @NonNull ActivityWindowInfo activityWindowInfo) {
         if (!attachedToProcess()) {
             ProtoLog.w(WM_DEBUG_CONFIGURATION, "Can't report activity configuration "
                     + "update - client not running, activityRecord=%s", this);
@@ -1458,8 +1509,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending new config to %s, "
                     + "config: %s", this, config);
 
-            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                    ActivityConfigurationChangeItem.obtain(config));
+            mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
+                    ActivityConfigurationChangeItem.obtain(token, config, activityWindowInfo));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -1479,8 +1530,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             ProtoLog.v(WM_DEBUG_STATES, "Sending position change to %s, onTop: %b",
                     this, onTop);
 
-            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                    TopResumedActivityChangeItem.obtain(onTop));
+            mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
+                    TopResumedActivityChangeItem.obtain(token, onTop));
         } catch (RemoteException e) {
             // If process died, whatever.
             Slog.w(TAG, "Failed to send top-resumed=" + onTop + " to " + this, e);
@@ -1501,7 +1552,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 updatePictureInPictureMode(null, false);
             } else {
                 mLastReportedMultiWindowMode = inMultiWindowMode;
-                ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS);
+                ensureActivityConfiguration();
             }
         }
     }
@@ -1517,12 +1568,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Picture-in-picture mode changes also trigger a multi-window mode change as well, so
             // update that here in order. Set the last reported MW state to the same as the PiP
             // state since we haven't yet actually resized the task (these callbacks need to
-            // precede the configuration change from the resize.
+            // precede the configuration change from the resize.)
             mLastReportedPictureInPictureMode = inPictureInPictureMode;
             mLastReportedMultiWindowMode = inPictureInPictureMode;
-            ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
-                    true /* ignoreVisibility */);
-            if (inPictureInPictureMode && findMainWindow() == null) {
+            ensureActivityConfiguration(true /* ignoreVisibility */);
+            if (inPictureInPictureMode && findMainWindow() == null
+                    && task.topRunningActivity() == this) {
                 // Prevent malicious app entering PiP without valid WindowState, which can in turn
                 // result a non-touchable PiP window since the InputConsumer for PiP requires it.
                 EventLog.writeEvent(0x534e4554, "265293293", -1, "");
@@ -1548,9 +1599,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        // Transition change for the activity moving into a TaskFragment of different bounds.
-        return newParent.isOrganizedTaskFragment()
-                && !newParent.getBounds().equals(oldParent.getBounds());
+        final boolean isInPip2 = ActivityTaskManagerService.isPip2ExperimentEnabled()
+                && inPinnedWindowingMode();
+        if (!newParent.isOrganizedTaskFragment() && !isInPip2) {
+            // Parent TaskFragment isn't associated with a TF organizer and we are not in PiP2,
+            // so do not allow for initializeChangeTransition() on parent changes
+            return false;
+        }
+        // Transition change for the activity moving into TaskFragment of different bounds.
+        return !newParent.getBounds().equals(oldParent.getBounds());
     }
 
     @Override
@@ -1731,6 +1788,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mAnimatingActivityRegistry = registry;
     }
 
+    boolean canAutoEnterPip() {
+        // beforeStopping=false since the actual pip-ing will take place after startPausing()
+        final boolean activityCanPip = checkEnterPictureInPictureState(
+                "startActivityUnchecked", false /* beforeStopping */);
+
+        // check if this activity is about to auto-enter pip
+        return activityCanPip && pictureInPictureArgs != null
+                && pictureInPictureArgs.isAutoEnterEnabled();
+    }
+
     /**
      * Sets {@link #mLastParentBeforePip} to the current parent Task, it's caller's job to ensure
      * {@link #getTask()} is set before this is called.
@@ -1750,6 +1817,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLastTaskFragmentOrganizerBeforePip = organizedTf != null
                 ? organizedTf.getTaskFragmentOrganizer()
                 : null;
+        if (organizedTf != null
+                // Not necessary for content pip.
+                && launchIntoPipHostActivity == null) {
+            mLastEmbeddedParentTfTokenBeforePip = organizedTf.getFragmentToken();
+        }
     }
 
     void clearLastParentBeforePip() {
@@ -1759,10 +1831,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         mLaunchIntoPipHostActivity = null;
         mLastTaskFragmentOrganizerBeforePip = null;
+        mLastEmbeddedParentTfTokenBeforePip = null;
     }
 
     @Nullable Task getLastParentBeforePip() {
         return mLastParentBeforePip;
+    }
+
+    @Nullable IBinder getLastEmbeddedParentTfTokenBeforePip() {
+        return mLastEmbeddedParentTfTokenBeforePip;
     }
 
     @Nullable ActivityRecord getLaunchIntoPipHostActivity() {
@@ -1814,20 +1891,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLetterboxUiController.onMovedToDisplay(mDisplayContent.getDisplayId());
     }
 
-    void layoutLetterbox(WindowState winHint) {
-        mLetterboxUiController.layoutLetterbox(winHint);
+    void layoutLetterboxIfNeeded(WindowState winHint) {
+        mLetterboxUiController.layoutLetterboxIfNeeded(winHint);
     }
 
     boolean hasWallpaperBackgroundForLetterbox() {
         return mLetterboxUiController.hasWallpaperBackgroundForLetterbox();
     }
 
-    void updateLetterboxSurface(WindowState winHint, Transaction t) {
-        mLetterboxUiController.updateLetterboxSurface(winHint, t);
+    void updateLetterboxSurfaceIfNeeded(WindowState winHint, Transaction t) {
+        mLetterboxUiController.updateLetterboxSurfaceIfNeeded(winHint, t);
     }
 
-    void updateLetterboxSurface(WindowState winHint) {
-        mLetterboxUiController.updateLetterboxSurface(winHint);
+    void updateLetterboxSurfaceIfNeeded(WindowState winHint) {
+        mLetterboxUiController.updateLetterboxSurfaceIfNeeded(winHint);
     }
 
     /** Gets the letterbox insets. The insets will be empty if there is no letterbox. */
@@ -1847,24 +1924,24 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         if (mCameraCompatControlClickedByUser && (showControl
-                || mCameraCompatControlState == TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED)) {
+                || mCameraCompatControlState == CAMERA_COMPAT_CONTROL_DISMISSED)) {
             // The user already applied treatment on this activity or dismissed control.
             // Respecting their choice.
             return;
         }
         mCompatCameraControlCallback = callback;
         int newCameraCompatControlState = !showControl
-                ? TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN
+                ? CAMERA_COMPAT_CONTROL_HIDDEN
                 : transformationApplied
-                        ? TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED
-                        : TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+                        ? CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED
+                        : CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
         boolean changed = setCameraCompatControlState(newCameraCompatControlState);
         if (!changed) {
             return;
         }
         mTaskSupervisor.getActivityMetricsLogger().logCameraCompatControlAppearedEventReported(
                 newCameraCompatControlState, info.applicationInfo.uid);
-        if (newCameraCompatControlState == TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN) {
+        if (newCameraCompatControlState == CAMERA_COMPAT_CONTROL_HIDDEN) {
             mCameraCompatControlClickedByUser = false;
             mCompatCameraControlCallback = null;
         }
@@ -1882,7 +1959,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Feature is disabled by config_isCameraCompatControlForStretchedIssuesEnabled.
             return;
         }
-        if (state == TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN) {
+        if (state == CAMERA_COMPAT_CONTROL_HIDDEN) {
             Slog.w(TAG, "Unexpected hidden state in updateCameraCompatState");
             return;
         }
@@ -1893,7 +1970,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         mTaskSupervisor.getActivityMetricsLogger().logCameraCompatControlClickedEventReported(
                 state, info.applicationInfo.uid);
-        if (state == TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED) {
+        if (state == CAMERA_COMPAT_CONTROL_DISMISSED) {
             mCompatCameraControlCallback = null;
             return;
         }
@@ -1902,7 +1979,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         try {
-            if (state == TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED) {
+            if (state == CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED) {
                 mCompatCameraControlCallback.applyCameraCompatTreatment();
             } else {
                 mCompatCameraControlCallback.revertCameraCompatTreatment();
@@ -1992,6 +2069,37 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    boolean hasCaller(IBinder callerToken) {
+        return mCallerState.hasCaller(callerToken);
+    }
+
+    int getCallerUid(IBinder callerToken) {
+        return mCallerState.getUid(callerToken);
+    }
+
+    String getCallerPackage(IBinder callerToken) {
+        return mCallerState.getPackage(callerToken);
+    }
+
+    boolean isCallerShareIdentityEnabled(IBinder callerToken) {
+        return mCallerState.isShareIdentityEnabled(callerToken);
+    }
+
+    void computeInitialCallerInfo() {
+        computeCallerInfo(initialCallerInfoAccessToken, intent, launchedFromUid,
+                launchedFromPackage, mShareIdentity);
+    }
+
+    void computeCallerInfo(IBinder callerToken, Intent intent, int callerUid,
+            String callerPackageName, boolean isCallerShareIdentityEnabled) {
+        mCallerState.computeCallerInfo(callerToken, intent, callerUid, callerPackageName,
+                isCallerShareIdentityEnabled);
+    }
+
+    boolean checkContentUriPermission(IBinder callerToken, GrantUri grantUri, int modeFlags) {
+        return mCallerState.checkContentUriPermission(callerToken, grantUri, modeFlags);
+    }
+
     private ActivityRecord(ActivityTaskManagerService _service, WindowProcessController _caller,
             int _launchedFromPid, int _launchedFromUid, String _launchedFromPackage,
             @Nullable String _launchedFromFeature, Intent _intent, String _resolvedType,
@@ -2031,9 +2139,28 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLetterboxUiController = new LetterboxUiController(mWmService, this);
         mCameraCompatControlEnabled = mWmService.mContext.getResources()
                 .getBoolean(R.bool.config_isCameraCompatControlForStretchedIssuesEnabled);
+        mResolveConfigHint = new TaskFragment.ConfigOverrideHint();
+        if (mWmService.mFlags.mInsetsDecoupledConfiguration) {
+            // When the stable configuration is the default behavior, override for the legacy apps
+            // without forward override flag.
+            mResolveConfigHint.mUseOverrideInsetsForConfig =
+                    !info.isChangeEnabled(INSETS_DECOUPLED_CONFIGURATION_ENFORCED)
+                            && !info.isChangeEnabled(
+                                    OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION);
+        } else {
+            // When the stable configuration is not the default behavior, forward overriding the
+            // listed apps.
+            mResolveConfigHint.mUseOverrideInsetsForConfig =
+                    info.isChangeEnabled(OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION);
+        }
 
         mTargetSdk = info.applicationInfo.targetSdkVersion;
-        mShowForAllUsers = (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0;
+
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        final UserProperties properties = umi.getUserProperties(mUserId);
+        mIsUserAlwaysVisible =  properties != null && properties.getAlwaysVisible();
+
+        mShowForAllUsers = (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0 || mIsUserAlwaysVisible;
         setOrientation(info.screenOrientation);
         mRotationAnimationHint = info.rotationAnimation;
 
@@ -2057,9 +2184,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     || ent.array.getBoolean(R.styleable.Window_windowShowWallpaper, false);
             mStyleFillsParent = mOccludesParent;
             noDisplay = ent.array.getBoolean(R.styleable.Window_windowNoDisplay, false);
+            mOptOutEdgeToEdge = ent.array.getBoolean(
+                    R.styleable.Window_windowOptOutEdgeToEdgeEnforcement, false);
         } else {
             mStyleFillsParent = mOccludesParent = true;
             noDisplay = false;
+            mOptOutEdgeToEdge = false;
         }
 
         if (options != null) {
@@ -2079,7 +2209,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
 
             mOverrideTaskTransition = options.getOverrideTaskTransition();
-            mDismissKeyguard = options.getDismissKeyguard();
+            mDismissKeyguardIfInsecure = options.getDismissKeyguardIfInsecure();
             mShareIdentity = options.isShareIdentityEnabled();
         }
 
@@ -2106,7 +2236,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         launchFailed = false;
         delayedResume = false;
         finishing = false;
-        deferRelaunchUntilPaused = false;
         keysPaused = false;
         inHistory = false;
         nowVisible = false;
@@ -2115,8 +2244,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         hasBeenLaunched = false;
         mTaskSupervisor = supervisor;
 
-        info.taskAffinity = computeTaskAffinity(info.taskAffinity, info.applicationInfo.uid,
-                info.launchMode, mActivityComponent);
+        info.taskAffinity = computeTaskAffinity(info.taskAffinity, info.applicationInfo.uid);
         taskAffinity = info.taskAffinity;
         final String uid = Integer.toString(info.applicationInfo.uid);
         if (info.windowLayout != null && info.windowLayout.windowLayoutAffinity != null
@@ -2129,14 +2257,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             sConstrainDisplayApisConfig = new ConstrainDisplayApisConfig();
         }
         stateNotNeeded = (aInfo.flags & FLAG_STATE_NOT_NEEDED) != 0;
-        nonLocalizedLabel = aInfo.nonLocalizedLabel;
-        labelRes = aInfo.labelRes;
-        if (nonLocalizedLabel == null && labelRes == 0) {
-            ApplicationInfo app = aInfo.applicationInfo;
-            nonLocalizedLabel = app.nonLocalizedLabel;
-            labelRes = app.labelRes;
-        }
-        icon = aInfo.getIconResource();
         theme = aInfo.getThemeResource();
         if ((aInfo.flags & FLAG_MULTIPROCESS) != 0 && _caller != null
                 && (aInfo.applicationInfo.uid == SYSTEM_UID
@@ -2166,7 +2286,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // The result receiver is the transition receiver, which will handle the shared element
             // exit transition.
             mHasSceneTransition = options.getAnimationType() == ANIM_SCENE_TRANSITION
-                    && options.getResultReceiver() != null;
+                    && options.getSceneTransitionInfo() != null
+                    && options.getSceneTransitionInfo().getResultReceiver() != null;
             final PendingIntent usageReport = options.getUsageTimeReport();
             if (usageReport != null) {
                 appTimeTracker = new AppTimeTracker(usageReport);
@@ -2196,18 +2317,45 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mActivityRecordInputSink = new ActivityRecordInputSink(this, sourceRecord);
 
-        updateEnterpriseThumbnailDrawable(mAtmService.getUiContext());
+        mAppActivityEmbeddingSplitsEnabled = isAppActivityEmbeddingSplitsEnabled();
+        mAllowUntrustedEmbeddingStateSharing = getAllowUntrustedEmbeddingStateSharingProperty();
 
-        boolean appActivityEmbeddingEnabled = false;
+        mOptInOnBackInvoked = WindowOnBackInvokedDispatcher
+                .isOnBackInvokedCallbackEnabled(info, info.applicationInfo,
+                        () -> {
+                            Context appContext = null;
+                            try {
+                                appContext = mAtmService.mContext.createPackageContextAsUser(
+                                        info.packageName, CONTEXT_RESTRICTED,
+                                        UserHandle.of(mUserId));
+                                appContext.setTheme(theme);
+                            } catch (PackageManager.NameNotFoundException ignore) {
+                            }
+                            return appContext;
+                        });
+        mCallerState = new ActivityCallerState(mAtmService);
+    }
+
+    private boolean isAppActivityEmbeddingSplitsEnabled() {
+        if (!hasWindowExtensionsEnabled()) {
+            // WM Extensions disabled.
+            return false;
+        }
+        if (ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15 && !CompatChanges.isChangeEnabled(
+                ENABLE_ACTIVITY_EMBEDDING_FOR_ANDROID_15,
+                info.packageName,
+                UserHandle.getUserHandleForUid(getUid()))) {
+            // Activity Embedding is guarded with Android 15+, but this app is not qualified.
+            return false;
+        }
         try {
-            appActivityEmbeddingEnabled = WindowManager.hasWindowExtensionsEnabled()
-                    && mAtmService.mContext.getPackageManager()
-                            .getProperty(PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED, packageName)
-                            .getBoolean();
+            return mAtmService.mContext.getPackageManager()
+                    .getProperty(PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED, packageName)
+                    .getBoolean();
         } catch (PackageManager.NameNotFoundException e) {
             // No such property name.
+            return false;
         }
-        mAppActivityEmbeddingSplitsEnabled = appActivityEmbeddingEnabled;
     }
 
     /**
@@ -2216,19 +2364,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *
      * @param affinity The affinity of the activity.
      * @param uid The user-ID that has been assigned to this application.
-     * @param launchMode The activity launch mode
-     * @param componentName The activity component name. This is only useful when the given
-     *                      launchMode is {@link ActivityInfo#LAUNCH_SINGLE_INSTANCE}
      * @return The task affinity
      */
-    static String computeTaskAffinity(String affinity, int uid, int launchMode,
-            ComponentName componentName) {
+    static String computeTaskAffinity(String affinity, int uid) {
         final String uidStr = Integer.toString(uid);
         if (affinity != null && !affinity.startsWith(uidStr)) {
             affinity = uidStr + ":" + affinity;
-            if (launchMode == LAUNCH_SINGLE_INSTANCE && componentName != null) {
-                affinity += ":" + componentName.hashCode();
-            }
         }
         return affinity;
     }
@@ -2410,12 +2551,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        if (mStartingData != null) {
+        if (hasStartingWindow()) {
             return false;
         }
 
-        final WindowState mainWin = findMainWindow();
-        if (mainWin != null && mainWin.mWinAnimator.getShown()) {
+        final WindowState mainWin = findMainWindow(false /* includeStartingApp */);
+        if (mainWin != null && mainWin.isDrawn()) {
             // App already has a visible window...why would you want a starting window?
             return false;
         }
@@ -2439,7 +2580,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int typeParameter = StartingSurfaceController
                 .makeStartingWindowTypeParameter(newTask, taskSwitch, processRunning,
                         allowTaskSnapshot, activityCreated, isSimple, useLegacy, activityAllDrawn,
-                        type, packageName, mUserId);
+                        type, isIconStylePreferred(resolvedTheme), packageName, mUserId);
 
         if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
             if (isActivityTypeHome()) {
@@ -2484,7 +2625,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Creating SnapshotStartingData");
         mStartingData = new SnapshotStartingData(mWmService, snapshot, typeParams);
-        if (task.forAllLeafTaskFragments(TaskFragment::isEmbedded)) {
+        if ((!mStyleFillsParent && task.getChildCount() > 1)
+                || task.forAllLeafTaskFragments(TaskFragment::isEmbedded)) {
+            // Case 1:
+            // If it is moving a Task{[0]=main activity, [1]=translucent activity} to front, use
+            // shared starting window so that the transition doesn't need to wait for the activity
+            // behind the translucent activity. Also, onFirstWindowDrawn will check all visible
+            // activities are drawn in the task to remove the snapshot starting window.
+            // Case 2:
             // Associate with the task so if this activity is resized by task fragment later, the
             // starting window can keep the same bounds as the task.
             associateStartingDataWithTask();
@@ -2493,69 +2641,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return true;
     }
 
-    void scheduleAddStartingWindow() {
-        mAddStartingWindow.run();
-    }
+    private void scheduleAddStartingWindow() {
+        ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Add starting %s: startingData=%s",
+                this, mStartingData);
 
-    private class AddStartingWindow implements Runnable {
-
-        @Override
-        public void run() {
-            // Can be accessed without holding the global lock
-            final StartingData startingData;
-            synchronized (mWmService.mGlobalLock) {
-                // There can only be one adding request, silly caller!
-
-                if (mStartingData == null) {
-                    // Animation has been canceled... do nothing.
-                    ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
-                            "startingData was nulled out before handling"
-                                    + " mAddStartingWindow: %s", ActivityRecord.this);
-                    return;
-                }
-                startingData = mStartingData;
-            }
-
-            ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Add starting %s: startingData=%s",
-                    this, startingData);
-
-            StartingSurfaceController.StartingSurface surface = null;
-            try {
-                surface = startingData.createStartingSurface(ActivityRecord.this);
-            } catch (Exception e) {
-                Slog.w(TAG, "Exception when adding starting window", e);
-            }
-            if (surface != null) {
-                boolean abort = false;
-                synchronized (mWmService.mGlobalLock) {
-                    // If the window was successfully added, then we need to remove it.
-                    if (mStartingData == null) {
-                        ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Aborted starting %s: startingData=%s",
-                                ActivityRecord.this, mStartingData);
-
-                        mStartingWindow = null;
-                        mStartingData = null;
-                        abort = true;
-                    } else {
-                        mStartingSurface = surface;
-                    }
-                    if (!abort) {
-                        ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
-                                "Added starting %s: startingWindow=%s startingView=%s",
-                                ActivityRecord.this, mStartingWindow, mStartingSurface);
-                    }
-                }
-                if (abort) {
-                    surface.remove(false /* prepareAnimation */);
-                }
-            } else {
-                ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Surface returned was null: %s",
-                        ActivityRecord.this);
-            }
+        mStartingSurface = mStartingData.createStartingSurface(ActivityRecord.this);
+        if (mStartingSurface != null) {
+            ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
+                    "Added starting %s: startingWindow=%s startingView=%s",
+                    ActivityRecord.this, mStartingWindow, mStartingSurface);
+        } else {
+            ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Surface returned was null: %s",
+                    ActivityRecord.this);
         }
     }
-
-    private final AddStartingWindow mAddStartingWindow = new AddStartingWindow();
 
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated, boolean activityAllDrawn,
@@ -2611,10 +2710,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (snapshot == null) {
             return false;
         }
-        if (!snapshot.getTopActivityComponent().equals(mActivityComponent)) {
-            // Obsoleted snapshot.
-            return false;
-        }
+        return isSnapshotComponentCompatible(snapshot) && isSnapshotOrientationCompatible(snapshot);
+    }
+
+    /**
+     * Returns {@code true} if the top activity component of task snapshot equals to this activity.
+     */
+    boolean isSnapshotComponentCompatible(@NonNull TaskSnapshot snapshot) {
+        return snapshot.getTopActivityComponent().equals(mActivityComponent);
+    }
+
+    /**
+     * Returns {@code true} if the orientation of task snapshot is compatible with this activity.
+     */
+    boolean isSnapshotOrientationCompatible(@NonNull TaskSnapshot snapshot) {
         final int rotation = mDisplayContent.rotationForActivityInDifferentOrientation(this);
         final int currentRotation = task.getWindowConfiguration().getRotation();
         final int targetRotation = rotation != ROTATION_UNDEFINED
@@ -2676,10 +2785,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean transferSplashScreenIfNeeded() {
         if (finishing || !mHandleExitSplashScreen || mStartingSurface == null
                 || mStartingWindow == null
-                || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_FINISH) {
+                || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_FINISH
+                // skip copy splash screen to client if it was resized
+                || (mStartingData != null && mStartingData.mResizedFromTransfer)) {
             return false;
         }
         if (isTransferringSplashScreen()) {
+            return true;
+        }
+        // Only do transfer after transaction has done when starting window exist.
+        if (mStartingData != null && mStartingData.mWaitForSyncTransactionCommit) {
+            mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_COPY_TO_CLIENT;
             return true;
         }
         requestCopySplashScreen();
@@ -2693,7 +2809,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private void requestCopySplashScreen() {
         mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_COPYING;
-        if (!mAtmService.mTaskOrganizerController.copySplashScreenView(getTask())) {
+        if (mStartingSurface == null || !mAtmService.mTaskOrganizerController.copySplashScreenView(
+                getTask(), mStartingSurface.mTaskOrganizer)) {
             mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_FINISH;
             removeStartingWindow();
         }
@@ -2704,14 +2821,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Receive the splash screen data from shell, sending to client.
      * @param parcelable The data to reconstruct the splash screen view, null mean unable to copy.
      */
-    void onCopySplashScreenFinish(SplashScreenViewParcelable parcelable) {
+    void onCopySplashScreenFinish(@Nullable SplashScreenViewParcelable parcelable) {
         removeTransferSplashScreenTimeout();
-        // unable to copy from shell, maybe it's not a splash screen. or something went wrong.
-        // either way, abort and reset the sequence.
-        if (parcelable == null
+        final SurfaceControl windowAnimationLeash = (parcelable == null
                 || mTransferringSplashScreenState != TRANSFER_SPLASH_SCREEN_COPYING
                 || mStartingWindow == null || mStartingWindow.mRemoved
-                || finishing) {
+                || finishing) ? null
+                : TaskOrganizerController.applyStartingWindowAnimation(mStartingWindow);
+        if (windowAnimationLeash == null) {
+            // Unable to copy from shell, maybe it's not a splash screen, or something went wrong.
+            // Either way, abort and reset the sequence.
             if (parcelable != null) {
                 parcelable.clearIfNeeded();
             }
@@ -2719,13 +2838,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             removeStartingWindow();
             return;
         }
-        // schedule attach splashScreen to client
-        final SurfaceControl windowAnimationLeash = TaskOrganizerController
-                .applyStartingWindowAnimation(mStartingWindow);
         try {
             mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_ATTACH_TO_CLIENT;
-            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                    TransferSplashScreenViewStateItem.obtain(parcelable,
+            mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
+                    TransferSplashScreenViewStateItem.obtain(token, parcelable,
                             windowAnimationLeash));
             scheduleTransferSplashScreenTimeout();
         } catch (Exception e) {
@@ -2761,7 +2877,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 && (mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_FINISH
                 || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_IDLE)) {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Cleaning splash screen token=%s", this);
-            mAtmService.mTaskOrganizerController.onAppSplashScreenViewRemoved(getTask());
+            mAtmService.mTaskOrganizerController.onAppSplashScreenViewRemoved(getTask(),
+                    mStartingSurface != null ? mStartingSurface.mTaskOrganizer : null);
         }
     }
 
@@ -2782,11 +2899,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else if (isEmbedded()) {
                 associateStartingWindowWithTaskIfNeeded();
             }
+            if (mTransitionController.isCollecting()) {
+                mStartingData.mTransitionId = mTransitionController.getCollectingTransitionId();
+            }
         }
     }
 
     /** Makes starting window always fill the associated task. */
     private void attachStartingSurfaceToAssociatedTask() {
+        if (mSyncState == SYNC_STATE_NONE && isEmbedded()) {
+            // Collect this activity since it's starting window will reparent to task. To ensure
+            // any starting window's transaction will occur in order.
+            mTransitionController.collect(this);
+        }
         // Associate the configuration of starting window with the task.
         overrideConfigurationPropagation(mStartingWindow, mStartingData.mAssociatedTask);
         getSyncTransaction().reparent(mStartingWindow.mSurfaceControl,
@@ -2839,10 +2964,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mStartingData == null) {
             return;
         }
-        mStartingData.mWaitForSyncTransactionCommit = false;
-        if (mStartingData.mRemoveAfterTransaction) {
-            mStartingData.mRemoveAfterTransaction = false;
-            removeStartingWindowAnimation(mStartingData.mPrepareRemoveAnimation);
+        final StartingData lastData = mStartingData;
+        lastData.mWaitForSyncTransactionCommit = false;
+        if (lastData.mRemoveAfterTransaction == AFTER_TRANSACTION_REMOVE_DIRECTLY) {
+            removeStartingWindowAnimation(lastData.mPrepareRemoveAnimation);
+        } else if (lastData.mRemoveAfterTransaction == AFTER_TRANSACTION_COPY_TO_CLIENT) {
+            removeStartingWindow();
         }
     }
 
@@ -2865,17 +2992,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final StartingSurfaceController.StartingSurface surface;
-        final WindowState startingWindow = mStartingWindow;
         final boolean animate;
+        final boolean hasImeSurface;
         if (mStartingData != null) {
             if (mStartingData.mWaitForSyncTransactionCommit
-                    || mTransitionController.inCollectingTransition(startingWindow)) {
-                mStartingData.mRemoveAfterTransaction = true;
+                    || mTransitionController.isCollecting(this)) {
+                mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_REMOVE_DIRECTLY;
                 mStartingData.mPrepareRemoveAnimation = prepareAnimation;
                 return;
             }
             animate = prepareAnimation && mStartingData.needRevealAnimation()
                     && mStartingWindow.isVisibleByPolicy();
+            hasImeSurface = mStartingData.hasImeSurface();
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Schedule remove starting %s startingWindow=%s"
                             + " animate=%b Callers=%s", this, mStartingWindow, animate,
                     Debug.getCallers(5));
@@ -2895,7 +3023,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     this);
             return;
         }
-        surface.remove(animate);
+        surface.remove(animate, hasImeSurface);
     }
 
     /**
@@ -2919,7 +3047,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         reparent(newTaskFrag, position);
     }
 
-    private boolean isHomeIntent(Intent intent) {
+    static boolean isHomeIntent(Intent intent) {
         return ACTION_MAIN.equals(intent.getAction())
                 && (intent.hasCategory(CATEGORY_HOME)
                 || intent.hasCategory(CATEGORY_SECONDARY_HOME))
@@ -3025,6 +3153,64 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return parent != null && parent.isEmbedded();
     }
 
+    /**
+     * Returns {@code true} if the system is allowed to share this activity's state with the host
+     * app when this activity is embedded in untrusted mode.
+     */
+    boolean isUntrustedEmbeddingStateSharingAllowed() {
+        if (!Flags.untrustedEmbeddingStateSharing()) {
+            return false;
+        }
+        return mAllowUntrustedEmbeddingStateSharing;
+    }
+
+    private boolean getAllowUntrustedEmbeddingStateSharingProperty() {
+        if (!Flags.untrustedEmbeddingStateSharing()) {
+            return false;
+        }
+        try {
+            return mAtmService.mContext.getPackageManager()
+                    .getProperty(PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING,
+                            mActivityComponent)
+                    .getBoolean();
+        } catch (PackageManager.NameNotFoundException e) {
+            // No such property name.
+            return false;
+        }
+    }
+
+    /**
+     * This is different from {@link #isEmbedded()}.
+     * {@link #isEmbedded()} is {@code true} when any of the parent {@link TaskFragment} is created
+     * by a {@link android.window.TaskFragmentOrganizer}, while this method is {@code true} when
+     * the parent {@link TaskFragment} is embedded and has bounds override that does not fill the
+     * leaf {@link Task}.
+     */
+    boolean isEmbeddedInHostContainer() {
+        final TaskFragment taskFragment = getOrganizedTaskFragment();
+        return taskFragment != null && taskFragment.isEmbeddedWithBoundsOverride();
+    }
+
+    @NonNull
+    ActivityWindowInfo getActivityWindowInfo() {
+        if (!Flags.activityWindowInfoFlag() || !isAttached()) {
+            return mTmpActivityWindowInfo;
+        }
+        if (isFixedRotationTransforming()) {
+            // Fixed rotation only applied to fullscreen activity, thus using the activity bounds
+            // for Task/TaskFragment so that it is "pre-rotated" and in sync with the Configuration
+            // update.
+            final Rect bounds = getBounds();
+            mTmpActivityWindowInfo.set(false /* isEmbedded */, bounds, bounds);
+        } else {
+            mTmpActivityWindowInfo.set(
+                    isEmbeddedInHostContainer(),
+                    getTask().getBounds(),
+                    getTaskFragment().getBounds());
+        }
+        return mTmpActivityWindowInfo;
+    }
+
     @Override
     @Nullable
     TaskDisplayArea getDisplayArea() {
@@ -3033,7 +3219,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean providesOrientation() {
-        return mStyleFillsParent;
+        return mStyleFillsParent || mOccludesParent;
     }
 
     @Override
@@ -3059,16 +3245,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean changed = occludesParent != mOccludesParent;
         mOccludesParent = occludesParent;
         setMainWindowOpaque(occludesParent);
-        mWmService.mWindowPlacerLocked.requestTraversal();
 
-        if (changed && task != null && !occludesParent) {
-            getRootTask().convertActivityToTranslucent(this);
+        if (changed && task != null) {
+            if (!occludesParent) {
+                getRootTask().convertActivityToTranslucent(this);
+            } else {
+                getRootTask().convertActivityFromTranslucent(this);
+            }
         }
         // Always ensure visibility if this activity doesn't occlude parent, so the
         // {@link #returningOptions} of the activity under this one can be applied in
         // {@link #handleAlreadyVisible()}.
         if (changed || !occludesParent) {
-            mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+            mRootWindowContainer.ensureActivitiesVisible();
         }
         return changed;
     }
@@ -3113,9 +3302,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean canReceiveKeys() {
-        // TODO(156521483): Propagate the state down the hierarchy instead of checking the parent
-        return getWindowConfiguration().canReceiveKeys()
-                && (task == null || task.getWindowConfiguration().canReceiveKeys());
+        return getWindowConfiguration().canReceiveKeys() && !mWaitForEnteringPinnedMode;
     }
 
     boolean isResizeable() {
@@ -3353,9 +3540,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // current focused activity could be another activity in the same Task if activities are
         // displayed on adjacent TaskFragments.
         final ActivityRecord currentFocusedApp = mDisplayContent.mFocusedApp;
-        if (currentFocusedApp != null && currentFocusedApp.task == task) {
+        final int topFocusedDisplayId = mRootWindowContainer.getTopFocusedDisplayContent() != null
+                ? mRootWindowContainer.getTopFocusedDisplayContent().getDisplayId()
+                : INVALID_DISPLAY;
+        if (currentFocusedApp != null && currentFocusedApp.task == task
+                && topFocusedDisplayId == mDisplayContent.getDisplayId()) {
             final Task topFocusableTask = mDisplayContent.getTask(
-                    (t) -> t.isLeafTask() && t.isFocusable(), true /*  traverseTopToBottom */);
+                    (t) -> t.isLeafTask() && t.isFocusable() && !t.inPinnedWindowingMode(),
+                    true /*  traverseTopToBottom */);
             if (task == topFocusableTask) {
                 if (currentFocusedApp == this) {
                     ProtoLog.d(WM_DEBUG_FOCUS, "moveFocusableActivityToTop: already on top "
@@ -3375,7 +3567,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         rootTask.moveToFront(reason, task);
         // Report top activity change to tracking services and WM
-        if (mRootWindowContainer.getTopResumedActivity() == this) {
+        if (mState == RESUMED && mRootWindowContainer.getTopResumedActivity() == this) {
             mAtmService.setLastResumedActivityUncheckLocked(this, reason);
         }
         return true;
@@ -3420,6 +3612,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(resultGrants,
                         resultTo.getUriPermissionsLocked());
             }
+            IBinder callerToken = new Binder();
+            if (android.security.Flags.contentUriPermissionApis()) {
+                try {
+                    resultTo.computeCallerInfo(callerToken, resultData, this.getUid(),
+                            mAtmService.getPackageManager().getNameForUid(this.getUid()),
+                            /* isShareIdentityEnabled */ false);
+                    // Result callers cannot share their identity via
+                    // {@link ActivityOptions#setShareIdentityEnabled(boolean)} since
+                    // {@link android.app.Activity#setResult} doesn't have a
+                    // {@link android.os.Bundle}.
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             if (mForceSendResultForMediaProjection || resultTo.isState(RESUMED)) {
                 // Sending the result to the resultTo activity asynchronously to prevent the
                 // resultTo activity getting results before this Activity paused.
@@ -3427,12 +3633,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAtmService.mH.post(() -> {
                     synchronized (mAtmService.mGlobalLock) {
                         resultToActivity.sendResult(this.getUid(), resultWho, requestCode,
-                                resultCode, resultData, resultGrants,
+                                resultCode, resultData, callerToken, resultGrants,
                                 mForceSendResultForMediaProjection);
                     }
                 });
             } else {
-                resultTo.addResultLocked(this, resultWho, requestCode, resultCode, resultData);
+                resultTo.addResultLocked(this, resultWho, requestCode, resultCode, resultData,
+                        callerToken);
             }
             resultTo = null;
         } else if (DEBUG_RESULTS) {
@@ -3540,8 +3747,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             final boolean endTask = task.getTopNonFinishingActivity() == null
                     && !task.isClearingToReuseTask();
+            final WindowContainer<?> trigger = endTask ? task : this;
             final Transition newTransition =
-                    mTransitionController.requestCloseTransitionIfNeeded(endTask ? task : this);
+                    mTransitionController.requestCloseTransitionIfNeeded(trigger);
+            if (newTransition != null) {
+                newTransition.collectClose(trigger);
+            } else if (mTransitionController.isCollecting()) {
+                mTransitionController.getCollectingTransition().collectClose(trigger);
+            }
             if (isState(RESUMED)) {
                 if (endTask) {
                     mAtmService.getTaskChangeNotificationController().notifyTaskRemovalStarted(
@@ -3705,8 +3918,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
 
             if (ensureVisibility) {
-                mDisplayContent.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                        false /* preserveWindows */, true /* notifyClients */);
+                mDisplayContent.ensureActivitiesVisible(null /* starting */,
+                        true /* notifyClients */);
             }
         }
 
@@ -3751,7 +3964,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (isCurrentVisible) {
-            if (isNextNotYetVisible || delayRemoval) {
+            if (isNextNotYetVisible || delayRemoval || (next != null && isInTransition())) {
                 // Add this activity to the list of stopping activities. It will be processed and
                 // destroyed when the next activity reports idle.
                 addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
@@ -3811,8 +4024,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If the display does not have running activity, the configuration may need to be
         // updated for restoring original orientation of the display.
         if (next == null) {
-            mRootWindowContainer.ensureVisibilityAndConfig(next, getDisplayId(),
-                    false /* markFrozenIfConfigChanged */, true /* deferResume */);
+            mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */, mDisplayContent,
+                    true /* deferResume */);
         }
         if (activityRemoved) {
             mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -3870,6 +4083,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         boolean removedFromHistory = false;
 
         cleanUp(false /* cleanServices */, false /* setState */);
+        setVisibleRequested(false);
 
         if (hasProcess()) {
             app.removeActivity(this, true /* keepAssociation */);
@@ -3881,8 +4095,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             try {
                 if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "Destroying: " + this);
-                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                        DestroyActivityItem.obtain(finishing, configChangeFlags));
+                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
+                        DestroyActivityItem.obtain(token, finishing));
             } catch (Exception e) {
                 // We can just ignore exceptions here...  if the process has crashed, our death
                 // notification will clean things up.
@@ -3924,23 +4138,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
 
-        configChangeFlags = 0;
-
         return removedFromHistory;
-    }
-
-    boolean safelyDestroy(String reason) {
-        if (isDestroyable()) {
-            if (DEBUG_SWITCH) {
-                final Task task = getTask();
-                Slog.v(TAG_SWITCH, "Safely destroying " + this + " in state " + getState()
-                        + " resumed=" + task.getTopResumedActivity()
-                        + " pausing=" + task.getTopPausingActivity()
-                        + " for reason " + reason);
-            }
-            return destroyImmediately(reason);
-        }
-        return false;
     }
 
     /** Note: call {@link #cleanUp(boolean, boolean)} before this method. */
@@ -4006,10 +4204,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mAppStopped) {
             abortAndClearOptionsAnimation();
         }
-    }
-
-    boolean isFinishing() {
-        return finishing;
+        if (mDisplayContent != null) {
+            mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
+        }
     }
 
     /**
@@ -4047,11 +4244,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         getTaskFragment().cleanUpActivityReferences(this);
         clearLastParentBeforePip();
 
+        // Abort and reset state if the scence transition is playing.
+        final Task rootTask = getRootTask();
+        if (rootTask != null) {
+            rootTask.abortTranslucentActivityWaiting(this);
+        }
+
         // Clean up the splash screen if it was still displayed.
         cleanUpSplashScreen();
-
-        deferRelaunchUntilPaused = false;
-        frozenBeforeDestroy = false;
 
         if (setState) {
             setState(DESTROYED, "cleanUp");
@@ -4068,7 +4268,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 PendingIntentRecord rec = apr.get();
                 if (rec != null) {
                     mAtmService.mPendingIntentController.cancelIntentSender(rec,
-                            false /* cleanActivity */);
+                            false /* cleanActivity */,
+                            PendingIntentRecord.CANCEL_REASON_HOSTING_ACTIVITY_DESTROYED);
                 }
             }
             pendingResults = null;
@@ -4121,8 +4322,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (rootTask != null && rootTask.shouldSleepOrShutDownActivities()) {
             // Activity is always relaunched to either resumed or paused state. If it was
             // relaunched while hidden (by keyguard or smth else), it should be stopped.
-            rootTask.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                    false /* preserveWindows */);
+            rootTask.ensureActivitiesVisible(null /* starting */);
         }
     }
 
@@ -4214,11 +4414,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Slog.v(TAG_APP, "Keeping entry during removeHistory for activity " + this);
             }
         }
+        if (task != null && task.mKillProcessesOnDestroyed) {
+            mTaskSupervisor.removeTimeoutOfKillProcessesOnProcessDied(this, task);
+        }
         // upgrade transition trigger to task if this is the last activity since it means we are
         // closing the task.
         final WindowContainer trigger = remove && task != null && task.getChildCount() == 1
                 ? task : this;
-        mTransitionController.requestCloseTransitionIfNeeded(trigger);
+        final Transition newTransit = mTransitionController.requestCloseTransitionIfNeeded(trigger);
+        if (newTransit != null) {
+            newTransit.collectClose(trigger);
+        } else if (mTransitionController.isCollecting()) {
+            mTransitionController.getCollectingTransition().collectClose(trigger);
+        }
         cleanUp(true /* cleanServices */, true /* setState */);
         if (remove) {
             if (mStartingData != null && mVisible && task != null) {
@@ -4279,11 +4487,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         getDisplayContent().mOpeningApps.remove(this);
         getDisplayContent().mUnknownAppVisibilityController.appRemovedOrHidden(this);
         mWmService.mSnapshotController.onAppRemoved(this);
+        mAtmService.mStartingProcessActivities.remove(this);
 
         mTaskSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
         mTaskSupervisor.mStoppingActivities.remove(this);
         mLetterboxUiController.destroy();
-        waitingToShow = false;
 
         // Defer removal of this activity when either a child is animating, or app transition is on
         // going. App transition animation might be applied on the parent task not on the activity,
@@ -4359,7 +4567,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Reset the last saved PiP snap fraction on removal.
         mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
         mDisplayContent.onRunningActivityChanged();
-        mWmService.mEmbeddedWindowController.onActivityRemoved(this);
         mRemovingFromDisplay = false;
     }
 
@@ -4424,7 +4631,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         super.removeChild(child);
         checkKeyguardFlagsChanged();
-        updateLetterboxSurface(child);
+        updateLetterboxSurfaceIfNeeded(child);
     }
 
     void setAppLayoutChanges(int changes, String reason) {
@@ -4445,6 +4652,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // to another activity because it may be in the remove process.
                 // Don't need to remove the starting window at this point because that will happen
                 // at #postWindowRemoveCleanupLocked
+                return false;
+            }
+            // Do not transfer if the orientation doesn't match, redraw starting window while it is
+            // on top will cause flicker.
+            if (fromActivity.getRequestedConfigurationOrientation()
+                    != getRequestedConfigurationOrientation()) {
                 return false;
             }
             // In this case, the starting icon has already been displayed, so start
@@ -4516,7 +4729,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     mTransitionChangeFlags |= FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
                 }
                 // Post cleanup after the visibility and animation are transferred.
-                fromActivity.postWindowRemoveStartingWindowCleanup();
+                fromActivity.postWindowRemoveStartingWindowCleanup(tStartingWindow);
                 fromActivity.mVisibleSetFromTransferredStartingWindow = false;
 
                 mWmService.updateFocusedWindowLocked(
@@ -4560,6 +4773,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         task.forAllActivities(fromActivity -> {
             if (fromActivity == this) return true;
+            // The snapshot starting window could remove itself when receive resized request without
+            // redraw, so transfer it to a different size activity could only cause flicker.
+            // By schedule remove snapshot starting window, the remove process will happen when
+            // transition ready, transition ready means the app window is drawn.
+            final StartingData tmpStartingData = fromActivity.mStartingData;
+            if (tmpStartingData != null && tmpStartingData.mAssociatedTask == null
+                    && mTransitionController.isCollecting(fromActivity)
+                    && tmpStartingData instanceof SnapshotStartingData) {
+                final Rect fromBounds = fromActivity.getBounds();
+                final Rect myBounds = getBounds();
+                if (!fromBounds.equals(myBounds)) {
+                    // Mark as no animation, so these changes won't merge into playing transition.
+                    if (mTransitionController.inPlayingTransition(fromActivity)) {
+                        mTransitionController.setNoAnimation(this);
+                        mTransitionController.setNoAnimation(fromActivity);
+                    }
+                    fromActivity.removeStartingWindow();
+                    return true;
+                }
+            }
             return !fromActivity.isVisibleRequested() && transferStartingWindow(fromActivity);
         });
     }
@@ -4615,21 +4848,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void setShowWhenLocked(boolean showWhenLocked) {
         mShowWhenLocked = showWhenLocked;
-        mAtmService.mRootWindowContainer.ensureActivitiesVisible(null /* starting */,
-                0 /* configChanges */, false /* preserveWindows */);
+        mAtmService.mRootWindowContainer.ensureActivitiesVisible();
     }
 
     void setInheritShowWhenLocked(boolean inheritShowWhenLocked) {
         mInheritShownWhenLocked = inheritShowWhenLocked;
-        mAtmService.mRootWindowContainer.ensureActivitiesVisible(null /* starting */,
-                0 /* configChanges */, false /* preserveWindows */);
+        mAtmService.mRootWindowContainer.ensureActivitiesVisible();
     }
 
     /**
      * @return {@code true} if the activity windowing mode is not in
      *         {@link android.app.WindowConfiguration#WINDOWING_MODE_PINNED} and a) activity
      *         contains windows that have {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set or if the
-     *         activity has set {@link #mShowWhenLocked}, or b) if the activity has set
+     *         activity has set {@link #mShowWhenLocked}, or if its user
+     *         is {@link #mIsUserAlwaysVisible always-visible} or b) if the activity has set
      *         {@link #mInheritShownWhenLocked} and the activity behind this satisfies the
      *         conditions a) above.
      *         Multi-windowing mode will be exited if {@code true} is returned.
@@ -4638,15 +4870,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (r == null || r.getTaskFragment() == null) {
             return false;
         }
-        if (!r.inPinnedWindowingMode() && (r.mShowWhenLocked || r.containsShowWhenLockedWindow())) {
+        if (canShowWhenLockedInner(r)) {
             return true;
         } else if (r.mInheritShownWhenLocked) {
             final ActivityRecord activity = r.getTaskFragment().getActivityBelow(r);
-            return activity != null && !activity.inPinnedWindowingMode()
-                    && (activity.mShowWhenLocked || activity.containsShowWhenLockedWindow());
+            return activity != null && canShowWhenLockedInner(activity);
         } else {
             return false;
         }
+    }
+
+    /** @see #canShowWhenLocked(ActivityRecord) */
+    private static boolean canShowWhenLockedInner(@NonNull ActivityRecord r) {
+        return !r.inPinnedWindowingMode() &&
+                (r.mShowWhenLocked || r.containsShowWhenLockedWindow() || r.mIsUserAlwaysVisible);
     }
 
     /**
@@ -4668,26 +4905,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * @return Whether we are allowed to show non-starting windows at the moment. We disallow
-     *         showing windows while the transition animation is playing in case we have windows
-     *         that have wide-color-gamut color mode set to avoid jank in the middle of the
-     *         animation.
+     * @return Whether we are allowed to show non-starting windows at the moment.
      */
     boolean canShowWindows() {
-        final boolean drawn = mTransitionController.isShellTransitionsEnabled()
+        return mTransitionController.isShellTransitionsEnabled()
                 ? mSyncState != SYNC_STATE_WAITING_FOR_DRAW : allDrawn;
-        final boolean animating = mTransitionController.isShellTransitionsEnabled()
-                ? mTransitionController.inPlayingTransition(this)
-                : isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION);
-        return drawn && !(animating && hasNonDefaultColorWindow());
-    }
-
-    /**
-     * @return true if we have a window that has a non-default color mode set; false otherwise.
-     */
-    private boolean hasNonDefaultColorWindow() {
-        return forAllWindows(ws -> ws.mAttrs.getColorMode() != COLOR_MODE_DEFAULT,
-                true /* topToBottom */);
     }
 
     @Override
@@ -4725,9 +4947,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void addResultLocked(ActivityRecord from, String resultWho,
             int requestCode, int resultCode,
-            Intent resultData) {
+            Intent resultData, IBinder callerToken) {
         ActivityResult r = new ActivityResult(from, resultWho,
-                requestCode, resultCode, resultData);
+                requestCode, resultCode, resultData, callerToken);
         if (results == null) {
             results = new ArrayList<ResultInfo>();
         }
@@ -4753,13 +4975,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void sendResult(int callingUid, String resultWho, int requestCode, int resultCode,
-            Intent data, NeededUriGrants dataGrants) {
-        sendResult(callingUid, resultWho, requestCode, resultCode, data, dataGrants,
+            Intent data, IBinder callerToken, NeededUriGrants dataGrants) {
+        sendResult(callingUid, resultWho, requestCode, resultCode, data, callerToken, dataGrants,
                 false /* forceSendForMediaProjection */);
     }
 
     void sendResult(int callingUid, String resultWho, int requestCode, int resultCode,
-            Intent data, NeededUriGrants dataGrants, boolean forceSendForMediaProjection) {
+            Intent data, IBinder callerToken, NeededUriGrants dataGrants,
+            boolean forceSendForMediaProjection) {
+        if (android.security.Flags.contentUriPermissionApis()
+                && !mCallerState.hasCaller(callerToken)) {
+            try {
+                computeCallerInfo(callerToken, data, callingUid,
+                        mAtmService.getPackageManager().getNameForUid(callingUid),
+                        false /* isShareIdentityEnabled */);
+                // Result callers cannot share their identity via
+                // {@link ActivityOptions#setShareIdentityEnabled(boolean)} since
+                // {@link android.app.Activity#setResult} doesn't have a {@link android.os.Bundle}.
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
         if (callingUid > 0) {
             mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(dataGrants,
                     getUriPermissionsLocked());
@@ -4774,10 +5010,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (isState(RESUMED) && attachedToProcess()) {
             try {
-                final ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
-                list.add(new ResultInfo(resultWho, requestCode, resultCode, data));
-                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                        ActivityResultItem.obtain(list));
+                final ArrayList<ResultInfo> list = new ArrayList<>();
+                list.add(new ResultInfo(resultWho, requestCode, resultCode, data, callerToken));
+                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
+                        ActivityResultItem.obtain(token, list));
                 return;
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending result to " + this, e);
@@ -4787,22 +5023,24 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Schedule sending results now for Media Projection setup.
         if (forceSendForMediaProjection && attachedToProcess() && isState(STARTED, PAUSING, PAUSED,
                 STOPPING, STOPPED)) {
-            final ClientTransaction transaction = ClientTransaction.obtain(app.getThread(), token);
             // Build result to be returned immediately.
-            transaction.addCallback(ActivityResultItem.obtain(
-                    List.of(new ResultInfo(resultWho, requestCode, resultCode, data))));
+            final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
+                    token, List.of(new ResultInfo(resultWho, requestCode, resultCode, data,
+                            callerToken)));
             // When the activity result is delivered, the activity will transition to RESUMED.
             // Since the activity is only resumed so the result can be immediately delivered,
             // return it to its original lifecycle state.
-            ActivityLifecycleItem lifecycleItem = getLifecycleItemForCurrentStateForResult();
-            if (lifecycleItem != null) {
-                transaction.setLifecycleStateRequest(lifecycleItem);
-            } else {
-                Slog.w(TAG, "Unable to get the lifecycle item for state " + mState
-                        + " so couldn't immediately send result");
-            }
+            final ActivityLifecycleItem lifecycleItem = getLifecycleItemForCurrentStateForResult();
             try {
-                mAtmService.getLifecycleManager().scheduleTransaction(transaction);
+                if (lifecycleItem != null) {
+                    mAtmService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
+                            app.getThread(), activityResultItem, lifecycleItem);
+                } else {
+                    Slog.w(TAG, "Unable to get the lifecycle item for state " + mState
+                            + " so couldn't immediately send result");
+                    mAtmService.getLifecycleManager().scheduleTransactionItem(
+                            app.getThread(), activityResultItem);
+                }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception thrown sending result to " + this, e);
             }
@@ -4812,7 +5050,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        addResultLocked(null /* from */, resultWho, requestCode, resultCode, data);
+        addResultLocked(null /* from */, resultWho, requestCode, resultCode, data, callerToken);
     }
 
     /**
@@ -4831,13 +5069,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private ActivityLifecycleItem getLifecycleItemForCurrentStateForResult() {
         switch (mState) {
             case STARTED:
-                return StartActivityItem.obtain(null);
+                return StartActivityItem.obtain(token, null);
             case PAUSING:
             case PAUSED:
-                return PauseActivityItem.obtain();
+                return PauseActivityItem.obtain(token);
             case STOPPING:
             case STOPPED:
-                return StopActivityItem.obtain(configChangeFlags);
+                return StopActivityItem.obtain(token);
             default:
                 // Do not send a result immediately if the activity is in state INITIALIZING,
                 // RESTARTING_PROCESS, FINISHING, DESTROYING, or DESTROYED.
@@ -4862,11 +5100,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * method will be called at the proper time.
      */
     final void deliverNewIntentLocked(int callingUid, Intent intent, NeededUriGrants intentGrants,
-            String referrer) {
+            String referrer, boolean isShareIdentityEnabled, int userId, int recipientAppId) {
+        IBinder callerToken = new Binder();
+        if (android.security.Flags.contentUriPermissionApis()) {
+            computeCallerInfo(callerToken, intent, callingUid, referrer, isShareIdentityEnabled);
+        }
         // The activity now gets access to the data associated with this Intent.
         mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(intentGrants,
                 getUriPermissionsLocked());
-        final ReferrerIntent rintent = new ReferrerIntent(intent, getFilteredReferrer(referrer));
+        if (isShareIdentityEnabled && android.security.Flags.contentUriPermissionApis()) {
+            final PackageManagerInternal pmInternal = mAtmService.getPackageManagerInternalLocked();
+            pmInternal.grantImplicitAccess(userId, intent, recipientAppId /*recipient*/,
+                    callingUid /*visible*/, true /*direct*/);
+        }
+        final ReferrerIntent rintent = new ReferrerIntent(intent, getFilteredReferrer(referrer),
+                callerToken);
         boolean unsent = true;
         final boolean isTopActivityWhileSleeping = isTopRunningActivity() && isSleeping();
 
@@ -4882,8 +5130,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Making sure the client state is RESUMED after transaction completed and doing
                 // so only if activity is currently RESUMED. Otherwise, client may have extra
                 // life-cycle calls to RESUMED (and PAUSED later).
-                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                        NewIntentItem.obtain(ar, mState == RESUMED));
+                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
+                        NewIntentItem.obtain(token, ar, mState == RESUMED));
                 unsent = false;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception thrown sending new intent to " + this, e);
@@ -5139,16 +5387,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mPendingOptions;
     }
 
-    ActivityOptions takeOptions() {
-        if (DEBUG_TRANSITION) Slog.i(TAG, "Taking options for " + this + " callers="
-                + Debug.getCallers(6));
+    ActivityOptions.SceneTransitionInfo takeSceneTransitionInfo() {
+        if (DEBUG_TRANSITION) {
+            Slog.i(TAG, "Taking SceneTransitionInfo for " + this + " callers="
+                    + Debug.getCallers(6));
+        }
         if (mPendingOptions == null) return null;
         final ActivityOptions opts = mPendingOptions;
         mPendingOptions = null;
-        // Strip sensitive information from options before sending it to app.
-        opts.setRemoteTransition(null);
-        opts.setRemoteAnimationAdapter(null);
-        return opts;
+        return opts.getSceneTransitionInfo();
     }
 
     RemoteTransition takeRemoteTransition() {
@@ -5210,7 +5457,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean canAffectSystemUiFlags() {
         return task != null && task.canAffectSystemUiFlags() && isVisible()
-                && !inPinnedWindowingMode();
+                && !mWaitForEnteringPinnedMode && !inPinnedWindowingMode();
     }
 
     @Override
@@ -5330,19 +5577,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Finish should only ever commit visibility=false, so we can check full containment
                 // rather than just direct membership.
                 inFinishingTransition = mTransitionController.inFinishingTransition(this);
-                if (!inFinishingTransition && !mDisplayContent.isSleeping()) {
-                    Slog.e(TAG, "setVisibility=" + visible
-                            + " while transition is not collecting or finishing "
-                            + this + " caller=" + Debug.getCallers(8));
-                    // Force showing the parents because they may be hidden by previous transition.
+                if (!inFinishingTransition) {
                     if (visible) {
-                        final Transaction t = getSyncTransaction();
-                        for (WindowContainer<?> p = getParent(); p != null && p != mDisplayContent;
-                                p = p.getParent()) {
-                            if (p.mSurfaceControl != null) {
-                                t.show(p.mSurfaceControl);
-                            }
+                        if (!mDisplayContent.isSleeping() || canShowWhenLocked()) {
+                            mTransitionController.onVisibleWithoutCollectingTransition(this,
+                                    Debug.getCallers(1, 1));
                         }
+                    } else if (!mDisplayContent.isSleeping()) {
+                        Slog.w(TAG, "Set invisible without transition " + this);
                     }
                 }
             }
@@ -5353,17 +5595,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final DisplayContent displayContent = getDisplayContent();
         displayContent.mOpeningApps.remove(this);
         displayContent.mClosingApps.remove(this);
-        waitingToShow = false;
         setVisibleRequested(visible);
         mLastDeferHidingClient = deferHidingClient;
 
         if (!visible) {
-            // If this activity is about to finish/stopped and now becomes invisible, remove it
-            // from the unknownApp list in case the activity does not want to draw anything, which
-            // keep the user waiting for the next transition to start.
-            if (finishing || isState(STOPPED)) {
-                displayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
-            }
             // Because starting window was transferred, this activity may be a trampoline which has
             // been occluded by next activity. If it has added windows, set client visibility
             // immediately to avoid the client getting RELAYOUT_RES_FIRST_TIME from relayout and
@@ -5384,25 +5619,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // stopped, then we need to set up to wait for its windows to be ready.
             if (!isVisible() || mAppStopped) {
                 clearAllDrawn();
-
-                // If the app was already visible, don't reset the waitingToShow state.
-                if (!isVisible()) {
-                    waitingToShow = true;
-
-                    // If the client isn't hidden, we don't need to reset the drawing state.
-                    if (!isClientVisible()) {
-                        // Let's reset the draw state in order to prevent the starting window to be
-                        // immediately dismissed when the app still has the surface.
-                        forAllWindows(w -> {
-                            if (w.mWinAnimator.mDrawState == HAS_DRAWN) {
-                                w.mWinAnimator.resetDrawState();
-
-                                // Force add to mResizingWindows, so that we are guaranteed to get
-                                // another reportDrawn callback.
-                                w.forceReportingResized();
-                            }
-                        }, true /* traverseTopToBottom */);
-                    }
+                // Reset the draw state in order to prevent the starting window to be immediately
+                // dismissed when the app still has the surface.
+                if (!isVisible() && !isClientVisible()) {
+                    forAllWindows(w -> {
+                        if (w.mWinAnimator.mDrawState == HAS_DRAWN) {
+                            w.mWinAnimator.resetDrawState();
+                            // Force add to mResizingWindows, so the window will report drawn.
+                            w.forceReportingResized();
+                        }
+                    }, true /* traverseTopToBottom */);
                 }
             }
 
@@ -5423,8 +5649,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Defer committing visibility until transition starts.
         if (isCollecting) {
             // It may be occluded by the activity above that calls convertFromTranslucent().
-            if (!visible && mTransitionController.inPlayingTransition(this)) {
-                mTransitionChangeFlags |= FLAG_IS_OCCLUDED;
+            // Or it may be restoring transient launch to invisible when finishing transition.
+            if (!visible) {
+                if (mTransitionController.inPlayingTransition(this)) {
+                    mTransitionChangeFlags |= FLAG_IS_OCCLUDED;
+                } else if (mTransitionController.inFinishingTransition(this)) {
+                    mTransitionChangeFlags |= FLAGS_IS_OCCLUDED_NO_ANIMATION;
+                }
+            } else {
+                mTransitionChangeFlags &= ~FLAG_IS_OCCLUDED;
             }
             return;
         }
@@ -5631,22 +5864,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // to be some edge cases where we change our visibility but client visibility never gets
         // updated.
         // If we're becoming invisible, update the client visibility if we are not running an
-        // animation. Otherwise, we'll update client visibility in onAnimationFinished.
-        if (visible || usingShellTransitions
-                || !isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)) {
+        // animation and aren't in RESUMED state. Otherwise, we'll update client visibility in
+        // onAnimationFinished or activityStopped.
+        if (visible || (mState != RESUMED && (usingShellTransitions || !isAnimating(
+                PARENTS, ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)))) {
             setClientVisible(visible);
         }
 
         final DisplayContent displayContent = getDisplayContent();
         if (!visible) {
             mImeInsetsFrozenUntilStartInput = true;
-            if (usingShellTransitions) {
-                final WindowState wallpaperTarget =
-                        displayContent.mWallpaperController.getWallpaperTarget();
-                if (wallpaperTarget != null && wallpaperTarget.mActivityRecord == this) {
-                    displayContent.mWallpaperController.hideWallpapers(wallpaperTarget);
-                }
-            }
         }
 
         if (!displayContent.mClosingApps.contains(this)
@@ -5669,14 +5896,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // can be synchronized with showing the next surface in the transition.
         if (!usingShellTransitions && !isVisible() && !delayed
                 && !displayContent.mAppTransition.isTransitionSet()) {
-            SurfaceControl.openTransaction();
-            try {
-                forAllWindows(win -> {
-                    win.mWinAnimator.hide(getGlobalTransaction(), "immediately hidden");
-                }, true);
-            } finally {
-                SurfaceControl.closeTransaction();
-            }
+            forAllWindows(win -> {
+                win.mWinAnimator.hide(getPendingTransaction(), "immediately hidden");
+            }, true);
+            scheduleAnimation();
         }
     }
 
@@ -5813,6 +6036,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 break;
             case STOPPED:
                 mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_STOPPED);
+                if (mDisplayContent != null) {
+                    mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
+                }
                 break;
             case DESTROYED:
                 if (app != null && (mVisible || mVisibleRequested)) {
@@ -5908,7 +6134,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (destroyedSomething) {
             final DisplayContent dc = getDisplayContent();
             dc.assignWindowLayers(true /*setLayoutNeeded*/);
-            updateLetterboxSurface(null);
+            updateLetterboxSurfaceIfNeeded(null);
         }
     }
 
@@ -6012,6 +6238,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean shouldBeVisible() {
+        return shouldBeVisible(false /* ignoringKeyguard */);
+    }
+
+    boolean shouldBeVisible(boolean ignoringKeyguard) {
         final Task task = getTask();
         if (task == null) {
             return false;
@@ -6019,7 +6249,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final boolean behindOccludedContainer = !task.shouldBeVisible(null /* starting */)
                 || task.getOccludingActivityAbove(this) != null;
-        return shouldBeVisible(behindOccludedContainer, false /* ignoringKeyguard */);
+        return shouldBeVisible(behindOccludedContainer, ignoringKeyguard);
     }
 
     void makeVisibleIfNeeded(ActivityRecord starting, boolean reportToClient) {
@@ -6123,9 +6353,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             EventLogTags.writeWmPauseActivity(mUserId, System.identityHashCode(this),
                     shortComponentName, "userLeaving=false", "make-active");
             try {
-                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                        PauseActivityItem.obtain(finishing, false /* userLeaving */,
-                                configChangeFlags, false /* dontReport */, mAutoEnteringPip));
+                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
+                        PauseActivityItem.obtain(token, finishing, false /* userLeaving */,
+                                false /* dontReport */, mAutoEnteringPip));
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending pause: " + intent.getComponent(), e);
             }
@@ -6136,8 +6366,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             setState(STARTED, "makeActiveIfNeeded");
 
             try {
-                mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                        StartActivityItem.obtain(takeOptions()));
+                mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
+                        StartActivityItem.obtain(token, takeSceneTransitionInfo()));
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending start: " + intent.getComponent(), e);
             }
@@ -6241,10 +6471,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void handleAlreadyVisible() {
-        stopFreezingScreenLocked(false);
         try {
-            if (returningOptions != null) {
-                app.getThread().scheduleOnNewActivityOptions(token, returningOptions.toBundle());
+            if (returningOptions != null
+                    && returningOptions.getAnimationType() == ANIM_SCENE_TRANSITION
+                    && returningOptions.getSceneTransitionInfo() != null) {
+                app.getThread().scheduleOnNewSceneTransitionInfo(token,
+                        returningOptions.getSceneTransitionInfo());
             }
         } catch(RemoteException e) {
         }
@@ -6273,8 +6505,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // and the token could be null.
             return;
         }
-        if (r.mDisplayContent.mDisplayRotationCompatPolicy != null) {
-            r.mDisplayContent.mDisplayRotationCompatPolicy.onActivityRefreshed(r);
+        if (r.mDisplayContent.mActivityRefresher != null) {
+            r.mDisplayContent.mActivityRefresher.onActivityRefreshed(r);
         }
     }
 
@@ -6293,12 +6525,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * state to match that fact.
      */
     void completeResumeLocked() {
-        final boolean wasVisible = mVisibleRequested;
-        setVisibility(true);
-        if (!wasVisible) {
-            // Visibility has changed, so take a note of it so we call the TaskStackChangedListener
-            mTaskSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
-        }
         idle = false;
         results = null;
         if (newIntents != null && newIntents.size() > 0) {
@@ -6306,9 +6532,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         newIntents = null;
 
-        if (isActivityTypeHome()) {
-            mTaskSupervisor.updateHomeProcess(task.getBottomMostActivity().app);
-        }
+        mTaskSupervisor.updateHomeProcessIfNeeded(this);
 
         if (nowVisible) {
             mTaskSupervisor.stopWaitingForActivityVisible(this);
@@ -6369,7 +6593,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         mDisplayContent.handleActivitySizeCompatModeIfNeeded(this);
-        mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+        mRootWindowContainer.ensureActivitiesVisible();
     }
 
     /**
@@ -6404,20 +6628,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void stopIfPossible() {
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH, "Stopping: " + this);
-        final Task rootTask = getRootTask();
+        if (finishing) {
+            Slog.e(TAG, "Request to stop a finishing activity: " + this);
+            destroyIfPossible("stopIfPossible-finishing");
+            return;
+        }
         if (isNoHistory()) {
-            if (!finishing) {
-                if (!rootTask.shouldSleepActivities()) {
-                    ProtoLog.d(WM_DEBUG_STATES, "no-history finish of %s", this);
-                    if (finishIfPossible("stop-no-history", false /* oomAdj */)
-                            != FINISH_RESULT_CANCELLED) {
-                        resumeKeyDispatchingLocked();
-                        return;
-                    }
-                } else {
-                    ProtoLog.d(WM_DEBUG_STATES, "Not finishing noHistory %s on stop "
-                            + "because we're just sleeping", this);
+            if (!task.shouldSleepActivities()) {
+                ProtoLog.d(WM_DEBUG_STATES, "no-history finish of %s", this);
+                if (finishIfPossible("stop-no-history", false /* oomAdj */)
+                        != FINISH_RESULT_CANCELLED) {
+                    resumeKeyDispatchingLocked();
+                    return;
                 }
+            } else {
+                ProtoLog.d(WM_DEBUG_STATES, "Not finishing noHistory %s on stop "
+                        + "because we're just sleeping", this);
             }
         }
 
@@ -6434,8 +6660,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             EventLogTags.writeWmStopActivity(
                     mUserId, System.identityHashCode(this), shortComponentName);
-            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                    StopActivityItem.obtain(configChangeFlags));
+            mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
+                    StopActivityItem.obtain(token));
 
             mAtmService.mH.postDelayed(mStopTimeoutRunnable, STOP_TIMEOUT);
         } catch (Exception e) {
@@ -6446,9 +6672,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mAppStopped = true;
             ProtoLog.v(WM_DEBUG_STATES, "Stop failed; moving to STOPPED: %s", this);
             setState(STOPPED, "stopIfPossible");
-            if (deferRelaunchUntilPaused) {
-                destroyImmediately("stop-except");
-            }
         }
     }
 
@@ -6493,7 +6716,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // Reset the last saved PiP snap fraction on app stop.
         mDisplayContent.mPinnedTaskController.onActivityHidden(mActivityComponent);
-        mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
         if (isClientVisible()) {
             // Though this is usually unlikely to happen, still make sure the client is invisible.
             setClientVisible(false);
@@ -6505,12 +6727,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (finishing) {
             abortAndClearOptionsAnimation();
         } else {
-            if (deferRelaunchUntilPaused) {
-                destroyImmediately("stop-config");
-                mRootWindowContainer.resumeFocusedTasksTopActivities();
-            } else {
-                mAtmService.updatePreviousProcess(this);
-            }
+            mAtmService.updatePreviousProcess(this);
         }
         mTaskSupervisor.checkReadyForSleepLocked(true /* allowDelay */);
     }
@@ -6592,10 +6809,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return hasProcess() && !app.isCrashing() && !app.isNotResponding();
     }
 
-    void startFreezingScreenLocked(int configChanges) {
-        startFreezingScreenLocked(app, configChanges);
-    }
-
     void startFreezingScreenLocked(WindowProcessController app, int configChanges) {
         if (mayFreezeScreenLocked(app)) {
             if (getParent() == null) {
@@ -6674,19 +6887,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         stopFreezingScreen(true, true);
     }
 
-    void stopFreezingScreenLocked(boolean force) {
-        if (force || frozenBeforeDestroy) {
-            frozenBeforeDestroy = false;
-            if (getParent() == null) {
-                return;
-            }
-            ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "Clear freezing of %s: visible=%b freezing=%b", token,
-                                isVisible(), isFreezingScreen());
-            stopFreezingScreen(true, force);
-        }
-    }
-
     void stopFreezingScreen(boolean unfreezeSurfaceNow, boolean force) {
         if (!mFreezingScreen) {
             return;
@@ -6719,6 +6919,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // stop tracking
         mSplashScreenStyleSolidColor = true;
 
+        mAtmService.mBackNavigationController.removePredictiveSurfaceIfNeeded(this);
         if (mStartingWindow != null) {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Finish starting %s"
                     + ": first real window is shown, no animation", win.mToken);
@@ -7093,15 +7294,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mVisibleRequested || nowVisible || mState == PAUSING || mState == RESUMED;
     }
 
+    /**
+     * Returns the task id of the activity token. If onlyRoot=true is specified, it will
+     * return a valid id only if the activity is root or the activity is immediately above
+     * the first non-relinquish-identity activity.
+     * TODO(b/297476786): Clarify the use cases about when should get the bottom activity
+     *                    or the first non-relinquish-identity activity from bottom.
+     */
     static int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         if (r == null || r.getParent() == null) {
             return INVALID_TASK_ID;
         }
-        return getTaskForActivityLocked(r, onlyRoot);
-    }
-
-    static int getTaskForActivityLocked(ActivityRecord r, boolean onlyRoot) {
         final Task task = r.task;
         if (onlyRoot && r.compareTo(task.getRootActivity(
                 false /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/)) > 0) {
@@ -7233,8 +7437,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void showStartingWindow(boolean taskSwitch) {
-        showStartingWindow(null /* prev */, false /* newTask */, taskSwitch,
-                false /* startActivity */, null);
+        // Pass the activity which contains starting window already.
+        final ActivityRecord prev = task.getActivity(
+                a -> a != this && a.mStartingData != null && a.showToCurrentUser());
+        showStartingWindow(prev, false /* newTask */, taskSwitch, false /* startActivity */, null);
     }
 
     /**
@@ -7284,6 +7490,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         return false;
     }
+
+    /**
+     * @return true if a solid color splash screen must be used
+     *         false when an icon splash screen can be used, but the final decision for whether to
+     *               use an icon or solid color splash screen will be made by WmShell.
+     */
     private boolean shouldUseSolidColorSplashScreen(ActivityRecord sourceRecord,
             boolean startActivity, ActivityOptions options, int resolvedTheme) {
         if (sourceRecord == null && !startActivity) {
@@ -7297,39 +7509,36 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // setSplashScreenStyle decide in priority of windowSplashScreenBehavior.
-        if (options != null) {
-            final int optionsStyle = options.getSplashScreenStyle();
-            if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR) {
-                return true;
-            } else if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_ICON
+        final int optionsStyle = options != null ? options.getSplashScreenStyle() :
+                SplashScreen.SPLASH_SCREEN_STYLE_UNDEFINED;
+        if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_SOLID_COLOR) {
+            return true;
+        } else if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_ICON
                     || isIconStylePreferred(resolvedTheme)) {
-                return false;
-            }
-            // Choose the default behavior for Launcher and SystemUI when the SplashScreen style is
-            // not specified in the ActivityOptions.
-            if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME
-                    || launchedFromUid == Process.SHELL_UID) {
-                return false;
-            } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
-                return true;
-            }
-        } else if (isIconStylePreferred(resolvedTheme)) {
             return false;
         }
-        if (sourceRecord == null) {
-            sourceRecord = searchCandidateLaunchingActivity();
-        }
 
-        if (sourceRecord != null && !sourceRecord.isActivityTypeHome()) {
-            return sourceRecord.mSplashScreenStyleSolidColor;
-        }
+        // Choose the default behavior when neither the ActivityRecord nor the activity theme have
+        // specified a splash screen style.
 
-        // If this activity was launched from Launcher or System for first start, never use a
-        // solid color splash screen.
-        // Need to check sourceRecord before in case this activity is launched from service.
-        return !startActivity || !(mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEM
-                || mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME
-                || launchedFromUid == Process.SHELL_UID);
+        if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_HOME || launchedFromUid == Process.SHELL_UID) {
+            return false;
+        } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
+            return true;
+        } else {
+            // Need to check sourceRecord in case this activity is launched from a service.
+            if (sourceRecord == null) {
+                sourceRecord = searchCandidateLaunchingActivity();
+            }
+
+            if (sourceRecord != null) {
+                return sourceRecord.mSplashScreenStyleSolidColor;
+            }
+
+            // Use an icon if the activity was launched from System for the first start.
+            // Otherwise, must use solid color splash screen.
+            return mLaunchSourceType != LAUNCH_SOURCE_TYPE_SYSTEM || !startActivity;
+        }
     }
 
     private int getSplashscreenTheme(ActivityOptions options) {
@@ -7430,7 +7639,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    void postWindowRemoveStartingWindowCleanup() {
+    void postWindowRemoveStartingWindowCleanup(@NonNull WindowState win) {
+        if (mStartingWindow == win) {
+            // This could only happen when the window is removed from hierarchy. So do not keep its
+            // reference anymore.
+            mStartingWindow = null;
+            mStartingData = null;
+            mStartingSurface = null;
+        }
         if (mChildren.size() == 0 && mVisibleSetFromTransferredStartingWindow) {
             // We set the visible state to true for the token from a transferred starting
             // window. We now reset it back to false since the starting window was the last
@@ -7444,20 +7660,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final WindowState w = mChildren.get(i);
             w.requestUpdateWallpaperIfNeeded();
         }
-    }
-
-    /**
-     * @return The to top most child window for which {@link LayoutParams#isFullscreen()} returns
-     *         true and isn't fully transparent.
-     */
-    WindowState getTopFullscreenOpaqueWindow() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState win = mChildren.get(i);
-            if (win != null && win.mAttrs.isFullscreen() && !win.isFullyTransparent()) {
-                return win;
-            }
-        }
-        return null;
     }
 
     WindowState findMainWindow() {
@@ -7569,7 +7771,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (mNeedsLetterboxedAnimation) {
-            updateLetterboxSurface(findMainWindow(), t);
+            updateLetterboxSurfaceIfNeeded(findMainWindow(), t);
             mNeedsAnimationBoundsLayer = true;
         }
 
@@ -7618,8 +7820,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void prepareSurfaces() {
-        final boolean show = isVisible() || isAnimating(PARENTS,
-                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+        final boolean isDecorSurfaceBoosted =
+                getTask() != null && getTask().isDecorSurfaceBoosted();
+        final boolean show = (isVisible()
+                // Ensure that the activity content is hidden when the decor surface is boosted to
+                // prevent UI redressing attack.
+                && !isDecorSurfaceBoosted)
+                || isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS
+                        | ANIMATION_TYPE_PREDICT_BACK);
 
         if (mSurfaceControl != null) {
             if (show && !mLastSurfaceShowing) {
@@ -7679,9 +7887,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         final Rect frame = win.getRelativeFrame();
-        final Drawable thumbnailDrawable = task.mUserId == mWmService.mCurrentUserId
-                ? mAtmService.getUiContext().getDrawable(R.drawable.ic_account_circle)
-                : mEnterpriseThumbnailDrawable;
+        final Context context = mAtmService.getUiContext();
+        final Drawable thumbnailDrawable;
+        if (task.mUserId == mWmService.mCurrentUserId) {
+            thumbnailDrawable = context.getDrawable(R.drawable.ic_account_circle);
+        } else {
+            final DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+            thumbnailDrawable = dpm.getResources().getDrawable(
+                    WORK_PROFILE_ICON, OUTLINE, PROFILE_SWITCH_ANIMATION,
+                    () -> context.getDrawable(R.drawable.ic_corp_badge));
+        }
         final HardwareBuffer thumbnail = getDisplayContent().mAppTransition
                 .createCrossProfileAppsThumbnail(thumbnailDrawable, frame);
         if (thumbnail == null) {
@@ -7729,7 +7944,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mNeedsAnimationBoundsLayer = false;
         if (mNeedsLetterboxedAnimation) {
             mNeedsLetterboxedAnimation = false;
-            updateLetterboxSurface(findMainWindow(), t);
+            updateLetterboxSurfaceIfNeeded(findMainWindow(), t);
         }
 
         if (mAnimatingActivityRegistry != null) {
@@ -7841,7 +8056,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void applyFixedRotationTransform(DisplayInfo info, DisplayFrames displayFrames,
             Configuration config) {
         super.applyFixedRotationTransform(info, displayFrames, config);
-        ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
+        ensureActivityConfiguration();
     }
 
     /**
@@ -7936,7 +8151,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         startFreezingScreen(originalDisplayRotation);
         // This activity may relaunch or perform configuration change so once it has reported drawn,
         // the screen can be unfrozen.
-        ensureActivityConfiguration(0 /* globalChanges */, !PRESERVE_WINDOWS);
+        ensureActivityConfiguration();
         if (mTransitionController.isCollecting(this)) {
             // In case the task was changed from PiP but still keeps old transform.
             task.resetSurfaceControlTransforms();
@@ -7947,6 +8162,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mLetterboxUiController.shouldIgnoreRequestedOrientation(requestedOrientation)) {
             return;
         }
+        final int originalRelaunchingCount = mPendingRelaunchCount;
         // This is necessary in order to avoid going into size compat mode when the orientation
         // change request comes from the app
         if (getRequestedConfigurationOrientation(false, requestedOrientation)
@@ -7964,8 +8180,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // the request is handled at task level with letterbox.
         if (!getMergedOverrideConfiguration().equals(
                 mLastReportedConfiguration.getMergedConfiguration())) {
-            ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */,
-                    false /* ignoreVisibility */, true /* isRequestedOrientationChanged */);
+            ensureActivityConfiguration(false /* ignoreVisibility */);
+            if (mPendingRelaunchCount > originalRelaunchingCount) {
+                mLetterboxUiController.setRelaunchingAfterRequestedOrientationChanged(true);
+            }
             if (mTransitionController.inPlayingTransition(this)) {
                 mTransitionController.mValidateActivityCompat.add(this);
             }
@@ -8017,7 +8235,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     @Override
     int getOrientation(int candidate) {
-        if (shouldIgnoreOrientationRequests()) {
+        if (finishing || shouldIgnoreOrientationRequests()) {
             return SCREEN_ORIENTATION_UNSET;
         }
 
@@ -8031,8 +8249,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // The {@link ActivityRecord} should only specify an orientation when it is not closing.
         // Allowing closing {@link ActivityRecord} to participate can lead to an Activity in another
         // task being started in the wrong orientation during the transition.
-        if (!getDisplayContent().mClosingApps.contains(this)
-                && (isVisibleRequested() || getDisplayContent().mOpeningApps.contains(this))) {
+        if (isVisibleRequested()) {
             return getOverrideOrientation();
         }
 
@@ -8072,13 +8289,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Set the last reported configuration to the client. Should be called whenever
      * a new merged configuration is sent to the client for this activity.
      */
-    void setLastReportedConfiguration(@NonNull MergedConfiguration config) {
-        setLastReportedConfiguration(config.getGlobalConfiguration(),
-            config.getOverrideConfiguration());
+    void setLastReportedConfiguration(@NonNull Configuration global,
+            @NonNull Configuration override) {
+        mLastReportedConfiguration.setConfiguration(global, override);
     }
 
-    private void setLastReportedConfiguration(Configuration global, Configuration override) {
-        mLastReportedConfiguration.setConfiguration(global, override);
+    void setLastReportedActivityWindowInfo(@NonNull ActivityWindowInfo activityWindowInfo) {
+        if (Flags.activityWindowInfoFlag()) {
+            mLastReportedActivityWindowInfo.set(activityWindowInfo);
+        }
     }
 
     @Nullable
@@ -8138,6 +8357,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         aspect ratio.
      */
     boolean shouldCreateCompatDisplayInsets() {
+        if (mLetterboxUiController.hasFullscreenOverride()) {
+            // If the user has forced the applications aspect ratio to be fullscreen, don't use size
+            // compatibility mode in any situation. The user has been warned and therefore accepts
+            // the risk of the application misbehaving.
+            return false;
+        }
         switch (supportsSizeChanges()) {
             case SIZE_CHANGES_SUPPORTED_METADATA:
             case SIZE_CHANGES_SUPPORTED_OVERRIDE:
@@ -8147,7 +8372,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             default:
                 // Fall through
         }
-        if (inMultiWindowMode() || getWindowConfiguration().hasWindowDecorCaption()) {
+        // Use root activity's info for tasks in multi-window mode, or fullscreen tasks in freeform
+        // task display areas, to ensure visual consistency across activity launches and exits in
+        // the same task.
+        final TaskDisplayArea tda = getTaskDisplayArea();
+        if (inMultiWindowMode() || (tda != null && tda.inFreeformWindowingMode())) {
             final ActivityRecord root = task != null ? task.getRootActivity() : null;
             if (root != null && root != this && !root.shouldCreateCompatDisplayInsets()) {
                 // If the root activity doesn't use size compatibility mode, the activities above
@@ -8217,15 +8446,24 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     fullConfig.windowConfiguration.getRotation());
         }
 
+        final Rect letterboxedContainerBounds =
+                mLetterboxBoundsForFixedOrientationAndAspectRatio != null
+                        ? mLetterboxBoundsForFixedOrientationAndAspectRatio
+                        : mLetterboxBoundsForAspectRatio;
         // The role of CompatDisplayInsets is like the override bounds.
         mCompatDisplayInsets =
                 new CompatDisplayInsets(
-                        mDisplayContent, this, mLetterboxBoundsForFixedOrientationAndAspectRatio);
+                        mDisplayContent, this, letterboxedContainerBounds,
+                        mResolveConfigHint.mUseOverrideInsetsForConfig);
     }
 
     private void clearSizeCompatModeAttributes() {
         mInSizeCompatModeForBounds = false;
+        final float lastSizeCompatScale = mSizeCompatScale;
         mSizeCompatScale = 1f;
+        if (mSizeCompatScale != lastSizeCompatScale) {
+            forAllWindows(WindowState::updateGlobalScale, false /* traverseTopToBottom */);
+        }
         mSizeCompatBounds = null;
         mCompatDisplayInsets = null;
         mLetterboxUiController.clearInheritedCompatDisplayInsets();
@@ -8233,11 +8471,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @VisibleForTesting
     void clearSizeCompatMode() {
-        final float lastSizeCompatScale = mSizeCompatScale;
         clearSizeCompatModeAttributes();
-        if (mSizeCompatScale != lastSizeCompatScale) {
-            forAllWindows(WindowState::updateGlobalScale, false /* traverseTopToBottom */);
-        }
         // Clear config override in #updateCompatDisplayInsets().
         final int activityType = getActivityType();
         final Configuration overrideConfig = getRequestedOverrideConfiguration();
@@ -8292,14 +8526,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mIsAspectRatioApplied = false;
         mIsEligibleForFixedOrientationLetterbox = false;
         mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
+        mLetterboxBoundsForAspectRatio = null;
 
         // Can't use resolvedConfig.windowConfiguration.getWindowingMode() because it can be
         // different from windowing mode of the task (PiP) during transition from fullscreen to PiP
         // and back which can cause visible issues (see b/184078928).
         final int parentWindowingMode =
                 newParentConfiguration.windowConfiguration.getWindowingMode();
-        final boolean isFixedOrientationLetterboxAllowed =
-                parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
+
+        // Bubble activities should always fill their parent and should not be letterboxed.
+        final boolean isFixedOrientationLetterboxAllowed = !getLaunchedFromBubble()
+                && (parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
                         || parentWindowingMode == WINDOWING_MODE_FULLSCREEN
                         // When starting to switch between PiP and fullscreen, the task is pinned
                         // and the activity is fullscreen. But only allow to apply letterbox if the
@@ -8307,11 +8544,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         || (!mWaitForEnteringPinnedMode
                                 && parentWindowingMode == WINDOWING_MODE_PINNED
                                 && resolvedConfig.windowConfiguration.getWindowingMode()
-                                        == WINDOWING_MODE_FULLSCREEN);
+                                        == WINDOWING_MODE_FULLSCREEN));
         // TODO(b/181207944): Consider removing the if condition and always run
         // resolveFixedOrientationConfiguration() since this should be applied for all cases.
         if (isFixedOrientationLetterboxAllowed) {
             resolveFixedOrientationConfiguration(newParentConfiguration);
+        }
+        // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
+        // are already calculated in resolveFixedOrientationConfiguration.
+        // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
+        if (Flags.immersiveAppRepositioning() && !isLetterboxedForFixedOrientationAndAspectRatio()
+                && !mLetterboxUiController.hasFullscreenOverride()) {
+            resolveAspectRatioRestriction(newParentConfiguration);
         }
         final CompatDisplayInsets compatDisplayInsets = getCompatDisplayInsets();
         if (compatDisplayInsets != null) {
@@ -8323,12 +8567,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // If the activity has requested override bounds, the configuration needs to be
             // computed accordingly.
             if (!matchParentBounds()) {
-                getTaskFragment().computeConfigResourceOverrides(resolvedConfig,
-                        newParentConfiguration);
+                computeConfigByResolveHint(resolvedConfig, newParentConfiguration);
             }
+        }
         // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
-        // are already calculated in resolveFixedOrientationConfiguration.
-        } else if (!isLetterboxedForFixedOrientationAndAspectRatio()) {
+        // are already calculated in resolveFixedOrientationConfiguration, or if in size compat
+        // mode, it should already be calculated in resolveSizeCompatModeConfiguration.
+        // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
+        if (!Flags.immersiveAppRepositioning() && !isLetterboxedForFixedOrientationAndAspectRatio()
+                && !mInSizeCompatModeForBounds && !mLetterboxUiController.hasFullscreenOverride()) {
             resolveAspectRatioRestriction(newParentConfiguration);
         }
 
@@ -8393,17 +8640,107 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             resolvedConfig.windowConfiguration.setMaxBounds(mTmpBounds);
         }
 
+        applySizeOverrideIfNeeded(newParentConfiguration, parentWindowingMode, resolvedConfig);
+
         logAppCompatState();
     }
 
     /**
-     * @return The orientation to use to understand if reachability is enabled.
+     * If necessary, override configuration fields related to app bounds.
+     * This will happen when the app is targeting SDK earlier than 35.
+     * The insets and configuration has decoupled since SDK level 35, to make the system
+     * compatible to existing apps, override the configuration with legacy metrics. In legacy
+     * metrics, fields such as appBounds will exclude some of the system bar areas.
+     * The override contains all potentially affected fields in Configuration, including
+     * screenWidthDp, screenHeightDp, smallestScreenWidthDp, and orientation.
+     * All overrides to those fields should be in this method.
+     *
+     * TODO: Consider integrate this with computeConfigByResolveHint()
      */
-    @Configuration.Orientation
-    int getOrientationForReachability() {
-        return mLetterboxUiController.hasInheritedLetterboxBehavior()
-                ? mLetterboxUiController.getInheritedOrientation()
-                : getRequestedConfigurationOrientation();
+    private void applySizeOverrideIfNeeded(Configuration newParentConfiguration,
+            int parentWindowingMode, Configuration inOutConfig) {
+        if (mDisplayContent == null) {
+            return;
+        }
+        final Rect parentBounds = newParentConfiguration.windowConfiguration.getBounds();
+        int rotation = newParentConfiguration.windowConfiguration.getRotation();
+        if (rotation == ROTATION_UNDEFINED && !isFixedRotationTransforming()) {
+            rotation = mDisplayContent.getRotation();
+        }
+        if (!mOptOutEdgeToEdge && (!mResolveConfigHint.mUseOverrideInsetsForConfig
+                || getCompatDisplayInsets() != null || shouldCreateCompatDisplayInsets()
+                || isFloating(parentWindowingMode) || rotation == ROTATION_UNDEFINED)) {
+            // If the insets configuration decoupled logic is not enabled for the app, or the app
+            // already has a compat override, or the context doesn't contain enough info to
+            // calculate the override, skip the override.
+            return;
+        }
+        // Make sure the orientation related fields will be updated by the override insets, because
+        // fixed rotation has assigned the fields from display's configuration.
+        if (hasFixedRotationTransform()) {
+            inOutConfig.windowConfiguration.setAppBounds(null);
+            inOutConfig.screenWidthDp = Configuration.SCREEN_WIDTH_DP_UNDEFINED;
+            inOutConfig.screenHeightDp = Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+            inOutConfig.smallestScreenWidthDp = Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+            inOutConfig.orientation = ORIENTATION_UNDEFINED;
+        }
+
+        // Override starts here.
+        final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+        final int dw = rotated ? mDisplayContent.mBaseDisplayHeight
+                : mDisplayContent.mBaseDisplayWidth;
+        final int dh = rotated ? mDisplayContent.mBaseDisplayWidth
+                : mDisplayContent.mBaseDisplayHeight;
+        final  Rect nonDecorInsets = mDisplayContent.getDisplayPolicy()
+                .getDecorInsetsInfo(rotation, dw, dh).mOverrideNonDecorInsets;
+        // This should be the only place override the configuration for ActivityRecord. Override
+        // the value if not calculated yet.
+        Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
+        if (outAppBounds == null || outAppBounds.isEmpty()) {
+            inOutConfig.windowConfiguration.setAppBounds(parentBounds);
+            outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
+            outAppBounds.inset(nonDecorInsets);
+        }
+        float density = inOutConfig.densityDpi;
+        if (density == Configuration.DENSITY_DPI_UNDEFINED) {
+            density = newParentConfiguration.densityDpi;
+        }
+        density *= DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
+            final int overrideScreenWidthDp = (int) (outAppBounds.width() / density + 0.5f);
+            inOutConfig.screenWidthDp = overrideScreenWidthDp;
+        }
+        if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
+            final int overrideScreenHeightDp = (int) (outAppBounds.height() / density + 0.5f);
+            inOutConfig.screenHeightDp = overrideScreenHeightDp;
+        }
+        if (inOutConfig.smallestScreenWidthDp
+                == Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED
+                && parentWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+            // For the case of PIP transition and multi-window environment, the
+            // smallestScreenWidthDp is handled already. Override only if the app is in
+            // fullscreen.
+            final DisplayInfo info = new DisplayInfo(mDisplayContent.getDisplayInfo());
+            mDisplayContent.computeSizeRanges(info, rotated, dw, dh,
+                    mDisplayContent.getDisplayMetrics().density,
+                    inOutConfig, true /* overrideConfig */);
+        }
+
+        // It's possible that screen size will be considered in different orientation with or
+        // without considering the system bar insets. Override orientation as well.
+        if (inOutConfig.orientation == ORIENTATION_UNDEFINED) {
+            inOutConfig.orientation =
+                    (inOutConfig.screenWidthDp <= inOutConfig.screenHeightDp)
+                            ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+        }
+    }
+
+    private void computeConfigByResolveHint(@NonNull Configuration resolvedConfig,
+            @NonNull Configuration parentConfig) {
+        task.computeConfigResourceOverrides(resolvedConfig, parentConfig, mResolveConfigHint);
+        // Reset the temp info which should only take effect for the specified computation.
+        mResolveConfigHint.mTmpCompatInsets = null;
+        mResolveConfigHint.mTmpOverrideDisplayInfo = null;
     }
 
     /**
@@ -8461,7 +8798,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION;
         }
         // Letterbox for limited aspect ratio.
-        if (mIsAspectRatioApplied) {
+        if (isLetterboxedForAspectRatioOnly()) {
             return APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO;
         }
 
@@ -8490,13 +8827,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Rect parentBounds = newParentConfiguration.windowConfiguration.getBounds();
         final float screenResolvedBoundsWidth = screenResolvedBounds.width();
         final float parentAppBoundsWidth = parentAppBounds.width();
+        final boolean isImmersiveMode = isImmersiveMode(parentBounds);
+        final Insets navBarInsets;
+        if (isImmersiveMode) {
+            navBarInsets = mDisplayContent.getInsetsStateController()
+                    .getRawInsetsState().calculateInsets(
+                            parentBounds,
+                            WindowInsets.Type.navigationBars(),
+                            true /* ignoreVisibility */);
+        } else {
+            navBarInsets = Insets.NONE;
+        }
         // Horizontal position
         int offsetX = 0;
         if (parentBounds.width() != screenResolvedBoundsWidth) {
             if (screenResolvedBoundsWidth <= parentAppBoundsWidth) {
                 float positionMultiplier = mLetterboxUiController.getHorizontalPositionMultiplier(
                         newParentConfiguration);
-                offsetX = Math.max(0, (int) Math.ceil((parentAppBoundsWidth
+                // If in immersive mode, always align to right and overlap right insets (task bar)
+                // as they are transient and hidden. This removes awkward right spacing.
+                final int appWidth = (int) (parentAppBoundsWidth + navBarInsets.right);
+                offsetX = Math.max(0, (int) Math.ceil((appWidth
                         - screenResolvedBoundsWidth) * positionMultiplier)
                         // This is added to make sure that insets added inside
                         // CompatDisplayInsets#getContainerBounds() do not break the alignment
@@ -8516,9 +8867,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         newParentConfiguration);
                 // If in immersive mode, always align to bottom and overlap bottom insets (nav bar,
                 // task bar) as they are transient and hidden. This removes awkward bottom spacing.
-                final float newHeight = mDisplayContent.getDisplayPolicy().isImmersiveMode()
-                        ? parentBoundsHeight : parentAppBoundsHeight;
-                offsetY = Math.max(0, (int) Math.ceil((newHeight
+                final int appHeight = (int) (parentAppBoundsHeight + navBarInsets.bottom);
+                offsetY = Math.max(0, (int) Math.ceil((appHeight
                         - screenResolvedBoundsHeight) * positionMultiplier)
                         // This is added to make sure that insets added inside
                         // CompatDisplayInsets#getContainerBounds() do not break the alignment
@@ -8538,7 +8888,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // If the top is aligned with parentAppBounds add the vertical insets back so that the app
         // content aligns with the status bar
-        if (resolvedConfig.windowConfiguration.getAppBounds().top == parentAppBounds.top) {
+        if (resolvedConfig.windowConfiguration.getAppBounds().top == parentAppBounds.top
+                && !isImmersiveMode) {
             resolvedConfig.windowConfiguration.getBounds().top = parentBounds.top;
             if (mSizeCompatBounds != null) {
                 mSizeCompatBounds.top = parentBounds.top;
@@ -8546,7 +8897,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Since bounds has changed, the configuration needs to be computed accordingly.
-        getTaskFragment().computeConfigResourceOverrides(resolvedConfig, newParentConfiguration);
+        computeConfigByResolveHint(resolvedConfig, newParentConfiguration);
 
         // The position of configuration bounds were calculated in screen space because that is
         // easier to resolve the relative position in parent container. However, if the activity is
@@ -8559,6 +8910,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final int dy = (int) (screenPosY / mSizeCompatScale + 0.5f) - screenPosY;
             offsetBounds(resolvedConfig, dx, dy);
         }
+    }
+
+    boolean isImmersiveMode(@NonNull Rect parentBounds) {
+        if (!Flags.immersiveAppRepositioning()) {
+            return false;
+        }
+        if (!mResolveConfigHint.mUseOverrideInsetsForConfig
+                && mWmService.mFlags.mInsetsDecoupledConfiguration) {
+            return false;
+        }
+        final Insets navBarInsets = mDisplayContent.getInsetsStateController()
+                .getRawInsetsState().calculateInsets(
+                        parentBounds,
+                        WindowInsets.Type.navigationBars(),
+                        false /* ignoreVisibility */);
+        return Insets.NONE.equals(navBarInsets);
     }
 
     @NonNull Rect getScreenResolvedBounds() {
@@ -8603,6 +8970,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mLetterboxBoundsForFixedOrientationAndAspectRatio != null;
     }
 
+    boolean isLetterboxedForAspectRatioOnly() {
+        return mLetterboxBoundsForAspectRatio != null;
+    }
+
     boolean isAspectRatioApplied() {
         return mIsAspectRatioApplied;
     }
@@ -8640,13 +9011,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *                     to compute the stable bounds.
      * @param outStableBounds will store the stable bounds, which are the bounds with insets
      *                        applied, if orientation is not respected when insets are applied.
-     *                        Otherwise outStableBounds will be empty. Stable bounds should be used
-     *                        to compute letterboxed bounds if orientation is not respected when
-     *                        insets are applied.
+     *                        Stable bounds should be used to compute letterboxed bounds if
+     *                        orientation is not respected when insets are applied.
+     * @param outNonDecorBounds will store the non decor bounds, which are the bounds with non
+     *                          decor insets applied, like display cutout and nav bar.
      */
-    private boolean orientationRespectedWithInsets(Rect parentBounds, Rect outStableBounds) {
+    private boolean orientationRespectedWithInsets(Rect parentBounds, Rect outStableBounds,
+            Rect outNonDecorBounds) {
         outStableBounds.setEmpty();
         if (mDisplayContent == null) {
+            return true;
+        }
+        if (!mResolveConfigHint.mUseOverrideInsetsForConfig) {
+            // No insets should be considered any more.
             return true;
         }
         // Only need to make changes if activity sets an orientation
@@ -8662,8 +9039,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 ? getFixedRotationTransformDisplayInfo()
                 : mDisplayContent.getDisplayInfo();
         final Task task = getTask();
-        task.calculateInsetFrames(mTmpBounds /* outNonDecorBounds */,
-                outStableBounds /* outStableBounds */, parentBounds /* bounds */, di);
+        task.calculateInsetFrames(outNonDecorBounds /* outNonDecorBounds */,
+                outStableBounds /* outStableBounds */, parentBounds /* bounds */, di,
+                mResolveConfigHint.mUseOverrideInsetsForConfig);
         final int orientationWithInsets = outStableBounds.height() >= outStableBounds.width()
                 ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
         // If orientation does not match the orientation with insets applied, then a
@@ -8673,9 +9051,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // have the desired orientation.
         final boolean orientationRespectedWithInsets = orientation == orientationWithInsets
                 || orientationWithInsets == requestedOrientation;
-        if (orientationRespectedWithInsets) {
-            outStableBounds.setEmpty();
-        }
         return orientationRespectedWithInsets;
     }
 
@@ -8701,9 +9076,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig) {
         final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
         final Rect stableBounds = new Rect();
+        final Rect outNonDecorBounds = mTmpBounds;
         // If orientation is respected when insets are applied, then stableBounds will be empty.
         boolean orientationRespectedWithInsets =
-                orientationRespectedWithInsets(parentBounds, stableBounds);
+                orientationRespectedWithInsets(parentBounds, stableBounds, outNonDecorBounds);
         if (orientationRespectedWithInsets && handlesOrientationChangeFromDescendant(
                 getOverrideOrientation())) {
             // No need to letterbox because of fixed orientation. Display will handle
@@ -8720,7 +9096,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final Rect resolvedBounds =
                 getResolvedOverrideConfiguration().windowConfiguration.getBounds();
-        final int parentOrientation = newParentConfig.orientation;
+        final int stableBoundsOrientation = stableBounds.width() > stableBounds.height()
+                ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+        final int parentOrientation = mResolveConfigHint.mUseOverrideInsetsForConfig
+                ? stableBoundsOrientation : newParentConfig.orientation;
 
         // If the activity requires a different orientation (either by override or activityInfo),
         // make it fit the available bounds by scaling down its bounds.
@@ -8735,7 +9114,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         final CompatDisplayInsets compatDisplayInsets = getCompatDisplayInsets();
 
-        if (compatDisplayInsets != null && !compatDisplayInsets.mIsInFixedOrientationLetterbox) {
+        if (compatDisplayInsets != null
+                && !compatDisplayInsets.mIsInFixedOrientationOrAspectRatioLetterbox) {
             // App prefers to keep its original size.
             // If the size compat is from previous fixed orientation letterboxing, we may want to
             // have fixed orientation letterbox again, otherwise it will show the size compat
@@ -8743,10 +9123,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
+        final Rect parentAppBounds = mResolveConfigHint.mUseOverrideInsetsForConfig
+                ? outNonDecorBounds : newParentConfig.windowConfiguration.getAppBounds();
         // TODO(b/182268157): Explore using only one type of parentBoundsWithInsets, either app
         // bounds or stable bounds to unify aspect ratio logic.
         final Rect parentBoundsWithInsets = orientationRespectedWithInsets
-                ? newParentConfig.windowConfiguration.getAppBounds() : stableBounds;
+                ? parentAppBounds : stableBounds;
         final Rect containingBounds = new Rect();
         final Rect containingBoundsWithInsets = new Rect();
         // Need to shrink the containing bounds into a square because the parent orientation
@@ -8757,8 +9139,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // vertically centered within parent bounds with insets, so position vertical bounds
             // within parent bounds with insets to prevent insets from unnecessarily trimming
             // vertical bounds.
-            final int bottom = Math.min(parentBoundsWithInsets.top + parentBounds.width() - 1,
-                    parentBoundsWithInsets.bottom);
+            final int bottom = Math.min(parentBoundsWithInsets.top
+                            + parentBoundsWithInsets.width() - 1, parentBoundsWithInsets.bottom);
             containingBounds.set(parentBounds.left, parentBoundsWithInsets.top, parentBounds.right,
                     bottom);
             containingBoundsWithInsets.set(parentBoundsWithInsets.left, parentBoundsWithInsets.top,
@@ -8769,8 +9151,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // horizontally centered within parent bounds with insets, so position horizontal bounds
             // within parent bounds with insets to prevent insets from unnecessarily trimming
             // horizontal bounds.
-            final int right = Math.min(parentBoundsWithInsets.left + parentBounds.height(),
-                    parentBoundsWithInsets.right);
+            final int right = Math.min(parentBoundsWithInsets.left
+                            + parentBoundsWithInsets.height(), parentBoundsWithInsets.right);
             containingBounds.set(parentBoundsWithInsets.left, parentBounds.top, right,
                     parentBounds.bottom);
             containingBoundsWithInsets.set(parentBoundsWithInsets.left, parentBoundsWithInsets.top,
@@ -8812,10 +9194,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
 
+        // Fixed orientation bounds are the same as its parent container, so clear the fixed
+        // orientation bounds. This can happen in close to square displays where the orientation
+        // is not respected with insets, but the display still matches or is less than the
+        // activity aspect ratio.
+        if (resolvedBounds.equals(parentBounds)) {
+            resolvedBounds.set(prevResolvedBounds);
+            return;
+        }
+
         // Calculate app bounds using fixed orientation bounds because they will be needed later
         // for comparison with size compat app bounds in {@link resolveSizeCompatModeConfiguration}.
-        getTaskFragment().computeConfigResourceOverrides(getResolvedOverrideConfiguration(),
-                newParentConfig, compatDisplayInsets);
+        mResolveConfigHint.mTmpCompatInsets = compatDisplayInsets;
+        computeConfigByResolveHint(getResolvedOverrideConfiguration(), newParentConfig);
         mLetterboxBoundsForFixedOrientationAndAspectRatio = new Rect(resolvedBounds);
     }
 
@@ -8856,8 +9247,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!resolvedBounds.isEmpty() && !resolvedBounds.equals(parentBounds)) {
             // Compute the configuration based on the resolved bounds. If aspect ratio doesn't
             // restrict, the bounds should be the requested override bounds.
-            getTaskFragment().computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
-                    getFixedRotationTransformDisplayInfo());
+            mResolveConfigHint.mTmpOverrideDisplayInfo = getFixedRotationTransformDisplayInfo();
+            computeConfigByResolveHint(resolvedConfig, newParentConfiguration);
+            mLetterboxBoundsForAspectRatio = new Rect(resolvedBounds);
         }
     }
 
@@ -8869,17 +9261,35 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             @NonNull CompatDisplayInsets compatDisplayInsets) {
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
+        final Insets insets;
+        if (mResolveConfigHint.mUseOverrideInsetsForConfig) {
+            // TODO(b/343197837): Add test to verify SCM behaviour with new bound configuration
+            // Insets are decoupled from configuration by default from V+, use legacy
+            // compatibility behaviour for apps targeting SDK earlier than 35
+            // (see applySizeOverrideIfNeeded).
+            insets = Insets.of(mDisplayContent.getDisplayPolicy()
+                    .getDecorInsetsInfo(mDisplayContent.mDisplayFrames.mRotation,
+                            mDisplayContent.mDisplayFrames.mWidth,
+                            mDisplayContent.mDisplayFrames.mHeight).mOverrideNonDecorInsets);
+        } else {
+            insets = Insets.NONE;
+        }
 
         // When an activity needs to be letterboxed because of fixed orientation, use fixed
         // orientation bounds (stored in resolved bounds) instead of parent bounds since the
         // activity will be displayed within them even if it is in size compat mode. They should be
         // saved here before resolved bounds are overridden below.
-        final Rect containerBounds = isLetterboxedForFixedOrientationAndAspectRatio()
+        final boolean useResolvedBounds = Flags.immersiveAppRepositioning()
+                ? isAspectRatioApplied() : isLetterboxedForFixedOrientationAndAspectRatio();
+        final Rect containerBounds = useResolvedBounds
                 ? new Rect(resolvedBounds)
                 : newParentConfiguration.windowConfiguration.getBounds();
-        final Rect containerAppBounds = isLetterboxedForFixedOrientationAndAspectRatio()
-                ? new Rect(getResolvedOverrideConfiguration().windowConfiguration.getAppBounds())
-                : newParentConfiguration.windowConfiguration.getAppBounds();
+        final Rect parentAppBounds =
+                newParentConfiguration.windowConfiguration.getAppBounds();
+        parentAppBounds.inset(insets);
+        final Rect containerAppBounds = useResolvedBounds
+                ? new Rect(resolvedConfig.windowConfiguration.getAppBounds())
+                : parentAppBounds;
 
         final int requestedOrientation = getRequestedConfigurationOrientation();
         final boolean orientationRequested = requestedOrientation != ORIENTATION_UNDEFINED;
@@ -8921,8 +9331,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Use resolvedBounds to compute other override configurations such as appBounds. The bounds
         // are calculated in compat container space. The actual position on screen will be applied
         // later, so the calculation is simpler that doesn't need to involve offset from parent.
-        getTaskFragment().computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
-                compatDisplayInsets);
+        mResolveConfigHint.mTmpCompatInsets = compatDisplayInsets;
+        computeConfigByResolveHint(resolvedConfig, newParentConfiguration);
         // Use current screen layout as source because the size of app is independent to parent.
         resolvedConfig.screenLayout = computeScreenLayout(
                 getConfiguration().screenLayout, resolvedConfig.screenWidthDp,
@@ -9119,6 +9529,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return false;
     }
 
+    @Override
+    protected boolean setOverrideGender(Configuration requestsTmpConfig, int gender) {
+        return WindowProcessController.applyConfigGenderOverride(
+                requestsTmpConfig, gender, mAtmService.mGrammaticalManagerInternal, getUid());
+    }
+
     @VisibleForTesting
     @Override
     Rect getAnimationBounds(int appRootTaskClipMode) {
@@ -9147,7 +9563,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     getRequestedOverrideWindowingMode() == WINDOWING_MODE_UNDEFINED
                             ? newParentConfig.windowConfiguration.getWindowingMode()
                             : getRequestedOverrideWindowingMode();
-            if (getWindowingMode() != projectedWindowingMode) {
+            if (getWindowingMode() != projectedWindowingMode
+                    // Do not collect a pip activity about to enter pinned mode
+                    // as a part of WindowOrganizerController#finishTransition().
+                    // If not checked the activity might be collected for the wrong transition,
+                    // such as a TRANSIT_OPEN transition requested right after TRANSIT_PIP.
+                    && !(mWaitForEnteringPinnedMode
+                    && mTransitionController.inFinishingTransition(this))) {
                 mTransitionController.collect(this);
             }
         }
@@ -9217,13 +9639,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             Slog.w(TAG, errorMessage);
         }
 
-        // Configuration's equality doesn't consider seq so if only seq number changes in resolved
-        // override configuration. Therefore ConfigurationContainer doesn't change merged override
-        // configuration, but it's used to push configuration changes so explicitly update that.
-        if (getMergedOverrideConfiguration().seq != getResolvedOverrideConfiguration().seq) {
-            onMergedOverrideConfigurationChanged();
-        }
-
         // Before PiP animation is done, th windowing mode of the activity is still the previous
         // mode (see RootWindowContainer#moveActivityToPinnedRootTask). So once the windowing mode
         // of activity is changed, it is the signal of the last step to update the PiP states.
@@ -9260,6 +9675,59 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    @Override
+    void dispatchConfigurationToChild(WindowState child, Configuration config) {
+        if (isConfigurationDispatchPaused()) {
+            return;
+        }
+        super.dispatchConfigurationToChild(child, config);
+    }
+
+    /**
+     * Pauses dispatch of configuration changes to the client. This includes any
+     * configuration-triggered lifecycle changes, WindowState configs, and surface changes. If
+     * a lifecycle change comes from another source (eg. stop), it will still run but will use the
+     * paused configuration.
+     *
+     * The main way this works is by blocking calls to {@link #updateReportedConfigurationAndSend}.
+     * That method is responsible for evaluating whether the activity needs to be relaunched and
+     * sending configurations.
+     */
+    void pauseConfigurationDispatch() {
+        ++mPauseConfigurationDispatchCount;
+        if (mPauseConfigurationDispatchCount == 1) {
+            ProtoLog.v(WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Pausing configuration dispatch for "
+                    + " %s", this);
+        }
+    }
+
+    /** @return `true` if configuration actually changed. */
+    boolean resumeConfigurationDispatch() {
+        --mPauseConfigurationDispatchCount;
+        if (mPauseConfigurationDispatchCount > 0) {
+            return false;
+        }
+        ProtoLog.v(WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Resuming configuration dispatch for %s", this);
+        if (mPauseConfigurationDispatchCount < 0) {
+            Slog.wtf(TAG, "Trying to resume non-paused configuration dispatch");
+            mPauseConfigurationDispatchCount = 0;
+            return false;
+        }
+        if (mLastReportedDisplayId == getDisplayId()
+                && getConfiguration().equals(mLastReportedConfiguration.getMergedConfiguration())) {
+            return false;
+        }
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            dispatchConfigurationToChild(getChildAt(i), getConfiguration());
+        }
+        updateReportedConfigurationAndSend();
+        return true;
+    }
+
+    boolean isConfigurationDispatchPaused() {
+        return mPauseConfigurationDispatchCount > 0;
+    }
+
     private boolean applyAspectRatio(Rect outBounds, Rect containingAppBounds,
             Rect containingBounds) {
         return applyAspectRatio(outBounds, containingAppBounds, containingBounds,
@@ -9279,8 +9747,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Task rootTask = getRootTask();
         final float minAspectRatio = getMinAspectRatio();
         final TaskFragment organizedTf = getOrganizedTaskFragment();
+        float aspectRatioToApply = desiredAspectRatio;
         if (task == null || rootTask == null
-                || (maxAspectRatio < 1 && minAspectRatio < 1 && desiredAspectRatio < 1)
+                || (maxAspectRatio < 1 && minAspectRatio < 1 && aspectRatioToApply < 1)
                 // Don't set aspect ratio if we are in VR mode.
                 || isInVrUiMode(getConfiguration())
                 // TODO(b/232898850): Always respect aspect ratio requests.
@@ -9293,30 +9762,30 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int containingAppHeight = containingAppBounds.height();
         final float containingRatio = computeAspectRatio(containingAppBounds);
 
-        if (desiredAspectRatio < 1) {
-            desiredAspectRatio = containingRatio;
+        if (aspectRatioToApply < 1) {
+            aspectRatioToApply = containingRatio;
         }
 
-        if (maxAspectRatio >= 1 && desiredAspectRatio > maxAspectRatio) {
-            desiredAspectRatio = maxAspectRatio;
-        } else if (minAspectRatio >= 1 && desiredAspectRatio < minAspectRatio) {
-            desiredAspectRatio = minAspectRatio;
+        if (maxAspectRatio >= 1 && aspectRatioToApply > maxAspectRatio) {
+            aspectRatioToApply = maxAspectRatio;
+        } else if (minAspectRatio >= 1 && aspectRatioToApply < minAspectRatio) {
+            aspectRatioToApply = minAspectRatio;
         }
 
         int activityWidth = containingAppWidth;
         int activityHeight = containingAppHeight;
 
-        if (containingRatio - desiredAspectRatio > ASPECT_RATIO_ROUNDING_TOLERANCE) {
+        if (containingRatio - aspectRatioToApply > ASPECT_RATIO_ROUNDING_TOLERANCE) {
             if (containingAppWidth < containingAppHeight) {
                 // Width is the shorter side, so we use that to figure-out what the max. height
                 // should be given the aspect ratio.
-                activityHeight = (int) ((activityWidth * desiredAspectRatio) + 0.5f);
+                activityHeight = (int) ((activityWidth * aspectRatioToApply) + 0.5f);
             } else {
                 // Height is the shorter side, so we use that to figure-out what the max. width
                 // should be given the aspect ratio.
-                activityWidth = (int) ((activityHeight * desiredAspectRatio) + 0.5f);
+                activityWidth = (int) ((activityHeight * aspectRatioToApply) + 0.5f);
             }
-        } else if (desiredAspectRatio - containingRatio > ASPECT_RATIO_ROUNDING_TOLERANCE) {
+        } else if (aspectRatioToApply - containingRatio > ASPECT_RATIO_ROUNDING_TOLERANCE) {
             boolean adjustWidth;
             switch (getRequestedConfigurationOrientation()) {
                 case ORIENTATION_LANDSCAPE:
@@ -9344,9 +9813,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     break;
             }
             if (adjustWidth) {
-                activityWidth = (int) ((activityHeight / desiredAspectRatio) + 0.5f);
+                activityWidth = (int) ((activityHeight / aspectRatioToApply) + 0.5f);
             } else {
-                activityHeight = (int) ((activityWidth / desiredAspectRatio) + 0.5f);
+                activityHeight = (int) ((activityWidth / aspectRatioToApply) + 0.5f);
             }
         }
 
@@ -9388,10 +9857,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (info.applicationInfo == null) {
             return info.getMinAspectRatio();
         }
-        if (!mLetterboxUiController.shouldOverrideMinAspectRatio()) {
+        if (mLetterboxUiController.shouldApplyUserMinAspectRatioOverride()) {
+            return mLetterboxUiController.getUserMinAspectRatio();
+        }
+        if (!mLetterboxUiController.shouldOverrideMinAspectRatio()
+                && !mLetterboxUiController.shouldOverrideMinAspectRatioForCamera()) {
             return info.getMinAspectRatio();
         }
-
         if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY)
                 && !ActivityInfo.isFixedOrientationPortrait(
                         getOverrideOrientation())) {
@@ -9463,35 +9935,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mLastReportedDisplayId != getDisplayId();
     }
 
-    boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow) {
-        return ensureActivityConfiguration(globalChanges, preserveWindow,
-                false /* ignoreVisibility */, false /* isRequestedOrientationChanged */);
-    }
-
-    boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow,
-            boolean ignoreVisibility) {
-        return ensureActivityConfiguration(globalChanges, preserveWindow, ignoreVisibility,
-                false /* isRequestedOrientationChanged */);
+    boolean ensureActivityConfiguration() {
+        return ensureActivityConfiguration(false /* ignoreVisibility */);
     }
 
     /**
      * Make sure the given activity matches the current configuration. Ensures the HistoryRecord
      * is updated with the correct configuration and all other bookkeeping is handled.
      *
-     * @param globalChanges The changes to the global configuration.
-     * @param preserveWindow If the activity window should be preserved on screen if the activity
-     *                       is relaunched.
      * @param ignoreVisibility If we should try to relaunch the activity even if it is invisible
      *                         (stopped state). This is useful for the case where we know the
      *                         activity will be visible soon and we want to ensure its configuration
      *                         before we make it visible.
-     * @param isRequestedOrientationChanged whether this is triggered in response to an app calling
-     *                                      {@link android.app.Activity#setRequestedOrientation}.
      * @return False if the activity was relaunched and true if it wasn't relaunched because we
      *         can't or the app handles the specific configuration that is changing.
      */
-    boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow,
-            boolean ignoreVisibility, boolean isRequestedOrientationChanged) {
+    boolean ensureActivityConfiguration(boolean ignoreVisibility) {
         final Task rootTask = getRootTask();
         if (rootTask.mConfigWillChange) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Skipping config check "
@@ -9503,7 +9962,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (finishing) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration doesn't matter "
                     + "in finishing %s", this);
-            stopFreezingScreenLocked(false);
             return true;
         }
 
@@ -9519,6 +9977,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return true;
         }
 
+        if (isConfigurationDispatchPaused()) {
+            return true;
+        }
+
+        return updateReportedConfigurationAndSend();
+    }
+
+    /**
+     * @return {@code true} if the Camera is active for the current activity
+     */
+    boolean isCameraActive() {
+        return mDisplayContent != null
+                && mDisplayContent.getDisplayRotationCompatPolicy() != null
+                && mDisplayContent.getDisplayRotationCompatPolicy()
+                    .isCameraActive(this, /* mustBeFullscreen */ true);
+    }
+
+    boolean updateReportedConfigurationAndSend() {
+        if (isConfigurationDispatchPaused()) {
+            Slog.wtf(TAG, "trying to update reported(client) config while dispatch is paused");
+        }
         ProtoLog.v(WM_DEBUG_CONFIGURATION, "Ensuring correct "
                 + "configuration: %s", this);
 
@@ -9545,7 +10024,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // configurations because there are cases (like moving a task to the root pinned task) where
         // the combine configurations are equal, but would otherwise differ in the override config
         mTmpConfig.setTo(mLastReportedConfiguration.getMergedConfiguration());
-        if (getConfiguration().equals(mTmpConfig) && !forceNewConfig && !displayChanged) {
+        final ActivityWindowInfo newActivityWindowInfo = getActivityWindowInfo();
+        final boolean isActivityWindowInfoChanged = Flags.activityWindowInfoFlag()
+                && !mLastReportedActivityWindowInfo.equals(newActivityWindowInfo);
+        if (!displayChanged && !isActivityWindowInfoChanged
+                && getConfiguration().equals(mTmpConfig)) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration & display "
                     + "unchanged in %s", this);
             return true;
@@ -9562,6 +10045,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Configuration newMergedOverrideConfig = getMergedOverrideConfiguration();
 
         setLastReportedConfiguration(getProcessGlobalConfiguration(), newMergedOverrideConfig);
+        setLastReportedActivityWindowInfo(newActivityWindowInfo);
 
         if (mState == INITIALIZING) {
             // No need to relaunch or schedule new config for activity that hasn't been launched
@@ -9572,17 +10056,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return true;
         }
 
-        if (changes == 0 && !forceNewConfig) {
+        if (changes == 0) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration no differences in %s",
                     this);
             // There are no significant differences, so we won't relaunch but should still deliver
             // the new configuration to the client process.
             if (displayChanged) {
-                scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig);
+                scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig,
+                        newActivityWindowInfo);
             } else {
-                scheduleConfigurationChanged(newMergedOverrideConfig);
+                scheduleConfigurationChanged(newMergedOverrideConfig, newActivityWindowInfo);
             }
-            notifyDisplayCompatPolicyAboutConfigurationChange(
+            notifyActivityRefresherAboutConfigurationChange(
                     mLastReportedConfiguration.getMergedConfiguration(), mTmpConfig);
             return true;
         }
@@ -9594,8 +10079,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // pick that up next time it starts.
         if (!attachedToProcess()) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration doesn't matter not running %s", this);
-            stopFreezingScreenLocked(false);
-            forceNewConfig = false;
             return true;
         }
 
@@ -9605,14 +10088,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Integer.toHexString(changes), Integer.toHexString(info.getRealConfigChanged()),
                 mLastReportedConfiguration);
 
-        if (shouldRelaunchLocked(changes, mTmpConfig) || forceNewConfig) {
+        if (shouldRelaunchLocked(changes, mTmpConfig)) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
-            configChangeFlags |= changes;
-            startFreezingScreenLocked(globalChanges);
-            forceNewConfig = false;
+            if (mVisible && mAtmService.mTmpUpdateConfigurationResult.mIsUpdating
+                    && !mTransitionController.isShellTransitionsEnabled()) {
+                startFreezingScreenLocked(app, mAtmService.mTmpUpdateConfigurationResult.changes);
+            }
+            final boolean displayMayChange = mTmpConfig.windowConfiguration.getDisplayRotation()
+                    != getWindowConfiguration().getDisplayRotation()
+                    || !mTmpConfig.windowConfiguration.getMaxBounds().equals(
+                            getWindowConfiguration().getMaxBounds());
+            final boolean isAppResizeOnly = !displayMayChange
+                    && (changes & ~(CONFIG_SCREEN_SIZE | CONFIG_SMALLEST_SCREEN_SIZE
+                            | CONFIG_ORIENTATION | CONFIG_SCREEN_LAYOUT)) == 0;
             // Do not preserve window if it is freezing screen because the original window won't be
             // able to update drawn state that causes freeze timeout.
-            preserveWindow &= isResizeOnlyChange(changes) && !mFreezingScreen;
+            // TODO(b/258618073): Always preserve if possible.
+            final boolean preserveWindow = isAppResizeOnly && !mFreezingScreen;
             final boolean hasResizeChange = hasResizeChange(changes & ~info.getRealConfigChanged());
             if (hasResizeChange) {
                 final boolean isDragResizing = task.isDragResizing();
@@ -9621,26 +10113,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else {
                 mRelaunchReason = RELAUNCH_REASON_NONE;
             }
-            if (isRequestedOrientationChanged) {
-                mLetterboxUiController.setRelaunchingAfterRequestedOrientationChanged(true);
+            ProtoLog.v(WM_DEBUG_CONFIGURATION, "Config is relaunching %s", this);
+            if (!mVisibleRequested) {
+                ProtoLog.v(WM_DEBUG_STATES, "Config is relaunching invisible "
+                        + "activity %s called by %s", this, Debug.getCallers(4));
             }
-            if (mState == PAUSING) {
-                // A little annoying: we are waiting for this activity to finish pausing. Let's not
-                // do anything now, but just flag that it needs to be restarted when done pausing.
-                ProtoLog.v(WM_DEBUG_CONFIGURATION,
-                        "Config is skipping already pausing %s", this);
-                deferRelaunchUntilPaused = true;
-                preserveWindowOnDeferredRelaunch = preserveWindow;
-                return true;
-            } else {
-                ProtoLog.v(WM_DEBUG_CONFIGURATION, "Config is relaunching %s",
-                        this);
-                if (!mVisibleRequested) {
-                    ProtoLog.v(WM_DEBUG_STATES, "Config is relaunching invisible "
-                            + "activity %s called by %s", this, Debug.getCallers(4));
-                }
-                relaunchActivityLocked(preserveWindow);
-            }
+            relaunchActivityLocked(preserveWindow, changes);
 
             // All done...  tell the caller we weren't able to keep this activity around.
             return false;
@@ -9651,25 +10129,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // changes is always sent to all processes when they happen so it can just use whatever
         // system level configuration it last got.
         if (displayChanged) {
-            scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig);
+            scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig,
+                    newActivityWindowInfo);
         } else {
-            scheduleConfigurationChanged(newMergedOverrideConfig);
+            scheduleConfigurationChanged(newMergedOverrideConfig, newActivityWindowInfo);
         }
-        notifyDisplayCompatPolicyAboutConfigurationChange(
+        notifyActivityRefresherAboutConfigurationChange(
                 mLastReportedConfiguration.getMergedConfiguration(), mTmpConfig);
-
-        stopFreezingScreenLocked(false);
-
         return true;
     }
 
-    private void notifyDisplayCompatPolicyAboutConfigurationChange(
+    private void notifyActivityRefresherAboutConfigurationChange(
             Configuration newConfig, Configuration lastReportedConfig) {
-        if (mDisplayContent.mDisplayRotationCompatPolicy == null
+        if (mDisplayContent.mActivityRefresher == null
                 || !shouldBeResumed(/* activeActivity */ null)) {
             return;
         }
-        mDisplayContent.mDisplayRotationCompatPolicy.onActivityConfigurationChanging(
+        mDisplayContent.mActivityRefresher.onActivityConfigurationChanging(
                 this, newConfig, lastReportedConfig);
     }
 
@@ -9779,19 +10255,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return changes;
     }
 
-    private static boolean isResizeOnlyChange(int change) {
-        return (change & ~(CONFIG_SCREEN_SIZE | CONFIG_SMALLEST_SCREEN_SIZE | CONFIG_ORIENTATION
-                | CONFIG_SCREEN_LAYOUT)) == 0;
-    }
-
     private static boolean hasResizeChange(int change) {
         return (change & (CONFIG_SCREEN_SIZE | CONFIG_SMALLEST_SCREEN_SIZE | CONFIG_ORIENTATION
                 | CONFIG_SCREEN_LAYOUT)) != 0;
     }
 
-    void relaunchActivityLocked(boolean preserveWindow) {
+    void relaunchActivityLocked(boolean preserveWindow, int configChangeFlags) {
         if (mAtmService.mSuppressResizeConfigChanges && preserveWindow) {
-            configChangeFlags = 0;
             return;
         }
         if (!preserveWindow) {
@@ -9827,34 +10297,29 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     task.mTaskId, shortComponentName, Integer.toHexString(configChangeFlags));
         }
 
-        startFreezingScreenLocked(0);
-
         try {
             ProtoLog.i(WM_DEBUG_STATES, "Moving to %s Relaunching %s callers=%s" ,
                     (andResume ? "RESUMED" : "PAUSED"), this, Debug.getCallers(6));
-            forceNewConfig = false;
-            startRelaunching();
-            final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(pendingResults,
-                    pendingNewIntents, configChangeFlags,
+            final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(token,
+                    pendingResults, pendingNewIntents, configChangeFlags,
                     new MergedConfiguration(getProcessGlobalConfiguration(),
                             getMergedOverrideConfiguration()),
-                    preserveWindow);
+                    preserveWindow, getActivityWindowInfo());
             final ActivityLifecycleItem lifecycleItem;
             if (andResume) {
-                lifecycleItem = ResumeActivityItem.obtain(isTransitionForward(),
+                lifecycleItem = ResumeActivityItem.obtain(token, isTransitionForward(),
                         shouldSendCompatFakeFocus());
             } else {
-                lifecycleItem = PauseActivityItem.obtain();
+                lifecycleItem = PauseActivityItem.obtain(token);
             }
-            final ClientTransaction transaction = ClientTransaction.obtain(app.getThread(), token);
-            transaction.addCallback(callbackItem);
-            transaction.setLifecycleStateRequest(lifecycleItem);
-            mAtmService.getLifecycleManager().scheduleTransaction(transaction);
+            mAtmService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
+                    app.getThread(), callbackItem, lifecycleItem);
+            startRelaunching();
             // Note: don't need to call pauseIfSleepingLocked() here, because the caller will only
             // request resume if this activity is currently resumed, which implies we aren't
             // sleeping.
         } catch (RemoteException e) {
-            ProtoLog.i(WM_DEBUG_STATES, "Relaunch failed %s", e);
+            Slog.w(TAG, "Failed to relaunch " + this + ": " + e);
         }
 
         if (andResume) {
@@ -9869,10 +10334,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // The activity may be waiting for stop, but that is no longer appropriate for it.
         mTaskSupervisor.mStoppingActivities.remove(this);
-
-        configChangeFlags = 0;
-        deferRelaunchUntilPaused = false;
-        preserveWindowOnDeferredRelaunch = false;
     }
 
     /**
@@ -9940,8 +10401,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // The process will be killed until the activity reports stopped with saved state (see
         // {@link ActivityTaskManagerService.activityStopped}).
         try {
-            mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
-                    StopActivityItem.obtain(0 /* configChanges */));
+            mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
+                    StopActivityItem.obtain(token));
         } catch (RemoteException e) {
             Slog.w(TAG, "Exception thrown during restart " + this, e);
         }
@@ -10020,6 +10481,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mPersistentState.saveToXml(out);
             out.endTag(null, TAG_PERSISTABLEBUNDLE);
         }
+
+        if (android.security.Flags.contentUriPermissionApis()) {
+            ActivityCallerState.CallerInfo initialCallerInfo = mCallerState.getCallerInfoOrNull(
+                    initialCallerInfoAccessToken);
+            if (initialCallerInfo != null) {
+                out.startTag(null, TAG_INITIAL_CALLER_INFO);
+                initialCallerInfo.saveToXml(out);
+                out.endTag(null, TAG_INITIAL_CALLER_INFO);
+            }
+        }
     }
 
     static ActivityRecord restoreFromXml(TypedXmlPullParser in,
@@ -10034,6 +10505,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         int userId = in.getAttributeInt(null, ATTR_USERID, 0);
         long createTime = in.getAttributeLong(null, ATTR_ID, -1);
         final int outerDepth = in.getDepth();
+        ActivityCallerState.CallerInfo initialCallerInfo = null;
 
         TaskDescription taskDescription = new TaskDescription();
         taskDescription.restoreFromXml(in);
@@ -10053,6 +10525,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     persistentState = PersistableBundle.restoreFromXml(in);
                     if (DEBUG) Slog.d(TaskPersister.TAG,
                             "ActivityRecord: persistentState=" + persistentState);
+                } else if (android.security.Flags.contentUriPermissionApis()
+                        && TAG_INITIAL_CALLER_INFO.equals(name)) {
+                    initialCallerInfo = ActivityCallerState.CallerInfo.restoreFromXml(in);
                 } else {
                     Slog.w(TAG, "restoreActivity: unexpected name=" + name);
                     XmlUtils.skipCurrentTag(in);
@@ -10071,7 +10546,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             throw new XmlPullParserException("restoreActivity resolver error. Intent=" + intent +
                     " resolvedType=" + resolvedType);
         }
-        return new ActivityRecord.Builder(service)
+        final ActivityRecord r = new ActivityRecord.Builder(service)
                 .setLaunchedFromUid(launchedFromUid)
                 .setLaunchedFromPackage(launchedFromPackage)
                 .setLaunchedFromFeature(launchedFromFeature)
@@ -10083,6 +10558,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 .setTaskDescription(taskDescription)
                 .setCreateTime(createTime)
                 .build();
+
+        if (android.security.Flags.contentUriPermissionApis() && initialCallerInfo != null) {
+            r.mCallerState.add(r.initialCallerInfoAccessToken, initialCallerInfo);
+        }
+        return r;
     }
 
     private static boolean isInVrUiMode(Configuration config) {
@@ -10141,8 +10621,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!getTurnScreenOnFlag()) {
             return false;
         }
-        final Task rootTask = getRootTask();
-        return mCurrentLaunchCanTurnScreenOn && rootTask != null
+        return mCurrentLaunchCanTurnScreenOn
                 && mTaskSupervisor.getKeyguardController().checkKeyguardVisibility(this);
     }
 
@@ -10152,50 +10631,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void setAllowCrossUidActivitySwitchFromBelow(boolean allowed) {
         mAllowCrossUidActivitySwitchFromBelow = allowed;
-    }
-
-    /**
-     * Determines if a source is allowed to add or remove activities from the task,
-     * if the current ActivityRecord is above it in the stack
-     *
-     * A transition is blocked ({@code false} returned) if all of the following are met:
-     * <pre>
-     * 1. The source activity and the current activity record belong to different apps
-     * (i.e, have different UIDs).
-     * 2. Both the source activity and the current activity target U+
-     * 3. The current activity has not set
-     * {@link ActivityRecord#setAllowCrossUidActivitySwitchFromBelow(boolean)} to {@code true}
-     * </pre>
-     *
-     * Returns a pair where the elements mean:
-     * <pre>
-     * First: {@code false} if we should actually block the transition (takes into consideration
-     * feature flag and targetSdk).
-     * Second: {@code false} if we should warn about the transition via toasts. This happens if
-     * the transition would be blocked in case both the app was targeting U+ and the feature was
-     * enabled.
-     * </pre>
-     *
-     * @param sourceUid The source (s) activity performing the state change
-     */
-    Pair<Boolean, Boolean> allowCrossUidActivitySwitchFromBelow(int sourceUid) {
-        int myUid = info.applicationInfo.uid;
-        if (sourceUid == myUid) {
-            return new Pair<>(true, true);
-        }
-
-        // If mAllowCrossUidActivitySwitchFromBelow is set, honor it.
-        if (mAllowCrossUidActivitySwitchFromBelow) {
-            return new Pair<>(true, true);
-        }
-
-        // If it is not set, default to true if both records target ≥ U, false otherwise
-        // TODO(b/258792202) Replace with CompatChanges and replace Pair with boolean once feature
-        // flag is removed
-        boolean restrictActivitySwitch =
-                ActivitySecurityModelFeatureFlags.shouldRestrictActivitySwitch(myUid)
-                    && ActivitySecurityModelFeatureFlags.shouldRestrictActivitySwitch(sourceUid);
-        return new Pair<>(!restrictActivitySwitch, false);
     }
 
     boolean getTurnScreenOnFlag() {
@@ -10353,6 +10788,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mLetterboxUiController.shouldRefreshActivityForCameraCompat());
         proto.write(SHOULD_REFRESH_ACTIVITY_VIA_PAUSE_FOR_CAMERA_COMPAT,
                 mLetterboxUiController.shouldRefreshActivityViaPauseForCameraCompat());
+        proto.write(SHOULD_OVERRIDE_MIN_ASPECT_RATIO,
+                mLetterboxUiController.shouldOverrideMinAspectRatio());
+        proto.write(SHOULD_IGNORE_ORIENTATION_REQUEST_LOOP,
+                mLetterboxUiController.shouldIgnoreOrientationRequestLoop());
+        proto.write(SHOULD_OVERRIDE_FORCE_RESIZE_APP,
+                mLetterboxUiController.shouldOverrideForceResizeApp());
+        proto.write(SHOULD_ENABLE_USER_ASPECT_RATIO_SETTINGS,
+                mLetterboxUiController.shouldEnableUserAspectRatioSettings());
+        proto.write(IS_USER_FULLSCREEN_OVERRIDE_ENABLED,
+                mLetterboxUiController.isUserFullscreenOverrideEnabled());
     }
 
     @Override
@@ -10402,10 +10847,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         /** Whether the {@link Task} windowingMode represents a floating window*/
         final boolean mIsFloating;
         /**
-         * Whether is letterboxed because of fixed orientation when the unresizable activity is
-         * first shown.
+         * Whether is letterboxed because of fixed orientation or aspect ratio when
+         * the unresizable activity is first shown.
          */
-        final boolean mIsInFixedOrientationLetterbox;
+        final boolean mIsInFixedOrientationOrAspectRatioLetterbox;
         /**
          * The nonDecorInsets for each rotation. Includes the navigation bar and cutout insets. It
          * is used to compute the appBounds.
@@ -10420,7 +10865,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         /** Constructs the environment to simulate the bounds behavior of the given container. */
         CompatDisplayInsets(DisplayContent display, ActivityRecord container,
-                @Nullable Rect fixedOrientationBounds) {
+                @Nullable Rect letterboxedContainerBounds, boolean useOverrideInsets) {
             mOriginalRotation = display.getRotation();
             mIsFloating = container.getWindowConfiguration().tasksAreFloating();
             mOriginalRequestedOrientation = container.getRequestedConfigurationOrientation();
@@ -10435,25 +10880,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     mNonDecorInsets[rotation] = emptyRect;
                     mStableInsets[rotation] = emptyRect;
                 }
-                mIsInFixedOrientationLetterbox = false;
+                mIsInFixedOrientationOrAspectRatioLetterbox = false;
                 return;
             }
 
             final Task task = container.getTask();
 
-            mIsInFixedOrientationLetterbox = fixedOrientationBounds != null;
+            mIsInFixedOrientationOrAspectRatioLetterbox = letterboxedContainerBounds != null;
 
             // Store the bounds of the Task for the non-resizable activity to use in size compat
             // mode so that the activity will not be resized regardless the windowing mode it is
             // currently in.
-            // When an activity needs to be letterboxed because of fixed orientation, use fixed
-            // orientation bounds instead of task bounds since the activity will be displayed
-            // within these even if it is in size compat mode.
-            final Rect filledContainerBounds = mIsInFixedOrientationLetterbox
-                    ? fixedOrientationBounds
+            // When an activity needs to be letterboxed because of fixed orientation or aspect
+            // ratio, use resolved bounds instead of task bounds since the activity will be
+            // displayed within these even if it is in size compat mode.
+            final Rect filledContainerBounds = mIsInFixedOrientationOrAspectRatioLetterbox
+                    ? letterboxedContainerBounds
                     : task != null ? task.getBounds() : display.getBounds();
-            final int filledContainerRotation = task != null
-                    ? task.getConfiguration().windowConfiguration.getRotation()
+            final boolean useActivityRotation = container.hasFixedRotationTransform()
+                    && mIsInFixedOrientationOrAspectRatioLetterbox;
+            final int filledContainerRotation = useActivityRotation
+                    ? container.getWindowConfiguration().getRotation()
                     : display.getConfiguration().windowConfiguration.getRotation();
             final Point dimensions = getRotationZeroDimensions(
                     filledContainerBounds, filledContainerRotation);
@@ -10472,8 +10919,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 final int dh = rotated ? display.mBaseDisplayWidth : display.mBaseDisplayHeight;
                 final DisplayPolicy.DecorInsets.Info decorInfo =
                         policy.getDecorInsetsInfo(rotation, dw, dh);
-                mNonDecorInsets[rotation].set(decorInfo.mNonDecorInsets);
-                mStableInsets[rotation].set(decorInfo.mConfigInsets);
+                if (useOverrideInsets) {
+                    mStableInsets[rotation].set(decorInfo.mOverrideConfigInsets);
+                    mNonDecorInsets[rotation].set(decorInfo.mOverrideNonDecorInsets);
+                } else {
+                    mStableInsets[rotation].set(decorInfo.mConfigInsets);
+                    mNonDecorInsets[rotation].set(decorInfo.mNonDecorInsets);
+                }
 
                 if (unfilledContainerBounds == null) {
                     continue;
@@ -10638,6 +11090,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
+        if (task != null && task.mSharedStartingData != null) {
+            final WindowState startingWin = task.topStartingWindow();
+            if (startingWin != null && startingWin.mSyncState == SYNC_STATE_READY
+                    && mDisplayContent.mUnknownAppVisibilityController.allResolved()) {
+                // The sync is ready if a drawn starting window covered the task.
+                return true;
+            }
+        }
         if (!super.isSyncFinished(group)) return false;
         if (mDisplayContent != null && mDisplayContent.mUnknownAppVisibilityController
                 .isVisibilityUnknown(this)) {
@@ -10676,6 +11136,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return null;
         }
         return new Point(windowLayout.minWidth, windowLayout.minHeight);
+    }
+
+    /**
+     * Returns the {@link #createTime} if the top window is the `base` window. Note that do not
+     * use the window creation time because the window could be re-created when the activity
+     * relaunched if configuration changed.
+     * <p>
+     * Otherwise, return the creation time of the top window.
+     */
+    long getLastWindowCreateTime() {
+        final WindowState window = getWindow(alwaysTruePredicate());
+        return window != null && window.mAttrs.type != TYPE_BASE_APPLICATION
+                ? window.getCreateTime()
+                : createTime;
     }
 
     /**

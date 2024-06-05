@@ -25,7 +25,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteException;
 import android.os.Parcel;
-import android.support.test.uiautomator.UiDevice;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
 import android.util.Log;
@@ -35,6 +34,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
+import androidx.test.uiautomator.UiDevice;
 
 import junit.framework.Assert;
 
@@ -914,6 +914,24 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         verifyLookasideStats(true);
     }
 
+    void verifyLookasideStats(boolean expectDisabled) {
+        boolean dbStatFound = false;
+        SQLiteDebug.PagerStats info = SQLiteDebug.getDatabaseInfo();
+        for (SQLiteDebug.DbStats dbStat : info.dbStats) {
+            if (dbStat.dbName.endsWith(mDatabaseFile.getName()) && !dbStat.arePoolStats) {
+                dbStatFound = true;
+                Log.i(TAG, "Lookaside for " + dbStat.dbName + " " + dbStat.lookaside);
+                if (expectDisabled) {
+                    assertTrue("lookaside slots count should be zero", dbStat.lookaside == 0);
+                } else {
+                    assertTrue("lookaside slots count should be greater than zero",
+                            dbStat.lookaside > 0);
+                }
+            }
+        }
+        assertTrue("No dbstat found for " + mDatabaseFile.getName(), dbStatFound);
+    }
+
     @SmallTest
     public void testOpenParamsSetLookasideConfigValidation() {
         try {
@@ -928,24 +946,6 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
             fail("Negative slot count should be rejected");
         } catch (IllegalArgumentException expected) {
         }
-    }
-
-    void verifyLookasideStats(boolean expectDisabled) {
-        boolean dbStatFound = false;
-        SQLiteDebug.PagerStats info = SQLiteDebug.getDatabaseInfo();
-        for (SQLiteDebug.DbStats dbStat : info.dbStats) {
-            if (dbStat.dbName.endsWith(mDatabaseFile.getName())) {
-                dbStatFound = true;
-                Log.i(TAG, "Lookaside for " + dbStat.dbName + " " + dbStat.lookaside);
-                if (expectDisabled) {
-                    assertTrue("lookaside slots count should be zero", dbStat.lookaside == 0);
-                } else {
-                    assertTrue("lookaside slots count should be greater than zero",
-                            dbStat.lookaside > 0);
-                }
-            }
-        }
-        assertTrue("No dbstat found for " + mDatabaseFile.getName(), dbStatFound);
     }
 
     @LargeTest

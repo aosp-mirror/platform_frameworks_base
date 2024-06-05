@@ -19,6 +19,7 @@ package com.android.server.inputmethod;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
@@ -76,9 +77,13 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
         mCountDownLatch = new CountDownLatch(1);
         // Remove flag Context.BIND_SCHEDULE_LIKE_TOP_APP because in tests we are not calling
         // from system.
-        mBindingController =
-                new InputMethodBindingController(
-                        mInputMethodManagerService, mImeConnectionBindFlags, mCountDownLatch);
+        synchronized (ImfLock.class) {
+            mBindingController =
+                    new InputMethodBindingController(
+                            mInputMethodManagerService.getCurrentImeUserIdLocked(),
+                            mInputMethodManagerService, mImeConnectionBindFlags,
+                            mCountDownLatch);
+        }
     }
 
     @Test
@@ -132,10 +137,11 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
     }
 
     private void testBindCurrentMethodWithMainConnection() throws Exception {
+        final InputMethodInfo info;
         synchronized (ImfLock.class) {
             mBindingController.setSelectedMethodId(TEST_IME_ID);
+            info = mInputMethodManagerService.queryInputMethodForCurrentUserLocked(TEST_IME_ID);
         }
-        InputMethodInfo info = mInputMethodManagerService.mMethodMap.get(TEST_IME_ID);
         assertThat(info).isNotNull();
         assertThat(info.getId()).isEqualTo(TEST_IME_ID);
         assertThat(info.getServiceName()).isEqualTo(TEST_SERVICE_NAME);
@@ -157,12 +163,15 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
         assertThat(result.result).isEqualTo(InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING);
         assertThat(result.id).isEqualTo(info.getId());
         synchronized (ImfLock.class) {
-            assertThat(mBindingController.hasConnection()).isTrue();
+            assertThat(mBindingController.hasMainConnection()).isTrue();
             assertThat(mBindingController.getCurId()).isEqualTo(info.getId());
             assertThat(mBindingController.getCurToken()).isNotNull();
         }
         // Wait for onServiceConnected()
-        mCountDownLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+        boolean completed = mCountDownLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+        if (!completed) {
+            fail("Timed out waiting for onServiceConnected()");
+        }
 
         // Verify onServiceConnected() is called and bound successfully.
         synchronized (ImfLock.class) {
@@ -198,7 +207,7 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
 
         synchronized (ImfLock.class) {
             // Unbind both main connection and visible connection
-            assertThat(mBindingController.hasConnection()).isFalse();
+            assertThat(mBindingController.hasMainConnection()).isFalse();
             assertThat(mBindingController.isVisibleBound()).isFalse();
             verify(mContext, times(2)).unbindService(any(ServiceConnection.class));
             assertThat(mBindingController.getCurToken()).isNull();

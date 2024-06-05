@@ -24,10 +24,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialResponse;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
-import android.credentials.ui.CreateCredentialProviderData;
-import android.credentials.ui.Entry;
-import android.credentials.ui.ProviderPendingIntentResponse;
+import android.credentials.selection.CreateCredentialProviderData;
+import android.credentials.selection.Entry;
+import android.credentials.selection.ProviderPendingIntentResponse;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
 import android.service.credentials.BeginCreateCredentialRequest;
@@ -51,7 +52,7 @@ import java.util.Map;
  */
 public final class ProviderCreateSession extends ProviderSession<
         BeginCreateCredentialRequest, BeginCreateCredentialResponse> {
-    private static final String TAG = "ProviderCreateSession";
+    private static final String TAG = CredentialManager.TAG;
 
     // Key to be used as an entry key for a save entry
     public static final String SAVE_ENTRY_KEY = "save_entry_key";

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <dimen name="autofill_view_top_padding">12dp</dimen>
+    <dimen name="autofill_view_right_padding">16dp</dimen>
+    <dimen name="autofill_view_bottom_padding">12dp</dimen>
+    <dimen name="autofill_view_left_padding">16dp</dimen>
+    <dimen name="autofill_view_icon_to_text_padding">16dp</dimen>
+    <dimen name="autofill_view_end_items_padding">8dp</dimen>
+    <dimen name="more_options_item_vertical_padding">14dp</dimen>
+    <dimen name="autofill_icon_size">24dp</dimen>
+    <dimen name="autofill_dropdown_textview_min_width">112dp</dimen>
+    <dimen name="autofill_dropdown_textview_max_width">230dp</dimen>
+    <dimen name="dropdown_layout_horizontal_margin">24dp</dimen>
+    <integer name="autofill_max_visible_datasets">4</integer>
+    <dimen name="dropdown_touch_target_min_height">49dp</dimen>
+    <dimen name="horizontal_chip_padding">8dp</dimen>
+    <dimen name="vertical_chip_padding">6dp</dimen>
+</resources>

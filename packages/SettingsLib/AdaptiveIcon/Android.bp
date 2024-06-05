@@ -9,14 +9,21 @@ package {
 
 android_library {
     name: "SettingsLibAdaptiveIcon",
+    use_resource_processor: true,
+    defaults: [
+        "SettingsLintDefaults",
+    ],
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
 
     static_libs: [
-          "androidx.annotation_annotation",
-          "SettingsLibTile"
+        "androidx.annotation_annotation",
+        "SettingsLibTile",
     ],
 
     min_sdk_version: "21",
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }

@@ -16,6 +16,9 @@
 
 package com.android.server.notification;
 
+import static android.service.notification.Condition.STATE_TRUE;
+import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_USER;
+
 import android.app.INotificationManager;
 import android.app.NotificationManager;
 import android.content.ComponentName;
@@ -234,7 +237,7 @@ public class ConditionProviders extends ManagedServices {
             if (pkgList != null && (pkgList.length > 0)) {
                 for (String pkgName : pkgList) {
                     try {
-                        inm.removeAutomaticZenRules(pkgName);
+                        inm.removeAutomaticZenRules(pkgName, /* fromUser= */ false);
                         inm.setNotificationPolicyAccessGranted(pkgName, false);
                     } catch (Exception e) {
                         Slog.e(TAG, "Failed to clean up rules for " + pkgName, e);
@@ -247,6 +250,11 @@ public class ConditionProviders extends ManagedServices {
 
     @Override
     protected boolean isValidEntry(String packageOrComponent, int userId) {
+        return true;
+    }
+
+    @Override
+    protected boolean allowRebindForParentUser() {
         return true;
     }
 
@@ -314,7 +322,20 @@ public class ConditionProviders extends ManagedServices {
                 final Condition c = conditions[i];
                 final ConditionRecord r = getRecordLocked(c.id, info.component, true /*create*/);
                 r.info = info;
-                r.condition = c;
+                if (android.app.Flags.modesUi()) {
+                    // if user turned on the mode, ignore the update unless the app also wants the
+                    // mode on. this will update the origin of the mode and let the owner turn it
+                    // off when the context ends
+                    if (r.condition != null && r.condition.source == UPDATE_ORIGIN_USER) {
+                        if (r.condition.state == STATE_TRUE && c.state == STATE_TRUE) {
+                            r.condition = c;
+                        }
+                    } else {
+                        r.condition = c;
+                    }
+                } else {
+                    r.condition = c;
+                }
             }
         }
         final int N = conditions.length;
@@ -434,6 +455,58 @@ public class ConditionProviders extends ManagedServices {
 
     private static IConditionProvider provider(ManagedServiceInfo info) {
         return info == null ? null : (IConditionProvider) info.service;
+    }
+
+    void resetDefaultFromConfig() {
+        synchronized (mDefaultsLock) {
+            mDefaultComponents.clear();
+            mDefaultPackages.clear();
+        }
+        loadDefaultsFromConfig();
+    }
+
+    boolean removeDefaultFromConfig(int userId) {
+        boolean removed = false;
+        String defaultDndDenied = mContext.getResources().getString(
+                R.string.config_defaultDndDeniedPackages);
+        if (defaultDndDenied != null) {
+            String[] dnds = defaultDndDenied.split(ManagedServices.ENABLED_SERVICES_SEPARATOR);
+            for (int i = 0; i < dnds.length; i++) {
+                if (TextUtils.isEmpty(dnds[i])) {
+                    continue;
+                }
+                removed |= removePackageFromApprovedLists(userId, dnds[i], "remove from config");
+            }
+        }
+        return removed;
+    }
+
+    private boolean removePackageFromApprovedLists(int userId, String pkg, String reason) {
+        boolean removed = false;
+        synchronized (mApproved) {
+            final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(
+                    userId);
+            if (approvedByType != null) {
+                int approvedByTypeSize = approvedByType.size();
+                for (int i = 0; i < approvedByTypeSize; i++) {
+                    final ArraySet<String> approved = approvedByType.valueAt(i);
+                    int approvedSize = approved.size();
+                    for (int j = approvedSize - 1; j >= 0; j--) {
+                        final String packageOrComponent = approved.valueAt(j);
+                        final String packageName = getPackageName(packageOrComponent);
+                        if (TextUtils.equals(pkg, packageName)) {
+                            approved.removeAt(j);
+                            removed = true;
+                            if (DEBUG) {
+                                Slog.v(TAG, "Removing " + packageOrComponent
+                                        + " from approved list; " + reason);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return removed;
     }
 
     private static class ConditionRecord {

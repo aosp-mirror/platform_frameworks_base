@@ -23,6 +23,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
@@ -96,12 +97,29 @@ public class RestrictedPreference extends TwoTargetPreference {
         mHelper.checkRestrictionAndSetDisabled(userRestriction, userId);
     }
 
+    /**
+     * Checks if the given setting is subject to Enhanced Confirmation Mode restrictions for this
+     * package. Marks the preference as disabled if so.
+     * @param settingIdentifier The key identifying the setting
+     * @param packageName the package to check the settingIdentifier for
+     */
+    public void checkEcmRestrictionAndSetDisabled(@NonNull String settingIdentifier,
+            @NonNull String packageName) {
+        mHelper.checkEcmRestrictionAndSetDisabled(settingIdentifier, packageName);
+    }
+
     @Override
     public void setEnabled(boolean enabled) {
         if (enabled && isDisabledByAdmin()) {
             mHelper.setDisabledByAdmin(null);
             return;
         }
+
+        if (enabled && isDisabledByEcm()) {
+            mHelper.setDisabledByEcm(null);
+            return;
+        }
+
         super.setEnabled(enabled);
     }
 
@@ -111,14 +129,12 @@ public class RestrictedPreference extends TwoTargetPreference {
         }
     }
 
-    public void setDisabledByAppOps(boolean disabled) {
-        if (mHelper.setDisabledByAppOps(disabled)) {
-            notifyChanged();
-        }
-    }
-
     public boolean isDisabledByAdmin() {
         return mHelper.isDisabledByAdmin();
+    }
+
+    public boolean isDisabledByEcm() {
+        return mHelper.isDisabledByEcm();
     }
 
     public int getUid() {
@@ -127,5 +143,17 @@ public class RestrictedPreference extends TwoTargetPreference {
 
     public String getPackageName() {
         return mHelper != null ? mHelper.packageName : null;
+    }
+
+    /**
+     * @deprecated TODO(b/308921175): This will be deleted with the
+     * {@link android.security.Flags#extendEcmToAllSettings} feature flag. Do not use for any new
+     * code.
+     */
+    @Deprecated
+    public void setDisabledByAppOps(boolean disabled) {
+        if (mHelper.setDisabledByAppOps(disabled)) {
+            notifyChanged();
+        }
     }
 }

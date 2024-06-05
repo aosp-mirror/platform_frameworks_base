@@ -29,11 +29,10 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.systemui.R;
-import com.android.systemui.biometrics.AuthBiometricFingerprintIconController;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthDialog;
 import com.android.systemui.biometrics.UdfpsDialogMeasureAdapter;
+import com.android.systemui.res.R;
 
 import kotlin.Pair;
 
@@ -85,13 +84,13 @@ public class BiometricPromptLayout extends LinearLayout {
     }
 
     @Deprecated
-    public void updateFingerprintAffordanceSize(
-            @NonNull AuthBiometricFingerprintIconController iconController) {
+    public Pair<Integer, Integer> getUpdatedFingerprintAffordanceSize() {
         if (mUdfpsAdapter != null) {
             final int sensorDiameter = mUdfpsAdapter.getSensorDiameter(
                     mScaleFactorProvider.provide());
-            iconController.setIconLayoutParamSize(new Pair(sensorDiameter, sensorDiameter));
+            return new Pair(sensorDiameter, sensorDiameter);
         }
+        return null;
     }
 
     @NonNull
@@ -102,6 +101,7 @@ public class BiometricPromptLayout extends LinearLayout {
             final View child = getChildAt(i);
 
             if (child.getId() == R.id.space_above_icon
+                    || child.getId() == R.id.space_above_content
                     || child.getId() == R.id.space_below_icon
                     || child.getId() == R.id.button_bar) {
                 child.measure(
@@ -114,6 +114,12 @@ public class BiometricPromptLayout extends LinearLayout {
                         MeasureSpec.makeMeasureSpec(iconView.getLayoutParams().width,
                                 MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(iconView.getLayoutParams().height,
+                                MeasureSpec.EXACTLY));
+            } else if (child.getId() == R.id.logo) {
+                child.measure(
+                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().width,
+                                MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().height,
                                 MeasureSpec.EXACTLY));
             } else if (child.getId() == R.id.biometric_icon) {
                 child.measure(

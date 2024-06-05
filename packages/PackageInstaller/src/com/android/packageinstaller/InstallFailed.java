@@ -23,26 +23,26 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-
 import androidx.annotation.Nullable;
-
-import java.io.File;
 
 /**
  * Installation failed: Return status code to the caller or display failure UI to user
  */
-public class InstallFailed extends AlertActivity {
+public class InstallFailed extends Activity {
+
     private static final String LOG_TAG = InstallFailed.class.getSimpleName();
 
-    /** Label of the app that failed to install */
+    /**
+     * Label of the app that failed to install
+     */
     private CharSequence mLabel;
+
+    private AlertDialog mDialog;
 
     /**
      * Unhide the appropriate label for the statusCode.
@@ -55,19 +55,19 @@ public class InstallFailed extends AlertActivity {
         View viewToEnable;
         switch (statusCode) {
             case PackageInstaller.STATUS_FAILURE_BLOCKED:
-                viewToEnable = requireViewById(R.id.install_failed_blocked);
+                viewToEnable = mDialog.requireViewById(R.id.install_failed_blocked);
                 break;
             case PackageInstaller.STATUS_FAILURE_CONFLICT:
-                viewToEnable = requireViewById(R.id.install_failed_conflict);
+                viewToEnable = mDialog.requireViewById(R.id.install_failed_conflict);
                 break;
             case PackageInstaller.STATUS_FAILURE_INCOMPATIBLE:
-                viewToEnable = requireViewById(R.id.install_failed_incompatible);
+                viewToEnable = mDialog.requireViewById(R.id.install_failed_incompatible);
                 break;
             case PackageInstaller.STATUS_FAILURE_INVALID:
-                viewToEnable = requireViewById(R.id.install_failed_invalid_apk);
+                viewToEnable = mDialog.requireViewById(R.id.install_failed_invalid_apk);
                 break;
             default:
-                viewToEnable = requireViewById(R.id.install_failed);
+                viewToEnable = mDialog.requireViewById(R.id.install_failed);
                 break;
         }
 
@@ -80,45 +80,45 @@ public class InstallFailed extends AlertActivity {
 
         setFinishOnTouchOutside(true);
 
-        int statusCode = getIntent().getIntExtra(PackageInstaller.EXTRA_STATUS,
-                PackageInstaller.STATUS_FAILURE);
+        Intent intent = getIntent();
+        int statusCode = intent.getIntExtra(PackageInstaller.EXTRA_STATUS,
+            PackageInstaller.STATUS_FAILURE);
+        boolean returnResult = intent.getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
 
-        if (getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false)) {
-            int legacyStatus = getIntent().getIntExtra(PackageInstaller.EXTRA_LEGACY_STATUS,
-                    PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
+        if (returnResult) {
+            int legacyStatus = intent.getIntExtra(PackageInstaller.EXTRA_LEGACY_STATUS,
+                PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
 
             // Return result if requested
             Intent result = new Intent();
             result.putExtra(Intent.EXTRA_INSTALL_RESULT, legacyStatus);
             setResult(Activity.RESULT_FIRST_USER, result);
             finish();
-        } else {
-            Intent intent = getIntent();
-            ApplicationInfo appInfo = intent
-                    .getParcelableExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO);
-            Uri packageURI = intent.getData();
+        } else if (statusCode != PackageInstaller.STATUS_FAILURE_ABORTED) {
+            // statusCode will be STATUS_FAILURE_ABORTED if the update-owner confirmation dialog was
+            // dismissed by the user. We don't want to show a InstallFailed dialog in this case.
+            // If the user denies install permission for normal installs, this dialog will never be
+            // triggered as the status code is returned from PackageInstallerActivity.java
 
             // Set header icon and title
-            PackageUtil.AppSnippet as;
-            PackageManager pm = getPackageManager();
-
-            if ("package".equals(packageURI.getScheme())) {
-                as = new PackageUtil.AppSnippet(pm.getApplicationLabel(appInfo),
-                        pm.getApplicationIcon(appInfo));
-            } else {
-                final File sourceFile = new File(packageURI.getPath());
-                as = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
-            }
+            PackageUtil.AppSnippet as = intent.getParcelableExtra(
+                PackageInstallerActivity.EXTRA_APP_SNIPPET, PackageUtil.AppSnippet.class);
 
             // Store label for dialog
             mLabel = as.label;
 
-            mAlert.setIcon(as.icon);
-            mAlert.setTitle(as.label);
-            mAlert.setView(R.layout.install_content_view);
-            mAlert.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.done),
-                    (ignored, ignored2) -> finish(), null);
-            setupAlert();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+            builder.setIcon(as.icon);
+            builder.setTitle(as.label);
+            builder.setView(R.layout.install_content_view);
+            builder.setPositiveButton(getString(R.string.done),
+                    (ignored, ignored2) -> finish());
+            builder.setOnCancelListener(dialog -> {
+                finish();
+            });
+            mDialog = builder.create();
+            mDialog.show();
 
             // Show out of space dialog if needed
             if (statusCode == PackageInstaller.STATUS_FAILURE_STORAGE) {
@@ -127,6 +127,8 @@ public class InstallFailed extends AlertActivity {
 
             // Get status messages
             setExplanationFromErrorCode(statusCode);
+        } else {
+            finish();
         }
     }
 
@@ -135,6 +137,7 @@ public class InstallFailed extends AlertActivity {
      * "manage applications" settings page.
      */
     public static class OutOfSpaceDialog extends DialogFragment {
+
         private InstallFailed mActivity;
 
         @Override
@@ -147,16 +150,16 @@ public class InstallFailed extends AlertActivity {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             return new AlertDialog.Builder(mActivity)
-                    .setTitle(R.string.out_of_space_dlg_title)
-                    .setMessage(getString(R.string.out_of_space_dlg_text, mActivity.mLabel))
-                    .setPositiveButton(R.string.manage_applications, (dialog, which) -> {
-                        // launch manage applications
-                        Intent intent = new Intent("android.intent.action.MANAGE_PACKAGE_STORAGE");
-                        startActivity(intent);
-                        mActivity.finish();
-                    })
-                    .setNegativeButton(R.string.cancel, (dialog, which) -> mActivity.finish())
-                    .create();
+                .setTitle(R.string.out_of_space_dlg_title)
+                .setMessage(getString(R.string.out_of_space_dlg_text, mActivity.mLabel))
+                .setPositiveButton(R.string.manage_applications, (dialog, which) -> {
+                    // launch manage applications
+                    Intent intent = new Intent("android.intent.action.MANAGE_PACKAGE_STORAGE");
+                    startActivity(intent);
+                    mActivity.finish();
+                })
+                .setNegativeButton(R.string.cancel, (dialog, which) -> mActivity.finish())
+                .create();
         }
 
         @Override

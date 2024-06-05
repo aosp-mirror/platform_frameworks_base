@@ -1,0 +1,17 @@
+package {
+    default_team: "trendy_team_system_ui_please_use_a_more_specific_subteam_if_possible_",
+}
+
+java_aconfig_library {
+    name: "notification_flags_lib",
+    aconfig_declarations: "notification_flags",
+}
+
+aconfig_declarations {
+    name: "notification_flags",
+    package: "com.android.server.notification",
+    container: "system",
+    srcs: [
+        "flags.aconfig",
+    ],
+}

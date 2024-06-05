@@ -17,12 +17,14 @@
 package android.hardware.display;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.metrics.LogMaker;
@@ -35,6 +37,7 @@ import android.provider.Settings.Secure;
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.server.display.feature.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -397,6 +400,8 @@ public final class ColorDisplayManager {
      * @return {@code true} if the display is not at full saturation
      * @hide
      */
+    @TestApi
+    @FlaggedApi(android.app.Flags.FLAG_MODES_API)
     @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
     public boolean isSaturationActivated() {
         return mManager.isSaturationActivated();
@@ -529,11 +534,15 @@ public final class ColorDisplayManager {
 
     /**
      * Returns {@code true} if reduce bright colors is supported by the device.
+     * Will return false if even dimmer is enabled - since this is the successor to RBC and cannot
+     * be run concurrently.
      *
      * @hide
      */
     public static boolean isReduceBrightColorsAvailable(Context context) {
-        return context.getResources().getBoolean(R.bool.config_reduceBrightColorsAvailable);
+        return context.getResources().getBoolean(R.bool.config_reduceBrightColorsAvailable)
+                && !(Flags.evenDimmer() && context.getResources().getBoolean(
+                com.android.internal.R.bool.config_evenDimmerEnabled));
     }
 
     /**

@@ -1,31 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="4539824758261855508">"ರುಜುವಾತು ನಿರ್ವಾಹಕ"</string>
     <string name="string_cancel" msgid="6369133483981306063">"ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="string_continue" msgid="1346732695941131882">"ಮುಂದುವರಿಸಿ"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"ಇನ್ನಷ್ಟು ಆಯ್ಕೆಗಳು"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"ಬೇರೆ ವಿಧಾನದಲ್ಲಿ ಉಳಿಸಿ"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"ಪಾಸ್‌ವರ್ಡ್ ತೋರಿಸಿ"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಮರೆಮಾಡಿ"</string>
-    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ಪಾಸ್‌ಕೀಗಳೊಂದಿಗೆ ಸುರಕ್ಷಿತವಾಗಿರುತ್ತವೆ"</string>
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ಪಾಸ್‌ಕೀಗಳ ಸಹಾಯದಿಂದ ಸುರಕ್ಷಿತವಾಗಿರಿ"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"ಪಾಸ್‌ಕೀಗಳ ಮೂಲಕ, ನೀವು ಕ್ಲಿಷ್ಟ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ರಚಿಸುವ ಅಥವಾ ನೆನಪಿಟ್ಟುಕೊಳ್ಳುವ ಅಗತ್ಯವಿಲ್ಲ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ಪಾಸ್‌ಕೀಗಳು ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್, ಫೇಸ್ ಅಥವಾ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ನೀವು ರಚಿಸುವ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಿದ ಡಿಜಿಟಲ್ ಕೀಗಳಾಗಿವೆ"</string>
-    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ಅವುಗಳನ್ನು ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕದಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ, ಹಾಗಾಗಿ ನೀವು ಇತರ ಸಾಧನಗಳಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಬಹುದು"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ಅವುಗಳನ್ನು ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕದಲ್ಲಿ ಉಳಿಸಲಾಗುತ್ತದೆ, ಹಾಗಾಗಿ ನೀವು ಇತರ ಸಾಧನಗಳಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಬಹುದು"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"ಪಾಸ್‌ಕೀಗಳ ಕುರಿತು ಇನ್ನಷ್ಟು"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"ಪಾಸ್‌ವರ್ಡ್ ರಹಿತ ತಂತ್ರಜ್ಞಾನ"</string>
-    <string name="passwordless_technology_detail" msgid="6853928846532955882">"ಪಾಸ್‌ಕೀಗಳು ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಅವಲಂಬಿಸದೆ ಸೈನ್ ಇನ್ ಮಾಡಲು ಅನುಮತಿಸುತ್ತದೆ. ನಿಮ್ಮ ಗುರುತನ್ನು ಪರಿಶೀಲಿಸಲು ಮತ್ತು ಪಾಸ್‌ಕೀ ರಚಿಸಲು ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್, ಮುಖ ಗುರುತಿಸುವಿಕೆ, ಪಿನ್ ಅಥವಾ ಸ್ವೈಪ್ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ನೀವು ಬಳಸಬೇಕಾಗುತ್ತದೆ."</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"ಪಾಸ್‌ಕೀಗಳು ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಅವಲಂಬಿಸದೆ ಸೈನ್ ಇನ್ ಮಾಡಲು ಅನುಮತಿಸುತ್ತವೆ. ನಿಮ್ಮ ಗುರುತನ್ನು ದೃಢೀಕರಿಸಲು ಮತ್ತು ಪಾಸ್‌ಕೀ ರಚಿಸಲು ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್, ಮುಖ ಗುರುತಿಸುವಿಕೆ, ಪಿನ್ ಅಥವಾ ಸ್ವೈಪ್ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ನೀವು ಬಳಸಬೇಕಾಗುತ್ತದೆ."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"ಸಾರ್ವಜನಿಕ ಕೀ ಕ್ರಿಪ್ಟೋಗ್ರಫಿ"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO ಅಲೈಯನ್ಸ್ (ಇದು Google, Apple, Microsoft ಮತ್ತು ಹೆಚ್ಚಿನದನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ) ಮತ್ತು W3C ಮಾನದಂಡಗಳನ್ನು ಆಧರಿಸಿ, ಪಾಸ್‌ಕೀಗಳು ಕ್ರಿಪ್ಟೋಗ್ರಾಫಿಕ್ ಕೀ ಜೋಡಿಗಳನ್ನು ಬಳಸುತ್ತವೆ. ಪಾಸ್‌ವರ್ಡ್‌ಗಳಿಗಾಗಿ ನಾವು ಬಳಸುವ ಬಳಕೆದಾರಹೆಸರು ಮತ್ತು ಅಕ್ಷರಗಳ ಸ್ಟ್ರಿಂಗ್‌ಗಿಂತ ಭಿನ್ನವಾಗಿ, ಆ್ಯಪ್ ಅಥವಾ ವೆಬ್‌ಸೈಟ್‌ಗಾಗಿ ಖಾಸಗಿ-ಸಾರ್ವಜನಿಕ ಕೀ ಜೋಡಿಯನ್ನು ರಚಿಸಲಾಗಿದೆ. ಖಾಸಗಿ ಕೀ ಅನ್ನು ನಿಮ್ಮ ಸಾಧನ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕದಲ್ಲಿ ಸುರಕ್ಷಿತವಾಗಿ ಸಂಗ್ರಹಿಸಲಾಗಿದೆ ಮತ್ತು ಅದು ನಿಮ್ಮ ಗುರುತನ್ನು ಖಚಿತಪಡಿಸುತ್ತದೆ. ಸಾರ್ವಜನಿಕ ಕೀ ಅನ್ನು ಆ್ಯಪ್ ಅಥವಾ ವೆಬ್‌ಸೈಟ್ ಸರ್ವರ್ ಜೊತೆಗೆ ಹಂಚಿಕೊಳ್ಳಲಾಗಿದೆ. ಅನುಗುಣವಾದ ಕೀ ಮೂಲಕ, ನೀವು ತಕ್ಷಣ ನೋಂದಾಯಿಸಬಹುದು ಮತ್ತು ಸೈನ್ ಇನ್ ಮಾಡಬಹುದು."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO ಅಲೈಯನ್ಸ್ (ಇದು Google, Apple, Microsoft ಮತ್ತು ಹೆಚ್ಚಿನದನ್ನು ಒಳಗೊಂಡಿದೆ) ಮತ್ತು W3C ಮಾನದಂಡಗಳನ್ನು ಆಧರಿಸಿ, ಪಾಸ್‌ಕೀಗಳು ಕ್ರಿಪ್ಟೋಗ್ರಾಫಿಕ್ ಕೀ ಜೋಡಿಗಳನ್ನು ಬಳಸುತ್ತವೆ. ಪಾಸ್‌ವರ್ಡ್‌ಗಳಿಗಾಗಿ ನಾವು ಬಳಸುವ ಬಳಕೆದಾರರ ಹೆಸರು ಮತ್ತು ಅಕ್ಷರಗಳ ಸ್ಟ್ರಿಂಗ್‌ಗಿಂತ ಭಿನ್ನವಾಗಿ, ಆ್ಯಪ್ ಅಥವಾ ವೆಬ್‌ಸೈಟ್‌ಗಾಗಿ ಖಾಸಗಿ-ಸಾರ್ವಜನಿಕ ಕೀ ಜೋಡಿಯನ್ನು ರಚಿಸಲಾಗುತ್ತದೆ. ಖಾಸಗಿ ಕೀ ಅನ್ನು ನಿಮ್ಮ ಸಾಧನ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕದಲ್ಲಿ ಸುರಕ್ಷಿತವಾಗಿ ಸಂಗ್ರಹಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಅದು ನಿಮ್ಮ ಗುರುತನ್ನು ಖಚಿತಪಡಿಸುತ್ತದೆ. ಸಾರ್ವಜನಿಕ ಕೀ ಅನ್ನು ಆ್ಯಪ್ ಅಥವಾ ವೆಬ್‌ಸೈಟ್ ಸರ್ವರ್ ಜೊತೆಗೆ ಹಂಚಿಕೊಳ್ಳಲಾಗುತ್ತದೆ. ಅನುಗುಣವಾದ ಕೀಗಳೊಂದಿಗೆ, ನೀವು ತಕ್ಷಣ ನೋಂದಾಯಿಸಬಹುದು ಮತ್ತು ಸೈನ್ ಇನ್ ಮಾಡಬಹುದು."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"ಸುಧಾರಿತ ಖಾತೆಯ ಭದ್ರತೆ"</string>
-    <string name="improved_account_security_detail" msgid="9123750251551844860">"ಪ್ರತಿಯೊಂದು ಕೀ ಅವುಗಳನ್ನು ರಚಿಸಲಾದ ಆ್ಯಪ್ ಅಥವಾ ವೆಬ್‌ಸೈಟ್‌ನ ಜೊತೆಗೆ ಪ್ರತ್ಯೇಕವಾಗಿ ಲಿಂಕ್ ಮಾಡಲಾಗಿದೆ, ಆದ್ದರಿಂದ ನೀವು ಎಂದಿಗೂ ತಪ್ಪಾಗಿ ವಂಚನೆಯ ಆ್ಯಪ್ ಅಥವಾ ವೆಬ್‌ಸೈಟ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಜೊತೆಗೆ, ಸರ್ವರ್‌ಗಳು ಮಾತ್ರ ಸಾರ್ವಜನಿಕ ಕೀಗಳನ್ನು ಇಟ್ಟುಕೊಳ್ಳುವುದರಿಂದ, ಹ್ಯಾಕಿಂಗ್ ಮಾಡುವುದು ತುಂಬಾ ಕಷ್ಟಕರವಾಗಿದೆ."</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"ಪ್ರತಿಯೊಂದು ಕೀಯನ್ನು ಯಾವ ಆ್ಯಪ್ ಅಥವಾ ವೆಬ್‌ಸೈಟ್‌ಗಾಗಿ ರಚಿಸಲಾಗಿದೆಯೋ ಅದರೊಂದಿಗೆ ಮಾತ್ರ ಲಿಂಕ್ ಮಾಡಲಾಗುತ್ತದೆ. ಆದ್ದರಿಂದ ನೀವು ಎಂದಿಗೂ ತಪ್ಪಾಗಿ ವಂಚನೆಯ ಆ್ಯಪ್ ಅಥವಾ ವೆಬ್‌ಸೈಟ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಜೊತೆಗೆ, ಸರ್ವರ್‌ಗಳು ಸಾರ್ವಜನಿಕ ಕೀಗಳನ್ನು ಮಾತ್ರ ಇಟ್ಟುಕೊಳ್ಳುವುದರಿಂದ, ಹ್ಯಾಕಿಂಗ್ ಮಾಡುವುದು ತುಂಬಾ ಕಷ್ಟಕರವಾಗಿದೆ."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"ಅಡಚಣೆರಹಿತ ಪರಿವರ್ತನೆ"</string>
     <string name="seamless_transition_detail" msgid="4475509237171739843">"ನಾವು ಪಾಸ್‌ವರ್ಡ್ ರಹಿತ ತಂತ್ರಜ್ಞಾನದ ಕಡೆಗೆ ಸಾಗುತ್ತಿರುವಾಗ, ಪಾಸ್‌ಕೀಗಳ ಜೊತೆಗೆ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಇನ್ನೂ ಲಭ್ಯವಿರುತ್ತವೆ."</string>
-    <string name="choose_provider_title" msgid="8870795677024868108">"ನಿಮ್ಮ <xliff:g id="CREATETYPES">%1$s</xliff:g> ಅನ್ನು ಎಲ್ಲಿ ಉಳಿಸಬೇಕು ಎಂದು ಆರಿಸಿ"</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"ನಿಮ್ಮ <xliff:g id="CREATETYPES">%1$s</xliff:g> ಎಲ್ಲಿ ಸೇವ್‌ ಆಗಬೇಕು ಎಂಬುದನ್ನು ಆರಿಸಿ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ನಿಮ್ಮ ಮಾಹಿತಿಯನ್ನು ಉಳಿಸಲು ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕವನ್ನು ಆಯ್ಕೆಮಾಡಿ ಹಾಗೂ ಮುಂದಿನ ಬಾರಿ ವೇಗವಾಗಿ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> ಗಾಗಿ ಪಾಸ್‌ಕೀ ಅನ್ನು ರಚಿಸುವುದೇ?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> ಗಾಗಿ ಪಾಸ್‌ವರ್ಡ್‌ ಉಳಿಸುವುದೇ?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> ಗಾಗಿ ಸೈನ್-ಇನ್ ಮಾಹಿತಿಯನ್ನು ಉಳಿಸುವುದೇ?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಲು ಪಾಸ್‌ಕೀ ಯನ್ನು ರಚಿಸಬೇಕೇ?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಲು ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಸೇವ್ ಮಾಡಬೇಕೇ?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಸೈನ್-ಇನ್ ಮಾಹಿತಿಯನ್ನು ಸೇವ್ ಮಾಡಬೇಕೇ?"</string>
     <string name="passkey" msgid="632353688396759522">"ಪಾಸ್‌ಕೀ"</string>
     <string name="password" msgid="6738570945182936667">"ಪಾಸ್‌ವರ್ಡ್"</string>
     <string name="passkeys" msgid="5733880786866559847">"ಪಾಸ್‌ಕೀಗಳು"</string>
@@ -33,10 +49,13 @@
     <string name="sign_ins" msgid="4710739369149469208">"ಸೈನ್-ಇನ್‌ಗಳು"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"ಸೈನ್-ಇನ್ ಮಾಹಿತಿ"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"ಇಲ್ಲಿಗೆ <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ಅನ್ನು ಉಳಿಸಿ"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"ಮತ್ತೊಂದು ಸಾಧನದಲ್ಲಿ ಪಾಸ್‌ಕೀಯನ್ನು ರಚಿಸಬೇಕೇ?"</string>
-    <string name="use_provider_for_all_title" msgid="4201020195058980757">"ನಿಮ್ಮ ಎಲ್ಲಾ ಸೈನ್-ಇನ್‌ಗಳಿಗಾಗಿ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ಅನ್ನು ಬಳಸುವುದೇ?"</string>
-    <string name="use_provider_for_all_description" msgid="8466427781848268490">"ಈ ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕವು ನಿಮಗೆ ಸುಲಭವಾಗಿ ಸೈನ್ ಇನ್ ಮಾಡುವುದಕ್ಕೆ ಸಹಾಯ ಮಾಡಲು ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಾಸ್‌ಕೀಗಳನ್ನು ಸಂಗ್ರಹಿಸುತ್ತದೆ"</string>
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"ಇನ್ನೊಂದು ಸಾಧನದಲ್ಲಿ ಪಾಸ್‌ಕೀ ಅನ್ನು ರಚಿಸಬೇಕೆ?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"ಇನ್ನೊಂದು ಸಾಧನದಲ್ಲಿ ಪಾಸ್‌ವರ್ಡ್ ಉಳಿಸಬೇಕೆ?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"ಮತ್ತೊಂದು ಸಾಧನದಲ್ಲಿ ಸೈನ್-ಇನ್ ಅನ್ನು ಉಳಿಸಬೇಕೆ?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"ನಿಮ್ಮ ಎಲ್ಲಾ ಸೈನ್-ಇನ್‌ಗಳಿಗಾಗಿ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ಅನ್ನು ಬಳಸಬೇಕೇ?"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> ಗಾಗಿ ಈ ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕವು ನಿಮಗೆ ಸುಲಭವಾಗಿ ಸೈನ್ ಇನ್ ಮಾಡುವುದಕ್ಕೆ ಸಹಾಯ ಮಾಡಲು ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಾಸ್‌ಕೀಗಳನ್ನು ಸಂಗ್ರಹಿಸುತ್ತದೆ"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ಡೀಫಾಲ್ಟ್ ಆಗಿ ಸೆಟ್ ಮಾಡಿ"</string>
+    <string name="settings" msgid="6536394145760913145">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="use_once" msgid="9027366575315399714">"ಒಂದು ಬಾರಿ ಬಳಸಿ"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ಪಾಸ್‌ವರ್ಡ್‌ಗಳು • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> ಪಾಸ್‌ಕೀಗಳು"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ಪಾಸ್‌ವರ್ಡ್‌ಗಳು"</string>
@@ -47,21 +66,33 @@
     <string name="other_password_manager" msgid="565790221427004141">"ಇತರ ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕರು"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ಶೀಟ್ ಮುಚ್ಚಿರಿ"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ಹಿಂದಿನ ಪುಟಕ್ಕೆ ಹಿಂದಿರುಗಿ"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಭಾಗದಲ್ಲಿ ಗೋಚರಿಸುವ ರುಜುವಾತು ನಿರ್ವಾಹಕ ಕ್ರಿಯೆಯ ಸಲಹೆಯನ್ನು ಮುಚ್ಚಿ"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ನಿಮ್ಮ ಪಾಸ್‌ಕೀ ಅನ್ನು ಬಳಸಬೇಕೆ?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ನಿಮ್ಮ ಸೈನ್-ಇನ್ ಅನ್ನು ಬಳಸಬೇಕೆ?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ಸೈನ್-ಇನ್ ಮಾಹಿತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"ಮುಚ್ಚಿರಿ"</string>
+    <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"ವಜಾಗೊಳಿಸಿ"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಸೇವ್ ಮಾಡಿದ ನಿಮ್ಮ ಪಾಸ್‌ಕೀ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಸೇವ್ ಮಾಡಿದ ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ನಿಮ್ಮ ಖಾತೆಯನ್ನು ಬಳಸಿ"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗೆ <xliff:g id="USERNAME">%2$s</xliff:g> ಮೂಲಕ ಸೈನ್ ಇನ್ ಮಾಡಲು ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಸೈನ್ ಇನ್ ಆಯ್ಕೆಗಳನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ಪಾಸ್‌ಕೀ ಅನ್ನು ಆರಿಸಿ"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಆರಿಸಿ"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ಸೈನ್-ಇನ್ ಮಾಹಿತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಒಂದು ಖಾತೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಆಯ್ಕೆಯನ್ನು ಆರಿಸಬೇಕೆ?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"ಈ ಮಾಹಿತಿಯನ್ನು <xliff:g id="APP_NAME">%1$s</xliff:g> ನಲ್ಲಿ ಬಳಸಬೇಕೆ?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ಬೇರೆ ವಿಧಾನದಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <string name="snackbar_action" msgid="37373514216505085">"ಆಯ್ಕೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ಮುಂದುವರಿಸಿ"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ಸೈನ್ ಇನ್ ಆಯ್ಕೆಗಳು"</string>
+    <string name="button_label_view_more" msgid="3429098227286495651">"ಇನ್ನಷ್ಟು ವೀಕ್ಷಿಸಿ"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> ಗಾಗಿ"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕರನ್ನು ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
-    <skip />
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"ಯಾವುದೇ ಸೈನ್ ಇನ್ ಮಾಹಿತಿಯಿಲ್ಲ"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"<xliff:g id="SOURCE">%1$s</xliff:g> ನಲ್ಲಿ ಯಾವುದೇ ಸೈನ್-ಇನ್ ಮಾಹಿತಿ ಇಲ್ಲ"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"ಸೈನ್-ಇನ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ಮತ್ತೊಂದು ಸಾಧನದಿಂದ"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ಬೇರೆ ಸಾಧನವನ್ನು ಬಳಸಿ"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನಿಂದ ವಿನಂತಿಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"ಸೈನ್ ಇನ್ ಆಯ್ಕೆಗಳು"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"ಇನ್ನಷ್ಟು"</string>
 </resources>

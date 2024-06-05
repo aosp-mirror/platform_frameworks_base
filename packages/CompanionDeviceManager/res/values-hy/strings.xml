@@ -17,36 +17,41 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Companion Device Manager"</string>
-    <string name="confirmation_title" msgid="8024993972587946678">"Թույլատրեք &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; հավելվածին կառավարել &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; սարքը"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"Թույլատրե՞լ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; հավելվածին կառավարել &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; սարքը"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ժամացույց"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Ընտրեք <xliff:g id="PROFILE_NAME">%1$s</xliff:g>ը, որը պետք է կառավարվի &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; հավելվածի կողմից"</string>
-    <string name="summary_watch" msgid="6566922405914995759">"Հավելվածն անհրաժեշտ է ձեր <xliff:g id="DEVICE_NAME">%1$s</xliff:g> սարքը կառավարելու համար։ <xliff:g id="APP_NAME">%2$s</xliff:g> հավելվածը կկարողանա համաժամացնել տվյալները, օր․՝ զանգողի անունը, փոխազդել ձեր ծանուցումների հետ և կստանա «Հեռախոս», «SMS», «Կոնտակտներ», «Օրացույց», «Կանչերի ցուցակ» և «Մոտակա սարքեր» թույլտվությունները։"</string>
-    <string name="summary_watch_single_device" msgid="7443464525873186735">"Հավելվածն անհրաժեշտ է ձեր <xliff:g id="DEVICE_NAME">%1$s</xliff:g> սարքը կառավարելու համար։ <xliff:g id="APP_NAME">%2$s</xliff:g> հավելվածը կկարողանա համաժամացնել տվյալները, օր․՝ զանգողի անունը, և կստանա հետևյալ թույլտվությունները․"</string>
-    <string name="profile_name_glasses" msgid="8488394059007275998">"ակնոց"</string>
-    <string name="summary_glasses" msgid="3808267780579061241">"Այս հավելվածն անհրաժեշտ է <xliff:g id="DEVICE_NAME">%1$s</xliff:g> սարքը կառավարելու համար։ <xliff:g id="APP_NAME">%2$s</xliff:g> հավելվածը կկարողանա փոխազդել ձեր ծանուցումների հետ և կստանա «Հեռախոս», «SMS», «Կոնտակտներ», «Խոսափող» և «Մոտակա սարքեր» թույլտվությունները։"</string>
-    <string name="summary_glasses_single_device" msgid="7051392780285915640">"Հավելվածն անհրաժեշտ է <xliff:g id="DEVICE_NAME">%1$s</xliff:g> սարքը կառավարելու համար։ <xliff:g id="APP_NAME">%2$s</xliff:g> հավելվածին կթույլատրվի օգտվել այս թույլտվություններից․"</string>
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"Ընտրեք սարքը, որը պետք է կառավարվի &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; հավելվածի միջոցով"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"Կարգավորելու համար ընտրեք <xliff:g id="PROFILE_NAME">%1$s</xliff:g>ը"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"Այս հավելվածը կկարողանա համաժամացնել տվյալները, օր․՝ զանգողի անունը, և կստանա հետևյալ թույլտվությունները ձեր <xliff:g id="DEVICE_NAME">%1$s</xliff:g>ում"</string>
+    <string name="confirmation_title_glasses" msgid="8288346850537727333">"Թույլատրե՞լ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; հավելվածին կառավարել &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; սարքը"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"սարք"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"Այս հավելվածը կստանա հետևյալ թույլտվությունները ձեր <xliff:g id="DEVICE_NAME">%1$s</xliff:g>ում"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Թույլատրեք &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; հավելվածին օգտագործել այս տեղեկությունները ձեր հեռախոսից"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Թույլատրե՞լ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;-ին հեռարձակել ձեր հեռախոսի հավելվածները"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s-ին հասանելի կլինի հեռախոսում ցուցադրվող կամ նվագարկվող բովանդակությունը՝ ներառյալ աուդիոն, լուսանկարները, գաղտնաբառերը և հաղորդագրությունները։&lt;br/&gt;&lt;br/&gt;%1$s-ը կկարողանա հավելվածներ հեռարձակել, քանի դեռ չեք չեղարկել այս թույլտվությունը։"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Միջսարքային ծառայություններ"</string>
-    <string name="helper_summary_app_streaming" msgid="5977509499890099">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը ձեր <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> սարքի անունից թույլտվություն է խնդրում՝ ձեր սարքերի միջև հավելվածներ հեռարձակելու համար"</string>
+    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը ձեր <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> սարքի անունից թույլտվություն է խնդրում՝ ձեր սարքերի միջև հավելվածներ հեռարձակելու համար"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը ձեր <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> սարքի անունից թույլտվություն է խնդրում՝ ձեր սարքերի միջև հավելվածներ հեռարձակելու համար"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Թույլատրեք &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; հավելվածին օգտագործել այս տեղեկությունները ձեր հեռախոսից"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play ծառայություններ"</string>
-    <string name="helper_summary_computer" msgid="9050724687678157852">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը ձեր <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> սարքի անունից թույլտվություն է խնդրում՝ ձեր հեռախոսի լուսանկարները, մեդիաֆայլերն ու ծանուցումները տեսնելու համար"</string>
-    <string name="title_nearby_device_streaming" msgid="179278282547719200">"Թույլատրել &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; հավելվածին կատարել այս գործողությունը ձեր հեռախոսում"</string>
-    <string name="helper_title_nearby_device_streaming" msgid="6124438217620593669">"Միջսարքային ծառայություններ"</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="5538329403511524333">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը ձեր <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> սարքի անունից թույլտվություն է խնդրում՝ մոտակա սարքերին բովանդակություն հեռարձակելու համար"</string>
+    <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը ձեր <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> սարքի անունից թույլտվություն է խնդրում՝ ձեր հեռախոսի լուսանկարները, մեդիաֆայլերն ու ծանուցումները տեսնելու համար"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Թույլատրե՞լ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; հավելվածին կատարել այս գործողությունը"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Թույլատրե՞լ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;-ին հեռարձակել ձեր հեռախոսի հավելվածները և համակարգի գործառույթները"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s-ին հասանելի կլինի ձեր հեռախոսում ցուցադրվող կամ նվագարկվող բովանդակությունը՝ ներառյալ աուդիոն, լուսանկարները, վճարային տեղեկությունները, գաղտնաբառերը և հաղորդագրությունները։&lt;br/&gt;&lt;br/&gt;%1$s-ը կկարողանա հավելվածներ և համակարգի գործառույթներ հեռարձակել, քանի դեռ չեք չեղարկել այս թույլտվությունը։"</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը ձեր <xliff:g id="DEVICE_NAME">%2$s</xliff:g> սարքի անունից թույլտվություն է խնդրում՝ մոտակա սարքերին հավելվածներ և համակարգի այլ գործառույթներ հեռարձակելու համար"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"սարք"</string>
-    <string name="summary_generic_single_device" msgid="4735072202474939111">"Այս հավելվածը կկարողանա համաժամացնել ձեր հեռախոսի և <xliff:g id="DEVICE_NAME">%1$s</xliff:g> սարքի տվյալները, օր․՝ զանգողի անունը։"</string>
-    <string name="summary_generic" msgid="4988130802522924650">"Այս հավելվածը կկարողանա համաժամացնել ձեր հեռախոսի և ընտրված սարքի տվյալները, օր․՝ զանգողի անունը։"</string>
+    <string name="summary_generic" msgid="1761976003668044801">"Այս հավելվածը կկարողանա համաժամացնել ձեր հեռախոսի և ընտրված սարքի տվյալները, օր․՝ զանգողի անունը"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Թույլատրել"</string>
     <string name="consent_no" msgid="2640796915611404382">"Չթույլատրել"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"Չեղարկել"</string>
     <string name="consent_back" msgid="2560683030046918882">"Հետ"</string>
+    <string name="permission_expand" msgid="893185038020887411">"Ծավալել «<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>» բաժինը"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"Ծալել «<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>» բաժինը"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;-ում հավելվածներին տա՞լ նույն թույլտվությունները, ինչ &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;-ում"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"Սա կարող է ներառել &lt;strong&gt;խոսափողի&lt;/strong&gt;, &lt;strong&amp;gtտեսախցիկի&lt;/strong&gt;, &lt;strong&gt;տեղադրության&lt;/strong&gt; և այլ կոնֆիդենցիալ տվյալների օգտագործման թույլտվությունները &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; սարքում։ &lt;br/&gt;&lt;br/&gt;Այդ թույլտվությունները ցանկացած ժամանակ կարող եք փոխել &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; սարքի ձեր կարգավորումներում։"</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"Հավելվածի պատկերակ"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"«Այլ տեղեկություններ» կոճակ"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"Լրացուցիչ տեղեկություններ"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Հեռախոս"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Կոնտակտներ"</string>
@@ -54,19 +59,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Խոսափող"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Կանչերի ցուցակ"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Մոտակա սարքեր"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Փոխել մեդիա արտածումը"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Լուսանկարներ և մուլտիմեդիա"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Ծանուցումներ"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Ծանուցումներ"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Հավելվածներ"</string>
-    <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"Հեռարձակում մոտակա սարքերին"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Կարող է կատարել հեռախոսազանգեր և կառավարել դրանք"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Կարող է դիտել և գրանցել կանչերը"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Կարող է ուղարկել SMS հաղորդագրություններ և դիտել դրանք"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Կարող է օգտագործել ձեր կոնտակտները"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Կարող է օգտագործել ձեր օրացույցը"</string>
-    <string name="permission_microphone_summary" msgid="4241354865859396558">"Կարող է օգտագործել խոսափողը՝ ձայնագրություններ անելու համար"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Կարող է գտնել և որոշել մոտակա սարքերի մոտավոր դիրքը և միանալ դրանց"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Կարող է կարդալ բոլոր ծանուցումները, ներառյալ տեղեկությունները, օրինակ՝ կոնտակտները, հաղորդագրությունները և լուսանկարները"</string>
+    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Հեռարձակում"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Կատարել զանգեր և կառավարել զանգերը"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Դիտել հեռախոսի զանգերի մատյանը և կատարել գրանցում"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Ուղարկել և կարդալ SMS հաղորդագրություններ"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Օգտագործել ձեր կոնտակտները"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Օգտագործել ձեր օրացույցը"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Ձայնագրել"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Գտնել և որոշել մոտակա սարքերի մոտավոր դիրքը և միանալ դրանց"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Կարդալ բոլոր ծանուցումները, ներառյալ տեղեկությունները, օրինակ՝ կոնտակտները, հաղորդագրությունները և լուսանկարները"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Կարդալ բոլոր ծանուցումները, այդ թվում՝ կոնտակտները, հաղորդագրությունները և լուսանկարները&lt;br/&gt;• Ուղարկել ծանուցումներ&lt;br/&gt;&lt;br/&gt;Դուք ցանկացած պահի կարող եք կառավարել այս հավելվածի՝ ծանուցումներ կարդալու հնարավորությունը՝ անցնելով Կարգավորումներ &gt; Ծանուցումներ։"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Հեռարձակել հեռախոսի հավելվածները"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="5776807830582725074">"Հեռարձակել բովանդակություն մոտակա սարքերին"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Հեռարձակել հավելվածներ և համակարգի այլ գործառույթներ հեռախոսում"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Բացել հասանելի սարքերի ցանկը և կառավարել, թե որ սարքը աուդիո կամ վիդեո հեռարձակի այլ հավելվածներից"</string>
+    <string name="device_type" product="default" msgid="8268703872070046263">"հեռախոս"</string>
+    <string name="device_type" product="tablet" msgid="5038791954983067774">"պլանշետ"</string>
 </resources>

@@ -1,0 +1,41 @@
+package: "android.hardware.biometrics"
+container: "system"
+
+flag {
+    name: "last_authentication_time"
+    is_exported: true
+    namespace: "wallet_integration"
+    description: "Feature flag for adding getLastAuthenticationTime API to BiometricManager"
+    bug: "301979982"
+}
+
+flag {
+  name: "add_key_agreement_crypto_object"
+  is_exported: true
+  namespace: "biometrics"
+  description: "Feature flag for adding KeyAgreement api to CryptoObject."
+  bug: "282058146"
+}
+
+flag {
+  name: "get_op_id_crypto_object"
+  is_exported: true
+  namespace: "biometrics_framework"
+  description: "Feature flag for adding a get operation id api to CryptoObject."
+  bug: "307601768"
+}
+
+flag {
+  name: "custom_biometric_prompt"
+  is_exported: true
+  namespace: "biometrics_framework"
+  description: "Feature flag for adding a custom content view API to BiometricPrompt.Builder."
+  bug: "302735104"
+}
+
+flag {
+  name: "mandatory_biometrics"
+  namespace: "biometrics_framework"
+  description: "This flag controls whether LSKF fallback is removed from biometric prompt when the phone is outside trusted locations"
+  bug: "322081563"
+}

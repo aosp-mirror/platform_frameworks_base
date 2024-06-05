@@ -1,0 +1,1 @@
+This project is the wear implementation of the Credential Manager feature.

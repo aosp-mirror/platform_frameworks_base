@@ -1,0 +1,8 @@
+{
+  "imports": [
+    {
+      "path": "frameworks/base/services/core/java/com/android/server/power"
+    }
+  ]
+}
+

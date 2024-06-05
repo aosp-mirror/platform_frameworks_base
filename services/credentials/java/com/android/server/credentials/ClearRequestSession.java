@@ -21,10 +21,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.credentials.ClearCredentialStateException;
 import android.credentials.ClearCredentialStateRequest;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.IClearCredentialStateCallback;
-import android.credentials.ui.ProviderData;
-import android.credentials.ui.RequestInfo;
+import android.credentials.selection.ProviderData;
+import android.credentials.selection.RequestInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
@@ -40,7 +41,7 @@ import java.util.Set;
 public final class ClearRequestSession extends RequestSession<ClearCredentialStateRequest,
         IClearCredentialStateCallback, Void>
         implements ProviderSession.ProviderInternalCallback<Void> {
-    private static final String TAG = "GetRequestSession";
+    private static final String TAG = CredentialManager.TAG;
 
     public ClearRequestSession(Context context, RequestSession.SessionLifetime sessionCallback,
             Object lock, int userId, int callingUid,
@@ -50,7 +51,8 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
                 RequestInfo.TYPE_UNDEFINED,
-                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp);
+                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp,
+                /*shouldBindClientToDeath=*/ true);
     }
 
     /**

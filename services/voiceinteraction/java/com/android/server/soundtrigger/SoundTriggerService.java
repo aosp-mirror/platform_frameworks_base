@@ -31,12 +31,11 @@ import static android.hardware.soundtrigger.SoundTrigger.STATUS_OK;
 import static android.provider.Settings.Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY;
 import static android.provider.Settings.Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT;
 
-import static com.android.server.soundtrigger.SoundTriggerEvent.SessionEvent.Type;
-import static com.android.server.utils.EventLogger.Event.ALOGW;
-
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.soundtrigger.DeviceStateHandler.DeviceStateListener;
 import static com.android.server.soundtrigger.DeviceStateHandler.SoundTriggerDeviceState;
+import static com.android.server.soundtrigger.SoundTriggerEvent.SessionEvent.Type;
+import static com.android.server.utils.EventLogger.Event.ALOGW;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -94,8 +93,8 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.SparseArray;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ISoundTriggerService;
@@ -105,19 +104,17 @@ import com.android.server.SoundTriggerInternal;
 import com.android.server.SystemService;
 import com.android.server.soundtrigger.SoundTriggerEvent.ServiceEvent;
 import com.android.server.soundtrigger.SoundTriggerEvent.SessionEvent;
-import com.android.server.utils.EventLogger.Event;
 import com.android.server.utils.EventLogger;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.function.Consumer;
-import java.util.List;
-import java.util.Set;
 import java.util.Deque;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -126,6 +123,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -257,6 +255,11 @@ public class SoundTriggerService extends SystemService {
         publishLocalService(SoundTriggerInternal.class, mLocalSoundTriggerService);
     }
 
+    private boolean hasCalling() {
+        return mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_TELEPHONY_CALLING);
+    }
+
     @Override
     public void onBootPhase(int phase) {
         Slog.d(TAG, "onBootPhase: " + phase + " : " + isSafeMode());
@@ -282,11 +285,13 @@ public class SoundTriggerService extends SystemService {
             // Do so after registering the listener so we ensure that we don't drop any events
             mDeviceStateHandler.onPowerModeChanged(powerManager.getSoundTriggerPowerSaveMode());
 
-            // PhoneCallStateHandler initializes the original call state
-            mPhoneCallStateHandler = new PhoneCallStateHandler(
-                      mContext.getSystemService(SubscriptionManager.class),
-                      mContext.getSystemService(TelephonyManager.class),
-                      mDeviceStateHandler);
+            if (hasCalling()) {
+                // PhoneCallStateHandler initializes the original call state
+                mPhoneCallStateHandler = new PhoneCallStateHandler(
+                        mContext.getSystemService(SubscriptionManager.class),
+                        mContext.getSystemService(TelephonyManager.class),
+                        mDeviceStateHandler);
+            }
         }
         mMiddlewareService = ISoundTriggerMiddlewareService.Stub.asInterface(
                 ServiceManager.waitForService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE));
@@ -365,7 +370,7 @@ public class SoundTriggerService extends SystemService {
             // Validate package name
             try {
                 int uid = mPackageManager.getPackageUid(mOriginatorIdentity.packageName,
-                        PackageManager.PackageInfoFlags.of(0));
+                        PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ANY_USER));
                 if (!UserHandle.isSameApp(uid, mOriginatorIdentity.uid)) {
                     throw new SecurityException("Uid " + mOriginatorIdentity.uid +
                             " attempted to spoof package name " +
@@ -407,7 +412,9 @@ public class SoundTriggerService extends SystemService {
                 var eventLogger = new EventLogger(SESSION_MAX_EVENT_SIZE,
                         "SoundTriggerSessionLogs for package: "
                         + Objects.requireNonNull(originatorIdentity.packageName)
-                        + "#" + sessionId);
+                        + "#" + sessionId
+                        + " - " + originatorIdentity.uid
+                        + "|" + originatorIdentity.pid);
                 return new SoundTriggerSessionStub(client,
                         newSoundTriggerHelper(moduleProperties, eventLogger), eventLogger);
             }
@@ -428,7 +435,9 @@ public class SoundTriggerService extends SystemService {
                 var eventLogger = new EventLogger(SESSION_MAX_EVENT_SIZE,
                         "SoundTriggerSessionLogs for package: "
                         + Objects.requireNonNull(originatorIdentity.packageName) + "#"
-                        + sessionId);
+                        + sessionId
+                        + " - " + originatorIdentity.uid
+                        + "|" + originatorIdentity.pid);
                 return new SoundTriggerSessionStub(client,
                         newSoundTriggerHelper(moduleProperties, eventLogger), eventLogger);
             }
@@ -1801,7 +1810,9 @@ public class SoundTriggerService extends SystemService {
                         ServiceEvent.Type.ATTACH, identity.packageName + "#" + sessionId));
             var eventLogger = new EventLogger(SESSION_MAX_EVENT_SIZE,
                     "LocalSoundTriggerEventLogger for package: " +
-                    identity.packageName + "#" + sessionId);
+                    identity.packageName + "#" + sessionId
+                        + " - " + identity.uid
+                        + "|" + identity.pid);
 
             return new SessionImpl(newSoundTriggerHelper(underlyingModule, eventLogger, isTrusted),
                     client, eventLogger, identity);

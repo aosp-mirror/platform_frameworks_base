@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.Flags.FLAG_QS_NEW_PIPELINE;
 import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
 import static com.android.systemui.statusbar.phone.AutoTileManager.DEVICE_CONTROLS;
 
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
@@ -43,20 +45,21 @@ import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dagger.NightDisplayListenerModule;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -86,7 +89,7 @@ import java.util.List;
 
 import javax.inject.Named;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 @SmallTest
 public class AutoTileManagerTest extends SysuiTestCase {
@@ -111,6 +114,8 @@ public class AutoTileManagerTest extends SysuiTestCase {
     @Mock private DataSaverController mDataSaverController;
     @Mock private ManagedProfileController mManagedProfileController;
     @Mock private NightDisplayListener mNightDisplayListener;
+    @Mock(answer = Answers.RETURNS_SELF)
+    private NightDisplayListenerModule.Builder mNightDisplayListenerBuilder;
     @Mock private ReduceBrightColorsController mReduceBrightColorsController;
     @Mock private DeviceControlsController mDeviceControlsController;
     @Mock private WalletController mWalletController;
@@ -130,6 +135,8 @@ public class AutoTileManagerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mSecureSettings = new FakeSettings();
+
+        mSetFlagsRule.disableFlags(FLAG_QS_NEW_PIPELINE);
 
         mContext.getOrCreateTestableResources().addOverride(
                 R.array.config_quickSettingsAutoAdd,
@@ -151,6 +158,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
                 .thenReturn(TEST_CUSTOM_SAFETY_PKG);
         Context context = Mockito.spy(mContext);
         when(context.getPackageManager()).thenReturn(mPackageManager);
+        when(mNightDisplayListenerBuilder.build()).thenReturn(mNightDisplayListener);
 
         mAutoTileManager = createAutoTileManager(context);
         mAutoTileManager.init();
@@ -167,7 +175,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
             HotspotController hotspotController,
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,
-            NightDisplayListener nightDisplayListener,
+            NightDisplayListenerModule.Builder nightDisplayListenerBuilder,
             CastController castController,
             ReduceBrightColorsController reduceBrightColorsController,
             DeviceControlsController deviceControlsController,
@@ -180,7 +188,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
                 hotspotController,
                 dataSaverController,
                 managedProfileController,
-                nightDisplayListener,
+                mNightDisplayListenerBuilder,
                 castController,
                 reduceBrightColorsController,
                 deviceControlsController,
@@ -191,7 +199,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
 
     private AutoTileManager createAutoTileManager(Context context) {
         return createAutoTileManager(context, mAutoAddTrackerBuilder, mHotspotController,
-                mDataSaverController, mManagedProfileController, mNightDisplayListener,
+                mDataSaverController, mManagedProfileController, mNightDisplayListenerBuilder,
                 mCastController, mReduceBrightColorsController, mDeviceControlsController,
                 mWalletController, mSafetyController, mIsReduceBrightColorsAvailable);
     }
@@ -204,7 +212,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         HotspotController hC = mock(HotspotController.class);
         DataSaverController dSC = mock(DataSaverController.class);
         ManagedProfileController mPC = mock(ManagedProfileController.class);
-        NightDisplayListener nDS = mock(NightDisplayListener.class);
+        NightDisplayListenerModule.Builder nDSB = mock(NightDisplayListenerModule.Builder.class);
         CastController cC = mock(CastController.class);
         ReduceBrightColorsController rBC = mock(ReduceBrightColorsController.class);
         DeviceControlsController dCC = mock(DeviceControlsController.class);
@@ -212,14 +220,14 @@ public class AutoTileManagerTest extends SysuiTestCase {
         SafetyController sC = mock(SafetyController.class);
 
         AutoTileManager manager =
-                createAutoTileManager(mock(Context.class), builder, hC, dSC, mPC, nDS, cC, rBC,
+                createAutoTileManager(mock(Context.class), builder, hC, dSC, mPC, nDSB, cC, rBC,
                         dCC, wC, sC, true);
 
         verify(tracker, never()).initialize();
         verify(hC, never()).addCallback(any());
         verify(dSC, never()).addCallback(any());
         verify(mPC, never()).addCallback(any());
-        verify(nDS, never()).setCallback(any());
+        verifyNoMoreInteractions(nDSB);
         verify(cC, never()).addCallback(any());
         verify(rBC, never()).addCallback(any());
         verify(dCC, never()).setCallback(any());
@@ -283,7 +291,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         inOrderSafety.verify(mSafetyController).removeCallback(any());
         inOrderSafety.verify(mSafetyController).addCallback(any());
 
-        SettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
+        UserSettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
         assertEquals(USER + 1, setting.getCurrentUser());
         assertTrue(setting.isListening());
     }
@@ -337,7 +345,7 @@ public class AutoTileManagerTest extends SysuiTestCase {
         inOrderSafety.verify(mSafetyController).removeCallback(any());
         inOrderSafety.verify(mSafetyController).addCallback(any());
 
-        SettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
+        UserSettingObserver setting = mAutoTileManager.getSecureSettingForKey(TEST_SETTING);
         assertEquals(USER + 1, setting.getCurrentUser());
         assertFalse(setting.isListening());
     }
@@ -613,6 +621,15 @@ public class AutoTileManagerTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources().addOverride(
                 R.array.config_quickSettingsAutoAdd, null);
         createAutoTileManager(mContext).destroy();
+    }
+
+    @Test
+    public void testUserChange_newNightDisplayListenerCreated() {
+        UserHandle newUser = UserHandle.of(1000);
+        mAutoTileManager.changeUser(newUser);
+        InOrder inOrder = inOrder(mNightDisplayListenerBuilder);
+        inOrder.verify(mNightDisplayListenerBuilder).setUser(newUser.getIdentifier());
+        inOrder.verify(mNightDisplayListenerBuilder).build();
     }
 
     // Will only notify if it's listening

@@ -63,6 +63,7 @@ import java.lang.reflect.Modifier;
  * your new thread.  The given Runnable or Message will then be scheduled
  * in the Handler's message queue and processed when appropriate.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Handler {
     /*
      * Set this flag to true to detect anonymous, local or member classes
@@ -119,7 +120,7 @@ public class Handler {
      *   crashes (if a handler is sometimes created on a thread without a Looper active), or race
      *   conditions, where the thread a handler is associated with is not what the author
      *   anticipated. Instead, use an {@link java.util.concurrent.Executor} or specify the Looper
-     *   explicitly, using {@link Looper#getMainLooper}, {link android.view.View#getHandler}, or
+     *   explicitly, using {@link Looper#getMainLooper}, {@link android.view.View#getHandler}, or
      *   similar. If the implicit thread local behavior is required for compatibility, use
      *   {@code new Handler(Looper.myLooper())} to make it clear to readers.
      *
@@ -144,7 +145,7 @@ public class Handler {
      *   crashes (if a handler is sometimes created on a thread without a Looper active), or race
      *   conditions, where the thread a handler is associated with is not what the author
      *   anticipated. Instead, use an {@link java.util.concurrent.Executor} or specify the Looper
-     *   explicitly, using {@link Looper#getMainLooper}, {link android.view.View#getHandler}, or
+     *   explicitly, using {@link Looper#getMainLooper}, {@link android.view.View#getHandler}, or
      *   similar. If the implicit thread local behavior is required for compatibility, use
      *   {@code new Handler(Looper.myLooper(), callback)} to make it clear to readers.
      */
@@ -182,7 +183,7 @@ public class Handler {
      *
      * Asynchronous messages represent interrupts or events that do not require global ordering
      * with respect to synchronous messages.  Asynchronous messages are not subject to
-     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+     * the synchronization barriers introduced by {@link MessageQueue#postSyncBarrier()}.
      *
      * @param async If true, the handler calls {@link Message#setAsynchronous(boolean)} for
      * each {@link Message} that is sent to it or {@link Runnable} that is posted to it.
@@ -203,7 +204,7 @@ public class Handler {
      *
      * Asynchronous messages represent interrupts or events that do not require global ordering
      * with respect to synchronous messages.  Asynchronous messages are not subject to
-     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+     * the synchronization barriers introduced by {@link MessageQueue#postSyncBarrier()}.
      *
      * @param callback The callback interface in which to handle messages, or null.
      * @param async If true, the handler calls {@link Message#setAsynchronous(boolean)} for
@@ -751,7 +752,7 @@ public class Handler {
         MessageQueue queue = mQueue;
         if (queue == null) {
             RuntimeException e = new RuntimeException(
-                this + " sendMessageAtTime() called with no mQueue");
+                    this + " sendMessageAtFrontOfQueue() called with no mQueue");
             Log.w("Looper", e.getMessage(), e);
             return false;
         }

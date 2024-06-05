@@ -34,13 +34,16 @@ cc_library_static {
         "tvinput/BufferProducerThread.cpp",
         "tvinput/JTvInputHal.cpp",
         "tvinput/TvInputHal_hidl.cpp",
+        "com_android_server_accessibility_BrailleDisplayConnection.cpp",
         "com_android_server_adb_AdbDebuggingManager.cpp",
         "com_android_server_am_BatteryStatsService.cpp",
         "com_android_server_biometrics_SurfaceToNativeHandleConverter.cpp",
         "com_android_server_ConsumerIrService.cpp",
         "com_android_server_companion_virtual_InputController.cpp",
+        "com_android_server_companion_virtual_VirtualDeviceImpl.cpp",
         "com_android_server_devicepolicy_CryptoTestHelper.cpp",
         "com_android_server_display_DisplayControl.cpp",
+        "com_android_server_display_SmallAreaDetectionController.cpp",
         "com_android_server_connectivity_Vpn.cpp",
         "com_android_server_gpu_GpuService.cpp",
         "com_android_server_HardwarePropertiesManagerService.cpp",
@@ -50,6 +53,7 @@ cc_library_static {
         "com_android_server_locksettings_SyntheticPasswordManager.cpp",
         "com_android_server_power_PowerManagerService.cpp",
         "com_android_server_powerstats_PowerStatsService.cpp",
+        "com_android_server_power_stats_CpuPowerStatsCollector.cpp",
         "com_android_server_hint_HintManagerService.cpp",
         "com_android_server_SerialService.cpp",
         "com_android_server_soundtrigger_middleware_AudioSessionProviderImpl.cpp",
@@ -68,7 +72,7 @@ cc_library_static {
         "com_android_server_UsbHostManager.cpp",
         "com_android_server_vibrator_VibratorController.cpp",
         "com_android_server_vibrator_VibratorManagerService.cpp",
-        "com_android_server_PersistentDataBlockService.cpp",
+        "com_android_server_pdb_PersistentDataBlockService.cpp",
         "com_android_server_am_LowMemDetector.cpp",
         "com_android_server_pm_PackageManagerShellCommandDataLoader.cpp",
         "com_android_server_sensor_SensorService.cpp",
@@ -76,6 +80,8 @@ cc_library_static {
         "onload.cpp",
         ":lib_cachedAppOptimizer_native",
         ":lib_gameManagerService_native",
+        ":lib_oomConnection_native",
+        ":lib_anrTimer_native",
     ],
 
     include_dirs: [
@@ -94,7 +100,10 @@ cc_library_static {
 
 cc_defaults {
     name: "libservices.core-libs",
-    defaults: ["android.hardware.graphics.common-ndk_shared"],
+    defaults: [
+        "android.hardware.graphics.common-ndk_shared",
+        "android.hardware.power-ndk_shared",
+    ],
     shared_libs: [
         "libadb_pairing_server",
         "libadb_pairing_connection",
@@ -117,6 +126,7 @@ cc_defaults {
         "libhardware_legacy",
         "libhidlbase",
         "libmeminfo",
+        "libmemevents",
         "libmemtrackproxy",
         "libmtp",
         "libnativehelper",
@@ -141,6 +151,7 @@ cc_defaults {
         "libsensorservicehidl",
         "libsensorserviceaidl",
         "libgui",
+        "libtimeinstate",
         "libtimestats_atoms_proto",
         "libusbhost",
         "libtinyalsa",
@@ -168,7 +179,6 @@ cc_defaults {
         "android.hardware.graphics.bufferqueue@1.0",
         "android.hardware.graphics.bufferqueue@2.0",
         "android.hardware.graphics.common@1.2",
-        "android.hardware.graphics.mapper@4.0",
         "android.hardware.input.processor-V1-ndk",
         "android.hardware.ir@1.0",
         "android.hardware.light@2.0",
@@ -177,13 +187,12 @@ cc_defaults {
         "android.hardware.power@1.1",
         "android.hardware.power@1.2",
         "android.hardware.power@1.3",
-        "android.hardware.power-V4-cpp",
         "android.hardware.power.stats@1.0",
         "android.hardware.power.stats-V1-ndk",
         "android.hardware.thermal@1.0",
-        "android.hardware.thermal-V1-ndk",
+        "android.hardware.thermal-V2-ndk",
         "android.hardware.tv.input@1.0",
-        "android.hardware.tv.input-V1-ndk",
+        "android.hardware.tv.input-V2-ndk",
         "android.hardware.vibrator-V2-cpp",
         "android.hardware.vibrator@1.0",
         "android.hardware.vibrator@1.1",
@@ -206,6 +215,7 @@ cc_defaults {
     static_libs: [
         "android.hardware.broadcastradio@common-utils-1x-lib",
         "libaidlcommonsupport",
+        "libvirtualdevicebuildflags",
     ],
 
     product_variables: {
@@ -233,5 +243,17 @@ filegroup {
     name: "lib_gameManagerService_native",
     srcs: [
         "com_android_server_app_GameManagerService.cpp",
+    ],
+}
+
+filegroup {
+    name: "lib_oomConnection_native",
+    srcs: ["com_android_server_am_OomConnection.cpp"],
+}
+
+filegroup {
+    name: "lib_anrTimer_native",
+    srcs: [
+        "com_android_server_utils_AnrTimer.cpp",
     ],
 }

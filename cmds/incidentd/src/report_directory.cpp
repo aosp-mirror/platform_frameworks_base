@@ -62,8 +62,8 @@ void clean_directory(const char* directory, off_t maxSize, size_t maxCount) {
             continue;
         }
         String8 filename = dirbase + entry->d_name;
-        if (stat(filename.string(), &st) != 0) {
-            ALOGE("Unable to stat file %s", filename.string());
+        if (stat(filename.c_str(), &st) != 0) {
+            ALOGE("Unable to stat file %s", filename.c_str());
             continue;
         }
         if (!S_ISREG(st.st_mode)) {
@@ -88,7 +88,7 @@ void clean_directory(const char* directory, off_t maxSize, size_t maxCount) {
     // Remove files until we're under our limits.
     for (std::vector<std::pair<String8, struct stat>>::iterator it = files.begin();
          it != files.end() && totalSize >= maxSize && totalCount >= maxCount; it++) {
-        remove(it->first.string());
+        remove(it->first.c_str());
         totalSize -= it->second.st_size;
         totalCount--;
     }

@@ -261,8 +261,8 @@ TEST_F(SplitTest, TestNewResourceIsAccessibleByName) {
   const String16 package("com.android.basic");
   ASSERT_EQ(
       R::string::test3,
-      table.identifierForName(name.string(), name.size(), type.string(),
-                              type.size(), package.string(), package.size()));
+      table.identifierForName(name.c_str(), name.size(), type.c_str(),
+                              type.size(), package.c_str(), package.size()));
 }
 
 }  // namespace

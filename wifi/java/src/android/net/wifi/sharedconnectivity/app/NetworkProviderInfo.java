@@ -16,10 +16,12 @@
 
 package android.net.wifi.sharedconnectivity.app;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.net.wifi.flags.Flags;
 import android.net.wifi.sharedconnectivity.service.SharedConnectivityService;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -84,17 +86,12 @@ public final class NetworkProviderInfo implements Parcelable {
     public @interface DeviceType {
     }
 
-    /**
-     * Key in extras bundle indicating that the device battery is charging.
-     * @hide
-     */
-    public static final String EXTRA_KEY_IS_BATTERY_CHARGING = "is_battery_charging";
-
     @DeviceType
     private final int mDeviceType;
     private final String mDeviceName;
     private final String mModelName;
     private final int mBatteryPercentage;
+    private final boolean mIsBatteryCharging;
     private final int mConnectionStrength;
     private final Bundle mExtras;
 
@@ -106,6 +103,7 @@ public final class NetworkProviderInfo implements Parcelable {
         private String mDeviceName;
         private String mModelName;
         private int mBatteryPercentage;
+        private boolean mIsBatteryCharging;
         private int mConnectionStrength;
         private Bundle mExtras = Bundle.EMPTY;
 
@@ -167,6 +165,19 @@ public final class NetworkProviderInfo implements Parcelable {
         }
 
         /**
+         * Sets if the battery of the remote device is charging.
+         *
+         * @param isBatteryCharging True if battery is charging.
+         * @return Returns the Builder object.
+         */
+        @NonNull
+        @FlaggedApi(Flags.FLAG_NETWORK_PROVIDER_BATTERY_CHARGING_STATUS)
+        public Builder setBatteryCharging(boolean isBatteryCharging) {
+            mIsBatteryCharging = isBatteryCharging;
+            return this;
+        }
+
+        /**
          * Sets the displayed connection strength of the remote device to the internet.
          *
          * @param connectionStrength Connection strength in range 0 to 4.
@@ -198,7 +209,7 @@ public final class NetworkProviderInfo implements Parcelable {
         @NonNull
         public NetworkProviderInfo build() {
             return new NetworkProviderInfo(mDeviceType, mDeviceName, mModelName, mBatteryPercentage,
-                    mConnectionStrength, mExtras);
+                    mIsBatteryCharging, mConnectionStrength, mExtras);
         }
     }
 
@@ -218,13 +229,14 @@ public final class NetworkProviderInfo implements Parcelable {
     }
 
     private NetworkProviderInfo(@DeviceType int deviceType, @NonNull String deviceName,
-            @NonNull String modelName, int batteryPercentage, int connectionStrength,
-            @NonNull Bundle extras) {
+            @NonNull String modelName, int batteryPercentage, boolean isBatteryCharging,
+            int connectionStrength, @NonNull Bundle extras) {
         validate(deviceType, deviceName, modelName, batteryPercentage, connectionStrength);
         mDeviceType = deviceType;
         mDeviceName = deviceName;
         mModelName = modelName;
         mBatteryPercentage = batteryPercentage;
+        mIsBatteryCharging = isBatteryCharging;
         mConnectionStrength = connectionStrength;
         mExtras = extras;
     }
@@ -270,6 +282,16 @@ public final class NetworkProviderInfo implements Parcelable {
     }
 
     /**
+     * Gets the charging state of the battery on the remote device.
+     *
+     * @return Returns true if the battery of the remote device is charging.
+     */
+    @FlaggedApi(Flags.FLAG_NETWORK_PROVIDER_BATTERY_CHARGING_STATUS)
+    public boolean isBatteryCharging() {
+        return mIsBatteryCharging;
+    }
+
+    /**
      * Gets the displayed connection strength of the remote device to the internet.
      *
      * @return Returns the connection strength in range 0 to 4.
@@ -297,13 +319,14 @@ public final class NetworkProviderInfo implements Parcelable {
                 && Objects.equals(mDeviceName, other.mDeviceName)
                 && Objects.equals(mModelName, other.mModelName)
                 && mBatteryPercentage == other.mBatteryPercentage
+                && mIsBatteryCharging == other.mIsBatteryCharging
                 && mConnectionStrength == other.mConnectionStrength;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mDeviceType, mDeviceName, mModelName, mBatteryPercentage,
-                mConnectionStrength);
+                mIsBatteryCharging, mConnectionStrength);
     }
 
     @Override
@@ -312,6 +335,7 @@ public final class NetworkProviderInfo implements Parcelable {
         dest.writeString(mDeviceName);
         dest.writeString(mModelName);
         dest.writeInt(mBatteryPercentage);
+        dest.writeBoolean(mIsBatteryCharging);
         dest.writeInt(mConnectionStrength);
         dest.writeBundle(mExtras);
     }
@@ -329,7 +353,7 @@ public final class NetworkProviderInfo implements Parcelable {
     @NonNull
     public static NetworkProviderInfo readFromParcel(@NonNull Parcel in) {
         return new NetworkProviderInfo(in.readInt(), in.readString(), in.readString(), in.readInt(),
-                in.readInt(), in.readBundle());
+                in.readBoolean(), in.readInt(), in.readBundle());
     }
 
     @NonNull
@@ -352,6 +376,7 @@ public final class NetworkProviderInfo implements Parcelable {
                 .append(", deviceName=").append(mDeviceName)
                 .append(", modelName=").append(mModelName)
                 .append(", batteryPercentage=").append(mBatteryPercentage)
+                .append(", isBatteryCharging=").append(mIsBatteryCharging)
                 .append(", connectionStrength=").append(mConnectionStrength)
                 .append(", extras=").append(mExtras.toString())
                 .append("]").toString();

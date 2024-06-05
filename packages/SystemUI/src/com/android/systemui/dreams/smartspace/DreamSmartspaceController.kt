@@ -34,9 +34,9 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin.UI_SURFACE_DREAM
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.smartspace.SmartspaceTargetFilter
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_SMARTSPACE_DATA_PLUGIN
-import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_SMARTSPACE_PRECONDITION
-import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_SMARTSPACE_TARGET_FILTER
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_WEATHER_SMARTSPACE_DATA_PLUGIN
+import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.LOCKSCREEN_SMARTSPACE_PRECONDITION
+import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.LOCKSCREEN_SMARTSPACE_TARGET_FILTER
 import com.android.systemui.smartspace.dagger.SmartspaceViewComponent
 import com.android.systemui.util.concurrency.Execution
 import java.util.Optional
@@ -50,12 +50,12 @@ import javax.inject.Named
 @SysUISingleton
 class DreamSmartspaceController @Inject constructor(
     private val context: Context,
-    private val smartspaceManager: SmartspaceManager,
+    private val smartspaceManager: SmartspaceManager?,
     private val execution: Execution,
     @Main private val uiExecutor: Executor,
     private val smartspaceViewComponentFactory: SmartspaceViewComponent.Factory,
-    @Named(DREAM_SMARTSPACE_PRECONDITION) private val precondition: SmartspacePrecondition,
-    @Named(DREAM_SMARTSPACE_TARGET_FILTER)
+    @Named(LOCKSCREEN_SMARTSPACE_PRECONDITION) private val precondition: SmartspacePrecondition,
+    @Named(LOCKSCREEN_SMARTSPACE_TARGET_FILTER)
     private val optionalTargetFilter: Optional<SmartspaceTargetFilter>,
     @Named(DREAM_SMARTSPACE_DATA_PLUGIN) optionalPlugin: Optional<BcSmartspaceDataPlugin>,
     @Named(DREAM_WEATHER_SMARTSPACE_DATA_PLUGIN)
@@ -184,6 +184,9 @@ class DreamSmartspaceController @Inject constructor(
     }
 
     private fun connectSession() {
+        if (smartspaceManager == null) {
+            return
+        }
         if (plugin == null && weatherPlugin == null) {
             return
         }

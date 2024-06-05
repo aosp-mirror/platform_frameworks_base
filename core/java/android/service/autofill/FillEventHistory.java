@@ -309,12 +309,19 @@ public final class FillEventHistory implements Parcelable {
         /** The autofill suggestion is shown as a dialog presentation. */
         public static final int UI_TYPE_DIALOG = 3;
 
+        /**
+         *  The autofill suggestion is shown os a credman bottom sheet
+         *  @hide
+         */
+        public static final int UI_TYPE_CREDMAN_BOTTOM_SHEET = 4;
+
         /** @hide */
         @IntDef(prefix = { "UI_TYPE_" }, value = {
                 UI_TYPE_UNKNOWN,
                 UI_TYPE_MENU,
                 UI_TYPE_INLINE,
-                UI_TYPE_DIALOG
+                UI_TYPE_DIALOG,
+                UI_TYPE_CREDMAN_BOTTOM_SHEET
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface UiType {}
@@ -755,6 +762,8 @@ public final class FillEventHistory implements Parcelable {
                     return "UI_TYPE_INLINE";
                 case UI_TYPE_DIALOG:
                     return "UI_TYPE_FILL_DIALOG";
+                case UI_TYPE_CREDMAN_BOTTOM_SHEET:
+                    return "UI_TYPE_CREDMAN_BOTTOM_SHEET";
                 default:
                     return "UI_TYPE_UNKNOWN";
             }

@@ -24,22 +24,19 @@ import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_USER_CANCELED;
 import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED;
 import static android.content.Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE;
 
-import static com.android.systemui.flags.Flags.SCREENSHOT_APP_CLIPS;
+import static com.android.internal.infra.AndroidFuture.completedFuture;
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_TRIGGERED;
 import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
-import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_USE_WP_USER;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
-import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -52,20 +49,22 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.intercepting.SingleActivityFactory;
 
+import com.android.internal.infra.ServiceConnector;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
+import com.android.internal.statusbar.IAppClipsService;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastSender;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.notetask.NoteTaskController;
-import com.android.systemui.settings.UserTracker;
-import com.android.wm.shell.bubbles.Bubbles;
+import com.android.systemui.res.R;
+
+import com.google.common.util.concurrent.MoreExecutors;
 
 import org.junit.After;
 import org.junit.Before;
@@ -75,8 +74,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.Executor;
 
 @RunWith(AndroidTestingRunner.class)
 public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
@@ -86,25 +84,19 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
     private static final int TEST_UID = 42;
     private static final String TEST_CALLING_PACKAGE = "test-calling-package";
 
-    @Mock
-    private DevicePolicyManager mDevicePolicyManager;
-    @Mock
-    private FeatureFlags mFeatureFlags;
-    @Mock
-    private Optional<Bubbles> mOptionalBubbles;
-    @Mock
-    private Bubbles mBubbles;
+    @Mock private ServiceConnector<IAppClipsService> mServiceConnector;
     @Mock
     private NoteTaskController mNoteTaskController;
     @Mock
     private PackageManager mPackageManager;
     @Mock
-    private UserTracker mUserTracker;
-    @Mock
     private UiEventLogger mUiEventLogger;
     @Mock
-    private UserManager mUserManager;
-
+    private BroadcastSender mBroadcastSender;
+    @Background
+    private Executor mBgExecutor;
+    @Main
+    private Executor mMainExecutor;
     @Main
     private Handler mMainHandler;
 
@@ -114,9 +106,9 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
             new SingleActivityFactory<>(AppClipsTrampolineActivityTestable.class) {
                 @Override
                 protected AppClipsTrampolineActivityTestable create(Intent unUsed) {
-                    return new AppClipsTrampolineActivityTestable(mDevicePolicyManager,
-                            mFeatureFlags, mOptionalBubbles, mNoteTaskController, mPackageManager,
-                            mUserTracker, mUiEventLogger, mUserManager, mMainHandler);
+                    return new AppClipsTrampolineActivityTestable(mServiceConnector,
+                            mNoteTaskController, mPackageManager, mUiEventLogger, mBroadcastSender,
+                            mBgExecutor, mMainExecutor, mMainHandler);
                 }
             };
 
@@ -131,8 +123,12 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
     public void setUp() {
         assumeFalse("Skip test: does not apply to watches",
             mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH));
+        assumeFalse("Skip test: does not apply to TVs",
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK));
 
         MockitoAnnotations.initMocks(this);
+        mBgExecutor = MoreExecutors.directExecutor();
+        mMainExecutor = MoreExecutors.directExecutor();
         mMainHandler = mContext.getMainThreadHandler();
 
         mActivityIntent = new Intent(mContext, AppClipsTrampolineActivityTestable.class);
@@ -169,19 +165,9 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
     }
 
     @Test
-    public void flagOff_shouldFinishWithResultCancel() {
-        when(mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)).thenReturn(false);
-
-        mActivityRule.launchActivity(mActivityIntent);
-
-        assertThat(mActivityRule.getActivityResult().getResultCode())
-                .isEqualTo(Activity.RESULT_CANCELED);
-    }
-
-    @Test
-    public void bubblesEmpty_shouldFinishWithFailed() {
-        when(mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)).thenReturn(true);
-        when(mOptionalBubbles.isEmpty()).thenReturn(true);
+    public void queryService_returnedFailed_shouldFinishWithFailed() {
+        when(mServiceConnector.postForResult(any()))
+                .thenReturn(completedFuture(CAPTURE_CONTENT_FOR_NOTE_FAILED));
 
         mActivityRule.launchActivity(mActivityIntent);
 
@@ -189,14 +175,13 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         assertThat(actualResult.getResultCode()).isEqualTo(Activity.RESULT_OK);
         assertThat(getStatusCodeExtra(actualResult.getResultData()))
                 .isEqualTo(CAPTURE_CONTENT_FOR_NOTE_FAILED);
+        assertThat(mActivityRule.getActivity().isFinishing()).isTrue();
     }
 
     @Test
-    public void taskIdNotAppBubble_shouldFinishWithWindowModeUnsupported() {
-        when(mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)).thenReturn(true);
-        when(mOptionalBubbles.isEmpty()).thenReturn(false);
-        when(mOptionalBubbles.get()).thenReturn(mBubbles);
-        when(mBubbles.isAppBubbleTaskId(anyInt())).thenReturn(false);
+    public void queryService_returnedWindowModeUnsupported_shouldFinishWithWindowModeUnsupported() {
+        when(mServiceConnector.postForResult(any()))
+                .thenReturn(completedFuture(CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED));
 
         mActivityRule.launchActivity(mActivityIntent);
 
@@ -204,15 +189,13 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         assertThat(actualResult.getResultCode()).isEqualTo(Activity.RESULT_OK);
         assertThat(getStatusCodeExtra(actualResult.getResultData()))
                 .isEqualTo(CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED);
+        assertThat(mActivityRule.getActivity().isFinishing()).isTrue();
     }
 
     @Test
-    public void dpmScreenshotBlocked_shouldFinishWithBlockedByAdmin() {
-        when(mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)).thenReturn(true);
-        when(mOptionalBubbles.isEmpty()).thenReturn(false);
-        when(mOptionalBubbles.get()).thenReturn(mBubbles);
-        when(mBubbles.isAppBubbleTaskId(anyInt())).thenReturn(true);
-        when(mDevicePolicyManager.getScreenCaptureDisabled(eq(null))).thenReturn(true);
+    public void queryService_returnedScreenshotBlocked_shouldFinishWithBlockedByAdmin() {
+        when(mServiceConnector.postForResult(any()))
+                .thenReturn(completedFuture(CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN));
 
         mActivityRule.launchActivity(mActivityIntent);
 
@@ -220,6 +203,7 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         assertThat(actualResult.getResultCode()).isEqualTo(Activity.RESULT_OK);
         assertThat(getStatusCodeExtra(actualResult.getResultData()))
                 .isEqualTo(CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN);
+        assertThat(mActivityRule.getActivity().isFinishing()).isTrue();
     }
 
     @Test
@@ -240,6 +224,7 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         assertThat(actualResult.getResultCode()).isEqualTo(Activity.RESULT_OK);
         assertThat(getStatusCodeExtra(actualResult.getResultData()))
                 .isEqualTo(CAPTURE_CONTENT_FOR_NOTE_USER_CANCELED);
+        assertThat(mActivityRule.getActivity().isFinishing()).isTrue();
     }
 
     @Test
@@ -261,6 +246,7 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         assertThat(getStatusCodeExtra(actualResult.getResultData()))
                 .isEqualTo(CAPTURE_CONTENT_FOR_NOTE_SUCCESS);
         assertThat(actualResult.getResultData().getData()).isEqualTo(TEST_URI);
+        assertThat(mActivityRule.getActivity().isFinishing()).isTrue();
     }
 
     @Test
@@ -274,48 +260,9 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         verify(mUiEventLogger).log(SCREENSHOT_FOR_NOTE_TRIGGERED, TEST_UID, TEST_CALLING_PACKAGE);
     }
 
-    @Test
-    public void startAppClipsActivity_throughWPUser_shouldStartMainUserActivity()
-            throws NameNotFoundException {
-        when(mUserManager.isManagedProfile()).thenReturn(true);
-        when(mUserManager.getMainUser()).thenReturn(UserHandle.SYSTEM);
-        mockToSatisfyAllPrerequisites();
-
-        AppClipsTrampolineActivityTestable activity = mActivityRule.launchActivity(mActivityIntent);
-        waitForIdleSync();
-
-        Intent actualIntent = activity.mStartedIntent;
-        assertThat(actualIntent.getComponent()).isEqualTo(
-                new ComponentName(mContext, AppClipsTrampolineActivity.class));
-        assertThat(actualIntent.getFlags()).isEqualTo(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
-        assertThat(actualIntent.getBooleanExtra(EXTRA_USE_WP_USER, false)).isTrue();
-        assertThat(activity.mStartingUser).isEqualTo(UserHandle.SYSTEM);
-    }
-
-    @Test
-    public void startAppClipsActivity_throughWPUser_noMainUser_shouldFinishWithFailed()
-            throws NameNotFoundException {
-        when(mUserManager.isManagedProfile()).thenReturn(true);
-        when(mUserManager.getMainUser()).thenReturn(null);
-
-        mockToSatisfyAllPrerequisites();
-
-        mActivityRule.launchActivity(mActivityIntent);
-        waitForIdleSync();
-
-        ActivityResult actualResult = mActivityRule.getActivityResult();
-        assertThat(actualResult.getResultCode()).isEqualTo(Activity.RESULT_OK);
-        assertThat(getStatusCodeExtra(actualResult.getResultData()))
-                .isEqualTo(CAPTURE_CONTENT_FOR_NOTE_FAILED);
-    }
-
     private void mockToSatisfyAllPrerequisites() throws NameNotFoundException {
-        when(mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)).thenReturn(true);
-        when(mOptionalBubbles.isEmpty()).thenReturn(false);
-        when(mOptionalBubbles.get()).thenReturn(mBubbles);
-        when(mBubbles.isAppBubbleTaskId(anyInt())).thenReturn(true);
-        when(mDevicePolicyManager.getScreenCaptureDisabled(eq(null))).thenReturn(false);
-        when(mUserTracker.getUserProfiles()).thenReturn(List.of());
+        when(mServiceConnector.postForResult(any()))
+                .thenReturn(completedFuture(CAPTURE_CONTENT_FOR_NOTE_SUCCESS));
 
         ApplicationInfo testApplicationInfo = new ApplicationInfo();
         testApplicationInfo.uid = TEST_UID;
@@ -330,17 +277,14 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         Intent mStartedIntent;
         UserHandle mStartingUser;
 
-        public AppClipsTrampolineActivityTestable(DevicePolicyManager devicePolicyManager,
-                FeatureFlags flags,
-                Optional<Bubbles> optionalBubbles,
-                NoteTaskController noteTaskController,
-                PackageManager packageManager,
-                UserTracker userTracker,
-                UiEventLogger uiEventLogger,
-                UserManager userManager,
+        public AppClipsTrampolineActivityTestable(
+                ServiceConnector<IAppClipsService> serviceServiceConnector,
+                NoteTaskController noteTaskController, PackageManager packageManager,
+                UiEventLogger uiEventLogger, BroadcastSender broadcastSender,
+                @Background Executor bgExecutor, @Main Executor mainExecutor,
                 @Main Handler mainHandler) {
-            super(devicePolicyManager, flags, optionalBubbles, noteTaskController, packageManager,
-                    userTracker, uiEventLogger, userManager, mainHandler);
+            super(serviceServiceConnector, noteTaskController, packageManager, uiEventLogger,
+                    broadcastSender, bgExecutor, mainExecutor, mainHandler);
         }
 
         @Override

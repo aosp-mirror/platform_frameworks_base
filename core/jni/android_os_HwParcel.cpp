@@ -235,6 +235,10 @@ bool JHwParcel::wasSent() const {
     return mWasSent;
 }
 
+void JHwParcel::addBlob(const sp<JHwBlob> &blob) {
+    mBlobs.emplace_back(blob);
+}
+
 }  // namespace android
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -285,7 +289,7 @@ static void JHwParcel_native_writeInterfaceToken(
         hardware::Parcel *parcel =
             JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
-        status_t err = parcel->writeInterfaceToken(nameCopy.string());
+        status_t err = parcel->writeInterfaceToken(nameCopy.c_str());
         signalExceptionForError(env, err);
     }
 }
@@ -687,9 +691,7 @@ static void JHwParcel_native_writeHidlMemory(
 static jstring MakeStringObjFromHidlString(JNIEnv *env, const hidl_string &s) {
     String16 utf16String(s.c_str(), s.size());
 
-    return env->NewString(
-            reinterpret_cast<const jchar *>(utf16String.string()),
-            utf16String.size());
+    return env->NewString(reinterpret_cast<const jchar *>(utf16String.c_str()), utf16String.size());
 }
 
 static jstring JHwParcel_native_readString(JNIEnv *env, jobject thiz) {
@@ -1061,6 +1063,7 @@ static void JHwParcel_native_writeBuffer(
         JHwParcel::GetNativeContext(env, thiz)->getParcel();
 
     sp<JHwBlob> blob = JHwBlob::GetNativeContext(env, blobObj);
+    JHwParcel::GetNativeContext(env, thiz)->addBlob(blob);
     status_t err = blob->writeToParcel(parcel);
 
     if (err != OK) {

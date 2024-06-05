@@ -118,8 +118,25 @@
     <attr name="wallpaperTextColorSecondary" format="reference|color" />
     <attr name="wallpaperTextColorAccent" format="reference|color" />
     <attr name="backgroundProtectedStyle" format="reference" />
-    <attr name="offStateColor" format="reference|color" />
-    <attr name="underSurfaceColor" format="reference|color" />
+
+    <!-- color attribute tokens for QS -->
+    <attr name="isQsTheme" format="boolean" />
+    <attr name="underSurface" format="reference|color"/>
+    <attr name="shadeActive" format="reference|color" />
+    <attr name="onShadeActive" format="reference|color" />
+    <attr name="onShadeActiveVariant" format="reference|color" />
+    <attr name="shadeInactive" format="reference|color" />
+    <attr name="onShadeInactive" format="reference|color" />
+    <attr name="onShadeInactiveVariant" format="reference|color" />
+    <attr name="shadeDisabled" format="reference|color" />
+    <attr name="surfaceBright" format="reference|color" />
+    <attr name="scHigh" format="reference|color" />
+    <attr name="tertiary" format="reference|color" />
+    <attr name="onSurface" format="reference|color" />
+    <attr name="onSurfaceVariant" format="reference|color" />
+    <attr name="outline" format="reference|color" />
+    <attr name="primary" format="reference|color" />
+
 
     <declare-styleable name="SmartReplyView">
         <attr name="spacing" format="dimension" />
@@ -204,6 +221,7 @@
         <attr name="descriptionTextAppearance" format="reference" />
         <attr name="passwordTextAppearance" format="reference" />
         <attr name="errorTextAppearance" format="reference"/>
+        <attr name="errorTextAppearanceLand" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="LogAccessPermissionGrantDialog">
@@ -216,6 +234,8 @@
         <attr name="progress" format="integer" />
         <attr name="iconStartContentDescription" format="reference" />
         <attr name="iconEndContentDescription" format="reference" />
+        <attr name="tickMark" format="reference" />
+        <attr name="seekBarChangeMagnitude" format="integer" />
     </declare-styleable>
 </resources>
 

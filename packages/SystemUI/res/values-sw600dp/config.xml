@@ -37,6 +37,12 @@
 
     <bool name="config_use_large_screen_shade_header">true</bool>
 
+    <!-- Whether to show bottom sheets edge to edge -->
+    <bool name="config_edgeToEdgeBottomSheetDialog">false</bool>
+
+    <!-- Flag to activate drag notification to contents feature -->
+    <bool name="config_notificationToContents">true</bool>
+
     <!-- A collection of defaults for the quick affordances on the lock screen. Each item must be a
     string with two parts: the ID of the slot and the comma-delimited list of affordance IDs,
     separated by a colon ':' character. For example: <item>bottom_end:home,wallet</item>. The
@@ -47,4 +53,7 @@
         <item>bottom_start:home</item>
         <item>bottom_end:create_note</item>
     </string-array>
+
+    <!-- Whether volume panel should use the large screen layout or not -->
+    <bool name="volume_panel_is_large_screen">true</bool>
 </resources>

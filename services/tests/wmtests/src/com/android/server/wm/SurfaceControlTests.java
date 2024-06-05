@@ -39,6 +39,8 @@ import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.wm.utils.CommonUtils;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -123,6 +125,7 @@ public class SurfaceControlTests {
 
     @Test
     public void testSurfaceChangedOnRotation() {
+        CommonUtils.dismissKeyguard();
         final Instrumentation instrumentation = getInstrumentation();
         final Context context = instrumentation.getContext();
         final Intent intent = new Intent().setComponent(
@@ -131,18 +134,34 @@ public class SurfaceControlTests {
         final Activity activity = instrumentation.startActivitySync(intent);
         final SurfaceView sv = new SurfaceView(activity);
         final AtomicInteger surfaceChangedCount = new AtomicInteger();
+        final boolean[] unexpectedTransformHint = new boolean[1];
         instrumentation.runOnMainSync(() -> activity.setContentView(sv));
         sv.getHolder().addCallback(new SurfaceHolder.Callback() {
+            int mInitialTransformHint = -1;
+            int mInitialW;
+            int mInitialH;
+
             @Override
             public void surfaceCreated(@NonNull SurfaceHolder holder) {
             }
             @Override
             public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width,
                     int height) {
+                final int transformHint =
+                        sv.getViewRootImpl().getSurfaceControl().getTransformHint();
+                if (mInitialTransformHint == -1) {
+                    mInitialTransformHint = transformHint;
+                    mInitialW = width;
+                    mInitialH = height;
+                } else if (mInitialTransformHint == transformHint
+                        && (width > height) != (mInitialW > mInitialH)) {
+                    // For example, the initial hint is from portrait, so the later changes from
+                    // landscape should not receive the same hint.
+                    unexpectedTransformHint[0] = true;
+                }
                 surfaceChangedCount.getAndIncrement();
                 Log.i("surfaceChanged", "width=" + width + " height=" + height
-                        + " getTransformHint="
-                        + sv.getViewRootImpl().getSurfaceControl().getTransformHint());
+                        + " transformHint=" + transformHint);
             }
             @Override
             public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
@@ -160,7 +179,7 @@ public class SurfaceControlTests {
                 .windowConfiguration.getRotation();
         if (rotation == newRotation) {
             // The device might not support requested orientation.
-            activity.finishAndRemoveTask();
+            CommonUtils.waitUntilActivityRemoved(activity);
             return;
         }
         final int count = surfaceChangedCount.get();
@@ -169,11 +188,12 @@ public class SurfaceControlTests {
         context.startActivity(intent);
         instrumentation.getUiAutomation().syncInputTransactions();
         final int countAfterToFront = count - surfaceChangedCount.get();
-        activity.finishAndRemoveTask();
+        CommonUtils.waitUntilActivityRemoved(activity);
 
         // The first count is triggered from creation, so the target number is 2.
-        if (count > 2) {
-            fail("More than once surfaceChanged for rotation change: " + count);
+        if (count > 2 && unexpectedTransformHint[0]) {
+            fail("Received transform hint in previous orientation with more than once"
+                    + " surfaceChanged for rotation change: " + count);
         }
         if (countAfterToFront > 1) {
             fail("More than once surfaceChanged for app transition with rotation change: "

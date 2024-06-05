@@ -137,19 +137,37 @@ public class ActivityManagerWrapper {
     }
 
     /**
-     * @return a {@link ThumbnailData} with {@link TaskSnapshot} for the given {@param taskId}.
-     *         The snapshot will be triggered if no cached {@link TaskSnapshot} exists.
+     * @return the task snapshot for the given {@param taskId}.
      */
     public @NonNull ThumbnailData getTaskThumbnail(int taskId, boolean isLowResolution) {
         TaskSnapshot snapshot = null;
         try {
-            snapshot = getService().getTaskSnapshot(taskId, isLowResolution,
-                    true /* takeSnapshotIfNeeded */);
+            snapshot = getService().getTaskSnapshot(taskId, isLowResolution);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to retrieve task snapshot", e);
         }
         if (snapshot != null) {
-            return new ThumbnailData(snapshot);
+            return ThumbnailData.fromSnapshot(snapshot);
+        } else {
+            return new ThumbnailData();
+        }
+    }
+
+
+    /**
+     * Requests for a new snapshot to be taken for the given task, stores it in the cache, and
+     * returns a {@link ThumbnailData} with the result.
+     */
+    @NonNull
+    public ThumbnailData takeTaskThumbnail(int taskId) {
+        TaskSnapshot snapshot = null;
+        try {
+            snapshot = getService().takeTaskSnapshot(taskId, /* updateCache= */ true);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to take task snapshot", e);
+        }
+        if (snapshot != null) {
+            return ThumbnailData.fromSnapshot(snapshot);
         } else {
             return new ThumbnailData();
         }
@@ -178,7 +196,7 @@ public class ActivityManagerWrapper {
             final RecentsAnimationListener animationHandler, final Consumer<Boolean> resultCallback,
             Handler resultCallbackHandler) {
         boolean result = startRecentsActivity(intent, eventTime, animationHandler);
-        if (resultCallback != null) {
+        if (resultCallback != null && resultCallbackHandler != null) {
             resultCallbackHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -200,11 +218,12 @@ public class ActivityManagerWrapper {
                     @Override
                     public void onAnimationStart(IRecentsAnimationController controller,
                             RemoteAnimationTarget[] apps, RemoteAnimationTarget[] wallpapers,
-                            Rect homeContentInsets, Rect minimizedHomeBounds) {
+                            Rect homeContentInsets, Rect minimizedHomeBounds,
+                            Bundle extras) {
                         final RecentsAnimationControllerCompat controllerCompat =
                                 new RecentsAnimationControllerCompat(controller);
                         animationHandler.onAnimationStart(controllerCompat, apps,
-                                wallpapers, homeContentInsets, minimizedHomeBounds);
+                                wallpapers, homeContentInsets, minimizedHomeBounds, extras);
                     }
 
                     @Override

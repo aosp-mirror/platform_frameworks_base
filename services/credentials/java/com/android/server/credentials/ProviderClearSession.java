@@ -20,9 +20,10 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.credentials.ClearCredentialStateException;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
-import android.credentials.ui.ProviderData;
-import android.credentials.ui.ProviderPendingIntentResponse;
+import android.credentials.selection.ProviderData;
+import android.credentials.selection.ProviderPendingIntentResponse;
 import android.os.ICancellationSignal;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.ClearCredentialStateRequest;
@@ -37,7 +38,7 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
         Void>
         implements
         RemoteCredentialService.ProviderCallbacks<Void> {
-    private static final String TAG = "ProviderClearSession";
+    private static final String TAG = CredentialManager.TAG;
 
     private ClearCredentialStateException mProviderException;
 

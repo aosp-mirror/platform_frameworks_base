@@ -6,5 +6,11 @@
     {
       "name": "CtsProtoTestCases"
     }
+  ],
+  "ravenwood-presubmit": [
+    {
+      "name": "CtsProtoTestCasesRavenwood",
+      "host": true
+    }
   ]
 }

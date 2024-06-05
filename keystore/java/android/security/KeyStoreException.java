@@ -319,7 +319,7 @@ public class KeyStoreException extends Exception {
     /**
      * Returns one of the error codes exported by the class.
      *
-     * @return a public error code, one of the values in {@link PublicErrorCode}.
+     * @return a public error code
      */
     @PublicErrorCode
     public int getNumericErrorCode() {
@@ -614,9 +614,23 @@ public class KeyStoreException extends Exception {
                 KEYMINT_UNIMPLEMENTED_ERROR);
         sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_HARDWARE_TYPE_UNAVAILABLE,
                 KEYMINT_UNIMPLEMENTED_ERROR);
+        sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_PROOF_OF_PRESENCE_REQUIRED,
+                KEYMINT_INCORRECT_USAGE_ERROR);
+        sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_CONCURRENT_PROOF_OF_PRESENCE_REQUESTED,
+                KEYMINT_INCORRECT_USAGE_ERROR);
+        sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_NO_USER_CONFIRMATION,
+                KEYMINT_INCORRECT_USAGE_ERROR);
         sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_DEVICE_LOCKED,
                 new PublicErrorInformation(IS_SYSTEM_ERROR | REQUIRES_USER_AUTHENTICATION,
                         ERROR_USER_AUTHENTICATION_REQUIRED));
+        sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_EARLY_BOOT_ENDED,
+                GENERAL_KEYMINT_ERROR);
+        sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_ATTESTATION_KEYS_NOT_PROVISIONED,
+                GENERAL_KEYMINT_ERROR);
+        sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_ATTESTATION_IDS_NOT_PROVISIONED,
+                GENERAL_KEYMINT_ERROR);
+        sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_INVALID_OPERATION,
+                GENERAL_KEYMINT_ERROR);
         sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_STORAGE_KEY_UNSUPPORTED,
                 KEYMINT_UNIMPLEMENTED_ERROR);
         sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_INCOMPATIBLE_MGF_DIGEST,
@@ -626,6 +640,12 @@ public class KeyStoreException extends Exception {
         sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_MISSING_NOT_BEFORE,
                 KEYMINT_INCORRECT_USAGE_ERROR);
         sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_MISSING_NOT_AFTER,
+                KEYMINT_INCORRECT_USAGE_ERROR);
+        sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_MISSING_ISSUER_SUBJECT,
+                KEYMINT_INCORRECT_USAGE_ERROR);
+        sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_INVALID_ISSUER_SUBJECT,
+                KEYMINT_INCORRECT_USAGE_ERROR);
+        sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_BOOT_LEVEL_EXCEEDED,
                 KEYMINT_INCORRECT_USAGE_ERROR);
         // This should not be exposed to apps as it's handled by Keystore.
         sErrorCodeToFailureInfo.put(KeymasterDefs.KM_ERROR_HARDWARE_NOT_YET_AVAILABLE,

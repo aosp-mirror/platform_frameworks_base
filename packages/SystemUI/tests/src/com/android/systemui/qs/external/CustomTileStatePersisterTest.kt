@@ -20,7 +20,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.SharedPreferences
 import android.service.quicksettings.Tile
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.capture
@@ -36,12 +36,12 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class CustomTileStatePersisterTest : SysuiTestCase() {
 
     companion object {
@@ -54,6 +54,7 @@ class CustomTileStatePersisterTest : SysuiTestCase() {
         private const val TEST_SUBTITLE = "test_subtitle"
         private const val TEST_CONTENT_DESCRIPTION = "test_content_description"
         private const val TEST_STATE_DESCRIPTION = "test_state_description"
+        private const val TEST_DEFAULT_LABEL = "default_label"
 
         private fun Tile.isEqualTo(other: Tile): Boolean {
             return state == other.state &&
@@ -84,7 +85,7 @@ class CustomTileStatePersisterTest : SysuiTestCase() {
         `when`(sharedPreferences.edit()).thenReturn(editor)
 
         tile = Tile()
-        customTileStatePersister = CustomTileStatePersister(mockContext)
+        customTileStatePersister = CustomTileStatePersisterImpl(mockContext)
     }
 
     @Test
@@ -155,5 +156,15 @@ class CustomTileStatePersisterTest : SysuiTestCase() {
         customTileStatePersister.removeState(KEY)
 
         verify(editor).remove(KEY.toString())
+    }
+
+    @Test
+    fun testWithDefaultLabel_notStored() {
+        tile.setDefaultLabel(TEST_DEFAULT_LABEL)
+
+        `when`(sharedPreferences.getString(eq(KEY.toString()), any()))
+                .thenReturn(writeToString(tile))
+
+        assertThat(customTileStatePersister.readState(KEY)!!.label).isNull()
     }
 }

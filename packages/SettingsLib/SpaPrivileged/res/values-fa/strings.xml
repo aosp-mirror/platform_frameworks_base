@@ -21,7 +21,7 @@
     <string name="menu_show_system" msgid="906304605807554788">"نمایش سیستم"</string>
     <string name="menu_hide_system" msgid="374571689914923020">"پنهان کردن سیستم"</string>
     <string name="app_permission_summary_allowed" msgid="6115213465364138103">"مجاز"</string>
-    <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"غیرمجاز"</string>
+    <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"مجاز نبودن"</string>
     <string name="version_text" msgid="4001669804596458577">"نسخه <xliff:g id="VERSION_NUM">%1$s</xliff:g>"</string>
-    <string name="cloned_app_info_label" msgid="1765651167024478391">"همتای <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="cloned_app_info_label" msgid="1765651167024478391">"همسانه <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
 </resources>

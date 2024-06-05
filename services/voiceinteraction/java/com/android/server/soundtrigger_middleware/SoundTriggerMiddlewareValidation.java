@@ -36,7 +36,7 @@ import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
-import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.util.Preconditions;
@@ -150,7 +150,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     e.getMessage());
         }
 
-        Log.wtf(TAG, "Unexpected exception", e);
+        Slog.wtf(TAG, "Unexpected exception", e);
         throw new ServiceSpecificException(Status.INTERNAL_ERROR, e.getMessage());
     }
 
@@ -701,7 +701,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 try {
                     mCallback.onRecognition(modelHandle, event, captureSession);
                 } catch (Exception e) {
-                    Log.w(TAG, "Client callback exception.", e);
+                    Slog.w(TAG, "Client callback exception.", e);
                }
             }
 
@@ -719,7 +719,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 try {
                     mCallback.onPhraseRecognition(modelHandle, event, captureSession);
                 } catch (Exception e) {
-                    Log.w(TAG, "Client callback exception.", e);
+                    Slog.w(TAG, "Client callback exception.", e);
                }
             }
 
@@ -734,7 +734,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 try {
                     mCallback.onModelUnloaded(modelHandle);
                 } catch (Exception e) {
-                    Log.w(TAG, "Client callback exception.", e);
+                    Slog.w(TAG, "Client callback exception.", e);
                 }
             }
 
@@ -746,7 +746,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 } catch (RemoteException e) {
                     // Dead client will be handled by binderDied() - no need to handle here.
                     // In any case, client callbacks are considered best effort.
-                    Log.e(TAG, "Client callback exception.", e);
+                    Slog.e(TAG, "Client callback exception.", e);
                 }
             }
 
@@ -761,7 +761,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                 } catch (RemoteException e) {
                     // Dead client will be handled by binderDied() - no need to handle here.
                     // In any case, client callbacks are considered best effort.
-                    Log.e(TAG, "Client callback exception.", e);
+                    Slog.e(TAG, "Client callback exception.", e);
                 }
             }
 
@@ -795,11 +795,11 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                    // Check if state updated unexpectedly to log race conditions.
                     for (Map.Entry<Integer, ModelState> entry : mLoadedModels.entrySet()) {
                         if (cachedMap.get(entry.getKey()) != entry.getValue().activityState) {
-                            Log.e(TAG, "Unexpected state update in binderDied. Race occurred!");
+                            Slog.e(TAG, "Unexpected state update in binderDied. Race occurred!");
                         }
                     }
                     if (mLoadedModels.size() != cachedMap.size()) {
-                        Log.e(TAG, "Unexpected state update in binderDied. Race occurred!");
+                        Slog.e(TAG, "Unexpected state update in binderDied. Race occurred!");
                     }
                     try {
                         // Detach

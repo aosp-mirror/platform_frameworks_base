@@ -21,7 +21,8 @@ import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
 
-import static com.android.server.alarm.AlarmManagerService.clampPositive;
+import static com.android.server.alarm.AlarmManagerService.PRIORITY_NORMAL;
+import static com.android.server.alarm.AlarmManagerService.addClampPositive;
 
 import android.app.AlarmManager;
 import android.app.IAlarmListener;
@@ -44,7 +45,7 @@ import java.util.Date;
  */
 class Alarm {
     @VisibleForTesting
-    public static final int NUM_POLICIES = 5;
+    public static final int NUM_POLICIES = 4;
     /**
      * Index used to store the time the alarm was requested to expire. To be used with
      * {@link #setPolicyElapsed(int, long)}.
@@ -66,12 +67,6 @@ class Alarm {
      * To be used with {@link #setPolicyElapsed(int, long)}.
      */
     public static final int BATTERY_SAVER_POLICY_INDEX = 3;
-
-    /**
-     * Index used to store the earliest time the alarm can expire based on TARE policy.
-     * To be used with {@link #setPolicyElapsed(int, long)}.
-     */
-    public static final int TARE_POLICY_INDEX = 4;
 
     /**
      * Reason to use for inexact alarms.
@@ -128,8 +123,9 @@ class Alarm {
     /** The ultimate delivery time to be used for this alarm */
     private long mWhenElapsed;
     private long mMaxWhenElapsed;
-    public int mExactAllowReason;
-    public AlarmManagerService.PriorityClass priorityClass;
+    public int exactAllowReason;
+    @AlarmManagerService.DispatchPriority
+    public int priorityClass;
     /** Broadcast options to use when delivering this alarm */
     public Bundle mIdleOptions;
     public boolean mUsingReserveQuota;
@@ -146,7 +142,7 @@ class Alarm {
         mPolicyWhenElapsed[REQUESTER_POLICY_INDEX] = requestedWhenElapsed;
         mWhenElapsed = requestedWhenElapsed;
         this.windowLength = windowLength;
-        mMaxWhenElapsed = clampPositive(requestedWhenElapsed + windowLength);
+        mMaxWhenElapsed = addClampPositive(requestedWhenElapsed, windowLength);
         repeatInterval = interval;
         operation = op;
         listener = rec;
@@ -158,10 +154,11 @@ class Alarm {
         this.uid = uid;
         packageName = pkgName;
         mIdleOptions = idleOptions;
-        mExactAllowReason = exactAllowReason;
+        this.exactAllowReason = exactAllowReason;
         sourcePackage = (operation != null) ? operation.getCreatorPackage() : packageName;
         creatorUid = (operation != null) ? operation.getCreatorUid() : this.uid;
         mUsingReserveQuota = false;
+        priorityClass = PRIORITY_NORMAL;
     }
 
     public static String makeTag(PendingIntent pi, String tag, int type) {
@@ -241,8 +238,8 @@ class Alarm {
 
         final long oldMaxWhenElapsed = mMaxWhenElapsed;
         // windowLength should always be >= 0 here.
-        final long maxRequestedElapsed = clampPositive(
-                mPolicyWhenElapsed[REQUESTER_POLICY_INDEX] + windowLength);
+        final long maxRequestedElapsed = addClampPositive(
+                mPolicyWhenElapsed[REQUESTER_POLICY_INDEX], windowLength);
         mMaxWhenElapsed = Math.max(maxRequestedElapsed, mWhenElapsed);
 
         return (oldWhenElapsed != mWhenElapsed) || (oldMaxWhenElapsed != mMaxWhenElapsed);
@@ -275,8 +272,6 @@ class Alarm {
                 return "device_idle";
             case BATTERY_SAVER_POLICY_INDEX:
                 return "battery_saver";
-            case TARE_POLICY_INDEX:
-                return "tare";
             default:
                 return "--unknown(" + index + ")--";
         }
@@ -333,9 +328,9 @@ class Alarm {
         }
         ipw.print(" window=");
         TimeUtils.formatDuration(windowLength, ipw);
-        if (mExactAllowReason != EXACT_ALLOW_REASON_NOT_APPLICABLE) {
+        if (exactAllowReason != EXACT_ALLOW_REASON_NOT_APPLICABLE) {
             ipw.print(" exactAllowReason=");
-            ipw.print(exactReasonToString(mExactAllowReason));
+            ipw.print(exactReasonToString(exactAllowReason));
         }
         ipw.print(" repeatInterval=");
         ipw.print(repeatInterval);

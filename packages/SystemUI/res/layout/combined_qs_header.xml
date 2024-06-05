@@ -74,7 +74,7 @@ frame when animating QS <-> QQS transition
         android:layout_height="wrap_content"
         android:id="@+id/barrier"
         app:barrierDirection="start"
-        app:constraint_referenced_ids="statusIcons,privacy_container" />
+        app:constraint_referenced_ids="shade_header_system_icons,privacy_container" />
 
     <com.android.systemui.statusbar.policy.Clock
         android:id="@+id/clock"
@@ -108,46 +108,48 @@ frame when animating QS <-> QQS transition
     <include
         android:id="@+id/carrier_group"
         layout="@layout/shade_carrier_group"
-        app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
-        android:minHeight="@dimen/large_screen_shade_header_min_height"
-        app:layout_constraintWidth_min="48dp"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constrainedWidth="true"
         android:layout_gravity="end|center_vertical"
         android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/shade_header_system_icons"
+        app:layout_constraintHorizontal_bias="1"
         app:layout_constraintStart_toEndOf="@id/date"
-        app:layout_constraintEnd_toStartOf="@id/statusIcons"
-        app:layout_constraintTop_toTopOf="@id/clock"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="1"
-    />
+        app:layout_constraintTop_toTopOf="@id/clock" />
 
-    <com.android.systemui.statusbar.phone.StatusIconContainer
-        android:id="@+id/statusIcons"
-        app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
-        android:paddingEnd="@dimen/signal_cluster_battery_padding"
+    <FrameLayout
+        android:id="@+id/shade_header_system_icons"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/large_screen_shade_header_min_height"
-        app:layout_constraintStart_toEndOf="@id/carrier_group"
-        app:layout_constraintEnd_toStartOf="@id/batteryRemainingIcon"
-        app:layout_constraintTop_toTopOf="@id/clock"
+        android:layout_height="@dimen/shade_header_system_icons_height"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="1"
-    />
+        app:layout_constraintEnd_toEndOf="@id/privacy_container"
+        app:layout_constraintTop_toTopOf="@id/clock">
+        <LinearLayout
+            android:id="@+id/hover_system_icons_container"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end|center_vertical"
+            android:gravity="center_vertical"
+            android:paddingStart="@dimen/hover_system_icons_container_padding_start"
+            android:paddingEnd="@dimen/hover_system_icons_container_padding_end"
+            android:paddingTop="@dimen/hover_system_icons_container_padding_top"
+            android:paddingBottom="@dimen/hover_system_icons_container_padding_bottom">
 
-    <com.android.systemui.battery.BatteryMeterView
-        android:id="@+id/batteryRemainingIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/large_screen_shade_header_min_height"
-        app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
-        app:layout_constrainedWidth="true"
-        app:textAppearance="@style/TextAppearance.QS.Status"
-        app:layout_constraintStart_toEndOf="@id/statusIcons"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/clock"
-        app:layout_constraintBottom_toBottomOf="parent"
-    />
+            <com.android.systemui.statusbar.phone.StatusIconContainer
+                android:id="@+id/statusIcons"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:paddingEnd="@dimen/signal_cluster_battery_padding" />
+
+            <com.android.systemui.battery.BatteryMeterView
+                android:id="@+id/batteryRemainingIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:textAppearance="@style/TextAppearance.QS.Status" />
+        </LinearLayout>
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/privacy_container"

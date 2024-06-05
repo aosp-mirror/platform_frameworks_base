@@ -52,7 +52,7 @@ import java.io.OutputStream;
  * If a package gets installed from a content URI this step stages the installation session
  * reading bytes from the URI.
  */
-public class InstallStaging extends AlertActivity {
+public class InstallStaging extends Activity {
     private static final String LOG_TAG = InstallStaging.class.getSimpleName();
 
     private static final String STAGED_SESSION_ID = "STAGED_SESSION_ID";
@@ -65,6 +65,8 @@ public class InstallStaging extends AlertActivity {
     /** The session the package is in */
     private int mStagedSessionId;
 
+    private AlertDialog mDialog;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,10 +74,13 @@ public class InstallStaging extends AlertActivity {
         mInstaller = getPackageManager().getPackageInstaller();
 
         setFinishOnTouchOutside(true);
-        mAlert.setIcon(R.drawable.ic_file_download);
-        mAlert.setTitle(getString(R.string.app_name_unknown));
-        mAlert.setView(R.layout.install_content_view);
-        mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel),
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setIcon(R.drawable.ic_file_download);
+        builder.setTitle(getString(R.string.app_name_unknown));
+        builder.setView(R.layout.install_content_view);
+        builder.setNegativeButton(getString(R.string.cancel),
                 (ignored, ignored2) -> {
                     if (mStagingTask != null) {
                         mStagingTask.cancel(true);
@@ -85,9 +90,21 @@ public class InstallStaging extends AlertActivity {
 
                     setResult(RESULT_CANCELED);
                     finish();
-                }, null);
-        setupAlert();
-        requireViewById(R.id.staging).setVisibility(View.VISIBLE);
+                });
+        builder.setOnCancelListener(dialog -> {
+            if (mStagingTask != null) {
+                mStagingTask.cancel(true);
+            }
+
+            cleanupStagingSession();
+
+            setResult(RESULT_CANCELED);
+            finish();
+        });
+        mDialog = builder.create();
+        mDialog.show();
+        mDialog.requireViewById(com.android.packageinstaller.R.id.staging)
+            .setVisibility(View.VISIBLE);
 
         if (savedInstanceState != null) {
             mStagedSessionId = savedInstanceState.getInt(STAGED_SESSION_ID, 0);
@@ -148,7 +165,9 @@ public class InstallStaging extends AlertActivity {
         if (mStagingTask != null) {
             mStagingTask.cancel(true);
         }
-
+        if (mDialog != null) {
+            mDialog.dismiss();
+        }
         super.onDestroy();
     }
 
@@ -275,8 +294,9 @@ public class InstallStaging extends AlertActivity {
         @Override
         protected void onPreExecute() {
             final long sizeBytes = getContentSizeBytes();
-
-            mProgressBar = sizeBytes > 0 ? requireViewById(R.id.progress_indeterminate) : null;
+            if (sizeBytes > 0 && mDialog != null) {
+                mProgressBar = mDialog.requireViewById(R.id.progress_indeterminate);
+            }
             if (mProgressBar != null) {
                 mProgressBar.setProgress(0);
                 mProgressBar.setMax(100);

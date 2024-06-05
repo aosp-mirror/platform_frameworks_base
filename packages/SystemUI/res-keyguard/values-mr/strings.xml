@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज होत आहे"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वेगाने चार्ज होत आहे"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • सावकाश चार्ज होत आहे"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • बॅटरीचे संरक्षण करण्यासाठी चार्जिंग ऑप्टिमाइझ केले आहे"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्जिंगच्या ॲक्सेसरीसंबंधित समस्या"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"अनलॉक करण्यासाठी मेनू प्रेस करा."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • बॅटरीचे संरक्षण करण्यासाठी चार्जिंग थांबवले आहे"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्जिंगसंबंधित ॲक्सेसरी तपासा"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"नेटवर्क लॉक केले"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"सिम नाही"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"सिम जोडा."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"सिम गहाळ झाले आहे किंवा ते रीड करू शकत नाही. सिम जोडा."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"वापरण्यायोग्य नसलेले सिम."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"तुमचे सिम कायमचे डीॲक्टिव्हेट केले गेले आहे.\n दुसऱ्या सिमसाठी तुमच्या वायरलेस सेवा पुरवठादाराशी संपर्क साधा."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"सिम लॉक केलेले आहे."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"सिम PUK लॉक केलेले आहे."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"सिम अनलॉक करत आहे…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"लॉकडाउननंतर पिन आवश्यक आहे"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"लॉकडाउननंतर पासवर्ड आवश्यक आहे"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"लॉकडाउननंतर पॅटर्न आवश्यक आहे"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"अपडेट हे इनॅक्टिव्ह तासांदरम्यान इंस्टॉल होईल"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"डिव्हाइस वापरात नसताना अपडेट इंस्टॉल केले जाईल"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी पिन अनलॉक केला गेला नव्हता."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी पासवर्ड अनलॉक केला गेला नव्हता."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी पॅटर्न अनलॉक केला गेला नव्हता."</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"अतिरिक्त सुरक्षेसाठी, त्याऐवजी पॅटर्न वापरा"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"अतिरिक्त सुरक्षेसाठी, त्याऐवजी पिन वापरा"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"अतिरिक्त सुरक्षेसाठी, त्याऐवजी पासवर्ड वापरा"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"अतिरिक्त सुरक्षेसाठी पिन आवश्‍यक आहे"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"अतिरिक्त सुरक्षेसाठी पॅटर्न आवश्‍यक आहे"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"अतिरिक्त सुरक्षेसाठी पासवर्ड आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"प्रशासकाद्वारे लॉक केलेले डिव्हाइस"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"डिव्हाइस मॅन्युअली लॉक केले होते"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ओळखले नाही"</string>

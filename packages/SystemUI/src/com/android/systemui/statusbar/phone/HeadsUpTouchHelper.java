@@ -17,20 +17,24 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.os.RemoteException;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 /**
  * A helper class to handle touches on the heads-up views.
  */
 public class HeadsUpTouchHelper implements Gefingerpoken {
 
-    private final HeadsUpManagerPhone mHeadsUpManager;
+    private final HeadsUpManager mHeadsUpManager;
+    private final IStatusBarService mStatusBarService;
     private final Callback mCallback;
     private int mTrackingPointer;
     private final float mTouchSlop;
@@ -42,10 +46,12 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
     private final HeadsUpNotificationViewController mPanel;
     private ExpandableNotificationRow mPickedChild;
 
-    public HeadsUpTouchHelper(HeadsUpManagerPhone headsUpManager,
+    public HeadsUpTouchHelper(HeadsUpManager headsUpManager,
+            IStatusBarService statusBarService,
             Callback callback,
             HeadsUpNotificationViewController notificationPanelView) {
         mHeadsUpManager = headsUpManager;
+        mStatusBarService = statusBarService;
         mCallback = callback;
         mPanel = notificationPanelView;
         Context context = mCallback.getContext();
@@ -119,7 +125,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     // This call needs to be after the expansion start otherwise we will get a
                     // flicker of one frame as it's not expanded yet.
                     mHeadsUpManager.unpinAll(true);
-                    mPanel.clearNotificationEffects();
+                    clearNotificationEffects();
                     endMotion();
                     return true;
                 }
@@ -175,6 +181,14 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
         mTouchingHeadsUpView = false;
     }
 
+    private void clearNotificationEffects() {
+        try {
+            mStatusBarService.clearNotificationEffects();
+        } catch (RemoteException e) {
+            // Won't fail unless the world has ended.
+        }
+    }
+
     public interface Callback {
         ExpandableView getChildAtRawPosition(float touchX, float touchY);
         boolean isExpanded();
@@ -191,8 +205,5 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
 
         /** Called when a MotionEvent is about to trigger expansion. */
         void startExpand(float newX, float newY, boolean startTracking, float expandedHeight);
-
-        /** Clear any effects that were added for the expansion. */
-        void clearNotificationEffects();
     }
 }

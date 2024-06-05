@@ -16,11 +16,12 @@
   ~ limitations under the License
   -->
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="wrap_content"
+          xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+          android:layout_width="match_parent"
           android:layout_height="match_parent"
+          android:textAppearance="?android:attr/textAppearanceMedium"
           android:textSize="14sp"
-          android:fontFamily="sans-serif-medium"
-          android:paddingStart="24dp"
+          android:textColor="?androidprv:attr/materialColorPrimary"
+          android:importantForAccessibility="yes"
           android:paddingTop="20dp"
-          android:paddingEnd="24dp"
           android:paddingBottom="10dp"/>

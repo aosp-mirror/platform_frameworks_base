@@ -24,7 +24,6 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
@@ -59,10 +58,10 @@ public class WallpaperUpdateReceiver extends BroadcastReceiver {
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Set customized default_wallpaper.");
-            Bitmap blank = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
-            // set a blank wallpaper to force a redraw of default_wallpaper
-            wallpaperManager.setBitmap(blank);
-            wallpaperManager.setResource(com.android.internal.R.drawable.default_wallpaper);
+            // Check if it is not a live wallpaper set
+            if (wallpaperManager.getWallpaperInfo() == null) {
+                wallpaperManager.clearWallpaper();
+            }
         } catch (Exception e) {
             Slog.w(TAG, "Failed to customize system wallpaper." + e);
         }
@@ -88,7 +87,7 @@ public class WallpaperUpdateReceiver extends BroadcastReceiver {
         } else {
             //live wallpaper
             ComponentName currCN = info.getComponent();
-            ComponentName defaultCN = WallpaperManager.getDefaultWallpaperComponent(context);
+            ComponentName defaultCN = WallpaperManager.getCmfDefaultWallpaperComponent(context);
             if (!currCN.equals(defaultCN)) {
                 return true;
             }

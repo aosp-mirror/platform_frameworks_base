@@ -28,4 +28,24 @@ TEST(SdkConstantsTest, NonFrameworkAttributeIsSdk0) {
   EXPECT_EQ(0, FindAttributeSdkLevel(ResourceId(0x7f010345)));
 }
 
+TEST(SdkConstantsTest, GetDevelopmentSdkCodeNameVersionValid) {
+  EXPECT_EQ(std::optional<ApiVersion>(10000), GetDevelopmentSdkCodeNameVersion("Q"));
+  EXPECT_EQ(std::optional<ApiVersion>(10000), GetDevelopmentSdkCodeNameVersion("VanillaIceCream"));
+}
+
+TEST(SdkConstantsTest, GetDevelopmentSdkCodeNameVersionPrivacySandbox) {
+  EXPECT_EQ(std::optional<ApiVersion>(10000), GetDevelopmentSdkCodeNameVersion("QPrivacySandbox"));
+  EXPECT_EQ(std::optional<ApiVersion>(10000),
+            GetDevelopmentSdkCodeNameVersion("VanillaIceCreamPrivacySandbox"));
+}
+
+TEST(SdkConstantsTest, GetDevelopmentSdkCodeNameVersionInvalid) {
+  EXPECT_EQ(std::optional<ApiVersion>(), GetDevelopmentSdkCodeNameVersion("A"));
+  EXPECT_EQ(std::optional<ApiVersion>(), GetDevelopmentSdkCodeNameVersion("Sv3"));
+  EXPECT_EQ(std::optional<ApiVersion>(),
+            GetDevelopmentSdkCodeNameVersion("VanillaIceCream_PrivacySandbox"));
+  EXPECT_EQ(std::optional<ApiVersion>(), GetDevelopmentSdkCodeNameVersion("PrivacySandbox"));
+  EXPECT_EQ(std::optional<ApiVersion>(), GetDevelopmentSdkCodeNameVersion("QQQQQQQQQQQQQQQ"));
+}
+
 }  // namespace aapt

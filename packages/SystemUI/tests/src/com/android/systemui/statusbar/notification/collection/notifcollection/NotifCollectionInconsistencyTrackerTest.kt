@@ -17,26 +17,27 @@
 package com.android.systemui.statusbar.notification.collection.notifcollection
 
 import android.service.notification.NotificationListenerService.RankingMap
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class NotifCollectionInconsistencyTrackerTest : SysuiTestCase() {
-    private val logger: NotifCollectionLogger = mock()
+    private val logger = spy(NotifCollectionLogger(logcatLogBuffer()))
     private val entry1: NotificationEntry = NotificationEntryBuilder().setId(1).build()
     private val entry2: NotificationEntry = NotificationEntryBuilder().setId(2).build()
     private val collectionSet = mutableSetOf<String>()

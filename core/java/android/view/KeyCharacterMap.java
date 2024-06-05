@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.input.InputManagerGlobal;
@@ -309,6 +310,10 @@ public class KeyCharacterMap implements Parcelable {
     private static native KeyCharacterMap nativeObtainEmptyKeyCharacterMap(int deviceId);
     private static native boolean nativeEquals(long ptr1, long ptr2);
 
+    private static native void nativeApplyOverlay(long ptr, String layoutDescriptor,
+            String overlay);
+    private static native int nativeGetMappedKey(long ptr, int scanCode);
+
     private KeyCharacterMap(Parcel in) {
         if (in == null) {
             throw new IllegalArgumentException("parcel must not be null");
@@ -365,6 +370,38 @@ public class KeyCharacterMap implements Parcelable {
             }
         }
         return inputDevice.getKeyCharacterMap();
+    }
+
+    /**
+     * Loads the key character map with applied KCM overlay.
+     *
+     * @param layoutDescriptor descriptor of the applied overlay KCM
+     * @param overlay          string describing the overlay KCM
+     * @return The resultant key character map.
+     * @throws {@link UnavailableException} if the key character map
+     *                could not be loaded because it was malformed or the default key character map
+     *                is missing from the system.
+     * @hide
+     */
+    public static KeyCharacterMap load(@NonNull String layoutDescriptor, @NonNull String overlay) {
+        KeyCharacterMap kcm = KeyCharacterMap.load(VIRTUAL_KEYBOARD);
+        kcm.applyOverlay(layoutDescriptor, overlay);
+        return kcm;
+    }
+
+    private void applyOverlay(@NonNull String layoutDescriptor, @NonNull String overlay) {
+        nativeApplyOverlay(mPtr, layoutDescriptor, overlay);
+    }
+
+    /**
+     * Gets the mapped key for the provided scan code. Returns the provided default if no mapping
+     * found in the KeyCharacterMap.
+     *
+     * @hide
+     */
+    public int getMappedKeyOrDefault(int scanCode, int defaultKeyCode) {
+        int keyCode = nativeGetMappedKey(mPtr, scanCode);
+        return keyCode == KeyEvent.KEYCODE_UNKNOWN ? defaultKeyCode : keyCode;
     }
 
     /**
@@ -539,6 +576,17 @@ public class KeyCharacterMap implements Parcelable {
             }
         }
         return combined;
+    }
+
+    /**
+     * Get the combining character that corresponds with the provided accent.
+     *
+     * @param accent The accent character.  eg. '`'
+     * @return The combining character
+     * @hide
+     */
+    public static int getCombiningChar(int accent) {
+        return sAccentToCombining.get(accent);
     }
 
     /**

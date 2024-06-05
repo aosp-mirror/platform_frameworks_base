@@ -17,6 +17,7 @@ android_test {
         "guava-android-testlib",
         "hamcrest-library",
         "platform-test-annotations",
+        "truth",
     ],
     platform_apis: true,
     certificate: "platform",

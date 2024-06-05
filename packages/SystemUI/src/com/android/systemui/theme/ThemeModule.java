@@ -18,14 +18,14 @@ package com.android.systemui.theme;
 
 import android.content.res.Resources;
 
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.res.R;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
-
-import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Named;
 
 /** */
 @Module(includes = {SysUIConcurrencyModule.class})

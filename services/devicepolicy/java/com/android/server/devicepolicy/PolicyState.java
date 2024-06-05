@@ -19,6 +19,7 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.PolicyValue;
+import android.util.IndentingPrintWriter;
 
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -189,9 +190,37 @@ final class PolicyState<V> {
 
     @Override
     public String toString() {
-        return "PolicyState { mPolicyDefinition= " + mPolicyDefinition + ", mPoliciesSetByAdmins= "
-                + mPoliciesSetByAdmins + ", mCurrentResolvedPolicy= " + mCurrentResolvedPolicy
-                + " }";
+        return "\nPolicyKey - " + mPolicyDefinition.getPolicyKey()
+                + "\nmPolicyDefinition= \n\t" + mPolicyDefinition
+                + "\nmPoliciesSetByAdmins= \n\t" + mPoliciesSetByAdmins
+                + ",\nmCurrentResolvedPolicy= \n\t" + mCurrentResolvedPolicy + " }";
+    }
+
+    public void dump(IndentingPrintWriter pw) {
+        pw.println(mPolicyDefinition.getPolicyKey());
+        pw.increaseIndent();
+
+        pw.println("Per-admin Policy:");
+        pw.increaseIndent();
+        if (mPoliciesSetByAdmins.size() == 0) {
+            pw.println("null");
+        } else {
+            for (EnforcingAdmin admin : mPoliciesSetByAdmins.keySet()) {
+                pw.println(admin);
+                pw.increaseIndent();
+                pw.println(mPoliciesSetByAdmins.get(admin));
+                pw.decreaseIndent();
+            }
+        }
+        pw.decreaseIndent();
+
+        pw.printf("Resolved Policy (%s):\n",
+                mPolicyDefinition.getResolutionMechanism().getClass().getSimpleName());
+        pw.increaseIndent();
+        pw.println(mCurrentResolvedPolicy);
+        pw.decreaseIndent();
+
+        pw.decreaseIndent();
     }
 
     void saveToXml(TypedXmlSerializer serializer) throws IOException {
@@ -260,11 +289,14 @@ final class PolicyState<V> {
                                 break;
                         }
                     }
-                    if (admin != null) {
+                    if (admin != null && value != null) {
                         policiesSetByAdmins.put(admin, value);
                     } else {
-                        Slogf.wtf(TAG, "Error Parsing TAG_ADMIN_POLICY_ENTRY, EnforcingAdmin "
-                                + "is null");
+                        Slogf.wtf(TAG, "Error Parsing TAG_ADMIN_POLICY_ENTRY for "
+                                + (policyDefinition == null ? "unknown policy" : "policy with "
+                                + "definition " + policyDefinition) + ", EnforcingAdmin is: "
+                                + (admin == null ? "null" : admin) + ", value is : "
+                                + (value == null ? "null" : value));
                     }
                     break;
                 case TAG_POLICY_DEFINITION_ENTRY:
@@ -283,7 +315,9 @@ final class PolicyState<V> {
                     }
                     currentResolvedPolicy = policyDefinition.readPolicyValueFromXml(parser);
                     if (currentResolvedPolicy == null) {
-                        Slogf.wtf(TAG, "Error Parsing TAG_RESOLVED_VALUE_ENTRY, "
+                        Slogf.wtf(TAG, "Error Parsing TAG_RESOLVED_VALUE_ENTRY for "
+                                + (policyDefinition == null ? "unknown policy" : "policy with "
+                                + "definition " + policyDefinition) + ", "
                                 + "currentResolvedPolicy is null");
                     }
                     break;

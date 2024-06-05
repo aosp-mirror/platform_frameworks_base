@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -44,14 +45,16 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.internal.pm.parsing.PackageParser2;
+import com.android.internal.pm.parsing.PackageParserException;
+import com.android.internal.pm.parsing.pkg.AndroidPackageLegacyUtils;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -66,6 +69,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @SmallTest
 @Presubmit
@@ -105,6 +109,18 @@ public class ApexManagerTest {
             public boolean hasFeature(String feature) {
                 return true;
             }
+
+            @androidx.annotation.NonNull
+            @Override
+            public Set<String> getHiddenApiWhitelistedApps() {
+                return new ArraySet<>();
+            }
+
+            @androidx.annotation.NonNull
+            @Override
+            public Set<String> getInstallConstraintsAllowlist() {
+                return new ArraySet<>();
+            }
         });
 
         mMockSystem.system().stageNominalSystemState();
@@ -116,7 +132,9 @@ public class ApexManagerTest {
                 Build.VERSION_CODES.CUR_DEVELOPMENT,
                 Build.VERSION.INCREMENTAL);
         mMockSystem.system().validateFinalState();
-        mInstallPackageHelper = new InstallPackageHelper(mPmService, mock(AppDataHelper.class));
+        mInstallPackageHelper = new InstallPackageHelper(mPmService, mock(AppDataHelper.class),
+                mock(RemovePackageHelper.class), mock(DeletePackageHelper.class),
+                mock(BroadcastHelper.class));
     }
 
     @NonNull
@@ -158,7 +176,7 @@ public class ApexManagerTest {
                     mPmService.getPlatformPackage(), /* isUpdatedSystemApp */ false);
             // isUpdatedSystemApp is ignoreable above, only used for shared library adjustment
             return parsedPackage.hideAsFinal();
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             throw new RuntimeException(e);
         }
     }
@@ -325,10 +343,12 @@ public class ApexManagerTest {
         List<ApexManager.ScanResult> scanResults = scanApexInfos(apexInfo);
         mApexManager.notifyScanResult(scanResults);
 
-        assertThat(mApexManager.getApkInApexInstallError(activeApex.apexModuleName)).isNull();
+        final String apexPackageName = mApexManager.getActivePackageNameForApexModuleName(
+                activeApex.apexModuleName);
+        assertThat(mApexManager.getApkInApexInstallError(apexPackageName)).isNull();
         mApexManager.reportErrorWithApkInApex(activeApex.apexDirectory.getAbsolutePath(),
                 "Some random error");
-        assertThat(mApexManager.getApkInApexInstallError(activeApex.apexModuleName))
+        assertThat(mApexManager.getApkInApexInstallError(apexPackageName))
                 .isEqualTo("Some random error");
     }
 
@@ -352,9 +372,11 @@ public class ApexManagerTest {
         List<ApexManager.ScanResult> scanResults = scanApexInfos(apexInfo);
         mApexManager.notifyScanResult(scanResults);
 
-        assertThat(mApexManager.getApksInApex(activeApex.apexModuleName)).isEmpty();
+        final String apexPackageName = mApexManager.getActivePackageNameForApexModuleName(
+                activeApex.apexModuleName);
+        assertThat(mApexManager.getApksInApex(apexPackageName)).isEmpty();
         mApexManager.registerApkInApex(fakeApkInApex);
-        assertThat(mApexManager.getApksInApex(activeApex.apexModuleName)).isEmpty();
+        assertThat(mApexManager.getApksInApex(apexPackageName)).isEmpty();
     }
 
     @Test
@@ -368,10 +390,11 @@ public class ApexManagerTest {
         File finalApex = extractResource("test.rebootles_apex_v2", "test.rebootless_apex_v2.apex");
         ApexInfo newApexInfo = createApexInfo("test.apex_rebootless", 2, /* isActive= */ true,
                 /* isFactory= */ false, finalApex);
-        when(mApexService.installAndActivatePackage(anyString())).thenReturn(newApexInfo);
+        when(mApexService.installAndActivatePackage(anyString(), anyBoolean())).thenReturn(
+                newApexInfo);
 
         File installedApex = extractResource("installed", "test.rebootless_apex_v2.apex");
-        newApexInfo = mApexManager.installPackage(installedApex);
+        newApexInfo = mApexManager.installPackage(installedApex, /* force= */ false);
 
         var newPkg = mockParsePackage(mPackageParser2, newApexInfo);
         assertThat(newPkg.getBaseApkPath()).isEqualTo(finalApex.getAbsolutePath());
@@ -381,7 +404,7 @@ public class ApexManagerTest {
                 findFactory(results, "test.apex.rebootless").apexInfo);
         assertThat(factoryPkg.getBaseApkPath()).isEqualTo(activeApexInfo.modulePath);
         assertThat(factoryPkg.getLongVersionCode()).isEqualTo(1);
-        assertThat(AndroidPackageUtils.isSystem(factoryPkg)).isTrue();
+        assertThat(AndroidPackageLegacyUtils.isSystem(factoryPkg)).isTrue();
     }
 
     @Test
@@ -398,10 +421,11 @@ public class ApexManagerTest {
         File finalApex = extractResource("test.rebootles_apex_v2", "test.rebootless_apex_v2.apex");
         ApexInfo newApexInfo = createApexInfo("test.apex_rebootless", 2, /* isActive= */ true,
                 /* isFactory= */ false, finalApex);
-        when(mApexService.installAndActivatePackage(anyString())).thenReturn(newApexInfo);
+        when(mApexService.installAndActivatePackage(anyString(), anyBoolean())).thenReturn(
+                newApexInfo);
 
         File installedApex = extractResource("installed", "test.rebootless_apex_v2.apex");
-        newApexInfo = mApexManager.installPackage(installedApex);
+        newApexInfo = mApexManager.installPackage(installedApex, /* force= */ false);
 
         var newPkg = mockParsePackage(mPackageParser2, newApexInfo);
         assertThat(newPkg.getBaseApkPath()).isEqualTo(finalApex.getAbsolutePath());
@@ -411,18 +435,18 @@ public class ApexManagerTest {
                 findFactory(results, "test.apex.rebootless").apexInfo);
         assertThat(factoryPkg.getBaseApkPath()).isEqualTo(factoryApexInfo.modulePath);
         assertThat(factoryPkg.getLongVersionCode()).isEqualTo(1);
-        assertThat(AndroidPackageUtils.isSystem(factoryPkg)).isTrue();
+        assertThat(AndroidPackageLegacyUtils.isSystem(factoryPkg)).isTrue();
     }
 
     @Test
     public void testInstallPackageBinderCallFails() throws Exception {
-        when(mApexService.installAndActivatePackage(anyString())).thenThrow(
+        when(mApexService.installAndActivatePackage(anyString(), anyBoolean())).thenThrow(
                 new RuntimeException("install failed :("));
 
         File installedApex = extractResource("test.apex_rebootless_v1",
                 "test.rebootless_apex_v1.apex");
         assertThrows(PackageManagerException.class,
-                () -> mApexManager.installPackage(installedApex));
+                () -> mApexManager.installPackage(installedApex, /* force= */ false));
     }
 
     @Test
@@ -471,15 +495,6 @@ public class ApexManagerTest {
         assertThat(mApexManager.getBackingApexFile(Environment.getApexDirectory())).isNull();
         assertThat(mApexManager.getBackingApexFile(new File("/apex/"))).isNull();
         assertThat(mApexManager.getBackingApexFile(new File("/apex//"))).isNull();
-    }
-
-    @Test
-    public void testGetBackingApexFiles_flattenedApex() {
-        ApexManager flattenedApexManager = new ApexManager.ApexManagerFlattenedApex();
-        final File backingApexFile = flattenedApexManager.getBackingApexFile(
-                new File(mMockSystem.system().getApexDirectory(),
-                        "com.android.apex.cts.shim/app/CtsShim/CtsShim.apk"));
-        assertThat(backingApexFile).isNull();
     }
 
     @Test

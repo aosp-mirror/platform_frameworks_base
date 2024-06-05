@@ -16,14 +16,14 @@
 
 package com.android.systemui.statusbar.notification.stack
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.statusbar.policy.AvalancheController
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
 
 private const val MAX_PULSE_HEIGHT = 100000f
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class AmbientStateTest : SysuiTestCase() {
 
@@ -42,7 +42,7 @@ class AmbientStateTest : SysuiTestCase() {
     private val bypassController = StackScrollAlgorithm.BypassController { false }
     private val statusBarKeyguardViewManager = mock<StatusBarKeyguardViewManager>()
     private val largeScreenShadeInterpolator = mock<LargeScreenShadeInterpolator>()
-    private val featureFlags = mock<FeatureFlags>()
+    private val avalancheController = mock<AvalancheController>()
 
     private lateinit var sut: AmbientState
 
@@ -56,42 +56,9 @@ class AmbientStateTest : SysuiTestCase() {
                 bypassController,
                 statusBarKeyguardViewManager,
                 largeScreenShadeInterpolator,
-                featureFlags
+                avalancheController
             )
     }
-
-    // region isDimmed
-    @Test
-    fun isDimmed_whenTrue_shouldReturnTrue() {
-        sut.arrangeDimmed(true)
-
-        assertThat(sut.isDimmed).isTrue()
-    }
-
-    @Test
-    fun isDimmed_whenFalse_shouldReturnFalse() {
-        sut.arrangeDimmed(false)
-
-        assertThat(sut.isDimmed).isFalse()
-    }
-
-    @Test
-    fun isDimmed_whenDozeAmountIsEmpty_shouldReturnTrue() {
-        sut.arrangeDimmed(true)
-        sut.dozeAmount = 0f
-
-        assertThat(sut.isDimmed).isTrue()
-    }
-
-    @Test
-    fun isDimmed_whenPulseExpandingIsFalse_shouldReturnTrue() {
-        sut.arrangeDimmed(true)
-        sut.arrangePulseExpanding(false)
-        sut.dozeAmount = 1f // arrangePulseExpanding changes dozeAmount
-
-        assertThat(sut.isDimmed).isTrue()
-    }
-    // endregion
 
     // region pulseHeight
     @Test
@@ -386,12 +353,6 @@ class AmbientStateTest : SysuiTestCase() {
 }
 
 // region Arrange helper methods.
-private fun AmbientState.arrangeDimmed(value: Boolean) {
-    isDimmed = value
-    dozeAmount = if (value) 0f else 1f
-    arrangePulseExpanding(!value)
-}
-
 private fun AmbientState.arrangePulseExpanding(value: Boolean) {
     if (value) {
         dozeAmount = 1f

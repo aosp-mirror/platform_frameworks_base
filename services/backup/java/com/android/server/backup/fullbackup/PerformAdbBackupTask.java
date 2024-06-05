@@ -40,6 +40,7 @@ import com.android.server.backup.KeyValueAdbBackupEngine;
 import com.android.server.backup.OperationStorage;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.utils.BackupEligibilityRules;
+import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 import com.android.server.backup.utils.PasswordUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -421,7 +422,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
                                 mCurrentOpToken,
                                 /*transportFlags=*/ 0,
                                 mBackupEligibilityRules,
-                                /* monitor= */ null);
+                                new BackupManagerMonitorEventSender(null));
                 sendOnBackupPackage(isSharedStorage ? "Shared storage" : pkg.packageName);
 
                 // Don't need to check preflight result as there is no preflight hook.

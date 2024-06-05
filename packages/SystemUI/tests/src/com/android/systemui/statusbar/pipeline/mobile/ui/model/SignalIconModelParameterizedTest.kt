@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.model
 import androidx.test.filters.SmallTest
 import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,7 +32,7 @@ internal class SignalIconModelParameterizedTest(private val testCase: TestCase) 
     @Test
     fun drawableFromModel_level0_numLevels4_noExclamation_notCarrierNetworkChange() {
         val model =
-            SignalIconModel(
+            SignalIconModel.Cellular(
                 level = 0,
                 numberOfLevels = 4,
                 showExclamationMark = false,
@@ -58,7 +59,7 @@ internal class SignalIconModelParameterizedTest(private val testCase: TestCase) 
         val expected: Int,
     ) {
         fun toSignalIconModel() =
-            SignalIconModel(
+            SignalIconModel.Cellular(
                 level = level,
                 numberOfLevels = numberOfLevels,
                 showExclamationMark = showExclamation,

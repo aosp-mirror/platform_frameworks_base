@@ -80,9 +80,9 @@ import android.util.apk.ApkSignatureVerifier;
 import android.util.apk.ApkSigningBlockUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.modules.expresslog.Histogram;
 import com.android.internal.os.IBinaryTransparencyService;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.expresslog.Histogram;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.AndroidPackageSplit;
@@ -229,8 +229,8 @@ public class BinaryTransparencyService extends SystemService {
 
                 // Only digest and split name are different between splits.
                 Digest digest = measureApk(split.getPath());
-                appInfo.digest = digest.value;
-                appInfo.digestAlgorithm = digest.algorithm;
+                appInfo.digest = digest.value();
+                appInfo.digestAlgorithm = digest.algorithm();
 
                 results.add(appInfo);
             }
@@ -391,8 +391,8 @@ public class BinaryTransparencyService extends SystemService {
                 var apexInfo = new IBinaryTransparencyService.ApexInfo();
                 apexInfo.packageName = packageState.getPackageName();
                 apexInfo.longVersion = packageState.getVersionCode();
-                apexInfo.digest = apexChecksum.value;
-                apexInfo.digestAlgorithm = apexChecksum.algorithm;
+                apexInfo.digest = apexChecksum.value();
+                apexInfo.digestAlgorithm = apexChecksum.algorithm();
                 apexInfo.signerDigests =
                         computePackageSignerSha256Digests(packageState.getSigningInfo());
 
@@ -1182,8 +1182,8 @@ public class BinaryTransparencyService extends SystemService {
 
         // we are only interested in doing things at PHASE_BOOT_COMPLETED
         if (phase == PHASE_BOOT_COMPLETED) {
-            Slog.i(TAG, "Boot completed. Getting VBMeta Digest.");
-            getVBMetaDigestInformation();
+            Slog.i(TAG, "Boot completed. Getting boot integrity data.");
+            collectBootIntegrityInfo();
 
             // Log to statsd
             // TODO(b/264061957): For now, biometric system properties are always collected if users
@@ -1391,7 +1391,7 @@ public class BinaryTransparencyService extends SystemService {
         // Check the flag to determine whether biometric property verification is enabled. It's
         // disabled by default.
         if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_BIOMETRICS,
-                KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION, false)) {
+                KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION, true)) {
             if (DEBUG) {
                 Slog.d(TAG, "Do not collect/verify biometric properties. Feature disabled by "
                         + "DeviceConfig");
@@ -1458,10 +1458,24 @@ public class BinaryTransparencyService extends SystemService {
         }
     }
 
-    private void getVBMetaDigestInformation() {
+    private void collectBootIntegrityInfo() {
         mVbmetaDigest = SystemProperties.get(SYSPROP_NAME_VBETA_DIGEST, VBMETA_DIGEST_UNAVAILABLE);
         Slog.d(TAG, String.format("VBMeta Digest: %s", mVbmetaDigest));
         FrameworkStatsLog.write(FrameworkStatsLog.VBMETA_DIGEST_REPORTED, mVbmetaDigest);
+
+        if (android.security.Flags.binaryTransparencySepolicyHash()) {
+            IoThread.getExecutor().execute(() -> {
+                byte[] sepolicyHash = PackageUtils.computeSha256DigestForLargeFileAsBytes(
+                        "/sys/fs/selinux/policy", PackageUtils.createLargeFileBuffer());
+                String sepolicyHashEncoded = null;
+                if (sepolicyHash != null) {
+                    sepolicyHashEncoded = HexEncoding.encodeToString(sepolicyHash, false);
+                    Slog.d(TAG, "sepolicy hash: " + sepolicyHashEncoded);
+                }
+                FrameworkStatsLog.write(FrameworkStatsLog.BOOT_INTEGRITY_INFO_REPORTED,
+                        sepolicyHashEncoded, mVbmetaDigest);
+            });
+        }
     }
 
     /**
@@ -1693,13 +1707,5 @@ public class BinaryTransparencyService extends SystemService {
         return slice.getList();
     }
 
-    private static class Digest {
-        public int algorithm;
-        public byte[] value;
-
-        Digest(int algorithm, byte[] value) {
-            this.algorithm = algorithm;
-            this.value = value;
-        }
-    }
+    private record Digest(int algorithm, byte[] value) {}
 }

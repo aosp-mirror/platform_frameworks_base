@@ -1,0 +1,193 @@
+package: "com.android.text.flags"
+container: "system"
+
+flag {
+  name: "vendor_custom_locale_fallback"
+  namespace: "text"
+  description: "A feature flag that adds custom locale fallback to the vendor customization XML. This enables vendors to add their locale specific fonts, e.g. Japanese font."
+  is_fixed_read_only: true
+  bug: "278768958"
+}
+
+flag {
+  name: "new_fonts_fallback_xml"
+  is_exported: true
+  namespace: "text"
+  description: "Feature flag for deprecating fonts.xml. By setting true for this feature flag, the new font configuration XML, /system/etc/font_fallback.xml is used. The new XML has a new syntax and flexibility of variable font declarations, but it is not compatible with the apps that reads fonts.xml. So, fonts.xml is maintained as a subset of the font_fallback.xml"
+  # Make read only, as it could be used before the Settings provider is initialized.
+  is_fixed_read_only: true
+  bug: "281769620"
+}
+
+flag {
+  name: "fix_double_underline"
+  namespace: "text"
+  description: "Feature flag for fixing double underline because of the multiple font used in the single line."
+  bug: "297336724"
+}
+
+flag {
+  name: "fix_line_height_for_locale"
+  is_exported: true
+  namespace: "text"
+  description: "Feature flag that preserve the line height of the TextView and EditText even if the the locale is different from Latin"
+  bug: "303326708"
+}
+
+flag {
+  name: "no_break_no_hyphenation_span"
+  is_exported: true
+  namespace: "text"
+  description: "A feature flag that adding new spans that prevents line breaking and hyphenation."
+  bug: "283193586"
+}
+
+flag {
+  name: "use_optimized_boottime_font_loading"
+  namespace: "text"
+  description: "Feature flag ensuring that font is loaded once and asynchronously."
+  # Make read only, as font loading is in the critical boot path which happens before the read-write
+  # flags propagate to the device.
+  is_fixed_read_only: true
+  bug: "304406888"
+}
+
+flag {
+  name: "complete_font_load_in_system_services_ready"
+  namespace: "text"
+  description: "Fix to ensure that font loading is complete on system-services-ready boot phase."
+  # Make read only, as font loading is in the critical boot path which happens before the read-write
+  # flags propagate to the device.
+  is_fixed_read_only: true
+  bug: "327941215"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "phrase_strict_fallback"
+  namespace: "text"
+  description: "Feature flag for automatic fallback from phrase based line break to strict line break."
+  bug: "281970875"
+}
+
+flag {
+  name: "use_bounds_for_width"
+  is_exported: true
+  namespace: "text"
+  description: "Feature flag for preventing horizontal clipping."
+  bug: "63938206"
+}
+
+flag {
+  name: "deprecate_ui_fonts"
+  namespace: "text"
+  description: "Feature flag for deprecating UI fonts. By setting true for this feature flag, the elegant text height of will be turned on by default unless explicitly setting it to false by attribute or Java API call."
+  bug: "279646685"
+}
+
+flag {
+  name: "word_style_auto"
+  is_exported: true
+  namespace: "text"
+  description: "A feature flag that implements line break word style auto."
+  bug: "280005585"
+}
+
+flag {
+  name: "letter_spacing_justification"
+  is_exported: true
+  namespace: "text"
+  description: "A feature flag that implement inter character justification."
+  bug: "283193133"
+}
+
+flag {
+  name: "escape_clears_focus"
+  namespace: "text"
+  description: "Feature flag for clearing focus when the escape key is pressed."
+  bug: "312921137"
+}
+
+flag {
+  name: "insert_mode_crash_when_delete"
+  namespace: "text"
+  description: "A feature flag for fixing the crash while delete text in insert mode."
+  bug: "314254153"
+}
+
+flag {
+  name: "insert_mode_not_update_selection"
+  namespace: "text"
+  description: "Fix that InputService#onUpdateSelection is not called when insert mode gesture is performed."
+  bug: "300850862"
+}
+
+flag {
+  name: "icu_bidi_migration"
+  namespace: "text"
+  description: "A flag for replacing AndroidBidi with android.icu.text.Bidi."
+  bug: "317144801"
+}
+
+flag {
+  name: "lazy_variation_instance"
+  namespace: "text"
+  description: "A flag for enabling lazy variation instance creation."
+  # Make read only, as it could be used before the Settings provider is initialized.
+  is_fixed_read_only: true
+  bug: "324676775"
+}
+
+flag {
+  name: "handwriting_end_of_line_tap"
+  namespace: "text"
+  description: "Initiate handwriting when stylus taps at the end of a line in a focused non-empty TextView with the cursor at the end of that line"
+  bug: "323376217"
+}
+
+flag {
+  name: "handwriting_cursor_position"
+  namespace: "text"
+  description: "When handwriting is initiated in an unfocused TextView, cursor is placed at the end of the closest paragraph."
+  bug: "323376217"
+}
+
+flag {
+  name: "handwriting_unsupported_message"
+  namespace: "text"
+  description: "Feature flag for showing error message when user tries stylus handwriting on a text field which doesn't support it"
+  bug: "297962571"
+}
+
+flag {
+  name: "fix_font_update_failure"
+  namespace: "text"
+  description: "There was a bug of updating system font from Android 13 to 14. This flag for fixing the migration failure."
+  is_fixed_read_only: true
+  bug: "331717791"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "fix_misaligned_context_menu"
+  namespace: "text"
+  description: "Fix the context menu misalignment and incosistent icon size."
+  bug: "332542108"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "missing_getter_apis"
+  namespace: "text"
+  description: "Fix the lint warning about missing getters."
+  bug: "340875345"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

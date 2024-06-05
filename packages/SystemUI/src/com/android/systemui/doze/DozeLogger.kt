@@ -20,9 +20,9 @@ import android.view.Display
 import com.android.systemui.doze.DozeLog.Reason
 import com.android.systemui.doze.DozeLog.reasonToString
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.ERROR
-import com.android.systemui.log.LogLevel.INFO
+import com.android.systemui.log.core.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.ERROR
+import com.android.systemui.log.core.LogLevel.INFO
 import com.android.systemui.log.dagger.DozeLog
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.google.errorprone.annotations.CompileTimeConstant
@@ -159,6 +159,15 @@ class DozeLogger @Inject constructor(
             bool1 = isVisible
         }, {
             "Keyguard visibility change, isVisible=$bool1"
+        })
+    }
+
+    fun logPendingUnscheduleTimeTick(isPending: Boolean, isTimeTickScheduled: Boolean) {
+        buffer.log(TAG, INFO, {
+            bool1 = isPending
+            bool2 = isTimeTickScheduled
+        }, {
+            "Pending unschedule time tick, isPending=$bool1, isTimeTickScheduled:$bool2"
         })
     }
 

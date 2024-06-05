@@ -16,101 +16,112 @@
 
 package com.android.systemui.statusbar.pipeline.airplane.data.repository
 
-import android.os.Handler
-import android.os.Looper
-import android.os.UserHandle
+import android.net.ConnectivityManager
 import android.provider.Settings.Global
+import android.telephony.SubscriptionManager
+import android.telephony.TelephonyManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.settings.FakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
-import org.junit.After
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class AirplaneModeRepositoryImplTest : SysuiTestCase() {
 
-    private lateinit var underTest: AirplaneModeRepositoryImpl
+    private lateinit var underTest: AirplaneModeRepository
 
     @Mock private lateinit var logger: TableLogBuffer
-    private lateinit var bgHandler: Handler
-    private lateinit var scope: CoroutineScope
-    private lateinit var settings: FakeSettings
+    @Mock private lateinit var telephonyManager: TelephonyManager
+    @Mock private lateinit var subscriptionManager: SubscriptionManager
+    @Mock private lateinit var connectivityManager: ConnectivityManager
+
+    private val testContext = StandardTestDispatcher()
+    private val scope = TestScope(testContext)
+
+    private lateinit var settings: FakeGlobalSettings
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        bgHandler = Handler(Looper.getMainLooper())
-        scope = CoroutineScope(IMMEDIATE)
-        settings = FakeSettings()
-        settings.userId = UserHandle.USER_ALL
+
+        settings = FakeGlobalSettings()
+
+        whenever(telephonyManager.emergencyCallbackMode).thenReturn(false)
+        whenever(subscriptionManager.activeSubscriptionIdList).thenReturn(intArrayOf())
 
         underTest =
             AirplaneModeRepositoryImpl(
-                bgHandler,
+                connectivityManager,
+                null,
+                scope.backgroundScope.coroutineContext,
                 settings,
                 logger,
-                scope,
+                scope.backgroundScope,
             )
-    }
-
-    @After
-    fun tearDown() {
-        scope.cancel()
     }
 
     @Test
     fun isAirplaneMode_initiallyGetsSettingsValue() =
-        runBlocking(IMMEDIATE) {
+        scope.runTest {
             settings.putInt(Global.AIRPLANE_MODE_ON, 1)
 
             underTest =
                 AirplaneModeRepositoryImpl(
-                    bgHandler,
+                    connectivityManager,
+                    null,
+                    scope.backgroundScope.coroutineContext,
                     settings,
                     logger,
-                    scope,
+                    scope.backgroundScope,
                 )
 
-            val job = underTest.isAirplaneMode.launchIn(this)
-
+            underTest.isAirplaneMode.launchIn(backgroundScope)
+            runCurrent()
             assertThat(underTest.isAirplaneMode.value).isTrue()
-
-            job.cancel()
         }
 
     @Test
     fun isAirplaneMode_settingUpdated_valueUpdated() =
-        runBlocking(IMMEDIATE) {
-            val job = underTest.isAirplaneMode.launchIn(this)
+        scope.runTest {
+            underTest.isAirplaneMode.launchIn(backgroundScope)
 
             settings.putInt(Global.AIRPLANE_MODE_ON, 0)
-            yield()
+            runCurrent()
             assertThat(underTest.isAirplaneMode.value).isFalse()
 
             settings.putInt(Global.AIRPLANE_MODE_ON, 1)
-            yield()
+            runCurrent()
             assertThat(underTest.isAirplaneMode.value).isTrue()
 
             settings.putInt(Global.AIRPLANE_MODE_ON, 0)
-            yield()
+            runCurrent()
             assertThat(underTest.isAirplaneMode.value).isFalse()
+        }
 
-            job.cancel()
+    @Test
+    fun setIsAirplaneMode() =
+        scope.runTest {
+            underTest.setIsAirplaneMode(true)
+            runCurrent()
+
+            verify(connectivityManager).setAirplaneMode(eq(true))
         }
 }
-
-private val IMMEDIATE = Dispatchers.Main.immediate

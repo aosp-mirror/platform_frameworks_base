@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.hardware.tv.tuner.Constant;
 import android.hardware.tv.tuner.Constant64Bit;
 import android.hardware.tv.tuner.FrontendScanType;
+import android.media.MediaCodec;
 import android.media.tv.TvInputService;
 import android.media.tv.tuner.dvr.DvrPlayback;
 import android.media.tv.tuner.dvr.DvrRecorder;
@@ -272,8 +273,12 @@ public class Tuner implements AutoCloseable  {
         try {
             System.loadLibrary("media_tv_tuner");
             nativeInit();
+            // Load and initialize MediaCodec to avoid flaky cts test result.
+            Class.forName(MediaCodec.class.getName());
         } catch (UnsatisfiedLinkError e) {
             Log.d(TAG, "tuner JNI library not found!");
+        } catch (ClassNotFoundException e) {
+            Log.e(TAG, "MediaCodec class not found!", e);
         }
     }
 
@@ -452,6 +457,12 @@ public class Tuner implements AutoCloseable  {
         acquireTRMSLock("shareFrontendFromTuner()");
         mFrontendLock.lock();
         try {
+            if (mFeOwnerTuner != null) {
+                // unregister self from the Frontend callback
+                mFeOwnerTuner.unregisterFrontendCallbackListener(this);
+                mFeOwnerTuner = null;
+                nativeUnshareFrontend();
+            }
             mTunerResourceManager.shareFrontend(mClientId, tuner.mClientId);
             mFeOwnerTuner = tuner;
             mFeOwnerTuner.registerFrontendCallbackListener(this);
@@ -897,6 +908,9 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
+    /**
+     * Releases Lnb resource if held. TRMS lock must be acquired prior to calling this function.
+     */
     private void closeLnb() {
         mLnbLock.lock();
         try {
@@ -905,7 +919,7 @@ public class Tuner implements AutoCloseable  {
                 if (DEBUG) {
                     Log.d(TAG, "calling mLnb.close() : " + mClientId);
                 }
-                mLnb.close();
+                mLnb.closeInternal();
             } else {
                 if (DEBUG) {
                     Log.d(TAG, "NOT calling mLnb.close() : " + mClientId);
@@ -1565,6 +1579,10 @@ public class Tuner implements AutoCloseable  {
         mFrontendCiCamLock.lock();
         mFrontendLock.lock();
         try {
+            if (mFrontendHandle == null) {
+                Log.d(TAG, "Operation cannot be done without frontend");
+                return RESULT_INVALID_STATE;
+            }
             if (mFeOwnerTuner != null) {
                 Log.d(TAG, "Operation cannot be done by sharee of tuner");
                 return RESULT_INVALID_STATE;
@@ -1632,6 +1650,10 @@ public class Tuner implements AutoCloseable  {
     public int disconnectFrontendToCiCam(int ciCamId) {
         acquireTRMSLock("disconnectFrontendToCiCam()");
         try {
+            if (mFrontendHandle == null) {
+                Log.d(TAG, "Operation cannot be done without frontend");
+                return RESULT_INVALID_STATE;
+            }
             if (mFeOwnerTuner != null) {
                 Log.d(TAG, "Operation cannot be done by sharee of tuner");
                 return RESULT_INVALID_STATE;
@@ -2331,6 +2353,7 @@ public class Tuner implements AutoCloseable  {
     @Nullable
     public Lnb openLnbByName(@NonNull String name, @CallbackExecutor @NonNull Executor executor,
             @NonNull LnbCallback cb) {
+        acquireTRMSLock("openLnbByName");
         mLnbLock.lock();
         try {
             Objects.requireNonNull(name, "LNB name must not be null");
@@ -2339,7 +2362,7 @@ public class Tuner implements AutoCloseable  {
             Lnb newLnb = nativeOpenLnbByName(name);
             if (newLnb != null) {
                 if (mLnb != null) {
-                    mLnb.close();
+                    mLnb.closeInternal();
                     mLnbHandle = null;
                 }
                 mLnb = newLnb;
@@ -2350,6 +2373,7 @@ public class Tuner implements AutoCloseable  {
             }
             return mLnb;
         } finally {
+            releaseTRMSLock();
             mLnbLock.unlock();
         }
     }
@@ -2392,13 +2416,16 @@ public class Tuner implements AutoCloseable  {
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER)
     @Nullable
     public Descrambler openDescrambler() {
+        acquireTRMSLock("openDescrambler()");
         mDemuxLock.lock();
         try {
-            if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX, mDemuxLock)) {
+            // no need to unlock mDemuxLock (so pass null instead) as TRMS lock is already acquired
+            if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX, null)) {
                 return null;
             }
             return requestDescrambler();
         } finally {
+            releaseTRMSLock();
             mDemuxLock.unlock();
         }
     }
@@ -2764,8 +2791,8 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
+    // Must be called while TRMS lock is being held
     /* package */ void releaseLnb() {
-        acquireTRMSLock("releaseLnb()");
         mLnbLock.lock();
         try {
             if (mLnbHandle != null) {
@@ -2782,7 +2809,6 @@ public class Tuner implements AutoCloseable  {
             }
             mLnb = null;
         } finally {
-            releaseTRMSLock();
             mLnbLock.unlock();
         }
     }
@@ -2790,6 +2816,10 @@ public class Tuner implements AutoCloseable  {
     /** @hide */
     public int getClientId() {
         return mClientId;
+    }
+
+    /* package */ TunerResourceManager getTunerResourceManager() {
+        return mTunerResourceManager;
     }
 
     private void acquireTRMSLock(String functionNameForLog) {

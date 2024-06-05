@@ -43,6 +43,7 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.R;
+import com.android.media.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -130,12 +131,6 @@ class LegacyBluetoothRouteController implements BluetoothRouteController {
     public void stop() {
         mContext.unregisterReceiver(mAdapterStateChangedReceiver);
         mContext.unregisterReceiver(mDeviceStateChangedReceiver);
-    }
-
-    @Override
-    public boolean selectRoute(String deviceAddress) {
-        // No-op as the class decides if a route is selected based on Bluetooth events.
-        return false;
     }
 
     /**
@@ -280,7 +275,7 @@ class LegacyBluetoothRouteController implements BluetoothRouteController {
 
     private void notifyBluetoothRoutesUpdated() {
         if (mListener != null) {
-            mListener.onBluetoothRoutesUpdated(getAllBluetoothRoutes());
+            mListener.onBluetoothRoutesUpdated();
         }
     }
 
@@ -289,7 +284,10 @@ class LegacyBluetoothRouteController implements BluetoothRouteController {
         newBtRoute.mBtDevice = device;
 
         String routeId = device.getAddress();
-        String deviceName = device.getName();
+        String deviceName =
+                Flags.enableUseOfBluetoothDeviceGetAliasForMr2infoGetName()
+                        ? device.getAlias()
+                        : device.getName();
         if (TextUtils.isEmpty(deviceName)) {
             deviceName = mContext.getResources().getText(R.string.unknownName).toString();
         }
@@ -508,7 +506,11 @@ class LegacyBluetoothRouteController implements BluetoothRouteController {
                 case BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED:
                     clearActiveRoutesWithType(MediaRoute2Info.TYPE_BLUETOOTH_A2DP);
                     if (device != null) {
-                        addActiveRoute(mBluetoothRoutes.get(device.getAddress()));
+                        if (DEBUG) {
+                            Log.d(TAG, "Setting active a2dp devices. device=" + device);
+                        }
+
+                        addActiveDevices(device);
                     }
                     notifyBluetoothRoutesUpdated();
                     break;

@@ -16,6 +16,7 @@
 
 package android.hardware;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -27,6 +28,8 @@ import android.os.MemoryFile;
 import android.util.Log;
 import android.util.SparseArray;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -893,9 +896,9 @@ public abstract class SensorManager {
 
     /**
      * Flushes the FIFO of all the sensors registered for this listener. If there are events
-     * in the FIFO of the sensor, they are returned as if the maxReportLantecy of the FIFO has
+     * in the FIFO of the sensor, they are returned as if the maxReportLatency of the FIFO has
      * expired. Events are returned in the usual way through the SensorEventListener.
-     * This call doesn't affect the maxReportLantecy for this sensor. This call is asynchronous and
+     * This call doesn't affect the maxReportLatency for this sensor. This call is asynchronous and
      * returns immediately.
      * {@link android.hardware.SensorEventListener2#onFlushCompleted onFlushCompleted} is called
      * after all the events in the batch at the time of calling this method have been delivered
@@ -923,7 +926,7 @@ public abstract class SensorManager {
      * Create a sensor direct channel backed by shared memory wrapped in MemoryFile object.
      *
      * The resulting channel can be used for delivering sensor events to native code, other
-     * processes, GPU/DSP or other co-processors without CPU intervention. This is the recommanded
+     * processes, GPU/DSP or other co-processors without CPU intervention. This is the recommended
      * for high performance sensor applications that use high sensor rates (e.g. greater than 200Hz)
      * and cares about sensor event latency.
      *
@@ -945,7 +948,7 @@ public abstract class SensorManager {
      * Create a sensor direct channel backed by shared memory wrapped in HardwareBuffer object.
      *
      * The resulting channel can be used for delivering sensor events to native code, other
-     * processes, GPU/DSP or other co-processors without CPU intervention. This is the recommanded
+     * processes, GPU/DSP or other co-processors without CPU intervention. This is the recommended
      * for high performance sensor applications that use high sensor rates (e.g. greater than 200Hz)
      * and cares about sensor event latency.
      *
@@ -1355,11 +1358,11 @@ public abstract class SensorManager {
      *        returned by {@link #getRotationMatrix}.
      *
      * @param X
-     *        defines the axis of the new cooridinate system that coincide with the X axis of the
+     *        defines the axis of the new coordinate system that coincide with the X axis of the
      *        original coordinate system.
      *
      * @param Y
-     *        defines the axis of the new cooridinate system that coincide with the Y axis of the
+     *        defines the axis of the new coordinate system that coincide with the Y axis of the
      *        original coordinate system.
      *
      * @param outR
@@ -1809,6 +1812,41 @@ public abstract class SensorManager {
     protected abstract boolean cancelTriggerSensorImpl(TriggerEventListener listener,
             Sensor sensor, boolean disable);
 
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({DATA_INJECTION, REPLAY_DATA_INJECTION, HAL_BYPASS_REPLAY_DATA_INJECTION})
+    public @interface DataInjectionMode {}
+    /**
+     * This mode is only used for testing purposes. Not all HALs support this mode. In this mode,
+     * the HAL ignores the sensor data provided by physical sensors and accepts the data that is
+     * injected from the SensorService as if it were the real sensor data. This mode is primarily
+     * used for testing various algorithms like vendor provided SensorFusion, Step Counter and
+     * Step Detector etc. Typically, in this mode, there is a client app which injects
+     * sensor data into the HAL. Normal apps can register and unregister for any sensor
+     * that supports injection. Registering to sensors that do not support injection will
+     * give an error.
+     * This is the default data injection mode.
+     * @hide
+     */
+    public static final int DATA_INJECTION = 1;
+    /**
+     * Mostly equivalent to DATA_INJECTION with the difference being that the injected data is
+     * delivered to all requesting apps rather than just the package allowed to inject data.
+     * This mode is only allowed to be used on development builds.
+     * @hide
+     */
+    public static final int REPLAY_DATA_INJECTION = 3;
+    /**
+     * Like REPLAY_DATA_INJECTION but injected data is not sent into the HAL. It is stored in a
+     * buffer in the platform and played back to all requesting apps.
+     * This is useful for playing back sensor data to test platform components without
+     * relying on the HAL to support data injection.
+     * @hide
+     */
+    public static final int HAL_BYPASS_REPLAY_DATA_INJECTION = 4;
+
 
     /**
      * For testing purposes only. Not for third party applications.
@@ -1833,13 +1871,47 @@ public abstract class SensorManager {
      */
     @SystemApi
     public boolean initDataInjection(boolean enable) {
-        return initDataInjectionImpl(enable);
+        return initDataInjectionImpl(enable, DATA_INJECTION);
+    }
+
+    /**
+     * For testing purposes only. Not for third party applications.
+     *
+     * Initialize data injection mode and create a client for data injection. SensorService should
+     * already be operating in one of DATA_INJECTION, REPLAY_DATA_INJECTION or
+     * HAL_BYPASS_REPLAY_DATA_INJECTION modes for this call succeed. To set SensorService in
+     * a Data Injection mode, use one of:
+     *
+     * <ul>
+     *      <li>adb shell dumpsys sensorservice data_injection</li>
+     *      <li>adb shell dumpsys sensorservice replay_data_injection package_name</li>
+     *      <li>adb shell dumpsys sensorservice hal_bypass_replay_data_injection package_name</li>
+     * </ul>
+     *
+     * Typically this is done using a host side test.  This mode is expected to be used
+     * only for testing purposes. See {@link DataInjectionMode} for details of each data injection
+     * mode. Once this method succeeds, the test can call
+     * {@link #injectSensorData(Sensor, float[], int, long)} to inject sensor data into the HAL.
+     * To put SensorService back into normal mode, use "adb shell dumpsys sensorservice enable"
+     *
+     * @param enable True to initialize a client in a data injection mode.
+     *               False to clean up the native resources.
+     *
+     * @param mode One of DATA_INJECTION, REPLAY_DATA_INJECTION or HAL_BYPASS_DATA_INJECTION.
+     *             See {@link DataInjectionMode} for details.
+     *
+     * @return true if the HAL supports data injection and false
+     *         otherwise.
+     * @hide
+     */
+    public boolean initDataInjection(boolean enable, @DataInjectionMode int mode) {
+        return initDataInjectionImpl(enable, mode);
     }
 
     /**
      * @hide
      */
-    protected abstract boolean initDataInjectionImpl(boolean enable);
+    protected abstract boolean initDataInjectionImpl(boolean enable, @DataInjectionMode int mode);
 
     /**
      * For testing purposes only. Not for third party applications.
@@ -1847,7 +1919,7 @@ public abstract class SensorManager {
      * This method is used to inject raw sensor data into the HAL.  Call {@link
      * initDataInjection(boolean)} before this method to set the HAL in data injection mode. This
      * method should be called only if a previous call to initDataInjection has been successful and
-     * the HAL and SensorService are already opreating in data injection mode.
+     * the HAL and SensorService are already operating in data injection mode.
      *
      * @param sensor The sensor to inject.
      * @param values Sensor values to inject. The length of this
@@ -1870,9 +1942,6 @@ public abstract class SensorManager {
                 long timestamp) {
         if (sensor == null) {
             throw new IllegalArgumentException("sensor cannot be null");
-        }
-        if (!sensor.isDataInjectionSupported()) {
-            throw new IllegalArgumentException("sensor does not support data injection");
         }
         if (values == null) {
             throw new IllegalArgumentException("sensor data cannot be null");

@@ -67,7 +67,11 @@ import java.util.concurrent.Executor;
 public class EuiccCardManager {
     private static final String TAG = "EuiccCardManager";
 
-    /** Reason for canceling a profile download session */
+    /**
+     * Reason for canceling a profile download session
+     *
+     * @removed mistakenly exposed previously
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"CANCEL_REASON_"}, value = {
             CANCEL_REASON_END_USER_REJECTED,
@@ -97,7 +101,11 @@ public class EuiccCardManager {
      */
     public static final int CANCEL_REASON_PPR_NOT_ALLOWED = 3;
 
-    /** Options for resetting eUICC memory */
+    /**
+     * Options for resetting eUICC memory
+     *
+     * @removed mistakenly exposed previously
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = {"RESET_OPTION_"}, value = {
             RESET_OPTION_DELETE_OPERATIONAL_PROFILES,
@@ -175,6 +183,9 @@ public class EuiccCardManager {
      * @param cardId   The Id of the eUICC.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and all the profiles.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void requestAllProfiles(String cardId, @CallbackExecutor Executor executor,
             ResultCallback<EuiccProfileInfo[]> callback) {
@@ -204,6 +215,9 @@ public class EuiccCardManager {
      * @param iccid    The iccid of the profile.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and profile.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void requestProfile(String cardId, String iccid, @CallbackExecutor Executor executor,
             ResultCallback<EuiccProfileInfo> callback) {
@@ -236,6 +250,9 @@ public class EuiccCardManager {
      *                  ICCID is known, an APDU will be sent through to read the enabled profile.
      * @param executor  The executor through which the callback should be invoked.
      * @param callback  The callback to get the result code and the profile.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void requestEnabledProfileForPort(@NonNull String cardId, int portIndex,
             @NonNull @CallbackExecutor Executor executor,
@@ -268,6 +285,9 @@ public class EuiccCardManager {
      * @param refresh  Whether sending the REFRESH command to modem.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void disableProfile(String cardId, String iccid, boolean refresh,
             @CallbackExecutor Executor executor, ResultCallback<Void> callback) {
@@ -299,6 +319,9 @@ public class EuiccCardManager {
      * @param refresh  Whether sending the REFRESH command to modem.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and the EuiccProfileInfo enabled.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      * @deprecated instead use {@link #switchToProfile(String, String, int, boolean, Executor,
      * ResultCallback)}
      */
@@ -336,6 +359,9 @@ public class EuiccCardManager {
      * @param refresh   Whether sending the REFRESH command to modem.
      * @param executor  The executor through which the callback should be invoked.
      * @param callback  The callback to get the result code and the EuiccProfileInfo enabled.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void switchToProfile(@Nullable String cardId, @Nullable String iccid, int portIndex,
             boolean refresh, @NonNull @CallbackExecutor Executor executor,
@@ -367,6 +393,9 @@ public class EuiccCardManager {
      * @param nickname The nickname of the profile.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void setNickname(String cardId, String iccid, String nickname,
             @CallbackExecutor Executor executor, ResultCallback<Void> callback) {
@@ -396,6 +425,9 @@ public class EuiccCardManager {
      * @param iccid The iccid of the profile.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void deleteProfile(String cardId, String iccid, @CallbackExecutor Executor executor,
             ResultCallback<Void> callback) {
@@ -426,6 +458,9 @@ public class EuiccCardManager {
      *     EuiccCard for details.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void resetMemory(String cardId, @ResetOption int options,
             @CallbackExecutor Executor executor, ResultCallback<Void> callback) {
@@ -454,6 +489,9 @@ public class EuiccCardManager {
      * @param cardId The Id of the eUICC.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and the default SM-DP+ address.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void requestDefaultSmdpAddress(String cardId, @CallbackExecutor Executor executor,
             ResultCallback<String> callback) {
@@ -482,6 +520,9 @@ public class EuiccCardManager {
      * @param cardId The Id of the eUICC.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code and the SM-DS address.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void requestSmdsAddress(String cardId, @CallbackExecutor Executor executor,
             ResultCallback<String> callback) {
@@ -511,6 +552,9 @@ public class EuiccCardManager {
      * @param defaultSmdpAddress The default SM-DP+ address to set.
      * @param executor The executor through which the callback should be invoked.
      * @param callback The callback to get the result code.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void setDefaultSmdpAddress(String cardId, String defaultSmdpAddress,
             @CallbackExecutor Executor executor, ResultCallback<Void> callback) {
@@ -540,6 +584,9 @@ public class EuiccCardManager {
      * @param cardId The Id of the eUICC.
      * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the rule authorisation table.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void requestRulesAuthTable(String cardId, @CallbackExecutor Executor executor,
             ResultCallback<EuiccRulesAuthTable> callback) {
@@ -568,6 +615,9 @@ public class EuiccCardManager {
      * @param cardId The Id of the eUICC.
      * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the challenge.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void requestEuiccChallenge(String cardId, @CallbackExecutor Executor executor,
             ResultCallback<byte[]> callback) {
@@ -596,6 +646,9 @@ public class EuiccCardManager {
      * @param cardId The Id of the eUICC.
      * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the info1.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void requestEuiccInfo1(String cardId, @CallbackExecutor Executor executor,
             ResultCallback<byte[]> callback) {
@@ -624,6 +677,9 @@ public class EuiccCardManager {
      * @param cardId The Id of the eUICC.
      * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the info2.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void requestEuiccInfo2(String cardId, @CallbackExecutor Executor executor,
             ResultCallback<byte[]> callback) {
@@ -663,6 +719,9 @@ public class EuiccCardManager {
      * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and a byte array which represents a
      *     {@code AuthenticateServerResponse} defined in GSMA RSP v2.0+.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void authenticateServer(String cardId, String matchingId, byte[] serverSigned1,
             byte[] serverSignature1, byte[] euiccCiPkIdToBeUsed, byte[] serverCertificate,
@@ -708,6 +767,9 @@ public class EuiccCardManager {
      * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and a byte array which represents a
      *     {@code PrepareDownloadResponse} defined in GSMA RSP v2.0+
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void prepareDownload(String cardId, @Nullable byte[] hashCc, byte[] smdpSigned2,
             byte[] smdpSignature2, byte[] smdpCertificate, @CallbackExecutor Executor executor,
@@ -745,6 +807,9 @@ public class EuiccCardManager {
      * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and a byte array which represents a
      *     {@code LoadBoundProfilePackageResponse} defined in GSMA RSP v2.0+.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void loadBoundProfilePackage(String cardId, byte[] boundProfilePackage,
             @CallbackExecutor Executor executor, ResultCallback<byte[]> callback) {
@@ -779,6 +844,9 @@ public class EuiccCardManager {
      * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and an byte[] which represents a
      *     {@code CancelSessionResponse} defined in GSMA RSP v2.0+.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void cancelSession(String cardId, byte[] transactionId, @CancelReason int reason,
             @CallbackExecutor Executor executor, ResultCallback<byte[]> callback) {
@@ -812,6 +880,9 @@ public class EuiccCardManager {
      * @param events bits of the event types ({@link EuiccNotification.Event}) to list.
      * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the list of notifications.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void listNotifications(String cardId, @EuiccNotification.Event int events,
             @CallbackExecutor Executor executor, ResultCallback<EuiccNotification[]> callback) {
@@ -842,6 +913,9 @@ public class EuiccCardManager {
      * @param events bits of the event types ({@link EuiccNotification.Event}) to list.
      * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the list of notifications.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void retrieveNotificationList(String cardId, @EuiccNotification.Event int events,
             @CallbackExecutor Executor executor, ResultCallback<EuiccNotification[]> callback) {
@@ -872,6 +946,9 @@ public class EuiccCardManager {
      * @param seqNumber the sequence number of the notification.
      * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code and the notification.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void retrieveNotification(String cardId, int seqNumber,
             @CallbackExecutor Executor executor, ResultCallback<EuiccNotification> callback) {
@@ -902,6 +979,9 @@ public class EuiccCardManager {
      * @param seqNumber the sequence number of the notification.
      * @param executor The executor through which the callback should be invoked.
      * @param callback the callback to get the result code.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public void removeNotificationFromList(String cardId, int seqNumber,
             @CallbackExecutor Executor executor, ResultCallback<Void> callback) {

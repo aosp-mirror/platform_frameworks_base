@@ -24,10 +24,13 @@ import android.content.pm.PackagePartitions;
 import android.content.pm.PackagePartitions.SystemPartition;
 import android.os.Build;
 import android.os.FileUtils;
+import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Xml;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.om.OverlayScanner.ParsedOverlayInfo;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
@@ -54,8 +57,11 @@ import java.util.Map;
  *
  * @see #parseOverlay(File, XmlPullParser, OverlayScanner, ParsingContext)
  * @see #parseMerge(File, XmlPullParser, OverlayScanner, ParsingContext)
+ *
+ * @hide
  **/
-final class OverlayConfigParser {
+@VisibleForTesting
+public final class OverlayConfigParser {
 
     /** Represents a part of a parsed overlay configuration XML file. */
     public static class ParsedConfigFile {
@@ -160,7 +166,11 @@ final class OverlayConfigParser {
         }
     }
 
-    static class OverlayPartition extends SystemPartition {
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static class OverlayPartition extends SystemPartition {
         // Policies passed to idmap2 during idmap creation.
         // Keep partition policy constants in sync with f/b/cmds/idmap2/include/idmap2/Policies.h.
         static final String POLICY_ODM = "odm";
@@ -173,7 +183,11 @@ final class OverlayConfigParser {
         @NonNull
         public final String policy;
 
-        OverlayPartition(@NonNull SystemPartition partition) {
+        /**
+         * @hide
+         **/
+        @VisibleForTesting
+        public OverlayPartition(@NonNull SystemPartition partition) {
             super(partition);
             this.policy = policyForPartition(partition);
         }
@@ -227,6 +241,18 @@ final class OverlayConfigParser {
         private ParsingContext(OverlayPartition partition) {
             mPartition = partition;
         }
+    }
+
+    @FunctionalInterface
+    public interface SysPropWrapper{
+        /**
+         * Get system property
+         *
+         * @param property the key to look up.
+         *
+         * @return The property value if found, empty string otherwise.
+         */
+        String get(String property);
     }
 
     /**
@@ -308,6 +334,76 @@ final class OverlayConfigParser {
     }
 
     /**
+     * Expand the property inside a rro configuration path.
+     *
+     * A RRO configuration can contain a property, this method expands
+     * the property to its value.
+     *
+     * Only read only properties allowed, prefixed with ro. Other
+     * properties will raise exception.
+     *
+     * Only a single property in the path is allowed.
+     *
+     * Example "${ro.boot.hardware.sku}/config.xml" would expand to
+     *     "G020N/config.xml"
+     *
+     * @param configPath path to expand
+     * @param sysPropWrapper method used for reading properties
+     *
+     * @return The expanded path. Returns null if configPath is null.
+     */
+    @VisibleForTesting
+    public static String expandProperty(String configPath,
+            SysPropWrapper sysPropWrapper) {
+        if (configPath == null) {
+            return null;
+        }
+
+        int propStartPos = configPath.indexOf("${");
+        if (propStartPos == -1) {
+            // No properties inside the string, return as is
+            return configPath;
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append(configPath.substring(0, propStartPos));
+
+        // Read out the end position
+        int propEndPos = configPath.indexOf("}", propStartPos);
+        if (propEndPos == -1) {
+            throw new IllegalStateException("Malformed property, unmatched braces, in: "
+                    + configPath);
+        }
+
+        // Confirm that there is only one property inside the string
+        if (configPath.indexOf("${", propStartPos + 2) != -1) {
+            throw new IllegalStateException("Only a single property supported in path: "
+                    + configPath);
+        }
+
+        final String propertyName = configPath.substring(propStartPos + 2, propEndPos);
+        if (!propertyName.startsWith("ro.")) {
+            throw new IllegalStateException("Only read only properties can be used when "
+                    + "merging RRO config files: " + propertyName);
+        }
+        final String propertyValue = sysPropWrapper.get(propertyName);
+        if (TextUtils.isEmpty(propertyValue)) {
+            throw new IllegalStateException("Property is empty or doesn't exist: " + propertyName);
+        }
+        Log.d(TAG, String.format("Using property in overlay config path: \"%s\"", propertyName));
+        sb.append(propertyValue);
+
+        // propEndPos points to '}', need to step to next character, might be outside of string
+        propEndPos = propEndPos + 1;
+        // Append the remainder, if exists
+        if (propEndPos < configPath.length()) {
+            sb.append(configPath.substring(propEndPos));
+        }
+
+        return sb.toString();
+    }
+
+    /**
      * Parses a <merge> tag within an overlay configuration file.
      *
      * Merge tags allow for other configuration files to be "merged" at the current parsing
@@ -319,10 +415,21 @@ final class OverlayConfigParser {
             @Nullable OverlayScanner scanner,
             @Nullable Map<String, ParsedOverlayInfo> packageManagerOverlayInfos,
             @NonNull ParsingContext parsingContext) {
-        final String path = parser.getAttributeValue(null, "path");
+        final String path;
+
+        try {
+            SysPropWrapper sysPropWrapper = p -> {
+                return SystemProperties.get(p, "");
+            };
+            path = expandProperty(parser.getAttributeValue(null, "path"), sysPropWrapper);
+        } catch (IllegalStateException e) {
+            throw new IllegalStateException(String.format("<merge> path expand error in %s at %s",
+                    configFile, parser.getPositionDescription()), e);
+        }
+
         if (path == null) {
-            throw new IllegalStateException(String.format("<merge> without path in %s at %s"
-                    + configFile, parser.getPositionDescription()));
+            throw new IllegalStateException(String.format("<merge> without path in %s at %s",
+                    configFile, parser.getPositionDescription()));
         }
 
         if (path.startsWith("/")) {

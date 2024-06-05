@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
@@ -26,6 +27,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 import android.annotation.Nullable;
 import android.platform.test.annotations.Presubmit;
@@ -233,6 +235,22 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDoNotWriteVirtualDisplaySettingsToStorage() throws Exception {
+        final DisplayInfo secondaryDisplayInfo = mSecondaryDisplay.getDisplayInfo();
+        secondaryDisplayInfo.type = TYPE_VIRTUAL;
+
+        // No write to storage on virtual display change.
+        final DisplayWindowSettingsProvider provider = new DisplayWindowSettingsProvider(
+                mDefaultVendorSettingsStorage, mOverrideSettingsStorage);
+        final SettingsEntry virtualSettings = provider.getOverrideSettings(secondaryDisplayInfo);
+        virtualSettings.mShouldShowSystemDecors = true;
+        virtualSettings.mImePolicy = DISPLAY_IME_POLICY_LOCAL;
+        virtualSettings.mDontMoveToTop = true;
+        provider.updateOverrideSettings(secondaryDisplayInfo, virtualSettings);
+        assertFalse(mOverrideSettingsStorage.wasWriteSuccessful());
+    }
+
+    @Test
     public void testWritingDisplaySettingsToStorage_UsePortAsId() throws Exception {
         prepareOverrideDisplaySettings(null /* displayIdentifier */, true /* usePortAsId */);
 
@@ -258,6 +276,54 @@ public class DisplayWindowSettingsProviderTests extends WindowTestsBase {
                 getStoredDisplayAttributeValue(mOverrideSettingsStorage, "shouldShowSystemDecors"));
         assertEquals("Attribute value must be stored", "0",
                 getStoredDisplayAttributeValue(mOverrideSettingsStorage, "imePolicy"));
+    }
+
+    @Test
+    public void testCleanUpEmptyDisplaySettingsOnDisplayRemoved() {
+        final DisplayWindowSettingsProvider provider = new DisplayWindowSettingsProvider(
+                mDefaultVendorSettingsStorage, mOverrideSettingsStorage);
+        final int initialSize = provider.getOverrideSettingsSize();
+
+        // Size + 1 when query for a new display.
+        final DisplayInfo secondaryDisplayInfo = mSecondaryDisplay.getDisplayInfo();
+        final SettingsEntry overrideSettings = provider.getOverrideSettings(secondaryDisplayInfo);
+
+        assertEquals(initialSize + 1, provider.getOverrideSettingsSize());
+
+        // When a display is removed, its override Settings is not removed if there is any override.
+        overrideSettings.mShouldShowSystemDecors = true;
+        provider.updateOverrideSettings(secondaryDisplayInfo, overrideSettings);
+        provider.onDisplayRemoved(secondaryDisplayInfo);
+
+        assertEquals(initialSize + 1, provider.getOverrideSettingsSize());
+
+        // When a display is removed, its override Settings is removed if there is no override.
+        provider.updateOverrideSettings(secondaryDisplayInfo, new SettingsEntry());
+        provider.onDisplayRemoved(secondaryDisplayInfo);
+
+        assertEquals(initialSize, provider.getOverrideSettingsSize());
+    }
+
+    @Test
+    public void testCleanUpVirtualDisplaySettingsOnDisplayRemoved() {
+        final DisplayWindowSettingsProvider provider = new DisplayWindowSettingsProvider(
+                mDefaultVendorSettingsStorage, mOverrideSettingsStorage);
+        final int initialSize = provider.getOverrideSettingsSize();
+
+        // Size + 1 when query for a new display.
+        final DisplayInfo secondaryDisplayInfo = mSecondaryDisplay.getDisplayInfo();
+        secondaryDisplayInfo.type = TYPE_VIRTUAL;
+        final SettingsEntry overrideSettings = provider.getOverrideSettings(secondaryDisplayInfo);
+
+        assertEquals(initialSize + 1, provider.getOverrideSettingsSize());
+
+        // When a virtual display is removed, its override Settings is removed even if it has
+        // override.
+        overrideSettings.mShouldShowSystemDecors = true;
+        provider.updateOverrideSettings(secondaryDisplayInfo, overrideSettings);
+        provider.onDisplayRemoved(secondaryDisplayInfo);
+
+        assertEquals(initialSize, provider.getOverrideSettingsSize());
     }
 
     /**

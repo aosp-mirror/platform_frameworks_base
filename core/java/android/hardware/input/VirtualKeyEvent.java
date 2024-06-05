@@ -172,6 +172,7 @@ public final class VirtualKeyEvent implements Parcelable {
             KeyEvent.KEYCODE_BREAK,
             KeyEvent.KEYCODE_BACK,
             KeyEvent.KEYCODE_FORWARD,
+            KeyEvent.KEYCODE_LANGUAGE_SWITCH,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SupportedKeycode {
@@ -203,6 +204,14 @@ public final class VirtualKeyEvent implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "VirtualKeyEvent("
+                + " action=" + KeyEvent.actionToString(mAction)
+                + " keyCode=" + KeyEvent.keyCodeToString(mKeyCode)
+                + " eventTime(ns)=" + mEventTimeNanos;
     }
 
     /**

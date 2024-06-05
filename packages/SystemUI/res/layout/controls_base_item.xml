@@ -25,7 +25,6 @@
     android:focusable="true"
     android:screenReaderFocusable="true"
     android:stateListAnimator="@anim/control_state_list_animator"
-    android:layout_marginStart="@dimen/control_spacing"
     android:background="@drawable/control_background">
 
     <ImageView

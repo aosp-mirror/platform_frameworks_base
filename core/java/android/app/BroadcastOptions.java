@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.ActivityOptions.BackgroundActivityStartMode;
+
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -46,6 +48,7 @@ import java.util.Objects;
  * {@link android.content.Context#sendBroadcast(android.content.Intent)
  * Context.sendBroadcast(Intent)} and related methods.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BroadcastOptions extends ComponentOptions {
     private @Flags int mFlags;
     private long mTemporaryAppAllowlistDuration;
@@ -751,6 +754,7 @@ public class BroadcastOptions extends ComponentOptions {
      * @hide
      */
     @TestApi
+    @android.ravenwood.annotation.RavenwoodThrow
     public boolean testRequireCompatChange(int uid) {
         if (mRequireCompatChangeId != CHANGE_INVALID) {
             final boolean requireEnabled = (mFlags & FLAG_REQUIRE_COMPAT_CHANGE_ENABLED) != 0;
@@ -843,8 +847,7 @@ public class BroadcastOptions extends ComponentOptions {
      * considered to be in the same delivery group as this iff it has the same {@code namespace}
      * and {@code key}.
      *
-     * <p> If neither matching key using this API nor matching filter using
-     * {@link #setDeliveryGroupMatchingFilter(IntentFilter)} is specified, then by default
+     * <p> If not matching key using this API then by default
      * {@link Intent#filterEquals(Intent)} will be used to identify the delivery group.
      */
     @NonNull
@@ -1059,7 +1062,8 @@ public class BroadcastOptions extends ComponentOptions {
     @SystemApi
     @NonNull
     @Override // to narrow down the return type
-    public BroadcastOptions setPendingIntentBackgroundActivityStartMode(int state) {
+    public BroadcastOptions setPendingIntentBackgroundActivityStartMode(
+            @BackgroundActivityStartMode int state) {
         super.setPendingIntentBackgroundActivityStartMode(state);
         return this;
     }

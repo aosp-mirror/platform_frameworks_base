@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone
 import android.view.View
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.unfold.FoldAodAnimationController
 import com.android.systemui.unfold.SysUIUnfoldComponent
@@ -37,8 +38,12 @@ class ScreenOffAnimationController @Inject constructor(
     private val animations: List<ScreenOffAnimation> =
         listOfNotNull(foldToAodAnimation, unlockedScreenOffAnimation)
 
-    fun initialize(centralSurfaces: CentralSurfaces, lightRevealScrim: LightRevealScrim) {
-        animations.forEach { it.initialize(centralSurfaces, lightRevealScrim) }
+    fun initialize(
+            centralSurfaces: CentralSurfaces,
+            shadeViewController: ShadeViewController,
+            lightRevealScrim: LightRevealScrim,
+    ) {
+        animations.forEach { it.initialize(centralSurfaces, shadeViewController, lightRevealScrim) }
         wakefulnessLifecycle.addObserver(this)
     }
 
@@ -197,7 +202,11 @@ class ScreenOffAnimationController @Inject constructor(
 }
 
 interface ScreenOffAnimation {
-    fun initialize(centralSurfaces: CentralSurfaces, lightRevealScrim: LightRevealScrim) {}
+    fun initialize(
+            centralSurfaces: CentralSurfaces,
+            shadeViewController: ShadeViewController,
+            lightRevealScrim: LightRevealScrim,
+    ) {}
 
     /**
      * Called when started going to sleep, should return true if the animation will be played

@@ -23,15 +23,11 @@ import java.io.File
 object PermissionApex {
     private const val MODULE_NAME = "com.android.permission"
 
-    /**
-     * @see ApexEnvironment.getDeviceProtectedDataDir
-     */
+    /** @see ApexEnvironment.getDeviceProtectedDataDir */
     val systemDataDirectory: File
         get() = apexEnvironment.deviceProtectedDataDir
 
-    /**
-     * @see ApexEnvironment.getDeviceProtectedDataDirForUser
-     */
+    /** @see ApexEnvironment.getDeviceProtectedDataDirForUser */
     fun getUserDataDirectory(userId: Int): File =
         apexEnvironment.getDeviceProtectedDataDirForUser(UserHandle.of(userId))
 

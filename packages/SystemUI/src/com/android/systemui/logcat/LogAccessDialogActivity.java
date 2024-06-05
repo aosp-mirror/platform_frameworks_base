@@ -41,9 +41,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ILogAccessDialogCallback;
-import com.android.systemui.R;
-
+import com.android.systemui.res.R;
 
 /**
  * Dialog responsible for obtaining user consent per-use log access
@@ -69,7 +69,8 @@ public class LogAccessDialogActivity extends Activity implements
 
     private AlertDialog.Builder mAlertDialog;
     private AlertDialog mAlert;
-    private View mAlertView;
+    @VisibleForTesting
+    protected View mAlertView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +116,10 @@ public class LogAccessDialogActivity extends Activity implements
         mAlertDialog = new AlertDialog.Builder(this, themeId);
         mAlertDialog.setView(mAlertView);
         mAlertDialog.setOnCancelListener(dialog -> declineLogAccess());
-        mAlertDialog.setOnDismissListener(dialog -> finish());
+        mAlertDialog.setOnDismissListener(dialog -> {
+            mAlert = null;
+            finish();
+        });
 
         // show Alert
         mAlert = mAlertDialog.create();
@@ -127,12 +131,11 @@ public class LogAccessDialogActivity extends Activity implements
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (!isChangingConfigurations() && mAlert != null && mAlert.isShowing()) {
-            mAlert.dismiss();
+    protected void onStop() {
+        super.onStop();
+        if (!isChangingConfigurations() && mAlert != null) {
+            mAlert.cancel();
         }
-        mAlert = null;
     }
 
     private boolean readIntentInfo(Intent intent) {
@@ -170,7 +173,6 @@ public class LogAccessDialogActivity extends Activity implements
                 case MSG_DISMISS_DIALOG:
                     if (mAlert != null) {
                         mAlert.dismiss();
-                        mAlert = null;
                         declineLogAccess();
                     }
                     break;
@@ -181,7 +183,7 @@ public class LogAccessDialogActivity extends Activity implements
         }
     };
 
-    private String getTitleString(Context context, String callingPackage, int uid)
+    protected String getTitleString(Context context, String callingPackage, int uid)
             throws NameNotFoundException {
         PackageManager pm = context.getPackageManager();
 
@@ -238,13 +240,13 @@ public class LogAccessDialogActivity extends Activity implements
         try {
             if (view.getId() == R.id.log_access_dialog_allow_button) {
                 mCallback.approveAccessForClient(mUid, mPackageName);
-                finish();
             } else if (view.getId() == R.id.log_access_dialog_deny_button) {
                 declineLogAccess();
-                finish();
             }
-        } catch (RemoteException e) {
-            finish();
+        } catch (RemoteException ignored) {
+            // Do nothing.
+        } finally {
+            mAlert.dismiss();
         }
     }
 

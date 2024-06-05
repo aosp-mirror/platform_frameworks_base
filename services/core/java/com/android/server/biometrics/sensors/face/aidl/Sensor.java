@@ -16,27 +16,26 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
-import android.hardware.biometrics.face.AuthenticationFrame;
-import android.hardware.biometrics.face.EnrollmentFrame;
-import android.hardware.biometrics.face.Error;
+import android.hardware.biometrics.common.ComponentInfo;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
-import android.hardware.biometrics.face.ISessionCallback;
-import android.hardware.face.Face;
-import android.hardware.face.FaceManager;
+import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.FaceSensorPropertiesInternal;
-import android.hardware.keymaster.HardwareAuthToken;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
@@ -44,30 +43,26 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
 import com.android.server.biometrics.UserStateProto;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
-import com.android.server.biometrics.sensors.AuthSessionCoordinator;
-import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
-import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.LockoutCache;
-import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
-import com.android.server.biometrics.sensors.RemovalConsumer;
+import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.StartUserClient;
 import com.android.server.biometrics.sensors.StopUserClient;
-import com.android.server.biometrics.sensors.UserAwareBiometricScheduler;
+import com.android.server.biometrics.sensors.UserSwitchProvider;
 import com.android.server.biometrics.sensors.face.FaceUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -76,496 +71,154 @@ import java.util.function.Supplier;
  */
 public class Sensor {
 
+    private static final String TAG = "Sensor";
+
     private boolean mTestHalEnabled;
 
-    @NonNull private final String mTag;
     @NonNull private final FaceProvider mProvider;
     @NonNull private final Context mContext;
     @NonNull private final IBinder mToken;
     @NonNull private final Handler mHandler;
     @NonNull private final FaceSensorPropertiesInternal mSensorProperties;
-    @NonNull private final UserAwareBiometricScheduler mScheduler;
-    @NonNull private final LockoutCache mLockoutCache;
+    @NonNull private BiometricScheduler<IFace, ISession> mScheduler;
+    @Nullable private LockoutTracker mLockoutTracker;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
 
-    @NonNull private final Supplier<AidlSession> mLazySession;
+    @NonNull private Supplier<AidlSession> mLazySession;
     @Nullable AidlSession mCurrentSession;
+    @NonNull BiometricContext mBiometricContext;
 
-    @VisibleForTesting
-    public static class HalSessionCallback extends ISessionCallback.Stub {
-        /**
-         * Interface to sends results to the HalSessionCallback's owner.
-         */
-        public interface Callback {
-            /**
-             * Invoked when the HAL sends ERROR_HW_UNAVAILABLE.
-             */
-            void onHardwareUnavailable();
-        }
-
-        @NonNull
-        private final Context mContext;
-        @NonNull
-        private final Handler mHandler;
-        @NonNull
-        private final String mTag;
-        @NonNull
-        private final UserAwareBiometricScheduler mScheduler;
-        private final int mSensorId;
-        private final int mUserId;
-        @NonNull
-        private final LockoutCache mLockoutCache;
-        @NonNull
-        private final LockoutResetDispatcher mLockoutResetDispatcher;
-
-        @NonNull
-        private AuthSessionCoordinator mAuthSessionCoordinator;
-        @NonNull
-        private final Callback mCallback;
-
-        HalSessionCallback(@NonNull Context context, @NonNull Handler handler, @NonNull String tag,
-                @NonNull UserAwareBiometricScheduler scheduler, int sensorId, int userId,
-                @NonNull LockoutCache lockoutTracker,
-                @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-                @NonNull AuthSessionCoordinator authSessionCoordinator,
-                @NonNull Callback callback) {
-            mContext = context;
-            mHandler = handler;
-            mTag = tag;
-            mScheduler = scheduler;
-            mSensorId = sensorId;
-            mUserId = userId;
-            mLockoutCache = lockoutTracker;
-            mLockoutResetDispatcher = lockoutResetDispatcher;
-            mAuthSessionCoordinator = authSessionCoordinator;
-            mCallback = callback;
-        }
-
-        @Override
-        public int getInterfaceVersion() {
-            return this.VERSION;
-        }
-
-        @Override
-        public String getInterfaceHash() {
-            return this.HASH;
-        }
-
-        @Override
-        public void onChallengeGenerated(long challenge) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceGenerateChallengeClient)) {
-                    Slog.e(mTag, "onChallengeGenerated for wrong client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FaceGenerateChallengeClient generateChallengeClient =
-                        (FaceGenerateChallengeClient) client;
-                generateChallengeClient.onChallengeGenerated(mSensorId, mUserId, challenge);
-            });
-        }
-
-        @Override
-        public void onChallengeRevoked(long challenge) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceRevokeChallengeClient)) {
-                    Slog.e(mTag, "onChallengeRevoked for wrong client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FaceRevokeChallengeClient revokeChallengeClient =
-                        (FaceRevokeChallengeClient) client;
-                revokeChallengeClient.onChallengeRevoked(mSensorId, mUserId, challenge);
-            });
-        }
-
-        @Override
-        public void onAuthenticationFrame(AuthenticationFrame frame) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceAuthenticationClient)) {
-                    Slog.e(mTag, "onAuthenticationFrame for incompatible client: "
-                            + Utils.getClientName(client));
-                    return;
-
-                }
-                if (frame == null) {
-                    Slog.e(mTag, "Received null authentication frame for client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-                ((FaceAuthenticationClient) client).onAuthenticationFrame(
-                        AidlConversionUtils.toFrameworkAuthenticationFrame(frame));
-            });
-        }
-
-        @Override
-        public void onEnrollmentFrame(EnrollmentFrame frame) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceEnrollClient)) {
-                    Slog.e(mTag, "onEnrollmentFrame for incompatible client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-                if (frame == null) {
-                    Slog.e(mTag, "Received null enrollment frame for client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-                ((FaceEnrollClient) client).onEnrollmentFrame(
-                        AidlConversionUtils.toFrameworkEnrollmentFrame(frame));
-            });
-        }
-
-        @Override
-        public void onError(byte error, int vendorCode) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                Slog.d(mTag, "onError"
-                        + ", client: " + Utils.getClientName(client)
-                        + ", error: " + error
-                        + ", vendorCode: " + vendorCode);
-                if (!(client instanceof ErrorConsumer)) {
-                    Slog.e(mTag, "onError for non-error consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final ErrorConsumer errorConsumer = (ErrorConsumer) client;
-                errorConsumer.onError(AidlConversionUtils.toFrameworkError(error), vendorCode);
-
-                if (error == Error.HW_UNAVAILABLE) {
-                    mCallback.onHardwareUnavailable();
-                }
-            });
-        }
-
-        @Override
-        public void onEnrollmentProgress(int enrollmentId, int remaining) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceEnrollClient)) {
-                    Slog.e(mTag, "onEnrollmentProgress for non-enroll client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final int currentUserId = client.getTargetUserId();
-                final CharSequence name = FaceUtils.getInstance(mSensorId)
-                        .getUniqueName(mContext, currentUserId);
-                final Face face = new Face(name, enrollmentId, mSensorId);
-
-                final FaceEnrollClient enrollClient = (FaceEnrollClient) client;
-                enrollClient.onEnrollResult(face, remaining);
-            });
-        }
-
-        @Override
-        public void onAuthenticationSucceeded(int enrollmentId, HardwareAuthToken hat) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof AuthenticationConsumer)) {
-                    Slog.e(mTag, "onAuthenticationSucceeded for non-authentication consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final AuthenticationConsumer authenticationConsumer =
-                        (AuthenticationConsumer) client;
-                final Face face = new Face("" /* name */, enrollmentId, mSensorId);
-                final byte[] byteArray = HardwareAuthTokenUtils.toByteArray(hat);
-                final ArrayList<Byte> byteList = new ArrayList<>();
-                for (byte b : byteArray) {
-                    byteList.add(b);
-                }
-                authenticationConsumer.onAuthenticated(face, true /* authenticated */, byteList);
-            });
-        }
-
-        @Override
-        public void onAuthenticationFailed() {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof AuthenticationConsumer)) {
-                    Slog.e(mTag, "onAuthenticationFailed for non-authentication consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final AuthenticationConsumer authenticationConsumer =
-                        (AuthenticationConsumer) client;
-                final Face face = new Face("" /* name */, 0 /* faceId */, mSensorId);
-                authenticationConsumer.onAuthenticated(face, false /* authenticated */,
-                        null /* hat */);
-            });
-        }
-
-        @Override
-        public void onLockoutTimed(long durationMillis) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof LockoutConsumer)) {
-                    Slog.e(mTag, "onLockoutTimed for non-lockout consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final LockoutConsumer lockoutConsumer = (LockoutConsumer) client;
-                lockoutConsumer.onLockoutTimed(durationMillis);
-            });
-        }
-
-        @Override
-        public void onLockoutPermanent() {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof LockoutConsumer)) {
-                    Slog.e(mTag, "onLockoutPermanent for non-lockout consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final LockoutConsumer lockoutConsumer = (LockoutConsumer) client;
-                lockoutConsumer.onLockoutPermanent();
-            });
-        }
-
-        @Override
-        public void onLockoutCleared() {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceResetLockoutClient)) {
-                    Slog.d(mTag, "onLockoutCleared outside of resetLockout by HAL");
-                    // Given that onLockoutCleared() can happen at any time, and is not necessarily
-                    // coming from a specific client, set this to -1 to indicate it wasn't for a
-                    // specific request.
-                    FaceResetLockoutClient.resetLocalLockoutStateToNone(mSensorId, mUserId,
-                            mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
-                            Utils.getCurrentStrength(mSensorId), -1 /* requestId */);
-                } else {
-                    Slog.d(mTag, "onLockoutCleared after resetLockout");
-                    final FaceResetLockoutClient resetLockoutClient =
-                            (FaceResetLockoutClient) client;
-                    resetLockoutClient.onLockoutCleared();
-                }
-            });
-        }
-
-        @Override
-        public void onInteractionDetected() {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceDetectClient)) {
-                    Slog.e(mTag, "onInteractionDetected for wrong client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FaceDetectClient detectClient = (FaceDetectClient) client;
-                detectClient.onInteractionDetected();
-            });
-        }
-
-        @Override
-        public void onEnrollmentsEnumerated(int[] enrollmentIds) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof EnumerateConsumer)) {
-                    Slog.e(mTag, "onEnrollmentsEnumerated for non-enumerate consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final EnumerateConsumer enumerateConsumer =
-                        (EnumerateConsumer) client;
-                if (enrollmentIds.length > 0) {
-                    for (int i = 0; i < enrollmentIds.length; ++i) {
-                        final Face face = new Face("" /* name */, enrollmentIds[i], mSensorId);
-                        enumerateConsumer.onEnumerationResult(face, enrollmentIds.length - i - 1);
-                    }
-                } else {
-                    enumerateConsumer.onEnumerationResult(null /* identifier */, 0 /* remaining */);
-                }
-            });
-        }
-
-        @Override
-        public void onFeaturesRetrieved(byte[] features) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceGetFeatureClient)) {
-                    Slog.e(mTag, "onFeaturesRetrieved for non-get feature consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-                final FaceGetFeatureClient faceGetFeatureClient = (FaceGetFeatureClient) client;
-                faceGetFeatureClient.onFeatureGet(true /* success */, features);
-            });
-
-        }
-
-        @Override
-        public void onFeatureSet(byte feature) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceSetFeatureClient)) {
-                    Slog.e(mTag, "onFeatureSet for non-set consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FaceSetFeatureClient faceSetFeatureClient = (FaceSetFeatureClient) client;
-                faceSetFeatureClient.onFeatureSet(true /* success */);
-            });
-        }
-
-        @Override
-        public void onEnrollmentsRemoved(int[] enrollmentIds) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof RemovalConsumer)) {
-                    Slog.e(mTag, "onRemoved for non-removal consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final RemovalConsumer removalConsumer = (RemovalConsumer) client;
-                if (enrollmentIds.length > 0) {
-                    for (int i = 0; i < enrollmentIds.length; i++) {
-                        final Face face = new Face("" /* name */, enrollmentIds[i], mSensorId);
-                        removalConsumer.onRemoved(face, enrollmentIds.length - i - 1);
-                    }
-                } else {
-                    removalConsumer.onRemoved(null /* identifier */, 0 /* remaining */);
-                }
-            });
-        }
-
-        @Override
-        public void onAuthenticatorIdRetrieved(long authenticatorId) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceGetAuthenticatorIdClient)) {
-                    Slog.e(mTag, "onAuthenticatorIdRetrieved for wrong consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FaceGetAuthenticatorIdClient getAuthenticatorIdClient =
-                        (FaceGetAuthenticatorIdClient) client;
-                getAuthenticatorIdClient.onAuthenticatorIdRetrieved(authenticatorId);
-            });
-        }
-
-        @Override
-        public void onAuthenticatorIdInvalidated(long newAuthenticatorId) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FaceInvalidationClient)) {
-                    Slog.e(mTag, "onAuthenticatorIdInvalidated for wrong consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FaceInvalidationClient invalidationClient = (FaceInvalidationClient) client;
-                invalidationClient.onAuthenticatorIdInvalidated(newAuthenticatorId);
-            });
-        }
-
-        @Override
-        public void onSessionClosed() {
-            mHandler.post(mScheduler::onUserStopped);
-        }
-    }
-
-    Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
+    Sensor(@NonNull FaceProvider provider, @NonNull Context context,
             @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull BiometricContext biometricContext, AidlSession session) {
-        mTag = tag;
+            @NonNull BiometricContext biometricContext) {
         mProvider = provider;
         mContext = context;
         mToken = new Binder();
         mHandler = handler;
         mSensorProperties = sensorProperties;
-        mScheduler = new UserAwareBiometricScheduler(tag,
-                BiometricScheduler.SENSOR_TYPE_FACE, null /* gestureAvailabilityDispatcher */,
+        mBiometricContext = biometricContext;
+        mAuthenticatorIds = new HashMap<>();
+    }
+
+    public Sensor(@NonNull FaceProvider provider, @NonNull Context context,
+            @NonNull Handler handler, @NonNull SensorProps prop,
+            @NonNull BiometricContext biometricContext,
+            boolean resetLockoutRequiresChallenge) {
+        this(provider, context, handler,
+                getFaceSensorPropertiesInternal(prop, resetLockoutRequiresChallenge),
+                biometricContext);
+    }
+
+    /**
+     * Initialize biometric scheduler, lockout tracker and session for the sensor.
+     */
+    public void init(@NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull FaceProvider provider) {
+        setScheduler(getBiometricSchedulerForInit(lockoutResetDispatcher, provider));
+        mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
+        mLockoutTracker = new LockoutCache();
+    }
+
+    private BiometricScheduler<IFace, ISession> getBiometricSchedulerForInit(
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull FaceProvider provider) {
+        return new BiometricScheduler<>(mHandler,
+                BiometricScheduler.SENSOR_TYPE_FACE,
+                null /* gestureAvailabilityDispatcher */,
                 () -> mCurrentSession != null ? mCurrentSession.getUserId() : UserHandle.USER_NULL,
-                new UserAwareBiometricScheduler.UserSwitchCallback() {
+                new UserSwitchProvider<IFace, ISession>() {
                     @NonNull
                     @Override
-                    public StopUserClient<?> getStopUserClient(int userId) {
-                        return new FaceStopUserClient(mContext, mLazySession, mToken, userId,
-                                mSensorProperties.sensorId,
-                                BiometricLogger.ofUnknown(mContext), biometricContext,
-                                () -> mCurrentSession = null);
+                    public StopUserClient<ISession> getStopUserClient(int userId) {
+                        return new FaceStopUserClient(mContext,
+                                () -> mLazySession.get().getSession(), mToken, userId,
+                                mSensorProperties.sensorId, BiometricLogger.ofUnknown(mContext),
+                                mBiometricContext, () -> mCurrentSession = null);
                     }
 
                     @NonNull
                     @Override
-                    public StartUserClient<?, ?> getStartUserClient(int newUserId) {
+                    public StartUserClient<IFace, ISession> getStartUserClient(int newUserId) {
                         final int sensorId = mSensorProperties.sensorId;
-
-                        final HalSessionCallback resultController = new HalSessionCallback(mContext,
-                                mHandler, mTag, mScheduler, sensorId, newUserId, mLockoutCache,
-                                lockoutResetDispatcher,
-                                biometricContext.getAuthSessionCoordinator(), () -> {
-                            Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
-                            mCurrentSession = null;
-                        });
-
-                        final StartUserClient.UserStartedCallback<ISession> userStartedCallback =
-                                (userIdStarted, newSession, halInterfaceVersion) -> {
-                                    Slog.d(mTag, "New session created for user: "
-                                            + userIdStarted + " with hal version: "
-                                            + halInterfaceVersion);
-                                    mCurrentSession = new AidlSession(halInterfaceVersion,
-                                            newSession, userIdStarted, resultController);
-                                    if (FaceUtils.getLegacyInstance(sensorId)
-                                            .isInvalidationInProgress(mContext, userIdStarted)) {
-                                        Slog.w(mTag,
-                                                "Scheduling unfinished invalidation request for "
-                                                        + "sensor: "
-                                                        + sensorId
-                                                        + ", user: " + userIdStarted);
-                                        provider.scheduleInvalidationRequest(sensorId,
-                                                userIdStarted);
+                        final AidlResponseHandler resultController = new AidlResponseHandler(
+                                mContext, mScheduler, sensorId, newUserId,
+                                mLockoutTracker, lockoutResetDispatcher,
+                                mBiometricContext.getAuthSessionCoordinator(),
+                                new AidlResponseHandler.AidlResponseHandlerCallback() {
+                                    @Override
+                                    public void onEnrollSuccess() {
+                                        mProvider.scheduleLoadAuthenticatorIdsForUser(sensorId,
+                                                newUserId);
+                                        mProvider.scheduleInvalidationRequest(sensorId,
+                                                newUserId);
                                     }
-                                };
 
-                        return new FaceStartUserClient(mContext, provider::getHalInstance,
-                                mToken, newUserId, mSensorProperties.sensorId,
-                                BiometricLogger.ofUnknown(mContext), biometricContext,
-                                resultController, userStartedCallback);
+                                    @Override
+                                    public void onHardwareUnavailable() {
+                                        Slog.e(TAG, "Face sensor hardware unavailable.");
+                                        mCurrentSession = null;
+                                    }
+                                });
+
+                        return Sensor.this.getStartUserClient(resultController, sensorId,
+                                newUserId, provider);
                     }
                 });
-        mLockoutCache = new LockoutCache();
-        mAuthenticatorIds = new HashMap<>();
-        mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
     }
 
-    Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
-            @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull BiometricContext biometricContext) {
-        this(tag, provider, context, handler, sensorProperties, lockoutResetDispatcher,
-                biometricContext, null);
+    private FaceStartUserClient getStartUserClient(@NonNull AidlResponseHandler resultController,
+            int sensorId, int newUserId, @NonNull FaceProvider provider) {
+        final StartUserClient.UserStartedCallback<ISession> userStartedCallback =
+                (userIdStarted, newSession, halInterfaceVersion) -> {
+                    Slog.d(TAG, "New face session created for user: "
+                            + userIdStarted + " with hal version: "
+                            + halInterfaceVersion);
+                    mCurrentSession = new AidlSession(halInterfaceVersion,
+                            newSession, userIdStarted, resultController);
+                    if (FaceUtils.getLegacyInstance(sensorId)
+                            .isInvalidationInProgress(mContext, userIdStarted)) {
+                        Slog.w(TAG,
+                                "Scheduling unfinished invalidation request for "
+                                        + "face sensor: "
+                                        + sensorId
+                                        + ", user: " + userIdStarted);
+                        provider.scheduleInvalidationRequest(sensorId,
+                                userIdStarted);
+                    }
+                };
+
+        return new FaceStartUserClient(mContext, provider::getHalInstance, mToken, newUserId,
+                mSensorProperties.sensorId, BiometricLogger.ofUnknown(mContext), mBiometricContext,
+                resultController, userStartedCallback);
     }
 
-    @NonNull Supplier<AidlSession> getLazySession() {
+    private static FaceSensorPropertiesInternal getFaceSensorPropertiesInternal(SensorProps prop,
+            boolean resetLockoutRequiresChallenge) {
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        if (prop.commonProps.componentInfo != null) {
+            for (ComponentInfo info : prop.commonProps.componentInfo) {
+                componentInfo.add(new ComponentInfoInternal(info.componentId,
+                        info.hardwareVersion, info.firmwareVersion, info.serialNumber,
+                        info.softwareVersion));
+            }
+        }
+        return new FaceSensorPropertiesInternal(
+                prop.commonProps.sensorId, prop.commonProps.sensorStrength,
+                prop.commonProps.maxEnrollmentsPerUser, componentInfo, prop.sensorType,
+                prop.supportsDetectInteraction, prop.halControlsPreview,
+                resetLockoutRequiresChallenge);
+    }
+
+    @NonNull public Supplier<AidlSession> getLazySession() {
         return mLazySession;
     }
 
-    @NonNull FaceSensorPropertiesInternal getSensorProperties() {
+    @NonNull protected FaceSensorPropertiesInternal getSensorProperties() {
         return mSensorProperties;
     }
 
-    @VisibleForTesting @Nullable AidlSession getSessionForUser(int userId) {
+    @VisibleForTesting @Nullable protected AidlSession getSessionForUser(int userId) {
+        Slog.d(TAG, "getSessionForUser: mCurrentSession: " + mCurrentSession);
         if (mCurrentSession != null && mCurrentSession.getUserId() == userId) {
             return mCurrentSession;
         } else {
@@ -578,30 +231,33 @@ public class Sensor {
                 mProvider, this);
     }
 
-    @NonNull BiometricScheduler getScheduler() {
+    @NonNull public BiometricScheduler<IFace, ISession> getScheduler() {
         return mScheduler;
     }
 
-    @NonNull LockoutCache getLockoutCache() {
-        return mLockoutCache;
+    @NonNull protected LockoutTracker getLockoutTracker(boolean forAuth) {
+        if (forAuth) {
+            return null;
+        }
+        return mLockoutTracker;
     }
 
-    @NonNull Map<Integer, Long> getAuthenticatorIds() {
+    @NonNull protected Map<Integer, Long> getAuthenticatorIds() {
         return mAuthenticatorIds;
     }
 
     void setTestHalEnabled(boolean enabled) {
-        Slog.w(mTag, "setTestHalEnabled: " + enabled);
+        Slog.w(TAG, "Face setTestHalEnabled: " + enabled);
         if (enabled != mTestHalEnabled) {
             // The framework should retrieve a new session from the HAL.
             try {
                 if (mCurrentSession != null) {
                     // TODO(181984005): This should be scheduled instead of directly invoked
-                    Slog.d(mTag, "Closing old session");
+                    Slog.d(TAG, "Closing old face session");
                     mCurrentSession.getSession().close();
                 }
             } catch (RemoteException e) {
-                Slog.e(mTag, "RemoteException", e);
+                Slog.e(TAG, "RemoteException", e);
             }
             mCurrentSession = null;
         }
@@ -640,9 +296,9 @@ public class Sensor {
     public void onBinderDied() {
         final BaseClientMonitor client = mScheduler.getCurrentClient();
         if (client != null && client.isInterruptable()) {
-            Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
+            Slog.e(TAG, "Sending face hardware unavailable error for client: " + client);
             final ErrorConsumer errorConsumer = (ErrorConsumer) client;
-            errorConsumer.onError(FaceManager.FACE_ERROR_HW_UNAVAILABLE,
+            errorConsumer.onError(FACE_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
 
             FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
@@ -656,5 +312,50 @@ public class Sensor {
         mScheduler.recordCrashState();
         mScheduler.reset();
         mCurrentSession = null;
+    }
+
+    protected BiometricContext getBiometricContext() {
+        return mBiometricContext;
+    }
+
+    protected Handler getHandler() {
+        return mHandler;
+    }
+
+    protected Context getContext() {
+        return mContext;
+    }
+
+    /**
+     * Schedules FaceUpdateActiveUserClient for user id.
+     */
+    public void scheduleFaceUpdateActiveUserClient(int userId) {}
+
+    /**
+     * Returns true if the sensor hardware is detected.
+     */
+    public boolean isHardwareDetected(String halInstanceName) {
+        if (mTestHalEnabled) {
+            return true;
+        }
+        return ServiceManager.checkService(IFace.DESCRIPTOR + "/" + halInstanceName) != null;
+    }
+
+    /**
+     * Returns lockout mode of this sensor.
+     */
+    @LockoutTracker.LockoutMode
+    public int getLockoutModeForUser(int userId) {
+        return mBiometricContext.getAuthSessionCoordinator().getLockoutStateFor(userId,
+                Utils.getCurrentStrength(mSensorProperties.sensorId));
+    }
+
+    public void setScheduler(BiometricScheduler scheduler) {
+        mScheduler = scheduler;
+    }
+
+    public void setLazySession(
+            Supplier<AidlSession> lazySession) {
+        mLazySession = lazySession;
     }
 }

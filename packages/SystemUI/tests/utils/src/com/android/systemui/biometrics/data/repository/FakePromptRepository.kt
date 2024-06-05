@@ -17,34 +17,64 @@ class FakePromptRepository : PromptRepository {
     private val _userId = MutableStateFlow<Int?>(null)
     override val userId = _userId.asStateFlow()
 
+    private val _requestId = MutableStateFlow<Long?>(null)
+    override val requestId = _requestId.asStateFlow()
+
     private var _challenge = MutableStateFlow<Long?>(null)
     override val challenge = _challenge.asStateFlow()
 
-    private val _kind = MutableStateFlow<PromptKind>(PromptKind.Biometric())
-    override val kind = _kind.asStateFlow()
+    private val _promptKind = MutableStateFlow<PromptKind>(PromptKind.None)
+    override val promptKind = _promptKind.asStateFlow()
 
     private val _isConfirmationRequired = MutableStateFlow(false)
     override val isConfirmationRequired = _isConfirmationRequired.asStateFlow()
 
+    private val _opPackageName: MutableStateFlow<String?> = MutableStateFlow(null)
+    override val opPackageName = _opPackageName.asStateFlow()
+
     override fun setPrompt(
         promptInfo: PromptInfo,
         userId: Int,
+        requestId: Long,
         gatekeeperChallenge: Long?,
         kind: PromptKind,
-        requireConfirmation: Boolean,
+        opPackageName: String,
+    ) =
+        setPrompt(
+            promptInfo,
+            userId,
+            requestId,
+            gatekeeperChallenge,
+            kind,
+            forceConfirmation = false,
+            opPackageName = opPackageName
+        )
+
+    fun setPrompt(
+        promptInfo: PromptInfo,
+        userId: Int,
+        requestId: Long,
+        gatekeeperChallenge: Long?,
+        kind: PromptKind,
+        forceConfirmation: Boolean = false,
+        opPackageName: String? = null,
     ) {
         _promptInfo.value = promptInfo
         _userId.value = userId
+        _requestId.value = requestId
         _challenge.value = gatekeeperChallenge
-        _kind.value = kind
-        _isConfirmationRequired.value = requireConfirmation
+        _promptKind.value = kind
+        _isConfirmationRequired.value = promptInfo.isConfirmationRequested || forceConfirmation
+        _opPackageName.value = opPackageName
     }
 
-    override fun unsetPrompt() {
+    override fun unsetPrompt(requestId: Long) {
         _promptInfo.value = null
         _userId.value = null
+        _requestId.value = null
         _challenge.value = null
-        _kind.value = PromptKind.Biometric()
+        _promptKind.value = PromptKind.None
+        _opPackageName.value = null
         _isConfirmationRequired.value = false
     }
 

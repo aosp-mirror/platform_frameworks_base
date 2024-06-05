@@ -16,8 +16,9 @@
 
 package com.android.systemui.log
 
+import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.bouncer.shared.model.BouncerMessageModel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.BouncerLog
 import javax.inject.Inject
 
@@ -58,5 +59,17 @@ class BouncerLogger @Inject constructor(@BouncerLog private val buffer: LogBuffe
 
     fun bindingBouncerMessageView() {
         buffer.log(TAG, LogLevel.DEBUG, "Binding BouncerMessageView")
+    }
+
+    fun interestedStateChanged(whatChanged: String, newValue: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = whatChanged
+                bool1 = newValue
+            },
+            { "state changed: $str1: $bool1" }
+        )
     }
 }

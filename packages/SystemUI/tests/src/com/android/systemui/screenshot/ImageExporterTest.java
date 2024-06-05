@@ -16,6 +16,8 @@
 
 package com.android.systemui.screenshot;
 
+import static com.android.systemui.screenshot.ImageExporter.createSystemFileDisplayName;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -39,6 +41,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.testing.AndroidTestingRunner;
+import android.view.Display;
 
 import androidx.exifinterface.media.ExifInterface;
 import androidx.test.filters.MediumTest;
@@ -88,7 +91,20 @@ public class ImageExporterTest extends SysuiTestCase {
     @Test
     public void testImageFilename() {
         assertEquals("image file name", "Screenshot_20201215-131500.png",
-                ImageExporter.createFilename(CAPTURE_TIME, CompressFormat.PNG));
+                ImageExporter.createFilename(CAPTURE_TIME, CompressFormat.PNG,
+                    Display.DEFAULT_DISPLAY));
+    }
+
+    @Test
+    public void testImageFilename_secondaryDisplay1() {
+        assertEquals("image file name", "Screenshot_20201215-131500-display-1.png",
+                ImageExporter.createFilename(CAPTURE_TIME, CompressFormat.PNG, /* displayId= */ 1));
+    }
+
+    @Test
+    public void testImageFilename_secondaryDisplay2() {
+        assertEquals("image file name", "Screenshot_20201215-131500-display-2.png",
+                ImageExporter.createFilename(CAPTURE_TIME, CompressFormat.PNG, /* displayId= */ 2));
     }
 
     @Test
@@ -116,7 +132,7 @@ public class ImageExporterTest extends SysuiTestCase {
 
         ListenableFuture<ImageExporter.Result> direct =
                 exporter.export(DIRECT_EXECUTOR, requestId, original, CAPTURE_TIME,
-                        Process.myUserHandle());
+                        Process.myUserHandle(), Display.DEFAULT_DISPLAY);
         assertTrue("future should be done", direct.isDone());
         assertFalse("future should not be canceled", direct.isCancelled());
         ImageExporter.Result result = direct.get();
@@ -168,8 +184,33 @@ public class ImageExporterTest extends SysuiTestCase {
     }
 
     @Test
+    public void testImageExport_customizedFileName()
+            throws ExecutionException, InterruptedException {
+        // This test only asserts the file name for the case when user specifies a file name,
+        // instead of using the auto-generated name by ImageExporter::createFileName. Other
+        // metadata are not affected by the specified file name.
+        final String customizedFileName = "customized_file_name";
+        ContentResolver contentResolver = mContext.getContentResolver();
+        ImageExporter exporter = new ImageExporter(contentResolver, mFeatureFlags);
+
+        UUID requestId = UUID.fromString("3c11da99-9284-4863-b1d5-6f3684976814");
+        Bitmap original = createCheckerBitmap(10, 10, 10);
+
+        ListenableFuture<ImageExporter.Result> direct =
+                exporter.export(DIRECT_EXECUTOR, requestId, original, CAPTURE_TIME,
+                        Process.myUserHandle(), customizedFileName);
+        assertTrue("future should be done", direct.isDone());
+        assertFalse("future should not be canceled", direct.isCancelled());
+        ImageExporter.Result result = direct.get();
+        assertEquals("Filename should contain the correct filename",
+                createSystemFileDisplayName(customizedFileName, CompressFormat.PNG),
+                result.fileName);
+    }
+
+    @Test
     public void testMediaStoreMetadata() {
-        String name = ImageExporter.createFilename(CAPTURE_TIME, CompressFormat.PNG);
+        String name = ImageExporter.createFilename(CAPTURE_TIME, CompressFormat.PNG,
+                Display.DEFAULT_DISPLAY);
         ContentValues values = ImageExporter.createMetadata(CAPTURE_TIME, CompressFormat.PNG, name);
         assertEquals("Pictures/Screenshots",
                 values.getAsString(MediaStore.MediaColumns.RELATIVE_PATH));
@@ -196,7 +237,7 @@ public class ImageExporterTest extends SysuiTestCase {
         Mockito.when(mMockContentResolver.insert(uriCaptor.capture(), Mockito.any())).thenReturn(
                 null);
         exporter.export(DIRECT_EXECUTOR, UUID.fromString("3c11da99-9284-4863-b1d5-6f3684976814"),
-                null, CAPTURE_TIME, imageUserHande);
+                null, CAPTURE_TIME, imageUserHande, Display.DEFAULT_DISPLAY);
 
         Uri expected = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         expected = ContentProvider.maybeAddUserId(expected, imageUserHande.getIdentifier());

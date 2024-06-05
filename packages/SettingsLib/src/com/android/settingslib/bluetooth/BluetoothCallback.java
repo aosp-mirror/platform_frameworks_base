@@ -26,9 +26,9 @@ import static android.bluetooth.BluetoothAdapter.STATE_TURNING_OFF;
 import static android.bluetooth.BluetoothAdapter.STATE_TURNING_ON;
 
 import android.annotation.IntDef;
-import android.annotation.Nullable;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -162,6 +162,16 @@ public interface BluetoothCallback {
      */
     default void onAclConnectionStateChanged(
             @NonNull CachedBluetoothDevice cachedDevice, int state) {}
+
+    /**
+     * Called when the Auto-on state is changed for any user. Listens to intent
+     * {@link android.bluetooth.BluetoothAdapter#ACTION_AUTO_ON_STATE_CHANGED }
+     *
+     * @param state        the Auto-on state, the possible values are:
+     *                     {@link android.bluetooth.BluetoothAdapter#AUTO_ON_STATE_ENABLED},
+     *                     {@link android.bluetooth.BluetoothAdapter#AUTO_ON_STATE_DISABLED}
+     */
+    default void onAutoOnStateChanged(int state) {}
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "STATE_" }, value = {

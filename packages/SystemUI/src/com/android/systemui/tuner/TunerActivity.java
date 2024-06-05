@@ -30,9 +30,9 @@ import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceScreen;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import javax.inject.Inject;
@@ -61,7 +61,7 @@ public class TunerActivity extends Activity implements
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.Theme_AppCompat_DayNight);
+        setTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         requestWindowFeature(Window.FEATURE_NO_TITLE);

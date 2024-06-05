@@ -121,23 +121,25 @@ public final class ShutdownCheckPoints {
 
     @VisibleForTesting
     void recordCheckPointInternal(@Nullable String reason) {
-        recordCheckPointInternal(new SystemServerCheckPoint(mInjector, reason));
+        recordCheckPointInternal(new SystemServerCheckPoint(mInjector.currentTimeMillis(), reason));
         Slog.v(TAG, "System server shutdown checkpoint recorded");
     }
 
     @VisibleForTesting
     void recordCheckPointInternal(int callerProcessId, @Nullable String reason) {
+        long timestamp = mInjector.currentTimeMillis();
         recordCheckPointInternal(callerProcessId == Process.myPid()
-                ? new SystemServerCheckPoint(mInjector, reason)
-                : new BinderCheckPoint(mInjector, callerProcessId, reason));
+                ? new SystemServerCheckPoint(timestamp, reason)
+                : new BinderCheckPoint(timestamp, callerProcessId, reason));
         Slog.v(TAG, "Binder shutdown checkpoint recorded with pid=" + callerProcessId);
     }
 
     @VisibleForTesting
     void recordCheckPointInternal(String intentName, String packageName, @Nullable String reason) {
+        long timestamp = mInjector.currentTimeMillis();
         recordCheckPointInternal("android".equals(packageName)
-                ? new SystemServerCheckPoint(mInjector, reason)
-                : new IntentCheckPoint(mInjector, intentName, packageName, reason));
+                ? new SystemServerCheckPoint(timestamp, reason)
+                : new IntentCheckPoint(timestamp, intentName, packageName, reason));
         Slog.v(TAG, String.format("Shutdown intent checkpoint recorded intent=%s from package=%s",
                 intentName, packageName));
     }
@@ -156,7 +158,7 @@ public final class ShutdownCheckPoints {
             records = new ArrayList<>(mCheckPoints);
         }
         for (CheckPoint record : records) {
-            record.dump(printWriter);
+            record.dump(mInjector, printWriter);
             printWriter.println();
         }
     }
@@ -185,12 +187,12 @@ public final class ShutdownCheckPoints {
         private final long mTimestamp;
         @Nullable private final String mReason;
 
-        CheckPoint(Injector injector, @Nullable String reason) {
-            mTimestamp = injector.currentTimeMillis();
+        CheckPoint(long timestamp, @Nullable String reason) {
+            mTimestamp = timestamp;
             mReason = reason;
         }
 
-        final void dump(PrintWriter printWriter) {
+        final void dump(Injector injector, PrintWriter printWriter) {
             printWriter.print("Shutdown request from ");
             printWriter.print(getOrigin());
             if (mReason != null) {
@@ -200,12 +202,12 @@ public final class ShutdownCheckPoints {
             printWriter.print(" at ");
             printWriter.print(DATE_FORMAT.format(new Date(mTimestamp)));
             printWriter.println(" (epoch=" + mTimestamp + ")");
-            dumpDetails(printWriter);
+            dumpDetails(injector, printWriter);
         }
 
         abstract String getOrigin();
 
-        abstract void dumpDetails(PrintWriter printWriter);
+        abstract void dumpDetails(Injector injector, PrintWriter printWriter);
     }
 
     /** Representation of a shutdown call from the system server, with stack trace. */
@@ -213,8 +215,8 @@ public final class ShutdownCheckPoints {
 
         private final StackTraceElement[] mStackTraceElements;
 
-        SystemServerCheckPoint(Injector injector, @Nullable String reason) {
-            super(injector, reason);
+        SystemServerCheckPoint(long timestamp, @Nullable String reason) {
+            super(timestamp, reason);
             mStackTraceElements = Thread.currentThread().getStackTrace();
         }
 
@@ -224,14 +226,14 @@ public final class ShutdownCheckPoints {
         }
 
         @Override
-        void dumpDetails(PrintWriter printWriter) {
-            String methodName = getMethodName();
+        void dumpDetails(Injector injector, PrintWriter printWriter) {
+            String methodName = findMethodName();
             printWriter.println(methodName == null ? "Failed to get method name" : methodName);
             printStackTrace(printWriter);
         }
 
         @Nullable
-        String getMethodName() {
+        String findMethodName() {
             int idx = findCallSiteIndex();
             if (idx < mStackTraceElements.length) {
                 StackTraceElement element = mStackTraceElements[idx];
@@ -241,7 +243,7 @@ public final class ShutdownCheckPoints {
         }
 
         void printStackTrace(PrintWriter printWriter) {
-            // Skip the call site line, as it's already considered with getMethodName.
+            // Skip the call site line, as it's already considered with findMethodName.
             for (int i = findCallSiteIndex() + 1; i < mStackTraceElements.length; i++) {
                 printWriter.print(" at ");
                 printWriter.println(mStackTraceElements[i]);
@@ -268,12 +270,10 @@ public final class ShutdownCheckPoints {
     /** Representation of a shutdown call to {@link android.os.Binder}, with caller process id. */
     private static class BinderCheckPoint extends SystemServerCheckPoint {
         private final int mCallerProcessId;
-        private final IActivityManager mActivityManager;
 
-        BinderCheckPoint(Injector injector, int callerProcessId, @Nullable String reason) {
-            super(injector, reason);
+        BinderCheckPoint(long timestamp, int callerProcessId, @Nullable String reason) {
+            super(timestamp, reason);
             mCallerProcessId = callerProcessId;
-            mActivityManager = injector.activityManager();
         }
 
         @Override
@@ -282,25 +282,25 @@ public final class ShutdownCheckPoints {
         }
 
         @Override
-        void dumpDetails(PrintWriter printWriter) {
-            String methodName = getMethodName();
+        void dumpDetails(Injector injector, PrintWriter printWriter) {
+            String methodName = findMethodName();
             printWriter.println(methodName == null ? "Failed to get method name" : methodName);
 
-            String processName = getProcessName();
+            String processName = findProcessName(injector.activityManager());
             printWriter.print("From process ");
             printWriter.print(processName == null ? "?" : processName);
             printWriter.println(" (pid=" + mCallerProcessId + ")");
         }
 
         @Nullable
-        String getProcessName() {
+        private String findProcessName(@Nullable IActivityManager activityManager) {
             try {
                 List<ActivityManager.RunningAppProcessInfo> runningProcesses = null;
-                if (mActivityManager != null) {
-                    runningProcesses = mActivityManager.getRunningAppProcesses();
+                if (activityManager != null) {
+                    runningProcesses = activityManager.getRunningAppProcesses();
                 } else {
-                    Slog.v(TAG, "No ActivityManager available to find process name with pid="
-                            + mCallerProcessId);
+                    Slog.v(TAG, "No ActivityManager to find name of process with pid="
+                        + mCallerProcessId);
                 }
                 if (runningProcesses != null) {
                     for (ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
@@ -322,8 +322,8 @@ public final class ShutdownCheckPoints {
         private final String mPackageName;
 
         IntentCheckPoint(
-                Injector injector, String intentName, String packageName, @Nullable String reason) {
-            super(injector, reason);
+                long timestamp, String intentName, String packageName, @Nullable String reason) {
+            super(timestamp, reason);
             mIntentName = intentName;
             mPackageName = packageName;
         }
@@ -334,7 +334,7 @@ public final class ShutdownCheckPoints {
         }
 
         @Override
-        void dumpDetails(PrintWriter printWriter) {
+        void dumpDetails(Injector injector, PrintWriter printWriter) {
             printWriter.print("Intent: ");
             printWriter.println(mIntentName);
             printWriter.print("Package: ");

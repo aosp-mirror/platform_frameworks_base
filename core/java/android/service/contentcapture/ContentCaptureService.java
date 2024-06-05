@@ -15,6 +15,8 @@
  */
 package android.service.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_PAUSED;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_RESUMED;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 import static android.view.contentcapture.ContentCaptureHelper.toList;
@@ -37,6 +39,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
@@ -50,7 +53,6 @@ import android.view.contentcapture.ContentCaptureSessionId;
 import android.view.contentcapture.DataRemovalRequest;
 import android.view.contentcapture.DataShareRequest;
 import android.view.contentcapture.IContentCaptureDirectManager;
-import android.view.contentcapture.MainContentCaptureSession;
 
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.FrameworkStatsLog;
@@ -88,6 +90,18 @@ public abstract class ContentCaptureService extends Service {
             "android.service.contentcapture.ContentCaptureService";
 
     /**
+     * The {@link Intent} that must be declared as handled by the protection service.
+     *
+     * <p>To be supported, the service must also require the {@link
+     * android.Manifest.permission#BIND_CONTENT_CAPTURE_SERVICE} permission so that other
+     * applications can not abuse it.
+     *
+     * @hide
+     */
+    public static final String PROTECTION_SERVICE_INTERFACE =
+            "android.service.contentcapture.ContentProtectionService";
+
+    /**
      * Name under which a ContentCaptureService component publishes information about itself.
      *
      * <p>This meta-data should reference an XML resource containing a
@@ -123,15 +137,15 @@ public abstract class ContentCaptureService extends Service {
             new LocalDataShareAdapterResourceManager();
 
     private Handler mHandler;
-    private IContentCaptureServiceCallback mCallback;
+    @Nullable private IContentCaptureServiceCallback mContentCaptureServiceCallback;
+    @Nullable private IContentProtectionAllowlistCallback mContentProtectionAllowlistCallback;
 
     private long mCallerMismatchTimeout = 1000;
     private long mLastCallerMismatchLog;
 
-    /**
-     * Binder that receives calls from the system server.
-     */
-    private final IContentCaptureService mServerInterface = new IContentCaptureService.Stub() {
+    /** Binder that receives calls from the system server in the content capture flow. */
+    private final IContentCaptureService mContentCaptureServerInterface =
+            new IContentCaptureService.Stub() {
 
         @Override
         public void onConnected(IBinder callback, boolean verbose, boolean debug) {
@@ -187,10 +201,34 @@ public abstract class ContentCaptureService extends Service {
         }
     };
 
-    /**
-     * Binder that receives calls from the app.
-     */
-    private final IContentCaptureDirectManager mClientInterface =
+    /** Binder that receives calls from the system server in the content protection flow. */
+    private final IContentProtectionService mContentProtectionServerInterface =
+            new IContentProtectionService.Stub() {
+
+                @Override
+                public void onLoginDetected(
+                        @SuppressWarnings("rawtypes") ParceledListSlice events) {
+                    mHandler.sendMessage(
+                            obtainMessage(
+                                    ContentCaptureService::handleOnLoginDetected,
+                                    ContentCaptureService.this,
+                                    Binder.getCallingUid(),
+                                    events));
+                }
+
+                @Override
+                public void onUpdateAllowlistRequest(IBinder callback) {
+                    mHandler.sendMessage(
+                            obtainMessage(
+                                    ContentCaptureService::handleOnUpdateAllowlistRequest,
+                                    ContentCaptureService.this,
+                                    Binder.getCallingUid(),
+                                    callback));
+                }
+            };
+
+    /** Binder that receives calls from the app in the content capture flow. */
+    private final IContentCaptureDirectManager mContentCaptureClientInterface =
             new IContentCaptureDirectManager.Stub() {
 
         @Override
@@ -220,9 +258,19 @@ public abstract class ContentCaptureService extends Service {
     @Override
     public final IBinder onBind(Intent intent) {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
-            return mServerInterface.asBinder();
+            return mContentCaptureServerInterface.asBinder();
         }
-        Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": " + intent);
+        if (PROTECTION_SERVICE_INTERFACE.equals(intent.getAction())) {
+            return mContentProtectionServerInterface.asBinder();
+        }
+        Log.w(
+                TAG,
+                "Tried to bind to wrong intent (should be "
+                        + SERVICE_INTERFACE
+                        + " or "
+                        + PROTECTION_SERVICE_INTERFACE
+                        + "): "
+                        + intent);
         return null;
     }
 
@@ -240,14 +288,31 @@ public abstract class ContentCaptureService extends Service {
      */
     public final void setContentCaptureWhitelist(@Nullable Set<String> packages,
             @Nullable Set<ComponentName> activities) {
-        final IContentCaptureServiceCallback callback = mCallback;
-        if (callback == null) {
-            Log.w(TAG, "setContentCaptureWhitelist(): no server callback");
+
+        IContentCaptureServiceCallback contentCaptureCallback = mContentCaptureServiceCallback;
+        IContentProtectionAllowlistCallback contentProtectionAllowlistCallback =
+                mContentProtectionAllowlistCallback;
+
+        if (contentCaptureCallback == null && contentProtectionAllowlistCallback == null) {
+            Log.w(TAG, "setContentCaptureWhitelist(): missing both server callbacks");
+            return;
+        }
+
+        if (contentCaptureCallback != null) {
+            if (contentProtectionAllowlistCallback != null) {
+                throw new IllegalStateException("Have both server callbacks");
+            }
+            try {
+                contentCaptureCallback.setContentCaptureWhitelist(
+                        toList(packages), toList(activities));
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
             return;
         }
 
         try {
-            callback.setContentCaptureWhitelist(toList(packages), toList(activities));
+            contentProtectionAllowlistCallback.setAllowlist(toList(packages));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -276,7 +341,7 @@ public abstract class ContentCaptureService extends Service {
      */
     public final void setContentCaptureConditions(@NonNull String packageName,
             @Nullable Set<ContentCaptureCondition> conditions) {
-        final IContentCaptureServiceCallback callback = mCallback;
+        final IContentCaptureServiceCallback callback = mContentCaptureServiceCallback;
         if (callback == null) {
             Log.w(TAG, "setContentCaptureConditions(): no server callback");
             return;
@@ -387,7 +452,7 @@ public abstract class ContentCaptureService extends Service {
     public final void disableSelf() {
         if (sDebug) Log.d(TAG, "disableSelf()");
 
-        final IContentCaptureServiceCallback callback = mCallback;
+        final IContentCaptureServiceCallback callback = mContentCaptureServiceCallback;
         if (callback == null) {
             Log.w(TAG, "disableSelf(): no server callback");
             return;
@@ -426,13 +491,14 @@ public abstract class ContentCaptureService extends Service {
     }
 
     private void handleOnConnected(@NonNull IBinder callback) {
-        mCallback = IContentCaptureServiceCallback.Stub.asInterface(callback);
+        mContentCaptureServiceCallback = IContentCaptureServiceCallback.Stub.asInterface(callback);
         onConnected();
     }
 
     private void handleOnDisconnected() {
         onDisconnected();
-        mCallback = null;
+        mContentCaptureServiceCallback = null;
+        mContentProtectionAllowlistCallback = null;
     }
 
     //TODO(b/111276913): consider caching the InteractionSessionId for the lifetime of the session,
@@ -456,7 +522,7 @@ public abstract class ContentCaptureService extends Service {
         } else {
             stateFlags |= ContentCaptureSession.STATE_DISABLED;
         }
-        setClientState(clientReceiver, stateFlags, mClientInterface.asBinder());
+        setClientState(clientReceiver, stateFlags, mContentCaptureClientInterface.asBinder());
     }
 
     private void handleSendEvents(int uid,
@@ -522,6 +588,37 @@ public abstract class ContentCaptureService extends Service {
             }
         }
         writeFlushMetrics(lastSessionId, activityComponent, metrics, options, reason);
+    }
+
+    private void handleOnLoginDetected(
+            int uid, @NonNull ParceledListSlice<ContentCaptureEvent> parceledEvents) {
+        if (uid != Process.SYSTEM_UID) {
+            Log.e(TAG, "handleOnLoginDetected() not allowed for uid: " + uid);
+            return;
+        }
+        List<ContentCaptureEvent> events = parceledEvents.getList();
+        int sessionIdInt = events.isEmpty() ? NO_SESSION_ID : events.get(0).getSessionId();
+        ContentCaptureSessionId sessionId = new ContentCaptureSessionId(sessionIdInt);
+
+        ContentCaptureEvent startEvent =
+                new ContentCaptureEvent(sessionIdInt, TYPE_SESSION_RESUMED);
+        startEvent.setSelectionIndex(0, events.size());
+        onContentCaptureEvent(sessionId, startEvent);
+
+        events.forEach(event -> onContentCaptureEvent(sessionId, event));
+
+        ContentCaptureEvent endEvent = new ContentCaptureEvent(sessionIdInt, TYPE_SESSION_PAUSED);
+        onContentCaptureEvent(sessionId, endEvent);
+    }
+
+    private void handleOnUpdateAllowlistRequest(int uid, @NonNull IBinder callback) {
+        if (uid != Process.SYSTEM_UID) {
+            Log.e(TAG, "handleOnUpdateAllowlistRequest() not allowed for uid: " + uid);
+            return;
+        }
+        mContentProtectionAllowlistCallback =
+                IContentProtectionAllowlistCallback.Stub.asInterface(callback);
+        onConnected();
     }
 
     private void handleOnActivitySnapshot(int sessionId, @NonNull SnapshotData snapshotData) {
@@ -626,7 +723,7 @@ public abstract class ContentCaptureService extends Service {
             final Bundle extras;
             if (binder != null) {
                 extras = new Bundle();
-                extras.putBinder(MainContentCaptureSession.EXTRA_BINDER, binder);
+                extras.putBinder(ContentCaptureSession.EXTRA_BINDER, binder);
             } else {
                 extras = null;
             }
@@ -642,13 +739,14 @@ public abstract class ContentCaptureService extends Service {
     private void writeFlushMetrics(int sessionId, @Nullable ComponentName app,
             @NonNull FlushMetrics flushMetrics, @Nullable ContentCaptureOptions options,
             int flushReason) {
-        if (mCallback == null) {
+        if (mContentCaptureServiceCallback == null) {
             Log.w(TAG, "writeSessionFlush(): no server callback");
             return;
         }
 
         try {
-            mCallback.writeSessionFlush(sessionId, app, flushMetrics, options, flushReason);
+            mContentCaptureServiceCallback.writeSessionFlush(
+                    sessionId, app, flushMetrics, options, flushReason);
         } catch (RemoteException e) {
             Log.e(TAG, "failed to write flush metrics: " + e);
         }

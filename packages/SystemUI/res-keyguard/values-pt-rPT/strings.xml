@@ -24,7 +24,7 @@
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"Introduza o PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Introduza o padrão"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Desenhe o padrão"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Introduza a palavra-passe."</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Introduza a palavra-passe"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Introduza a palavra-passe"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Cartão inválido."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Carregada"</string>
@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • A carregar…"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • A carregar rapidamente…"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • A carregar lentamente…"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Carregamento otimizado para proteger a bateria"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problema com o acessório de carregamento"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Prima Menu para desbloquear."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Carregamento em espera para proteger a bateria"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Verificar acessório de carregamento"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Rede bloqueada"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Sem SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Adicione um SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"O SIM está em falta ou não é legível. Adicione um SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM inutilizável."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"O SIM foi desativado permanentemente.\n Contacte o seu fornecedor de serviços de rede sem fios para obter outro SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"O SIM está bloqueado."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"O SIM está bloqueado com o PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"A desbloquear SIM…"</string>
@@ -61,7 +57,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN incorreto"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN errado. Tente de novo."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Ou desbloqueie com a impressão digital"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Impr. dig. não reconhecida"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Impressão digital não reconhecida"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Rosto não reconhecido"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Tente novamente ou introduza o PIN"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Tente novamente ou introduza a palavra-passe"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"O PIN é necessário após o bloqueio"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"A palavra-passe é necessária após o bloqueio"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"O padrão é necessário após o bloqueio"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"A atualização vai ser instalada nas horas inativas"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"A atualização é instalada quando o dispositivo não estiver a ser usado"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Mais segurança necessária. PIN não usado há muito."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Mais segurança necessária. Não usada há muito."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"+ segurança necessária. Padrão não usado há muito."</string>
@@ -112,9 +108,12 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Padrão necessário após reiniciar o dispositivo"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"PIN necessário após reiniciar o dispositivo"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Palavra-passe necessária após reiniciar dispositivo"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Para uma segurança adicional, use antes o padrão"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Para uma segurança adicional, use antes o PIN"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Para uma segurança adicional, use antes a palavra-passe"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Para segurança adicional, use o padrão"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Para segurança adicional, use o PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Para segurança adicional, use a palavra-passe"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Para segurança adicional, é necessária um PIN"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Para segurança adicional, é necessário um padrão"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Para segurança adicional, é necessária uma palavra-passe"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispositivo bloqueado pelo gestor"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"O dispositivo foi bloqueado manualmente"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Não reconhecido."</string>

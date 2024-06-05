@@ -47,7 +47,7 @@ MouseCursorController::MouseCursorController(PointerControllerContext& context)
     mLocked.pointerX = 0;
     mLocked.pointerY = 0;
     mLocked.pointerAlpha = 0.0f; // pointer is initially faded
-    mLocked.pointerSprite = mContext.getSpriteController()->createSprite();
+    mLocked.pointerSprite = mContext.getSpriteController().createSprite();
     mLocked.updatePointerIcon = false;
     mLocked.requestedPointerType = PointerIconStyle::TYPE_NOT_SPECIFIED;
     mLocked.resolvedPointerType = PointerIconStyle::TYPE_NOT_SPECIFIED;
@@ -117,7 +117,7 @@ FloatPoint MouseCursorController::getPosition() const {
     return {mLocked.pointerX, mLocked.pointerY};
 }
 
-int32_t MouseCursorController::getDisplayId() const {
+ui::LogicalDisplayId MouseCursorController::getDisplayId() const {
     std::scoped_lock lock(mLock);
     return mLocked.viewport.displayId;
 }
@@ -163,6 +163,15 @@ void MouseCursorController::setStylusHoverMode(bool stylusHoverMode) {
         mLocked.stylusHoverMode = stylusHoverMode;
         mLocked.updatePointerIcon = true;
     }
+}
+
+void MouseCursorController::setSkipScreenshot(bool skip) {
+    std::scoped_lock lock(mLock);
+    if (mLocked.skipScreenshot == skip) {
+        return;
+    }
+    mLocked.skipScreenshot = skip;
+    updatePointerLocked();
 }
 
 void MouseCursorController::reloadPointerResources(bool getAdditionalMouseResources) {
@@ -325,8 +334,8 @@ bool MouseCursorController::doBitmapAnimationLocked(nsecs_t timestamp) REQUIRES(
     }
 
     if (timestamp - mLocked.lastFrameUpdatedTime > iter->second.durationPerFrame) {
-        sp<SpriteController> spriteController = mContext.getSpriteController();
-        spriteController->openTransaction();
+        auto& spriteController = mContext.getSpriteController();
+        spriteController.openTransaction();
 
         int incr = (timestamp - mLocked.lastFrameUpdatedTime) / iter->second.durationPerFrame;
         mLocked.animationFrameIndex += incr;
@@ -336,7 +345,7 @@ bool MouseCursorController::doBitmapAnimationLocked(nsecs_t timestamp) REQUIRES(
         }
         mLocked.pointerSprite->setIcon(iter->second.animationFrames[mLocked.animationFrameIndex]);
 
-        spriteController->closeTransaction();
+        spriteController.closeTransaction();
     }
     // Keep animating.
     return true;
@@ -346,12 +355,13 @@ void MouseCursorController::updatePointerLocked() REQUIRES(mLock) {
     if (!mLocked.viewport.isValid()) {
         return;
     }
-    sp<SpriteController> spriteController = mContext.getSpriteController();
-    spriteController->openTransaction();
+    auto& spriteController = mContext.getSpriteController();
+    spriteController.openTransaction();
 
     mLocked.pointerSprite->setLayer(Sprite::BASE_LAYER_POINTER);
     mLocked.pointerSprite->setPosition(mLocked.pointerX, mLocked.pointerY);
     mLocked.pointerSprite->setDisplayId(mLocked.viewport.displayId);
+    mLocked.pointerSprite->setSkipScreenshot(mLocked.skipScreenshot);
 
     if (mLocked.pointerAlpha > 0) {
         mLocked.pointerSprite->setAlpha(mLocked.pointerAlpha);
@@ -392,7 +402,7 @@ void MouseCursorController::updatePointerLocked() REQUIRES(mLock) {
         mLocked.updatePointerIcon = false;
     }
 
-    spriteController->closeTransaction();
+    spriteController.closeTransaction();
 }
 
 void MouseCursorController::loadResourcesLocked(bool getAdditionalMouseResources) REQUIRES(mLock) {
@@ -467,10 +477,10 @@ void MouseCursorController::startAnimationLocked() REQUIRES(mLock) {
 
     std::function<bool(nsecs_t)> func = std::bind(&MouseCursorController::doAnimations, this, _1);
     /*
-     * Using -1 for displayId here to avoid removing the callback
+     * Using ui::LogicalDisplayId::INVALID for displayId here to avoid removing the callback
      * if a TouchSpotController with the same display is removed.
      */
-    mContext.addAnimationCallback(-1, func);
+    mContext.addAnimationCallback(ui::LogicalDisplayId::INVALID, func);
 }
 
 } // namespace android

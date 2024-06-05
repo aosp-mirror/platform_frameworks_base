@@ -1,11 +1,17 @@
 package com.android.systemui.statusbar.policy
 
 import android.content.res.Configuration
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 
 /** Fake implementation of [ConfigurationController] for tests. */
-class FakeConfigurationController : ConfigurationController {
+@SysUISingleton
+class FakeConfigurationController @Inject constructor() : ConfigurationController {
 
     private var listeners = mutableListOf<ConfigurationController.ConfigurationListener>()
+    private var isRtl = false
 
     override fun addCallback(listener: ConfigurationController.ConfigurationListener) {
         listeners += listener
@@ -31,5 +37,16 @@ class FakeConfigurationController : ConfigurationController {
         onConfigurationChanged(newConfiguration = null)
     }
 
-    override fun isLayoutRtl(): Boolean = false
+    fun notifyLayoutDirectionChanged(isRtl: Boolean) {
+        this.isRtl = isRtl
+        listeners.forEach { it.onLayoutDirectionChanged(isRtl) }
+    }
+
+    override fun isLayoutRtl(): Boolean = isRtl
+    override fun getNightModeName(): String = "undefined"
+}
+
+@Module
+interface FakeConfigurationControllerModule {
+    @Binds fun bindFake(fake: FakeConfigurationController): ConfigurationController
 }

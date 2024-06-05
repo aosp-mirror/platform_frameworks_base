@@ -20,4 +20,17 @@
     <dimen name="alert_dialog_button_bar_height">0dp</dimen>
 
     <dimen name="toast_y_offset">0dip</dimen>
+
+    <!-- AppErrorDialog's list item height -->
+    <dimen name="aerr_list_item_height">52dp</dimen>
+    <!-- Padding for contents in a view of BaseErrorDialog such as a title and buttons -->
+    <dimen name="base_error_dialog_contents_padding">14dp</dimen>
+
+    <!-- Specifies height of the divider in the input method chooser -->
+    <dimen name="input_method_divider_height">4dp</dimen>
+
+    <!-- The width/height of the icon view on staring surface. -->
+    <dimen name="starting_surface_icon_size">48dp</dimen>
+    <!-- The default width/height of the icon on the spec of adaptive icon drawable. -->
+    <dimen name="starting_surface_default_icon_size">48dp</dimen>
 </resources>

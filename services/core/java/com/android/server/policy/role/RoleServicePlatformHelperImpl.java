@@ -19,6 +19,7 @@ package com.android.server.policy.role;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -29,6 +30,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.os.Environment;
+import android.permission.flags.Flags;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -57,7 +59,6 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -304,6 +305,8 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
     public String computePackageStateHash(@UserIdInt int userId) {
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
+        DevicePolicyManagerInternal devicePolicyManagerInternal = LocalServices.getService(
+                DevicePolicyManagerInternal.class);
         final MessageDigestOutputStream mdos = new MessageDigestOutputStream();
 
         DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(mdos));
@@ -314,11 +317,10 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
                 dataOutputStream.writeInt(packageManagerInternal.getApplicationEnabledState(
                         pkg.getPackageName(), userId));
 
-                final List<String> requestedPermissions = pkg.getRequestedPermissions();
-                final int requestedPermissionsSize = requestedPermissions.size();
-                dataOutputStream.writeInt(requestedPermissionsSize);
-                for (int i = 0; i < requestedPermissionsSize; i++) {
-                    dataOutputStream.writeUTF(requestedPermissions.get(i));
+                final Set<String> requestedPermissions = pkg.getRequestedPermissions();
+                dataOutputStream.writeInt(requestedPermissions.size());
+                for (String permissionName : requestedPermissions) {
+                    dataOutputStream.writeUTF(permissionName);
                 }
 
                 final ArraySet<String> enabledComponents =
@@ -344,6 +346,35 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
                 throw new AssertionError(e);
             }
         }, userId);
+        try {
+            String deviceOwner= "";
+            if (devicePolicyManagerInternal != null) {
+                if (devicePolicyManagerInternal.getDeviceOwnerUserId() == userId) {
+                    ComponentName deviceOwnerComponent =
+                        devicePolicyManagerInternal.getDeviceOwnerComponent(false);
+                    if (deviceOwnerComponent != null) {
+                        deviceOwner = deviceOwnerComponent.getPackageName();
+                    }
+                }
+            }
+            dataOutputStream.writeUTF(deviceOwner);
+            String profileOwner = "";
+            if (devicePolicyManagerInternal != null) {
+                ComponentName profileOwnerComponent =
+                    devicePolicyManagerInternal.getProfileOwnerAsUser(userId);
+                if (profileOwnerComponent != null) {
+                    profileOwner = profileOwnerComponent.getPackageName();
+                }
+            }
+            dataOutputStream.writeUTF(profileOwner);
+            dataOutputStream.writeInt(Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.DEVICE_DEMO_MODE, 0));
+            dataOutputStream.writeBoolean(Flags.walletRoleEnabled());
+            dataOutputStream.flush();
+        } catch (IOException e) {
+            // Never happens for MessageDigestOutputStream and DataOutputStream.
+            throw new AssertionError(e);
+        }
         return mdos.getDigestAsString();
     }
 

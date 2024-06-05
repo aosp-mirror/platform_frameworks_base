@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.app.IAlarmManager;
 import android.app.time.UnixEpochTime;
@@ -24,6 +25,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.location.ILocationManager;
 import android.location.LocationTime;
+import android.text.format.DateUtils;
 import android.util.Slog;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -109,6 +111,11 @@ public final class SystemClock {
     private static volatile IAlarmManager sIAlarmManager;
 
     /**
+     * Since {@code nanoTime()} is arbitrary, anchor our Ravenwood clocks against it.
+     */
+    private static final long sAnchorNanoTime$ravenwood = System.nanoTime();
+
+    /**
      * This class is uninstantiable.
      */
     @UnsupportedAppUsage
@@ -125,6 +132,7 @@ public final class SystemClock {
      *
      * @param ms to sleep before returning, in milliseconds of uptime.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void sleep(long ms)
     {
         long start = uptimeMillis();
@@ -186,16 +194,28 @@ public final class SystemClock {
      * @return milliseconds of non-sleep uptime since boot.
      */
     @CriticalNative
+    @android.ravenwood.annotation.RavenwoodReplace
     native public static long uptimeMillis();
+
+    /** @hide */
+    public static long uptimeMillis$ravenwood() {
+        return uptimeNanos() / 1_000_000;
+    }
 
     /**
      * Returns nanoseconds since boot, not counting time spent in deep sleep.
      *
      * @return nanoseconds of non-sleep uptime since boot.
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_ADPF_GPU_REPORT_ACTUAL_WORK_DURATION)
     @CriticalNative
+    @android.ravenwood.annotation.RavenwoodReplace
     public static native long uptimeNanos();
+
+    /** @hide */
+    public static long uptimeNanos$ravenwood() {
+        return System.nanoTime() - sAnchorNanoTime$ravenwood;
+    }
 
     /**
      * Return {@link Clock} that starts at system boot, not counting time spent
@@ -218,7 +238,13 @@ public final class SystemClock {
      * @return elapsed milliseconds since boot.
      */
     @CriticalNative
+    @android.ravenwood.annotation.RavenwoodReplace
     native public static long elapsedRealtime();
+
+    /** @hide */
+    public static long elapsedRealtime$ravenwood() {
+        return elapsedRealtimeNanos() / 1_000_000;
+    }
 
     /**
      * Return {@link Clock} that starts at system boot, including time spent in
@@ -241,7 +267,14 @@ public final class SystemClock {
      * @return elapsed nanoseconds since boot.
      */
     @CriticalNative
+    @android.ravenwood.annotation.RavenwoodReplace
     public static native long elapsedRealtimeNanos();
+
+    /** @hide */
+    public static long elapsedRealtimeNanos$ravenwood() {
+        // Elapsed realtime is uptime plus an hour that we've been "asleep"
+        return uptimeNanos() + (DateUtils.HOUR_IN_MILLIS * 1_000_000);
+    }
 
     /**
      * Returns milliseconds running in the current thread.
@@ -271,7 +304,14 @@ public final class SystemClock {
      */
     @UnsupportedAppUsage
     @CriticalNative
+    @android.ravenwood.annotation.RavenwoodReplace
     public static native long currentTimeMicro();
+
+    /** @hide */
+    public static long currentTimeMicro$ravenwood() {
+        // Ravenwood booted in Jan 2023, and has been in deep sleep for one week
+        return System.nanoTime() / 1000L;
+    }
 
     /**
      * Returns milliseconds since January 1, 1970 00:00:00.0 UTC, synchronized

@@ -17,11 +17,17 @@
 #ifndef AAPT2_LINK_H
 #define AAPT2_LINK_H
 
+#include <optional>
 #include <regex>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include "Command.h"
 #include "Resource.h"
 #include "androidfw/IDiagnostics.h"
+#include "cmd/Util.h"
 #include "format/binary/TableFlattener.h"
 #include "format/proto/ProtoSerialize.h"
 #include "link/ManifestFixer.h"
@@ -72,6 +78,7 @@ struct LinkOptions {
   bool use_sparse_encoding = false;
   std::unordered_set<std::string> extensions_to_not_compress;
   std::optional<std::regex> regex_to_not_compress;
+  FeatureFlagValues feature_flag_values;
 
   // Static lib options.
   bool no_static_lib_packages = false;
@@ -323,6 +330,16 @@ class LinkCommand : public Command {
             "should only be used together with the --static-lib flag.",
         &options_.merge_only);
     AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
+    AddOptionalFlagList("--feature-flags",
+                        "Specify the values of feature flags. The pairs in the argument\n"
+                        "are separated by ',' and the name is separated from the value by '='.\n"
+                        "Example: \"flag1=true,flag2=false,flag3=\" (flag3 has no given value).",
+                        &feature_flags_args_);
+    AddOptionalSwitch("--non-updatable-system",
+                      "Mark the app as a non-updatable system app. This inserts\n"
+                      "updatableSystem=\"false\" to the root manifest node, overwriting any\n"
+                      "existing attribute. This is ignored if the manifest has a versionCode.",
+                      &options_.manifest_fixer_options.non_updatable_system);
   }
 
   int Action(const std::vector<std::string>& args) override;
@@ -347,6 +364,7 @@ class LinkCommand : public Command {
   std::optional<std::string> stable_id_file_path_;
   std::vector<std::string> split_args_;
   std::optional<std::string> trace_folder_;
+  std::vector<std::string> feature_flags_args_;
 };
 
 }// namespace aapt

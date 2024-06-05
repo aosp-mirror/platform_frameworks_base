@@ -20,22 +20,28 @@ import static android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT;
 import static android.window.OnBackInvokedDispatcher.PRIORITY_OVERLAY;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IWindow;
 import android.view.IWindowSession;
+import android.view.ImeBackAnimationController;
+import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -45,6 +51,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -72,6 +79,12 @@ public class WindowOnBackInvokedDispatcherTest {
     @Mock
     private OnBackAnimationCallback mCallback2;
     @Mock
+    private ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback mImeCallback;
+    @Mock
+    private ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback mDefaultImeCallback;
+    @Mock
+    private ImeBackAnimationController mImeBackAnimationController;
+    @Mock
     private Context mContext;
     @Mock
     private ApplicationInfo mApplicationInfo;
@@ -84,8 +97,11 @@ public class WindowOnBackInvokedDispatcherTest {
             /* progress = */ 0,
             /* velocityX = */ 0,
             /* velocityY = */ 0,
+            /* triggerBack = */ false,
             /* swipeEdge = */ BackEvent.EDGE_LEFT,
             /* departingAnimationTarget = */ null);
+    private final MotionEvent mMotionEvent =
+            MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 100, 100, 0);
 
     @Before
     public void setUp() throws Exception {
@@ -94,8 +110,8 @@ public class WindowOnBackInvokedDispatcherTest {
         doReturn(true).when(mApplicationInfo).isOnBackInvokedCallbackEnabled();
         doReturn(mApplicationInfo).when(mContext).getApplicationInfo();
 
-        mDispatcher = new WindowOnBackInvokedDispatcher(mContext);
-        mDispatcher.attachToWindow(mWindowSession, mWindow);
+        mDispatcher = new WindowOnBackInvokedDispatcher(mContext, Looper.getMainLooper());
+        mDispatcher.attachToWindow(mWindowSession, mWindow, mImeBackAnimationController);
     }
 
     private void waitForIdle() {
@@ -254,18 +270,15 @@ public class WindowOnBackInvokedDispatcherTest {
         callbackInfo1.getCallback().onBackStarted(mBackEvent);
 
         waitForIdle();
-        verify(mCallback1).onBackStarted(any(BackEvent.class));
-        verifyZeroInteractions(mCallback2);
+        verify(mCallback1, times(1)).onBackStarted(any(BackEvent.class));
+        verify(mCallback2, never()).onBackStarted(any(BackEvent.class));
+        clearInvocations(mCallback1);
 
         callbackInfo2.getCallback().onBackStarted(mBackEvent);
 
         waitForIdle();
-        verify(mCallback2).onBackStarted(any(BackEvent.class));
-
-        // Calls sequence: BackProgressAnimator.onBackStarted() -> BackProgressAnimator.reset() ->
-        // Spring.animateToFinalPosition(0). This causes a progress event to be fired.
-        verify(mCallback1, atMost(1)).onBackProgressed(any(BackEvent.class));
-        verifyNoMoreInteractions(mCallback1);
+        verify(mCallback1, never()).onBackStarted(any(BackEvent.class));
+        verify(mCallback2, times(1)).onBackStarted(any(BackEvent.class));
     }
 
     @Test
@@ -360,6 +373,30 @@ public class WindowOnBackInvokedDispatcherTest {
     }
 
     @Test
+    public void onBackCancelled_calledBeforeOnBackStartedOfNewGesture() throws RemoteException {
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
+        OnBackInvokedCallbackInfo callbackInfo = assertSetCallbackInfo();
+
+        callbackInfo.getCallback().onBackStarted(mBackEvent);
+
+        waitForIdle();
+        verify(mCallback1).onBackStarted(any(BackEvent.class));
+        clearInvocations(mCallback1);
+
+        callbackInfo.getCallback().onBackCancelled();
+        waitForIdle();
+
+        // simulate start of new gesture while cancel animation is still running
+        callbackInfo.getCallback().onBackStarted(mBackEvent);
+        waitForIdle();
+
+        // verify that onBackCancelled is called before onBackStarted
+        InOrder orderVerifier = Mockito.inOrder(mCallback1);
+        orderVerifier.verify(mCallback1).onBackCancelled();
+        orderVerifier.verify(mCallback1).onBackStarted(any(BackEvent.class));
+    }
+
+    @Test
     public void onDetachFromWindow_cancelCallbackAndIgnoreOnBackInvoked() throws RemoteException {
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
 
@@ -378,5 +415,64 @@ public class WindowOnBackInvokedDispatcherTest {
         waitForIdle();
         verify(mCallback1, never()).onBackInvoked();
         verify(mCallback1).onBackCancelled();
+    }
+
+    @Test
+    public void updatesDispatchingState() throws RemoteException {
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
+        OnBackInvokedCallbackInfo callbackInfo = assertSetCallbackInfo();
+
+        callbackInfo.getCallback().onBackStarted(mBackEvent);
+        waitForIdle();
+        assertTrue(mDispatcher.isBackGestureInProgress());
+
+        callbackInfo.getCallback().onBackInvoked();
+        waitForIdle();
+        assertFalse(mDispatcher.isBackGestureInProgress());
+    }
+
+    @Test
+    public void handlesMotionEvent() throws RemoteException {
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
+        OnBackInvokedCallbackInfo callbackInfo = assertSetCallbackInfo();
+
+        // Send motion event in View's main thread.
+        final Handler main = Handler.getMain();
+        main.runWithScissors(() -> mDispatcher.onMotionEvent(mMotionEvent), 100);
+        assertFalse(mDispatcher.mTouchTracker.isActive());
+
+        callbackInfo.getCallback().onBackStarted(mBackEvent);
+        waitForIdle();
+        assertTrue(mDispatcher.isBackGestureInProgress());
+        assertTrue(mDispatcher.mTouchTracker.isActive());
+
+        main.runWithScissors(() -> mDispatcher.onMotionEvent(mMotionEvent), 100);
+        waitForIdle();
+        // onBackPressed is called from animator, so it can happen more than once.
+        verify(mCallback1, atLeast(1)).onBackProgressed(any());
+    }
+
+    @Test
+    public void registerImeCallbacks_onBackInvokedCallbackEnabled() throws RemoteException {
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mDefaultImeCallback);
+        assertCallbacksSize(/* default */ 1, /* overlay */ 0);
+        assertSetCallbackInfo();
+        assertTopCallback(mImeBackAnimationController);
+
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mImeCallback);
+        assertCallbacksSize(/* default */ 2, /* overlay */ 0);
+        assertSetCallbackInfo();
+        assertTopCallback(mImeCallback);
+    }
+
+    @Test
+    public void registerImeCallbacks_legacyBack() throws RemoteException {
+        doReturn(false).when(mApplicationInfo).isOnBackInvokedCallbackEnabled();
+
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mDefaultImeCallback);
+        assertNoSetCallbackInfo();
+
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mImeCallback);
+        assertNoSetCallbackInfo();
     }
 }

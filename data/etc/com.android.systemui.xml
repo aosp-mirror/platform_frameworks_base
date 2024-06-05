@@ -52,10 +52,12 @@
         <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.READ_PRECISE_PHONE_STATE"/>
+        <permission name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"/>
         <permission name="android.permission.READ_WALLPAPER_INTERNAL"/>
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.REQUEST_NETWORK_SCORES"/>
         <permission name="android.permission.RECEIVE_MEDIA_RESOURCE_USAGE"/>
+        <permission name="android.permission.SATELLITE_COMMUNICATION"/>
         <permission name="android.permission.SET_WALLPAPER_DIM_AMOUNT"/>
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />
         <permission name="android.permission.START_ACTIVITY_AS_CALLER"/>
@@ -87,5 +89,8 @@
         <permission name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS" />
         <permission name="android.permission.READ_SEARCH_INDEXABLES" />
         <permission name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT"/>
+        <permission name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS" />
+        <permission name="android.permission.CONTROL_UI_TRACING" />
+        <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND" />
     </privapp-permissions>
 </permissions>

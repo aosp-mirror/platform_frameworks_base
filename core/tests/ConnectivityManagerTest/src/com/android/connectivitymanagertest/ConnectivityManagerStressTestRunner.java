@@ -99,7 +99,7 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
         }
     }
 
-    public int getSoftApInterations() {
+    public int getSoftApIterations() {
         return mSoftApIterations;
     }
 

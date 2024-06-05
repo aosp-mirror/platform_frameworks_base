@@ -40,7 +40,7 @@ struct Symbol {
 };
 
 /**
- * A specific defintion of a symbol, defined with a configuration and a definition site.
+ * A specific definition of a symbol, defined with a configuration and a definition site.
  */
 struct SymbolDefinition {
     inline SymbolDefinition();
@@ -68,9 +68,9 @@ Symbol::Symbol(const android::String16& p, const android::String16& t, const and
 
 android::String8 Symbol::toString() const {
     return android::String8::format("%s:%s/%s (0x%08x)",
-            android::String8(package).string(),
-            android::String8(type).string(),
-            android::String8(name).string(),
+            android::String8(package).c_str(),
+            android::String8(type).c_str(),
+            android::String8(name).c_str(),
             (int) id);
 }
 
@@ -92,4 +92,3 @@ bool SymbolDefinition::operator<(const SymbolDefinition& rhs) const {
 }
 
 #endif // AAPT_SYMBOL_H
-

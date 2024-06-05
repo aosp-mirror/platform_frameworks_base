@@ -55,9 +55,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_BACKGROUND_CHECK = DEBUG_ALL || false;
     static final boolean DEBUG_BACKUP = DEBUG_ALL || false;
     static final boolean DEBUG_BROADCAST = DEBUG_ALL || false;
-    static final boolean DEBUG_BROADCAST_BACKGROUND = DEBUG_BROADCAST || false;
     static final boolean DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || false;
-    static final boolean DEBUG_BROADCAST_DEFERRAL = DEBUG_BROADCAST || false;
     static final boolean DEBUG_COMPACTION = DEBUG_ALL || false;
     static final boolean DEBUG_FREEZER = DEBUG_ALL || false;
     static final boolean DEBUG_LRU = DEBUG_ALL || false;
@@ -71,6 +69,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_PROCESSES = DEBUG_ALL || false;
     static final boolean DEBUG_PROVIDER = DEBUG_ALL || false;
     static final boolean DEBUG_PSS = DEBUG_ALL || false;
+    static final boolean DEBUG_RSS = DEBUG_ALL || false;
     static final boolean DEBUG_SERVICE = DEBUG_ALL || false;
     static final boolean DEBUG_FOREGROUND_SERVICE = DEBUG_ALL || false;
     static final boolean DEBUG_SERVICE_EXECUTING = DEBUG_ALL || false;
@@ -91,6 +90,7 @@ class ActivityManagerDebugConfig {
             ? "_ProcessObservers" : "";
     static final String POSTFIX_PROCESSES = (APPEND_CATEGORY_NAME) ? "_Processes" : "";
     static final String POSTFIX_PSS = (APPEND_CATEGORY_NAME) ? "_Pss" : "";
+    static final String POSTFIX_RSS = (APPEND_CATEGORY_NAME) ? "_Rss" : "";
     static final String POSTFIX_SERVICE = (APPEND_CATEGORY_NAME) ? "_Service" : "";
     static final String POSTFIX_SERVICE_EXECUTING =
             (APPEND_CATEGORY_NAME) ? "_ServiceExecuting" : "";

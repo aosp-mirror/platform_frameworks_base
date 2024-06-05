@@ -17,6 +17,7 @@
 package com.android.wm.shell.animation;
 
 import android.graphics.Path;
+import android.view.animation.BackGestureInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
@@ -71,6 +72,13 @@ public class Interpolators {
      */
     public static final Interpolator EMPHASIZED_DECELERATE = new PathInterpolator(
             0.05f, 0.7f, 0.1f, 1f);
+
+    /**
+     * The standard decelerating interpolator that should be used on every regular movement of
+     * content that is appearing e.g. when coming from off screen.
+     */
+    public static final Interpolator STANDARD_DECELERATE = new PathInterpolator(0f, 0f, 0f, 1f);
+
     /**
      * Interpolator to be used when animating a move based on a click. Pair with enough duration.
      */
@@ -87,6 +95,15 @@ public class Interpolators {
 
     public static final PathInterpolator DIM_INTERPOLATOR =
             new PathInterpolator(.23f, .87f, .52f, -0.11f);
+
+    /**
+     * Use this interpolator for animating progress values coming from the back callback to get
+     * the predictive-back-typical decelerate motion.
+     *
+     * This interpolator is similar to {@link Interpolators#STANDARD_DECELERATE} but has a slight
+     * acceleration phase at the start.
+     */
+    public static final Interpolator BACK_GESTURE = new BackGestureInterpolator();
 
     // Create the default emphasized interpolator
     private static PathInterpolator createEmphasizedInterpolator() {

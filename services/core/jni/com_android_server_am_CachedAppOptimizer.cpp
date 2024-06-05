@@ -54,6 +54,9 @@ using android::base::WriteStringToFile;
 using android::meminfo::ProcMemInfo;
 using namespace android::meminfo;
 
+static const size_t kPageSize = getpagesize();
+static const size_t kPageMask = ~(kPageSize - 1);
+
 #define COMPACT_ACTION_FILE_FLAG 1
 #define COMPACT_ACTION_ANON_FLAG 2
 
@@ -64,7 +67,7 @@ using android::base::unique_fd;
 #define ASYNC_RECEIVED_WHILE_FROZEN (2)
 #define TXNS_PENDING_WHILE_FROZEN (4)
 
-#define MAX_RW_COUNT (INT_MAX & PAGE_MASK)
+#define MAX_RW_COUNT (INT_MAX & kPageMask)
 
 // Defines the maximum amount of VMAs we can send per process_madvise syscall.
 // Currently this is set to UIO_MAXIOV which is the maximum segments allowed by
@@ -258,7 +261,7 @@ int madviseVmasFromBatch(unique_fd& pidfd, VmaBatch& batch, int madviseType,
     } else if (bytesProcessedInSend < batch.totalBytes) {
         // Partially processed the bytes requested
         // skip last page which is where it failed.
-        bytesProcessedInSend += PAGE_SIZE;
+        bytesProcessedInSend += kPageSize;
     }
     bytesProcessedInSend = consumeBytes(batch, bytesProcessedInSend);
 
@@ -333,7 +336,10 @@ static int getFilePageAdvice(const Vma& vma) {
     return -1;
 }
 static int getAnonPageAdvice(const Vma& vma) {
-    if (vma.inode == 0 && !vma.is_shared) {
+    bool hasReadFlag = (vma.flags & PROT_READ) > 0;
+    bool hasWriteFlag = (vma.flags & PROT_WRITE) > 0;
+    bool hasExecuteFlag = (vma.flags & PROT_EXEC) > 0;
+    if ((hasReadFlag || hasWriteFlag) && !hasExecuteFlag && !vma.is_shared) {
         return MADV_PAGEOUT;
     }
     return -1;
@@ -376,6 +382,9 @@ static int64_t compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
                 ++coldVmaIndex;
                 break;
             case MADV_PAGEOUT:
+#ifdef DEBUG_COMPACTION
+                ALOGE("Adding to compact vma=%s", vma.name.c_str());
+#endif
                 if (pageoutVmaIndex < pageoutVmas.size()) {
                     pageoutVmas[pageoutVmaIndex] = vma;
                 } else {
@@ -384,6 +393,7 @@ static int64_t compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
                 ++pageoutVmaIndex;
                 break;
         }
+        return true;
     };
     meminfo.ForEachVmaFromMaps(vmaCollectorCb, mapsBuffer);
     ATRACE_END();
@@ -562,8 +572,8 @@ static jstring com_android_server_am_CachedAppOptimizer_getFreezerCheckPath(JNIE
 }
 
 static jboolean com_android_server_am_CachedAppOptimizer_isFreezerProfileValid(JNIEnv* env) {
-    int uid = getuid();
-    int pid = getpid();
+    uid_t uid = getuid();
+    pid_t pid = getpid();
 
     return isProfileValidForProcess("Frozen", uid, pid) &&
             isProfileValidForProcess("Unfrozen", uid, pid);

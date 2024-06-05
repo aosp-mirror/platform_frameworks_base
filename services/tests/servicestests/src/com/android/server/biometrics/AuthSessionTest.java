@@ -25,7 +25,11 @@ import static android.hardware.biometrics.BiometricPrompt.DISMISSED_REASON_NEGAT
 
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_CALLED;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_STARTED;
+import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_PAUSED;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_STARTED_UI_SHOWING;
+import static com.android.server.biometrics.BiometricServiceStateProto.STATE_ERROR_PENDING_SYSUI;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -48,6 +52,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.ComponentInfoInternal;
@@ -64,7 +69,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.security.KeyStore;
+import android.security.KeyStoreAuthorization;
 
 import androidx.test.filters.SmallTest;
 
@@ -101,9 +106,10 @@ public class AuthSessionTest {
     @Mock private IBiometricServiceReceiver mClientReceiver;
     @Mock private IStatusBarService mStatusBarService;
     @Mock private IBiometricSysuiReceiver mSysuiReceiver;
-    @Mock private KeyStore mKeyStore;
+    @Mock private KeyStoreAuthorization mKeyStoreAuthorization;
     @Mock private AuthSession.ClientDeathReceiver mClientDeathReceiver;
     @Mock private BiometricFrameworkStatsLogger mBiometricFrameworkStatsLogger;
+    @Mock private BiometricCameraManager mBiometricCameraManager;
 
     private Random mRandom;
     private IBinder mToken;
@@ -179,7 +185,8 @@ public class AuthSessionTest {
                     eq(TEST_PACKAGE),
                     eq(TEST_REQUEST_ID),
                     eq(sensor.getCookie()),
-                    anyBoolean() /* allowBackgroundAuthentication */);
+                    anyBoolean() /* allowBackgroundAuthentication */,
+                    anyBoolean() /* isForLegacyFingerprintManager */);
         }
 
         final int cookie1 = session.mPreAuthInfo.eligibleSensors.get(0).getCookie();
@@ -207,6 +214,117 @@ public class AuthSessionTest {
                 assertEquals(BiometricSensor.STATE_COOKIE_RETURNED, sensor.getSensorState());
             }
         }
+    }
+
+    @Test
+    public void testOnErrorReceived_lockoutError() throws RemoteException {
+        setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_REAR);
+        setupFace(1 /* id */, false /* confirmationAlwaysRequired */,
+                mock(IBiometricAuthenticator.class));
+        final AuthSession session = createAuthSession(mSensors,
+                false /* checkDevicePolicyManager */,
+                Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
+                0 /* operationId */,
+                0 /* userId */);
+        session.goToInitialState();
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            assertEquals(BiometricSensor.STATE_WAITING_FOR_COOKIE, sensor.getSensorState());
+            session.onCookieReceived(
+                    session.mPreAuthInfo.eligibleSensors.get(sensor.id).getCookie());
+        }
+        assertTrue(session.allCookiesReceived());
+        assertEquals(STATE_AUTH_STARTED, session.getState());
+
+        // Either of strong sensor's lockout should cancel both sensors.
+        final int cookie1 = session.mPreAuthInfo.eligibleSensors.get(0).getCookie();
+        session.onErrorReceived(0, cookie1, BiometricConstants.BIOMETRIC_ERROR_LOCKOUT, 0);
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            assertEquals(BiometricSensor.STATE_CANCELING, sensor.getSensorState());
+        }
+        assertEquals(STATE_ERROR_PENDING_SYSUI, session.getState());
+
+        // If the sensor is STATE_CANCELING, delayed onAuthenticationRejected() shouldn't change the
+        // session state to STATE_AUTH_PAUSED.
+        session.onAuthenticationRejected(1);
+        assertEquals(STATE_ERROR_PENDING_SYSUI, session.getState());
+    }
+
+    @Test
+    public void testOnErrorReceivedBeforeOnDialogAnimatedIn() throws RemoteException {
+        final int fingerprintId = 0;
+        final int faceId = 1;
+        setupFingerprint(fingerprintId, FingerprintSensorProperties.TYPE_REAR);
+        setupFace(faceId, true /* confirmationAlwaysRequired */,
+                mock(IBiometricAuthenticator.class));
+        final AuthSession session = createAuthSession(mSensors,
+                false /* checkDevicePolicyManager */,
+                Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
+                0 /* operationId */,
+                0 /* userId */);
+        session.goToInitialState();
+
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            assertThat(sensor.getSensorState()).isEqualTo(BiometricSensor.STATE_WAITING_FOR_COOKIE);
+            session.onCookieReceived(
+                    session.mPreAuthInfo.eligibleSensors.get(sensor.id).getCookie());
+        }
+        assertThat(session.allCookiesReceived()).isTrue();
+        assertThat(session.getState()).isEqualTo(STATE_AUTH_STARTED);
+
+        final BiometricSensor faceSensor = session.mPreAuthInfo.eligibleSensors.get(faceId);
+        final BiometricSensor fingerprintSensor = session.mPreAuthInfo.eligibleSensors.get(
+                fingerprintId);
+        final int cookie = faceSensor.getCookie();
+        session.onErrorReceived(0, cookie, BiometricConstants.BIOMETRIC_ERROR_RE_ENROLL, 0);
+
+        assertThat(faceSensor.getSensorState()).isEqualTo(BiometricSensor.STATE_STOPPED);
+        assertThat(session.getState()).isEqualTo(STATE_ERROR_PENDING_SYSUI);
+
+        session.onDialogAnimatedIn(true);
+
+        assertThat(session.getState()).isEqualTo(STATE_AUTH_STARTED_UI_SHOWING);
+        assertThat(fingerprintSensor.getSensorState()).isEqualTo(
+                BiometricSensor.STATE_AUTHENTICATING);
+    }
+
+    @Test
+    public void testOnRejectionReceivedBeforeOnDialogAnimatedIn() throws RemoteException {
+        final int fingerprintId = 0;
+        final int faceId = 1;
+        setupFingerprint(fingerprintId, FingerprintSensorProperties.TYPE_REAR);
+        setupFace(faceId, false /* confirmationAlwaysRequired */,
+                mock(IBiometricAuthenticator.class));
+        final AuthSession session = createAuthSession(mSensors,
+                false /* checkDevicePolicyManager */,
+                Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
+                0 /* operationId */,
+                0 /* userId */);
+        session.goToInitialState();
+
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            assertThat(sensor.getSensorState()).isEqualTo(BiometricSensor.STATE_WAITING_FOR_COOKIE);
+            session.onCookieReceived(
+                    session.mPreAuthInfo.eligibleSensors.get(sensor.id).getCookie());
+        }
+        assertThat(session.allCookiesReceived()).isTrue();
+        assertThat(session.getState()).isEqualTo(STATE_AUTH_STARTED);
+
+        final BiometricSensor faceSensor = session.mPreAuthInfo.eligibleSensors.get(faceId);
+        final BiometricSensor fingerprintSensor = session.mPreAuthInfo.eligibleSensors.get(
+                fingerprintId);
+        session.onAuthenticationRejected(faceId);
+
+        assertThat(faceSensor.getSensorState()).isEqualTo(BiometricSensor.STATE_CANCELING);
+        assertThat(session.getState()).isEqualTo(STATE_AUTH_PAUSED);
+
+        session.onDialogAnimatedIn(true);
+
+        assertThat(session.getState()).isEqualTo(STATE_AUTH_STARTED_UI_SHOWING);
+        assertThat(fingerprintSensor.getSensorState()).isEqualTo(
+                BiometricSensor.STATE_AUTHENTICATING);
     }
 
     @Test
@@ -314,6 +432,8 @@ public class AuthSessionTest {
         assertEquals(startFingerprintNow ? BiometricSensor.STATE_AUTHENTICATING
                         : BiometricSensor.STATE_COOKIE_RETURNED,
                 session.mPreAuthInfo.eligibleSensors.get(fingerprintSensorId).getSensorState());
+        verify(mBiometricContext).updateContext((OperationContextExt) anyObject(),
+                eq(session.isCrypto()));
 
         // start fingerprint sensor if it was delayed
         if (!startFingerprintNow) {
@@ -482,6 +602,69 @@ public class AuthSessionTest {
                 eq(0) /* userId */);
     }
 
+    @Test
+    public void onErrorReceivedAfterOnTryAgainPressedWhenSensorsAuthenticating() throws Exception {
+        setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
+        setupFace(1 /* id */, false, mock(IBiometricAuthenticator.class));
+        final long operationId = 123;
+        final int userId = 10;
+        final AuthSession session = createAuthSession(mSensors,
+                false /* checkDevicePolicyManager */,
+                Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
+                operationId,
+                userId);
+        session.goToInitialState();
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            session.onCookieReceived(
+                    session.mPreAuthInfo.eligibleSensors.get(sensor.id).getCookie());
+        }
+        session.onDialogAnimatedIn(true /* startFingerprintNow */);
+
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            assertEquals(BiometricSensor.STATE_AUTHENTICATING, sensor.getSensorState());
+        }
+        session.onTryAgainPressed();
+        session.onErrorReceived(0 /* sensorId */,
+                session.mPreAuthInfo.eligibleSensors.get(0 /* sensorId */).getCookie(),
+                BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT, 0);
+
+        verify(mStatusBarService).onBiometricError(anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void onErrorReceivedAfterOnTryAgainPressedWhenSensorStopped() throws Exception {
+        setupFingerprint(0 /* id */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL);
+        setupFace(1 /* id */, false, mock(IBiometricAuthenticator.class));
+        final long operationId = 123;
+        final int userId = 10;
+        final AuthSession session = createAuthSession(mSensors,
+                false /* checkDevicePolicyManager */,
+                Authenticators.BIOMETRIC_STRONG,
+                TEST_REQUEST_ID,
+                operationId,
+                userId);
+        session.goToInitialState();
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            session.onCookieReceived(
+                    session.mPreAuthInfo.eligibleSensors.get(sensor.id).getCookie());
+        }
+        session.onDialogAnimatedIn(true /* startFingerprintNow */);
+
+        for (BiometricSensor sensor : session.mPreAuthInfo.eligibleSensors) {
+            sensor.goToStoppedStateIfCookieMatches(sensor.getCookie(),
+                    BiometricConstants.BIOMETRIC_ERROR_TIMEOUT);
+            assertEquals(BiometricSensor.STATE_STOPPED, sensor.getSensorState());
+        }
+
+        session.onTryAgainPressed();
+        session.onErrorReceived(0 /* sensorId */,
+                session.mPreAuthInfo.eligibleSensors.get(0 /* sensorId */).getCookie(),
+                BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT, 0);
+
+        verify(mStatusBarService, never()).onBiometricError(anyInt(), anyInt(), anyInt());
+    }
+
     // TODO (b/208484275) : Enable these tests
     // @Test
     // public void testPreAuth_canAuthAndPrivacyDisabled() throws Exception {
@@ -571,7 +754,8 @@ public class AuthSessionTest {
                 promptInfo,
                 TEST_PACKAGE,
                 checkDevicePolicyManager,
-                mContext);
+                mContext,
+                mBiometricCameraManager);
     }
 
     private AuthSession createAuthSession(List<BiometricSensor> sensors,
@@ -583,9 +767,10 @@ public class AuthSessionTest {
         final PreAuthInfo preAuthInfo = createPreAuthInfo(sensors, userId, promptInfo,
                 checkDevicePolicyManager);
         return new AuthSession(mContext, mBiometricContext, mStatusBarService, mSysuiReceiver,
-                mKeyStore, mRandom, mClientDeathReceiver, preAuthInfo, mToken, requestId,
-                operationId, userId, mSensorReceiver, mClientReceiver, TEST_PACKAGE, promptInfo,
-                false /* debugEnabled */, mFingerprintSensorProps, mBiometricFrameworkStatsLogger);
+                mKeyStoreAuthorization, mRandom, mClientDeathReceiver, preAuthInfo, mToken,
+                requestId, operationId, userId, mSensorReceiver, mClientReceiver, TEST_PACKAGE,
+                promptInfo, false /* debugEnabled */, mFingerprintSensorProps,
+                mBiometricFrameworkStatsLogger);
     }
 
     private PromptInfo createPromptInfo(@Authenticators.Types int authenticators) {

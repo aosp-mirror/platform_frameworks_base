@@ -25,10 +25,12 @@ import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.INotificationManager;
+import android.app.IUriGrantsManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.StatsManager;
+import android.app.StatusBarManager;
 import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
@@ -39,6 +41,7 @@ import android.app.smartspace.SmartspaceManager;
 import android.app.trust.TrustManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -46,6 +49,7 @@ import android.content.SharedPreferences;
 import android.content.om.OverlayManager;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.content.res.AssetManager;
@@ -62,15 +66,19 @@ import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.input.InputManager;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.MediaRouter2Manager;
+import android.media.projection.IMediaProjectionManager;
 import android.media.projection.MediaProjectionManager;
 import android.media.session.MediaSessionManager;
+import android.nearby.NearbyManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
+import android.os.IDeviceIdleController;
 import android.os.PowerExemptionManager;
 import android.os.PowerManager;
 import android.os.ServiceManager;
@@ -87,6 +95,7 @@ import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.satellite.SatelliteManager;
 import android.view.Choreographer;
 import android.view.CrossWindowBlurListeners;
 import android.view.IWindowManager;
@@ -113,6 +122,8 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.shared.system.PackageManagerWrapper;
+import com.android.systemui.user.utils.UserScopedService;
+import com.android.systemui.user.utils.UserScopedServiceImpl;
 
 import dagger.Module;
 import dagger.Provides;
@@ -215,6 +226,13 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static UserScopedService<ColorDisplayManager> provideScopedColorDisplayManager(
+            Context context) {
+        return new UserScopedServiceImpl<>(context, ColorDisplayManager.class);
+    }
+
+    @Provides
+    @Singleton
     static CrossWindowBlurListeners provideCrossWindowBlurListeners() {
         return CrossWindowBlurListeners.getInstance();
     }
@@ -229,6 +247,12 @@ public class FrameworkServicesModule {
     @Singleton
     static DisplayManager provideDisplayManager(Context context) {
         return context.getSystemService(DisplayManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static VirtualDeviceManager provideVirtualDeviceManager(Context context) {
+        return context.getSystemService(VirtualDeviceManager.class);
     }
 
     @Provides
@@ -412,6 +436,13 @@ public class FrameworkServicesModule {
     }
 
     @Provides
+    @Singleton
+    static IMediaProjectionManager provideIMediaProjectionManager() {
+        return IMediaProjectionManager.Stub.asInterface(
+                ServiceManager.getService(Context.MEDIA_PROJECTION_SERVICE));
+    }
+
+    @Provides
     static MediaRouter2Manager provideMediaRouter2Manager(Context context) {
         return MediaRouter2Manager.getInstance(context);
     }
@@ -419,6 +450,12 @@ public class FrameworkServicesModule {
     @Provides
     static MediaSessionManager provideMediaSessionManager(Context context) {
         return context.getSystemService(MediaSessionManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static NearbyManager provideNearbyManager(Context context) {
+        return context.getSystemService(NearbyManager.class);
     }
 
     @Provides
@@ -451,6 +488,12 @@ public class FrameworkServicesModule {
     @Singleton
     static PackageManager providePackageManager(Context context) {
         return context.getPackageManager();
+    }
+
+    @Provides
+    @Singleton
+    static PackageInstaller providePackageInstaller(PackageManager packageManager) {
+        return packageManager.getPackageInstaller();
     }
 
     @Provides
@@ -538,7 +581,7 @@ public class FrameworkServicesModule {
     @Provides
     @Singleton
     static SubscriptionManager provideSubscriptionManager(Context context) {
-        return context.getSystemService(SubscriptionManager.class);
+        return context.getSystemService(SubscriptionManager.class).createForAllUserProfiles();
     }
 
     @Provides
@@ -599,6 +642,12 @@ public class FrameworkServicesModule {
     }
 
     @Provides
+    @Singleton
+    static UserScopedService<UserManager> provideScopedUserManager(@Application Context context) {
+        return new UserScopedServiceImpl<>(context, UserManager.class);
+    }
+
+    @Provides
     static WallpaperManager provideWallpaperManager(Context context) {
         return context.getSystemService(WallpaperManager.class);
     }
@@ -618,6 +667,7 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    @Nullable
     static CarrierConfigManager provideCarrierConfigManager(Context context) {
         return context.getSystemService(CarrierConfigManager.class);
     }
@@ -640,12 +690,19 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static LocationManager provideLocationManager(Context context) {
+        return context.getSystemService(LocationManager.class);
+    }
+
+    @Provides
+    @Singleton
     static ClipboardManager provideClipboardManager(Context context) {
         return context.getSystemService(ClipboardManager.class);
     }
 
     @Provides
     @Singleton
+    @Nullable
     static SmartspaceManager provideSmartspaceManager(Context context) {
         return context.getSystemService(SmartspaceManager.class);
     }
@@ -679,5 +736,32 @@ public class FrameworkServicesModule {
     @Singleton
     static TextClassificationManager provideTextClassificationManager(Context context) {
         return context.getSystemService(TextClassificationManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static StatusBarManager provideStatusBarManager(Context context) {
+        return context.getSystemService(StatusBarManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static IUriGrantsManager provideIUriGrantsManager() {
+        return IUriGrantsManager.Stub.asInterface(
+                ServiceManager.getService(Context.URI_GRANTS_SERVICE)
+        );
+    }
+
+    @Provides
+    @Singleton
+    static Optional<SatelliteManager> provideSatelliteManager(Context context) {
+        return Optional.ofNullable(context.getSystemService(SatelliteManager.class));
+    }
+
+    @Provides
+    @Singleton
+    static IDeviceIdleController provideDeviceIdleController() {
+        return IDeviceIdleController.Stub.asInterface(
+                ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
     }
 }

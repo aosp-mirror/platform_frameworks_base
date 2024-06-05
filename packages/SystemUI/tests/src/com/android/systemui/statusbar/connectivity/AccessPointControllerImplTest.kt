@@ -17,12 +17,13 @@
 package com.android.systemui.statusbar.connectivity
 
 import android.os.UserManager
-import android.test.suitebuilder.annotation.SmallTest
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import android.testing.TestableLooper.RunWithLooper
 import androidx.lifecycle.Lifecycle
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.wifitrackerlib.WifiEntry
 import com.android.wifitrackerlib.WifiPickerTracker
@@ -31,7 +32,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyList
 import org.mockito.Captor
 import org.mockito.Mock
@@ -42,7 +42,7 @@ import org.mockito.MockitoAnnotations
 import java.util.concurrent.Executor
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 class AccessPointControllerImplTest : SysuiTestCase() {
 
@@ -52,7 +52,7 @@ class AccessPointControllerImplTest : SysuiTestCase() {
     private lateinit var userTracker: UserTracker
     @Mock
     private lateinit var wifiPickerTrackerFactory:
-            AccessPointControllerImpl.WifiPickerTrackerFactory
+            WifiPickerTrackerFactory
     @Mock
     private lateinit var wifiPickerTracker: WifiPickerTracker
     @Mock
@@ -72,7 +72,7 @@ class AccessPointControllerImplTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        `when`(wifiPickerTrackerFactory.create(any(), any())).thenReturn(wifiPickerTracker)
+        `when`(wifiPickerTrackerFactory.create(any(), any(), any())).thenReturn(wifiPickerTracker)
 
         `when`(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntryConnected)
         `when`(wifiPickerTracker.wifiEntries).thenReturn(ArrayList<WifiEntry>().apply {
@@ -148,6 +148,24 @@ class AccessPointControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun onWifiEntriesChanged_reasonIsScanResults_fireWifiScanCallbackFalse() {
+        controller.addAccessPointCallback(callback)
+
+        controller.onWifiEntriesChanged(WifiPickerTracker.WIFI_ENTRIES_CHANGED_REASON_SCAN_RESULTS)
+
+        verify(callback).onWifiScan(false)
+    }
+
+    @Test
+    fun onScanRequested_fireWifiScanCallbackTrue() {
+        controller.addAccessPointCallback(callback)
+
+        controller.onScanRequested()
+
+        verify(callback).onWifiScan(true)
+    }
+
+    @Test
     fun testOnNumSavedNetworksChangedDoesntTriggerCallback() {
         controller.addAccessPointCallback(callback)
         controller.onNumSavedNetworksChanged()
@@ -165,7 +183,7 @@ class AccessPointControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testReturnEmptyListWhenNoWifiPickerTracker() {
-        `when`(wifiPickerTrackerFactory.create(any(), any())).thenReturn(null)
+        `when`(wifiPickerTrackerFactory.create(any(), any(), any())).thenReturn(null)
         val otherController = AccessPointControllerImpl(
                 userManager,
                 userTracker,

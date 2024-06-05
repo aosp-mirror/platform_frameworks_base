@@ -38,43 +38,33 @@ import com.android.settingslib.spaprivileged.tests.testutils.FakeRestrictionsPro
 import com.android.settingslib.spaprivileged.tests.testutils.TestTogglePermissionAppListModel
 import com.android.settingslib.spaprivileged.tests.testutils.TestTogglePermissionAppListProvider
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 class TogglePermissionAppInfoPageTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @get:Rule
-    val mockito: MockitoRule = MockitoJUnit.rule()
-
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    @Mock
-    private lateinit var packageManagers: IPackageManagers
+    private val packageManagers = mock<IPackageManagers> {
+        on { getPackageInfoAsUser(PACKAGE_NAME, USER_ID) } doReturn PACKAGE_INFO
+    }
 
     private val fakeNavControllerWrapper = FakeNavControllerWrapper()
 
-    private val fakeRestrictionsProvider = FakeRestrictionsProvider()
+    private val fakeRestrictionsProvider = FakeRestrictionsProvider().apply {
+        restrictedMode = NoRestricted
+    }
 
     private val appListTemplate =
         TogglePermissionAppListTemplate(listOf(TestTogglePermissionAppListProvider))
 
     private val appInfoPageProvider = TogglePermissionAppInfoPageProvider(appListTemplate)
-
-    @Before
-    fun setUp() {
-        fakeRestrictionsProvider.restrictedMode = NoRestricted
-        whenever(packageManagers.getPackageInfoAsUser(PACKAGE_NAME, USER_ID))
-            .thenReturn(PACKAGE_INFO)
-    }
 
     @Test
     fun buildEntry() {
@@ -238,6 +228,7 @@ class TogglePermissionAppInfoPageTest {
         const val PACKAGE_NAME = "package.name"
         val APP = ApplicationInfo().apply {
             packageName = PACKAGE_NAME
+            uid = 11000
         }
         val PACKAGE_INFO = PackageInfo().apply {
             packageName = PACKAGE_NAME

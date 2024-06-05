@@ -17,6 +17,7 @@
 package com.android.systemui.flags
 
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -35,6 +36,7 @@ class FlagManager constructor(
 ) : FlagListenable {
     companion object {
         const val RECEIVING_PACKAGE = "com.android.systemui"
+        const val RECEIVING_PACKAGE_WATCH = "com.google.android.apps.wearable.systemui"
         const val ACTION_SET_FLAG = "com.android.systemui.action.SET_FLAG"
         const val ACTION_GET_FLAGS = "com.android.systemui.action.GET_FLAGS"
         const val FLAGS_PERMISSION = "com.android.systemui.permission.FLAGS"
@@ -62,7 +64,7 @@ class FlagManager constructor(
 
     fun getFlagsFuture(): ListenableFuture<Collection<Flag<*>>> {
         val intent = Intent(ACTION_GET_FLAGS)
-        intent.setPackage(RECEIVING_PACKAGE)
+        intent.setPackage(if (isWatch()) RECEIVING_PACKAGE_WATCH else RECEIVING_PACKAGE)
 
         return CallbackToFutureAdapter.getFuture {
                 completer: CallbackToFutureAdapter.Completer<Collection<Flag<*>>> ->
@@ -116,13 +118,6 @@ class FlagManager constructor(
     }
 
     /** Returns the stored value or null if not set.  */
-    // TODO(b/265188950): Remove method this once ids are fully deprecated.
-    fun <T> readFlagValue(id: Int, serializer: FlagSerializer<T>): T? {
-        val data = settings.getStringFromSecure(idToSettingsKey(id))
-        return serializer.fromSettingsData(data)
-    }
-
-    /** Returns the stored value or null if not set.  */
     fun <T> readFlagValue(name: String, serializer: FlagSerializer<T>): T? {
         val data = settings.getString(nameToSettingsKey(name))
         return serializer.fromSettingsData(data)
@@ -156,11 +151,6 @@ class FlagManager constructor(
         intent.putExtra(EXTRA_NAME, name)
 
         return intent
-    }
-
-    // TODO(b/265188950): Remove method this once ids are fully deprecated.
-    fun idToSettingsKey(id: Int): String {
-        return "$SETTINGS_PREFIX/$id"
     }
 
     fun nameToSettingsKey(name: String): String {
@@ -203,6 +193,10 @@ class FlagManager constructor(
         // Suppress restart only if ALL listeners request it.
         val suppressRestart = suppressRestartList.all { it }
         restartAction?.accept(suppressRestart)
+    }
+
+    private fun isWatch(): Boolean {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
     }
 
     private data class PerFlagListener(val name: String, val listener: FlagListenable.Listener)

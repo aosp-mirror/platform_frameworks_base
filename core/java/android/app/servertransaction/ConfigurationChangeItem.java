@@ -16,11 +16,11 @@
 
 package android.app.servertransaction;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
-import android.os.IBinder;
 import android.os.Parcel;
 
 import java.util.Objects;
@@ -35,29 +35,28 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
     private int mDeviceId;
 
     @Override
-    public void preExecute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client) {
         CompatibilityInfo.applyOverrideScaleIfNeeded(mConfiguration);
         client.updatePendingConfiguration(mConfiguration);
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, IBinder token,
-            PendingTransactionActions pendingActions) {
+    public void execute(@NonNull ClientTransactionHandler client,
+            @NonNull PendingTransactionActions pendingActions) {
         client.handleConfigurationChanged(mConfiguration, mDeviceId);
     }
-
 
     // ObjectPoolItem implementation
 
     private ConfigurationChangeItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static ConfigurationChangeItem obtain(Configuration config, int deviceId) {
+    public static ConfigurationChangeItem obtain(@NonNull Configuration config, int deviceId) {
         ConfigurationChangeItem instance = ObjectPool.obtain(ConfigurationChangeItem.class);
         if (instance == null) {
             instance = new ConfigurationChangeItem();
         }
-        instance.mConfiguration = config;
+        instance.mConfiguration = new Configuration(config);
         instance.mDeviceId = deviceId;
 
         return instance;

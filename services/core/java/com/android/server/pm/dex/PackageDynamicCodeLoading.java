@@ -538,9 +538,10 @@ class PackageDynamicCodeLoading extends AbstractStatsBase<Void> {
             } else {
                 if (fileInfo.mUserId != userId) {
                     // This should be impossible: private app files are always user-specific and
-                    // can't be accessed from different users.
-                    throw new IllegalArgumentException("Cannot change userId for '" + path
-                            + "' from " + fileInfo.mUserId + " to " + userId);
+                    // can't be accessed from different users. But it does very occasionally happen
+                    // (b/323665257). Ignore such cases - we shouldn't record data from a different
+                    // user.
+                    return false;
                 }
                 // Changing file type (i.e. loading the same file in different ways is possible if
                 // unlikely. We allow it but ignore it.

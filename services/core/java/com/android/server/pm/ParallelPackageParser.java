@@ -22,9 +22,10 @@ import android.os.Process;
 import android.os.Trace;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.PackageParser2;
+import com.android.internal.pm.parsing.PackageParserException;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.util.ConcurrentUtils;
-import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -125,6 +126,10 @@ class ParallelPackageParser {
     @VisibleForTesting
     protected ParsedPackage parsePackage(File scanFile, int parseFlags)
             throws PackageManagerException {
-        return mPackageParser.parsePackage(scanFile, parseFlags, true);
+        try {
+            return mPackageParser.parsePackage(scanFile, parseFlags, true);
+        } catch (PackageParserException e) {
+            throw new PackageManagerException(e.error, e.getMessage(), e);
+        }
     }
 }

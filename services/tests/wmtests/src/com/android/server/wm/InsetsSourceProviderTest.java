@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -62,28 +63,31 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
     @Test
     public void testPostLayout() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        statusBar.setBounds(0, 0, 500, 1000);
         statusBar.getFrame().set(0, 0, 500, 100);
         statusBar.mHasSurface = true;
         mProvider.setWindowContainer(statusBar, null, null);
         mProvider.updateSourceFrame(statusBar.getFrame());
         mProvider.onPostLayout();
         assertEquals(new Rect(0, 0, 500, 100), mProvider.getSource().getFrame());
-        assertEquals(Insets.of(0, 100, 0, 0),
-                mProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
-                        false /* ignoreVisibility */));
-        assertEquals(Insets.of(0, 100, 0, 0),
-                mProvider.getSource().calculateVisibleInsets(new Rect(0, 0, 500, 500)));
+        assertEquals(Insets.of(0, 100, 0, 0), mProvider.getInsetsHint());
+
+        // Change the bounds and call onPostLayout. Make sure the insets hint gets updated.
+        statusBar.setBounds(0, 10, 500, 1000);
+        mProvider.onPostLayout();
+        assertEquals(Insets.of(0, 90, 0, 0), mProvider.getInsetsHint());
     }
 
     @Test
     public void testPostLayout_invisible() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        statusBar.setBounds(0, 0, 500, 1000);
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindowContainer(statusBar, null, null);
         mProvider.updateSourceFrame(statusBar.getFrame());
         mProvider.onPostLayout();
-        assertEquals(Insets.NONE, mProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
-                false /* ignoreVisibility */));
+        assertTrue(mProvider.getSource().getFrame().isEmpty());
+        assertEquals(Insets.NONE, mProvider.getInsetsHint());
     }
 
     @Test
@@ -160,6 +164,78 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
     }
 
     @Test
+    public void testGetLeash() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
+        final WindowState fakeTarget = createWindow(null, TYPE_APPLICATION, "fakeTarget");
+        final WindowState otherTarget = createWindow(null, TYPE_APPLICATION, "otherTarget");
+        statusBar.getFrame().set(0, 0, 500, 100);
+
+        // We must not have control or control target before we have the insets source window,
+        // so also no leash.
+        mProvider.updateControlForTarget(target, true /* force */);
+        assertNull(mProvider.getControl(target));
+        assertNull(mProvider.getControlTarget());
+        assertNull(mProvider.getLeash(target));
+
+        // We can have the control or the control target after we have the insets source window,
+        // but no leash as this is not yet ready for dispatching.
+        mProvider.setWindowContainer(statusBar, null, null);
+        mProvider.updateControlForTarget(target, false /* force */);
+        assertNotNull(mProvider.getControl(target));
+        assertNotNull(mProvider.getControlTarget());
+        assertEquals(mProvider.getControlTarget(), target);
+        assertNull(mProvider.getLeash(target));
+
+        // After surface transactions are applied, the leash is ready for dispatching.
+        mProvider.onSurfaceTransactionApplied();
+        assertNotNull(mProvider.getLeash(target));
+
+        // We do have fake control for the fake control target, but that has no leash.
+        mProvider.updateFakeControlTarget(fakeTarget);
+        assertNotNull(mProvider.getControl(fakeTarget));
+        assertNotNull(mProvider.getFakeControlTarget());
+        assertNotEquals(mProvider.getControlTarget(), fakeTarget);
+        assertNull(mProvider.getLeash(fakeTarget));
+
+        // We don't have any control for a different (non-fake control target), so also no leash.
+        assertNull(mProvider.getControl(otherTarget));
+        assertNotNull(mProvider.getControlTarget());
+        assertNotEquals(mProvider.getControlTarget(), otherTarget);
+        assertNull(mProvider.getLeash(otherTarget));
+    }
+
+    @Test
+    public void testUpdateSourceFrame() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        mProvider.setWindowContainer(statusBar, null, null);
+        statusBar.setBounds(0, 0, 500, 1000);
+
+        mProvider.setServerVisible(true);
+        statusBar.getFrame().set(0, 0, 500, 100);
+        mProvider.updateSourceFrame(statusBar.getFrame());
+        assertEquals(statusBar.getFrame(), mProvider.getSource().getFrame());
+        assertEquals(Insets.of(0, 100, 0, 0), mProvider.getInsetsHint());
+
+        // Only change the source frame but not the visibility.
+        statusBar.getFrame().set(0, 0, 500, 90);
+        mProvider.updateSourceFrame(statusBar.getFrame());
+        assertEquals(statusBar.getFrame(), mProvider.getSource().getFrame());
+        assertEquals(Insets.of(0, 90, 0, 0), mProvider.getInsetsHint());
+
+        mProvider.setServerVisible(false);
+        statusBar.getFrame().set(0, 0, 500, 80);
+        mProvider.updateSourceFrame(statusBar.getFrame());
+        assertTrue(mProvider.getSource().getFrame().isEmpty());
+        assertEquals(Insets.of(0, 90, 0, 0), mProvider.getInsetsHint());
+
+        // Only change the visibility but not the frame.
+        mProvider.setServerVisible(true);
+        assertEquals(statusBar.getFrame(), mProvider.getSource().getFrame());
+        assertEquals(Insets.of(0, 80, 0, 0), mProvider.getInsetsHint());
+    }
+
+    @Test
     public void testUpdateSourceFrameForIme() {
         final WindowState inputMethod = createWindow(null, TYPE_INPUT_METHOD, "inputMethod");
 
@@ -184,7 +260,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
     }
 
     @Test
-    public void testInsetsModified() {
+    public void testSetRequestedVisibleTypes() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         statusBar.getFrame().set(0, 0, 500, 100);
@@ -196,7 +272,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
     }
 
     @Test
-    public void testInsetsModified_noControl() {
+    public void testSetRequestedVisibleTypes_noControl() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         statusBar.getFrame().set(0, 0, 500, 100);

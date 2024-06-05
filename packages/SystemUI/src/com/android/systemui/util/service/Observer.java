@@ -16,6 +16,8 @@
 
 package com.android.systemui.util.service;
 
+import com.android.systemui.util.annotations.WeaklyReferencedCallback;
+
 /**
  * The {@link Observer} interface specifies an entity which listeners
  * can be informed of changes to the source, which will require updating. Note that this deals
@@ -25,6 +27,7 @@ public interface Observer {
     /**
      * Callback for receiving updates from the {@link Observer}.
      */
+    @WeaklyReferencedCallback
     interface Callback {
         /**
          * Invoked when the source has changed.

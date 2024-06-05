@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.MainThread;
@@ -32,7 +31,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.R;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -43,6 +42,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 
 import javax.inject.Inject;
@@ -53,7 +53,8 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     public static final String TILE_SPEC = "work";
 
-    private final Icon mIcon = ResourceIcon.get(R.drawable.stat_sys_managed_profile_status);
+    private final Icon mIcon = ResourceIcon.get(
+            com.android.internal.R.drawable.stat_sys_managed_profile_status);
 
     private final ManagedProfileController mProfileController;
 
@@ -87,7 +88,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    public void handleClick(@Nullable View view) {
+    public void handleClick(@Nullable Expandable expandable) {
         mProfileController.setWorkModeEnabled(!mState.value);
     }
 
@@ -121,10 +122,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
             onManagedProfileRemoved();
         }
 
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
-
         if (arg instanceof Boolean) {
             state.value = (Boolean) arg;
         } else {
@@ -132,15 +129,13 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
         }
 
         state.icon = mIcon;
-        if (state.value) {
-            state.slash.isSlashed = false;
-        } else {
-            state.slash.isSlashed = true;
-        }
         state.label = getTileLabel();
         state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.secondaryLabel = state.value
+                ? ""
+                : mContext.getString(R.string.quick_settings_work_mode_paused_state);
     }
 
     @Override

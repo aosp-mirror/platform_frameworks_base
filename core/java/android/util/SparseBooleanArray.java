@@ -22,8 +22,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
-import libcore.util.EmptyArray;
-
 /**
  * SparseBooleanArrays map integers to booleans.
  * Unlike a normal array of booleans
@@ -46,6 +44,7 @@ import libcore.util.EmptyArray;
  * keys in ascending order, or the values corresponding to the keys in ascending
  * order in the case of <code>valueAt(int)</code>.</p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class SparseBooleanArray implements Cloneable {
     /**
      * Creates a new SparseBooleanArray containing no mappings.

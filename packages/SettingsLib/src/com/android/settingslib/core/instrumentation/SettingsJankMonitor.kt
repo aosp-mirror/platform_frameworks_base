@@ -18,7 +18,7 @@ package com.android.settingslib.core.instrumentation
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.preference.PreferenceGroupAdapter
-import androidx.preference.SwitchPreference
+import androidx.preference.TwoStatePreference
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.jank.InteractionJankMonitor
 import java.util.concurrent.Executors
@@ -37,13 +37,16 @@ object SettingsJankMonitor {
     const val MONITORED_ANIMATION_DURATION_MS = 300L
 
     /**
-     * Detects the jank when click on a SwitchPreference.
+     * Detects the jank when click on a TwoStatePreference.
      *
      * @param recyclerView the recyclerView contains the preference
      * @param preference the clicked preference
      */
     @JvmStatic
-    fun detectSwitchPreferenceClickJank(recyclerView: RecyclerView, preference: SwitchPreference) {
+    fun detectSwitchPreferenceClickJank(
+        recyclerView: RecyclerView,
+        preference: TwoStatePreference,
+    ) {
         val adapter = recyclerView.adapter as? PreferenceGroupAdapter ?: return
         val adapterPosition = adapter.getPreferenceAdapterPosition(preference)
         val viewHolder = recyclerView.findViewHolderForAdapterPosition(adapterPosition) ?: return

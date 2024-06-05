@@ -19,9 +19,10 @@ import android.content.ContentResolver
 import android.database.ContentObserver
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.unfold.TestUnfoldTransitionProvider
+import com.android.systemui.unfold.FakeUnfoldTransitionProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.util.mockito.any
 import org.junit.Before
@@ -36,11 +37,12 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
+@TestableLooper.RunWithLooper
 class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
 
     @Mock lateinit var sinkProvider: TransitionProgressListener
 
-    private val sourceProvider = TestUnfoldTransitionProvider()
+    private val sourceProvider = FakeUnfoldTransitionProvider()
 
     private lateinit var contentResolver: ContentResolver
     private lateinit var progressProvider: ScaleAwareTransitionProgressProvider
@@ -130,6 +132,6 @@ class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
             durationScale.toString()
         )
 
-        animatorDurationScaleListenerCaptor.value.dispatchChange(/* selfChange= */false)
+        animatorDurationScaleListenerCaptor.value.dispatchChange(/* selfChange= */ false)
     }
 }

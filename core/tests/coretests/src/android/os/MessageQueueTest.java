@@ -16,13 +16,22 @@
 
 package android.os;
 
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.Suppress;
+import androidx.test.runner.AndroidJUnit4;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @Suppress  // Failing.
-public class MessageQueueTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class MessageQueueTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private static class BaseTestHandler extends TestHandlerThread {
         Handler mHandler;
@@ -61,6 +70,7 @@ public class MessageQueueTest extends TestCase {
         }
     }
 
+    @Test
     @MediumTest
     public void testMessageOrder() throws Exception {
         TestHandlerThread tester = new BaseTestHandler() {
@@ -80,6 +90,7 @@ public class MessageQueueTest extends TestCase {
         tester.doTest(1000);
     }
 
+    @Test
     @MediumTest
     public void testAtFrontOfQueue() throws Exception {
         TestHandlerThread tester = new BaseTestHandler() {
@@ -141,7 +152,9 @@ public class MessageQueueTest extends TestCase {
         }
     }
 
+    @Test
     @MediumTest
+    @IgnoreUnderRavenwood(reason = "Flaky test, b/315872700")
     public void testFieldIntegrity() throws Exception {
 
         TestHandlerThread tester = new TestFieldIntegrityHandler() {
@@ -157,7 +170,7 @@ public class MessageQueueTest extends TestCase {
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
                 if (msg.what == 0) {
-                    msg.flags = -1;
+                    msg.flags = Message.FLAGS_TO_CLEAR_ON_COPY_FROM;
                     msg.what = 1;
                     msg.arg1 = 456;
                     msg.arg2 = 789;

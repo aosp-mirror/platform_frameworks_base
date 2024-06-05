@@ -30,10 +30,14 @@
 #include <utime.h>
 #include <zlib.h>
 
+#include <androidfw/PathUtils.h>
 #include <log/log.h>
 #include <utils/ByteOrder.h>
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
+
+#include <com_android_server_backup.h>
+namespace backup_flags = com::android::server::backup;
 
 namespace android {
 
@@ -179,7 +183,7 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileRec>& snapshot)
             }
 
             // filename is not NULL terminated, but it is padded
-            amt = write(fd, name.string(), nameLen);
+            amt = write(fd, name.c_str(), nameLen);
             if (amt != nameLen) {
                 ALOGW("write_snapshot_file error writing filename %s", strerror(errno));
                 return 1;
@@ -203,7 +207,7 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileRec>& snapshot)
 static int
 write_delete_file(BackupDataWriter* dataStream, const String8& key)
 {
-    LOGP("write_delete_file %s\n", key.string());
+    LOGP("write_delete_file %s\n", key.c_str());
     return dataStream->WriteEntityHeader(key, -1);
 }
 
@@ -211,9 +215,9 @@ static int
 write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8& key,
         char const* realFilename)
 {
-    LOGP("write_update_file %s (%s) : mode 0%o\n", realFilename, key.string(), mode);
+    LOGP("write_update_file %s (%s) : mode 0%o\n", realFilename, key.c_str(), mode);
 
-    const int bufsize = 4*1024;
+    const int bufsize = backup_flags::enable_max_size_writes_to_pipes() ? (64*1024) : (4*1024);
     int err;
     int amt;
     int fileSize;
@@ -365,7 +369,7 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
             r.s.size = st.st_size;
 
             if (newSnapshot.indexOfKey(key) >= 0) {
-                LOGP("back_up_files key already in use '%s'", key.string());
+                LOGP("back_up_files key already in use '%s'", key.c_str());
                 return -1;
             }
 
@@ -390,30 +394,30 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
         int cmp = p.compare(q);
         if (cmp < 0) {
             // file present in oldSnapshot, but not present in newSnapshot
-            LOGP("file removed: %s", p.string());
+            LOGP("file removed: %s", p.c_str());
             write_delete_file(dataStream, p);
             n++;
         } else if (cmp > 0) {
             // file added
-            LOGP("file added: %s crc=0x%08x", g.file.string(), g.s.crc32);
-            write_update_file(dataStream, q, g.file.string());
+            LOGP("file added: %s crc=0x%08x", g.file.c_str(), g.s.crc32);
+            write_update_file(dataStream, q, g.file.c_str());
             m++;
         } else {
             // same file exists in both old and new; check whether to update
             const FileState& f = oldSnapshot.valueAt(n);
 
-            LOGP("%s", q.string());
+            LOGP("%s", q.c_str());
             LOGP("  old: modTime=%d,%d mode=%04o size=%-3d crc32=0x%08x",
                     f.modTime_sec, f.modTime_nsec, f.mode, f.size, f.crc32);
             LOGP("  new: modTime=%d,%d mode=%04o size=%-3d crc32=0x%08x",
                     g.s.modTime_sec, g.s.modTime_nsec, g.s.mode, g.s.size, g.s.crc32);
             if (f.modTime_sec != g.s.modTime_sec || f.modTime_nsec != g.s.modTime_nsec
                     || f.mode != g.s.mode || f.size != g.s.size || f.crc32 != g.s.crc32) {
-                int fd = open(g.file.string(), O_RDONLY);
+                int fd = open(g.file.c_str(), O_RDONLY);
                 if (fd < 0) {
-                    ALOGE("Unable to read file for backup: %s", g.file.string());
+                    ALOGE("Unable to read file for backup: %s", g.file.c_str());
                 } else {
-                    write_update_file(dataStream, fd, g.s.mode, p, g.file.string());
+                    write_update_file(dataStream, fd, g.s.mode, p, g.file.c_str());
                     close(fd);
                 }
             }
@@ -432,7 +436,7 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
     while (m<M) {
         const String8& q = newSnapshot.keyAt(m);
         FileRec& g = newSnapshot.editValueAt(m);
-        write_update_file(dataStream, q, g.file.string());
+        write_update_file(dataStream, q, g.file.c_str());
         m++;
     }
 
@@ -483,7 +487,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
         BackupDataWriter* writer)
 {
     // In the output stream everything is stored relative to the root
-    const char* relstart = filepath.string() + rootpath.length();
+    const char* relstart = filepath.c_str() + rootpath.length();
     if (*relstart == '/') relstart++;     // won't be true when path == rootpath
     String8 relpath(relstart);
 
@@ -514,9 +518,9 @@ int write_tarfile(const String8& packageName, const String8& domain,
 
     int err = 0;
     struct stat64 s;
-    if (lstat64(filepath.string(), &s) != 0) {
+    if (lstat64(filepath.c_str(), &s) != 0) {
         err = errno;
-        ALOGE("Error %d (%s) from lstat64(%s)", err, strerror(err), filepath.string());
+        ALOGE("Error %d (%s) from lstat64(%s)", err, strerror(err), filepath.c_str());
         return err;
     }
 
@@ -541,15 +545,16 @@ int write_tarfile(const String8& packageName, const String8& domain,
 
     // !!! TODO: use mmap when possible to avoid churning the buffer cache
     // !!! TODO: this will break with symlinks; need to use readlink(2)
-    int fd = open(filepath.string(), O_RDONLY);
+    int fd = open(filepath.c_str(), O_RDONLY);
     if (fd < 0) {
         err = errno;
-        ALOGE("Error %d (%s) from open(%s)", err, strerror(err), filepath.string());
+        ALOGE("Error %d (%s) from open(%s)", err, strerror(err), filepath.c_str());
         return err;
     }
 
     // read/write up to this much at a time.
-    const size_t BUFSIZE = 32 * 1024;
+    const size_t BUFSIZE = backup_flags::enable_max_size_writes_to_pipes() ? (64*1024) : (32*1024);
+
     char* buf = (char *)calloc(1,BUFSIZE);
     const size_t PAXHEADER_OFFSET = 512;
     const size_t PAXHEADER_SIZE = 512;
@@ -592,7 +597,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
     } else if (S_ISREG(s.st_mode)) {
         type = '0';     // tar magic: '0' == normal file
     } else {
-        ALOGW("Error: unknown file mode 0%o [%s]", s.st_mode, filepath.string());
+        ALOGW("Error: unknown file mode 0%o [%s]", s.st_mode, filepath.c_str());
         goto cleanup;
     }
     buf[156] = type;
@@ -606,30 +611,30 @@ int write_tarfile(const String8& packageName, const String8& domain,
             prefix += packageName;
         }
         if (domain.length() > 0) {
-            prefix.appendPath(domain);
+            appendPath(prefix, domain);
         }
 
         // pax extended means we don't put in a prefix field, and put a different
         // string in the basic name field.  We can also construct the full path name
         // out of the substrings we've now built.
         fullname = prefix;
-        fullname.appendPath(relpath);
+        appendPath(fullname, relpath);
 
         // ustar:
         //    [   0 : 100 ]; file name/path
         //    [ 345 : 155 ] filename path prefix
         // We only use the prefix area if fullname won't fit in the path
         if (fullname.length() > 100) {
-            strncpy(buf, relpath.string(), 100);
-            strncpy(buf + 345, prefix.string(), 155);
+            strncpy(buf, relpath.c_str(), 100);
+            strncpy(buf + 345, prefix.c_str(), 155);
         } else {
-            strncpy(buf, fullname.string(), 100);
+            strncpy(buf, fullname.c_str(), 100);
         }
     }
 
     // [ 329 : 8 ] and [ 337 : 8 ] devmajor/devminor, not used
 
-    ALOGI("   Name: %s", fullname.string());
+    ALOGI("   Name: %s", fullname.c_str());
 
     // If we're using a pax extended header, build & write that here; lengths are
     // already preflighted
@@ -647,18 +652,18 @@ int write_tarfile(const String8& packageName, const String8& domain,
 
         // fullname was generated above with the ustar paths
         paxLen += write_pax_header_entry(paxData + paxLen, PAXDATA_SIZE - paxLen,
-                "path", fullname.string());
+                "path", fullname.c_str());
 
         // Now we know how big the pax data is
 
         // Now build the pax *header* templated on the ustar header
         memcpy(paxHeader, buf, 512);
 
-        String8 leaf = fullname.getPathLeaf();
+        String8 leaf = getPathLeaf(fullname);
         memset(paxHeader, 0, 100);                  // rewrite the name area
-        snprintf(paxHeader, 100, "PaxHeader/%s", leaf.string());
+        snprintf(paxHeader, 100, "PaxHeader/%s", leaf.c_str());
         memset(paxHeader + 345, 0, 155);            // rewrite the prefix area
-        strncpy(paxHeader + 345, prefix.string(), 155);
+        strncpy(paxHeader + 345, prefix.c_str(), 155);
 
         paxHeader[156] = 'x';                       // mark it as a pax extended header
 
@@ -691,12 +696,12 @@ int write_tarfile(const String8& packageName, const String8& domain,
             ssize_t nRead = read(fd, buf, toRead);
             if (nRead < 0) {
                 err = errno;
-                ALOGE("Unable to read file [%s], err=%d (%s)", filepath.string(),
+                ALOGE("Unable to read file [%s], err=%d (%s)", filepath.c_str(),
                         err, strerror(err));
                 break;
             } else if (nRead == 0) {
                 ALOGE("EOF but expect %lld more bytes in [%s]", (long long) toWrite,
-                        filepath.string());
+                        filepath.c_str());
                 err = EIO;
                 break;
             }
@@ -725,7 +730,7 @@ done:
 
 
 
-#define RESTORE_BUF_SIZE (8*1024)
+const size_t RESTORE_BUF_SIZE = backup_flags::enable_max_size_writes_to_pipes() ? 64*1024 : 8*1024;
 
 RestoreHelperBase::RestoreHelperBase()
 {
@@ -762,7 +767,7 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
     file_metadata_v1 metadata;
     amt = in->ReadEntityData(&metadata, sizeof(metadata));
     if (amt != sizeof(metadata)) {
-        ALOGW("Could not read metadata for %s -- %ld / %s", filename.string(),
+        ALOGW("Could not read metadata for %s -- %ld / %s", filename.c_str(),
                 (long)amt, strerror(errno));
         return EIO;
     }
@@ -779,9 +784,9 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
 
     // Write the file and compute the crc
     crc = crc32(0L, Z_NULL, 0);
-    fd = open(filename.string(), O_CREAT|O_RDWR|O_TRUNC, mode);
+    fd = open(filename.c_str(), O_CREAT|O_RDWR|O_TRUNC, mode);
     if (fd == -1) {
-        ALOGW("Could not open file %s -- %s", filename.string(), strerror(errno));
+        ALOGW("Could not open file %s -- %s", filename.c_str(), strerror(errno));
         return errno;
     }
 
@@ -789,7 +794,7 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
         err = write(fd, buf, amt);
         if (err != amt) {
             close(fd);
-            ALOGW("Error '%s' writing '%s'", strerror(errno), filename.string());
+            ALOGW("Error '%s' writing '%s'", strerror(errno), filename.c_str());
             return errno;
         }
         crc = crc32(crc, (Bytef*)buf, amt);
@@ -798,9 +803,9 @@ RestoreHelperBase::WriteFile(const String8& filename, BackupDataReader* in)
     close(fd);
 
     // Record for the snapshot
-    err = stat(filename.string(), &st);
+    err = stat(filename.c_str(), &st);
     if (err != 0) {
-        ALOGW("Error stating file that we just created %s", filename.string());
+        ALOGW("Error stating file that we just created %s", filename.c_str());
         return errno;
     }
 
@@ -1104,9 +1109,9 @@ backup_helper_test_four()
             fprintf(stderr, "state %zu expected={%d/%d, %04o, 0x%08x, 0x%08x, %3zu} '%s'\n"
                             "          actual={%d/%d, %04o, 0x%08x, 0x%08x, %3d} '%s'\n", i,
                     states[i].modTime_sec, states[i].modTime_nsec, states[i].mode, states[i].size,
-                    states[i].crc32, name.length(), filenames[i].string(),
+                    states[i].crc32, name.length(), filenames[i].c_str(),
                     state.modTime_sec, state.modTime_nsec, state.mode, state.size, state.crc32,
-                    state.nameLen, name.string());
+                    state.nameLen, name.c_str());
             matched = false;
         }
     }
@@ -1152,9 +1157,9 @@ test_write_header_and_entity(BackupDataWriter& writer, const char* str)
         return err;
     }
 
-    err = writer.WriteEntityData(text.string(), text.length()+1);
+    err = writer.WriteEntityData(text.c_str(), text.length()+1);
     if (err != 0) {
-        fprintf(stderr, "write failed for data '%s'\n", text.string());
+        fprintf(stderr, "write failed for data '%s'\n", text.c_str());
         return errno;
     }
 
@@ -1230,7 +1235,7 @@ test_read_header_and_entity(BackupDataReader& reader, const char* str)
         goto finished;
     }
     if (string != str) {
-        fprintf(stderr, "ReadEntityHeader expected key '%s' got '%s'\n", str, string.string());
+        fprintf(stderr, "ReadEntityHeader expected key '%s' got '%s'\n", str, string.c_str());
         err = EINVAL;
         goto finished;
     }

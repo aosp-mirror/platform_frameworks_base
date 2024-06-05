@@ -118,9 +118,6 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String NAS_DEFAULT_SERVICE = "nas_default_service";
 
-    /** (boolean) Whether notify() calls to NMS should acquire and hold WakeLocks. */
-    public static final String NOTIFY_WAKELOCK = "nms_notify_wakelock";
-
     // Flags related to media notifications
 
     /**
@@ -129,11 +126,6 @@ public final class SystemUiDeviceConfigFlags {
     public static final String HASH_SALT_MAX_DAYS = "hash_salt_max_days";
 
     // Flag related to Privacy Indicators
-
-    /**
-     * Whether to show the complete ongoing app ops chip.
-     */
-    public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_2_enabled";
 
     /**
      * Whether to show app ops chip for just microphone + camera.
@@ -422,11 +414,6 @@ public final class SystemUiDeviceConfigFlags {
             "dark_launch_remote_prediction_service_enabled";
 
     /**
-     * (boolean) Whether to enable pinch resizing for PIP.
-     */
-    public static final String PIP_PINCH_RESIZE = "pip_pinch_resize";
-
-    /**
      * (boolean) Whether to enable stashing for PIP.
      */
     public static final String PIP_STASHING = "pip_stashing";
@@ -552,12 +539,6 @@ public final class SystemUiDeviceConfigFlags {
             "task_manager_inform_job_scheduler_of_pending_app_stop";
 
     /**
-     * (boolean) Whether widget provider info would be saved to / loaded from system persistence
-     * layer as opposed to individual manifests in respective apps.
-     */
-    public static final String PERSISTS_WIDGET_PROVIDER_INFO = "persists_widget_provider_info";
-
-    /**
      * (boolean) Whether to show smart chips (based on TextClassifier) in the clipboard overlay.
      */
     public static final String CLIPBOARD_OVERLAY_SHOW_ACTIONS = "clipboard_overlay_show_actions";
@@ -573,6 +554,24 @@ public final class SystemUiDeviceConfigFlags {
      * (boolean) Whether to combine the broadcasts APPWIDGET_ENABLED and APPWIDGET_UPDATE
      */
     public static final String COMBINED_BROADCAST_ENABLED = "combined_broadcast_enabled";
+
+    /**
+     * (boolean) Whether to allow cursor hover states for certain elements.
+     */
+    public static final String CURSOR_HOVER_STATES_ENABLED = "cursor_hover_states_enabled";
+
+
+    /*
+     * (long) The reset interval for generated preview API calls.
+     */
+    public static final String GENERATED_PREVIEW_API_RESET_INTERVAL_MS =
+            "generated_preview_api_reset_interval_ms";
+
+    /*
+     * (int) The max number of generated preview API calls per reset interval.
+     */
+    public static final String GENERATED_PREVIEW_API_MAX_CALLS_PER_INTERVAL =
+            "generated_preview_api_max_calls_per_interval";
 
     private SystemUiDeviceConfigFlags() {
     }

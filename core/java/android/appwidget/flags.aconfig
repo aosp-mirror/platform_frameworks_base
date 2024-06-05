@@ -1,0 +1,52 @@
+package: "android.appwidget.flags"
+container: "system"
+
+flag {
+  name: "generated_previews"
+  is_exported: true
+  namespace: "app_widgets"
+  description: "Enable support for generated previews in AppWidgetManager"
+  bug: "306546610"
+}
+
+flag {
+  name: "remote_adapter_conversion"
+  namespace: "app_widgets"
+  description: "Enable adapter conversion to RemoteCollectionItemsAdapter"
+  bug: "245950570"
+}
+
+flag {
+  name: "remove_app_widget_service_io_from_critical_path"
+  namespace: "app_widgets"
+  description: "Move state file IO to non-critical path"
+  bug: "312949280"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "draw_data_parcel"
+  is_exported: true
+  namespace: "app_widgets"
+  description: "Enable support for transporting draw instructions as data parcel"
+  bug: "286130467"
+}
+
+flag {
+  name: "throttle_widget_updates"
+  namespace: "app_widgets"
+  description: "Throttle the widget view updates to mitigate transaction exceptions"
+  bug: "326145514"
+}
+
+flag {
+  name: "support_resume_restore_after_reboot"
+  namespace: "app_widgets"
+  description: "Enable support for resume restore widget after reboot by persisting intermediate states to disk"
+  bug: "336976070"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}

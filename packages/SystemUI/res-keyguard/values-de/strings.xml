@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Gib deine PIN ein"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"PIN eingeben"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"Gib die PIN ein"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Muster eingeben"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Zeichne das Muster"</string>
@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wird geladen"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wird schnell geladen"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wird langsam geladen"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Optimiertes Laden zur Akkuschonung"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problem mit dem Ladezubehör"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Zum Entsperren die Menütaste drücken."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladevorgang zum Schutz des Akkus angehalten"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladezubehör prüfen"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Netzwerk gesperrt"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Keine SIM-Karte"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Lege eine SIM-Karte ein."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM-Karte fehlt oder ist nicht lesbar. Lege eine SIM-Karte ein."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM-Karte ist nicht nutzbar."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Deine SIM-Karte wurde dauerhaft deaktiviert.\n Wende dich an deinen Mobilfunkanbieter, um eine andere SIM-Karte zu erhalten."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-Karte ist gesperrt."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM-Karte ist mit einem PUK gesperrt."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM-Karte wird entsperrt…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Nach einer Sperre muss die PIN eingegeben werden"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Nach einer Sperre muss das Passwort eingegeben werden"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Nach einer Sperre muss das Muster gezeichnet werden"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Update wird installiert, wenn das Gerät inaktiv ist"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Update wird installiert, wenn das Gerät nicht verwendet wird"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Zusätzliche Sicherheitsmaßnahme erforderlich. Die PIN wurde länger nicht genutzt."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Zusätzliche Sicherheitsmaßnahme erforderlich. Passwort wurde länger nicht genutzt."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Zusätzliche Sicherheitsmaßnahme erforderlich. Muster wurde länger nicht genutzt."</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Verwende für mehr Sicherheit stattdessen dein Muster"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Verwende für mehr Sicherheit stattdessen deine PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Verwende für mehr Sicherheit stattdessen dein Passwort"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Zur Verbesserung der Sicherheit ist eine PIN erforderlich"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Zur Verbesserung der Sicherheit ist ein Muster erforderlich"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Zur Verbesserung der Sicherheit ist ein Passwort erforderlich"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Gerät vom Administrator gesperrt"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Gerät manuell gesperrt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nicht erkannt"</string>

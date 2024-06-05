@@ -25,15 +25,16 @@ import static android.app.admin.DevicePolicyManager.REQUIRED_APP_MANAGED_USER;
 import static android.content.pm.PackageManager.GET_META_DATA;
 
 import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.server.devicepolicy.DevicePolicyManagerService.dumpResources;
+import static com.android.server.devicepolicy.DevicePolicyManagerService.dumpApps;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.ArrayRes;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.flags.Flags;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -67,13 +68,16 @@ public class OverlayPackagesProvider {
 
     protected static final String TAG = "OverlayPackagesProvider";
     private static final Map<String, String> sActionToMetadataKeyMap = new HashMap<>();
-    {
+
+    static {
         sActionToMetadataKeyMap.put(ACTION_PROVISION_MANAGED_USER, REQUIRED_APP_MANAGED_USER);
         sActionToMetadataKeyMap.put(ACTION_PROVISION_MANAGED_PROFILE, REQUIRED_APP_MANAGED_PROFILE);
         sActionToMetadataKeyMap.put(ACTION_PROVISION_MANAGED_DEVICE, REQUIRED_APP_MANAGED_DEVICE);
     }
+
     private static final Set<String> sAllowedActions = new HashSet<>();
-    {
+
+    static {
         sAllowedActions.add(ACTION_PROVISION_MANAGED_USER);
         sAllowedActions.add(ACTION_PROVISION_MANAGED_PROFILE);
         sAllowedActions.add(ACTION_PROVISION_MANAGED_DEVICE);
@@ -83,8 +87,13 @@ public class OverlayPackagesProvider {
     private final Context mContext;
     private final Injector mInjector;
 
+    private final RecursiveStringArrayResourceResolver mRecursiveStringArrayResourceResolver;
+
     public OverlayPackagesProvider(Context context) {
-        this(context, new DefaultInjector());
+        this(
+                context,
+                new DefaultInjector(),
+                new RecursiveStringArrayResourceResolver(context.getResources()));
     }
 
     @VisibleForTesting
@@ -113,8 +122,8 @@ public class OverlayPackagesProvider {
         public String getDevicePolicyManagementRoleHolderPackageName(Context context) {
             return Binder.withCleanCallingIdentity(() -> {
                 RoleManager roleManager = context.getSystemService(RoleManager.class);
-                List<String> roleHolders =
-                        roleManager.getRoleHolders(RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT);
+                List<String> roleHolders = roleManager.getRoleHolders(
+                        RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT);
                 if (roleHolders.isEmpty()) {
                     return null;
                 }
@@ -124,17 +133,20 @@ public class OverlayPackagesProvider {
     }
 
     @VisibleForTesting
-    OverlayPackagesProvider(Context context, Injector injector) {
+    OverlayPackagesProvider(Context context, Injector injector,
+            RecursiveStringArrayResourceResolver recursiveStringArrayResourceResolver) {
         mContext = context;
-        mPm = checkNotNull(context.getPackageManager());
-        mInjector = checkNotNull(injector);
+        mPm = requireNonNull(context.getPackageManager());
+        mInjector = requireNonNull(injector);
+        mRecursiveStringArrayResourceResolver = requireNonNull(
+                recursiveStringArrayResourceResolver);
     }
 
     /**
      * Computes non-required apps. All the system apps with a launcher that are not in
      * the required set of packages, and all mainline modules that are not declared as required
      * via metadata in their manifests, will be considered as non-required apps.
-     *
+     * <p>
      * Note: If an app is mistakenly listed as both required and disallowed, it will be treated as
      * disallowed.
      *
@@ -176,12 +188,12 @@ public class OverlayPackagesProvider {
     /**
      * Returns a subset of {@code packageNames} whose packages are mainline modules declared as
      * required apps via their app metadata.
+     *
      * @see DevicePolicyManager#REQUIRED_APP_MANAGED_USER
      * @see DevicePolicyManager#REQUIRED_APP_MANAGED_DEVICE
      * @see DevicePolicyManager#REQUIRED_APP_MANAGED_PROFILE
      */
-    private Set<String> getRequiredAppsMainlineModules(
-            Set<String> packageNames,
+    private Set<String> getRequiredAppsMainlineModules(Set<String> packageNames,
             String provisioningAction) {
         final Set<String> result = new HashSet<>();
         for (String packageName : packageNames) {
@@ -201,6 +213,9 @@ public class OverlayPackagesProvider {
         try {
             packageInfo = mPm.getPackageInfo(packageName, GET_META_DATA);
         } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        if (packageInfo.applicationInfo == null || packageInfo.applicationInfo.metaData == null) {
             return false;
         }
         final String metadataKey = sActionToMetadataKeyMap.get(provisioningAction);
@@ -225,8 +240,8 @@ public class OverlayPackagesProvider {
     }
 
     private boolean isApkInApexMainlineModule(String packageName) {
-        final String apexPackageName =
-                mInjector.getActiveApexPackageNameContainingPackage(packageName);
+        final String apexPackageName = mInjector.getActiveApexPackageNameContainingPackage(
+                packageName);
         return apexPackageName != null;
     }
 
@@ -274,112 +289,94 @@ public class OverlayPackagesProvider {
     }
 
     private Set<String> getRequiredAppsSet(String provisioningAction) {
-        final int resId;
-        switch (provisioningAction) {
-            case ACTION_PROVISION_MANAGED_USER:
-                resId = R.array.required_apps_managed_user;
-                break;
-            case ACTION_PROVISION_MANAGED_PROFILE:
-                resId = R.array.required_apps_managed_profile;
-                break;
-            case ACTION_PROVISION_MANAGED_DEVICE:
-                resId = R.array.required_apps_managed_device;
-                break;
-            default:
-                throw new IllegalArgumentException("Provisioning type "
-                        + provisioningAction + " not supported.");
-        }
-        return new ArraySet<>(Arrays.asList(mContext.getResources().getStringArray(resId)));
+        final int resId = switch (provisioningAction) {
+            case ACTION_PROVISION_MANAGED_USER -> R.array.required_apps_managed_user;
+            case ACTION_PROVISION_MANAGED_PROFILE -> R.array.required_apps_managed_profile;
+            case ACTION_PROVISION_MANAGED_DEVICE -> R.array.required_apps_managed_device;
+            default -> throw new IllegalArgumentException(
+                    "Provisioning type " + provisioningAction + " not supported.");
+        };
+        return resolveStringArray(resId);
     }
 
     private Set<String> getDisallowedAppsSet(String provisioningAction) {
-        final int resId;
-        switch (provisioningAction) {
-            case ACTION_PROVISION_MANAGED_USER:
-                resId = R.array.disallowed_apps_managed_user;
-                break;
-            case ACTION_PROVISION_MANAGED_PROFILE:
-                resId = R.array.disallowed_apps_managed_profile;
-                break;
-            case ACTION_PROVISION_MANAGED_DEVICE:
-                resId = R.array.disallowed_apps_managed_device;
-                break;
-            default:
-                throw new IllegalArgumentException("Provisioning type "
-                        + provisioningAction + " not supported.");
-        }
-        return new ArraySet<>(Arrays.asList(mContext.getResources().getStringArray(resId)));
+        final int resId = switch (provisioningAction) {
+            case ACTION_PROVISION_MANAGED_USER -> R.array.disallowed_apps_managed_user;
+            case ACTION_PROVISION_MANAGED_PROFILE -> R.array.disallowed_apps_managed_profile;
+            case ACTION_PROVISION_MANAGED_DEVICE -> R.array.disallowed_apps_managed_device;
+            default -> throw new IllegalArgumentException(
+                    "Provisioning type " + provisioningAction + " not supported.");
+        };
+        return resolveStringArray(resId);
     }
 
     private Set<String> getVendorRequiredAppsSet(String provisioningAction) {
-        final int resId;
-        switch (provisioningAction) {
-            case ACTION_PROVISION_MANAGED_USER:
-                resId = R.array.vendor_required_apps_managed_user;
-                break;
-            case ACTION_PROVISION_MANAGED_PROFILE:
-                resId = R.array.vendor_required_apps_managed_profile;
-                break;
-            case ACTION_PROVISION_MANAGED_DEVICE:
-                resId = R.array.vendor_required_apps_managed_device;
-                break;
-            default:
-                throw new IllegalArgumentException("Provisioning type "
-                        + provisioningAction + " not supported.");
-        }
-        return new ArraySet<>(Arrays.asList(mContext.getResources().getStringArray(resId)));
+        final int resId = switch (provisioningAction) {
+            case ACTION_PROVISION_MANAGED_USER -> R.array.vendor_required_apps_managed_user;
+            case ACTION_PROVISION_MANAGED_PROFILE -> R.array.vendor_required_apps_managed_profile;
+            case ACTION_PROVISION_MANAGED_DEVICE -> R.array.vendor_required_apps_managed_device;
+            default -> throw new IllegalArgumentException(
+                    "Provisioning type " + provisioningAction + " not supported.");
+        };
+        return resolveStringArray(resId);
     }
 
     private Set<String> getVendorDisallowedAppsSet(String provisioningAction) {
-        final int resId;
-        switch (provisioningAction) {
-            case ACTION_PROVISION_MANAGED_USER:
-                resId = R.array.vendor_disallowed_apps_managed_user;
-                break;
-            case ACTION_PROVISION_MANAGED_PROFILE:
-                resId = R.array.vendor_disallowed_apps_managed_profile;
-                break;
-            case ACTION_PROVISION_MANAGED_DEVICE:
-                resId = R.array.vendor_disallowed_apps_managed_device;
-                break;
-            default:
-                throw new IllegalArgumentException("Provisioning type "
-                        + provisioningAction + " not supported.");
+        final int resId = switch (provisioningAction) {
+            case ACTION_PROVISION_MANAGED_USER -> R.array.vendor_disallowed_apps_managed_user;
+            case ACTION_PROVISION_MANAGED_PROFILE -> R.array.vendor_disallowed_apps_managed_profile;
+            case ACTION_PROVISION_MANAGED_DEVICE -> R.array.vendor_disallowed_apps_managed_device;
+            default -> throw new IllegalArgumentException(
+                    "Provisioning type " + provisioningAction + " not supported.");
+        };
+        return resolveStringArray(resId);
+    }
+
+    private Set<String> resolveStringArray(@ArrayRes int resId) {
+        if (Flags.isRecursiveRequiredAppMergingEnabled()) {
+            return mRecursiveStringArrayResourceResolver.resolve(mContext.getPackageName(), resId);
+        } else {
+            return new ArraySet<>(Arrays.asList(mContext.getResources().getStringArray(resId)));
         }
-        return new ArraySet<>(Arrays.asList(mContext.getResources().getStringArray(resId)));
     }
 
     void dump(IndentingPrintWriter pw) {
         pw.println("OverlayPackagesProvider");
         pw.increaseIndent();
 
-        dumpResources(pw, mContext, "required_apps_managed_device",
-                R.array.required_apps_managed_device);
-        dumpResources(pw, mContext, "required_apps_managed_user",
-                R.array.required_apps_managed_user);
-        dumpResources(pw, mContext, "required_apps_managed_profile",
-                R.array.required_apps_managed_profile);
+        dumpApps(pw, "required_apps_managed_device",
+                resolveStringArray(R.array.required_apps_managed_device).toArray(String[]::new));
+        dumpApps(pw, "required_apps_managed_user",
+                resolveStringArray(R.array.required_apps_managed_user).toArray(String[]::new));
+        dumpApps(pw, "required_apps_managed_profile",
+                resolveStringArray(R.array.required_apps_managed_profile).toArray(String[]::new));
 
-        dumpResources(pw, mContext, "disallowed_apps_managed_device",
-                R.array.disallowed_apps_managed_device);
-        dumpResources(pw, mContext, "disallowed_apps_managed_user",
-                R.array.disallowed_apps_managed_user);
-        dumpResources(pw, mContext, "disallowed_apps_managed_device",
-                R.array.disallowed_apps_managed_device);
+        dumpApps(pw, "disallowed_apps_managed_device",
+                resolveStringArray(R.array.disallowed_apps_managed_device).toArray(String[]::new));
+        dumpApps(pw, "disallowed_apps_managed_user",
+                resolveStringArray(R.array.disallowed_apps_managed_user).toArray(String[]::new));
+        dumpApps(pw, "disallowed_apps_managed_device",
+                resolveStringArray(R.array.disallowed_apps_managed_device).toArray(String[]::new));
 
-        dumpResources(pw, mContext, "vendor_required_apps_managed_device",
-                R.array.vendor_required_apps_managed_device);
-        dumpResources(pw, mContext, "vendor_required_apps_managed_user",
-                R.array.vendor_required_apps_managed_user);
-        dumpResources(pw, mContext, "vendor_required_apps_managed_profile",
-                R.array.vendor_required_apps_managed_profile);
+        dumpApps(pw, "vendor_required_apps_managed_device",
+                resolveStringArray(R.array.vendor_required_apps_managed_device).toArray(
+                        String[]::new));
+        dumpApps(pw, "vendor_required_apps_managed_user",
+                resolveStringArray(R.array.vendor_required_apps_managed_user).toArray(
+                        String[]::new));
+        dumpApps(pw, "vendor_required_apps_managed_profile",
+                resolveStringArray(R.array.vendor_required_apps_managed_profile).toArray(
+                        String[]::new));
 
-        dumpResources(pw, mContext, "vendor_disallowed_apps_managed_user",
-                R.array.vendor_disallowed_apps_managed_user);
-        dumpResources(pw, mContext, "vendor_disallowed_apps_managed_device",
-                R.array.vendor_disallowed_apps_managed_device);
-        dumpResources(pw, mContext, "vendor_disallowed_apps_managed_profile",
-                R.array.vendor_disallowed_apps_managed_profile);
+        dumpApps(pw, "vendor_disallowed_apps_managed_user",
+                resolveStringArray(R.array.vendor_disallowed_apps_managed_user).toArray(
+                        String[]::new));
+        dumpApps(pw, "vendor_disallowed_apps_managed_device",
+                resolveStringArray(R.array.vendor_disallowed_apps_managed_device).toArray(
+                        String[]::new));
+        dumpApps(pw, "vendor_disallowed_apps_managed_profile",
+                resolveStringArray(R.array.vendor_disallowed_apps_managed_profile).toArray(
+                        String[]::new));
 
         pw.decreaseIndent();
     }

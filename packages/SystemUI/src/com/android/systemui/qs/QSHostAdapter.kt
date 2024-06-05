@@ -22,13 +22,11 @@ import androidx.annotation.GuardedBy
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.qs.QSTile
-import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.external.TileServiceRequestController
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository.Companion.POSITION_AT_END
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -37,10 +35,11 @@ import kotlinx.coroutines.launch
 
 /**
  * Adapter to determine what real class to use for classes that depend on [QSHost].
- * * When [Flags.QS_PIPELINE_NEW_HOST] is off, all calls will be routed to [QSTileHost].
- * * When [Flags.QS_PIPELINE_NEW_HOST] is on, calls regarding the current set of tiles will be
- *   routed to [CurrentTilesInteractor]. Other calls (like [createTileView]) will still be routed to
+ * * When [QSPipelineFlagsRepository.pipelineEnabled] is false, all calls will be routed to
  *   [QSTileHost].
+ * * When [QSPipelineFlagsRepository.pipelineEnabled] is true, calls regarding the current set of
+ *   tiles will be routed to [CurrentTilesInteractor]. Other calls (like [createTileView]) will
+ *   still be routed to [QSTileHost].
  *
  * This routing also includes dumps.
  */
@@ -53,7 +52,7 @@ constructor(
     private val context: Context,
     private val tileServiceRequestControllerBuilder: TileServiceRequestController.Builder,
     @Application private val scope: CoroutineScope,
-    private val featureFlags: FeatureFlags,
+    flags: QSPipelineFlagsRepository,
     dumpManager: DumpManager,
 ) : QSHost {
 
@@ -61,7 +60,7 @@ constructor(
         private const val TAG = "QSTileHost"
     }
 
-    private val useNewHost = featureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)
+    private val useNewHost = flags.pipelineEnabled
 
     @GuardedBy("callbacksMap") private val callbacksMap = mutableMapOf<QSHost.Callback, Job>()
 
@@ -106,7 +105,7 @@ constructor(
 
     override fun removeCallback(callback: QSHost.Callback) {
         if (useNewHost) {
-            synchronized(callbacksMap) { callbacksMap.get(callback)?.cancel() }
+            synchronized(callbacksMap) { callbacksMap.remove(callback)?.cancel() }
         } else {
             qsTileHost.removeCallback(callback)
         }
@@ -174,14 +173,6 @@ constructor(
         } else {
             qsTileHost.userId
         }
-    }
-
-    override fun createTileView(
-        themedContext: Context?,
-        tile: QSTile?,
-        collapsedView: Boolean
-    ): QSTileView {
-        return qsTileHost.createTileView(themedContext, tile, collapsedView)
     }
 
     override fun createTile(tileSpec: String): QSTile? {

@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.hardware.broadcastradio.V2_0.ConfigFlag;
 import android.hardware.broadcastradio.V2_0.ITunerSession;
+import android.hardware.broadcastradio.V2_0.ProgramListChunk;
 import android.hardware.broadcastradio.V2_0.Result;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ProgramList;
@@ -29,27 +30,25 @@ import android.hardware.radio.RadioManager;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
-import android.util.IndentingPrintWriter;
+import android.util.ArraySet;
 import android.util.MutableBoolean;
 import android.util.MutableInt;
-import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.broadcastradio.RadioEventLogger;
 import com.android.server.broadcastradio.RadioServiceUserController;
 import com.android.server.utils.Slogf;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-class TunerSession extends ITuner.Stub {
+final class TunerSession extends ITuner.Stub {
     private static final String TAG = "BcRadio2Srv.session";
-    private static final String kAudioDeviceName = "Radio tuner source";
     private static final int TUNER_EVENT_LOGGER_QUEUE_SIZE = 25;
 
     private final Object mLock = new Object();
-    @NonNull private final RadioEventLogger mEventLogger;
+    private final RadioEventLogger mEventLogger;
 
     private final RadioModule mModule;
     private final ITunerSession mHwSession;
@@ -98,7 +97,7 @@ class TunerSession extends ITuner.Stub {
             try {
                 mCallback.onError(error);
             } catch (RemoteException ex) {
-                Slog.w(TAG, "mCallback.onError() failed: ", ex);
+                Slogf.w(TAG, "mCallback.onError() failed: ", ex);
             }
         }
         mModule.onTunerSessionClosed(this);
@@ -128,7 +127,7 @@ class TunerSession extends ITuner.Stub {
             checkNotClosedLocked();
             mDummyConfig = Objects.requireNonNull(config);
         }
-        Slog.i(TAG, "Ignoring setConfiguration - not applicable for broadcastradio HAL 2.0");
+        Slogf.i(TAG, "Ignoring setConfiguration - not applicable for broadcastradio HAL 2.0");
         mModule.fanoutAidlCallback(cb -> cb.onConfigurationChanged(config));
     }
 
@@ -147,7 +146,7 @@ class TunerSession extends ITuner.Stub {
             if (mIsMuted == mute) return;
             mIsMuted = mute;
         }
-        Slog.w(TAG, "Mute via RadioService is not implemented - please handle it via app");
+        Slogf.w(TAG, "Mute via RadioService is not implemented - please handle it via app");
     }
 
     @Override
@@ -204,7 +203,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void cancel() {
-        Slog.i(TAG, "Cancel");
+        Slogf.i(TAG, "Cancel");
         if (!RadioServiceUserController.isCurrentOrSystemUser()) {
             Slogf.w(TAG, "Cannot cancel on HAL 2.0 client from non-current user");
             return;
@@ -217,7 +216,8 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public void cancelAnnouncement() {
-        Slog.w(TAG, "Announcements control doesn't involve cancelling at the HAL level in HAL 2.0");
+        Slogf.w(TAG,
+                "Announcements control doesn't involve cancelling at the HAL level in HAL 2.0");
     }
 
     @Override
@@ -228,7 +228,7 @@ class TunerSession extends ITuner.Stub {
 
     @Override
     public boolean startBackgroundScan() {
-        Slog.w(TAG, "Explicit background scan trigger is not supported with HAL 2.0");
+        Slogf.w(TAG, "Explicit background scan trigger is not supported with HAL 2.0");
         if (!RadioServiceUserController.isCurrentOrSystemUser()) {
             Slogf.w(TAG,
                     "Cannot start background scan on HAL 2.0 client from non-current user");
@@ -239,7 +239,7 @@ class TunerSession extends ITuner.Stub {
     }
 
     @Override
-    public void startProgramListUpdates(ProgramList.Filter filter) throws RemoteException {
+    public void startProgramListUpdates(ProgramList.Filter filter) {
         mEventLogger.logRadioEvent("start programList updates %s", filter);
         if (!RadioServiceUserController.isCurrentOrSystemUser()) {
             Slogf.w(TAG,
@@ -249,8 +249,8 @@ class TunerSession extends ITuner.Stub {
         // If the AIDL client provides a null filter, it wants all updates, so use the most broad
         // filter.
         if (filter == null) {
-            filter = new ProgramList.Filter(new HashSet<Integer>(),
-                    new HashSet<android.hardware.radio.ProgramSelector.Identifier>(), true, false);
+            filter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
+                    /* includeCategories= */ true, /* excludeModifications= */ false);
         }
         synchronized (mLock) {
             checkNotClosedLocked();
@@ -267,7 +267,7 @@ class TunerSession extends ITuner.Stub {
         }
     }
 
-    void onMergedProgramListUpdateFromHal(ProgramList.Chunk mergedChunk) {
+    void onMergedProgramListUpdateFromHal(ProgramListChunk mergedChunk) {
         List<ProgramList.Chunk> clientUpdateChunks = null;
         synchronized (mLock) {
             if (mProgramInfoCache == null) {
@@ -284,7 +284,7 @@ class TunerSession extends ITuner.Stub {
             if (mProgramInfoCache == null) {
                 return;
             }
-            clientUpdateChunks = mProgramInfoCache.filterAndUpdateFrom(halCache, true);
+            clientUpdateChunks = mProgramInfoCache.filterAndUpdateFrom(halCache, /* purge= */ true);
         }
         dispatchClientUpdateChunks(clientUpdateChunks);
     }
@@ -297,7 +297,7 @@ class TunerSession extends ITuner.Stub {
             try {
                 mCallback.onProgramListUpdated(chunk);
             } catch (RemoteException ex) {
-                Slog.w(TAG, "mCallback.onProgramListUpdated() failed: ", ex);
+                Slogf.w(TAG, "mCallback.onProgramListUpdated() failed: ", ex);
             }
         }
     }
@@ -389,7 +389,7 @@ class TunerSession extends ITuner.Stub {
         }
     }
 
-    void dumpInfo(IndentingPrintWriter pw) {
+    void dumpInfo(android.util.IndentingPrintWriter pw) {
         pw.printf("TunerSession\n");
         pw.increaseIndent();
         pw.printf("HIDL HAL Session: %s\n", mHwSession);

@@ -26,6 +26,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
+import com.android.internal.os.MonotonicClock;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
@@ -36,6 +37,7 @@ import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -54,6 +56,7 @@ import java.util.List;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class BatteryUsageStats implements Parcelable, Closeable {
 
     /**
@@ -115,11 +118,18 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     static final String XML_ATTR_HIGHEST_DRAIN_PACKAGE = "highest_drain_package";
     static final String XML_ATTR_TIME_IN_FOREGROUND = "time_in_foreground";
     static final String XML_ATTR_TIME_IN_BACKGROUND = "time_in_background";
+    static final String XML_ATTR_TIME_IN_FOREGROUND_SERVICE = "time_in_foreground_service";
 
     // We need about 700 bytes per UID
     private static final long BATTERY_CONSUMER_CURSOR_WINDOW_SIZE = 5_000 * 700;
 
     private static final int STATSD_PULL_ATOM_MAX_BYTES = 45000;
+
+    private static final int[] UID_USAGE_TIME_PROCESS_STATES = {
+            BatteryConsumer.PROCESS_STATE_FOREGROUND,
+            BatteryConsumer.PROCESS_STATE_BACKGROUND,
+            BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE
+    };
 
     private final int mDischargePercentage;
     private final double mBatteryCapacityMah;
@@ -315,7 +325,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             throw new IllegalStateException(
                     "Battery history was not requested in the BatteryUsageStatsQuery");
         }
-        return new BatteryStatsHistoryIterator(mBatteryStatsHistory);
+        return new BatteryStatsHistoryIterator(mBatteryStatsHistory, 0, MonotonicClock.UNDEFINED);
     }
 
     @Override
@@ -514,6 +524,22 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             proto.write(
                     BatteryUsageStatsAtomsProto.UidBatteryConsumer.TIME_IN_BACKGROUND_MILLIS,
                     bgMs);
+            for (int processState : UID_USAGE_TIME_PROCESS_STATES) {
+                final long timeInStateMillis = consumer.getTimeInProcessStateMs(processState);
+                if (timeInStateMillis <= 0) {
+                    continue;
+                }
+                final long timeInStateToken = proto.start(
+                        BatteryUsageStatsAtomsProto.UidBatteryConsumer.TIME_IN_STATE);
+                proto.write(
+                        BatteryUsageStatsAtomsProto.UidBatteryConsumer.TimeInState.PROCESS_STATE,
+                        processState);
+                proto.write(
+                        BatteryUsageStatsAtomsProto.UidBatteryConsumer.TimeInState
+                                .TIME_IN_STATE_MILLIS,
+                        timeInStateMillis);
+                proto.end(timeInStateToken);
+            }
             proto.end(token);
 
             if (proto.getRawSize() >= maxRawSize) {
@@ -585,7 +611,8 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                             + "(" + BatteryConsumer.processStateToString(key.processState) + ")";
                 }
                 printPowerComponent(pw, prefix, label, devicePowerMah, appsPowerMah,
-                        deviceConsumer.getPowerModel(key),
+                        mIncludesPowerModels ? deviceConsumer.getPowerModel(key)
+                                : BatteryConsumer.POWER_MODEL_UNDEFINED,
                         deviceConsumer.getUsageDurationMillis(key));
             }
         }
@@ -707,7 +734,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                         XML_ATTR_PREFIX_INCLUDES_PROC_STATE_DATA, false);
 
                 builder = new Builder(customComponentNames.toArray(new String[0]), true,
-                        includesProcStateData);
+                        includesProcStateData, 0);
 
                 builder.setStatsStartTimestamp(
                         parser.getAttributeLong(null, XML_ATTR_START_TIMESTAMP));
@@ -773,6 +800,15 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         super.finalize();
     }
 
+    @Override
+    public String toString() {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        dump(pw, "");
+        pw.flush();
+        return sw.toString();
+    }
+
     /**
      * Builder for BatteryUsageStats.
      */
@@ -782,6 +818,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         private final String[] mCustomPowerComponentNames;
         private final boolean mIncludePowerModels;
         private final boolean mIncludesProcessStateData;
+        private final double mMinConsumedPowerThreshold;
         private final BatteryConsumer.BatteryConsumerDataLayout mBatteryConsumerDataLayout;
         private long mStatsStartTimestampMs;
         private long mStatsEndTimestampMs;
@@ -802,11 +839,11 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         private BatteryStatsHistory mBatteryStatsHistory;
 
         public Builder(@NonNull String[] customPowerComponentNames) {
-            this(customPowerComponentNames, false, false);
+            this(customPowerComponentNames, false, false, 0);
         }
 
         public Builder(@NonNull String[] customPowerComponentNames, boolean includePowerModels,
-                boolean includeProcessStateData) {
+                boolean includeProcessStateData, double minConsumedPowerThreshold) {
             mBatteryConsumersCursorWindow =
                     new CursorWindow(null, BATTERY_CONSUMER_CURSOR_WINDOW_SIZE);
             mBatteryConsumerDataLayout =
@@ -817,12 +854,14 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             mCustomPowerComponentNames = customPowerComponentNames;
             mIncludePowerModels = includePowerModels;
             mIncludesProcessStateData = includeProcessStateData;
+            mMinConsumedPowerThreshold = minConsumedPowerThreshold;
             for (int scope = 0; scope < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; scope++) {
                 final BatteryConsumer.BatteryConsumerData data =
                         BatteryConsumer.BatteryConsumerData.create(mBatteryConsumersCursorWindow,
                                 mBatteryConsumerDataLayout);
                 mAggregateBatteryConsumersBuilders[scope] =
-                        new AggregateBatteryConsumer.Builder(data, scope);
+                        new AggregateBatteryConsumer.Builder(
+                                data, scope, mMinConsumedPowerThreshold);
             }
         }
 
@@ -961,7 +1000,8 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                 final BatteryConsumer.BatteryConsumerData data =
                         BatteryConsumer.BatteryConsumerData.create(mBatteryConsumersCursorWindow,
                                 mBatteryConsumerDataLayout);
-                builder = new UidBatteryConsumer.Builder(data, batteryStatsUid);
+                builder = new UidBatteryConsumer.Builder(data, batteryStatsUid,
+                        mMinConsumedPowerThreshold);
                 mUidBatteryConsumerBuilders.put(uid, builder);
             }
             return builder;
@@ -979,7 +1019,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                 final BatteryConsumer.BatteryConsumerData data =
                         BatteryConsumer.BatteryConsumerData.create(mBatteryConsumersCursorWindow,
                                 mBatteryConsumerDataLayout);
-                builder = new UidBatteryConsumer.Builder(data, uid);
+                builder = new UidBatteryConsumer.Builder(data, uid, mMinConsumedPowerThreshold);
                 mUidBatteryConsumerBuilders.put(uid, builder);
             }
             return builder;
@@ -996,7 +1036,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                 final BatteryConsumer.BatteryConsumerData data =
                         BatteryConsumer.BatteryConsumerData.create(mBatteryConsumersCursorWindow,
                                 mBatteryConsumerDataLayout);
-                builder = new UserBatteryConsumer.Builder(data, userId);
+                builder = new UserBatteryConsumer.Builder(data, userId, mMinConsumedPowerThreshold);
                 mUserBatteryConsumerBuilders.put(userId, builder);
             }
             return builder;

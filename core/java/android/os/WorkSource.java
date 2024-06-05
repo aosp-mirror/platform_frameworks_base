@@ -23,6 +23,7 @@ import java.util.Objects;
  * Currently the public representation of what a work source is not
  * defined; this is an opaque container.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class WorkSource implements Parcelable {
     static final String TAG = "WorkSource";
     static final boolean DEBUG = false;
@@ -141,9 +142,15 @@ public class WorkSource implements Parcelable {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static boolean isChainedBatteryAttributionEnabled(Context context) {
         return Settings.Global.getInt(context.getContentResolver(),
                 Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED, 0) == 1;
+    }
+
+    /** @hide */
+    public static boolean isChainedBatteryAttributionEnabled$ravenwood(Context context) {
+        return false;
     }
 
     /**

@@ -17,6 +17,7 @@
 package com.android.packageinstaller;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.content.pm.Flags.usePiaV2;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import static com.android.packageinstaller.PackageUtil.getMaxTargetSdkVersionForUid;
@@ -46,15 +47,16 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-
 import com.android.packageinstaller.handheld.ErrorDialogFragment;
 import com.android.packageinstaller.handheld.UninstallAlertDialogFragment;
 import com.android.packageinstaller.television.ErrorFragment;
 import com.android.packageinstaller.television.UninstallAlertFragment;
 import com.android.packageinstaller.television.UninstallAppProgress;
+import com.android.packageinstaller.common.EventResultPersister;
+import com.android.packageinstaller.common.UninstallEventReceiver;
+import com.android.packageinstaller.v2.ui.UninstallLaunch;
 
 import java.util.List;
 
@@ -75,6 +77,7 @@ public class UninstallerActivity extends Activity {
         public boolean allUsers;
         public UserHandle user;
         public PackageManager.UninstallCompleteCallback callback;
+        public int deleteFlags;
     }
 
     private String mPackageName;
@@ -87,6 +90,23 @@ public class UninstallerActivity extends Activity {
         // Never restore any state, esp. never create any fragments. The data in the fragment might
         // be stale, if e.g. the app was uninstalled while the activity was destroyed.
         super.onCreate(null);
+
+        // TODO(b/318521110) Enable PIA v2 for archive dialog.
+        if (usePiaV2() && !isTv() && !isArchiveDialog(getIntent())) {
+            Log.i(TAG, "Using Pia V2");
+
+            boolean returnResult = getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
+            Intent piaV2 = new Intent(getIntent());
+            piaV2.putExtra(UninstallLaunch.EXTRA_CALLING_PKG_UID, getLaunchedFromUid());
+            piaV2.putExtra(UninstallLaunch.EXTRA_CALLING_ACTIVITY_NAME, getCallingActivity());
+            if (returnResult) {
+                piaV2.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+            }
+            piaV2.setClass(this, UninstallLaunch.class);
+            startActivity(piaV2);
+            finish();
+            return;
+        }
 
         int callingUid = getLaunchedFromUid();
         if (callingUid == Process.INVALID_UID) {
@@ -176,7 +196,8 @@ public class UninstallerActivity extends Activity {
 
         try {
             mDialogInfo.appInfo = pm.getApplicationInfo(mPackageName,
-                    PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_ANY_USER));
+                    PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_ANY_USER
+                            | PackageManager.MATCH_ARCHIVED_PACKAGES));
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Unable to get packageName. Package manager is dead?");
         }
@@ -199,8 +220,29 @@ public class UninstallerActivity extends Activity {
                 // Continue as the ActivityInfo isn't critical.
             }
         }
+        parseDeleteFlags(intent);
 
         showConfirmationDialog();
+    }
+
+    private boolean isArchiveDialog(Intent intent) {
+        return (intent.getIntExtra(PackageInstaller.EXTRA_DELETE_FLAGS, 0)
+                & PackageManager.DELETE_ARCHIVE) != 0;
+    }
+
+    /**
+     * Parses specific {@link android.content.pm.PackageManager.DeleteFlags} from {@link Intent}
+     * to archive an app if requested.
+     *
+     * Do not parse any flags because developers might pass here any flags which might cause
+     * unintended behaviour.
+     * For more context {@link com.android.server.pm.PackageArchiver#requestArchive}.
+     */
+    private void parseDeleteFlags(Intent intent) {
+        int deleteFlags = intent.getIntExtra(PackageInstaller.EXTRA_DELETE_FLAGS, 0);
+        int archive = deleteFlags & PackageManager.DELETE_ARCHIVE;
+        int keepData = deleteFlags & PackageManager.DELETE_KEEP_DATA;
+        mDialogInfo.deleteFlags = archive | keepData;
     }
 
     public DialogInfo getDialogInfo() {
@@ -320,7 +362,10 @@ public class UninstallerActivity extends Activity {
             if (returnResult || getCallingActivity() != null) {
                 newIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
             }
-
+            if (mDialogInfo.deleteFlags != 0) {
+                newIntent.putExtra(PackageInstaller.EXTRA_DELETE_FLAGS,
+                        mDialogInfo.deleteFlags);
+            }
             startActivity(newIntent);
         } else {
             int uninstallId;
@@ -366,6 +411,7 @@ public class UninstallerActivity extends Activity {
 
                 int flags = mDialogInfo.allUsers ? PackageManager.DELETE_ALL_USERS : 0;
                 flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;
+                flags |= mDialogInfo.deleteFlags;
 
                 createContextAsUser(mDialogInfo.user, 0).getPackageManager().getPackageInstaller()
                         .uninstall(new VersionedPackage(mDialogInfo.appInfo.packageName,

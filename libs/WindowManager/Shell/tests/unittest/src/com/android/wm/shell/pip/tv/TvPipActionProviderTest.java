@@ -23,21 +23,23 @@ import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_EXPAND_COLLAPSE;
 import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_FULLSCREEN;
 import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_MOVE;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import static java.util.Collections.EMPTY_LIST;
+
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.graphics.drawable.Icon;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.util.Log;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipMediaController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +48,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Unit tests for {@link TvPipActionsProvider}
@@ -69,35 +73,38 @@ public class TvPipActionProviderTest extends ShellTestCase {
     @Mock
     private PendingIntent mMockPendingIntent;
 
-    private RemoteAction createRemoteAction(int identifier) {
+    private int mNumberOfRemoteActionsCreated = 0;
+
+    private RemoteAction createRemoteAction() {
+        final int identifier = mNumberOfRemoteActionsCreated++;
         return new RemoteAction(mMockIcon, "" + identifier, "" + identifier, mMockPendingIntent);
     }
 
     private List<RemoteAction> createRemoteActions(int numberOfActions) {
         List<RemoteAction> actions = new ArrayList<>();
         for (int i = 0; i < numberOfActions; i++) {
-            actions.add(createRemoteAction(i));
+            actions.add(createRemoteAction());
         }
         return actions;
     }
 
-    private boolean checkActionsMatch(List<TvPipAction> actions, int[] actionTypes) {
-        for (int i = 0; i < actions.size(); i++) {
-            int type = actions.get(i).getActionType();
-            if (type != actionTypes[i]) {
-                Log.e(TAG, "Action at index " + i + ": found " + type
-                        + ", expected " + actionTypes[i]);
-                return false;
-            }
-        }
-        return true;
+    private void assertActionTypes(List<Integer> expected, List<Integer> actual) {
+        assertEquals(getActionTypesStrings(expected), getActionTypesStrings(actual));
+    }
+
+    private static List<String> getActionTypesStrings(List<Integer> actionTypes) {
+        return actionTypes.stream().map(a -> TvPipAction.getActionTypeString(a))
+                .collect(Collectors.toList());
+    }
+
+    private List<Integer> getActionsTypes() {
+        return mActionsProvider.getActionsList().stream().map(a -> a.getActionType())
+                .collect(Collectors.toList());
     }
 
     @Before
     public void setUp() {
-        if (!isTelevision()) {
-            return;
-        }
+        assumeTelevision();
         MockitoAnnotations.initMocks(this);
         mActionsProvider = new TvPipActionsProvider(mContext, mMockPipMediaController,
                 mMockSystemActionsHandler);
@@ -105,57 +112,51 @@ public class TvPipActionProviderTest extends ShellTestCase {
 
     @Test
     public void defaultSystemActions_regularPip() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(false);
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE}));
+        assertActionTypes(Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE),
+                          getActionsTypes());
     }
 
     @Test
     public void defaultSystemActions_expandedPip() {
-        assumeTelevision();
         mActionsProvider.updateExpansionEnabled(true);
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE, ACTION_EXPAND_COLLAPSE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE, ACTION_EXPAND_COLLAPSE),
+                getActionsTypes());
     }
 
     @Test
     public void expandedPip_enableExpansion_enable() {
-        assumeTelevision();
         // PiP has expanded PiP disabled.
-        mActionsProvider.updateExpansionEnabled(false);
-
         mActionsProvider.addListener(mMockListener);
         mActionsProvider.updateExpansionEnabled(true);
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE, ACTION_EXPAND_COLLAPSE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE, ACTION_EXPAND_COLLAPSE),
+                getActionsTypes());
         verify(mMockListener).onActionsChanged(/* added= */ 1, /* updated= */ 0, /* index= */ 3);
     }
 
     @Test
     public void expandedPip_enableExpansion_disable() {
-        assumeTelevision();
         mActionsProvider.updateExpansionEnabled(true);
 
         mActionsProvider.addListener(mMockListener);
         mActionsProvider.updateExpansionEnabled(false);
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE),
+                getActionsTypes());
         verify(mMockListener).onActionsChanged(/* added= */ -1, /* updated= */ 0, /* index= */ 3);
     }
 
     @Test
     public void expandedPip_enableExpansion_AlreadyEnabled() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(true);
-
         mActionsProvider.addListener(mMockListener);
         mActionsProvider.updateExpansionEnabled(true);
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE, ACTION_EXPAND_COLLAPSE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE, ACTION_EXPAND_COLLAPSE),
+                getActionsTypes());
     }
 
     private void check_expandedPip_updateExpansionState(
@@ -167,8 +168,9 @@ public class TvPipActionProviderTest extends ShellTestCase {
         mActionsProvider.addListener(mMockListener);
         mActionsProvider.updatePipExpansionState(endExpansion);
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE, ACTION_EXPAND_COLLAPSE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE, ACTION_EXPAND_COLLAPSE),
+                getActionsTypes());
 
         if (updateExpected) {
             verify(mMockListener).onActionsChanged(0, 1, 3);
@@ -180,7 +182,6 @@ public class TvPipActionProviderTest extends ShellTestCase {
 
     @Test
     public void expandedPip_toggleExpansion_collapse() {
-        assumeTelevision();
         check_expandedPip_updateExpansionState(
                 /* startExpansion= */ true,
                 /* endExpansion= */ false,
@@ -189,7 +190,6 @@ public class TvPipActionProviderTest extends ShellTestCase {
 
     @Test
     public void expandedPip_toggleExpansion_expand() {
-        assumeTelevision();
         check_expandedPip_updateExpansionState(
                 /* startExpansion= */ false,
                 /* endExpansion= */ true,
@@ -198,7 +198,6 @@ public class TvPipActionProviderTest extends ShellTestCase {
 
     @Test
     public void expandedPiP_updateExpansionState_alreadyExpanded() {
-        assumeTelevision();
         check_expandedPip_updateExpansionState(
                 /* startExpansion= */ true,
                 /* endExpansion= */ true,
@@ -207,7 +206,6 @@ public class TvPipActionProviderTest extends ShellTestCase {
 
     @Test
     public void expandedPiP_updateExpansionState_alreadyCollapsed() {
-        assumeTelevision();
         check_expandedPip_updateExpansionState(
                 /* startExpansion= */ false,
                 /* endExpansion= */ false,
@@ -216,8 +214,6 @@ public class TvPipActionProviderTest extends ShellTestCase {
 
     @Test
     public void regularPiP_updateExpansionState_setCollapsed() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(false);
         mActionsProvider.updatePipExpansionState(/* expanded= */ false);
 
         mActionsProvider.addListener(mMockListener);
@@ -229,153 +225,207 @@ public class TvPipActionProviderTest extends ShellTestCase {
 
     @Test
     public void customActions_added() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(false);
         mActionsProvider.addListener(mMockListener);
 
         mActionsProvider.setAppActions(createRemoteActions(2), null);
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
-                        ACTION_MOVE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
+                    ACTION_MOVE),
+                getActionsTypes());
         verify(mMockListener).onActionsChanged(/* added= */ 2, /* updated= */ 0, /* index= */ 2);
     }
 
     @Test
     public void customActions_replacedMore() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(false);
         mActionsProvider.setAppActions(createRemoteActions(2), null);
 
         mActionsProvider.addListener(mMockListener);
         mActionsProvider.setAppActions(createRemoteActions(3), null);
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
-                        ACTION_CUSTOM, ACTION_MOVE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
+                    ACTION_CUSTOM, ACTION_MOVE),
+                getActionsTypes());
         verify(mMockListener).onActionsChanged(/* added= */ 1, /* updated= */ 2, /* index= */ 2);
     }
 
     @Test
     public void customActions_replacedLess() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(false);
         mActionsProvider.setAppActions(createRemoteActions(2), null);
 
         mActionsProvider.addListener(mMockListener);
-        mActionsProvider.setAppActions(createRemoteActions(0), null);
+        mActionsProvider.setAppActions(EMPTY_LIST, null);
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE),
+                getActionsTypes());
         verify(mMockListener).onActionsChanged(/* added= */ -2, /* updated= */ 0, /* index= */ 2);
     }
 
     @Test
     public void customCloseAdded() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(false);
-
         List<RemoteAction> customActions = new ArrayList<>();
         mActionsProvider.setAppActions(customActions, null);
 
         mActionsProvider.addListener(mMockListener);
-        mActionsProvider.setAppActions(customActions, createRemoteAction(0));
+        mActionsProvider.setAppActions(customActions, createRemoteAction());
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CUSTOM_CLOSE, ACTION_MOVE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CUSTOM_CLOSE, ACTION_MOVE),
+                getActionsTypes());
         verify(mMockListener).onActionsChanged(/* added= */ 0, /* updated= */ 1, /* index= */ 1);
     }
 
     @Test
     public void customClose_matchesOtherCustomAction() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(false);
-
         List<RemoteAction> customActions = createRemoteActions(2);
-        RemoteAction customClose = createRemoteAction(/* id= */ 10);
+        RemoteAction customClose = createRemoteAction();
         customActions.add(customClose);
 
         mActionsProvider.addListener(mMockListener);
         mActionsProvider.setAppActions(customActions, customClose);
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CUSTOM_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
-                        ACTION_MOVE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CUSTOM_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
+                    ACTION_MOVE),
+                getActionsTypes());
         verify(mMockListener).onActionsChanged(/* added= */ 0, /* updated= */ 1, /* index= */ 1);
         verify(mMockListener).onActionsChanged(/* added= */ 2, /* updated= */ 0, /* index= */ 2);
     }
 
     @Test
     public void mediaActions_added_whileCustomActionsExist() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(false);
         mActionsProvider.setAppActions(createRemoteActions(2), null);
 
         mActionsProvider.addListener(mMockListener);
         mActionsProvider.onMediaActionsChanged(createRemoteActions(3));
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
-                        ACTION_MOVE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
+                    ACTION_MOVE),
+                getActionsTypes());
         verify(mMockListener, times(0)).onActionsChanged(anyInt(), anyInt(), anyInt());
     }
 
     @Test
     public void customActions_removed_whileMediaActionsExist() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(false);
         mActionsProvider.onMediaActionsChanged(createRemoteActions(2));
         mActionsProvider.setAppActions(createRemoteActions(3), null);
 
-        mActionsProvider.addListener(mMockListener);
-        mActionsProvider.setAppActions(createRemoteActions(0), null);
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
+                    ACTION_CUSTOM, ACTION_MOVE),
+                getActionsTypes());
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
-                        ACTION_MOVE}));
+        mActionsProvider.addListener(mMockListener);
+        mActionsProvider.setAppActions(EMPTY_LIST, null);
+
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
+                    ACTION_MOVE),
+                getActionsTypes());
         verify(mMockListener).onActionsChanged(/* added= */ -1, /* updated= */ 2, /* index= */ 2);
     }
 
     @Test
     public void customCloseOnly_mediaActionsShowing() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(false);
         mActionsProvider.onMediaActionsChanged(createRemoteActions(2));
 
         mActionsProvider.addListener(mMockListener);
-        mActionsProvider.setAppActions(createRemoteActions(0), createRemoteAction(5));
+        mActionsProvider.setAppActions(EMPTY_LIST, createRemoteAction());
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CUSTOM_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
-                        ACTION_MOVE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CUSTOM_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
+                    ACTION_MOVE),
+                getActionsTypes());
         verify(mMockListener).onActionsChanged(/* added= */ 0, /* updated= */ 1, /* index= */ 1);
     }
 
     @Test
     public void customActions_showDisabledActions() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(false);
-
         List<RemoteAction> customActions = createRemoteActions(2);
         customActions.get(0).setEnabled(false);
         mActionsProvider.setAppActions(customActions, null);
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
-                        ACTION_MOVE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
+                    ACTION_MOVE),
+                getActionsTypes());
     }
 
     @Test
     public void mediaActions_hideDisabledActions() {
-        assumeTelevision();
-        mActionsProvider.updateExpansionEnabled(false);
-
         List<RemoteAction> customActions = createRemoteActions(2);
         customActions.get(0).setEnabled(false);
         mActionsProvider.onMediaActionsChanged(customActions);
 
-        assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
-                new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_MOVE}));
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_MOVE),
+                getActionsTypes());
+    }
+
+    @Test
+    public void reset_mediaActions() {
+        List<RemoteAction> customActions = createRemoteActions(2);
+        customActions.get(0).setEnabled(false);
+        mActionsProvider.onMediaActionsChanged(customActions);
+
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_MOVE),
+                getActionsTypes());
+
+        mActionsProvider.reset();
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE),
+                getActionsTypes());
+    }
+
+    @Test
+    public void reset_customActions() {
+        List<RemoteAction> customActions = createRemoteActions(2);
+        customActions.get(0).setEnabled(false);
+        mActionsProvider.setAppActions(customActions, null);
+
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
+                    ACTION_MOVE),
+                getActionsTypes());
+
+        mActionsProvider.reset();
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE),
+                getActionsTypes());
+    }
+
+    @Test
+    public void reset_customClose() {
+        mActionsProvider.setAppActions(EMPTY_LIST, createRemoteAction());
+
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CUSTOM_CLOSE, ACTION_MOVE),
+                getActionsTypes());
+
+        mActionsProvider.reset();
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE),
+                getActionsTypes());
+    }
+
+    @Test
+    public void reset_All() {
+        mActionsProvider.setAppActions(createRemoteActions(2), createRemoteAction());
+        mActionsProvider.onMediaActionsChanged(createRemoteActions(3));
+
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CUSTOM_CLOSE, ACTION_CUSTOM, ACTION_CUSTOM,
+                    ACTION_MOVE),
+                getActionsTypes());
+
+        mActionsProvider.reset();
+        assertActionTypes(
+                Arrays.asList(ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE),
+                getActionsTypes());
     }
 
 }

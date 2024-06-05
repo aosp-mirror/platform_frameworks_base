@@ -24,8 +24,8 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.Process;
-import android.os.RemoteException;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
@@ -87,8 +87,12 @@ public class WebViewLibraryLoader {
             } finally {
                 // We must do our best to always notify the update service, even if something fails.
                 try {
-                    WebViewFactory.getUpdateServiceUnchecked().notifyRelroCreationCompleted();
-                } catch (RemoteException e) {
+                    if (Flags.updateServiceIpcWrapper()) {
+                        WebViewUpdateManager.getInstance().notifyRelroCreationCompleted();
+                    } else {
+                        WebViewFactory.getUpdateServiceUnchecked().notifyRelroCreationCompleted();
+                    }
+                } catch (Exception e) {
                     Log.e(LOGTAG, "error notifying update service", e);
                 }
 
@@ -114,8 +118,12 @@ public class WebViewLibraryLoader {
             public void run() {
                 try {
                     Log.e(LOGTAG, "relro file creator for " + abi + " crashed. Proceeding without");
-                    WebViewFactory.getUpdateService().notifyRelroCreationCompleted();
-                } catch (RemoteException e) {
+                    if (Flags.updateServiceIpcWrapper()) {
+                        WebViewUpdateManager.getInstance().notifyRelroCreationCompleted();
+                    } else {
+                        WebViewFactory.getUpdateService().notifyRelroCreationCompleted();
+                    }
+                } catch (Exception e) {
                     Log.e(LOGTAG, "Cannot reach WebViewUpdateService. " + e.getMessage());
                 }
             }
@@ -130,7 +138,7 @@ public class WebViewLibraryLoader {
             if (!success) throw new Exception("Failed to start the relro file creator process");
         } catch (Throwable t) {
             // Log and discard errors as we must not crash the system server.
-            Log.e(LOGTAG, "error starting relro file creator for abi " + abi, t);
+            Slog.wtf(LOGTAG, "error starting relro file creator for abi " + abi, t);
             crashHandler.run();
         }
     }

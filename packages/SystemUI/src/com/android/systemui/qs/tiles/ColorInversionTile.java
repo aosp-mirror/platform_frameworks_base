@@ -22,15 +22,13 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
-import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.R;
-import com.android.systemui.R.drawable;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -39,9 +37,10 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -51,7 +50,7 @@ import javax.inject.Inject;
 public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
     public static final String TILE_SPEC = "inversion";
-    private final SettingObserver mSetting;
+    private final UserSettingObserver mSetting;
 
     @Inject
     public ColorInversionTile(
@@ -70,7 +69,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
 
-        mSetting = new SettingObserver(secureSettings, mHandler,
+        mSetting = new UserSettingObserver(secureSettings, mHandler,
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
@@ -109,7 +108,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         mSetting.setValue(mState.value ? 0 : 1);
     }
 
@@ -126,8 +125,8 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
         state.icon = ResourceIcon.get(state.value
-                ? drawable.qs_invert_colors_icon_on
-                : drawable.qs_invert_colors_icon_off);
+                ? R.drawable.qs_invert_colors_icon_on
+                : R.drawable.qs_invert_colors_icon_off);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
     }

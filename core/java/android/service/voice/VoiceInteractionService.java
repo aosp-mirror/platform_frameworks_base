@@ -46,6 +46,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
@@ -130,6 +131,9 @@ public class VoiceInteractionService extends Service {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long MULTIPLE_ACTIVE_HOTWORD_DETECTORS = 193232191L;
+
+    private static final boolean SYSPROP_VISUAL_QUERY_SERVICE_ENABLED =
+            SystemProperties.getBoolean("ro.hotword.visual_query_service_enabled", false);
 
     IVoiceInteractionService mInterface = new IVoiceInteractionService.Stub() {
         @Override
@@ -380,7 +384,6 @@ public class VoiceInteractionService extends Service {
         Handler.getMain().executeOrSendMessage(PooledLambda.obtainMessage(
                 VoiceInteractionService::onShutdownInternal, VoiceInteractionService.this));
     };
-
 
     private void onShutdownInternal() {
         onShutdown();
@@ -734,7 +737,7 @@ public class VoiceInteractionService extends Service {
             AlwaysOnHotwordDetector dspDetector = new AlwaysOnHotwordDetector(keyphrase, locale,
                     executor, callback, mKeyphraseEnrollmentInfo, mSystemService,
                     getApplicationContext().getApplicationInfo().targetSdkVersion,
-                    supportHotwordDetectionService);
+                    supportHotwordDetectionService, getAttributionTag());
             mActiveDetectors.add(dspDetector);
 
             try {
@@ -895,7 +898,7 @@ public class VoiceInteractionService extends Service {
 
             SoftwareHotwordDetector softwareHotwordDetector =
                     new SoftwareHotwordDetector(mSystemService, /* audioFormat= */ null,
-                            executor, callback);
+                            executor, callback, getAttributionTag());
             mActiveDetectors.add(softwareHotwordDetector);
 
             try {
@@ -929,7 +932,10 @@ public class VoiceInteractionService extends Service {
      * @param sharedMemory The unrestricted data blob to be provided to the
      * {@link VisualQueryDetectionService}. Use this to provide models or other such data to the
      * sandboxed process.
-     * @param callback The callback to notify of detection events.
+     * @param callback The callback to notify of detection events. Single threaded or sequential
+     *                 executors are recommended for the callback are not guaranteed to be executed
+     *                 in the order of how they were called from the
+     *                 {@link VisualQueryDetectionService}.
      * @return An instanece of {@link VisualQueryDetector}.
      * @throws IllegalStateException when there is an existing {@link VisualQueryDetector}, or when
      * there is a non-trusted hotword detector running.
@@ -947,6 +953,10 @@ public class VoiceInteractionService extends Service {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
+        if (!SYSPROP_VISUAL_QUERY_SERVICE_ENABLED) {
+            throw new IllegalStateException("VisualQueryDetectionService is not enabled on this "
+                    + "system. Please set ro.hotword.visual_query_service_enabled to true.");
+        }
         if (mSystemService == null) {
             throw new IllegalStateException("Not available until onReady() is called");
         }
@@ -965,7 +975,8 @@ public class VoiceInteractionService extends Service {
             }
 
             VisualQueryDetector visualQueryDetector =
-                    new VisualQueryDetector(mSystemService, executor, callback);
+                    new VisualQueryDetector(mSystemService, executor, callback, this,
+                            getAttributionTag());
             HotwordDetector visualQueryDetectorInitializationDelegate =
                     visualQueryDetector.getInitializationDelegate();
             mActiveDetectors.add(visualQueryDetectorInitializationDelegate);

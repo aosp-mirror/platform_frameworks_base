@@ -43,6 +43,7 @@ import android.app.AppOpsManagerInternal;
 import android.app.KeyguardManager;
 import android.app.TaskInfo;
 import android.app.compat.CompatChanges;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
@@ -58,7 +59,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PermissionInfo;
-import android.content.pm.UserPackage;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
@@ -142,18 +142,18 @@ public final class PermissionPolicyService extends SystemService {
     private OnInitializedCallback mOnInitializedCallback;
 
     /**
-     * Whether an async {@link #synchronizePackagePermissionsAndAppOpsForUser} is currently
-     * scheduled for a package/user.
+     * Whether an async {@link #synchronizeUidPermissionsAndAppOps} is currently
+     * scheduled for a UID.
      */
     @GuardedBy("mLock")
-    private final ArraySet<UserPackage> mIsPackageSyncsScheduled = new ArraySet<>();
+    private final SparseBooleanArray mIsUidSyncScheduled = new SparseBooleanArray();
 
     /**
      * Whether an async {@link #resetAppOpPermissionsIfNotRequestedForUid} is currently
      * scheduled for a uid.
      */
     @GuardedBy("mLock")
-    private final SparseBooleanArray mIsUidSyncScheduled = new SparseBooleanArray();
+    private final SparseBooleanArray mIsUidResetScheduled = new SparseBooleanArray();
 
     /**
      * This change reflects the presence of the new Notification Permission
@@ -199,7 +199,8 @@ public final class PermissionPolicyService extends SystemService {
                         .getUserIds();
                 for (final int userId : userIds) {
                     if (isStarted(userId)) {
-                        synchronizePackagePermissionsAndAppOpsForUser(packageName, userId);
+                        final int uid = UserHandle.getUid(userId, appId);
+                        synchronizeUidPermissionsAndAppOps(uid);
                     }
                 }
             }
@@ -210,8 +211,8 @@ public final class PermissionPolicyService extends SystemService {
                         .getUserIds();
                 for (final int userId : userIds) {
                     if (isStarted(userId)) {
-                        synchronizePackagePermissionsAndAppOpsForUser(packageName, userId);
                         final int uid = UserHandle.getUid(userId, appId);
+                        synchronizeUidPermissionsAndAppOps(uid);
                         resetAppOpPermissionsIfNotRequestedForUid(uid);
                     }
                 }
@@ -230,14 +231,18 @@ public final class PermissionPolicyService extends SystemService {
             }
         });
 
-        mPermissionManagerInternal.addOnRuntimePermissionStateChangedListener(
-                this::synchronizePackagePermissionsAndAppOpsAsyncForUser);
+        mPackageManager.addOnPermissionsChangeListener(
+                this::synchronizeUidPermissionsAndAppOpsAsync);
 
         mAppOpsCallback = new IAppOpsCallback.Stub() {
-            public void opChanged(int op, int uid, @Nullable String packageName) {
+            public void opChanged(int op, int uid, @Nullable String packageName,
+                    String persistentDeviceId) {
+                if (!Objects.equals(persistentDeviceId,
+                        VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT)) {
+                    return;
+                }
                 if (packageName != null) {
-                    synchronizePackagePermissionsAndAppOpsAsyncForUser(packageName,
-                            UserHandle.getUserId(uid));
+                    synchronizeUidPermissionsAndAppOpsAsync(uid);
                 }
                 resetAppOpPermissionsIfNotRequestedForUidAsync(uid);
             }
@@ -348,8 +353,15 @@ public final class PermissionPolicyService extends SystemService {
                 UserHandle user = UserHandle.getUserHandleForUid(uid);
                 PermissionControllerManager manager = mPermControllerManagers.get(user);
                 if (manager == null) {
-                    manager = new PermissionControllerManager(
-                            getUserContext(getContext(), user), PermissionThread.getHandler());
+                    try {
+                        manager = new PermissionControllerManager(
+                                getUserContext(getContext(), user), PermissionThread.getHandler());
+                    } catch (IllegalArgumentException exception) {
+                        // There's a possible race condition when a user is being removed
+                        Log.e(LOG_TAG, "Could not create PermissionControllerManager for user"
+                                        + user, exception);
+                        return;
+                    }
                     mPermControllerManagers.put(user, manager);
                 }
                 manager.updateUserSensitiveForApp(uid);
@@ -381,24 +393,23 @@ public final class PermissionPolicyService extends SystemService {
         return AppOpsManager.opToSwitch(op);
     }
 
-    private void synchronizePackagePermissionsAndAppOpsAsyncForUser(@NonNull String packageName,
-            @UserIdInt int changedUserId) {
-        if (isStarted(changedUserId)) {
+    private void synchronizeUidPermissionsAndAppOpsAsync(int uid) {
+        final int userId = UserHandle.getUserId(uid);
+        if (isStarted(userId)) {
             synchronized (mLock) {
-                if (mIsPackageSyncsScheduled.add(UserPackage.of(changedUserId, packageName))) {
+                if (!mIsUidSyncScheduled.get(uid)) {
                     // TODO(b/165030092): migrate this to PermissionThread.getHandler().
-                    // synchronizePackagePermissionsAndAppOpsForUser is a heavy operation.
+                    // synchronizeUidPermissionsAndAppOps is a heavy operation.
                     // Dispatched on a PermissionThread, it interferes with user switch.
                     // FgThread is busy and schedules it after most of the switch is done.
                     // A possible solution is to delay the callback.
                     FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
-                            PermissionPolicyService
-                                    ::synchronizePackagePermissionsAndAppOpsForUser,
-                            this, packageName, changedUserId));
+                            PermissionPolicyService::synchronizeUidPermissionsAndAppOps, this,
+                            uid));
+                    mIsUidSyncScheduled.put(uid, true);
                 } else {
                     if (DEBUG) {
-                        Slog.v(LOG_TAG, "sync for " + packageName + "/" + changedUserId
-                                + " already scheduled");
+                        Slog.v(LOG_TAG, "sync for UID " + uid + " already scheduled");
                     }
                 }
             }
@@ -483,6 +494,7 @@ public final class PermissionPolicyService extends SystemService {
         PhoneCarrierPrivilegesCallback(int phoneId) {
             mPhoneId = phoneId;
         }
+
         @Override
         public void onCarrierPrivilegesChanged(
                 @NonNull Set<String> privilegedPackageNames,
@@ -552,7 +564,11 @@ public final class PermissionPolicyService extends SystemService {
 
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("Permission_grant_default_permissions-" + userId);
-        grantOrUpgradeDefaultRuntimePermissionsIfNeeded(userId);
+        if (mPackageManagerInternal.isPermissionUpgradeNeeded(userId)) {
+            grantOrUpgradeDefaultRuntimePermissions(userId);
+            updateUserSensitive(userId);
+            mPackageManagerInternal.updateRuntimePermissionsFingerprint(userId);
+        }
         t.traceEnd();
 
         final OnInitializedCallback callback;
@@ -584,53 +600,54 @@ public final class PermissionPolicyService extends SystemService {
         }
     }
 
-    private void grantOrUpgradeDefaultRuntimePermissionsIfNeeded(@UserIdInt int userId) {
-        if (DEBUG) Slog.i(LOG_TAG, "grantOrUpgradeDefaultPermsIfNeeded(" + userId + ")");
+    private void grantOrUpgradeDefaultRuntimePermissions(@UserIdInt int userId) {
+        if (PermissionManager.USE_ACCESS_CHECKING_SERVICE) {
+            return;
+        }
+
+        if (DEBUG) Slog.i(LOG_TAG, "grantOrUpgradeDefaultPerms(" + userId + ")");
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
-        final PackageManagerInternal packageManagerInternal =
-                LocalServices.getService(PackageManagerInternal.class);
-        final PermissionManagerServiceInternal permissionManagerInternal =
-                LocalServices.getService(PermissionManagerServiceInternal.class);
-        if (packageManagerInternal.isPermissionUpgradeNeeded(userId)) {
-            if (DEBUG) Slog.i(LOG_TAG, "defaultPermsWereGrantedSinceBoot(" + userId + ")");
+        // Now call into the permission controller to apply policy around permissions
+        final AndroidFuture<Boolean> future = new AndroidFuture<>();
 
-            // Now call into the permission controller to apply policy around permissions
-            final AndroidFuture<Boolean> future = new AndroidFuture<>();
-
-            // We need to create a local manager that does not schedule work on the main
-            // there as we are on the main thread and want to block until the work is
-            // completed or we time out.
-            final PermissionControllerManager permissionControllerManager =
-                    new PermissionControllerManager(
-                            getUserContext(getContext(), UserHandle.of(userId)),
-                            PermissionThread.getHandler());
-            permissionControllerManager.grantOrUpgradeDefaultRuntimePermissions(
-                    PermissionThread.getExecutor(), successful -> {
-                        if (successful) {
-                            future.complete(null);
-                        } else {
-                            // We are in an undefined state now, let us crash and have
-                            // rescue party suggest a wipe to recover to a good one.
-                            final String message = "Error granting/upgrading runtime permissions"
-                                    + " for user " + userId;
-                            Slog.wtf(LOG_TAG, message);
-                            future.completeExceptionally(new IllegalStateException(message));
-                        }
-                    });
-            try {
-                t.traceBegin("Permission_callback_waiting-" + userId);
-                future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new IllegalStateException(e);
-            } finally {
-                t.traceEnd();
-            }
-
-            permissionControllerManager.updateUserSensitive();
-
-            packageManagerInternal.updateRuntimePermissionsFingerprint(userId);
+        // We need to create a local manager that does not schedule work on the main
+        // there as we are on the main thread and want to block until the work is
+        // completed or we time out.
+        final PermissionControllerManager permissionControllerManager =
+                new PermissionControllerManager(
+                        getUserContext(getContext(), UserHandle.of(userId)),
+                        PermissionThread.getHandler());
+        permissionControllerManager.grantOrUpgradeDefaultRuntimePermissions(
+                PermissionThread.getExecutor(), successful -> {
+                    if (successful) {
+                        future.complete(null);
+                    } else {
+                        // We are in an undefined state now, let us crash and have
+                        // rescue party suggest a wipe to recover to a good one.
+                        final String message = "Error granting/upgrading runtime permissions"
+                                + " for user " + userId;
+                        Slog.wtf(LOG_TAG, message);
+                        future.completeExceptionally(new IllegalStateException(message));
+                    }
+                });
+        try {
+            t.traceBegin("Permission_callback_waiting-" + userId);
+            future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            t.traceEnd();
         }
+    }
+
+    private void updateUserSensitive(@UserIdInt int userId) {
+        if (DEBUG) Slog.i(LOG_TAG, "updateUserSensitive(" + userId + ")");
+        final PermissionControllerManager permissionControllerManager =
+                new PermissionControllerManager(
+                        getUserContext(getContext(), UserHandle.of(userId)),
+                        PermissionThread.getHandler());
+        permissionControllerManager.updateUserSensitive();
     }
 
     private static @Nullable Context getUserContext(@NonNull Context context,
@@ -648,39 +665,27 @@ public final class PermissionPolicyService extends SystemService {
     }
 
     /**
-     * Synchronize a single package.
+     * Synchronize a single UID.
      */
-    private void synchronizePackagePermissionsAndAppOpsForUser(@NonNull String packageName,
-            @UserIdInt int userId) {
+    private void synchronizeUidPermissionsAndAppOps(int uid) {
         synchronized (mLock) {
-            mIsPackageSyncsScheduled.remove(UserPackage.of(userId, packageName));
+            mIsUidSyncScheduled.delete(uid);
         }
 
         if (DEBUG) {
             Slog.v(LOG_TAG,
-                    "synchronizePackagePermissionsAndAppOpsForUser(" + packageName + ", "
-                            + userId + ")");
+                    "synchronizePackagePermissionsAndAppOpsForUser(" + uid + ")");
         }
 
-        final PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                PackageManagerInternal.class);
-        final PackageInfo pkg = packageManagerInternal.getPackageInfo(packageName, 0,
-                Process.SYSTEM_UID, userId);
-        if (pkg == null) {
-            return;
-        }
+        final UserHandle user = UserHandle.getUserHandleForUid(uid);
         final PermissionToOpSynchroniser synchroniser = new PermissionToOpSynchroniser(
-                getUserContext(getContext(), UserHandle.of(userId)));
-        synchroniser.addPackage(pkg.packageName);
-        final String[] sharedPkgNames = packageManagerInternal.getSharedUserPackagesForPackage(
-                pkg.packageName, userId);
-
-        for (String sharedPkgName : sharedPkgNames) {
-            final AndroidPackage sharedPkg = packageManagerInternal
-                    .getPackage(sharedPkgName);
-            if (sharedPkg != null) {
-                synchroniser.addPackage(sharedPkg.getPackageName());
-            }
+                getUserContext(getContext(), user));
+        final int appId = UserHandle.getAppId(uid);
+        final List<AndroidPackage> pkgs = mPackageManagerInternal.getPackagesForAppId(appId);
+        final int pkgsSize = pkgs.size();
+        for (int i = 0; i < pkgsSize; i++) {
+            final AndroidPackage pkg = pkgs.get(i);
+            synchroniser.addPackage(pkg.getPackageName());
         }
         synchroniser.syncPackages();
     }
@@ -692,12 +697,10 @@ public final class PermissionPolicyService extends SystemService {
         if (DEBUG) Slog.i(LOG_TAG, "synchronizePermissionsAndAppOpsForUser(" + userId + ")");
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
-        final PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                PackageManagerInternal.class);
         final PermissionToOpSynchroniser synchronizer = new PermissionToOpSynchroniser(
                 getUserContext(getContext(), UserHandle.of(userId)));
         t.traceBegin("Permission_synchronize_addPackages-" + userId);
-        packageManagerInternal.forEachPackage(
+        mPackageManagerInternal.forEachPackage(
                 (pkg) -> synchronizer.addPackage(pkg.getPackageName()));
         t.traceEnd();
         t.traceBegin("Permission_syncPackages-" + userId);
@@ -708,8 +711,8 @@ public final class PermissionPolicyService extends SystemService {
     private void resetAppOpPermissionsIfNotRequestedForUidAsync(int uid) {
         if (isStarted(UserHandle.getUserId(uid))) {
             synchronized (mLock) {
-                if (!mIsUidSyncScheduled.get(uid)) {
-                    mIsUidSyncScheduled.put(uid, true);
+                if (!mIsUidResetScheduled.get(uid)) {
+                    mIsUidResetScheduled.put(uid, true);
                     PermissionThread.getHandler().sendMessage(PooledLambda.obtainMessage(
                             PermissionPolicyService::resetAppOpPermissionsIfNotRequestedForUid,
                             this, uid));
@@ -720,7 +723,7 @@ public final class PermissionPolicyService extends SystemService {
 
     private void resetAppOpPermissionsIfNotRequestedForUid(int uid) {
         synchronized (mLock) {
-            mIsUidSyncScheduled.delete(uid);
+            mIsUidResetScheduled.delete(uid);
         }
 
         final Context context = getContext();
@@ -858,7 +861,7 @@ public final class PermissionPolicyService extends SystemService {
         /**
          * Set app ops that were added in {@link #addPackage}.
          *
-         * <p>This processes ops previously added by {@link #addAppOps(PackageInfo, String)}
+         * <p>This processes ops previously added by {@link #addPackage(String)})}
          */
         private void syncPackages() {
             // Remember which ops were already set. This makes sure that we always set the most
@@ -1049,13 +1052,11 @@ public final class PermissionPolicyService extends SystemService {
          * @param pkgName The package to add for later processing.
          */
         void addPackage(@NonNull String pkgName) {
-            PackageManagerInternal pmInternal =
-                    LocalServices.getService(PackageManagerInternal.class);
             final PackageInfo pkgInfo;
             final AndroidPackage pkg;
             try {
                 pkgInfo = mPackageManager.getPackageInfo(pkgName, GET_PERMISSIONS);
-                pkg = pmInternal.getPackage(pkgName);
+                pkg = mPackageManagerInternal.getPackage(pkgName);
             } catch (NameNotFoundException e) {
                 return;
             }
@@ -1315,7 +1316,8 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         private boolean isTaskStartedFromLauncher(String currPkg, TaskInfo taskInfo) {
-            return currPkg.equals(taskInfo.baseActivity.getPackageName())
+            return taskInfo.baseActivity != null
+                    && currPkg.equals(taskInfo.baseActivity.getPackageName())
                     && isLauncherIntent(taskInfo.baseIntent);
         }
 
@@ -1431,8 +1433,8 @@ public final class PermissionPolicyService extends SystemService {
             }
             boolean hasCreatedNotificationChannels = mNotificationManager
                     .getNumNotificationChannelsForPackage(pkgName, uid, true) > 0;
-            boolean granted = mPermissionManagerInternal.checkUidPermission(uid, POST_NOTIFICATIONS)
-                    == PackageManager.PERMISSION_GRANTED;
+            boolean granted = mPermissionManagerInternal.checkUidPermission(uid, POST_NOTIFICATIONS,
+                    Context.DEVICE_ID_DEFAULT) == PackageManager.PERMISSION_GRANTED;
             int flags = mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, pkgName, user);
             boolean explicitlySet = (flags & PermissionManager.EXPLICIT_SET_FLAGS) != 0;
             return !granted && hasCreatedNotificationChannels && !explicitlySet;

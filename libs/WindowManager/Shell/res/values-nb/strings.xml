@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Lukk"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Vis"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Innstillinger"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Aktivér delt skjerm"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Meny"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Bilde-i-bilde-meny"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> er i bilde-i-bilde"</string>
@@ -32,13 +31,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Endre størrelse"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Oppbevar"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Avslutt oppbevaring"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Det kan hende at appen ikke fungerer med delt skjerm."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Appen støtter ikke delt skjerm."</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Denne appen kan bare åpnes i ett vindu."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Det kan hende at appen ikke fungerer med delt skjerm"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Appen støtter ikke delt skjerm"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Denne appen kan bare åpnes i ett vindu"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Appen fungerer kanskje ikke på en sekundær skjerm."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Appen kan ikke kjøres på sekundære skjermer."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Skilleelement for delt skjerm"</string>
-    <string name="divider_title" msgid="5482989479865361192">"Skilleelement for delt skjerm"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Skilleelement for delt skjerm"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Skilleelement for delt skjerm"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Utvid den venstre delen av skjermen til hele skjermen"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Sett størrelsen på den venstre delen av skjermen til 70 %"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Sett størrelsen på den venstre delen av skjermen til 50 %"</string>
@@ -49,14 +48,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Sett størrelsen på den øverste delen av skjermen til 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Sett størrelsen på den øverste delen av skjermen til 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Utvid den nederste delen av skjermen til hele skjermen"</string>
-    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
-    <skip />
-    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
-    <skip />
-    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
-    <skip />
-    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
-    <skip />
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Del opp til venstre"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Del opp til høyre"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Del opp øverst"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Del opp nederst"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Bruk av enhåndsmodus"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"For å avslutte, sveip opp fra bunnen av skjermen eller trykk hvor som helst over appen"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Start enhåndsmodus"</string>
@@ -70,6 +65,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Flytt til øverst til høyre"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Flytt til nederst til venstre"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Flytt til nederst til høyre"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"vis <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"skjul <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>-innstillinger"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Lukk boblen"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Ikke vis samtaler i bobler"</string>
@@ -80,15 +77,21 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Greit"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Ingen nylige bobler"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Nylige bobler og avviste bobler vises her"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Chat med bobler"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Nye samtaler vises som ikoner i et hjørne nede på skjermen. Trykk for å åpne dem, eller dra for å lukke dem."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Kontroller bobler når som helst"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Trykk her for å administrere hvilke apper og samtaler som kan vises i bobler"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Boble"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Administrer"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Boblen er avvist."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Trykk for å starte denne appen på nytt for bedre visning."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Trykk for å starte denne appen på nytt og få en bedre visning"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Endre høyde/bredde-forholdet for denne appen i innstillingene"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Endre høyde/bredde-forholdet"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Har du kameraproblemer?\nTrykk for å tilpasse"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Ble ikke problemet løst?\nTrykk for å gå tilbake"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Har du ingen kameraproblemer? Trykk for å lukke."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Se og gjør mer"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Dra inn en annen app for å bruke delt skjerm"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Dra inn en annen app for å bruke delt skjerm"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dobbelttrykk utenfor en app for å flytte den"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Greit"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Vis for å få mer informasjon."</string>
@@ -97,14 +100,23 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Avbryt"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Start på nytt"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Ikke vis dette igjen"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Dobbelttrykk for\nå flytte denne appen"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksimer"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimer"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Lukk"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Tilbake"</string>
     <string name="handle_text" msgid="1766582106752184456">"Håndtak"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"Appikon"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Fullskjerm"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Skrivebordmodus"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Delt skjerm"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Mer"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Svevende"</string>
+    <string name="select_text" msgid="5139083974039906583">"Velg"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Skjermdump"</string>
+    <string name="close_text" msgid="4986518933445178928">"Lukk"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Lukk menyen"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Åpne menyen"</string>
+    <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maksimer skjermen"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Fest skjermen"</string>
 </resources>

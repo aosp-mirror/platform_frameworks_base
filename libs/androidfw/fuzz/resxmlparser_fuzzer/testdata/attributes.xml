@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <child id="1">
+        <subchild type="A">Content A</subchild>
+        <subchild type="B">Content B</subchild>
+    </child>
+    <child id="2" extra="data">
+        <subchild type="C">Content C</subchild>
+    </child>
+</root>

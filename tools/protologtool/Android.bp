@@ -17,6 +17,7 @@ java_library_host {
         "javaparser",
         "platformprotos",
         "jsonlib",
+        "perfetto_trace-full",
     ],
 }
 
@@ -42,5 +43,6 @@ java_test_host {
         "junit",
         "mockito",
         "objenesis",
+        "truth",
     ],
 }

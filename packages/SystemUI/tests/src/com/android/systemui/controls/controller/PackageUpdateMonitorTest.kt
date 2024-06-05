@@ -17,6 +17,7 @@
 package com.android.systemui.controls.controller
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.UserHandle
 import android.testing.AndroidTestingRunner
@@ -34,6 +35,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -42,12 +44,14 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
 
     @Mock private lateinit var context: Context
     @Mock private lateinit var bgHandler: Handler
+    @Mock private lateinit var packageManager: PackageManager
 
     private lateinit var underTest: PackageUpdateMonitor
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        whenever(context.packageManager).thenReturn(packageManager)
     }
 
     @Test
@@ -55,12 +59,17 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
         underTest = PackageUpdateMonitor(USER, PACKAGE, {}, bgHandler, context)
 
         underTest.startMonitoring()
-        // There are two receivers registered
-        verify(context, times(2))
-            .registerReceiverAsUser(any(), eq(USER), any(), eq(null), eq(bgHandler))
+
+        verify(packageManager).registerPackageMonitorCallback(any(), eq(USER.getIdentifier()))
+        // context will be used to get PackageManager, the test should clear invocations
+        // for next startMonitoring() assertion
+        clearInvocations(context)
 
         underTest.startMonitoring()
+        // No more interactions for registerReceiverAsUser
         verifyNoMoreInteractions(context)
+        // No more interactions for registerPackageMonitorCallback
+        verifyNoMoreInteractions(packageManager)
     }
 
     @Test
@@ -69,12 +78,20 @@ class PackageUpdateMonitorTest : SysuiTestCase() {
 
         underTest.startMonitoring()
         clearInvocations(context)
+        clearInvocations(packageManager)
 
         underTest.stopMonitoring()
-        verify(context).unregisterReceiver(any())
+
+        verify(packageManager).unregisterPackageMonitorCallback(any())
+        // context will be used to get PackageManager, the test should clear invocations
+        // for next stopMonitoring() assertion
+        clearInvocations(context)
 
         underTest.stopMonitoring()
+        // No more interactions for unregisterReceiver
         verifyNoMoreInteractions(context)
+        // No more interactions for unregisterPackageMonitorCallback
+        verifyNoMoreInteractions(packageManager)
     }
 
     @Test

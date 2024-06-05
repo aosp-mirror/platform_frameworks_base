@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.ILogd;
 import android.os.Looper;
@@ -518,7 +519,15 @@ public final class LogcatManagerService extends SystemService {
             Slog.d(TAG, "Approving log access: " + request);
         }
         try {
-            getLogdService().approve(request.mUid, request.mGid, request.mPid, request.mFd);
+            try {
+                getLogdService().approve(request.mUid, request.mGid, request.mPid, request.mFd);
+            } catch (DeadObjectException e) {
+                // This can happen if logd restarts, so force getting a new connection
+                // to logd and try once more.
+                Slog.w(TAG, "Logd connection no longer valid while approving, trying once more.");
+                mLogdService = null;
+                getLogdService().approve(request.mUid, request.mGid, request.mPid, request.mFd);
+            }
             Integer activeCount = mActiveLogAccessCount.getOrDefault(client, 0);
             mActiveLogAccessCount.put(client, activeCount + 1);
         } catch (RemoteException e) {
@@ -531,7 +540,15 @@ public final class LogcatManagerService extends SystemService {
             Slog.d(TAG, "Declining log access: " + request);
         }
         try {
-            getLogdService().decline(request.mUid, request.mGid, request.mPid, request.mFd);
+            try {
+                getLogdService().decline(request.mUid, request.mGid, request.mPid, request.mFd);
+            } catch (DeadObjectException e) {
+                // This can happen if logd restarts, so force getting a new connection
+                // to logd and try once more.
+                Slog.w(TAG, "Logd connection no longer valid while declining, trying once more.");
+                mLogdService = null;
+                getLogdService().decline(request.mUid, request.mGid, request.mPid, request.mFd);
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Fails to call remote functions", e);
         }

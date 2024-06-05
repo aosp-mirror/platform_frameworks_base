@@ -16,9 +16,14 @@
 
 package com.android.server.display.utils;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.Temperature;
 import android.text.TextUtils;
+
+import com.android.server.display.config.SensorData;
 
 import java.util.List;
 
@@ -29,15 +34,24 @@ public class SensorUtils {
     public static final int NO_FALLBACK = 0;
 
     /**
+     * Finds the specified sensor for SensorData from DisplayDeviceConfig.
+     */
+    @Nullable
+    public static Sensor findSensor(@Nullable SensorManager sensorManager,
+            @Nullable SensorData sensorData, int fallbackType) {
+        if (sensorData == null) {
+            return null;
+        } else {
+            return findSensor(sensorManager, sensorData.type, sensorData.name, fallbackType);
+        }
+    }
+    /**
      * Finds the specified sensor by type and name using SensorManager.
      */
-    public static Sensor findSensor(SensorManager sensorManager, String sensorType,
-            String sensorName, int fallbackType) {
+    @Nullable
+    public static Sensor findSensor(@Nullable SensorManager sensorManager,
+            @Nullable String sensorType, @Nullable String sensorName, int fallbackType) {
         if (sensorManager == null) {
-            return null;
-        }
-
-        if ("".equals(sensorName) && "".equals(sensorType)) {
             return null;
         }
         final boolean isNameSpecified = !TextUtils.isEmpty(sensorName);
@@ -56,6 +70,19 @@ public class SensorUtils {
         }
 
         return null;
+    }
+
+    /**
+     * Convert string temperature type to its corresponding integer value.
+     */
+    public static int getSensorTemperatureType(@NonNull SensorData tempSensor) {
+        if (tempSensor.type.equalsIgnoreCase(SensorData.TEMPERATURE_TYPE_DISPLAY)) {
+            return Temperature.TYPE_DISPLAY;
+        } else if (tempSensor.type.equalsIgnoreCase(SensorData.TEMPERATURE_TYPE_SKIN)) {
+            return Temperature.TYPE_SKIN;
+        }
+        throw new IllegalArgumentException(
+            "tempSensor doesn't support type: " + tempSensor.type);
     }
 
 }

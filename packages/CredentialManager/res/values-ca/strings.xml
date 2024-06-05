@@ -1,44 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="4539824758261855508">"Gestor de credencials"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Cancel·la"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continua"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"Més opcions"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Desa d\'altra forma"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Més informació"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"Mostra la contrasenya"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"Amaga la contrasenya"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Més seguretat amb les claus d\'accés"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Amb les claus d\'accés, no cal que creïs ni recordis contrasenyes difícils"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Les claus d\'accés són claus digitals encriptades que pots crear amb la teva cara, l\'empremta digital o el bloqueig de pantalla"</string>
-    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Es desen a un gestor de contrasenyes perquè puguis iniciar la sessió en altres dispositius"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Es desen en un gestor de contrasenyes perquè puguis iniciar la sessió en altres dispositius"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Més sobre les claus d\'accés"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Tecnologia sense contrasenyes"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Les claus d\'accés et permeten iniciar la sessió sense dependre de cap contrasenya. Només necessites utilitzar l\'empremta digital, el reconeixement facial, el PIN o lliscar el patró per verificar la teva identitat i crear una clau d\'accés."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Criptografia de la clau pública"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"D\'acord amb FIDO Alliance i els estàndards W3C, les claus d\'accés utilitzen parells de claus criptogràfiques. En lloc del nom d\'usuari i la cadena de caràcters que utilitzem per a les contrasenyes, es crea un parell de claus per a una app o web. La clau privada es desa de manera segura al dispositiu o al gestor de contrasenyes i confirma la teva identitat. La clau pública es comparteix amb l\'app o el servidor del lloc web. Amb les claus corresponents, pots registrar-te i iniciar sessió a l\'instant."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"D\'acord amb FIDO Alliance i els estàndards W3C, les claus d\'accés utilitzen parells de claus criptogràfiques. En lloc del nom d\'usuari i la cadena de caràcters que utilitzem per a les contrasenyes, es crea un parell de claus per a una app o un lloc web. La clau privada es desa de manera segura al dispositiu o al gestor de contrasenyes i confirma la teva identitat. La clau pública es comparteix amb l\'app o el servidor del lloc web. Amb les claus corresponents, pots registrar-te i iniciar sessió a l\'instant."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Seguretat dels comptes millorada"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada clau està exclusivament enllaçada a l\'aplicació o al lloc web per als quals s\'ha creat. D\'aquesta manera, mai iniciaràs la sessió en una aplicació o un lloc web fraudulents per error. A més, com que els servidors només conserven les claus públiques, el hacking és molt més difícil."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transició fluida"</string>
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Tot i que avancem cap a un futur sense contrasenyes, continuaran estant disponibles juntament amb les claus d\'accés."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Tria on vols desar les <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un gestor de contrasenyes per desar la teva informació i iniciar la sessió més ràpidament la pròxima vegada"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vols crear la clau d\'accés per a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Vols desar la contrasenya per a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Vols desar la informació d\'inici de sessió per a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Vols crear una clau d\'accés per iniciar la sessió a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Vols desar la contrasenya per iniciar la sessió a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Vols desar la informació d\'inici de sessió per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"clau d\'accés"</string>
     <string name="password" msgid="6738570945182936667">"contrasenya"</string>
     <string name="passkeys" msgid="5733880786866559847">"claus d\'accés"</string>
     <string name="passwords" msgid="5419394230391253816">"contrasenyes"</string>
     <string name="sign_ins" msgid="4710739369149469208">"inicis de sessió"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"informació d\'inici de sessió"</string>
-    <string name="save_credential_to_title" msgid="3172811692275634301">"Desa <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> a"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Vols crear una clau d\'accés en un altre dispositiu?"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Desa la <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> a"</string>
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Vols crear una clau d\'accés en un altre dispositiu?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Vols desar la contrasenya en un altre dispositiu?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Vols desar l\'inici de sessió en un altre dispositiu?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Vols utilitzar <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> per a tots els teus inicis de sessió?"</string>
-    <string name="use_provider_for_all_description" msgid="8466427781848268490">"Aquest gestor de contrasenyes emmagatzemarà les teves contrasenyes i claus d\'accés per ajudar-te a iniciar la sessió fàcilment"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Aquest gestor de contrasenyes per a <xliff:g id="USERNAME">%1$s</xliff:g> emmagatzemarà les teves contrasenyes i claus d\'accés per ajudar-te a iniciar la sessió fàcilment"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Estableix com a predeterminada"</string>
+    <string name="settings" msgid="6536394145760913145">"Configuració"</string>
     <string name="use_once" msgid="9027366575315399714">"Utilitza un cop"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> contrasenyes • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> claus d\'accés"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> contrasenyes"</string>
@@ -49,21 +66,33 @@
     <string name="other_password_manager" msgid="565790221427004141">"Altres gestors de contrasenyes"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Tanca el full"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Torna a la pàgina anterior"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"Tanca el suggeriment d\'acció del Gestor de credencials que es mostra a la part inferior de la pantalla"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Vols utilitzar la clau d\'accés desada per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Vols utilitzar l\'inici de sessió desat per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Tria un inici de sessió desat per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"Tanca"</string>
+    <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Ignora"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Utilitza la clau d\'accés desada per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Utilitza la contrasenya desada per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Utilitza el teu compte per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Utilitza el bloqueig de pantalla per iniciar la sessió a <xliff:g id="APP_NAME">%1$s</xliff:g> amb <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Desbloqueja les opcions d\'inici de sessió per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Tria una clau d\'accés desada per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Tria una contrasenya desada per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Tria un inici de sessió desat per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Selecciona un compte per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Vols triar una opció per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Vols utilitzar aquesta informació a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Inicia la sessió d\'una altra manera"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Mostra les opcions"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continua"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opcions d\'inici de sessió"</string>
+    <string name="button_label_view_more" msgid="3429098227286495651">"Mostra\'n més"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Per a <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Gestors de contrasenyes bloquejats"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
-    <skip />
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Toca per desbloquejar"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Sense informació d\'inici de sessió"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"Sense informació d\'inici de sessió per a <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Gestiona els inicis de sessió"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Des d\'un altre dispositiu"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Utilitza un dispositiu diferent"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> ha cancel·lat la sol·licitud"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Opcions d\'inici de sessió"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Més"</string>
 </resources>

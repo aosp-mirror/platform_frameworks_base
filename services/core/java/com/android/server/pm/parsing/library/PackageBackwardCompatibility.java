@@ -24,9 +24,9 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACH
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.server.SystemConfig;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
 
 import java.util.ArrayList;
 import java.util.List;

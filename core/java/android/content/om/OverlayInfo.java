@@ -385,7 +385,6 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
      * <p>The return value of this function can be used to unregister the related overlay.
      *
      * @return an identifier representing the current overlay.
-     * @see OverlayManagerTransaction.Builder#unregisterFabricatedOverlay(OverlayIdentifier)
      */
     @Override
     @NonNull

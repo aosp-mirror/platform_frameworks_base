@@ -20,9 +20,12 @@ import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_FLAG_SELF;
+import static android.app.AppOpsManager.OP_READ_DEVICE_IDENTIFIERS;
 import static android.app.AppOpsManager.OP_READ_SMS;
+import static android.app.AppOpsManager.OP_TAKE_AUDIO_FOCUS;
 import static android.app.AppOpsManager.OP_WIFI_SCAN;
 import static android.app.AppOpsManager.OP_WRITE_SMS;
+import static android.os.UserHandle.getAppId;
 import static android.os.UserHandle.getUserId;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -37,8 +40,10 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -46,14 +51,18 @@ import static org.mockito.ArgumentMatchers.nullable;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
 import android.app.AppOpsManager.PackageOps;
+import android.app.SyncNotedAppOp;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -75,7 +84,6 @@ import org.junit.runner.RunWith;
 import org.mockito.quality.Strictness;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -95,12 +103,15 @@ public class AppOpsServiceTest {
 
     private static final Context sContext = InstrumentationRegistry.getTargetContext();
     private static final String sMyPackageName = sContext.getOpPackageName();
+    private static final String sSdkSandboxPackageName = sContext.getPackageManager()
+            .getSdkSandboxPackageName();
 
     private File mStorageFile;
     private File mRecentAccessesFile;
     private Handler mHandler;
     private AppOpsService mAppOpsService;
     private int mMyUid;
+    private int mSdkSandboxPackageUid;
     private long mTestStartMillis;
     private StaticMockitoSession mMockingSession;
 
@@ -108,6 +119,7 @@ public class AppOpsServiceTest {
         mAppOpsService = new AppOpsService(mRecentAccessesFile, mStorageFile, mHandler,
                 spy(sContext));
         mAppOpsService.mHistoricalRegistry.systemReady(sContext.getContentResolver());
+        mAppOpsService.prepareInternalCallbacks();
 
         // Always approve all permission checks
         doNothing().when(mAppOpsService.mContext).enforcePermission(anyString(), anyInt(),
@@ -116,6 +128,8 @@ public class AppOpsServiceTest {
 
     @Before
     public void setUp() {
+        assumeFalse(PermissionManager.USE_ACCESS_CHECKING_SERVICE);
+
         mStorageFile = new File(sContext.getFilesDir(), APP_OPS_FILENAME);
         mRecentAccessesFile = new File(sContext.getFilesDir(), APP_OPS_ACCESSES_FILENAME);
         mStorageFile.delete();
@@ -125,6 +139,7 @@ public class AppOpsServiceTest {
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
         mMyUid = Process.myUid();
+        mSdkSandboxPackageUid = resolveSdkSandboxPackageUid();
 
         initializeStaticMocks();
 
@@ -135,9 +150,47 @@ public class AppOpsServiceTest {
 
     @After
     public void tearDown() {
+        // @After methods are still executed even if there's assumption failure in @Before.
+        if (PermissionManager.USE_ACCESS_CHECKING_SERVICE) {
+            return;
+        }
+
         mAppOpsService.shutdown();
 
         mMockingSession.finishMocking();
+    }
+
+    private static int resolveSdkSandboxPackageUid() {
+        try {
+            return sContext.getPackageManager().getPackageUid(
+                    sSdkSandboxPackageName,
+                    PackageManager.PackageInfoFlags.of(0)
+            );
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Can't resolve sandbox package uid", e);
+            return Process.INVALID_UID;
+        }
+    }
+
+    private static void mockGetPackage(
+            PackageManagerInternal managerMock,
+            String packageName
+    ) {
+        AndroidPackage packageMock = mock(AndroidPackage.class);
+        when(managerMock.getPackage(packageName)).thenReturn(packageMock);
+    }
+
+    private static void mockGetPackageStateInternal(
+            PackageManagerInternal managerMock,
+            String packageName,
+            int uid
+    ) {
+        PackageStateInternal packageStateInternalMock = mock(PackageStateInternal.class);
+        when(packageStateInternalMock.isPrivileged()).thenReturn(false);
+        when(packageStateInternalMock.getAppId()).thenReturn(uid);
+        when(packageStateInternalMock.getAndroidPackage()).thenReturn(mock(AndroidPackage.class));
+        when(managerMock.getPackageStateInternal(packageName))
+                .thenReturn(packageStateInternalMock);
     }
 
     private void initializeStaticMocks() {
@@ -151,16 +204,13 @@ public class AppOpsServiceTest {
         // Mock LocalServices.getService(PackageManagerInternal.class).getPackageStateInternal
         // and getPackage dependency needed by AppOpsService
         PackageManagerInternal mockPackageManagerInternal = mock(PackageManagerInternal.class);
-        AndroidPackage mockMyPkg = mock(AndroidPackage.class);
-        when(mockMyPkg.getAttributions()).thenReturn(Collections.emptyList());
-        PackageStateInternal mockMyPSInternal = mock(PackageStateInternal.class);
-        when(mockMyPSInternal.isPrivileged()).thenReturn(false);
-        when(mockMyPSInternal.getAppId()).thenReturn(mMyUid);
-        when(mockMyPSInternal.getAndroidPackage()).thenReturn(mockMyPkg);
-
-        when(mockPackageManagerInternal.getPackageStateInternal(sMyPackageName))
-                .thenReturn(mockMyPSInternal);
-        when(mockPackageManagerInternal.getPackage(sMyPackageName)).thenReturn(mockMyPkg);
+        mockGetPackage(mockPackageManagerInternal, sMyPackageName);
+        mockGetPackageStateInternal(mockPackageManagerInternal, sMyPackageName, mMyUid);
+        mockGetPackage(mockPackageManagerInternal, sSdkSandboxPackageName);
+        mockGetPackageStateInternal(mockPackageManagerInternal, sSdkSandboxPackageName,
+                mSdkSandboxPackageUid);
+        when(mockPackageManagerInternal.getPackageUid(eq(sMyPackageName), anyLong(),
+                eq(getUserId(mMyUid)))).thenReturn(mMyUid);
         doReturn(mockPackageManagerInternal).when(
                 () -> LocalServices.getService(PackageManagerInternal.class));
 
@@ -184,6 +234,16 @@ public class AppOpsServiceTest {
         // Mock behavior to use specific Settings.Global.APPOP_HISTORY_PARAMETERS
         doReturn(null).when(() -> Settings.Global.getString(any(ContentResolver.class),
                 eq(Settings.Global.APPOP_HISTORY_PARAMETERS)));
+
+        prepareInstallInvocation(mockPackageManagerInternal);
+    }
+
+    private void prepareInstallInvocation(PackageManagerInternal mockPackageManagerInternal) {
+        when(mockPackageManagerInternal.getPackageList(any())).thenAnswer(invocation -> {
+            PackageManagerInternal.PackageListObserver observer = invocation.getArgument(0);
+            observer.onPackageAdded(sMyPackageName, getAppId(mMyUid));
+            return null;
+        });
     }
 
     @Test
@@ -207,6 +267,21 @@ public class AppOpsServiceTest {
         loggedOps = getLoggedOps();
         assertContainsOp(loggedOps, OP_READ_SMS, mTestStartMillis, -1, MODE_ALLOWED);
         assertContainsOp(loggedOps, OP_WRITE_SMS, -1, mTestStartMillis, MODE_ERRORED);
+    }
+
+    @Test
+    public void testNoteOperationFromSdkSandbox() {
+        int sandboxUid = Process.toSdkSandboxUid(mMyUid);
+
+        // Note an op that's allowed.
+        SyncNotedAppOp allowedResult = mAppOpsService.noteOperation(OP_TAKE_AUDIO_FOCUS, sandboxUid,
+                sSdkSandboxPackageName, null, false, null, false);
+        assertThat(allowedResult.getOpMode()).isEqualTo(MODE_ALLOWED);
+
+        // Note another op that's not allowed.
+        SyncNotedAppOp erroredResult = mAppOpsService.noteOperation(OP_READ_DEVICE_IDENTIFIERS,
+                sandboxUid, sSdkSandboxPackageName, null, false, null, false);
+        assertThat(erroredResult.getOpMode()).isEqualTo(MODE_ERRORED);
     }
 
     /**

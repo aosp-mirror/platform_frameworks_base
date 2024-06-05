@@ -37,6 +37,7 @@ import java.util.function.Predicate;
  * Test:
  atest FrameworksCoreTests:DumpUtilsTest
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class DumpUtils {
 
     /**
@@ -92,6 +93,8 @@ public final class DumpUtils {
      * @return true if access should be granted.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow(
+            blockedBy = android.permission.PermissionManager.class)
     public static boolean checkDumpPermission(Context context, String tag, PrintWriter pw) {
         if (context.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -112,6 +115,8 @@ public final class DumpUtils {
      * @return true if access should be granted.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow(
+            blockedBy = android.permission.PermissionManager.class)
     public static boolean checkUsageStatsPermission(Context context, String tag, PrintWriter pw) {
         // System internals always get access
         final int uid = Binder.getCallingUid();
@@ -166,6 +171,8 @@ public final class DumpUtils {
      * @return true if access should be granted.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow(
+            blockedBy = android.permission.PermissionManager.class)
     public static boolean checkDumpAndUsageStatsPermission(Context context, String tag,
             PrintWriter pw) {
         return checkDumpPermission(context, tag, pw) && checkUsageStatsPermission(context, tag, pw);

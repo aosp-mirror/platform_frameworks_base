@@ -25,26 +25,19 @@ import android.view.inputmethod.ImeTracker;
 interface IImeTracker {
 
     /**
-     * Called when an IME show request is created.
+     * Called when an IME request is started.
      *
      * @param tag the logging tag.
-     * @param uid the uid of the client that requested the IME.
-     * @param origin the origin of the IME show request.
-     * @param reason the reason why the IME show request was created.
-     * @return A new IME tracking token.
-     */
-    ImeTracker.Token onRequestShow(String tag, int uid, int origin, int reason);
-
-    /**
-     * Called when an IME hide request is created.
+     * @param uid the uid of the client that started the request.
+     * @param type the type of the request.
+     * @param origin the origin of the request.
+     * @param fromUser whether this request was created directly from user interaction.
+     * @param reason the reason for starting the request.
      *
-     * @param tag the logging tag.
-     * @param uid the uid of the client that requested the IME.
-     * @param origin the origin of the IME hide request.
-     * @param reason the reason why the IME hide request was created.
-     * @return A new IME tracking token.
+     * @return An IME request tracking token.
      */
-    ImeTracker.Token onRequestHide(String tag, int uid, int origin, int reason);
+    ImeTracker.Token onStart(String tag, int uid, int type, int origin, int reason,
+        boolean fromUser);
 
     /**
      * Called when the IME request progresses to a further phase.
@@ -71,18 +64,26 @@ interface IImeTracker {
     oneway void onCancelled(in ImeTracker.Token statsToken, int phase);
 
     /**
-     * Called when the IME show request is successful.
+     * Called when the show IME request is successful.
      *
      * @param statsToken the token tracking the current IME request.
      */
     oneway void onShown(in ImeTracker.Token statsToken);
 
     /**
-     * Called when the IME hide request is successful.
+     * Called when the hide IME request is successful.
      *
      * @param statsToken the token tracking the current IME request.
      */
     oneway void onHidden(in ImeTracker.Token statsToken);
+
+    /**
+     * Called when the user-controlled IME request was dispatched to the requesting app. The
+     * user animation can take an undetermined amount of time, so it shouldn't be tracked.
+     *
+     * @param statsToken the token tracking the current IME request.
+     */
+    oneway void onDispatched(in ImeTracker.Token statsToken);
 
     /**
      * Checks whether there are any pending IME visibility requests.
@@ -93,4 +94,13 @@ interface IImeTracker {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.TEST_INPUT_METHOD)")
     boolean hasPendingImeVisibilityRequests();
+
+    /**
+     * Finishes the tracking of any pending IME visibility requests. This won't stop the actual
+     * requests, but allows resetting the state when starting up test runs.
+     */
+    @EnforcePermission("TEST_INPUT_METHOD")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.TEST_INPUT_METHOD)")
+    oneway void finishTrackingPendingImeVisibilityRequests();
 }

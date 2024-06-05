@@ -30,7 +30,7 @@ import android.view.inputmethod.ImeTracker;
 
 import androidx.annotation.BinderThread;
 
-import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -199,6 +199,16 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
             }
         }
 
+        private void setImeInputTargetRequestedVisibility(boolean visible) {
+            CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
+            if (listeners == null) {
+                return;
+            }
+            for (OnInsetsChangedListener listener : listeners) {
+                listener.setImeInputTargetRequestedVisibility(visible);
+            }
+        }
+
         @BinderThread
         private class DisplayWindowInsetsControllerImpl
                 extends IDisplayWindowInsetsController.Stub {
@@ -240,6 +250,14 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
                     PerDisplay.this.hideInsets(types, fromIme, statsToken);
                 });
             }
+
+            @Override
+            public void setImeInputTargetRequestedVisibility(boolean visible)
+                    throws RemoteException {
+                mMainExecutor.execute(() -> {
+                    PerDisplay.this.setImeInputTargetRequestedVisibility(visible);
+                });
+            }
         }
     }
 
@@ -277,8 +295,7 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
          *
          * @param types {@link InsetsType} to show
          * @param fromIme true if this request originated from IME (InputMethodService).
-         * @param statsToken the token tracking the current IME show request
-         *                   or {@code null} otherwise.
+         * @param statsToken the token tracking the current IME request or {@code null} otherwise.
          */
         default void showInsets(@InsetsType int types, boolean fromIme,
                 @Nullable ImeTracker.Token statsToken) {}
@@ -288,10 +305,16 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
          *
          * @param types {@link InsetsType} to hide
          * @param fromIme true if this request originated from IME (InputMethodService).
-         * @param statsToken the token tracking the current IME hide request
-         *                   or {@code null} otherwise.
+         * @param statsToken the token tracking the current IME request or {@code null} otherwise.
          */
         default void hideInsets(@InsetsType int types, boolean fromIme,
                 @Nullable ImeTracker.Token statsToken) {}
+
+        /**
+         * Called to set the requested visibility of the IME in DisplayImeController. Invoked by
+         * {@link com.android.server.wm.DisplayContent.RemoteInsetsControlTarget}.
+         * @param visible requested status of the IME
+         */
+        default void setImeInputTargetRequestedVisibility(boolean visible) {}
     }
 }

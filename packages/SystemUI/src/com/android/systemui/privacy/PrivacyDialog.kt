@@ -29,7 +29,7 @@ import android.view.WindowInsets
 import android.widget.ImageView
 import android.widget.TextView
 import com.android.settingslib.Utils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean

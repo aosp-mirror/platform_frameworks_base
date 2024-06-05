@@ -103,6 +103,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_ADD_USER,
             UserManager.DISALLOW_ADD_MANAGED_PROFILE,
             UserManager.DISALLOW_ADD_CLONE_PROFILE,
+            UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
             UserManager.ENSURE_VERIFY_APPS,
             UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
             UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
@@ -151,7 +152,11 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_ADD_WIFI_CONFIG,
             UserManager.DISALLOW_CELLULAR_2G,
             UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO,
-            UserManager.DISALLOW_CONFIG_DEFAULT_APPS
+            UserManager.DISALLOW_CONFIG_DEFAULT_APPS,
+            UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
+            UserManager.DISALLOW_SIM_GLOBALLY,
+            UserManager.DISALLOW_ASSIST_CONTENT,
+            UserManager.DISALLOW_THREAD_NETWORK
     });
 
     public static final Set<String> DEPRECATED_USER_RESTRICTIONS = Sets.newArraySet(
@@ -201,7 +206,9 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_WIFI_DIRECT,
             UserManager.DISALLOW_ADD_WIFI_CONFIG,
             UserManager.DISALLOW_CELLULAR_2G,
-            UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO
+            UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO,
+            UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
+            UserManager.DISALLOW_THREAD_NETWORK
     );
 
     /**
@@ -225,14 +232,16 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_UNMUTE_MICROPHONE,
             UserManager.DISALLOW_UNMUTE_DEVICE,
-            UserManager.DISALLOW_CAMERA
+            UserManager.DISALLOW_CAMERA,
+            UserManager.DISALLOW_ASSIST_CONTENT,
+            UserManager.DISALLOW_CONFIG_DEFAULT_APPS
     );
 
     /**
      * Special user restrictions that profile owner of an organization-owned managed profile can
      * set on the parent profile instance to apply them globally.
      */
-    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS =
+    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_PARENT_GLOBAL_RESTRICTIONS =
             Sets.newArraySet(
                     UserManager.DISALLOW_AIRPLANE_MODE,
                     UserManager.DISALLOW_CONFIG_DATE_TIME,
@@ -243,14 +252,25 @@ public class UserRestrictionsUtils {
                     UserManager.DISALLOW_WIFI_DIRECT,
                     UserManager.DISALLOW_ADD_WIFI_CONFIG,
                     UserManager.DISALLOW_CELLULAR_2G,
-                    UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO
-    );
+                    UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO,
+                    UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
+                    UserManager.DISALLOW_THREAD_NETWORK
+            );
+
+    /**
+     * Special user restrictions that profile owner of an organization-owned managed profile can
+     * set on the profile, which regular profile owners cannot set.
+     */
+    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_PROFILE_RESTRICTIONS =
+            Sets.newArraySet(
+                    UserManager.DISALLOW_SIM_GLOBALLY
+            );
 
     /**
      * Special user restrictions that profile owner of an organization-owned managed profile can
      * set on the parent profile instance to apply them on the personal profile.
      */
-    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS =
+    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_PARENT_LOCAL_RESTRICTIONS =
             Sets.newArraySet(
                     UserManager.DISALLOW_CONFIG_BLUETOOTH,
                     UserManager.DISALLOW_CONFIG_LOCATION,
@@ -271,7 +291,11 @@ public class UserRestrictionsUtils {
                     UserManager.DISALLOW_SMS,
                     UserManager.DISALLOW_USB_FILE_TRANSFER,
                     UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
-                    UserManager.DISALLOW_UNMUTE_MICROPHONE
+                    UserManager.DISALLOW_UNMUTE_MICROPHONE,
+                    UserManager.DISALLOW_CONFIG_DEFAULT_APPS,
+                    UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                    UserManager.DISALLOW_CONFIG_BRIGHTNESS,
+                    UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT
     );
 
     /**
@@ -291,7 +315,8 @@ public class UserRestrictionsUtils {
     private static final Set<String> PROFILE_GLOBAL_RESTRICTIONS = Sets.newArraySet(
             UserManager.ENSURE_VERIFY_APPS,
             UserManager.DISALLOW_AIRPLANE_MODE,
-            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY,
+            UserManager.DISALLOW_SIM_GLOBALLY
     );
 
     /**
@@ -455,22 +480,65 @@ public class UserRestrictionsUtils {
     }
 
     /**
-     * @return true if a restriction is settable by profile owner.  Note it takes a boolean to say
-     * if the relevant user is the {@link UserManager#isMainUser() MainUser}, because some
-     * restrictions can be changed by PO only when it's running on the main user.
+     * Checks whether a restriction is settable by a profile owner
+     *
+     * <p> Whether a restriction is settable by a profile owner is a property of the restriction and
+     * defined statically by the restriction. It may depend on other context information, such
+     * as whether the relevant user is the {@link UserManager#isMainUser() MainUser}.
+     *
+     * @param restriction the restrictions to check
+     * @param isMainUser true if the relevant user is the {@link UserManager#isMainUser() MainUser}.
+     *                   Some restrictions can be changed by PO only when it's running on the main
+     *                   user.
+     * @param isProfileOwnerOnOrgOwnedDevice true if the relevant user is the profile owner of an
+     *                                       organization owned device. Some restrictions can only
+     *                                       be set by PO when it's running as the profile owner
+     *                                       on an organization owned device.
+     * @return true if a restriction is settable by a profile owner
      */
-    public static boolean canProfileOwnerChange(String restriction, boolean isMainUser) {
+    public static boolean canProfileOwnerChange(
+            String restriction,
+            boolean isMainUser,
+            boolean isProfileOwnerOnOrgOwnedDevice) {
+        if (android.app.admin.flags.Flags.esimManagementEnabled()) {
+            if (IMMUTABLE_BY_OWNERS.contains(restriction)) {
+                return false;
+            }
+            if (DEVICE_OWNER_ONLY_RESTRICTIONS.contains(restriction)) {
+                return false;
+            }
+            if (!isMainUser && MAIN_USER_ONLY_RESTRICTIONS.contains(restriction)) {
+                return false;
+            }
+            if (!isProfileOwnerOnOrgOwnedDevice
+                    && PROFILE_OWNER_ORGANIZATION_OWNED_PROFILE_RESTRICTIONS.contains(
+                            restriction)) {
+                return false;
+            }
+            return true;
+        }
         return !IMMUTABLE_BY_OWNERS.contains(restriction)
                 && !DEVICE_OWNER_ONLY_RESTRICTIONS.contains(restriction)
                 && !(!isMainUser && MAIN_USER_ONLY_RESTRICTIONS.contains(restriction));
     }
 
     /**
-     * @return true if a restriction is settable by profile owner of an organization owned device.
+     * Checks whether a restriction is settable by a profile owner on the parent instance
+     * of an organization owned device.
+     *
+     * <p> Whether a restriction is settable by a profile owner is a property of the restriction and
+     * defined statically by the restriction.
+     *
+     * <p> Note: This is used to check whether a restriction can be set by a profile owner
+     *     on the parent instance.
+     *
+     * @param restriction the restrictions to check
+     * @return true if a restriction is settable by a profile owner on the parent instance
      */
-    public static boolean canProfileOwnerOfOrganizationOwnedDeviceChange(String restriction) {
-        return PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS.contains(restriction)
-                || PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS.contains(restriction);
+    public static boolean canParentOfProfileOwnerOfOrganizationOwnedDeviceChange(
+            String restriction) {
+        return PROFILE_OWNER_ORGANIZATION_OWNED_PARENT_GLOBAL_RESTRICTIONS.contains(restriction)
+                || PROFILE_OWNER_ORGANIZATION_OWNED_PARENT_LOCAL_RESTRICTIONS.contains(restriction);
     }
 
     /**
@@ -498,7 +566,7 @@ public class UserRestrictionsUtils {
                 MAIN_USER_ONLY_RESTRICTIONS.contains(key) || GLOBAL_RESTRICTIONS.contains(key)))
                 || ((restrictionOwnerType
                 == UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE)
-                && PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS.contains(key))
+                && (PROFILE_OWNER_ORGANIZATION_OWNED_PARENT_GLOBAL_RESTRICTIONS.contains(key)))
                 || PROFILE_GLOBAL_RESTRICTIONS.contains(key)
                 || DEVICE_OWNER_ONLY_RESTRICTIONS.contains(key);
     }
@@ -649,10 +717,12 @@ public class UserRestrictionsUtils {
                     break;
                 case UserManager.DISALLOW_RUN_IN_BACKGROUND:
                     if (newValue) {
-                        int currentUser = ActivityManager.getCurrentUser();
-                        if (currentUser != userId && userId != UserHandle.USER_SYSTEM) {
+                        final ActivityManager am = context.getSystemService(ActivityManager.class);
+                        if (!am.isProfileForeground(UserHandle.of(userId))
+                                && userId != UserHandle.USER_SYSTEM) {
                             try {
-                                ActivityManager.getService().stopUser(userId, false, null);
+                                ActivityManager.getService().stopUserExceptCertainProfiles(
+                                        userId, false, null);
                             } catch (RemoteException e) {
                                 throw e.rethrowAsRuntimeException();
                             }
@@ -789,7 +859,6 @@ public class UserRestrictionsUtils {
                 break;
 
             case android.provider.Settings.System.SCREEN_BRIGHTNESS:
-            case android.provider.Settings.System.SCREEN_BRIGHTNESS_FLOAT:
             case android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE:
                 if (callingUid == Process.SYSTEM_UID) {
                     return false;

@@ -35,6 +35,7 @@ interface IAmbientContextManager {
     void registerObserverWithCallback(in AmbientContextEventRequest request,
         String packageName,
         in IAmbientContextObserver observer);
+    @EnforcePermission("ACCESS_AMBIENT_CONTEXT_EVENT")
     void unregisterObserver(in String callingPackage);
     void queryServiceStatus(in int[] eventTypes, in String callingPackage,
         in RemoteCallback statusCallback);

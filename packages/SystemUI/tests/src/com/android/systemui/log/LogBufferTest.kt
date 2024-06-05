@@ -2,6 +2,7 @@ package com.android.systemui.log
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.core.Logger
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -32,7 +33,8 @@ class LogBufferTest : SysuiTestCase() {
 
     @Test
     fun log_shouldSaveLogToBuffer() {
-        buffer.log("Test", LogLevel.INFO, "Some test message")
+        val logger = Logger(buffer, "Test")
+        logger.i("Some test message")
 
         val dumpedString = dumpBuffer()
 
@@ -41,8 +43,9 @@ class LogBufferTest : SysuiTestCase() {
 
     @Test
     fun log_shouldRotateIfLogBufferIsFull() {
-        buffer.log("Test", LogLevel.INFO, "This should be rotated")
-        buffer.log("Test", LogLevel.INFO, "New test message")
+        val logger = Logger(buffer, "Test")
+        logger.i("This should be rotated")
+        logger.i("New test message")
 
         val dumpedString = dumpBuffer()
 
@@ -53,7 +56,8 @@ class LogBufferTest : SysuiTestCase() {
     fun dump_writesExceptionAndStacktrace() {
         buffer = createBuffer()
         val exception = createTestException("Exception message", "TestClass")
-        buffer.log("Tag", LogLevel.ERROR, { str1 = "Extra message" }, { str1!! }, exception)
+        val logger = Logger(buffer, "Test")
+        logger.e("Extra message", exception)
 
         val dumpedString = dumpBuffer()
 
@@ -72,7 +76,8 @@ class LogBufferTest : SysuiTestCase() {
                 "TestClass",
                 cause = createTestException("The real cause!", "TestClass")
             )
-        buffer.log("Tag", LogLevel.ERROR, { str1 = "Extra message" }, { str1!! }, exception)
+        val logger = Logger(buffer, "Test")
+        logger.e("Extra message", exception)
 
         val dumpedString = dumpBuffer()
 
@@ -93,7 +98,8 @@ class LogBufferTest : SysuiTestCase() {
             )
         )
         exception.addSuppressed(createTestException("Second suppressed exception", "SecondClass"))
-        buffer.log("Tag", LogLevel.ERROR, { str1 = "Extra message" }, { str1!! }, exception)
+        val logger = Logger(buffer, "Test")
+        logger.e("Extra message", exception)
 
         val dumpedStr = dumpBuffer()
 

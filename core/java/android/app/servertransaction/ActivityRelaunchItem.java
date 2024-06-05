@@ -29,9 +29,11 @@ import android.os.Parcel;
 import android.os.Trace;
 import android.util.MergedConfiguration;
 import android.util.Slog;
+import android.window.ActivityWindowInfo;
 
 import com.android.internal.content.ReferrerIntent;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,26 +50,27 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
     private int mConfigChanges;
     private MergedConfiguration mConfig;
     private boolean mPreserveWindow;
+    private ActivityWindowInfo mActivityWindowInfo;
 
     /**
      * A record that was properly configured for relaunch. Execution will be cancelled if not
-     * initialized after {@link #preExecute(ClientTransactionHandler, IBinder)}.
+     * initialized after {@link #preExecute(ClientTransactionHandler)}.
      */
     private ActivityClientRecord mActivityClientRecord;
 
     @Override
-    public void preExecute(ClientTransactionHandler client, IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client) {
         // The local config is already scaled so only apply if this item is from server side.
         if (!client.isExecutingLocalTransaction()) {
             CompatibilityInfo.applyOverrideScaleIfNeeded(mConfig);
         }
-        mActivityClientRecord = client.prepareRelaunchActivity(token, mPendingResults,
-                mPendingNewIntents, mConfigChanges, mConfig, mPreserveWindow);
+        mActivityClientRecord = client.prepareRelaunchActivity(getActivityToken(), mPendingResults,
+                mPendingNewIntents, mConfigChanges, mConfig, mPreserveWindow, mActivityWindowInfo);
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
-            PendingTransactionActions pendingActions) {
+    public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
+            @NonNull PendingTransactionActions pendingActions) {
         if (mActivityClientRecord == null) {
             if (DEBUG_ORDER) Slog.d(TAG, "Activity relaunch cancelled");
             return;
@@ -78,9 +81,9 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
     }
 
     @Override
-    public void postExecute(ClientTransactionHandler client, IBinder token,
-            PendingTransactionActions pendingActions) {
-        final ActivityClientRecord r = getActivityClientRecord(client, token);
+    public void postExecute(@NonNull ClientTransactionHandler client,
+            @NonNull PendingTransactionActions pendingActions) {
+        final ActivityClientRecord r = getActivityClientRecord(client);
         client.reportRelaunch(r);
     }
 
@@ -89,30 +92,38 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
     private ActivityRelaunchItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static ActivityRelaunchItem obtain(List<ResultInfo> pendingResults,
-            List<ReferrerIntent> pendingNewIntents, int configChanges, MergedConfiguration config,
-            boolean preserveWindow) {
+    @NonNull
+    public static ActivityRelaunchItem obtain(@NonNull IBinder activityToken,
+            @Nullable List<ResultInfo> pendingResults,
+            @Nullable List<ReferrerIntent> pendingNewIntents, int configChanges,
+            @NonNull MergedConfiguration config, boolean preserveWindow,
+            @NonNull ActivityWindowInfo activityWindowInfo) {
         ActivityRelaunchItem instance = ObjectPool.obtain(ActivityRelaunchItem.class);
         if (instance == null) {
             instance = new ActivityRelaunchItem();
         }
-        instance.mPendingResults = pendingResults;
-        instance.mPendingNewIntents = pendingNewIntents;
+        instance.setActivityToken(activityToken);
+        instance.mPendingResults = pendingResults != null ? new ArrayList<>(pendingResults) : null;
+        instance.mPendingNewIntents =
+                pendingNewIntents != null ? new ArrayList<>(pendingNewIntents) : null;
         instance.mConfigChanges = configChanges;
-        instance.mConfig = config;
+        instance.mConfig = new MergedConfiguration(config);
         instance.mPreserveWindow = preserveWindow;
+        instance.mActivityWindowInfo = new ActivityWindowInfo(activityWindowInfo);
 
         return instance;
     }
 
     @Override
     public void recycle() {
+        super.recycle();
         mPendingResults = null;
         mPendingNewIntents = null;
         mConfigChanges = 0;
         mConfig = null;
         mPreserveWindow = false;
         mActivityClientRecord = null;
+        mActivityWindowInfo = null;
         ObjectPool.recycle(this);
     }
 
@@ -121,64 +132,75 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
 
     /** Write to Parcel. */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeTypedList(mPendingResults, flags);
         dest.writeTypedList(mPendingNewIntents, flags);
         dest.writeInt(mConfigChanges);
         dest.writeTypedObject(mConfig, flags);
         dest.writeBoolean(mPreserveWindow);
+        dest.writeTypedObject(mActivityWindowInfo, flags);
     }
 
     /** Read from Parcel. */
-    private ActivityRelaunchItem(Parcel in) {
+    private ActivityRelaunchItem(@NonNull Parcel in) {
+        super(in);
         mPendingResults = in.createTypedArrayList(ResultInfo.CREATOR);
         mPendingNewIntents = in.createTypedArrayList(ReferrerIntent.CREATOR);
         mConfigChanges = in.readInt();
         mConfig = in.readTypedObject(MergedConfiguration.CREATOR);
         mPreserveWindow = in.readBoolean();
+        mActivityWindowInfo = in.readTypedObject(ActivityWindowInfo.CREATOR);
     }
 
     public static final @NonNull Creator<ActivityRelaunchItem> CREATOR =
-            new Creator<ActivityRelaunchItem>() {
-        public ActivityRelaunchItem createFromParcel(Parcel in) {
-            return new ActivityRelaunchItem(in);
-        }
+            new Creator<>() {
+                public ActivityRelaunchItem createFromParcel(@NonNull Parcel in) {
+                    return new ActivityRelaunchItem(in);
+                }
 
-        public ActivityRelaunchItem[] newArray(int size) {
-            return new ActivityRelaunchItem[size];
-        }
-    };
+                public ActivityRelaunchItem[] newArray(int size) {
+                    return new ActivityRelaunchItem[size];
+                }
+            };
 
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!super.equals(o)) {
             return false;
         }
         final ActivityRelaunchItem other = (ActivityRelaunchItem) o;
         return Objects.equals(mPendingResults, other.mPendingResults)
                 && Objects.equals(mPendingNewIntents, other.mPendingNewIntents)
                 && mConfigChanges == other.mConfigChanges && Objects.equals(mConfig, other.mConfig)
-                && mPreserveWindow == other.mPreserveWindow;
+                && mPreserveWindow == other.mPreserveWindow
+                && Objects.equals(mActivityWindowInfo, other.mActivityWindowInfo);
     }
 
     @Override
     public int hashCode() {
         int result = 17;
+        result = 31 * result + super.hashCode();
         result = 31 * result + Objects.hashCode(mPendingResults);
         result = 31 * result + Objects.hashCode(mPendingNewIntents);
         result = 31 * result + mConfigChanges;
         result = 31 * result + Objects.hashCode(mConfig);
         result = 31 * result + (mPreserveWindow ? 1 : 0);
+        result = 31 * result + Objects.hashCode(mActivityWindowInfo);
         return result;
     }
 
     @Override
     public String toString() {
-        return "ActivityRelaunchItem{pendingResults=" + mPendingResults
-                + ",pendingNewIntents=" + mPendingNewIntents + ",configChanges="  + mConfigChanges
-                + ",config=" + mConfig + ",preserveWindow" + mPreserveWindow + "}";
+        return "ActivityRelaunchItem{" + super.toString()
+                + ",pendingResults=" + mPendingResults
+                + ",pendingNewIntents=" + mPendingNewIntents
+                + ",configChanges="  + mConfigChanges
+                + ",config=" + mConfig
+                + ",preserveWindow=" + mPreserveWindow
+                + ",activityWindowInfo=" + mActivityWindowInfo + "}";
     }
 }

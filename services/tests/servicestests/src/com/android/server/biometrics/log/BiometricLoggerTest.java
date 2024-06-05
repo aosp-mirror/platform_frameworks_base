@@ -39,6 +39,7 @@ import android.testing.TestableContext;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.biometrics.AuthenticationStatsCollector;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 
 import org.junit.Before;
@@ -65,6 +66,8 @@ public class BiometricLoggerTest {
     @Mock
     private BiometricFrameworkStatsLogger mSink;
     @Mock
+    private AuthenticationStatsCollector mAuthenticationStatsCollector;
+    @Mock
     private SensorManager mSensorManager;
     @Mock
     private BaseClientMonitor mClient;
@@ -87,7 +90,8 @@ public class BiometricLoggerTest {
     }
 
     private BiometricLogger createLogger(int statsModality, int statsAction, int statsClient) {
-        return new BiometricLogger(statsModality, statsAction, statsClient, mSink, mSensorManager);
+        return new BiometricLogger(statsModality, statsAction, statsClient, mSink,
+                mAuthenticationStatsCollector, mSensorManager);
     }
 
     @Test
@@ -121,6 +125,8 @@ public class BiometricLoggerTest {
                 eq(DEFAULT_MODALITY), eq(DEFAULT_ACTION), eq(DEFAULT_CLIENT), anyBoolean(),
                 anyLong(), anyInt(), eq(requireConfirmation),
                 eq(targetUserId), any());
+
+        verify(mAuthenticationStatsCollector).authenticate(eq(targetUserId), eq(authenticated));
     }
 
     @Test
@@ -131,11 +137,11 @@ public class BiometricLoggerTest {
         final long latency = 44;
         final boolean enrollSuccessful = true;
 
-        mLogger.logOnEnrolled(targetUserId, latency, enrollSuccessful);
+        mLogger.logOnEnrolled(targetUserId, latency, enrollSuccessful, -1);
 
         verify(mSink).enroll(
                 eq(DEFAULT_MODALITY), eq(DEFAULT_ACTION), eq(DEFAULT_CLIENT),
-                eq(targetUserId), eq(latency), eq(enrollSuccessful), anyFloat());
+                eq(targetUserId), eq(latency), eq(enrollSuccessful), anyFloat(), anyInt());
     }
 
     @Test
@@ -186,7 +192,8 @@ public class BiometricLoggerTest {
                 true/* isBiometricPrompt */);
         mLogger.logOnEnrolled(2 /* targetUserId */,
                 10 /* latency */,
-                true /* enrollSuccessful */);
+                true /* enrollSuccessful */,
+                30 /* source */);
         mLogger.logOnError(mContext, mOpContext,
                 4 /* error */,
                 0 /* vendorCode */,
@@ -199,7 +206,8 @@ public class BiometricLoggerTest {
                 anyInt(), anyInt(), anyInt(), anyBoolean(),
                 anyLong(), anyInt(), anyBoolean(), anyInt(), anyFloat());
         verify(mSink, never()).enroll(
-                anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyBoolean(), anyFloat());
+                anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyBoolean(), anyFloat(),
+                anyInt());
         verify(mSink, never()).error(eq(mOpContext),
                 anyInt(), anyInt(), anyInt(), anyBoolean(),
                 anyLong(), anyInt(), anyInt(), anyInt());

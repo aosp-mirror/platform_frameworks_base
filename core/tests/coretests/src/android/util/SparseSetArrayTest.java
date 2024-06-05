@@ -17,9 +17,13 @@ package android.util;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -29,7 +33,11 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SparseSetArrayTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     @Test
+    @IgnoreUnderRavenwood(reason = "Flaky test, b/315872700")
     public void testAddAll() {
         final SparseSetArray<Integer> sparseSetArray = new SparseSetArray<>();
 
@@ -51,6 +59,7 @@ public class SparseSetArrayTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(reason = "b/315036461")
     public void testCopyConstructor() {
         final SparseSetArray<Integer> sparseSetArray = new SparseSetArray<>();
 

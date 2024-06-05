@@ -23,6 +23,7 @@ import android.annotation.Nullable;
  * Test:
  atest /android/pi-dev/frameworks/base/core/tests/coretests/src/com/android/internal/util/ParseUtilsTest.java
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ParseUtils {
     private ParseUtils() {
     }

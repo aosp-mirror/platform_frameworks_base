@@ -26,6 +26,7 @@ import java.util.ArrayList;
  * {@link #newRow()} to add rows. Automatically expands internal capacity
  * as needed.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class MatrixCursor extends AbstractCursor {
 
     private final String[] columnNames;

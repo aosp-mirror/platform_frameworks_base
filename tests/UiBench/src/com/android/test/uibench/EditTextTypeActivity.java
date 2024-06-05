@@ -15,15 +15,11 @@
  */
 package com.android.test.uibench;
 
-import android.app.Instrumentation;
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.Looper;
-import android.os.MessageQueue;
-import androidx.appcompat.app.AppCompatActivity;
-import android.view.KeyEvent;
 import android.widget.EditText;
 
-import java.util.concurrent.Semaphore;
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * Note: currently incomplete, complexity of input continuously grows, instead of looping
@@ -32,7 +28,13 @@ import java.util.concurrent.Semaphore;
  * Simulates typing continuously into an EditText.
  */
 public class EditTextTypeActivity extends AppCompatActivity {
-    Thread mThread;
+
+    /**
+     * Broadcast action: Used to notify UiBenchEditTextTypingMicrobenchmark test when the
+     * test activity was paused.
+     */
+    private static final String ACTION_CANCEL_TYPING_CALLBACK =
+            "com.android.uibench.action.CANCEL_TYPING_CALLBACK";
 
     private static String sSeedText = "";
     static {
@@ -46,9 +48,6 @@ public class EditTextTypeActivity extends AppCompatActivity {
         sSeedText = builder.toString();
     }
 
-    final Object mLock = new Object();
-    boolean mShouldStop = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,55 +55,13 @@ public class EditTextTypeActivity extends AppCompatActivity {
         EditText editText = new EditText(this);
         editText.setText(sSeedText);
         setContentView(editText);
-
-        final Instrumentation instrumentation = new Instrumentation();
-        final Semaphore sem = new Semaphore(0);
-        MessageQueue.IdleHandler handler = new MessageQueue.IdleHandler() {
-            @Override
-            public boolean queueIdle() {
-                // TODO: consider other signaling approaches
-                sem.release();
-                return true;
-            }
-        };
-        Looper.myQueue().addIdleHandler(handler);
-        synchronized (mLock) {
-            mShouldStop = false;
-        }
-        mThread = new Thread(new Runnable() {
-            int codes[] = { KeyEvent.KEYCODE_H, KeyEvent.KEYCODE_E, KeyEvent.KEYCODE_L,
-                    KeyEvent.KEYCODE_L, KeyEvent.KEYCODE_O, KeyEvent.KEYCODE_SPACE };
-            int i = 0;
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        sem.acquire();
-                    } catch (InterruptedException e) {
-                        // TODO, maybe
-                    }
-                    int code = codes[i % codes.length];
-                    if (i % 100 == 99) code = KeyEvent.KEYCODE_ENTER;
-
-                    synchronized (mLock) {
-                        if (mShouldStop) break;
-                    }
-
-                    // TODO: bit of a race here, since the event can arrive after pause/stop.
-                    // (Can't synchronize on key send, since it's synchronous.)
-                    instrumentation.sendKeyDownUpSync(code);
-                    i++;
-                }
-            }
-        });
-        mThread.start();
     }
 
     @Override
     protected void onPause() {
-        synchronized (mLock) {
-            mShouldStop = true;
-        }
+        // Cancel the typing when the test activity was paused.
+        sendBroadcast(new Intent(ACTION_CANCEL_TYPING_CALLBACK).addFlags(
+                Intent.FLAG_RECEIVER_FOREGROUND | Intent.FLAG_RECEIVER_REGISTERED_ONLY));
         super.onPause();
     }
 }

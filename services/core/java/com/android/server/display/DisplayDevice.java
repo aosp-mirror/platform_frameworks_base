@@ -16,12 +16,17 @@
 
 package com.android.server.display;
 
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAddress;
@@ -31,6 +36,7 @@ import android.view.SurfaceControl;
 import com.android.server.display.mode.DisplayModeDirector;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * Represents a display device such as the built-in display, an external monitor, a WiFi display,
@@ -40,6 +46,15 @@ import java.io.PrintWriter;
  * </p>
  */
 abstract class DisplayDevice {
+    /**
+     * Maximum acceptable anisotropy for the output image.
+     *
+     * Necessary to avoid unnecessary scaling when pixels are almost square, as they are non ideal
+     * anyway. For external displays, we expect an anisotropy of about 2% even if the pixels
+     * are, in fact, square due to the imprecision of the display's actual size (parsed from edid
+     * and rounded to the nearest cm).
+     */
+    static final float MAX_ANISOTROPY = 1.025f;
     private static final String TAG = "DisplayDevice";
     private static final Display.Mode EMPTY_DISPLAY_MODE = new Display.Mode.Builder().build();
 
@@ -65,13 +80,21 @@ abstract class DisplayDevice {
     // Do not use for any other purpose.
     DisplayDeviceInfo mDebugLastLoggedDeviceInfo;
 
-    public DisplayDevice(DisplayAdapter displayAdapter, IBinder displayToken, String uniqueId,
+    private final boolean mIsAnisotropyCorrectionEnabled;
+
+    DisplayDevice(DisplayAdapter displayAdapter, IBinder displayToken, String uniqueId,
             Context context) {
+        this(displayAdapter, displayToken, uniqueId, context, false);
+    }
+
+    DisplayDevice(DisplayAdapter displayAdapter, IBinder displayToken, String uniqueId,
+            Context context, boolean isAnisotropyCorrectionEnabled) {
         mDisplayAdapter = displayAdapter;
         mDisplayToken = displayToken;
         mUniqueId = uniqueId;
         mDisplayDeviceConfig = null;
         mContext = context;
+        mIsAnisotropyCorrectionEnabled = isAnisotropyCorrectionEnabled;
     }
 
     /**
@@ -132,12 +155,22 @@ abstract class DisplayDevice {
     /**
      * Returns the default size of the surface associated with the display, or null if the surface
      * is not provided for layer mirroring by SurfaceFlinger. For non virtual displays, this will
-     * be the actual display device's size.
+     * be the actual display device's size, reflecting the current rotation.
      */
     @Nullable
     public Point getDisplaySurfaceDefaultSizeLocked() {
         DisplayDeviceInfo displayDeviceInfo = getDisplayDeviceInfoLocked();
-        return new Point(displayDeviceInfo.width, displayDeviceInfo.height);
+        var width = displayDeviceInfo.width;
+        var height = displayDeviceInfo.height;
+        if (mIsAnisotropyCorrectionEnabled && displayDeviceInfo.type == Display.TYPE_EXTERNAL
+                    && displayDeviceInfo.yDpi > 0 && displayDeviceInfo.xDpi > 0) {
+            if (displayDeviceInfo.xDpi > displayDeviceInfo.yDpi * MAX_ANISOTROPY) {
+                height = (int) (height * displayDeviceInfo.xDpi / displayDeviceInfo.yDpi + 0.5);
+            } else if (displayDeviceInfo.xDpi * MAX_ANISOTROPY < displayDeviceInfo.yDpi) {
+                width = (int) (width * displayDeviceInfo.yDpi / displayDeviceInfo.xDpi  + 0.5);
+            }
+        }
+        return isRotatedLocked() ? new Point(height, width) : new Point(width, height);
     }
 
     /**
@@ -194,11 +227,15 @@ abstract class DisplayDevice {
      * @param state The new display state.
      * @param brightnessState The new display brightnessState.
      * @param sdrBrightnessState The new display brightnessState for SDR layers.
-     * @return A runnable containing work to be deferred until after we have
-     * exited the critical section, or null if none.
+     * @param displayOffloadSession {@link DisplayOffloadSession} associated with current device.
+     * @return A runnable containing work to be deferred until after we have exited the critical
+     *     section, or null if none.
      */
-    public Runnable requestDisplayStateLocked(int state, float brightnessState,
-            float sdrBrightnessState) {
+    public Runnable requestDisplayStateLocked(
+            int state,
+            float brightnessState,
+            float sdrBrightnessState,
+            @Nullable DisplayOffloadSessionImpl displayOffloadSession) {
         return null;
     }
 
@@ -357,8 +394,7 @@ abstract class DisplayDevice {
             viewport.physicalFrame.setEmpty();
         }
 
-        boolean isRotated = (mCurrentOrientation == Surface.ROTATION_90
-                || mCurrentOrientation == Surface.ROTATION_270);
+        final boolean isRotated = isRotatedLocked();
         DisplayDeviceInfo info = getDisplayDeviceInfoLocked();
         viewport.deviceWidth = isRotated ? info.height : info.width;
         viewport.deviceHeight = isRotated ? info.width : info.height;
@@ -388,7 +424,30 @@ abstract class DisplayDevice {
         pw.println("mCurrentSurface=" + mCurrentSurface);
     }
 
+    /**
+     * @return whether the orientation is {@link ROTATION_90} or {@link ROTATION_270}.
+     */
+    boolean isRotatedLocked() {
+        return mCurrentOrientation == ROTATION_90 || mCurrentOrientation == ROTATION_270;
+    }
+
+    /**
+     * @return set of supported resolutions as an ascending sorted array.
+     */
+    Point[] getSupportedResolutionsLocked() {
+        ArraySet<Point> resolutions = new ArraySet<>(2);
+        Display.Mode[] supportedModes = getDisplayDeviceInfoLocked().supportedModes;
+        for (Display.Mode mode : supportedModes) {
+            resolutions.add(new Point(mode.getPhysicalWidth(), mode.getPhysicalHeight()));
+        }
+        Point[] sortedArray = new Point[resolutions.size()];
+        resolutions.toArray(sortedArray);
+        Arrays.sort(sortedArray, (p1, p2) -> p1.x * p1.y - p2.x * p2.y);
+        return sortedArray;
+    }
+
     private DisplayDeviceConfig loadDisplayDeviceConfig() {
-        return DisplayDeviceConfig.create(mContext, false);
+        return DisplayDeviceConfig.create(mContext, /* useConfigXml= */ false,
+                mDisplayAdapter.getFeatureFlags());
     }
 }

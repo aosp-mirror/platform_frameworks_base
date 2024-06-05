@@ -16,15 +16,17 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.annotation.NonNull;
 import androidx.core.os.CancellationSignal;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -32,6 +34,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,12 +48,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class NotifBindPipelineTest extends SysuiTestCase {
 
     private NotifBindPipeline mBindPipeline;
-    private TestBindStage mStage = new TestBindStage();
+    private final TestBindStage mStage = new TestBindStage();
+    private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Mock private NotificationEntry mEntry;
     @Mock private ExpandableNotificationRow mRow;
@@ -61,8 +66,8 @@ public class NotifBindPipelineTest extends SysuiTestCase {
 
         mBindPipeline = new NotifBindPipeline(
                 collection,
-                mock(NotifBindPipelineLogger.class),
-                TestableLooper.get(this).getLooper());
+                new NotifBindPipelineLogger(logcatLogBuffer()),
+                new NotificationEntryProcessorFactoryExecutorImpl(mFakeExecutor));
         mBindPipeline.setStage(mStage);
 
         ArgumentCaptor<NotifCollectionListener> collectionListenerCaptor =
@@ -81,7 +86,7 @@ public class NotifBindPipelineTest extends SysuiTestCase {
         // WHEN content is invalidated
         BindCallback callback = mock(BindCallback.class);
         mStage.requestRebind(mEntry, callback);
-        TestableLooper.get(this).processAllMessages();
+        mFakeExecutor.runAllReady();
 
         // WHEN stage finishes its work
         mStage.doWorkSynchronously();
@@ -98,7 +103,7 @@ public class NotifBindPipelineTest extends SysuiTestCase {
         // GIVEN an in-progress pipeline run
         BindCallback callback = mock(BindCallback.class);
         CancellationSignal signal = mStage.requestRebind(mEntry, callback);
-        TestableLooper.get(this).processAllMessages();
+        mFakeExecutor.runAllReady();
 
         // WHEN the callback is cancelled.
         signal.cancel();
@@ -118,12 +123,12 @@ public class NotifBindPipelineTest extends SysuiTestCase {
         // WHEN the pipeline is invalidated.
         BindCallback callback = mock(BindCallback.class);
         mStage.requestRebind(mEntry, callback);
-        TestableLooper.get(this).processAllMessages();
+        mFakeExecutor.runAllReady();
 
         // WHEN the pipeline is invalidated again before the work completes.
         BindCallback callback2 = mock(BindCallback.class);
         mStage.requestRebind(mEntry, callback2);
-        TestableLooper.get(this).processAllMessages();
+        mFakeExecutor.runAllReady();
 
         // WHEN the stage finishes all work.
         mStage.doWorkSynchronously();

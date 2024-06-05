@@ -290,6 +290,11 @@ public class BaseRecordingCanvas extends Canvas {
     }
 
     @Override
+    public void drawRegion(@NonNull Region region, @NonNull Paint paint) {
+        nDrawRegion(mNativeCanvasWrapper, region.mNativeRegion, paint.getNativeInstance());
+    }
+
+    @Override
     public final void drawPicture(@NonNull Picture picture) {
         picture.endRecording();
         int restoreCount = save();
@@ -607,7 +612,8 @@ public class BaseRecordingCanvas extends Canvas {
     }
 
     @Override
-    public final void drawMesh(@NonNull Mesh mesh, BlendMode blendMode, @NonNull Paint paint) {
+    public final void drawMesh(@NonNull Mesh mesh, @Nullable BlendMode blendMode,
+            @NonNull Paint paint) {
         if (blendMode == null) {
             blendMode = BlendMode.MODULATE;
         }

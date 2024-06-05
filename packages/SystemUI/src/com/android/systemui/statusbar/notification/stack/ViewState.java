@@ -28,7 +28,7 @@ import android.view.animation.Interpolator;
 
 import com.android.app.animation.Interpolators;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.NotificationFadeAware.FadeOptimizedNotification;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -657,7 +657,7 @@ public class ViewState implements Dumpable {
         }
         ObjectAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_TRANSLATION_Y);
         AnimationFilter filter = properties.getAnimationFilter();
-        if (!filter.shouldAnimateY(child)) {
+        if (!filter.animateY) {
             // just a local update was performed
             if (previousAnimator != null) {
                 // we need to increase all animation keyframes of the previous animator by the

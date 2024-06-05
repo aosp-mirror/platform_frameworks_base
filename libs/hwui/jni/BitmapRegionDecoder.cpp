@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "BitmapRegionDecoder"
-
 #include "BitmapRegionDecoder.h"
 
 #include <HardwareBitmapUploader.h>

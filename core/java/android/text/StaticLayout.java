@@ -16,16 +16,22 @@
 
 package android.text;
 
+import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
+import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
+
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.text.LineBreakConfig;
 import android.graphics.text.LineBreaker;
 import android.os.Build;
-import android.os.SystemProperties;
+import android.os.Trace;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 import android.text.style.LineHeightSpan;
@@ -33,7 +39,6 @@ import android.text.style.TabStopSpan;
 import android.util.Log;
 import android.util.Pools.SynchronizedPool;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
@@ -75,13 +80,6 @@ public class StaticLayout extends Layout {
      * default values.
      */
     public final static class Builder {
-        // The content length threshold to enable LINE_BREAK_WORD_STYLE_PHRASE.
-        private static final int DEFAULT_LINECOUNT_THRESHOLD_FOR_PHRASE = 3;
-
-        // The property of content length threshold to enable LINE_BREAK_WORD_STYLE_PHRASE.
-        private static final String PROPERTY_LINECOUNT_THRESHOLD_FOR_PHRASE =
-                "android.phrase.linecount.threshold";
-
         private Builder() {}
 
         /**
@@ -122,6 +120,7 @@ public class StaticLayout extends Layout {
             b.mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
             b.mJustificationMode = Layout.JUSTIFICATION_MODE_NONE;
             b.mLineBreakConfig = LineBreakConfig.NONE;
+            b.mMinimumFontMetrics = null;
             return b;
         }
 
@@ -134,6 +133,7 @@ public class StaticLayout extends Layout {
             b.mText = null;
             b.mLeftIndents = null;
             b.mRightIndents = null;
+            b.mMinimumFontMetrics = null;
             sPool.release(b);
         }
 
@@ -143,6 +143,7 @@ public class StaticLayout extends Layout {
             mPaint = null;
             mLeftIndents = null;
             mRightIndents = null;
+            mMinimumFontMetrics = null;
         }
 
         public Builder setText(CharSequence source) {
@@ -430,6 +431,108 @@ public class StaticLayout extends Layout {
         }
 
         /**
+         * Set true for using width of bounding box as a source of automatic line breaking and
+         * drawing.
+         *
+         * If this value is false, the Layout determines the drawing offset and automatic line
+         * breaking based on total advances. By setting true, use all joined glyph's bounding boxes
+         * as a source of text width.
+         *
+         * If the font has glyphs that have negative bearing X or its xMax is greater than advance,
+         * the glyph clipping can happen because the drawing area may be bigger. By setting this to
+         * true, the Layout will reserve more spaces for drawing.
+         *
+         * @param useBoundsForWidth True for using bounding box, false for advances.
+         * @return this builder instance
+         * @see Layout#getUseBoundsForWidth()
+         * @see Layout.Builder#setUseBoundsForWidth(boolean)
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")  // The base class `Layout` has a getter.
+        @NonNull
+        @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+        public Builder setUseBoundsForWidth(boolean useBoundsForWidth) {
+            mUseBoundsForWidth = useBoundsForWidth;
+            return this;
+        }
+
+        /**
+         * Set true for shifting the drawing x offset for showing overhang at the start position.
+         *
+         * This flag is ignored if the {@link #getUseBoundsForWidth()} is false.
+         *
+         * If this value is false, the Layout draws text from the zero even if there is a glyph
+         * stroke in a region where the x coordinate is negative.
+         *
+         * If this value is true, the Layout draws text with shifting the x coordinate of the
+         * drawing bounding box.
+         *
+         * This value is false by default.
+         *
+         * @param shiftDrawingOffsetForStartOverhang true for shifting the drawing offset for
+         *                                          showing the stroke that is in the region where
+         *                                          the x coordinate is negative.
+         * @see #setUseBoundsForWidth(boolean)
+         * @see #getUseBoundsForWidth()
+         */
+        @NonNull
+        // The corresponding getter is getShiftDrawingOffsetForStartOverhang()
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+        public Builder setShiftDrawingOffsetForStartOverhang(
+                boolean shiftDrawingOffsetForStartOverhang) {
+            mShiftDrawingOffsetForStartOverhang = shiftDrawingOffsetForStartOverhang;
+            return this;
+        }
+
+        /**
+         * Internal API that tells underlying line breaker that calculating bounding boxes even if
+         * the line break is performed with advances. This is useful for DynamicLayout internal
+         * implementation because it uses bounding box as well as advances.
+         * @hide
+         */
+        public Builder setCalculateBounds(boolean value) {
+            mCalculateBounds = value;
+            return this;
+        }
+
+        /**
+         * Set the minimum font metrics used for line spacing.
+         *
+         * <p>
+         * {@code null} is the default value. If {@code null} is set or left as default, the
+         * font metrics obtained by {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)} is
+         * used.
+         *
+         * <p>
+         * The minimum meaning here is the minimum value of line spacing: maximum value of
+         * {@link Paint#ascent()}, minimum value of {@link Paint#descent()}.
+         *
+         * <p>
+         * By setting this value, each line will have minimum line spacing regardless of the text
+         * rendered. For example, usually Japanese script has larger vertical metrics than Latin
+         * script. By setting the metrics obtained by
+         * {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)} for Japanese or leave it
+         * {@code null} if the Paint's locale is Japanese, the line spacing for Japanese is reserved
+         * if the text is an English text. If the vertical metrics of the text is larger than
+         * Japanese, for example Burmese, the bigger font metrics is used.
+         *
+         * @param minimumFontMetrics A minimum font metrics. Passing {@code null} for using the
+         *                          value obtained by
+         *                          {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)}
+         * @see android.widget.TextView#setMinimumFontMetrics(Paint.FontMetrics)
+         * @see android.widget.TextView#getMinimumFontMetrics()
+         * @see Layout#getMinimumFontMetrics()
+         * @see Layout.Builder#setMinimumFontMetrics(Paint.FontMetrics)
+         * @see DynamicLayout.Builder#setMinimumFontMetrics(Paint.FontMetrics)
+         */
+        @NonNull
+        @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+        public Builder setMinimumFontMetrics(@Nullable Paint.FontMetrics minimumFontMetrics) {
+            mMinimumFontMetrics = minimumFontMetrics;
+            return this;
+        }
+
+        /**
          * Build the {@link StaticLayout} after options have been set.
          *
          * <p>Note: the builder object must not be reused in any way after calling this
@@ -440,53 +543,36 @@ public class StaticLayout extends Layout {
          */
         @NonNull
         public StaticLayout build() {
-            reviseLineBreakConfig();
-            StaticLayout result = new StaticLayout(this);
+            StaticLayout result = new StaticLayout(this, mIncludePad, mEllipsize != null
+                    ? COLUMNS_ELLIPSIZE : COLUMNS_NORMAL);
             Builder.recycle(this);
             return result;
         }
 
-        private void reviseLineBreakConfig() {
-            boolean autoPhraseBreaking = mLineBreakConfig.getAutoPhraseBreaking();
-            int wordStyle = mLineBreakConfig.getLineBreakWordStyle();
-            if (autoPhraseBreaking) {
-                if (wordStyle != LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE) {
-                    if (shouldEnablePhraseBreaking()) {
-                        mLineBreakConfig = LineBreakConfig.getLineBreakConfig(
-                                mLineBreakConfig.getLineBreakStyle(),
-                                LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE,
-                                mLineBreakConfig.getAutoPhraseBreaking());
-                    }
-                }
-            }
-        }
-
-        private boolean shouldEnablePhraseBreaking() {
-            if (TextUtils.isEmpty(mText) || mWidth <= 0) {
-                return false;
-            }
-            int lineLimit = SystemProperties.getInt(
-                    PROPERTY_LINECOUNT_THRESHOLD_FOR_PHRASE,
-                    DEFAULT_LINECOUNT_THRESHOLD_FOR_PHRASE);
-            double desiredWidth = (double) Layout.getDesiredWidth(mText, mStart,
-                    mEnd, mPaint, mTextDir);
-            int lineCount = (int) Math.ceil(desiredWidth / mWidth);
-            if (lineCount > 0 && lineCount <= lineLimit) {
-                return true;
-            }
-            return false;
-        }
-
         /**
-         * Get the line break word style.
+         * DO NOT USE THIS METHOD OTHER THAN DynamicLayout.
          *
-         * @return The current line break word style.
+         * This class generates a very weird StaticLayout only for getting a result of line break.
+         * Since DynamicLayout keeps StaticLayout reference in the static context for object
+         * recycling but keeping text reference in static context will end up with leaking Context
+         * due to TextWatcher via TextView.
          *
-         * @hide
+         * So, this is a dirty work around that creating StaticLayout without passing text reference
+         * to the super constructor, but calculating the text layout by calling generate function
+         * directly.
          */
-        @VisibleForTesting
-        public int getLineBreakWordStyle() {
-            return mLineBreakConfig.getLineBreakWordStyle();
+        /* package */ @NonNull StaticLayout buildPartialStaticLayoutForDynamicLayout(
+                boolean trackpadding, StaticLayout recycle) {
+            if (recycle == null) {
+                recycle = new StaticLayout();
+            }
+            Trace.beginSection("Generating StaticLayout For DynamicLayout");
+            try {
+                recycle.generate(this, mIncludePad, trackpadding);
+            } finally {
+                Trace.endSection();
+            }
+            return recycle;
         }
 
         private CharSequence mText;
@@ -510,10 +596,48 @@ public class StaticLayout extends Layout {
         private int mJustificationMode;
         private boolean mAddLastLineLineSpacing;
         private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
+        private boolean mUseBoundsForWidth;
+        private boolean mShiftDrawingOffsetForStartOverhang;
+        private boolean mCalculateBounds;
+        @Nullable private Paint.FontMetrics mMinimumFontMetrics;
 
         private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
         private static final SynchronizedPool<Builder> sPool = new SynchronizedPool<>(3);
+    }
+
+    /**
+     * DO NOT USE THIS CONSTRUCTOR OTHER THAN FOR DYNAMIC LAYOUT.
+     * See Builder#buildPartialStaticLayoutForDynamicLayout for the reason of this constructor.
+     */
+    private StaticLayout() {
+        super(
+                null,  // text
+                null,  // paint
+                0,  // width
+                null, // alignment
+                null, // textDir
+                1, // spacing multiplier
+                0, // spacing amount
+                false, // include font padding
+                false, // fallback line spacing
+                0,  // ellipsized width
+                null, // ellipsize
+                1,  // maxLines
+                BREAK_STRATEGY_SIMPLE,
+                HYPHENATION_FREQUENCY_NONE,
+                null,  // leftIndents
+                null,  // rightIndents
+                JUSTIFICATION_MODE_NONE,
+                null,  // lineBreakConfig,
+                false,  // useBoundsForWidth
+                false,  // shiftDrawingOffsetForStartOverhang
+                null  // minimumFontMetrics
+        );
+
+        mColumns = COLUMNS_ELLIPSIZE;
+        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2);
+        mLines  = ArrayUtils.newUnpaddedIntArray(2 * mColumns);
     }
 
     /**
@@ -568,88 +692,33 @@ public class StaticLayout extends Layout {
                         float spacingmult, float spacingadd,
                         boolean includepad,
                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth, int maxLines) {
-        super((ellipsize == null)
-                ? source
-                : (source instanceof Spanned)
-                    ? new SpannedEllipsizer(source)
-                    : new Ellipsizer(source),
-              paint, outerwidth, align, textDir, spacingmult, spacingadd);
-
-        Builder b = Builder.obtain(source, bufstart, bufend, paint, outerwidth)
-            .setAlignment(align)
-            .setTextDirection(textDir)
-            .setLineSpacing(spacingadd, spacingmult)
-            .setIncludePad(includepad)
-            .setEllipsizedWidth(ellipsizedWidth)
-            .setEllipsize(ellipsize)
-            .setMaxLines(maxLines);
-        /*
-         * This is annoying, but we can't refer to the layout until superclass construction is
-         * finished, and the superclass constructor wants the reference to the display text.
-         *
-         * In other words, the two Ellipsizer classes in Layout.java need a (Dynamic|Static)Layout
-         * as a parameter to do their calculations, but the Ellipsizers also need to be the input
-         * to the superclass's constructor (Layout). In order to go around the circular
-         * dependency, we construct the Ellipsizer with only one of the parameters, the text. And
-         * we fill in the rest of the needed information (layout, width, and method) later, here.
-         *
-         * This will break if the superclass constructor ever actually cares about the content
-         * instead of just holding the reference.
-         */
-        if (ellipsize != null) {
-            Ellipsizer e = (Ellipsizer) getText();
-
-            e.mLayout = this;
-            e.mWidth = ellipsizedWidth;
-            e.mMethod = ellipsize;
-            mEllipsizedWidth = ellipsizedWidth;
-
-            mColumns = COLUMNS_ELLIPSIZE;
-        } else {
-            mColumns = COLUMNS_NORMAL;
-            mEllipsizedWidth = outerwidth;
-        }
-
-        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2);
-        mLines  = ArrayUtils.newUnpaddedIntArray(2 * mColumns);
-        mMaximumVisibleLineCount = maxLines;
-
-        generate(b, b.mIncludePad, b.mIncludePad);
-
-        Builder.recycle(b);
+        this(Builder.obtain(source, bufstart, bufend, paint, outerwidth)
+                .setAlignment(align)
+                .setTextDirection(textDir)
+                .setLineSpacing(spacingadd, spacingmult)
+                .setIncludePad(includepad)
+                .setEllipsize(ellipsize)
+                .setEllipsizedWidth(ellipsizedWidth)
+                .setMaxLines(maxLines), includepad,
+                ellipsize != null ? COLUMNS_ELLIPSIZE : COLUMNS_NORMAL);
     }
 
-    /**
-     * Used by DynamicLayout.
-     */
-    /* package */ StaticLayout(@Nullable CharSequence text) {
-        super(text, null, 0, null, 0, 0);
+    private StaticLayout(Builder b, boolean trackPadding, int columnSize) {
+        super((b.mEllipsize == null) ? b.mText : (b.mText instanceof Spanned)
+                    ? new SpannedEllipsizer(b.mText) : new Ellipsizer(b.mText),
+                b.mPaint, b.mWidth, b.mAlignment, b.mTextDir, b.mSpacingMult, b.mSpacingAdd,
+                b.mIncludePad, b.mFallbackLineSpacing, b.mEllipsizedWidth, b.mEllipsize,
+                b.mMaxLines, b.mBreakStrategy, b.mHyphenationFrequency, b.mLeftIndents,
+                b.mRightIndents, b.mJustificationMode, b.mLineBreakConfig, b.mUseBoundsForWidth,
+                b.mShiftDrawingOffsetForStartOverhang, b.mMinimumFontMetrics);
 
-        mColumns = COLUMNS_ELLIPSIZE;
-        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2);
-        mLines  = ArrayUtils.newUnpaddedIntArray(2 * mColumns);
-    }
-
-    private StaticLayout(Builder b) {
-        super((b.mEllipsize == null)
-                ? b.mText
-                : (b.mText instanceof Spanned)
-                    ? new SpannedEllipsizer(b.mText)
-                    : new Ellipsizer(b.mText),
-                b.mPaint, b.mWidth, b.mAlignment, b.mTextDir, b.mSpacingMult, b.mSpacingAdd);
-
+        mColumns = columnSize;
         if (b.mEllipsize != null) {
             Ellipsizer e = (Ellipsizer) getText();
 
             e.mLayout = this;
             e.mWidth = b.mEllipsizedWidth;
             e.mMethod = b.mEllipsize;
-            mEllipsizedWidth = b.mEllipsizedWidth;
-
-            mColumns = COLUMNS_ELLIPSIZE;
-        } else {
-            mColumns = COLUMNS_NORMAL;
-            mEllipsizedWidth = b.mWidth;
         }
 
         mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2);
@@ -658,9 +727,13 @@ public class StaticLayout extends Layout {
 
         mLeftIndents = b.mLeftIndents;
         mRightIndents = b.mRightIndents;
-        setJustificationMode(b.mJustificationMode);
 
-        generate(b, b.mIncludePad, b.mIncludePad);
+        Trace.beginSection("Constructing StaticLayout");
+        try {
+            generate(b, b.mIncludePad, trackPadding);
+        } finally {
+            Trace.endSection();
+        }
     }
 
     private static int getBaseHyphenationFrequency(int frequency) {
@@ -701,7 +774,8 @@ public class StaticLayout extends Layout {
         mLineCount = 0;
         mEllipsized = false;
         mMaxLineHeight = mMaximumVisibleLineCount < 1 ? 0 : DEFAULT_MAX_LINE_HEIGHT;
-        mFallbackLineSpacing = b.mFallbackLineSpacing;
+        mDrawingBounds = null;
+        boolean isFallbackLineSpacing = b.mFallbackLineSpacing;
 
         int v = 0;
         boolean needMultiply = (spacingmult != 1 || spacingadd != 0);
@@ -725,12 +799,34 @@ public class StaticLayout extends Layout {
             indents = null;
         }
 
+        int defaultTop;
+        final int defaultAscent;
+        final int defaultDescent;
+        int defaultBottom;
+        if (ClientFlags.fixLineHeightForLocale() && b.mMinimumFontMetrics != null) {
+            defaultTop = (int) Math.floor(b.mMinimumFontMetrics.top);
+            defaultAscent = Math.round(b.mMinimumFontMetrics.ascent);
+            defaultDescent = Math.round(b.mMinimumFontMetrics.descent);
+            defaultBottom = (int) Math.ceil(b.mMinimumFontMetrics.bottom);
+
+            // Because the font metrics is provided by public APIs, adjust the top/bottom with
+            // ascent/descent: top must be smaller than ascent, bottom must be larger than descent.
+            defaultTop = Math.min(defaultTop, defaultAscent);
+            defaultBottom = Math.max(defaultBottom, defaultDescent);
+        } else {
+            defaultTop = 0;
+            defaultAscent = 0;
+            defaultDescent = 0;
+            defaultBottom = 0;
+        }
+
         final LineBreaker lineBreaker = new LineBreaker.Builder()
                 .setBreakStrategy(b.mBreakStrategy)
                 .setHyphenationFrequency(getBaseHyphenationFrequency(b.mHyphenationFrequency))
                 // TODO: Support more justification mode, e.g. letter spacing, stretching.
                 .setJustificationMode(b.mJustificationMode)
                 .setIndents(indents)
+                .setUseBoundsForWidth(b.mUseBoundsForWidth)
                 .build();
 
         LineBreaker.ParagraphConstraints constraints =
@@ -768,7 +864,7 @@ public class StaticLayout extends Layout {
             final PrecomputedText.Params param = new PrecomputedText.Params(paint,
                     b.mLineBreakConfig, textDir, b.mBreakStrategy, b.mHyphenationFrequency);
             paragraphInfo = PrecomputedText.createMeasuredParagraphs(source, param, bufStart,
-                    bufEnd, false /* computeLayout */);
+                    bufEnd, false /* computeLayout */, b.mCalculateBounds);
         }
 
         for (int paraIndex = 0; paraIndex < paragraphInfo.length; paraIndex++) {
@@ -902,7 +998,10 @@ public class StaticLayout extends Layout {
             // measuring
             int here = paraStart;
 
-            int fmTop = 0, fmBottom = 0, fmAscent = 0, fmDescent = 0;
+            int fmTop = defaultTop;
+            int fmBottom = defaultBottom;
+            int fmAscent = defaultAscent;
+            int fmDescent = defaultDescent;
             int fmCacheIndex = 0;
             int spanEndCacheIndex = 0;
             int breakIndex = 0;
@@ -940,17 +1039,17 @@ public class StaticLayout extends Layout {
 
                     boolean moreChars = (endPos < bufEnd);
 
-                    final int ascent = mFallbackLineSpacing
+                    final int ascent = isFallbackLineSpacing
                             ? Math.min(fmAscent, Math.round(ascents[breakIndex]))
                             : fmAscent;
-                    final int descent = mFallbackLineSpacing
+                    final int descent = isFallbackLineSpacing
                             ? Math.max(fmDescent, Math.round(descents[breakIndex]))
                             : fmDescent;
 
                     // The fallback ascent/descent may be larger than top/bottom of the default font
                     // metrics. Adjust top/bottom with ascent/descent for avoiding unexpected
                     // clipping.
-                    if (mFallbackLineSpacing) {
+                    if (isFallbackLineSpacing) {
                         if (ascent < fmTop) {
                             fmTop = ascent;
                         }
@@ -969,10 +1068,10 @@ public class StaticLayout extends Layout {
 
                     if (endPos < spanEnd) {
                         // preserve metrics for current span
-                        fmTop = fm.top;
-                        fmBottom = fm.bottom;
-                        fmAscent = fm.ascent;
-                        fmDescent = fm.descent;
+                        fmTop = Math.min(defaultTop, fm.top);
+                        fmBottom = Math.max(defaultBottom, fm.bottom);
+                        fmAscent = Math.min(defaultAscent, fm.ascent);
+                        fmDescent = Math.max(defaultDescent, fm.descent);
                     } else {
                         fmTop = fmBottom = fmAscent = fmDescent = 0;
                     }
@@ -995,7 +1094,15 @@ public class StaticLayout extends Layout {
                 && mLineCount < mMaximumVisibleLineCount) {
             final MeasuredParagraph measuredPara =
                     MeasuredParagraph.buildForBidi(source, bufEnd, bufEnd, textDir, null);
-            paint.getFontMetricsInt(fm);
+            if (defaultAscent != 0 && defaultDescent != 0) {
+                fm.top = defaultTop;
+                fm.ascent = defaultAscent;
+                fm.descent = defaultDescent;
+                fm.bottom = defaultBottom;
+            } else {
+                paint.getFontMetricsInt(fm);
+            }
+
             v = out(source,
                     bufEnd, bufEnd, fm.ascent, fm.descent,
                     fm.top, fm.bottom,
@@ -1464,13 +1571,13 @@ public class StaticLayout extends Layout {
     }
 
     @Override
-    public int getEllipsizedWidth() {
-        return mEllipsizedWidth;
-    }
-
-    @Override
-    public boolean isFallbackLineSpacingEnabled() {
-        return mFallbackLineSpacing;
+    @NonNull
+    public RectF computeDrawingBoundingBox() {
+        // Cache the drawing bounds result because it does not change after created.
+        if (mDrawingBounds == null) {
+            mDrawingBounds = super.computeDrawingBoundingBox();
+        }
+        return mDrawingBounds;
     }
 
     /**
@@ -1498,8 +1605,7 @@ public class StaticLayout extends Layout {
     private int mTopPadding, mBottomPadding;
     @UnsupportedAppUsage
     private int mColumns;
-    private int mEllipsizedWidth;
-    private boolean mFallbackLineSpacing;
+    private RectF mDrawingBounds = null;  // lazy calculation.
 
     /**
      * Keeps track if ellipsize is applied to the text.

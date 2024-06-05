@@ -16,9 +16,11 @@
 
 package com.android.systemui.biometrics;
 
+import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.Face;
 import android.hardware.face.FaceManager;
@@ -27,8 +29,9 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import javax.inject.Inject;
@@ -39,44 +42,61 @@ import javax.inject.Inject;
 @SysUISingleton
 public class BiometricNotificationDialogFactory {
     private static final String TAG = "BiometricNotificationDialogFactory";
+    private final Resources mResources;
+    private final SystemUIDialog.Factory mSystemUIDialogFactory;
+    @Nullable private final FingerprintManager mFingerprintManager;
+    @Nullable private final FaceManager mFaceManager;
 
     @Inject
-    BiometricNotificationDialogFactory() {}
+    BiometricNotificationDialogFactory(
+            @Main Resources resources,
+            SystemUIDialog.Factory systemUIDialogFactory,
+            @Nullable FingerprintManager fingerprintManager,
+            @Nullable FaceManager faceManager) {
+        mResources = resources;
+        mSystemUIDialogFactory = systemUIDialogFactory;
+        mFingerprintManager = fingerprintManager;
+        mFaceManager = faceManager;
+    }
 
-    Dialog createReenrollDialog(final Context context, final SystemUIDialog sysuiDialog,
-            BiometricSourceType biometricSourceType) {
+    Dialog createReenrollDialog(
+            int userId, ActivityStarter activityStarter, BiometricSourceType biometricSourceType,
+            boolean isReenrollForced) {
+        SystemUIDialog sysuiDialog = mSystemUIDialogFactory.create();
         if (biometricSourceType == BiometricSourceType.FACE) {
-            sysuiDialog.setTitle(context.getString(R.string.face_re_enroll_dialog_title));
-            sysuiDialog.setMessage(context.getString(R.string.face_re_enroll_dialog_content));
+            sysuiDialog.setTitle(mResources.getString(R.string.face_re_enroll_dialog_title));
+            sysuiDialog.setMessage(mResources.getString(R.string.face_re_enroll_dialog_content));
         } else if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
-            FingerprintManager fingerprintManager = context.getSystemService(
-                    FingerprintManager.class);
-            sysuiDialog.setTitle(context.getString(R.string.fingerprint_re_enroll_dialog_title));
-            if (fingerprintManager.getEnrolledFingerprints().size() == 1) {
-                sysuiDialog.setMessage(context.getString(
+            sysuiDialog.setTitle(mResources.getString(R.string.fingerprint_re_enroll_dialog_title));
+            if (mFingerprintManager.getEnrolledFingerprints().size() == 1) {
+                sysuiDialog.setMessage(mResources.getString(
                         R.string.fingerprint_re_enroll_dialog_content_singular));
             } else {
-                sysuiDialog.setMessage(context.getString(
+                sysuiDialog.setMessage(mResources.getString(
                         R.string.fingerprint_re_enroll_dialog_content));
             }
         }
 
         sysuiDialog.setPositiveButton(R.string.biometric_re_enroll_dialog_confirm,
-                (dialog, which) -> onReenrollDialogConfirm(context, biometricSourceType));
-        sysuiDialog.setNegativeButton(R.string.biometric_re_enroll_dialog_cancel,
-                (dialog, which) -> {});
+                (dialog, which) -> onReenrollDialogConfirm(
+                        userId, biometricSourceType, activityStarter));
+        if (!isReenrollForced) {
+            sysuiDialog.setNegativeButton(R.string.biometric_re_enroll_dialog_cancel,
+                    (dialog, which) -> {
+                    });
+        }
+        sysuiDialog.setCanceledOnTouchOutside(!isReenrollForced);
         return sysuiDialog;
     }
 
-    private static Dialog createReenrollFailureDialog(Context context,
-            BiometricSourceType biometricType) {
-        final SystemUIDialog sysuiDialog = new SystemUIDialog(context);
+    private Dialog createReenrollFailureDialog(BiometricSourceType biometricType) {
+        final SystemUIDialog sysuiDialog = mSystemUIDialogFactory.create();
 
         if (biometricType == BiometricSourceType.FACE) {
-            sysuiDialog.setMessage(context.getString(
+            sysuiDialog.setMessage(mResources.getString(
                     R.string.face_reenroll_failure_dialog_content));
         } else if (biometricType == BiometricSourceType.FINGERPRINT) {
-            sysuiDialog.setMessage(context.getString(
+            sysuiDialog.setMessage(mResources.getString(
                     R.string.fingerprint_reenroll_failure_dialog_content));
         }
 
@@ -84,41 +104,41 @@ public class BiometricNotificationDialogFactory {
         return sysuiDialog;
     }
 
-    private static void onReenrollDialogConfirm(final Context context,
-            BiometricSourceType biometricType) {
+    private void onReenrollDialogConfirm(
+            int userId, BiometricSourceType biometricType, ActivityStarter activityStarter) {
         if (biometricType == BiometricSourceType.FACE) {
-            reenrollFace(context);
+            reenrollFace(userId, activityStarter);
         } else if (biometricType == BiometricSourceType.FINGERPRINT) {
-            reenrollFingerprint(context);
+            reenrollFingerprint(userId, activityStarter);
         }
     }
 
-    private static void reenrollFingerprint(Context context) {
-        FingerprintManager fingerprintManager = context.getSystemService(FingerprintManager.class);
-        if (fingerprintManager == null) {
+    @SuppressLint("MissingPermission")
+    private void reenrollFingerprint(int userId, ActivityStarter activityStarter) {
+        if (mFingerprintManager == null) {
             Log.e(TAG, "Not launching enrollment. Fingerprint manager was null!");
-            createReenrollFailureDialog(context, BiometricSourceType.FINGERPRINT).show();
+            createReenrollFailureDialog(BiometricSourceType.FINGERPRINT).show();
             return;
         }
 
-        if (!fingerprintManager.hasEnrolledTemplates(context.getUserId())) {
-            createReenrollFailureDialog(context, BiometricSourceType.FINGERPRINT).show();
+        if (!mFingerprintManager.hasEnrolledTemplates(userId)) {
+            createReenrollFailureDialog(BiometricSourceType.FINGERPRINT).show();
             return;
         }
 
         // Remove all enrolled fingerprint. Launch enrollment if successful.
-        fingerprintManager.removeAll(context.getUserId(),
+        mFingerprintManager.removeAll(userId,
                 new FingerprintManager.RemovalCallback() {
                     boolean mDidShowFailureDialog;
 
                     @Override
-                    public void onRemovalError(Fingerprint fingerprint, int errMsgId,
-                            CharSequence errString) {
+                    public void onRemovalError(
+                            Fingerprint fingerprint, int errMsgId, CharSequence errString) {
                         Log.e(TAG, "Not launching enrollment."
                                 + "Failed to remove existing face(s).");
                         if (!mDidShowFailureDialog) {
                             mDidShowFailureDialog = true;
-                            createReenrollFailureDialog(context, BiometricSourceType.FINGERPRINT)
+                            createReenrollFailureDialog(BiometricSourceType.FINGERPRINT)
                                     .show();
                         }
                     }
@@ -129,27 +149,27 @@ public class BiometricNotificationDialogFactory {
                             Intent intent = new Intent(Settings.ACTION_FINGERPRINT_ENROLL);
                             intent.setPackage("com.android.settings");
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            context.startActivity(intent);
+                            activityStarter.startActivity(intent);
                         }
                     }
                 });
     }
 
-    private static void reenrollFace(Context context) {
-        FaceManager faceManager = context.getSystemService(FaceManager.class);
-        if (faceManager == null) {
+    @SuppressLint("MissingPermission")
+    private void reenrollFace(int userId, ActivityStarter activityStarter) {
+        if (mFaceManager == null) {
             Log.e(TAG, "Not launching enrollment. Face manager was null!");
-            createReenrollFailureDialog(context, BiometricSourceType.FACE).show();
+            createReenrollFailureDialog(BiometricSourceType.FACE).show();
             return;
         }
 
-        if (!faceManager.hasEnrolledTemplates(context.getUserId())) {
-            createReenrollFailureDialog(context, BiometricSourceType.FACE).show();
+        if (!mFaceManager.hasEnrolledTemplates(userId)) {
+            createReenrollFailureDialog(BiometricSourceType.FACE).show();
             return;
         }
 
         // Remove all enrolled faces. Launch enrollment if successful.
-        faceManager.removeAll(context.getUserId(),
+        mFaceManager.removeAll(userId,
                 new FaceManager.RemovalCallback() {
                     boolean mDidShowFailureDialog;
 
@@ -159,7 +179,7 @@ public class BiometricNotificationDialogFactory {
                                 + "Failed to remove existing face(s).");
                         if (!mDidShowFailureDialog) {
                             mDidShowFailureDialog = true;
-                            createReenrollFailureDialog(context, BiometricSourceType.FACE).show();
+                            createReenrollFailureDialog(BiometricSourceType.FACE).show();
                         }
                     }
 
@@ -169,9 +189,13 @@ public class BiometricNotificationDialogFactory {
                             Intent intent = new Intent("android.settings.FACE_ENROLL");
                             intent.setPackage("com.android.settings");
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            context.startActivity(intent);
+                            activityStarter.startActivity(intent);
                         }
                     }
                 });
+    }
+
+    interface ActivityStarter {
+        void startActivity(Intent intent);
     }
 }

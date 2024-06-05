@@ -16,84 +16,141 @@
 
 package com.android.systemui.biometrics
 
-import android.testing.AndroidTestingRunner
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.shade.ShadeExpansionStateManager
-import org.junit.Assert
+import com.android.systemui.flags.andSceneContainer
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.shadeTestUtil
+import com.android.systemui.testKosmos
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Ignore
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.junit.MockitoJUnit
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.verifyZeroInteractions
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
-class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class AuthDialogPanelInteractionDetectorTest(flags: FlagsParameterization?) : SysuiTestCase() {
 
-    private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
-    private lateinit var detector: AuthDialogPanelInteractionDetector
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
+
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+
+    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
 
     @Mock private lateinit var action: Runnable
 
-    @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
+    lateinit var detector: AuthDialogPanelInteractionDetector
 
     @Before
     fun setUp() {
-        shadeExpansionStateManager = ShadeExpansionStateManager()
+        MockitoAnnotations.initMocks(this)
         detector =
-            AuthDialogPanelInteractionDetector(shadeExpansionStateManager, mContext.mainExecutor)
-    }
-
-    @Ignore("b/316929376")
-    @Test
-    fun testEnableDetector_expandWithTrack_shouldPostRunnable() {
-        detector.enable(action)
-        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, true, 0f)
-        verify(action).run()
+            AuthDialogPanelInteractionDetector(
+                kosmos.applicationCoroutineScope,
+                { kosmos.shadeInteractor },
+            )
     }
 
     @Test
-    fun testEnableDetector_trackOnly_shouldPostRunnable() {
-        detector.enable(action)
-        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, false, true, 0f)
-        verify(action).run()
-    }
+    fun enableDetector_expand_shouldRunAction() =
+        testScope.runTest {
+            // GIVEN shade is closed and detector is enabled
+            shadeTestUtil.setShadeExpansion(0f)
+            detector.enable(action)
+            runCurrent()
+
+            // WHEN shade expands
+            shadeTestUtil.setTracking(true)
+            shadeTestUtil.setShadeExpansion(.5f)
+            runCurrent()
+
+            // THEN action was run
+            verify(action).run()
+        }
 
     @Test
-    fun testEnableDetector_expandOnly_shouldNotPostRunnable() {
-        detector.enable(action)
-        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, false, 0f)
-        verifyZeroInteractions(action)
-    }
+    fun enableDetector_isUserInteractingTrue_shouldNotPostRunnable() =
+        testScope.runTest {
+            // GIVEN isInteracting starts true
+            shadeTestUtil.setTracking(true)
+            runCurrent()
+            detector.enable(action)
+
+            // THEN action was not run
+            verifyZeroInteractions(action)
+        }
 
     @Test
-    fun testEnableDetector_expandWithoutFraction_shouldPostRunnable() {
-        detector.enable(action)
-        // simulate headsup notification
-        shadeExpansionStateManager.onPanelExpansionChanged(0.0f, true, false, 0f)
-        verifyZeroInteractions(action)
-    }
+    fun enableDetector_shadeExpandImmediate_shouldNotPostRunnable() =
+        testScope.runTest {
+            // GIVEN shade is closed and detector is enabled
+            shadeTestUtil.setShadeExpansion(0f)
+            detector.enable(action)
+            runCurrent()
+
+            // WHEN shade expands fully instantly
+            shadeTestUtil.setShadeExpansion(1f)
+            runCurrent()
+
+            // THEN action not run
+            verifyZeroInteractions(action)
+            detector.disable()
+        }
 
     @Test
-    fun testEnableDetector_shouldNotPostRunnable() {
-        detector.enable(action)
-        detector.disable()
-        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, true, 0f)
-        verifyZeroInteractions(action)
-    }
+    fun disableDetector_shouldNotPostRunnable() =
+        testScope.runTest {
+            // GIVEN shade is closed and detector is enabled
+            shadeTestUtil.setShadeExpansion(0f)
+            detector.enable(action)
+            runCurrent()
+
+            // WHEN detector is disabled and shade opens
+            detector.disable()
+            runCurrent()
+            shadeTestUtil.setTracking(true)
+            shadeTestUtil.setShadeExpansion(.5f)
+            runCurrent()
+
+            // THEN action not run
+            verifyZeroInteractions(action)
+        }
 
     @Test
-    fun testFromOpenState_becomeStateClose_enableDetector_shouldNotPostRunnable() {
-        // STATE_OPEN is 2
-        shadeExpansionStateManager.updateState(2)
-        detector.enable(action)
-        shadeExpansionStateManager.onPanelExpansionChanged(0.5f, false, false, 0f)
-        verifyZeroInteractions(action)
-        Assert.assertEquals(true, shadeExpansionStateManager.isClosed())
-    }
+    fun enableDetector_beginCollapse_shouldNotPostRunnable() =
+        testScope.runTest {
+            // GIVEN shade is open and detector is enabled
+            shadeTestUtil.setShadeExpansion(1f)
+            detector.enable(action)
+            runCurrent()
+
+            // WHEN shade begins to collapse
+            shadeTestUtil.programmaticCollapseShade()
+            runCurrent()
+
+            // THEN action not run
+            verifyZeroInteractions(action)
+            detector.disable()
+        }
 }

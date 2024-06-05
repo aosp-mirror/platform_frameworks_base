@@ -17,11 +17,14 @@
 package com.android.systemui.accessibility.accessibilitymenu.view;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 
 import static java.lang.Math.max;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
@@ -135,20 +138,26 @@ public class A11yMenuOverlayLayout {
             initLayoutParams();
         }
 
-        final Display display = mService.getSystemService(
-                DisplayManager.class).getDisplay(DEFAULT_DISPLAY);
-
-        mLayout = new FrameLayout(
-                mService.createDisplayContext(display).createWindowContext(
-                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY, null));
+        final Display display = mDisplayManager.getDisplay(DEFAULT_DISPLAY);
+        final Context context = mService.createDisplayContext(display).createWindowContext(
+                TYPE_ACCESSIBILITY_OVERLAY, null);
+        mLayout = new FrameLayout(context);
         updateLayoutPosition();
-        inflateLayoutAndSetOnTouchListener(mLayout);
-        mA11yMenuViewPager = new A11yMenuViewPager(mService);
+        inflateLayoutAndSetOnTouchListener(mLayout, context);
+        mA11yMenuViewPager = new A11yMenuViewPager(mService, context);
         mA11yMenuViewPager.configureViewPagerAndFooter(mLayout, createShortcutList(), pageIndex);
         mWindowManager.addView(mLayout, mLayoutParameter);
         mLayout.setVisibility(lastVisibilityState);
 
         return mLayout;
+    }
+
+    public void clearLayout() {
+        if (mLayout != null) {
+            mWindowManager.removeView(mLayout);
+            mLayout.setOnTouchListener(null);
+            mLayout = null;
+        }
     }
 
     /** Updates view layout with new layout parameters only. */
@@ -169,8 +178,8 @@ public class A11yMenuOverlayLayout {
         mLayoutParameter.setTitle(mService.getString(R.string.accessibility_menu_service_name));
     }
 
-    private void inflateLayoutAndSetOnTouchListener(ViewGroup view) {
-        LayoutInflater inflater = LayoutInflater.from(mService);
+    private void inflateLayoutAndSetOnTouchListener(ViewGroup view, Context displayContext) {
+        LayoutInflater inflater = LayoutInflater.from(displayContext);
         inflater.inflate(R.layout.paged_menu, view);
         view.setOnTouchListener(mService);
     }
@@ -313,7 +322,14 @@ public class A11yMenuOverlayLayout {
                 AccessibilityManager.FLAG_CONTENT_TEXT);
 
         final TextView snackbar = mLayout.findViewById(R.id.snackbar);
+        if (snackbar == null) {
+            return;
+        }
         snackbar.setText(text);
+        if (com.android.systemui.accessibility.accessibilitymenu
+                .Flags.a11yMenuSnackbarLiveRegion()) {
+            snackbar.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
+        }
 
         // Remove any existing fade-out animation before starting any new animations.
         mHandler.removeCallbacksAndMessages(null);

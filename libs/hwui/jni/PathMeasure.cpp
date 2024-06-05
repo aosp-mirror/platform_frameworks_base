@@ -17,7 +17,11 @@
 
 #include "GraphicsJNI.h"
 
+#include "SkMatrix.h"
+#include "SkPath.h"
 #include "SkPathMeasure.h"
+#include "SkPoint.h"
+#include "SkScalar.h"
 
 /*  We declare an explicit pair, so that we don't have to rely on the java
     client to be sure not to edit the path while we have an active measure

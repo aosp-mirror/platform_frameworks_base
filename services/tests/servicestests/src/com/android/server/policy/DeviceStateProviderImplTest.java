@@ -40,12 +40,12 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
+import android.hardware.devicestate.DeviceState;
 import android.os.PowerManager;
 
 import androidx.annotation.NonNull;
 
 import com.android.server.LocalServices;
-import com.android.server.devicestate.DeviceState;
 import com.android.server.devicestate.DeviceStateProvider;
 import com.android.server.input.InputManagerInternal;
 
@@ -60,7 +60,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Unit tests for {@link DeviceStateProviderImpl}.
@@ -68,10 +71,15 @@ import java.util.List;
  * Run with <code>atest DeviceStateProviderImplTest</code>.
  */
 public final class DeviceStateProviderImplTest {
-    private final ArgumentCaptor<DeviceState[]> mDeviceStateArrayCaptor = ArgumentCaptor.forClass(
-            DeviceState[].class);
+    private final ArgumentCaptor<DeviceState[]> mDeviceStateArrayCaptor =
+            ArgumentCaptor.forClass(DeviceState[].class);
     private final ArgumentCaptor<Integer> mIntegerCaptor = ArgumentCaptor.forClass(Integer.class);
     private static final int MAX_HINGE_ANGLE_EXCLUSIVE = 360;
+    private static final Set<Integer> EMPTY_PROPERTY_SET = new HashSet<>();
+    private static final Set<Integer> THERMAL_TEST_PROPERTY_SET = new HashSet<>(
+            Arrays.asList(DeviceState.PROPERTY_EMULATED_ONLY,
+                    DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL,
+                    DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE));
 
     private Context mContext;
     private SensorManager mSensorManager;
@@ -160,8 +168,8 @@ public final class DeviceStateProviderImplTest {
         verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
         final DeviceState[] expectedStates = new DeviceState[]{
-                new DeviceState(1, "", 0 /* flags */),
-                new DeviceState(2, "", 0 /* flags */) };
+                createDeviceState(1, "", EMPTY_PROPERTY_SET),
+                createDeviceState(2, "", EMPTY_PROPERTY_SET)};
         assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
 
         verify(listener).onStateChanged(mIntegerCaptor.capture());
@@ -169,13 +177,13 @@ public final class DeviceStateProviderImplTest {
     }
 
     @Test
-    public void create_stateWithCancelOverrideRequestFlag() {
+    public void create_stateWithCancelOverrideRequestProperty() {
         String configString = "<device-state-config>\n"
                 + "    <device-state>\n"
                 + "        <identifier>1</identifier>\n"
-                + "        <flags>\n"
-                + "            <flag>FLAG_CANCEL_OVERRIDE_REQUESTS</flag>\n"
-                + "        </flags>\n"
+                + "        <properties>\n"
+                + "            <property>PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS</property>\n"
+                + "        </properties>\n"
                 + "        <conditions/>\n"
                 + "    </device-state>\n"
                 + "    <device-state>\n"
@@ -192,20 +200,22 @@ public final class DeviceStateProviderImplTest {
 
         verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
+
         final DeviceState[] expectedStates = new DeviceState[]{
-                new DeviceState(1, "", DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS),
-                new DeviceState(2, "", 0 /* flags */) };
+                createDeviceState(1, "", new HashSet<>(
+                        List.of(DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS))),
+                createDeviceState(2, "", EMPTY_PROPERTY_SET)};
         assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
     }
 
     @Test
-    public void create_stateWithInvalidFlag() {
+    public void create_stateWithInvalidProperty() {
         String configString = "<device-state-config>\n"
                 + "    <device-state>\n"
                 + "        <identifier>1</identifier>\n"
-                + "        <flags>\n"
-                + "            <flag>INVALID_FLAG</flag>\n"
-                + "        </flags>\n"
+                + "        <properties>\n"
+                + "            <property>INVALID_PROPERTY</property>\n"
+                + "        </properties>\n"
                 + "        <conditions/>\n"
                 + "    </device-state>\n"
                 + "    <device-state>\n"
@@ -223,8 +233,8 @@ public final class DeviceStateProviderImplTest {
         verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
         final DeviceState[] expectedStates = new DeviceState[]{
-                new DeviceState(1, "", 0 /* flags */),
-                new DeviceState(2, "", 0 /* flags */) };
+                createDeviceState(1, "", EMPTY_PROPERTY_SET),
+                createDeviceState(2, "", EMPTY_PROPERTY_SET)};
         assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
     }
 
@@ -259,8 +269,8 @@ public final class DeviceStateProviderImplTest {
         verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
         final DeviceState[] expectedStates = new DeviceState[]{
-                new DeviceState(1, "", 0 /* flags */),
-                new DeviceState(2, "CLOSED", 0 /* flags */) };
+                createDeviceState(1, "", EMPTY_PROPERTY_SET),
+                createDeviceState(2, "CLOSED", EMPTY_PROPERTY_SET)};
         assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
 
         // onStateChanged() should not be called because the provider has not yet been notified of
@@ -327,11 +337,13 @@ public final class DeviceStateProviderImplTest {
                 + "    <device-state>\n"
                 + "        <identifier>4</identifier>\n"
                 + "        <name>THERMAL_TEST</name>\n"
-                + "        <flags>\n"
-                + "            <flag>FLAG_EMULATED_ONLY</flag>\n"
-                + "            <flag>FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL</flag>\n"
-                + "            <flag>FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE</flag>\n"
-                + "        </flags>\n"
+                + "        <properties>\n"
+                + "            <property>PROPERTY_EMULATED_ONLY</property>\n"
+                + "            <property>PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL"
+                + "</property>\n"
+                + "            <property>PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE"
+                + "</property>\n"
+                + "        </properties>\n"
                 + "    </device-state>\n"
                 + "</device-state-config>\n";
         DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
@@ -352,13 +364,11 @@ public final class DeviceStateProviderImplTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */),
-                        new DeviceState(4, "THERMAL_TEST",
-                                DeviceState.FLAG_EMULATED_ONLY
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE) },
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(4, "THERMAL_TEST",
+                                THERMAL_TEST_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
         // onStateChanged() should not be called because the provider has not yet been notified of
         // the initial sensor state.
@@ -405,7 +415,7 @@ public final class DeviceStateProviderImplTest {
     }
 
     @Test
-    public void test_flagDisableWhenThermalStatusCritical() throws Exception {
+    public void test_propertyDisableWhenThermalStatusCritical() throws Exception {
         Sensor sensor = newSensor("sensor", Sensor.STRING_TYPE_HINGE_ANGLE);
         when(mSensorManager.getSensorList(anyInt())).thenReturn(List.of(sensor));
         DeviceStateProviderImpl provider = create_sensorBasedProvider(sensor);
@@ -418,13 +428,11 @@ public final class DeviceStateProviderImplTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */),
-                        new DeviceState(4, "THERMAL_TEST",
-                                DeviceState.FLAG_EMULATED_ONLY
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE) },
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(4, "THERMAL_TEST",
+                                THERMAL_TEST_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
         Mockito.clearInvocations(listener);
 
@@ -439,9 +447,9 @@ public final class DeviceStateProviderImplTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */) },
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
         Mockito.clearInvocations(listener);
 
@@ -451,18 +459,16 @@ public final class DeviceStateProviderImplTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_NORMAL));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */),
-                        new DeviceState(4, "THERMAL_TEST",
-                                DeviceState.FLAG_EMULATED_ONLY
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE) },
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(4, "THERMAL_TEST",
+                                THERMAL_TEST_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
     }
 
     @Test
-    public void test_flagDisableWhenPowerSaveEnabled() throws Exception {
+    public void test_propertyDisableWhenPowerSaveEnabled() throws Exception {
         Sensor sensor = newSensor("sensor", Sensor.STRING_TYPE_HINGE_ANGLE);
         when(mSensorManager.getSensorList(anyInt())).thenReturn(List.of(sensor));
         DeviceStateProviderImpl provider = create_sensorBasedProvider(sensor);
@@ -475,13 +481,11 @@ public final class DeviceStateProviderImplTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */),
-                        new DeviceState(4, "THERMAL_TEST",
-                                DeviceState.FLAG_EMULATED_ONLY
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE) },
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(4, "THERMAL_TEST",
+                                THERMAL_TEST_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
         Mockito.clearInvocations(listener);
 
@@ -496,9 +500,9 @@ public final class DeviceStateProviderImplTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */) },
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
         Mockito.clearInvocations(listener);
 
@@ -508,13 +512,11 @@ public final class DeviceStateProviderImplTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
-                        new DeviceState(3, "OPENED", 0 /* flags */),
-                        new DeviceState(4, "THERMAL_TEST",
-                                DeviceState.FLAG_EMULATED_ONLY
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
-                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE) },
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(3, "OPENED", EMPTY_PROPERTY_SET),
+                        createDeviceState(4, "THERMAL_TEST",
+                                THERMAL_TEST_PROPERTY_SET)},
                 mDeviceStateArrayCaptor.getValue());
     }
 
@@ -598,11 +600,20 @@ public final class DeviceStateProviderImplTest {
                 eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
         assertArrayEquals(
                 new DeviceState[]{
-                        new DeviceState(1, "CLOSED", 0 /* flags */),
-                        new DeviceState(2, "HALF_OPENED", 0 /* flags */)
+                        createDeviceState(1, "CLOSED", EMPTY_PROPERTY_SET),
+                        createDeviceState(2, "HALF_OPENED", EMPTY_PROPERTY_SET)
                 }, mDeviceStateArrayCaptor.getValue());
         // onStateChanged() should not be called because the provider could not find the sensor.
         verify(listener, never()).onStateChanged(mIntegerCaptor.capture());
+    }
+
+    private DeviceState createDeviceState(int identifier, @NonNull String name,
+            @NonNull Set<@DeviceState.DeviceStateProperties Integer> systemProperties) {
+        DeviceState.Configuration configuration = new DeviceState.Configuration.Builder(identifier,
+                name)
+                .setSystemProperties(systemProperties)
+                .build();
+        return new DeviceState(configuration);
     }
 
     private static Sensor newSensor(String name, String type) throws Exception {

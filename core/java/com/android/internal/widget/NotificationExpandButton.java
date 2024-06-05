@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
 import android.view.View;
@@ -42,7 +44,7 @@ import java.util.Locale;
 @RemoteViews.RemoteView
 public class NotificationExpandButton extends FrameLayout {
 
-    private View mPillView;
+    private Drawable mPillDrawable;
     private TextView mNumberView;
     private ImageView mIconView;
     private boolean mExpanded;
@@ -73,7 +75,10 @@ public class NotificationExpandButton extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mPillView = findViewById(R.id.expand_button_pill);
+
+        final View pillView = findViewById(R.id.expand_button_pill);
+        final LayerDrawable layeredPill = (LayerDrawable) pillView.getBackground();
+        mPillDrawable = layeredPill.findDrawableByLayerId(R.id.expand_button_pill_colorized_layer);
         mNumberView = findViewById(R.id.expand_button_number);
         mIconView = findViewById(R.id.expand_button_icon);
     }
@@ -156,7 +161,7 @@ public class NotificationExpandButton extends FrameLayout {
     private void updateColors() {
         if (shouldShowNumber()) {
             if (mHighlightPillColor != 0) {
-                mPillView.setBackgroundTintList(ColorStateList.valueOf(mHighlightPillColor));
+                mPillDrawable.setTintList(ColorStateList.valueOf(mHighlightPillColor));
             }
             mIconView.setColorFilter(mHighlightTextColor);
             if (mHighlightTextColor != 0) {
@@ -164,7 +169,7 @@ public class NotificationExpandButton extends FrameLayout {
             }
         } else {
             if (mDefaultPillColor != 0) {
-                mPillView.setBackgroundTintList(ColorStateList.valueOf(mDefaultPillColor));
+                mPillDrawable.setTintList(ColorStateList.valueOf(mDefaultPillColor));
             }
             mIconView.setColorFilter(mDefaultTextColor);
             if (mDefaultTextColor != 0) {

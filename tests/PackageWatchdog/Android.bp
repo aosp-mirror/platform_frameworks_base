@@ -28,11 +28,13 @@ android_test {
     static_libs: [
         "junit",
         "mockito-target-extended-minus-junit4",
+        "flag-junit",
         "frameworks-base-testutils",
         "androidx.test.rules",
+        "PlatformProperties",
         "services.core",
         "services.net",
-        "truth-prebuilt",
+        "truth",
     ],
     libs: ["android.test.runner"],
     jni_libs: [

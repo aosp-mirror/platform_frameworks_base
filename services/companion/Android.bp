@@ -19,12 +19,19 @@ filegroup {
 java_library_static {
     name: "services.companion",
     defaults: ["platform_service_defaults"],
-    srcs: [":services.companion-sources"],
+    srcs: [
+        ":services.companion-sources",
+    ],
     libs: [
         "app-compat-annotations",
         "services.core",
     ],
     static_libs: [
         "ukey2_jni",
+        "virtualdevice_flags_lib",
+        "virtual_camera_service_aidl-java",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }

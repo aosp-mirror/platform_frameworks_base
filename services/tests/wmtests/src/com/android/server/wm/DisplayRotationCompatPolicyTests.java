@@ -30,6 +30,7 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -37,18 +38,16 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
-import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.RefreshCallbackItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.content.ComponentName;
@@ -92,6 +91,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     private CameraManager mMockCameraManager;
     private Handler mMockHandler;
     private LetterboxConfiguration mLetterboxConfiguration;
+    private ActivityRefresher mActivityRefresher;
 
     private DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
     private CameraManager.AvailabilityCallback mCameraAvailabilityCallback;
@@ -103,8 +103,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void setUp() throws Exception {
         mLetterboxConfiguration = mDisplayContent.mWmService.mLetterboxConfiguration;
         spyOn(mLetterboxConfiguration);
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                    /* checkDeviceConfig */ anyBoolean()))
+        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(true);
         when(mLetterboxConfiguration.isCameraCompatRefreshEnabled())
                 .thenReturn(true);
@@ -132,15 +131,24 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                     ((Runnable) invocation.getArgument(0)).run();
                     return null;
                 });
-        mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(
-                mDisplayContent, mMockHandler);
+        CameraStateMonitor cameraStateMonitor =
+                new CameraStateMonitor(mDisplayContent, mMockHandler);
+        mActivityRefresher = new ActivityRefresher(mDisplayContent.mWmService, mMockHandler);
+        mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(mDisplayContent,
+                cameraStateMonitor, mActivityRefresher);
+
+        // Do not show the real toast.
+        spyOn(mDisplayRotationCompatPolicy);
+        doNothing().when(mDisplayRotationCompatPolicy).showToast(anyInt());
+        doNothing().when(mDisplayRotationCompatPolicy).showToast(anyInt(), anyString());
+
+        cameraStateMonitor.startListeningToCameraState();
     }
 
     @Test
     public void testOpenedCameraInSplitScreen_showToast() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         spyOn(mTask);
-        spyOn(mDisplayRotationCompatPolicy);
         doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mActivity).getWindowingMode();
         doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mTask).getWindowingMode();
 
@@ -164,7 +172,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOpenedCameraInSplitScreen_orientationNotFixed_doNotShowToast() {
         configureActivity(SCREEN_ORIENTATION_UNSPECIFIED);
         spyOn(mTask);
-        spyOn(mDisplayRotationCompatPolicy);
         doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mActivity).getWindowingMode();
         doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mTask).getWindowingMode();
 
@@ -177,10 +184,8 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOnScreenRotationAnimationFinished_treatmentNotEnabled_doNotShowToast() {
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                    /* checkDeviceConfig */ anyBoolean()))
+        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(false);
-        spyOn(mDisplayRotationCompatPolicy);
 
         mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
 
@@ -190,8 +195,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOnScreenRotationAnimationFinished_noOpenCamera_doNotShowToast() {
-        spyOn(mDisplayRotationCompatPolicy);
-
         mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
 
         verify(mDisplayRotationCompatPolicy, never()).showToast(
@@ -202,7 +205,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnScreenRotationAnimationFinished_notFullscreen_doNotShowToast() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         doReturn(true).when(mActivity).inMultiWindowMode();
-        spyOn(mDisplayRotationCompatPolicy);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
@@ -216,7 +218,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnScreenRotationAnimationFinished_orientationNotFixed_doNotShowToast() {
         configureActivity(SCREEN_ORIENTATION_UNSPECIFIED);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-        spyOn(mDisplayRotationCompatPolicy);
 
         mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
 
@@ -228,7 +229,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnScreenRotationAnimationFinished_showToast() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-        spyOn(mDisplayRotationCompatPolicy);
 
         mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
 
@@ -238,8 +238,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testTreatmentNotEnabled_noForceRotationOrRefresh() throws Exception {
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                    /* checkDeviceConfig */ anyBoolean()))
+        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -253,8 +252,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testTreatmentDisabledViaDeviceConfig_noForceRotationOrRefresh() throws Exception {
-        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
-                    /* checkDeviceConfig */ true))
+        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -267,8 +265,8 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testTreatmentDisabledPerApp_noForceRotationOrRefresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        when(mActivity.mLetterboxUiController.shouldForceRotateForCameraCompat())
-                .thenReturn(false);
+        doReturn(false).when(mActivity.mLetterboxUiController)
+                .shouldForceRotateForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
@@ -468,8 +466,9 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_refreshDisabledViaFlag_noRefresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        when(mActivity.mLetterboxUiController.shouldRefreshActivityForCameraCompat())
-                .thenReturn(false);
+
+        doReturn(false).when(
+                mActivity.mLetterboxUiController).shouldRefreshActivityForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
@@ -533,13 +532,49 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabledForApp()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        when(mActivity.mLetterboxUiController.shouldRefreshActivityViaPauseForCameraCompat())
-                .thenReturn(true);
+        doReturn(true).when(mActivity.mLetterboxUiController)
+                .shouldRefreshActivityViaPauseForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
 
         assertActivityRefreshRequested(/* refreshRequested */ true, /* cycleThroughStop */ false);
+    }
+
+    @Test
+    public void testIsCameraActiveWhenCallbackInvokedNoMultiWindow_returnTrue() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertTrue(
+                mDisplayRotationCompatPolicy.isCameraActive(mActivity, /* mustBeFullscreen*/ true));
+    }
+
+    @Test
+    public void testIsCameraActiveWhenCallbackNotInvokedNoMultiWindow_returnFalse() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+
+        assertFalse(
+                mDisplayRotationCompatPolicy.isCameraActive(mActivity, /* mustBeFullscreen*/ true));
+    }
+
+    @Test
+    public void testIsCameraActiveWhenCallbackNotInvokedMultiWindow_returnFalse() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        when(mActivity.inMultiWindowMode()).thenReturn(true);
+
+        assertFalse(
+                mDisplayRotationCompatPolicy.isCameraActive(mActivity, /* mustBeFullscreen*/ true));
+    }
+
+    @Test
+    public void testIsCameraActiveWhenCallbackInvokedMultiWindow_returnFalse() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        when(mActivity.inMultiWindowMode()).thenReturn(true);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertFalse(
+                mDisplayRotationCompatPolicy.isCameraActive(mActivity, /* mustBeFullscreen*/ true));
     }
 
     private void configureActivity(@ScreenOrientation int activityOrientation) {
@@ -573,16 +608,16 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     private void assertActivityRefreshRequested(boolean refreshRequested,
                 boolean cycleThroughStop) throws Exception {
         verify(mActivity.mLetterboxUiController, times(refreshRequested ? 1 : 0))
-                .setIsRefreshAfterRotationRequested(true);
+                .setIsRefreshRequested(true);
 
-        final ClientTransaction transaction = ClientTransaction.obtain(
-                mActivity.app.getThread(), mActivity.token);
-        transaction.addCallback(RefreshCallbackItem.obtain(cycleThroughStop ? ON_STOP : ON_PAUSE));
-        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(
-                /* isForward */ false, /* shouldSendCompatFakeFocus */ false));
+        final RefreshCallbackItem refreshCallbackItem = RefreshCallbackItem.obtain(mActivity.token,
+                cycleThroughStop ? ON_STOP : ON_PAUSE);
+        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(mActivity.token,
+                /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
 
         verify(mActivity.mAtmService.getLifecycleManager(), times(refreshRequested ? 1 : 0))
-                .scheduleTransaction(eq(transaction));
+                .scheduleTransactionAndLifecycleItems(mActivity.app.getThread(),
+                        refreshCallbackItem, resumeActivityItem);
     }
 
     private void assertNoForceRotationOrRefresh() throws Exception {
@@ -595,7 +630,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     private void callOnActivityConfigurationChanging(
             ActivityRecord activity, boolean isDisplayRotationChanging) {
-        mDisplayRotationCompatPolicy.onActivityConfigurationChanging(activity,
+        mActivityRefresher.onActivityConfigurationChanging(activity,
                 /* newConfig */ createConfigurationWithDisplayRotation(ROTATION_0),
                 /* newConfig */ createConfigurationWithDisplayRotation(
                         isDisplayRotationChanging ? ROTATION_90 : ROTATION_0));

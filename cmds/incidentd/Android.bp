@@ -82,17 +82,11 @@ cc_binary {
         },
     },
 
-
     init_rc: ["incidentd.rc"],
 }
 
-// ==============
-// incidentd_test
-// ==============
-
-cc_test {
-    name: "incidentd_test",
-    test_suites: ["device-tests"],
+cc_defaults {
+    name: "incidentd_test_defaults",
 
     cflags: [
         "-Werror",
@@ -110,8 +104,6 @@ cc_test {
     generated_headers: ["framework-cppstream-protos"],
 
     srcs: [
-        "tests/**/*.cpp",
-        "tests/**/*.proto",
         "src/FdBuffer.cpp",
         "src/Privacy.cpp",
         "src/PrivacyFilter.cpp",
@@ -125,13 +117,11 @@ cc_test {
         "src/**/*.proto",
     ],
 
-    data: ["testdata/**/*"],
-
     static_libs: [
-        "libgmock",
         "libincidentcompanion",
         "libplatformprotos-test",
     ],
+
     shared_libs: [
         "libbase",
         "libbinder",
@@ -143,6 +133,30 @@ cc_test {
         "libprotoutil",
         "libservices",
         "libutils",
+    ],
+}
+
+// ==============
+// incidentd_test
+// ==============
+cc_test {
+    name: "incidentd_test",
+
+    defaults: [
+        "incidentd_test_defaults",
+    ],
+
+    test_suites: ["device-tests"],
+
+    srcs: [
+        "tests/**/*.cpp",
+        "tests/**/*.proto",
+    ],
+
+    data: ["testdata/**/*"],
+
+    static_libs: [
+        "libgmock",
     ],
 
     target: {
@@ -159,4 +173,28 @@ genrule {
     tools: ["incident-section-gen"],
     out: ["section_list.cpp"],
     cmd: "$(location incident-section-gen) incidentd > $(out)",
+}
+
+cc_fuzz {
+    name: "incidentd_service_fuzzer",
+    defaults: [
+        "service_fuzzer_defaults",
+        "fuzzer_disable_leaks",
+        "incidentd_test_defaults",
+    ],
+
+    fuzz_config: {
+        cc: [
+            "yaochen@google.com",
+            "yanmin@google.com",
+        ],
+        triage_assignee: "waghpawan@google.com",
+    },
+
+    srcs: [
+        "fuzzers/IncidentServiceFuzzer.cpp",
+        "src/IncidentService.cpp",
+        "src/Broadcaster.cpp",
+        ":incidentd_section_list",
+    ],
 }

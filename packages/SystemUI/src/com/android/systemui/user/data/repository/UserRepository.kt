@@ -17,22 +17,24 @@
 
 package com.android.systemui.user.data.repository
 
+import android.annotation.SuppressLint
+import android.annotation.UserIdInt
 import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.R
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.user.data.model.SelectedUserModel
+import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
@@ -47,7 +49,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -69,11 +70,11 @@ interface UserRepository {
     /** List of all users on the device. */
     val userInfos: Flow<List<UserInfo>>
 
+    /** Information about the currently-selected user, including [UserInfo] and other details. */
+    val selectedUser: StateFlow<SelectedUserModel>
+
     /** [UserInfo] of the currently-selected user. */
     val selectedUserInfo: Flow<UserInfo>
-
-    /** Whether user switching is currently in progress. */
-    val userSwitchingInProgress: Flow<Boolean>
 
     /** User ID of the main user. */
     val mainUserId: Int
@@ -107,6 +108,22 @@ interface UserRepository {
     fun isSimpleUserSwitcher(): Boolean
 
     fun isUserSwitcherEnabled(): Boolean
+
+    /**
+     * Returns the user ID of the "main user" of the device. This user may have access to certain
+     * features which are limited to at most one user. There will never be more than one main user
+     * on a device.
+     *
+     * <p>Currently, on most form factors the first human user on the device will be the main user;
+     * in the future, the concept may be transferable, so a different user (or even no user at all)
+     * may be designated the main user instead. On other form factors there might not be a main
+     * user.
+     *
+     * <p> When the device doesn't have a main user, this will return {@code null}.
+     *
+     * @see [UserManager.getMainUser]
+     */
+    @UserIdInt suspend fun getMainUserId(): Int?
 }
 
 @SysUISingleton
@@ -120,7 +137,6 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val globalSettings: GlobalSettings,
     private val tracker: UserTracker,
-    featureFlags: FeatureFlags,
 ) : UserRepository {
 
     private val _userSwitcherSettings: StateFlow<UserSwitcherSettingsModel> =
@@ -132,7 +148,6 @@ constructor(
                         Settings.Global.ADD_USERS_WHEN_LOCKED,
                         Settings.Global.USER_SWITCHER_ENABLED,
                     ),
-                userId = UserHandle.USER_SYSTEM,
             )
             .onStart { emit(Unit) } // Forces an initial update.
             .map { getSettings() }
@@ -146,9 +161,6 @@ constructor(
     private val _userInfos = MutableStateFlow<List<UserInfo>?>(null)
     override val userInfos: Flow<List<UserInfo>> = _userInfos.filterNotNull()
 
-    private val _selectedUserInfo = MutableStateFlow<UserInfo?>(null)
-    override val selectedUserInfo: Flow<UserInfo> = _selectedUserInfo.filterNotNull()
-
     override var mainUserId: Int = UserHandle.USER_NULL
         private set
     override var lastSelectedNonGuestUserId: Int = UserHandle.USER_NULL
@@ -160,10 +172,6 @@ constructor(
     private var _isGuestUserResetting: Boolean = false
     override var isGuestUserResetting: Boolean = _isGuestUserResetting
 
-    private val _isUserSwitchingInProgress = MutableStateFlow(false)
-    override val userSwitchingInProgress: Flow<Boolean>
-        get() = _isUserSwitchingInProgress
-
     override val isGuestUserCreationScheduled = AtomicBoolean()
 
     override val isStatusBarUserChipEnabled: Boolean =
@@ -173,25 +181,61 @@ constructor(
 
     override var isRefreshUsersPaused: Boolean = false
 
-    init {
-        observeSelectedUser()
-        if (featureFlags.isEnabled(FACE_AUTH_REFACTOR)) {
-            observeUserSwitching()
-        }
+    override val selectedUser: StateFlow<SelectedUserModel> = run {
+        // Some callbacks don't modify the selection status, so maintain the current value.
+        var currentSelectionStatus = SelectionStatus.SELECTION_COMPLETE
+        conflatedCallbackFlow {
+                fun send(selectionStatus: SelectionStatus) {
+                    currentSelectionStatus = selectionStatus
+                    trySendWithFailureLogging(
+                        SelectedUserModel(tracker.userInfo, selectionStatus),
+                        TAG,
+                    )
+                }
+
+                val callback =
+                    object : UserTracker.Callback {
+                        override fun onUserChanging(newUser: Int, userContext: Context) {
+                            send(SelectionStatus.SELECTION_IN_PROGRESS)
+                        }
+
+                        override fun onUserChanged(newUser: Int, userContext: Context) {
+                            send(SelectionStatus.SELECTION_COMPLETE)
+                        }
+
+                        override fun onProfilesChanged(profiles: List<UserInfo>) {
+                            send(currentSelectionStatus)
+                        }
+                    }
+
+                tracker.addCallback(callback, mainDispatcher.asExecutor())
+                send(currentSelectionStatus)
+
+                awaitClose { tracker.removeCallback(callback) }
+            }
+            .onEach {
+                if (!it.userInfo.isGuest) {
+                    lastSelectedNonGuestUserId = it.userInfo.id
+                }
+            }
+            .stateIn(
+                applicationScope,
+                SharingStarted.Eagerly,
+                initialValue = SelectedUserModel(tracker.userInfo, currentSelectionStatus)
+            )
     }
 
+    override val selectedUserInfo: Flow<UserInfo> = selectedUser.map { it.userInfo }
+
+    @SuppressLint("MissingPermission")
     override fun refreshUsers() {
         applicationScope.launch {
-            val result = withContext(backgroundDispatcher) { manager.aliveUsers }
-
-            if (result != null) {
-                _userInfos.value =
-                    result
-                        // Users should be sorted by ascending creation time.
-                        .sortedBy { it.creationTime }
-                        // The guest user is always last, regardless of creation time.
-                        .sortedBy { it.isGuest }
-            }
+            _userInfos.value =
+                withContext(backgroundDispatcher) { manager.aliveUsers }
+                    // Users should be sorted by ascending creation time.
+                    .sortedBy { it.creationTime }
+                    // The guest user is always last, regardless of creation time.
+                    .sortedBy { it.isGuest }
 
             if (mainUserId == UserHandle.USER_NULL) {
                 val mainUser = withContext(backgroundDispatcher) { manager.mainUser }
@@ -201,7 +245,7 @@ constructor(
     }
 
     override fun getSelectedUserInfo(): UserInfo {
-        return checkNotNull(_selectedUserInfo.value)
+        return selectedUser.value.userInfo
     }
 
     override fun isSimpleUserSwitcher(): Boolean {
@@ -212,64 +256,14 @@ constructor(
         return _userSwitcherSettings.value.isUserSwitcherEnabled
     }
 
-    private fun observeUserSwitching() {
-        conflatedCallbackFlow {
-                val callback =
-                    object : UserTracker.Callback {
-                        override fun onUserChanging(newUser: Int, userContext: Context) {
-                            trySendWithFailureLogging(true, TAG, "userSwitching started")
-                        }
-
-                        override fun onUserChanged(newUserId: Int, userContext: Context) {
-                            trySendWithFailureLogging(false, TAG, "userSwitching completed")
-                        }
-                    }
-                tracker.addCallback(callback, mainDispatcher.asExecutor())
-                trySendWithFailureLogging(false, TAG, "initial value defaulting to false")
-                awaitClose { tracker.removeCallback(callback) }
-            }
-            .onEach { _isUserSwitchingInProgress.value = it }
-            // TODO (b/262838215), Make this stateIn and initialize directly in field declaration
-            //  once the flag is launched
-            .launchIn(applicationScope)
-    }
-
-    private fun observeSelectedUser() {
-        conflatedCallbackFlow {
-                fun send() {
-                    trySendWithFailureLogging(tracker.userInfo, TAG)
-                }
-
-                val callback =
-                    object : UserTracker.Callback {
-                        override fun onUserChanging(newUser: Int, userContext: Context) {
-                            send()
-                        }
-
-                        override fun onProfilesChanged(profiles: List<UserInfo>) {
-                            send()
-                        }
-                    }
-
-                tracker.addCallback(callback, mainDispatcher.asExecutor())
-                send()
-
-                awaitClose { tracker.removeCallback(callback) }
-            }
-            .onEach {
-                if (!it.isGuest) {
-                    lastSelectedNonGuestUserId = it.id
-                }
-
-                _selectedUserInfo.value = it
-            }
-            .launchIn(applicationScope)
+    override suspend fun getMainUserId(): Int? {
+        return withContext(backgroundDispatcher) { manager.mainUser?.identifier }
     }
 
     private suspend fun getSettings(): UserSwitcherSettingsModel {
         return withContext(backgroundDispatcher) {
             val isSimpleUserSwitcher =
-                globalSettings.getIntForUser(
+                globalSettings.getInt(
                     SETTING_SIMPLE_USER_SWITCHER,
                     if (
                         appContext.resources.getBoolean(
@@ -280,18 +274,16 @@ constructor(
                     } else {
                         0
                     },
-                    UserHandle.USER_SYSTEM,
                 ) != 0
 
             val isAddUsersFromLockscreen =
-                globalSettings.getIntForUser(
+                globalSettings.getInt(
                     Settings.Global.ADD_USERS_WHEN_LOCKED,
                     0,
-                    UserHandle.USER_SYSTEM,
                 ) != 0
 
             val isUserSwitcherEnabled =
-                globalSettings.getIntForUser(
+                globalSettings.getInt(
                     Settings.Global.USER_SWITCHER_ENABLED,
                     if (
                         appContext.resources.getBoolean(
@@ -302,7 +294,6 @@ constructor(
                     } else {
                         0
                     },
-                    UserHandle.USER_SYSTEM,
                 ) != 0
 
             UserSwitcherSettingsModel(

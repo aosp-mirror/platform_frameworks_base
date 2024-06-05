@@ -164,7 +164,7 @@ void EphemeralStorage::release(JNIEnv *env) {
             }
 
             default:
-                CHECK(!"Should not be here");
+                CHECK(!"Should not be here") << "Item type: " << item.mType;
         }
     }
 

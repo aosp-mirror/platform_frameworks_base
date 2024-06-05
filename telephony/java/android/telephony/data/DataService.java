@@ -16,6 +16,8 @@
 
 package android.telephony.data;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -26,6 +28,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.net.LinkProperties;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
@@ -36,6 +39,9 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.IIntegerConsumer;
+import com.android.internal.telephony.flags.Flags;
+import com.android.internal.util.FunctionalUtils;
 import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -44,6 +50,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Base class of data service. Services that extend DataService must register the service in
@@ -113,10 +121,13 @@ public abstract class DataService extends Service {
     private static final int DATA_SERVICE_REQUEST_REGISTER_APN_UNTHROTTLED             = 14;
     private static final int DATA_SERVICE_REQUEST_UNREGISTER_APN_UNTHROTTLED           = 15;
     private static final int DATA_SERVICE_INDICATION_APN_UNTHROTTLED                   = 16;
+    private static final int DATA_SERVICE_REQUEST_VALIDATION                           = 17;
 
     private final HandlerThread mHandlerThread;
 
     private final DataServiceHandler mHandler;
+
+    private final Executor mHandlerExecutor;
 
     private final SparseArray<DataServiceProvider> mServiceMap = new SparseArray<>();
 
@@ -379,6 +390,43 @@ public abstract class DataService extends Service {
             }
         }
 
+        /**
+         * Request validation check to see if the network is working properly for a given data call.
+         *
+         * <p>This request is completed immediately after submitting the request to the data service
+         * provider and receiving {@link DataServiceCallback.ResultCode}, and progress status or
+         * validation results are notified through {@link
+         * DataCallResponse#getNetworkValidationStatus}.
+         *
+         * <p> If the network validation request is submitted successfully, {@link
+         * DataServiceCallback#RESULT_SUCCESS} is passed to {@code resultCodeCallback}. If the
+         * network validation feature is not supported by the data service provider itself, {@link
+         * DataServiceCallback#RESULT_ERROR_UNSUPPORTED} is passed to {@code resultCodeCallback}.
+         * See {@link DataServiceCallback.ResultCode} for the type of response that indicates
+         * whether the request was successfully submitted or had an error.
+         *
+         * <p>In response to this network validation request, providers can validate the data call
+         * in their own way. For example, in IWLAN, the DPD (Dead Peer Detection) can be used as a
+         * tool to check whether a data call is alive.
+         *
+         * @param cid The identifier of the data call which is provided in {@link DataCallResponse}
+         * @param executor The callback executor for the response.
+         * @param resultCodeCallback Listener for the {@link DataServiceCallback.ResultCode} that
+         *     request validation to the DataService and checks if the request has been submitted.
+         */
+        @FlaggedApi(Flags.FLAG_NETWORK_VALIDATION)
+        public void requestNetworkValidation(int cid,
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull @DataServiceCallback.ResultCode Consumer<Integer> resultCodeCallback) {
+            Objects.requireNonNull(executor, "executor cannot be null");
+            Objects.requireNonNull(resultCodeCallback, "resultCodeCallback cannot be null");
+
+            Log.d(TAG, "requestNetworkValidation: " + cid);
+
+            // The default implementation is to return unsupported.
+            executor.execute(() -> resultCodeCallback
+                    .accept(DataServiceCallback.RESULT_ERROR_UNSUPPORTED));
+        }
 
         /**
          * Notify the system that current data call list changed. Data service must invoke this
@@ -537,6 +585,17 @@ public abstract class DataService extends Service {
         }
     }
 
+    private static final class ValidationRequest {
+        public final int cid;
+        public final Executor executor;
+        public final IIntegerConsumer callback;
+        ValidationRequest(int cid, Executor executor, IIntegerConsumer callback) {
+            this.cid = cid;
+            this.executor = executor;
+            this.callback = callback;
+        }
+    }
+
     private class DataServiceHandler extends Handler {
 
         DataServiceHandler(Looper looper) {
@@ -679,6 +738,15 @@ public abstract class DataService extends Service {
                         loge("Failed to call onApnUnthrottled. " + e);
                     }
                     break;
+                case DATA_SERVICE_REQUEST_VALIDATION:
+                    if (serviceProvider == null) break;
+                    ValidationRequest validationRequest = (ValidationRequest) message.obj;
+                    serviceProvider.requestNetworkValidation(
+                            validationRequest.cid,
+                            validationRequest.executor,
+                            FunctionalUtils
+                                    .ignoreRemoteException(validationRequest.callback::accept));
+                    break;
             }
         }
     }
@@ -691,6 +759,7 @@ public abstract class DataService extends Service {
         mHandlerThread.start();
 
         mHandler = new DataServiceHandler(mHandlerThread.getLooper());
+        mHandlerExecutor = new HandlerExecutor(mHandler);
         log("Data service created");
     }
 
@@ -852,6 +921,19 @@ public abstract class DataService extends Service {
             }
             mHandler.obtainMessage(DATA_SERVICE_REQUEST_UNREGISTER_APN_UNTHROTTLED,
                     slotIndex, 0, callback).sendToTarget();
+        }
+
+        @Override
+        public void requestNetworkValidation(int slotIndex, int cid,
+                IIntegerConsumer resultCodeCallback) {
+            if (resultCodeCallback == null) {
+                loge("requestNetworkValidation: resultCodeCallback is null");
+                return;
+            }
+            ValidationRequest validationRequest =
+                    new ValidationRequest(cid, mHandlerExecutor, resultCodeCallback);
+            mHandler.obtainMessage(DATA_SERVICE_REQUEST_VALIDATION,
+                    slotIndex, 0, validationRequest).sendToTarget();
         }
     }
 

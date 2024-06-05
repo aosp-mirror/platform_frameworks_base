@@ -33,8 +33,9 @@
     android:clipToPadding="false">
     <include layout="@layout/keyguard_bouncer_message_area"/>
 
-    <com.android.systemui.keyguard.bouncer.ui.BouncerMessageView
+    <com.android.systemui.bouncer.ui.BouncerMessageView
         android:id="@+id/bouncer_message_view"
+        android:importantForAccessibility="noHideDescendants"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" />
@@ -57,6 +58,7 @@
             android:id="@+id/lockPatternView"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:focusable="false"
             androidprv:layout_constraintTop_toBottomOf="@id/pattern_top_guideline"
             androidprv:layout_constraintBottom_toBottomOf="parent"
             androidprv:layout_constraintLeft_toLeftOf="parent"

@@ -28,13 +28,13 @@ import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Trace;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.WindowCallbacks;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.jank.FrameTracker.Reasons;
-import com.android.internal.jank.InteractionJankMonitor.CujType;
 
 /**
  * An overlay that uses WindowCallbacks to draw the names of all running CUJs to the window
@@ -53,6 +53,7 @@ import com.android.internal.jank.InteractionJankMonitor.CujType;
  * @hide
  */
 class InteractionMonitorDebugOverlay implements WindowCallbacks {
+    private static final String TAG = "InteractionMonitorDebug";
     private static final int REASON_STILL_RUNNING = -1000;
     private final Object mLock;
     // Sparse array where the key in the CUJ and the value is the session status, or null if
@@ -78,7 +79,7 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
         mDebugPaint.setAntiAlias(false);
         mDebugFontMetrics = new Paint.FontMetrics();
         final Context context = ActivityThread.currentApplication();
-        mPackageName = context.getPackageName();
+        mPackageName = context == null ? "null" : context.getPackageName();
     }
 
     @UiThread
@@ -94,14 +95,14 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
     }
 
     @UiThread
-    private boolean attachViewRootIfNeeded(FrameTracker tracker) {
-        FrameTracker.ViewRootWrapper viewRoot = tracker.getViewRoot();
+    private boolean attachViewRootIfNeeded(InteractionJankMonitor.RunningTracker tracker) {
+        FrameTracker.ViewRootWrapper viewRoot = tracker.mTracker.getViewRoot();
         if (mViewRoot == null && viewRoot != null) {
             // Add a trace marker so we can identify traces that were captured while the debug
             // overlay was enabled. Traces that use the debug overlay should NOT be used for
             // performance analysis.
             Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, TRACK_NAME, "DEBUG_OVERLAY_DRAW", 0);
-            mHandler = tracker.getHandler();
+            mHandler = tracker.mConfig.getHandler();
             mViewRoot = viewRoot;
             mHandler.runWithScissors(() -> viewRoot.addWindowCallbacks(this),
                     InteractionJankMonitor.EXECUTOR_TASK_TIMEOUT);
@@ -111,11 +112,12 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
         return false;
     }
 
+    @GuardedBy("mLock")
     private float getWidthOfLongestCujName(int cujFontSize) {
         mDebugPaint.setTextSize(cujFontSize);
         float maxLength = 0;
         for (int i = 0; i < mRunningCujs.size(); i++) {
-            String cujName = InteractionJankMonitor.getNameOfCuj(mRunningCujs.keyAt(i));
+            String cujName = Cuj.getNameOfCuj(mRunningCujs.keyAt(i));
             float textLength = mDebugPaint.measureText(cujName);
             if (textLength > maxLength) {
                 maxLength = textLength;
@@ -149,12 +151,18 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
     }
 
     @UiThread
-    void onTrackerRemoved(@CujType int removedCuj, @Reasons int reason,
-                          SparseArray<FrameTracker> runningTrackers) {
+    void onTrackerRemoved(@Cuj.CujType int removedCuj, @Reasons int reason,
+                          SparseArray<InteractionJankMonitor.RunningTracker> runningTrackers) {
         synchronized (mLock) {
             mRunningCujs.put(removedCuj, reason);
+            boolean isLoggable = Log.isLoggable(TAG, Log.DEBUG);
+            if (isLoggable) {
+                String cujName = Cuj.getNameOfCuj(removedCuj);
+                Log.d(TAG, cujName + (reason == REASON_END_NORMAL ? " ended" : " cancelled"));
+            }
             // If REASON_STILL_RUNNING is not in mRunningCujs, then all CUJs have ended
             if (mRunningCujs.indexOfValue(REASON_STILL_RUNNING) < 0) {
+                if (isLoggable) Log.d(TAG, "All CUJs ended");
                 mRunningCujs.clear();
                 dispose();
             } else {
@@ -164,7 +172,7 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
                     // trackers
                     for (int i = 0; i < runningTrackers.size(); i++) {
                         if (mViewRoot.equals(
-                                runningTrackers.valueAt(i).getViewRoot())) {
+                                runningTrackers.valueAt(i).mTracker.getViewRoot())) {
                             needsNewViewRoot = false;
                             break;
                         }
@@ -185,7 +193,11 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
     }
 
     @UiThread
-    void onTrackerAdded(@CujType int addedCuj, FrameTracker tracker) {
+    void onTrackerAdded(@Cuj.CujType int addedCuj, InteractionJankMonitor.RunningTracker tracker) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            String cujName = Cuj.getNameOfCuj(addedCuj);
+            Log.d(TAG, cujName + " started");
+        }
         synchronized (mLock) {
             // Use REASON_STILL_RUNNING (not technically one of the '@Reasons') to indicate the CUJ
             // is still running
@@ -230,41 +242,44 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
         int cujFontSize = dipToPx(18);
         final float cujNameTextHeight = getTextHeight(cujFontSize);
         final float packageNameTextHeight = getTextHeight(packageNameFontSize);
-        float maxLength = getWidthOfLongestCujName(cujFontSize);
 
-        final int dx = (int) ((w - maxLength) / 2f);
-        canvas.translate(dx, dy);
-        // Draw background rectangle for displaying the text showing the CUJ name
-        mDebugPaint.setColor(mBgColor);
-        canvas.drawRect(
-                -padding * 2, // more padding on top so we can draw the package name
-                -padding,
-                padding * 2 + maxLength,
-                padding * 2 + packageNameTextHeight + cujNameTextHeight * mRunningCujs.size(),
-                mDebugPaint);
-        mDebugPaint.setTextSize(packageNameFontSize);
-        mDebugPaint.setColor(Color.BLACK);
-        mDebugPaint.setStrikeThruText(false);
-        canvas.translate(0, packageNameTextHeight);
-        canvas.drawText("package:" + mPackageName, 0, 0, mDebugPaint);
-        mDebugPaint.setTextSize(cujFontSize);
-        // Draw text for CUJ names
-        for (int i = 0; i < mRunningCujs.size(); i++) {
-            int status = mRunningCujs.valueAt(i);
-            if (status == REASON_STILL_RUNNING) {
-                mDebugPaint.setColor(Color.BLACK);
-                mDebugPaint.setStrikeThruText(false);
-            } else if (status == REASON_END_NORMAL) {
-                mDebugPaint.setColor(Color.GRAY);
-                mDebugPaint.setStrikeThruText(false);
-            } else {
-                // Cancelled, or otherwise ended for a bad reason
-                mDebugPaint.setColor(Color.RED);
-                mDebugPaint.setStrikeThruText(true);
+        synchronized (mLock) {
+            float maxLength = getWidthOfLongestCujName(cujFontSize);
+
+            final int dx = (int) ((w - maxLength) / 2f);
+            canvas.translate(dx, dy);
+            // Draw background rectangle for displaying the text showing the CUJ name
+            mDebugPaint.setColor(mBgColor);
+            canvas.drawRect(
+                    -padding * 2, // more padding on top so we can draw the package name
+                    -padding,
+                    padding * 2 + maxLength,
+                    padding * 2 + packageNameTextHeight + cujNameTextHeight * mRunningCujs.size(),
+                    mDebugPaint);
+            mDebugPaint.setTextSize(packageNameFontSize);
+            mDebugPaint.setColor(Color.BLACK);
+            mDebugPaint.setStrikeThruText(false);
+            canvas.translate(0, packageNameTextHeight);
+            canvas.drawText("package:" + mPackageName, 0, 0, mDebugPaint);
+            mDebugPaint.setTextSize(cujFontSize);
+            // Draw text for CUJ names
+            for (int i = 0; i < mRunningCujs.size(); i++) {
+                int status = mRunningCujs.valueAt(i);
+                if (status == REASON_STILL_RUNNING) {
+                    mDebugPaint.setColor(Color.BLACK);
+                    mDebugPaint.setStrikeThruText(false);
+                } else if (status == REASON_END_NORMAL) {
+                    mDebugPaint.setColor(Color.GRAY);
+                    mDebugPaint.setStrikeThruText(false);
+                } else {
+                    // Cancelled, or otherwise ended for a bad reason
+                    mDebugPaint.setColor(Color.RED);
+                    mDebugPaint.setStrikeThruText(true);
+                }
+                String cujName = Cuj.getNameOfCuj(mRunningCujs.keyAt(i));
+                canvas.translate(0, cujNameTextHeight);
+                canvas.drawText(cujName, 0, 0, mDebugPaint);
             }
-            String cujName = InteractionJankMonitor.getNameOfCuj(mRunningCujs.keyAt(i));
-            canvas.translate(0, cujNameTextHeight);
-            canvas.drawText(cujName, 0, 0, mDebugPaint);
         }
     }
 }

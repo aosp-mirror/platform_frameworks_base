@@ -194,17 +194,22 @@ class BlockingAudioTrack {
             audioTrack.play();
         }
 
-        int count = 0;
-        while (count < bytes.length) {
-            // Note that we don't take bufferCopy.mOffset into account because
-            // it is guaranteed to be 0.
-            int written = audioTrack.write(bytes, count, bytes.length);
+        int offset = 0;
+        while (offset < bytes.length) {
+            // Although it requests to write the entire bytes at once, it might fail when the track
+            // got stopped or the thread is interrupted. In that case, it needs to carry on from
+            // last offset.
+            int sizeToWrite = bytes.length - offset;
+            int written = audioTrack.write(bytes, offset, sizeToWrite);
             if (written <= 0) {
+                if (written < 0) {
+                    Log.e(TAG, "An error occurred while writing to audio track: " + written);
+                }
                 break;
             }
-            count += written;
+            offset += written;
         }
-        return count;
+        return offset;
     }
 
     private AudioTrack createStreamingAudioTrack() {

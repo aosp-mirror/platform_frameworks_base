@@ -93,10 +93,18 @@ message SecureSettingsProto {
         optional SettingProto hearing_aid_ringtone_routing = 46 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto hearing_aid_call_routing = 47 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto hearing_aid_media_routing = 48 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto hearing_aid_system_sounds_routing = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto hearing_aid_notification_routing = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_magnification_joystick_enabled = 50 [ (android.privacy).dest = DEST_AUTOMATIC ];
         // Settings for font scaling
         optional SettingProto accessibility_font_scaling_has_been_changed = 51 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_force_invert_color_enabled = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_magnification_two_finger_triple_tap_enabled = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto qs_targets = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_pinch_to_zoom_anywhere_enabled = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_single_finger_panning_enabled = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_gesture_targets = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto display_daltonizer_saturation_level = 58 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     }
     optional Accessibility accessibility = 2;
 
@@ -137,6 +145,11 @@ message SecureSettingsProto {
         optional SettingProto gesture_setup_complete = 9 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto touch_gesture_enabled = 10 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto long_press_home_enabled = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Deprecated - use search_all_entrypoints_enabled instead
+        optional SettingProto search_press_hold_nav_handle_enabled = 12 [ (android.privacy).dest = DEST_AUTOMATIC, deprecated = true  ];
+        optional SettingProto search_long_press_home_enabled = 13 [ (android.privacy).dest = DEST_AUTOMATIC, deprecated = true  ];
+        optional SettingProto visual_query_accessibility_detection_enabled = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto search_all_entrypoints_enabled = 15 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Assist assist = 7;
 
@@ -237,6 +250,11 @@ message SecureSettingsProto {
     }
     optional DateTime date_time = 90;
 
+    message Display {
+        optional SettingProto screen_resolution_mode = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Display display = 100;
+
     message Doze {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -262,6 +280,13 @@ message SecureSettingsProto {
     optional EmergencyResponse emergency_response = 83;
 
     optional SettingProto enhanced_voice_privacy_enabled = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message EvenDimmer {
+        optional SettingProto even_dimmer_activated = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto even_dimmer_min_nits = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+
+    optional EvenDimmer even_dimmer = 98;
 
     optional SettingProto font_weight_adjustment = 85 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
@@ -374,6 +399,8 @@ message SecureSettingsProto {
     optional SettingProto lock_to_app_exit_locked = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto lockdown_in_power_menu = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto long_press_timeout = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto key_press_timeout_ms = 96 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto key_press_delay_ms = 97 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message ManagedProfile {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -597,6 +624,7 @@ message SecureSettingsProto {
     }
     optional Sounds sounds = 72;
 
+    optional SettingProto stylus_pointer_icon_enabled = 99 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto swipe_bottom_to_notification_enabled = 82 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Defines whether managed profile ringtones should be synced from its
     // parent profile.
@@ -703,7 +731,9 @@ message SecureSettingsProto {
     }
     optional Zen zen = 71;
 
+    optional SettingProto charge_optimization_mode = 101 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 96;
+    // Next tag = 102;
 }

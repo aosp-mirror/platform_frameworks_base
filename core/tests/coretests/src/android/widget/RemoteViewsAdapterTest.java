@@ -353,6 +353,23 @@ public class RemoteViewsAdapterTest {
         public boolean isCreated() {
             return false;
         }
+
+        @Override
+        public RemoteViews.RemoteCollectionItems getRemoteCollectionItems(int capSize) {
+            RemoteViews.RemoteCollectionItems.Builder itemsBuilder =
+                    new RemoteViews.RemoteCollectionItems.Builder();
+            itemsBuilder.setHasStableIds(hasStableIds())
+                    .setViewTypeCount(getViewTypeCount());
+            try {
+                for (int i = 0; i < mCount; i++) {
+                    itemsBuilder.addItem(getItemId(i), getViewAt(i));
+                }
+            } catch (RemoteException e) {
+                // No-op
+            }
+
+            return itemsBuilder.build();
+        }
     }
 
     private static class DistinctIntent extends Intent {

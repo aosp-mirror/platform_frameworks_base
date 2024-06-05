@@ -137,6 +137,7 @@ extern int register_android_database_CursorWindow(JNIEnv* env);
 extern int register_android_database_SQLiteConnection(JNIEnv* env);
 extern int register_android_database_SQLiteGlobal(JNIEnv* env);
 extern int register_android_database_SQLiteDebug(JNIEnv* env);
+extern int register_android_database_SQLiteRawStatement(JNIEnv* env);
 extern int register_android_media_MediaMetrics(JNIEnv *env);
 extern int register_android_os_Debug(JNIEnv* env);
 extern int register_android_os_GraphicsEnvironment(JNIEnv* env);
@@ -151,8 +152,6 @@ extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_Parcel(JNIEnv* env);
 extern int register_android_os_PerformanceHintManager(JNIEnv* env);
 extern int register_android_os_SELinux(JNIEnv* env);
-extern int register_android_os_VintfObject(JNIEnv *env);
-extern int register_android_os_VintfRuntimeInfo(JNIEnv *env);
 extern int register_android_os_storage_StorageManager(JNIEnv* env);
 extern int register_android_os_SystemProperties(JNIEnv *env);
 extern int register_android_os_SystemClock(JNIEnv* env);
@@ -219,6 +218,11 @@ extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
 extern int register_android_window_WindowInfosListener(JNIEnv* env);
 extern int register_android_window_ScreenCapture(JNIEnv* env);
 extern int register_jni_common(JNIEnv* env);
+extern int register_android_tracing_PerfettoDataSource(JNIEnv* env);
+extern int register_android_tracing_PerfettoDataSourceInstance(JNIEnv* env);
+extern int register_android_tracing_PerfettoProducer(JNIEnv* env);
+extern int register_android_window_InputTransferToken(JNIEnv* env);
+extern int register_android_view_WindowManagerGlobal(JNIEnv* env);
 
 // Namespace for Android Runtime flags applied during boot time.
 static const char* RUNTIME_NATIVE_BOOT_NAMESPACE = "runtime_native_boot";
@@ -351,7 +355,7 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
     JNIEnv* env;
     jmethodID methodId;
 
-    ALOGD("Calling main entry %s", className.string());
+    ALOGD("Calling main entry %s", className.c_str());
 
     env = getJNIEnv();
     if (clazz == NULL || env == NULL) {
@@ -360,7 +364,7 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
 
     methodId = env->GetStaticMethodID(clazz, "main", "([Ljava/lang/String;)V");
     if (methodId == NULL) {
-        ALOGE("ERROR: could not find method %s.main(String[])\n", className.string());
+        ALOGE("ERROR: could not find method %s.main(String[])\n", className.c_str());
         return UNKNOWN_ERROR;
     }
 
@@ -376,7 +380,7 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
     strArray = env->NewObjectArray(numArgs, stringClass, NULL);
 
     for (size_t i = 0; i < numArgs; i++) {
-        jstring argStr = env->NewStringUTF(args[i].string());
+        jstring argStr = env->NewStringUTF(args[i].c_str());
         env->SetObjectArrayElement(strArray, i, argStr);
     }
 
@@ -652,6 +656,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
             sizeof("-Xps-save-resolved-classes-delay-ms:")-1 + PROPERTY_VALUE_MAX];
     char profileMinSavePeriodOptsBuf[sizeof("-Xps-min-save-period-ms:")-1 + PROPERTY_VALUE_MAX];
     char profileMinFirstSaveOptsBuf[sizeof("-Xps-min-first-save-ms:") - 1 + PROPERTY_VALUE_MAX];
+    char profileInlineCacheThresholdOptsBuf[
+            sizeof("-Xps-inline-cache-threshold:") - 1 + PROPERTY_VALUE_MAX];
     char madviseWillNeedFileSizeVdex[
             sizeof("-XMadviseWillNeedVdexFileSize:")-1 + PROPERTY_VALUE_MAX];
     char madviseWillNeedFileSizeOdex[
@@ -896,6 +902,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
 
     parseRuntimeOption("dalvik.vm.ps-min-first-save-ms", profileMinFirstSaveOptsBuf,
             "-Xps-min-first-save-ms:");
+
+    parseRuntimeOption("dalvik.vm.ps-inline-cache-threshold", profileInlineCacheThresholdOptsBuf,
+            "-Xps-inline-cache-threshold:");
 
     property_get("ro.config.low_ram", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
@@ -1267,7 +1276,7 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
     env->SetObjectArrayElement(strArray, 0, classNameStr);
 
     for (size_t i = 0; i < options.size(); ++i) {
-        jstring optionsStr = env->NewStringUTF(options.itemAt(i).string());
+        jstring optionsStr = env->NewStringUTF(options.itemAt(i).c_str());
         assert(optionsStr != NULL);
         env->SetObjectArrayElement(strArray, i + 1, optionsStr);
     }
@@ -1313,7 +1322,16 @@ void AndroidRuntime::exit(int code)
         ALOGI("VM exiting with result code %d.", code);
         onExit(code);
     }
+
+#ifdef __ANDROID_CLANG_COVERAGE__
+    // When compiled with coverage, a function is registered with atexit to call
+    // `__llvm_profile_write_file` when the process exit.
+    // For Clang code coverage to work, call exit instead of _exit to run hooks
+    // registered with atexit.
+    ::exit(code);
+#else
     ::_exit(code);
+#endif
 }
 
 void AndroidRuntime::onVmCreated(JNIEnv* env)
@@ -1527,8 +1545,6 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_NativeHandle),
         REG_JNI(register_android_os_ServiceManager),
         REG_JNI(register_android_os_storage_StorageManager),
-        REG_JNI(register_android_os_VintfObject),
-        REG_JNI(register_android_os_VintfRuntimeInfo),
         REG_JNI(register_android_service_DataLoaderService),
         REG_JNI(register_android_view_DisplayEventReceiver),
         REG_JNI(register_android_view_Surface),
@@ -1565,6 +1581,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_database_SQLiteConnection),
         REG_JNI(register_android_database_SQLiteGlobal),
         REG_JNI(register_android_database_SQLiteDebug),
+        REG_JNI(register_android_database_SQLiteRawStatement),
         REG_JNI(register_android_os_Debug),
         REG_JNI(register_android_os_FileObserver),
         REG_JNI(register_android_os_GraphicsEnvironment),
@@ -1659,6 +1676,12 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_window_WindowInfosListener),
         REG_JNI(register_android_window_ScreenCapture),
         REG_JNI(register_jni_common),
+
+        REG_JNI(register_android_tracing_PerfettoDataSource),
+        REG_JNI(register_android_tracing_PerfettoDataSourceInstance),
+        REG_JNI(register_android_tracing_PerfettoProducer),
+        REG_JNI(register_android_window_InputTransferToken),
+        REG_JNI(register_android_view_WindowManagerGlobal),
 };
 
 /*

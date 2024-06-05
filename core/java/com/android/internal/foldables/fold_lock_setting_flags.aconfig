@@ -1,0 +1,18 @@
+package: "com.android.internal.foldables.flags"
+container: "system"
+
+flag {
+    name: "fold_lock_setting_enabled"
+    namespace: "display_manager"
+    description: "Feature flag for Fold Lock Setting"
+    bug: "274447767"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "fold_grace_period_enabled"
+    namespace: "display_manager"
+    description: "Feature flag for Folding Grace Period"
+    bug: "308417021"
+    is_fixed_read_only: true
+}

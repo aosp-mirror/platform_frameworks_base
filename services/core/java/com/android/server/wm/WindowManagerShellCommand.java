@@ -41,13 +41,17 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Pair;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.ViewDebug;
 
 import com.android.internal.os.ByteTransferPipe;
-import com.android.internal.protolog.ProtoLogImpl;
+import com.android.internal.protolog.LegacyProtoLogImpl;
+import com.android.internal.protolog.PerfettoProtoLogImpl;
+import com.android.internal.protolog.common.IProtoLog;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.IoThread;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 import com.android.server.wm.LetterboxConfiguration.LetterboxHorizontalReachabilityPosition;
@@ -106,11 +110,23 @@ public class WindowManagerShellCommand extends ShellCommand {
                     // trace files can be written.
                     return mInternal.mWindowTracing.onShellCommand(this);
                 case "logging":
-                    int result = ProtoLogImpl.getSingleInstance().onShellCommand(this);
-                    if (result != 0) {
-                        pw.println("Not handled, please use "
-                                + "`adb shell dumpsys activity service SystemUIService WMShell` "
-                                + "if you are looking for ProtoLog in WMShell");
+                    IProtoLog instance = ProtoLog.getSingleInstance();
+                    int result = 0;
+                    if (instance instanceof LegacyProtoLogImpl
+                            || instance instanceof PerfettoProtoLogImpl) {
+                        if (instance instanceof LegacyProtoLogImpl) {
+                            result = ((LegacyProtoLogImpl) instance).onShellCommand(this);
+                        } else {
+                            result = ((PerfettoProtoLogImpl) instance).onShellCommand(this);
+                        }
+                        if (result != 0) {
+                            pw.println("Not handled, please use "
+                                    + "`adb shell dumpsys activity service SystemUIService "
+                                    + "WMShell` if you are looking for ProtoLog in WMShell");
+                        }
+                    } else {
+                        result = -1;
+                        pw.println("ProtoLog impl doesn't support handling commands");
                     }
                     return result;
                 case "user-rotation":
@@ -437,7 +453,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         }
 
         if ("free".equals(lockMode)) {
-            mInternal.thawDisplayRotation(displayId);
+            mInternal.thawDisplayRotation(displayId,
+                    /* caller= */ "WindowManagerShellCommand#free");
             return 0;
         }
 
@@ -450,7 +467,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         try {
             final int rotation =
                     arg != null ? Integer.parseInt(arg) : -1 /* lock to current rotation */;
-            mInternal.freezeDisplayRotation(displayId, rotation);
+            mInternal.freezeDisplayRotation(displayId, rotation,
+                    /* caller= */ "WindowManagerShellCommand#lock");
             return 0;
         } catch (IllegalArgumentException e) {
             getErrPrintWriter().println("Error: " + e.getMessage());
@@ -501,6 +519,9 @@ public class WindowManagerShellCommand extends ShellCommand {
             case "default":
                 fixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
                 break;
+            case "enabled_if_no_auto_rotation":
+                fixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_IF_NO_AUTO_ROTATION;
+                break;
             default:
                 getErrPrintWriter().println("Error: expecting enabled, disabled or default, but we "
                         + "get " + arg);
@@ -519,6 +540,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                 return 0;
             case IWindowManager.FIXED_TO_USER_ROTATION_DISABLED:
                 pw.println("disabled");
+                return 0;
+            case IWindowManager.FIXED_TO_USER_ROTATION_IF_NO_AUTO_ROTATION:
+                pw.println("enabled_if_no_auto_rotation");
                 return 0;
             case IWindowManager.FIXED_TO_USER_ROTATION_ENABLED:
                 pw.println("enabled");
@@ -728,7 +752,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
-            mLetterboxConfiguration.setLetterboxBackgroundType(backgroundType);
+            mLetterboxConfiguration.setLetterboxBackgroundTypeOverride(backgroundType);
         }
         return 0;
     }
@@ -770,10 +794,10 @@ public class WindowManagerShellCommand extends ShellCommand {
 
     private int runSetLetterboxBackgroundWallpaperBlurRadius(PrintWriter pw)
             throws RemoteException {
-        final int radius;
+        final int radiusDp;
         try {
             String arg = getNextArgRequired();
-            radius = Integer.parseInt(arg);
+            radiusDp = Integer.parseInt(arg);
         } catch (NumberFormatException  e) {
             getErrPrintWriter().println("Error: blur radius format " + e);
             return -1;
@@ -783,7 +807,9 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
-            mLetterboxConfiguration.setLetterboxBackgroundWallpaperBlurRadius(radius);
+            final int radiusPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    radiusDp, mInternal.mContext.getResources().getDisplayMetrics());
+            mLetterboxConfiguration.setLetterboxBackgroundWallpaperBlurRadiusPx(radiusPx);
         }
         return 0;
     }
@@ -822,7 +848,12 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
-            mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(multiplier);
+            try {
+                mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(multiplier);
+            } catch (IllegalArgumentException  e) {
+                getErrPrintWriter().println("Error: invalid multiplier value " + e);
+                return -1;
+            }
         }
         return 0;
     }
@@ -841,7 +872,12 @@ public class WindowManagerShellCommand extends ShellCommand {
             return -1;
         }
         synchronized (mInternal.mGlobalLock) {
-            mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(multiplier);
+            try {
+                mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(multiplier);
+            } catch (IllegalArgumentException  e) {
+                getErrPrintWriter().println("Error: invalid multiplier value " + e);
+                return -1;
+            }
         }
         return 0;
     }
@@ -904,6 +940,70 @@ public class WindowManagerShellCommand extends ShellCommand {
         }
         synchronized (mInternal.mGlobalLock) {
             mLetterboxConfiguration.setDefaultPositionForVerticalReachability(position);
+        }
+        return 0;
+    }
+
+    private int runSetPersistentLetterboxPositionForHorizontalReachability(PrintWriter pw)
+            throws RemoteException {
+        @LetterboxHorizontalReachabilityPosition final int position;
+        try {
+            String arg = getNextArgRequired();
+            switch (arg) {
+                case "left":
+                    position = LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT;
+                    break;
+                case "center":
+                    position = LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER;
+                    break;
+                case "right":
+                    position = LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT;
+                    break;
+                default:
+                    getErrPrintWriter().println(
+                            "Error: 'left', 'center' or 'right' are expected as an argument");
+                    return -1;
+            }
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println(
+                    "Error: 'left', 'center' or 'right' are expected as an argument" + e);
+            return -1;
+        }
+        synchronized (mInternal.mGlobalLock) {
+            mLetterboxConfiguration.setPersistentLetterboxPositionForHorizontalReachability(
+                    false /* IsInBookMode */, position);
+        }
+        return 0;
+    }
+
+    private int runSetPersistentLetterboxPositionForVerticalReachability(PrintWriter pw)
+            throws RemoteException {
+        @LetterboxVerticalReachabilityPosition final int position;
+        try {
+            String arg = getNextArgRequired();
+            switch (arg) {
+                case "top":
+                    position = LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
+                    break;
+                case "center":
+                    position = LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
+                    break;
+                case "bottom":
+                    position = LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM;
+                    break;
+                default:
+                    getErrPrintWriter().println(
+                            "Error: 'top', 'center' or 'bottom' are expected as an argument");
+                    return -1;
+            }
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println(
+                    "Error: 'top', 'center' or 'bottom' are expected as an argument" + e);
+            return -1;
+        }
+        synchronized (mInternal.mGlobalLock) {
+            mLetterboxConfiguration.setPersistentLetterboxPositionForVerticalReachability(
+                    false /* forTabletopMode */, position);
         }
         return 0;
     }
@@ -991,6 +1091,12 @@ public class WindowManagerShellCommand extends ShellCommand {
                 case "--defaultPositionForVerticalReachability":
                     runSetLetterboxDefaultPositionForVerticalReachability(pw);
                     break;
+                case "--persistentPositionForHorizontalReachability":
+                    runSetPersistentLetterboxPositionForHorizontalReachability(pw);
+                    break;
+                case "--persistentPositionForVerticalReachability":
+                    runSetPersistentLetterboxPositionForVerticalReachability(pw);
+                    break;
                 case "--isEducationEnabled":
                     runSetBooleanFlag(pw, mLetterboxConfiguration::setIsEducationEnabled);
                     break;
@@ -1006,13 +1112,20 @@ public class WindowManagerShellCommand extends ShellCommand {
                     runSetBooleanFlag(pw, mLetterboxConfiguration
                             ::setTranslucentLetterboxingOverrideEnabled);
                     break;
+                case "--isUserAppAspectRatioSettingsEnabled":
+                    runSetBooleanFlag(pw, mLetterboxConfiguration
+                            ::setUserAppAspectRatioSettingsOverrideEnabled);
+                    break;
+                case "--isUserAppAspectRatioFullscreenEnabled":
+                    runSetBooleanFlag(pw, mLetterboxConfiguration
+                            ::setUserAppAspectRatioFullscreenOverrideEnabled);
+                    break;
                 case "--isCameraCompatRefreshEnabled":
-                    runSetBooleanFlag(pw, enabled -> mLetterboxConfiguration
-                            .setCameraCompatRefreshEnabled(enabled));
+                    runSetBooleanFlag(pw, mLetterboxConfiguration::setCameraCompatRefreshEnabled);
                     break;
                 case "--isCameraCompatRefreshCycleThroughStopEnabled":
-                    runSetBooleanFlag(pw, enabled -> mLetterboxConfiguration
-                            .setCameraCompatRefreshCycleThroughStopEnabled(enabled));
+                    runSetBooleanFlag(pw,
+                            mLetterboxConfiguration::setCameraCompatRefreshCycleThroughStopEnabled);
                     break;
                 default:
                     getErrPrintWriter().println(
@@ -1047,7 +1160,7 @@ public class WindowManagerShellCommand extends ShellCommand {
                         mLetterboxConfiguration.resetLetterboxBackgroundColor();
                         break;
                     case "wallpaperBlurRadius":
-                        mLetterboxConfiguration.resetLetterboxBackgroundWallpaperBlurRadius();
+                        mLetterboxConfiguration.resetLetterboxBackgroundWallpaperBlurRadiusPx();
                         break;
                     case "wallpaperDarkScrimAlpha":
                         mLetterboxConfiguration.resetLetterboxBackgroundWallpaperDarkScrimAlpha();
@@ -1070,6 +1183,14 @@ public class WindowManagerShellCommand extends ShellCommand {
                     case "defaultPositionForVerticalReachability":
                         mLetterboxConfiguration.resetDefaultPositionForVerticalReachability();
                         break;
+                    case "persistentPositionForHorizontalReachability":
+                        mLetterboxConfiguration
+                                .resetPersistentLetterboxPositionForHorizontalReachability();
+                        break;
+                    case "persistentPositionForVerticalReachability":
+                        mLetterboxConfiguration
+                                .resetPersistentLetterboxPositionForVerticalReachability();
+                        break;
                     case "isEducationEnabled":
                         mLetterboxConfiguration.resetIsEducationEnabled();
                         break;
@@ -1083,6 +1204,12 @@ public class WindowManagerShellCommand extends ShellCommand {
                         break;
                     case "isTranslucentLetterboxingEnabled":
                         mLetterboxConfiguration.resetTranslucentLetterboxingEnabled();
+                        break;
+                    case "isUserAppAspectRatioSettingsEnabled":
+                        mLetterboxConfiguration.resetUserAppAspectRatioSettingsEnabled();
+                        break;
+                    case "isUserAppAspectRatioFullscreenEnabled":
+                        mLetterboxConfiguration.resetUserAppAspectRatioFullscreenEnabled();
                         break;
                     case "isCameraCompatRefreshEnabled":
                         mLetterboxConfiguration.resetCameraCompatRefreshEnabled();
@@ -1182,18 +1309,23 @@ public class WindowManagerShellCommand extends ShellCommand {
             mLetterboxConfiguration.resetLetterboxActivityCornersRadius();
             mLetterboxConfiguration.resetLetterboxBackgroundType();
             mLetterboxConfiguration.resetLetterboxBackgroundColor();
-            mLetterboxConfiguration.resetLetterboxBackgroundWallpaperBlurRadius();
+            mLetterboxConfiguration.resetLetterboxBackgroundWallpaperBlurRadiusPx();
             mLetterboxConfiguration.resetLetterboxBackgroundWallpaperDarkScrimAlpha();
             mLetterboxConfiguration.resetLetterboxHorizontalPositionMultiplier();
+            mLetterboxConfiguration.resetLetterboxVerticalPositionMultiplier();
             mLetterboxConfiguration.resetIsHorizontalReachabilityEnabled();
             mLetterboxConfiguration.resetIsVerticalReachabilityEnabled();
             mLetterboxConfiguration.resetEnabledAutomaticReachabilityInBookMode();
             mLetterboxConfiguration.resetDefaultPositionForHorizontalReachability();
             mLetterboxConfiguration.resetDefaultPositionForVerticalReachability();
+            mLetterboxConfiguration.resetPersistentLetterboxPositionForHorizontalReachability();
+            mLetterboxConfiguration.resetPersistentLetterboxPositionForVerticalReachability();
             mLetterboxConfiguration.resetIsEducationEnabled();
             mLetterboxConfiguration.resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
             mLetterboxConfiguration.resetIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
             mLetterboxConfiguration.resetTranslucentLetterboxingEnabled();
+            mLetterboxConfiguration.resetUserAppAspectRatioSettingsEnabled();
+            mLetterboxConfiguration.resetUserAppAspectRatioFullscreenEnabled();
             mLetterboxConfiguration.resetCameraCompatRefreshEnabled();
             mLetterboxConfiguration.resetCameraCompatRefreshCycleThroughStopEnabled();
         }
@@ -1215,6 +1347,12 @@ public class WindowManagerShellCommand extends ShellCommand {
             pw.println("Vertical position multiplier (tabletop mode): "
                     + mLetterboxConfiguration.getLetterboxVerticalPositionMultiplier(
                             true /* isInTabletopMode */));
+            pw.println("Horizontal position multiplier for reachability: "
+                    + mLetterboxConfiguration.getHorizontalMultiplierForReachability(
+                            false /* isInBookMode */));
+            pw.println("Vertical position multiplier for reachability: "
+                    + mLetterboxConfiguration.getVerticalMultiplierForReachability(
+                            false /* isInTabletopMode */));
             pw.println("Aspect ratio: "
                     + mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio());
             pw.println("Default min aspect ratio for unresizable apps: "
@@ -1249,22 +1387,21 @@ public class WindowManagerShellCommand extends ShellCommand {
                     + mLetterboxConfiguration.isCameraCompatRefreshEnabled());
             pw.println("    Refresh using \"stopped -> resumed\" cycle: "
                     + mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled());
-
             pw.println("Background type: "
                     + LetterboxConfiguration.letterboxBackgroundTypeToString(
                             mLetterboxConfiguration.getLetterboxBackgroundType()));
             pw.println("    Background color: " + Integer.toHexString(
                     mLetterboxConfiguration.getLetterboxBackgroundColor().toArgb()));
             pw.println("    Wallpaper blur radius: "
-                    + mLetterboxConfiguration.getLetterboxBackgroundWallpaperBlurRadius());
+                    + mLetterboxConfiguration.getLetterboxBackgroundWallpaperBlurRadiusPx());
             pw.println("    Wallpaper dark scrim alpha: "
                     + mLetterboxConfiguration.getLetterboxBackgroundWallpaperDarkScrimAlpha());
-
-            if (mLetterboxConfiguration.isTranslucentLetterboxingEnabled()) {
-                pw.println("Letterboxing for translucent activities: enabled");
-            } else {
-                pw.println("Letterboxing for translucent activities: disabled");
-            }
+            pw.println("Is letterboxing for translucent activities enabled: "
+                    + mLetterboxConfiguration.isTranslucentLetterboxingEnabled());
+            pw.println("Is the user aspect ratio settings enabled: "
+                    + mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled());
+            pw.println("Is the fullscreen option in user aspect ratio settings enabled: "
+                    + mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled());
         }
         return 0;
     }
@@ -1329,7 +1466,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         mInterface.setForcedDisplayScalingMode(displayId, DisplayContent.FORCE_SCALING_MODE_AUTO);
 
         // user-rotation
-        mInternal.thawDisplayRotation(displayId);
+        mInternal.thawDisplayRotation(displayId,
+                /* caller= */ "WindowManagerShellCommand#runReset");
 
         // fixed-to-user-rotation
         mInterface.setFixedToUserRotation(displayId, IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT);
@@ -1372,7 +1510,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Print or set user rotation mode and user rotation.");
         pw.println("  dump-visible-window-views");
         pw.println("    Dumps the encoded view hierarchies of visible windows");
-        pw.println("  fixed-to-user-rotation [-d DISPLAY_ID] [enabled|disabled|default]");
+        pw.println("  fixed-to-user-rotation [-d DISPLAY_ID] [enabled|disabled|default");
+        pw.println("      |enabled_if_no_auto_rotation]");
         pw.println("    Print or set rotating display for app requested orientation.");
         pw.println("  set-ignore-orientation-request [-d DISPLAY_ID] [true|1|false|0]");
         pw.println("  get-ignore-orientation-request [-d DISPLAY_ID] ");
@@ -1410,9 +1549,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("        both it and R.dimen.config_fixedOrientationLetterboxAspectRatio will");
         pw.println("        be ignored and framework implementation will determine aspect ratio.");
         pw.println("      --cornerRadius radius");
-        pw.println("        Corners radius for activities in the letterbox mode. If radius < 0,");
-        pw.println("        both it and R.integer.config_letterboxActivityCornersRadius will be");
-        pw.println("        ignored and corners of the activity won't be rounded.");
+        pw.println("        Corners radius (in pixels) for activities in the letterbox mode.");
+        pw.println("        If radius < 0, both R.integer.config_letterboxActivityCornersRadius");
+        pw.println("        and it will be ignored and corners of the activity won't be rounded.");
         pw.println("      --backgroundType [reset|solid_color|app_color_background");
         pw.println("          |app_color_background_floating|wallpaper]");
         pw.println("        Type of background used in the letterbox mode.");
@@ -1455,6 +1594,12 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("      --defaultPositionForVerticalReachability [top|center|bottom]");
         pw.println("        Default position of app window when vertical reachability is.");
         pw.println("        enabled.");
+        pw.println("      --persistentPositionForHorizontalReachability [left|center|right]");
+        pw.println("        Persistent position of app window when horizontal reachability is.");
+        pw.println("        enabled.");
+        pw.println("      --persistentPositionForVerticalReachability [top|center|bottom]");
+        pw.println("        Persistent position of app window when vertical reachability is.");
+        pw.println("        enabled.");
         pw.println("      --isEducationEnabled [true|1|false|0]");
         pw.println("        Whether education is allowed for letterboxed fullscreen apps.");
         pw.println("      --isSplitScreenAspectRatioForUnresizableAppsEnabled [true|1|false|0]");
@@ -1462,6 +1607,10 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("        unresizable apps.");
         pw.println("      --isTranslucentLetterboxingEnabled [true|1|false|0]");
         pw.println("        Whether letterboxing for translucent activities is enabled.");
+        pw.println("      --isUserAppAspectRatioSettingsEnabled [true|1|false|0]");
+        pw.println("        Whether user aspect ratio settings are enabled.");
+        pw.println("      --isUserAppAspectRatioFullscreenEnabled [true|1|false|0]");
+        pw.println("        Whether user aspect ratio fullscreen option is enabled.");
         pw.println("      --isCameraCompatRefreshEnabled [true|1|false|0]");
         pw.println("        Whether camera compatibility refresh is enabled.");
         pw.println("      --isCameraCompatRefreshCycleThroughStopEnabled [true|1|false|0]");
@@ -1472,8 +1621,10 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("      |backgroundColor|wallpaperBlurRadius|wallpaperDarkScrimAlpha");
         pw.println("      |horizontalPositionMultiplier|verticalPositionMultiplier");
         pw.println("      |isHorizontalReachabilityEnabled|isVerticalReachabilityEnabled");
-        pw.println("      |isEducationEnabled||defaultPositionMultiplierForHorizontalReachability");
-        pw.println("      |isTranslucentLetterboxingEnabled");
+        pw.println("      |isEducationEnabled|defaultPositionMultiplierForHorizontalReachability");
+        pw.println("      |isTranslucentLetterboxingEnabled|isUserAppAspectRatioSettingsEnabled");
+        pw.println("      |persistentPositionMultiplierForHorizontalReachability");
+        pw.println("      |persistentPositionMultiplierForVerticalReachability");
         pw.println("      |defaultPositionMultiplierForVerticalReachability]");
         pw.println("    Resets overrides to default values for specified properties separated");
         pw.println("    by space, e.g. 'reset-letterbox-style aspectRatio cornerRadius'.");

@@ -133,7 +133,8 @@ public class AnrHelperTest {
         verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS)).appNotResponding(
                 eq(activityShortComponentName), eq(appInfo), eq(parentShortComponentName),
                 eq(parentProcess), eq(aboveSystem), eq(timeoutRecord), eq(mAuxExecutorService),
-                eq(false) /* onlyDumpSelf */, eq(false) /*isContinuousAnr*/, eq(mEarlyDumpFuture));
+                anyBoolean() /* onlyDumpSelf */, eq(false) /*isContinuousAnr*/,
+                eq(mEarlyDumpFuture));
     }
 
     @Test
@@ -171,5 +172,10 @@ public class AnrHelperTest {
         verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS).only()).appNotResponding(
                 anyString(), any(), any(), any(), anyBoolean(), any(), eq(mAuxExecutorService),
                 anyBoolean(), anyBoolean(), any());
+    }
+
+    // TODO: [b/302724778] Remove manual JNI load
+    static {
+        System.loadLibrary("servicestestjni");
     }
 }

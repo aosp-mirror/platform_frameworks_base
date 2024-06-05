@@ -29,9 +29,9 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.pm.pkg.component.ParsedUsesPermission;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.component.ParsedUsesPermission;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -48,7 +48,7 @@ public class UpdateOwnershipHelper {
 
     private final Object mLock = new Object();
 
-    private static boolean hasValidOwnershipDenyList(PackageSetting pkgSetting) {
+    static boolean hasValidOwnershipDenyList(PackageSetting pkgSetting) {
         AndroidPackage pkg = pkgSetting.getPkg();
         // we're checking for uses-permission for these priv permissions instead of grant as we're
         // only considering system apps to begin with, so presumed to be granted.

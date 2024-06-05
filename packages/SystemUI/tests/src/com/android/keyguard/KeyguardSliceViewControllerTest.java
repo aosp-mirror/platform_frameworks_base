@@ -22,10 +22,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.os.Handler;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
@@ -57,17 +60,22 @@ public class KeyguardSliceViewControllerTest extends SysuiTestCase {
     private ActivityStarter mActivityStarter;
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
     private DumpManager mDumpManager = new DumpManager();
-
+    private Handler mHandler;
+    private Handler mBgHandler;
     private KeyguardSliceViewController mController;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        TestableLooper testableLooper = TestableLooper.get(this);
+        assert testableLooper != null;
+        mHandler = new Handler(testableLooper.getLooper());
+        mBgHandler = new Handler(testableLooper.getLooper());
         when(mView.isAttachedToWindow()).thenReturn(true);
         when(mView.getContext()).thenReturn(mContext);
-        mController = new KeyguardSliceViewController(
-                mView, mActivityStarter, mConfigurationController,
-                mTunerService, mDumpManager, mDisplayTracker);
+        mController = new KeyguardSliceViewController(mHandler, mBgHandler, mView,
+                mActivityStarter, mConfigurationController, mTunerService, mDumpManager,
+                mDisplayTracker);
         mController.setupUri(KeyguardSliceProvider.KEYGUARD_SLICE_URI);
     }
 

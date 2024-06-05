@@ -16,22 +16,53 @@
 
 package com.android.server.permission.access.util
 
+import android.os.FileUtils
 import android.util.AtomicFile
+import android.util.Slog
+import java.io.File
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 
-/**
- * Read from an [AtomicFile] and close everything safely when done.
- */
-@Throws(IOException::class)
-inline fun AtomicFile.read(block: (FileInputStream) -> Unit) {
-    openRead().use(block)
+/** Read from an [AtomicFile], fallback to reserve file to read the data. */
+@Throws(Exception::class)
+inline fun AtomicFile.readWithReserveCopy(block: (FileInputStream) -> Unit) {
+    try {
+        openRead().use(block)
+    } catch (e: FileNotFoundException) {
+        throw e
+    } catch (e: Exception) {
+        Slog.wtf("AccessPersistence", "Failed to read $this", e)
+        val reserveFile = File(baseFile.parentFile, baseFile.name + ".reservecopy")
+        try {
+            AtomicFile(reserveFile).openRead().use(block)
+        } catch (e2: Exception) {
+            Slog.e("AccessPersistence", "Failed to read $reserveFile", e2)
+            throw e
+        }
+    }
 }
 
-/**
- * Write to an [AtomicFile] and close everything safely when done.
- */
+/** Write to actual file and reserve file. */
+@Throws(IOException::class)
+inline fun AtomicFile.writeWithReserveCopy(block: (FileOutputStream) -> Unit) {
+    val reserveFile = File(baseFile.parentFile, baseFile.name + ".reservecopy")
+    reserveFile.delete()
+    writeInlined(block)
+    try {
+        FileInputStream(baseFile).use { inputStream ->
+            FileOutputStream(reserveFile).use { outputStream ->
+                FileUtils.copy(inputStream, outputStream)
+                outputStream.fd.sync()
+            }
+        }
+    } catch (e: Exception) {
+        Slog.e("AccessPersistence", "Failed to write $reserveFile", e)
+    }
+}
+
+/** Write to an [AtomicFile] and close everything safely when done. */
 @Throws(IOException::class)
 // Renamed to writeInlined() to avoid conflict with the hidden AtomicFile.write() that isn't inline.
 inline fun AtomicFile.writeInlined(block: (FileOutputStream) -> Unit) {

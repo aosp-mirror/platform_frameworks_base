@@ -24,6 +24,8 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.content.pm.SignedPackage;
 import android.os.Build;
 import android.os.CarrierAssociatedAppEntry;
 import android.os.Environment;
@@ -35,7 +37,6 @@ import android.os.VintfRuntimeInfo;
 import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.permission.PermissionManager.SplitPermissionInfo;
-import android.sysprop.ApexProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -96,6 +97,7 @@ public class SystemConfig {
     private static final int ALLOW_OVERRIDE_APP_RESTRICTIONS = 0x100;
     private static final int ALLOW_IMPLICIT_BROADCASTS = 0x200;
     private static final int ALLOW_VENDOR_APEX = 0x400;
+    private static final int ALLOW_SIGNATURE_PERMISSIONS = 0x800;
     private static final int ALLOW_ALL = ~0;
 
     // property for runtime configuration differentiation
@@ -103,6 +105,9 @@ public class SystemConfig {
 
     // property for runtime configuration differentiation in vendor
     private static final String VENDOR_SKU_PROPERTY = "ro.boot.product.vendor.sku";
+
+    // property for runtime configuration differentation in product
+    private static final String PRODUCT_SKU_PROPERTY = "ro.boot.hardware.sku";
 
     private static final ArrayMap<String, ArraySet<String>> EMPTY_PERMISSIONS =
             new ArrayMap<>();
@@ -261,6 +266,10 @@ public class SystemConfig {
     // location settings are off, for emergency purposes, as read from the configuration files.
     final ArrayMap<String, ArraySet<String>> mAllowIgnoreLocationSettings = new ArrayMap<>();
 
+    // These are the packages that are allow-listed to be able to access camera when
+    // the camera privacy state is enabled.
+    final ArraySet<String> mAllowlistCameraPrivacy = new ArraySet<>();
+
     // These are the action strings of broadcasts which are whitelisted to
     // be delivered anonymously even to apps which target O+.
     final ArraySet<String> mAllowImplicitBroadcasts = new ArraySet<>();
@@ -316,12 +325,16 @@ public class SystemConfig {
     private final ArraySet<String> mBugreportWhitelistedPackages = new ArraySet<>();
     private final ArraySet<String> mAppDataIsolationWhitelistedApps = new ArraySet<>();
 
+    // These packages will be set as 'prevent disable', where they are no longer possible
+    // for the end user to disable via settings. This flag should only be used for packages
+    // which meet the 'force or keep enabled apps' policy.
+    private final ArrayList<String> mPreventUserDisablePackages = new ArrayList<>();
+
     // Map of packagesNames to userTypes. Stored temporarily until cleared by UserManagerService().
     private ArrayMap<String, Set<String>> mPackageToUserTypeWhitelist = new ArrayMap<>();
     private ArrayMap<String, Set<String>> mPackageToUserTypeBlacklist = new ArrayMap<>();
 
     private final ArraySet<String> mRollbackWhitelistedPackages = new ArraySet<>();
-    private final ArraySet<String> mAutomaticRollbackDenylistedPackages = new ArraySet<>();
     private final ArraySet<String> mWhitelistedStagedInstallers = new ArraySet<>();
     // A map from package name of vendor APEXes that can be updated to an installer package name
     // allowed to install updates for it.
@@ -338,8 +351,25 @@ public class SystemConfig {
     // marked as stopped by the system
     @NonNull private final Set<String> mInitialNonStoppedSystemPackages = new ArraySet<>();
 
+    // Which packages (key) are allowed to join particular SharedUid (value).
+    @NonNull private final Map<String, String> mPackageToSharedUidAllowList = new ArrayMap<>();
+
     // A map of preloaded package names and the path to its app metadata file path.
     private final ArrayMap<String, String> mAppMetadataFilePaths = new ArrayMap<>();
+
+    // A set of pre-installed package names that requires strict signature verification once
+    // updated to avoid cached/potentially tampered results.
+    private final Set<String> mPreinstallPackagesWithStrictSignatureCheck = new ArraySet<>();
+
+    // A set of packages that should be considered "trusted packages" by ECM (Enhanced
+    // Confirmation Mode). "Trusted packages" are exempt from ECM (i.e., they will never be
+    // considered "restricted").
+    private final ArraySet<SignedPackage> mEnhancedConfirmationTrustedPackages = new ArraySet<>();
+
+    // A set of packages that should be considered "trusted installers" by ECM (Enhanced
+    // Confirmation Mode). "Trusted installers", and all apps installed by a trusted installer, are
+    // exempt from ECM (i.e., they will never be considered "restricted").
+    private final ArraySet<SignedPackage> mEnhancedConfirmationTrustedInstallers = new ArraySet<>();
 
     /**
      * Map of system pre-defined, uniquely named actors; keys are namespace,
@@ -462,16 +492,16 @@ public class SystemConfig {
         return mAllowedAssociations;
     }
 
+    public ArraySet<String> getCameraPrivacyAllowlist() {
+        return mAllowlistCameraPrivacy;
+    }
+
     public ArraySet<String> getBugreportWhitelistedPackages() {
         return mBugreportWhitelistedPackages;
     }
 
     public Set<String> getRollbackWhitelistedPackages() {
         return mRollbackWhitelistedPackages;
-    }
-
-    public Set<String> getAutomaticRollbackDenylistedPackages() {
-        return mAutomaticRollbackDenylistedPackages;
     }
 
     public Set<String> getWhitelistedStagedInstallers() {
@@ -499,6 +529,10 @@ public class SystemConfig {
 
     public ArraySet<String> getAppDataIsolationWhitelistedApps() {
         return mAppDataIsolationWhitelistedApps;
+    }
+
+    public @NonNull ArrayList<String> getPreventUserDisablePackages() {
+        return mPreventUserDisablePackages;
     }
 
     /**
@@ -539,8 +573,25 @@ public class SystemConfig {
         return mInitialNonStoppedSystemPackages;
     }
 
+    @NonNull
+    public Map<String, String> getPackageToSharedUidAllowList() {
+        return mPackageToSharedUidAllowList;
+    }
+
     public ArrayMap<String, String> getAppMetadataFilePaths() {
         return mAppMetadataFilePaths;
+    }
+
+    public Set<String> getPreinstallPackagesWithStrictSignatureCheck() {
+        return mPreinstallPackagesWithStrictSignatureCheck;
+    }
+
+    public ArraySet<SignedPackage> getEnhancedConfirmationTrustedPackages() {
+        return mEnhancedConfirmationTrustedPackages;
+    }
+
+    public ArraySet<SignedPackage> getEnhancedConfirmationTrustedInstallers() {
+        return mEnhancedConfirmationTrustedInstallers;
     }
 
     /**
@@ -581,7 +632,7 @@ public class SystemConfig {
 
         // Vendors are only allowed to customize these
         int vendorPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS
-                | ALLOW_ASSOCIATIONS | ALLOW_VENDOR_APEX;
+                | ALLOW_SIGNATURE_PERMISSIONS | ALLOW_ASSOCIATIONS | ALLOW_VENDOR_APEX;
         if (Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.O_MR1) {
             // For backward compatibility
             vendorPermissionFlag |= (ALLOW_PERMISSIONS | ALLOW_APP_CONFIGS);
@@ -633,9 +684,9 @@ public class SystemConfig {
         // TODO(b/157203468): ALLOW_HIDDENAPI_WHITELISTING must be removed because we prohibited
         // the use of hidden APIs from the product partition.
         int productPermissionFlag = ALLOW_FEATURES | ALLOW_LIBS | ALLOW_PERMISSIONS
-                | ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS | ALLOW_HIDDENAPI_WHITELISTING
-                | ALLOW_ASSOCIATIONS | ALLOW_OVERRIDE_APP_RESTRICTIONS | ALLOW_IMPLICIT_BROADCASTS
-                | ALLOW_VENDOR_APEX;
+                | ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS | ALLOW_SIGNATURE_PERMISSIONS
+                | ALLOW_HIDDENAPI_WHITELISTING | ALLOW_ASSOCIATIONS
+                | ALLOW_OVERRIDE_APP_RESTRICTIONS | ALLOW_IMPLICIT_BROADCASTS | ALLOW_VENDOR_APEX;
         if (Build.VERSION.DEVICE_INITIAL_SDK_INT <= Build.VERSION_CODES.R) {
             // TODO(b/157393157): This must check product interface enforcement instead of
             // DEVICE_INITIAL_SDK_INT for the devices without product interface enforcement.
@@ -645,6 +696,17 @@ public class SystemConfig {
                 Environment.getProductDirectory(), "etc", "sysconfig"), productPermissionFlag);
         readPermissions(parser, Environment.buildPath(
                 Environment.getProductDirectory(), "etc", "permissions"), productPermissionFlag);
+
+        String productSkuProperty = SystemProperties.get(PRODUCT_SKU_PROPERTY, "");
+        if (!productSkuProperty.isEmpty()) {
+            String productSkuDir = "sku_" + productSkuProperty;
+            readPermissions(parser, Environment.buildPath(
+                    Environment.getProductDirectory(), "etc", "sysconfig", productSkuDir),
+                    productPermissionFlag);
+            readPermissions(parser, Environment.buildPath(
+                    Environment.getProductDirectory(), "etc", "permissions", productSkuDir),
+                    productPermissionFlag);
+        }
 
         // Allow /system_ext to customize all system configs
         readPermissions(parser, Environment.buildPath(
@@ -755,6 +817,8 @@ public class SystemConfig {
             final boolean allowPermissions = (permissionFlag & ALLOW_PERMISSIONS) != 0;
             final boolean allowAppConfigs = (permissionFlag & ALLOW_APP_CONFIGS) != 0;
             final boolean allowPrivappPermissions = (permissionFlag & ALLOW_PRIVAPP_PERMISSIONS)
+                    != 0;
+            final boolean allowSignaturePermissions = (permissionFlag & ALLOW_SIGNATURE_PERMISSIONS)
                     != 0;
             final boolean allowOemPermissions = (permissionFlag & ALLOW_OEM_PERMISSIONS) != 0;
             final boolean allowApiWhitelisting = (permissionFlag & ALLOW_HIDDENAPI_WHITELISTING)
@@ -1023,6 +1087,20 @@ public class SystemConfig {
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
+                    case "camera-privacy-allowlisted-app" : {
+                        if (allowOverrideAppRestrictions) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mAllowlistCameraPrivacy.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
                     case "allow-ignore-location-settings": {
                         if (allowOverrideAppRestrictions) {
                             String pkgname = parser.getAttributeValue(null, "package");
@@ -1208,8 +1286,7 @@ public class SystemConfig {
                             boolean systemExt = permFile.toPath().startsWith(
                                     Environment.getSystemExtDirectory().toPath() + "/");
                             boolean apex = permFile.toPath().startsWith(
-                                    Environment.getApexDirectory().toPath() + "/")
-                                    && ApexProperties.updatable().orElse(false);
+                                    Environment.getApexDirectory().toPath() + "/");
                             if (vendor) {
                                 readPrivAppPermissions(parser,
                                         mPermissionAllowlist.getVendorPrivilegedAppAllowlist());
@@ -1225,6 +1302,38 @@ public class SystemConfig {
                             } else {
                                 readPrivAppPermissions(parser,
                                         mPermissionAllowlist.getPrivilegedAppAllowlist());
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                            XmlUtils.skipCurrentTag(parser);
+                        }
+                    } break;
+                    case "signature-permissions": {
+                        if (allowSignaturePermissions) {
+                            // signature permissions from system, apex, vendor, product and
+                            // system_ext partitions are stored separately. This is to
+                            // prevent xml files in the vendor partition from granting
+                            // permissions to signature apps in the system partition and vice versa.
+                            boolean vendor = permFile.toPath().startsWith(
+                                    Environment.getVendorDirectory().toPath() + "/")
+                                    || permFile.toPath().startsWith(
+                                    Environment.getOdmDirectory().toPath() + "/");
+                            boolean product = permFile.toPath().startsWith(
+                                    Environment.getProductDirectory().toPath() + "/");
+                            boolean systemExt = permFile.toPath().startsWith(
+                                    Environment.getSystemExtDirectory().toPath() + "/");
+                            if (vendor) {
+                                readSignatureAppPermissions(parser,
+                                        mPermissionAllowlist.getVendorSignatureAppAllowlist());
+                            } else if (product) {
+                                readSignatureAppPermissions(parser,
+                                        mPermissionAllowlist.getProductSignatureAppAllowlist());
+                            } else if (systemExt) {
+                                readSignatureAppPermissions(parser,
+                                        mPermissionAllowlist.getSystemExtSignatureAppAllowlist());
+                            } else {
+                                readSignatureAppPermissions(parser,
+                                        mPermissionAllowlist.getSignatureAppAllowlist());
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
@@ -1303,6 +1412,16 @@ public class SystemConfig {
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
+                    case "prevent-disable": {
+                        String pkgname = parser.getAttributeValue(null, "package");
+                        if (pkgname == null) {
+                            Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mPreventUserDisablePackages.add(pkgname);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
                     case "install-in-user-type": {
                         // NB: We allow any directory permission to declare install-in-user-type.
                         readInstallInUserType(parser,
@@ -1374,16 +1493,6 @@ public class SystemConfig {
                                     + " at " + parser.getPositionDescription());
                         } else {
                             mRollbackWhitelistedPackages.add(pkgname);
-                        }
-                        XmlUtils.skipCurrentTag(parser);
-                    } break;
-                    case "automatic-rollback-denylisted-app": {
-                        String pkgname = parser.getAttributeValue(null, "package");
-                        if (pkgname == null) {
-                            Slog.w(TAG, "<" + name + "> without package in " + permFile
-                                    + " at " + parser.getPositionDescription());
-                        } else {
-                            mAutomaticRollbackDenylistedPackages.add(pkgname);
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
@@ -1474,6 +1583,19 @@ public class SystemConfig {
                             mInitialNonStoppedSystemPackages.add(pkgName);
                         }
                     } break;
+                    case "allow-package-shareduid": {
+                        String pkgName = parser.getAttributeValue(null, "package");
+                        String sharedUid = parser.getAttributeValue(null, "shareduid");
+                        if (TextUtils.isEmpty(pkgName)) {
+                            Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else if (TextUtils.isEmpty(sharedUid)) {
+                            Slog.w(TAG, "<" + name + "> without shareduid in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mPackageToSharedUidAllowList.put(pkgName, sharedUid);
+                        }
+                    }
                     case "asl-file": {
                         String packageName = parser.getAttributeValue(null, "package");
                         String path = parser.getAttributeValue(null, "path");
@@ -1487,6 +1609,37 @@ public class SystemConfig {
                             mAppMetadataFilePaths.put(packageName, path);
                         }
                     } break;
+                    case "require-strict-signature": {
+                        if (android.security.Flags.extendVbChainToUpdatedApk()) {
+                            String packageName = parser.getAttributeValue(null, "package");
+                            if (TextUtils.isEmpty(packageName)) {
+                                Slog.w(TAG, "<" + name + "> without valid package in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                            } else {
+                                mPreinstallPackagesWithStrictSignatureCheck.add(packageName);
+                            }
+                        }
+                    } break;
+                    case "enhanced-confirmation-trusted-package": {
+                        if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()) {
+                            SignedPackage signedPackage = parseEnhancedConfirmationTrustedPackage(
+                                    parser, permFile, name);
+                            if (signedPackage != null) {
+                                mEnhancedConfirmationTrustedPackages.add(signedPackage);
+                            }
+                            break;
+                        }
+                    } // fall through if flag is not enabled
+                    case "enhanced-confirmation-trusted-installer": {
+                        if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()) {
+                            SignedPackage signedPackage = parseEnhancedConfirmationTrustedPackage(
+                                    parser, permFile, name);
+                            if (signedPackage != null) {
+                                mEnhancedConfirmationTrustedInstallers.add(signedPackage);
+                            }
+                            break;
+                        }
+                    } // fall through if flag is not enabled
                     default: {
                         Slog.w(TAG, "Tag " + name + " is unknown in "
                                 + permFile + " at " + parser.getPositionDescription());
@@ -1548,6 +1701,33 @@ public class SystemConfig {
         }
     }
 
+    private @Nullable SignedPackage parseEnhancedConfirmationTrustedPackage(XmlPullParser parser,
+            File permFile, String elementName) {
+        String pkgName = parser.getAttributeValue(null, "package");
+        if (TextUtils.isEmpty(pkgName)) {
+            Slog.w(TAG, "<" + elementName + "> without package " + permFile + " at "
+                    + parser.getPositionDescription());
+            return null;
+        }
+
+        String certificateDigestStr = parser.getAttributeValue(null, "sha256-cert-digest");
+        if (TextUtils.isEmpty(certificateDigestStr)) {
+            Slog.w(TAG, "<" + elementName + "> without sha256-cert-digest in " + permFile
+                    + " at " + parser.getPositionDescription());
+            return null;
+        }
+        byte[] certificateDigest = null;
+        try {
+            certificateDigest = new Signature(certificateDigestStr.replace(":", "")).toByteArray();
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "<" + elementName + "> with invalid sha256-cert-digest in "
+                    + permFile + " at " + parser.getPositionDescription());
+            return null;
+        }
+
+        return new SignedPackage(pkgName, certificateDigest);
+    }
+
     // This method only enables a new Android feature added in U and will not have impact on app
     // compatibility
     @SuppressWarnings("AndroidFrameworkCompatChange")
@@ -1603,7 +1783,13 @@ public class SystemConfig {
                 String gidStr = parser.getAttributeValue(null, "gid");
                 if (gidStr != null) {
                     int gid = Process.getGidForName(gidStr);
-                    perm.gids = appendInt(perm.gids, gid);
+                    if (gid != -1) {
+                        perm.gids = appendInt(perm.gids, gid);
+                    } else {
+                        Slog.w(TAG, "<group> with unknown gid \""
+                                + gidStr + " for permission " + name + " in "
+                                + parser.getPositionDescription());
+                    }
                 } else {
                     Slog.w(TAG, "<group> without gid at "
                             + parser.getPositionDescription());
@@ -1617,6 +1803,12 @@ public class SystemConfig {
             @NonNull ArrayMap<String, ArrayMap<String, Boolean>> allowlist)
             throws IOException, XmlPullParserException {
         readPermissionAllowlist(parser, allowlist, "privapp-permissions");
+    }
+
+    private void readSignatureAppPermissions(@NonNull XmlPullParser parser,
+            @NonNull ArrayMap<String, ArrayMap<String, Boolean>> allowlist)
+            throws IOException, XmlPullParserException {
+        readPermissionAllowlist(parser, allowlist, "signature-permissions");
     }
 
     private void readInstallInUserType(XmlPullParser parser,
@@ -1827,6 +2019,9 @@ public class SystemConfig {
                         soname, soname, new String[0], true);
                 mSharedLibraries.put(entry.name, entry);
             }
+        } catch (FileNotFoundException e) {
+            // Expected for /vendor/etc/public.libraries.txt on some devices
+            Slog.d(TAG, listFile + " does not exist");
         } catch (IOException e) {
             Slog.w(TAG, "Failed to read public libraries file " + listFile, e);
         }

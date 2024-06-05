@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.4.0-alpha01" type="baseline" client="" dependencies="true" name="" variant="all" version="8.4.0-alpha01">
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `new android.nfc.cardemulation.AidGroup`"
+        errorLine1="        AidGroup aidGroup = new AidGroup(aids, category);"
+        errorLine2="                            ~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="377"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.nfc.cardemulation.AidGroup#getAids`"
+        errorLine1="            return (group != null ? group.getAids() : null);"
+        errorLine2="                                          ~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="537"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.nfc.cardemulation.AidGroup#getAids`"
+        errorLine1="                return (group != null ? group.getAids() : null);"
+        errorLine2="                                              ~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="547"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.nfc.cardemulation.ApduServiceInfo#getAids`"
+        errorLine1="            return (serviceInfo != null ? serviceInfo.getAids() : null);"
+        errorLine2="                                                      ~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="714"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.nfc.cardemulation.ApduServiceInfo#getAids`"
+        errorLine1="                return (serviceInfo != null ? serviceInfo.getAids() : null);"
+        errorLine2="                                                          ~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="724"
+            column="59"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.nfc.cardemulation.ApduServiceInfo#isOnHost`"
+        errorLine1="                if (!serviceInfo.isOnHost()) {"
+        errorLine2="                                 ~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="755"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.nfc.cardemulation.ApduServiceInfo#getOffHostSecureElement`"
+        errorLine1="                    return serviceInfo.getOffHostSecureElement() == null ?"
+        errorLine2="                                       ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="756"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.nfc.cardemulation.ApduServiceInfo#getOffHostSecureElement`"
+        errorLine1='                            "OffHost" : serviceInfo.getOffHostSecureElement();'
+        errorLine2="                                                    ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="757"
+            column="53"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.nfc.cardemulation.ApduServiceInfo#isOnHost`"
+        errorLine1="                    if (!serviceInfo.isOnHost()) {"
+        errorLine2="                                     ~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="772"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.nfc.cardemulation.ApduServiceInfo#getOffHostSecureElement`"
+        errorLine1="                        return serviceInfo.getOffHostSecureElement() == null ?"
+        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="773"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.nfc.cardemulation.ApduServiceInfo#getOffHostSecureElement`"
+        errorLine1='                                "Offhost" : serviceInfo.getOffHostSecureElement();'
+        errorLine2="                                                        ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="774"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.nfc.cardemulation.ApduServiceInfo#getDescription`"
+        errorLine1="            return (serviceInfo != null ? serviceInfo.getDescription() : null);"
+        errorLine2="                                                      ~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="798"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.nfc.cardemulation.ApduServiceInfo#getDescription`"
+        errorLine1="                return (serviceInfo != null ? serviceInfo.getDescription() : null);"
+        errorLine2="                                                          ~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="808"
+            column="59"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.app.Activity#isResumed`"
+        errorLine1="        if (!activity.isResumed()) {"
+        errorLine2="                      ~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="1032"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.app.Activity#isResumed`"
+        errorLine1="        if (!activity.isResumed()) {"
+        errorLine2="                      ~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/CardEmulation.java"
+            line="1066"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.app.Activity#isResumed`"
+        errorLine1="            resumed = activity.isResumed();"
+        errorLine2="                               ~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcActivityManager.java"
+            line="124"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.app.Activity#isResumed`"
+        errorLine1="        if (!activity.isResumed()) {"
+        errorLine2="                      ~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/NfcAdapter.java"
+            line="2457"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.app.Activity#isResumed`"
+        errorLine1="        if (!activity.isResumed()) {"
+        errorLine2="                      ~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/NfcFCardEmulation.java"
+            line="315"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 35 (current min is 34): `android.app.Activity#isResumed`"
+        errorLine1="        if (!activity.isResumed()) {"
+        errorLine2="                      ~~~~~~~~~">
+        <location
+            file="frameworks/base/nfc/java/android/nfc/cardemulation/NfcFCardEmulation.java"
+            line="351"
+            column="23"/>
+    </issue>
+
+</issues>

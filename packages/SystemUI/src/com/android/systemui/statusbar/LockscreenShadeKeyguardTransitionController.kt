@@ -3,11 +3,12 @@ package com.android.systemui.statusbar
 import android.content.Context
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
-import com.android.systemui.R
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.controls.ui.MediaHierarchyManager
-import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -16,12 +17,14 @@ import dagger.assisted.AssistedInject
 class LockscreenShadeKeyguardTransitionController
 @AssistedInject
 constructor(
-    private val mediaHierarchyManager: MediaHierarchyManager,
-    @Assisted private val notificationPanelController: ShadeViewController,
-    context: Context,
-    configurationController: ConfigurationController,
-    dumpManager: DumpManager
-) : AbstractLockscreenShadeTransitionController(context, configurationController, dumpManager) {
+        private val mediaHierarchyManager: MediaHierarchyManager,
+        @Assisted private val shadeLockscreenInteractor: ShadeLockscreenInteractor,
+        context: Context,
+        configurationController: ConfigurationController,
+        dumpManager: DumpManager,
+        splitShadeStateController: SplitShadeStateController
+) : AbstractLockscreenShadeTransitionController(context, configurationController, dumpManager,
+        splitShadeStateController) {
 
     /**
      * Distance that the full shade transition takes in order for the keyguard content on
@@ -69,10 +72,10 @@ constructor(
         alphaProgress = MathUtils.saturate(dragDownAmount / alphaTransitionDistance)
         alpha = 1f - alphaProgress
         translationY = calculateKeyguardTranslationY(dragDownAmount)
-        notificationPanelController.setKeyguardTransitionProgress(alpha, translationY)
+        shadeLockscreenInteractor.setKeyguardTransitionProgress(alpha, translationY)
 
         statusBarAlpha = if (useSplitShade) alpha else -1f
-        notificationPanelController.setKeyguardStatusBarAlpha(statusBarAlpha)
+        shadeLockscreenInteractor.setKeyguardStatusBarAlpha(statusBarAlpha)
     }
 
     private fun calculateKeyguardTranslationY(dragDownAmount: Float): Int {
@@ -114,7 +117,7 @@ constructor(
     @AssistedFactory
     fun interface Factory {
         fun create(
-            notificationPanelController: ShadeViewController
+            shadeLockscreenInteractor: ShadeLockscreenInteractor
         ): LockscreenShadeKeyguardTransitionController
     }
 }

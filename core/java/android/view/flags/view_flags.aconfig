@@ -1,0 +1,84 @@
+package: "android.view.flags"
+container: "system"
+
+flag {
+    name: "enable_surface_native_alloc_registration_ro"
+    namespace: "toolkit"
+    description: "Feature flag for registering surfaces with the VM for faster"
+      " cleanup. Fixed readonly version."
+    bug: "306193257"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_use_measure_cache_during_force_layout"
+    namespace: "toolkit"
+    description: "Enables using the measure cache during a view force layout from the second "
+      "onMeasure call onwards during the same traversal."
+    bug: "316170253"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_vector_cursors"
+    namespace: "systemui"
+    description: "Feature flag to enable vector drawables in addition to bitmaps for PointerIcon."
+    bug: "305193969"
+    is_fixed_read_only: true
+}
+
+flag {
+  name: "sensitive_content_app_protection_api"
+  is_exported: true
+  namespace: "permissions"
+  description: "This flag controls the new sensitive content protection API,"
+    " The API will be used by other ui toolkits (i.e. compose, webview, custom virtual views)."
+  bug: "322887144"
+}
+
+flag {
+  name: "sensitive_content_app_protection"
+  namespace: "permissions"
+  description: "This flag controls the sensitive content protection when sharing the screen"
+  bug: "322887144"
+  # Referenced in WM where WM starts before DeviceConfig
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "sensitive_content_premature_protection_removed_fix"
+  namespace: "permissions"
+  description: "Bug fix where sensitive content protection is prematurely removed."
+  bug: "336626172"
+  # Referenced in WM where WM starts before DeviceConfig
+  is_fixed_read_only: true
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "enable_arrow_icon_on_hover_when_clickable"
+    namespace: "toolkit"
+    description: "Enable default arrow icon when hovering on buttons or clickable widgets."
+    bug: "299269803"
+}
+
+flag {
+    name: "enable_invalidate_check_thread"
+    namespace: "toolkit"
+    description: "Enable checkThread call in ViewRootImpl#onDescendentInvalidated"
+    bug: "333752000"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "add_schandle_to_vri_surface"
+    namespace: "window_surfaces"
+    description: "Add surface control handle to VRI Surface"
+    bug: "320706287"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

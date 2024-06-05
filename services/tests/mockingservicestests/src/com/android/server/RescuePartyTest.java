@@ -25,7 +25,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.RescueParty.DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN;
 import static com.android.server.RescueParty.LEVEL_FACTORY_RESET;
+import static com.android.server.RescueParty.RESCUE_LEVEL_FACTORY_RESET;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -33,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 
 import android.content.ContentResolver;
@@ -40,9 +43,11 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
+import android.crashrecovery.flags.Flags;
 import android.os.RecoverySystem;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.ArraySet;
@@ -54,6 +59,7 @@ import com.android.server.am.SettingsToPropertiesMapper;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
@@ -63,10 +69,12 @@ import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
@@ -95,12 +103,13 @@ public class RescuePartyTest {
             "persist.device_config.configuration.disable_rescue_party";
     private static final String PROP_DISABLE_FACTORY_RESET_FLAG =
             "persist.device_config.configuration.disable_rescue_party_factory_reset";
-    private static final String PROP_LAST_FACTORY_RESET_TIME_MS = "persist.sys.last_factory_reset";
 
-    private static final int THROTTLING_DURATION_MIN = 10;
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private MockitoSession mSession;
     private HashMap<String, String> mSystemSettingsMap;
+    private HashMap<String, String> mCrashRecoveryPropertiesMap;
     //Records the namespaces wiped by setProperties().
     private HashSet<String> mNamespacesWiped;
 
@@ -112,6 +121,9 @@ public class RescuePartyTest {
     private ContentResolver mMockContentResolver;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private PackageManager mPackageManager;
+
+    // Mock only sysprop apis
+    private PackageWatchdog.BootThreshold mSpyBootThreshold;
 
     @Captor
     private ArgumentCaptor<DeviceConfig.MonitorCallback> mMonitorCallbackCaptor;
@@ -208,12 +220,16 @@ public class RescuePartyTest {
         // Mock PackageWatchdog
         doAnswer((Answer<PackageWatchdog>) invocationOnMock -> mMockPackageWatchdog)
                 .when(() -> PackageWatchdog.getInstance(mMockContext));
+        mockCrashRecoveryProperties(mMockPackageWatchdog);
 
         doReturn(CURRENT_NETWORK_TIME_MILLIS).when(() -> RescueParty.getElapsedRealtime());
 
-        SystemProperties.set(RescueParty.PROP_RESCUE_BOOT_COUNT, Integer.toString(0));
+        setCrashRecoveryPropRescueBootCount(0);
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
         SystemProperties.set(PROP_DEVICE_CONFIG_DISABLE_FLAG, Boolean.toString(false));
+
+        // enable flag resets for tests
+        mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_RESCUE_PARTY_FLAG_RESETS);
     }
 
     @After
@@ -223,6 +239,9 @@ public class RescuePartyTest {
 
     @Test
     public void testBootLoopDetectionWithExecutionForAllRescueLevels() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescueParty.onSettingsProviderPublished(mMockContext);
         verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
                 any(Executor.class),
@@ -255,13 +274,52 @@ public class RescuePartyTest {
         noteBoot(4);
         assertTrue(RescueParty.isRebootPropertySet());
 
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        setCrashRecoveryPropAttemptingReboot(false);
         noteBoot(5);
         assertTrue(RescueParty.isFactoryResetPropertySet());
     }
 
     @Test
+    public void testBootLoopDetectionWithExecutionForAllRescueLevelsRecoverabilityDetection() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        RescueParty.onSettingsProviderPublished(mMockContext);
+        verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
+                any(Executor.class),
+                mMonitorCallbackCaptor.capture()));
+        HashMap<String, Integer> verifiedTimesMap = new HashMap<String, Integer>();
+
+        // Record DeviceConfig accesses
+        DeviceConfig.MonitorCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE1);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE2);
+
+        final String[] expectedAllResetNamespaces = new String[]{NAMESPACE1, NAMESPACE2};
+
+        noteBoot(1);
+        verifyDeviceConfigReset(expectedAllResetNamespaces, verifiedTimesMap);
+
+        noteBoot(2);
+        assertTrue(RescueParty.isRebootPropertySet());
+
+        noteBoot(3);
+        verifyOnlySettingsReset(Settings.RESET_MODE_UNTRUSTED_DEFAULTS);
+
+        noteBoot(4);
+        verifyOnlySettingsReset(Settings.RESET_MODE_UNTRUSTED_CHANGES);
+
+        noteBoot(5);
+        verifyOnlySettingsReset(Settings.RESET_MODE_TRUSTED_DEFAULTS);
+
+        setCrashRecoveryPropAttemptingReboot(false);
+        noteBoot(6);
+        assertTrue(RescueParty.isFactoryResetPropertySet());
+    }
+
+    @Test
     public void testPersistentAppCrashDetectionWithExecutionForAllRescueLevels() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         noteAppCrash(1, true);
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, /*resetNamespaces=*/ null,
@@ -280,13 +338,57 @@ public class RescuePartyTest {
         noteAppCrash(4, true);
         assertTrue(RescueParty.isRebootPropertySet());
 
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        setCrashRecoveryPropAttemptingReboot(false);
         noteAppCrash(5, true);
         assertTrue(RescueParty.isFactoryResetPropertySet());
     }
 
     @Test
+    public void testPersistentAppCrashDetectionWithExecutionForAllRescueLevelsRecoverability() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        RescueParty.onSettingsProviderPublished(mMockContext);
+        verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
+                any(Executor.class),
+                mMonitorCallbackCaptor.capture()));
+        HashMap<String, Integer> verifiedTimesMap = new HashMap<String, Integer>();
+
+        // Record DeviceConfig accesses
+        DeviceConfig.MonitorCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.onDeviceConfigAccess(PERSISTENT_PACKAGE, NAMESPACE1);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE1);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE2);
+
+        final String[] expectedResetNamespaces = new String[]{NAMESPACE1};
+        final String[] expectedAllResetNamespaces = new String[]{NAMESPACE1, NAMESPACE2};
+
+        noteAppCrash(1, true);
+        verifyDeviceConfigReset(expectedResetNamespaces, verifiedTimesMap);
+
+        noteAppCrash(2, true);
+        verifyDeviceConfigReset(expectedAllResetNamespaces, verifiedTimesMap);
+
+        noteAppCrash(3, true);
+        assertTrue(RescueParty.isRebootPropertySet());
+
+        noteAppCrash(4, true);
+        verifyOnlySettingsReset(Settings.RESET_MODE_UNTRUSTED_DEFAULTS);
+
+        noteAppCrash(5, true);
+        verifyOnlySettingsReset(Settings.RESET_MODE_UNTRUSTED_CHANGES);
+
+        noteAppCrash(6, true);
+        verifyOnlySettingsReset(Settings.RESET_MODE_TRUSTED_DEFAULTS);
+
+        setCrashRecoveryPropAttemptingReboot(false);
+        noteAppCrash(7, true);
+        assertTrue(RescueParty.isFactoryResetPropertySet());
+    }
+
+    @Test
     public void testNonPersistentAppOnlyPerformsFlagResets() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         noteAppCrash(1, false);
 
         verifySettingsResets(Settings.RESET_MODE_UNTRUSTED_DEFAULTS, /*resetNamespaces=*/ null,
@@ -310,7 +412,49 @@ public class RescuePartyTest {
     }
 
     @Test
+    public void testNonPersistentAppOnlyPerformsFlagResetsRecoverabilityDetection() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        RescueParty.onSettingsProviderPublished(mMockContext);
+        verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
+                any(Executor.class),
+                mMonitorCallbackCaptor.capture()));
+        HashMap<String, Integer> verifiedTimesMap = new HashMap<String, Integer>();
+
+        // Record DeviceConfig accesses
+        DeviceConfig.MonitorCallback monitorCallback = mMonitorCallbackCaptor.getValue();
+        monitorCallback.onDeviceConfigAccess(NON_PERSISTENT_PACKAGE, NAMESPACE1);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE1);
+        monitorCallback.onDeviceConfigAccess(CALLING_PACKAGE1, NAMESPACE2);
+
+        final String[] expectedResetNamespaces = new String[]{NAMESPACE1};
+        final String[] expectedAllResetNamespaces = new String[]{NAMESPACE1, NAMESPACE2};
+
+        noteAppCrash(1, false);
+        verifyDeviceConfigReset(expectedResetNamespaces, verifiedTimesMap);
+
+        noteAppCrash(2, false);
+        verifyDeviceConfigReset(expectedAllResetNamespaces, verifiedTimesMap);
+
+        noteAppCrash(3, false);
+        assertFalse(RescueParty.isRebootPropertySet());
+
+        noteAppCrash(4, false);
+        verifyNoSettingsReset(Settings.RESET_MODE_UNTRUSTED_DEFAULTS);
+        noteAppCrash(5, false);
+        verifyNoSettingsReset(Settings.RESET_MODE_UNTRUSTED_CHANGES);
+        noteAppCrash(6, false);
+        verifyNoSettingsReset(Settings.RESET_MODE_TRUSTED_DEFAULTS);
+
+        setCrashRecoveryPropAttemptingReboot(false);
+        noteAppCrash(7, false);
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+    }
+
+    @Test
     public void testNonPersistentAppCrashDetectionWithScopedResets() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescueParty.onSettingsProviderPublished(mMockContext);
         verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
                 any(Executor.class),
@@ -368,6 +512,9 @@ public class RescuePartyTest {
 
     @Test
     public void testNonDeviceConfigSettingsOnlyResetOncePerLevel() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescueParty.onSettingsProviderPublished(mMockContext);
         verify(() -> DeviceConfig.setMonitorCallback(eq(mMockContentResolver),
                 any(Executor.class),
@@ -433,19 +580,32 @@ public class RescuePartyTest {
     }
 
     @Test
-    public void testIsAttemptingFactoryReset() {
+    public void testIsRecoveryTriggeredReboot() {
         for (int i = 0; i < LEVEL_FACTORY_RESET; i++) {
             noteBoot(i + 1);
         }
         assertFalse(RescueParty.isFactoryResetPropertySet());
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        setCrashRecoveryPropAttemptingReboot(false);
         noteBoot(LEVEL_FACTORY_RESET + 1);
-        assertTrue(RescueParty.isAttemptingFactoryReset());
+        assertTrue(RescueParty.isRecoveryTriggeredReboot());
         assertTrue(RescueParty.isFactoryResetPropertySet());
     }
 
     @Test
-    public void testIsAttemptingFactoryResetOnlyAfterRebootCompleted() {
+    public void testIsRecoveryTriggeredRebootRecoverabilityDetection() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        for (int i = 0; i < RESCUE_LEVEL_FACTORY_RESET; i++) {
+            noteBoot(i + 1);
+        }
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+        setCrashRecoveryPropAttemptingReboot(false);
+        noteBoot(RESCUE_LEVEL_FACTORY_RESET + 1);
+        assertTrue(RescueParty.isRecoveryTriggeredReboot());
+        assertTrue(RescueParty.isFactoryResetPropertySet());
+    }
+
+    @Test
+    public void testIsRecoveryTriggeredRebootOnlyAfterRebootCompleted() {
         for (int i = 0; i < LEVEL_FACTORY_RESET; i++) {
             noteBoot(i + 1);
         }
@@ -456,57 +616,137 @@ public class RescuePartyTest {
         noteBoot(mitigationCount++);
         assertFalse(RescueParty.isFactoryResetPropertySet());
         noteBoot(mitigationCount++);
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        setCrashRecoveryPropAttemptingReboot(false);
         noteBoot(mitigationCount + 1);
-        assertTrue(RescueParty.isAttemptingFactoryReset());
+        assertTrue(RescueParty.isRecoveryTriggeredReboot());
+        assertTrue(RescueParty.isFactoryResetPropertySet());
+    }
+
+    @Test
+    public void testIsRecoveryTriggeredRebootOnlyAfterRebootCompletedRecoverabilityDetection() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        for (int i = 0; i < RESCUE_LEVEL_FACTORY_RESET; i++) {
+            noteBoot(i + 1);
+        }
+        int mitigationCount = RESCUE_LEVEL_FACTORY_RESET + 1;
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+        noteBoot(mitigationCount++);
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+        noteBoot(mitigationCount++);
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+        noteBoot(mitigationCount++);
+        setCrashRecoveryPropAttemptingReboot(false);
+        noteBoot(mitigationCount + 1);
+        assertTrue(RescueParty.isRecoveryTriggeredReboot());
         assertTrue(RescueParty.isFactoryResetPropertySet());
     }
 
     @Test
     public void testThrottlingOnBootFailures() {
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        setCrashRecoveryPropAttemptingReboot(false);
         long now = System.currentTimeMillis();
-        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN - 1);
-        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(beforeTimeout));
+        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN - 1);
+        setCrashRecoveryPropLastFactoryReset(beforeTimeout);
         for (int i = 1; i <= LEVEL_FACTORY_RESET; i++) {
             noteBoot(i);
         }
-        assertFalse(RescueParty.isAttemptingFactoryReset());
+        assertFalse(RescueParty.isRecoveryTriggeredReboot());
+    }
+
+    @Test
+    public void testThrottlingOnBootFailuresRecoverabilityDetection() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        setCrashRecoveryPropAttemptingReboot(false);
+        long now = System.currentTimeMillis();
+        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN - 1);
+        setCrashRecoveryPropLastFactoryReset(beforeTimeout);
+        for (int i = 1; i <= RESCUE_LEVEL_FACTORY_RESET; i++) {
+            noteBoot(i);
+        }
+        assertFalse(RescueParty.isRecoveryTriggeredReboot());
     }
 
     @Test
     public void testThrottlingOnAppCrash() {
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        setCrashRecoveryPropAttemptingReboot(false);
         long now = System.currentTimeMillis();
-        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN - 1);
-        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(beforeTimeout));
+        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN - 1);
+        setCrashRecoveryPropLastFactoryReset(beforeTimeout);
         for (int i = 0; i <= LEVEL_FACTORY_RESET; i++) {
             noteAppCrash(i + 1, true);
         }
-        assertFalse(RescueParty.isAttemptingFactoryReset());
+        assertFalse(RescueParty.isRecoveryTriggeredReboot());
+    }
+
+    @Test
+    public void testThrottlingOnAppCrashRecoverabilityDetection() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        setCrashRecoveryPropAttemptingReboot(false);
+        long now = System.currentTimeMillis();
+        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN - 1);
+        setCrashRecoveryPropLastFactoryReset(beforeTimeout);
+        for (int i = 0; i <= RESCUE_LEVEL_FACTORY_RESET; i++) {
+            noteAppCrash(i + 1, true);
+        }
+        assertFalse(RescueParty.isRecoveryTriggeredReboot());
     }
 
     @Test
     public void testNotThrottlingAfterTimeoutOnBootFailures() {
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        setCrashRecoveryPropAttemptingReboot(false);
         long now = System.currentTimeMillis();
-        long afterTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN + 1);
-        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(afterTimeout));
+        long afterTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN + 1);
+        setCrashRecoveryPropLastFactoryReset(afterTimeout);
         for (int i = 1; i <= LEVEL_FACTORY_RESET; i++) {
             noteBoot(i);
         }
-        assertTrue(RescueParty.isAttemptingFactoryReset());
+        assertTrue(RescueParty.isRecoveryTriggeredReboot());
     }
+
+    @Test
+    public void testNotThrottlingAfterTimeoutOnBootFailuresRecoverabilityDetection() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        setCrashRecoveryPropAttemptingReboot(false);
+        long now = System.currentTimeMillis();
+        long afterTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN + 1);
+        setCrashRecoveryPropLastFactoryReset(afterTimeout);
+        for (int i = 1; i <= RESCUE_LEVEL_FACTORY_RESET; i++) {
+            noteBoot(i);
+        }
+        assertTrue(RescueParty.isRecoveryTriggeredReboot());
+    }
+
     @Test
     public void testNotThrottlingAfterTimeoutOnAppCrash() {
-        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        setCrashRecoveryPropAttemptingReboot(false);
         long now = System.currentTimeMillis();
-        long afterTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN + 1);
-        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(afterTimeout));
+        long afterTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN + 1);
+        setCrashRecoveryPropLastFactoryReset(afterTimeout);
         for (int i = 0; i <= LEVEL_FACTORY_RESET; i++) {
             noteAppCrash(i + 1, true);
         }
-        assertTrue(RescueParty.isAttemptingFactoryReset());
+        assertTrue(RescueParty.isRecoveryTriggeredReboot());
+    }
+
+    @Test
+    public void testNotThrottlingAfterTimeoutOnAppCrashRecoverabilityDetection() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        setCrashRecoveryPropAttemptingReboot(false);
+        long now = System.currentTimeMillis();
+        long afterTimeout = now - TimeUnit.MINUTES.toMillis(
+                DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN + 1);
+        setCrashRecoveryPropLastFactoryReset(afterTimeout);
+        for (int i = 0; i <= RESCUE_LEVEL_FACTORY_RESET; i++) {
+            noteAppCrash(i + 1, true);
+        }
+        assertTrue(RescueParty.isRecoveryTriggeredReboot());
     }
 
     @Test
@@ -525,6 +765,7 @@ public class RescuePartyTest {
 
     @Test
     public void testExplicitlyEnablingAndDisablingRescue() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(false));
         SystemProperties.set(PROP_DISABLE_RESCUE, Boolean.toString(true));
         assertEquals(RescuePartyObserver.getInstance(mMockContext).execute(sFailingPackage,
@@ -537,6 +778,7 @@ public class RescuePartyTest {
 
     @Test
     public void testDisablingRescueByDeviceConfigFlag() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(false));
         SystemProperties.set(PROP_DEVICE_CONFIG_DISABLE_FLAG, Boolean.toString(true));
 
@@ -562,7 +804,24 @@ public class RescuePartyTest {
     }
 
     @Test
+    public void testDisablingFactoryResetByDeviceConfigFlagRecoverabilityDetection() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        SystemProperties.set(PROP_DISABLE_FACTORY_RESET_FLAG, Boolean.toString(true));
+
+        for (int i = 0; i < RESCUE_LEVEL_FACTORY_RESET; i++) {
+            noteBoot(i + 1);
+        }
+        assertFalse(RescueParty.isFactoryResetPropertySet());
+
+        // Restore the property value initialized in SetUp()
+        SystemProperties.set(PROP_DISABLE_FACTORY_RESET_FLAG, "");
+    }
+
+    @Test
     public void testHealthCheckLevels() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
 
         // Ensure that no action is taken for cases where the failure reason is unknown
@@ -588,7 +847,50 @@ public class RescuePartyTest {
     }
 
     @Test
+    public void testHealthCheckLevelsRecoverabilityDetection() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
+
+        // Ensure that no action is taken for cases where the failure reason is unknown
+        assertEquals(observer.onHealthCheckFailed(sFailingPackage,
+                PackageWatchdog.FAILURE_REASON_UNKNOWN, 1),
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_0);
+
+        // Ensure the correct user impact is returned for each mitigation count.
+        assertEquals(observer.onHealthCheckFailed(sFailingPackage,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1),
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_10);
+
+        assertEquals(observer.onHealthCheckFailed(sFailingPackage,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 2),
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_20);
+
+        assertEquals(observer.onHealthCheckFailed(sFailingPackage,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 3),
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_20);
+
+        assertEquals(observer.onHealthCheckFailed(sFailingPackage,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 4),
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_20);
+
+        assertEquals(observer.onHealthCheckFailed(sFailingPackage,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 5),
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_20);
+
+        assertEquals(observer.onHealthCheckFailed(sFailingPackage,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 6),
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_20);
+
+        assertEquals(observer.onHealthCheckFailed(sFailingPackage,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 7),
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_20);
+    }
+
+    @Test
     public void testBootLoopLevels() {
+        // this is old test where the flag needs to be disabled
+        mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
 
         assertEquals(observer.onBootLoop(0), PackageHealthObserverImpact.USER_IMPACT_LEVEL_0);
@@ -597,6 +899,19 @@ public class RescuePartyTest {
         assertEquals(observer.onBootLoop(3), PackageHealthObserverImpact.USER_IMPACT_LEVEL_50);
         assertEquals(observer.onBootLoop(4), PackageHealthObserverImpact.USER_IMPACT_LEVEL_50);
         assertEquals(observer.onBootLoop(5), PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
+    }
+
+    @Test
+    public void testBootLoopLevelsRecoverabilityDetection() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
+
+        assertEquals(observer.onBootLoop(1), PackageHealthObserverImpact.USER_IMPACT_LEVEL_20);
+        assertEquals(observer.onBootLoop(2), PackageHealthObserverImpact.USER_IMPACT_LEVEL_50);
+        assertEquals(observer.onBootLoop(3), PackageHealthObserverImpact.USER_IMPACT_LEVEL_71);
+        assertEquals(observer.onBootLoop(4), PackageHealthObserverImpact.USER_IMPACT_LEVEL_75);
+        assertEquals(observer.onBootLoop(5), PackageHealthObserverImpact.USER_IMPACT_LEVEL_80);
+        assertEquals(observer.onBootLoop(6), PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
     }
 
     @Test
@@ -721,11 +1036,26 @@ public class RescuePartyTest {
 
     private void verifySettingsResets(int resetMode, String[] resetNamespaces,
             HashMap<String, Integer> configResetVerifiedTimesMap) {
+        verifyOnlySettingsReset(resetMode);
+        verifyDeviceConfigReset(resetNamespaces, configResetVerifiedTimesMap);
+    }
+
+    private void verifyOnlySettingsReset(int resetMode) {
         verify(() -> Settings.Global.resetToDefaultsAsUser(mMockContentResolver, null,
                 resetMode, UserHandle.USER_SYSTEM));
         verify(() -> Settings.Secure.resetToDefaultsAsUser(eq(mMockContentResolver), isNull(),
                 eq(resetMode), anyInt()));
-        // Verify DeviceConfig resets
+    }
+
+    private void verifyNoSettingsReset(int resetMode) {
+        verify(() -> Settings.Global.resetToDefaultsAsUser(mMockContentResolver, null,
+                resetMode, UserHandle.USER_SYSTEM), never());
+        verify(() -> Settings.Secure.resetToDefaultsAsUser(eq(mMockContentResolver), isNull(),
+                eq(resetMode), anyInt()), never());
+    }
+
+    private void verifyDeviceConfigReset(String[] resetNamespaces,
+            Map<String, Integer> configResetVerifiedTimesMap) {
         if (resetNamespaces == null) {
             verify(() -> DeviceConfig.resetToDefaults(anyInt(), anyString()), never());
         } else {
@@ -752,5 +1082,139 @@ public class RescuePartyTest {
         String packageName = isPersistent ? PERSISTENT_PACKAGE : NON_PERSISTENT_PACKAGE;
         RescuePartyObserver.getInstance(mMockContext).execute(new VersionedPackage(
                 packageName, 1), PackageWatchdog.FAILURE_REASON_APP_CRASH, mitigationCount);
+    }
+
+    // Mock CrashRecoveryProperties as they cannot be accessed due to SEPolicy restrictions
+    private void mockCrashRecoveryProperties(PackageWatchdog watchdog) {
+        // mock properties in RescueParty
+        try {
+
+            doAnswer((Answer<Boolean>) invocationOnMock -> {
+                String storedValue = mCrashRecoveryPropertiesMap
+                        .getOrDefault("crashrecovery.attempting_factory_reset", "false");
+                return Boolean.parseBoolean(storedValue);
+            }).when(() -> RescueParty.isFactoryResetPropertySet());
+            doAnswer((Answer<Void>) invocationOnMock -> {
+                boolean value = invocationOnMock.getArgument(0);
+                mCrashRecoveryPropertiesMap.put("crashrecovery.attempting_factory_reset",
+                        Boolean.toString(value));
+                return null;
+            }).when(() -> RescueParty.setFactoryResetProperty(anyBoolean()));
+
+            doAnswer((Answer<Boolean>) invocationOnMock -> {
+                String storedValue = mCrashRecoveryPropertiesMap
+                        .getOrDefault("crashrecovery.attempting_reboot", "false");
+                return Boolean.parseBoolean(storedValue);
+            }).when(() -> RescueParty.isRebootPropertySet());
+            doAnswer((Answer<Void>) invocationOnMock -> {
+                boolean value = invocationOnMock.getArgument(0);
+                setCrashRecoveryPropAttemptingReboot(value);
+                return null;
+            }).when(() -> RescueParty.setRebootProperty(anyBoolean()));
+
+            doAnswer((Answer<Long>) invocationOnMock -> {
+                String storedValue = mCrashRecoveryPropertiesMap
+                        .getOrDefault("persist.crashrecovery.last_factory_reset", "0");
+                return Long.parseLong(storedValue);
+            }).when(() -> RescueParty.getLastFactoryResetTimeMs());
+            doAnswer((Answer<Void>) invocationOnMock -> {
+                long value = invocationOnMock.getArgument(0);
+                setCrashRecoveryPropLastFactoryReset(value);
+                return null;
+            }).when(() -> RescueParty.setLastFactoryResetTimeMs(anyLong()));
+
+            doAnswer((Answer<Integer>) invocationOnMock -> {
+                String storedValue = mCrashRecoveryPropertiesMap
+                        .getOrDefault("crashrecovery.max_rescue_level_attempted", "0");
+                return Integer.parseInt(storedValue);
+            }).when(() -> RescueParty.getMaxRescueLevelAttempted());
+            doAnswer((Answer<Void>) invocationOnMock -> {
+                int value = invocationOnMock.getArgument(0);
+                mCrashRecoveryPropertiesMap.put("crashrecovery.max_rescue_level_attempted",
+                        Integer.toString(value));
+                return null;
+            }).when(() -> RescueParty.setMaxRescueLevelAttempted(anyInt()));
+
+        } catch (Exception e) {
+            // tests will fail, just printing the error
+            System.out.println("Error while mocking crashrecovery properties " + e.getMessage());
+        }
+
+        // mock properties in BootThreshold
+        try {
+            mSpyBootThreshold = spy(watchdog.new BootThreshold(
+                    PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
+                    PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS));
+            mCrashRecoveryPropertiesMap = new HashMap<>();
+
+            doAnswer((Answer<Integer>) invocationOnMock -> {
+                String storedValue = mCrashRecoveryPropertiesMap
+                        .getOrDefault("crashrecovery.rescue_boot_count", "0");
+                return Integer.parseInt(storedValue);
+            }).when(mSpyBootThreshold).getCount();
+            doAnswer((Answer<Void>) invocationOnMock -> {
+                int count = invocationOnMock.getArgument(0);
+                setCrashRecoveryPropRescueBootCount(count);
+                return null;
+            }).when(mSpyBootThreshold).setCount(anyInt());
+
+            doAnswer((Answer<Integer>) invocationOnMock -> {
+                String storedValue = mCrashRecoveryPropertiesMap
+                        .getOrDefault("crashrecovery.boot_mitigation_count", "0");
+                return Integer.parseInt(storedValue);
+            }).when(mSpyBootThreshold).getMitigationCount();
+            doAnswer((Answer<Void>) invocationOnMock -> {
+                int count = invocationOnMock.getArgument(0);
+                mCrashRecoveryPropertiesMap.put("crashrecovery.boot_mitigation_count",
+                        Integer.toString(count));
+                return null;
+            }).when(mSpyBootThreshold).setMitigationCount(anyInt());
+
+            doAnswer((Answer<Long>) invocationOnMock -> {
+                String storedValue = mCrashRecoveryPropertiesMap
+                        .getOrDefault("crashrecovery.rescue_boot_start", "0");
+                return Long.parseLong(storedValue);
+            }).when(mSpyBootThreshold).getStart();
+            doAnswer((Answer<Void>) invocationOnMock -> {
+                long count = invocationOnMock.getArgument(0);
+                mCrashRecoveryPropertiesMap.put("crashrecovery.rescue_boot_start",
+                        Long.toString(count));
+                return null;
+            }).when(mSpyBootThreshold).setStart(anyLong());
+
+            doAnswer((Answer<Long>) invocationOnMock -> {
+                String storedValue = mCrashRecoveryPropertiesMap
+                        .getOrDefault("crashrecovery.boot_mitigation_start", "0");
+                return Long.parseLong(storedValue);
+            }).when(mSpyBootThreshold).getMitigationStart();
+            doAnswer((Answer<Void>) invocationOnMock -> {
+                long count = invocationOnMock.getArgument(0);
+                mCrashRecoveryPropertiesMap.put("crashrecovery.boot_mitigation_start",
+                        Long.toString(count));
+                return null;
+            }).when(mSpyBootThreshold).setMitigationStart(anyLong());
+
+            Field mBootThresholdField = watchdog.getClass().getDeclaredField("mBootThreshold");
+            mBootThresholdField.setAccessible(true);
+            mBootThresholdField.set(watchdog, mSpyBootThreshold);
+        } catch (Exception e) {
+            // tests will fail, just printing the error
+            System.out.println("Error while spying BootThreshold " + e.getMessage());
+        }
+    }
+
+    private void setCrashRecoveryPropRescueBootCount(int count) {
+        mCrashRecoveryPropertiesMap.put("crashrecovery.rescue_boot_count",
+                Integer.toString(count));
+    }
+
+    private void setCrashRecoveryPropAttemptingReboot(boolean value) {
+        mCrashRecoveryPropertiesMap.put("crashrecovery.attempting_reboot",
+                Boolean.toString(value));
+    }
+
+    private void setCrashRecoveryPropLastFactoryReset(long value) {
+        mCrashRecoveryPropertiesMap.put("persist.crashrecovery.last_factory_reset",
+                Long.toString(value));
     }
 }

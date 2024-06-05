@@ -62,28 +62,18 @@
     <string name="keyguard_plugged_in_charging_slowly"><xliff:g id="percentage">%s</xliff:g> • Charging slowly</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the defend mode is triggered, say that charging is temporarily limited.  -->
-    <string name="keyguard_plugged_in_charging_limited"><xliff:g id="percentage">%s</xliff:g> • Charging optimized to protect battery</string>
+    <string name="keyguard_plugged_in_charging_limited"><xliff:g id="percentage">%s</xliff:g> • Charging on hold to protect battery</string>
 
     <!-- When the lock screen is showing and the phone plugged in with incompatible charger. -->
-    <string name="keyguard_plugged_in_incompatible_charger"><xliff:g id="percentage">%s</xliff:g> • Issue with charging accessory</string>
-
-    <!-- On the keyguard screen, when pattern lock is disabled, only tell them to press menu to unlock.  This is shown in small font at the bottom. -->
-    <string name="keyguard_instructions_when_pattern_disabled">Press Menu to unlock.</string>
+    <string name="keyguard_plugged_in_incompatible_charger"><xliff:g id="percentage">%s</xliff:g> • Check charging accessory</string>
 
     <!-- SIM messages --><skip />
     <!-- When the user inserts a sim card from an unsupported network, it becomes network locked -->
     <string name="keyguard_network_locked_message">Network locked</string>
     <!-- Shown when there is no SIM. -->
     <string name="keyguard_missing_sim_message_short">No SIM</string>
-    <!-- Shown to ask the user to add a SIM. -->
-    <string name="keyguard_missing_sim_instructions">Add a SIM.</string>
-    <!-- Shown to ask the user to add a SIM when sim is missing or not readable. -->
-    <string name="keyguard_missing_sim_instructions_long">The SIM is missing or not readable. Add a SIM.</string>
     <!-- Shown when SIM is permanently disabled. -->
     <string name="keyguard_permanent_disabled_sim_message_short">Unusable SIM.</string>
-    <!-- Shown to inform the user to SIM is permanently deactivated. -->
-    <string name="keyguard_permanent_disabled_sim_instructions">Your SIM has been permanently deactivated.\n
-    Contact your wireless service provider for another SIM.</string>
     <!-- Shown to tell the user that their SIM is locked and they must unlock it. -->
     <string name="keyguard_sim_locked_message">SIM is locked.</string>
     <!-- When the user enters a wrong sim pin too many times, it becomes PUK locked (Pin Unlock Kode) -->
@@ -192,7 +182,7 @@
     <string name="kg_prompt_after_user_lockdown_pattern">Pattern is required after lockdown</string>
 
     <!-- Message shown to prepare for an unattended update (OTA). Also known as an over-the-air (OTA) update.  [CHAR LIMIT=70] -->
-    <string name="kg_prompt_unattended_update">Update will install during inactive hours</string>
+    <string name="kg_prompt_unattended_update">Update will install when device not in use</string>
 
     <!-- Message shown when primary authentication hasn't been used for some time.  [CHAR LIMIT=70] -->
     <string name="kg_prompt_pin_auth_timeout">Added security required. PIN not used for a while.</string>
@@ -313,6 +303,15 @@
 
     <!-- An explanation text that the password needs to be entered since the user hasn't used strong authentication since quite some time. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_timeout_password">For additional security, use password instead</string>
+
+    <!-- An explanation text that the pin needs to be provided to enter the device for security reasons. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_added_security_pin">PIN required for additional security</string>
+
+    <!-- An explanation text that the pattern needs to be provided to enter the device for security reasons. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_added_security_pattern">Pattern required for additional security</string>
+
+    <!-- An explanation text that the password needs to be provided to enter the device for security reasons. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_added_security_password">Password required for additional security</string>
 
     <!-- An explanation text that the credential needs to be entered because a device admin has
     locked the device. [CHAR LIMIT=80] -->

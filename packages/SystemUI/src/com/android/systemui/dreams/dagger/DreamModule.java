@@ -16,6 +16,8 @@
 
 package com.android.systemui.dreams.dagger;
 
+import android.annotation.Nullable;
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -23,19 +25,34 @@ import android.content.res.Resources;
 
 import com.android.dream.lowlight.dagger.LowLightDreamModule;
 import com.android.settingslib.dream.DreamBackend;
-import com.android.systemui.R;
+import com.android.systemui.ambient.touch.scrim.dagger.ScrimModule;
 import com.android.systemui.complication.dagger.RegisteredComplicationsModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
 import com.android.systemui.dreams.DreamOverlayService;
+import com.android.systemui.dreams.SystemDialogsCloser;
 import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
-import com.android.systemui.dreams.touch.scrim.dagger.ScrimModule;
+import com.android.systemui.dreams.homecontrols.DreamServiceDelegate;
+import com.android.systemui.dreams.homecontrols.DreamServiceDelegateImpl;
+import com.android.systemui.dreams.homecontrols.HomeControlsDreamService;
+import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.pipeline.shared.TileSpec;
+import com.android.systemui.qs.tiles.viewmodel.QSTileConfig;
+import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy;
+import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig;
+import com.android.systemui.res.R;
+import com.android.systemui.touch.TouchInsetManager;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
+import dagger.multibindings.StringKey;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 
@@ -55,9 +72,11 @@ public interface DreamModule {
     String DREAM_ONLY_ENABLED_FOR_DOCK_USER = "dream_only_enabled_for_dock_user";
     String DREAM_OVERLAY_SERVICE_COMPONENT = "dream_overlay_service_component";
     String DREAM_OVERLAY_ENABLED = "dream_overlay_enabled";
-
+    String DREAM_TOUCH_INSET_MANAGER = "dream_touch_inset_manager";
     String DREAM_SUPPORTED = "dream_supported";
     String DREAM_OVERLAY_WINDOW_TITLE = "dream_overlay_window_title";
+    String HOME_CONTROL_PANEL_DREAM_COMPONENT = "home_control_panel_dream_component";
+    String DREAM_TILE_SPEC = "dream";
 
     /**
      * Provides the dream component
@@ -66,6 +85,39 @@ public interface DreamModule {
     @Named(DREAM_OVERLAY_SERVICE_COMPONENT)
     static ComponentName providesDreamOverlayService(Context context) {
         return new ComponentName(context, DreamOverlayService.class);
+    }
+
+    /**
+     * Provides the home control panel component
+     */
+    @Provides
+    @Nullable
+    @Named(HOME_CONTROL_PANEL_DREAM_COMPONENT)
+    static ComponentName providesHomeControlPanelComponent(Context context) {
+        final String homeControlPanelComponent = context.getResources()
+                .getString(R.string.config_homePanelDreamComponent);
+        if (homeControlPanelComponent.isEmpty()) {
+            return null;
+        }
+        return ComponentName.unflattenFromString(homeControlPanelComponent);
+    }
+
+    /**
+     * Provides Home Controls Dream Service
+     */
+    @Binds
+    @IntoMap
+    @ClassKey(HomeControlsDreamService.class)
+    Service bindHomeControlsDreamService(
+            HomeControlsDreamService service);
+
+    /**
+     * Provides a touch inset manager for dreams.
+     */
+    @Provides
+    @Named(DREAM_TOUCH_INSET_MANAGER)
+    static TouchInsetManager providesTouchInsetManager(@Main Executor executor) {
+        return new TouchInsetManager(executor);
     }
 
     /**
@@ -102,6 +154,15 @@ public interface DreamModule {
         return Optional.empty();
     }
 
+    /**
+     * Provides an implementation for {@link SystemDialogsCloser} that calls
+     * {@link Context.closeSystemDialogs}.
+     */
+    @Provides
+    static SystemDialogsCloser providesSystemDialogsCloser(Context context) {
+        return () -> context.closeSystemDialogs();
+    }
+
     /** */
     @Provides
     @Named(DREAM_ONLY_ENABLED_FOR_DOCK_USER)
@@ -123,4 +184,26 @@ public interface DreamModule {
     static String providesDreamOverlayWindowTitle(@Main Resources resources) {
         return resources.getString(R.string.app_label);
     }
+
+    /** Provides config for the dream tile */
+    @Provides
+    @IntoMap
+    @StringKey(DREAM_TILE_SPEC)
+    static QSTileConfig provideDreamTileConfig(QsEventLogger uiEventLogger) {
+        TileSpec tileSpec = TileSpec.create(DREAM_TILE_SPEC);
+        return new QSTileConfig(tileSpec,
+                new QSTileUIConfig.Resource(
+                        R.drawable.ic_qs_screen_saver,
+                        R.string.quick_settings_screensaver_label),
+                uiEventLogger.getNewInstanceId(),
+                tileSpec.getSpec(),
+                QSTilePolicy.NoRestrictions.INSTANCE
+                );
+    }
+
+
+    /** Provides delegate to allow for testing of dream service */
+    @Binds
+    DreamServiceDelegate bindDreamDelegate(DreamServiceDelegateImpl impl);
+
 }

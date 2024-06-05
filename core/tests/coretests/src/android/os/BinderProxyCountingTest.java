@@ -24,18 +24,21 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.support.test.uiautomator.UiDevice;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
 
 import com.android.frameworks.coretests.aidl.IBpcCallbackObserver;
 import com.android.frameworks.coretests.aidl.IBpcTestAppCmdService;
 import com.android.frameworks.coretests.aidl.IBpcTestServiceCmdService;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -71,6 +74,7 @@ import java.util.function.Consumer;
  */
 @LargeTest
 @RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = ActivityManager.class)
 public class BinderProxyCountingTest {
     private static final String TAG = BinderProxyCountingTest.class.getSimpleName();
 
@@ -84,9 +88,10 @@ public class BinderProxyCountingTest {
 
     private static final int BIND_SERVICE_TIMEOUT_SEC = 5;
     private static final int TOO_MANY_BINDERS_TIMEOUT_SEC = 2;
+    private static final int TOO_MANY_BINDERS_WITH_KILL_TIMEOUT_SEC = 30;
 
-    // Keep in sync with sBinderProxyCountLimit in BpBinder.cpp
-    private static final int BINDER_PROXY_LIMIT = 2500;
+    // Keep in sync with BINDER_PROXY_HIGH_WATERMARK in ActivityManagerService.java
+    private static final int BINDER_PROXY_LIMIT = 6000;
 
     private static Context sContext;
     private static UiDevice sUiDevice;
@@ -107,11 +112,14 @@ public class BinderProxyCountingTest {
     };
     private static int sTestPkgUid;
 
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     /**
      * Setup any common data for the upcoming tests.
      */
-    @BeforeClass
-    public static void setUpOnce() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         sContext = InstrumentationRegistry.getContext();
         sTestPkgUid = sContext.getPackageManager().getPackageUid(TEST_APP_PKG, 0);
         ((ActivityManager) sContext.getSystemService(Context.ACTIVITY_SERVICE)).killUid(sTestPkgUid,
@@ -168,18 +176,26 @@ public class BinderProxyCountingTest {
         }
     }
 
-    private CountDownLatch createBinderLimitLatch() throws RemoteException {
-        final CountDownLatch latch = new CountDownLatch(1);
+    private CountDownLatch[] createBinderLimitLatch() throws RemoteException {
+        final CountDownLatch[] latches = new CountDownLatch[] {
+            new CountDownLatch(1), new CountDownLatch(1)
+        };
         sBpcTestServiceCmdService.setBinderProxyCountCallback(
                 new IBpcCallbackObserver.Stub() {
                     @Override
-                    public void onCallback(int uid) {
+                    public void onLimitReached(int uid) {
                         if (uid == sTestPkgUid) {
-                            latch.countDown();
+                            latches[0].countDown();
+                        }
+                    }
+                    @Override
+                    public void onWarningThresholdReached(int uid) {
+                        if (uid == sTestPkgUid) {
+                            latches[1].countDown();
                         }
                     }
                 });
-        return latch;
+        return latches;
     }
 
     /**
@@ -220,6 +236,7 @@ public class BinderProxyCountingTest {
     @Test
     public void testBinderProxyLimitBoundary() throws Exception {
         final int binderProxyLimit = 2000;
+        final int binderProxyWarning = 1900;
         final int rearmThreshold = 1800;
         try {
             sTestAppConnection = bindService(sTestAppConsumer, sTestAppIntent);
@@ -231,19 +248,33 @@ public class BinderProxyCountingTest {
             // Get the baseline of binders naturally held by the test Package
             int baseBinderCount = sBpcTestServiceCmdService.getBinderProxyCount(sTestPkgUid);
 
-            final CountDownLatch binderLimitLatch = createBinderLimitLatch();
-            sBpcTestServiceCmdService.setBinderProxyWatermarks(binderProxyLimit, rearmThreshold);
+            final CountDownLatch[] binderLatches = createBinderLimitLatch();
+            sBpcTestServiceCmdService.setBinderProxyWatermarks(binderProxyLimit, rearmThreshold,
+                    binderProxyWarning);
+
+            // Create Binder Proxies up to the warning;
+            sBpcTestAppCmdService.createTestBinders(binderProxyWarning - baseBinderCount);
+            if (binderLatches[1].await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+                fail("Received BinderProxyLimitCallback for uid " + sTestPkgUid
+                        + " when proxy warning should not have been triggered");
+            }
+
+            // Create one more Binder to trigger the warning
+            sBpcTestAppCmdService.createTestBinders(1);
+            if (!binderLatches[1].await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+                fail("Timed out waiting for uid " + sTestPkgUid + " to trigger the warning");
+            }
 
             // Create Binder Proxies up to the limit
-            sBpcTestAppCmdService.createTestBinders(binderProxyLimit - baseBinderCount);
-            if (binderLimitLatch.await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+            sBpcTestAppCmdService.createTestBinders(binderProxyLimit - binderProxyWarning - 1);
+            if (binderLatches[0].await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
                 fail("Received BinderProxyLimitCallback for uid " + sTestPkgUid
                         + " when proxy limit should not have been reached");
             }
 
             // Create one more Binder to cross the limit
             sBpcTestAppCmdService.createTestBinders(1);
-            if (!binderLimitLatch.await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+            if (!binderLatches[0].await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
                 fail("Timed out waiting for uid " + sTestPkgUid + " to hit limit");
             }
 
@@ -267,12 +298,20 @@ public class BinderProxyCountingTest {
             sBpcTestServiceCmdService.forceGc();
             int baseBinderCount = sBpcTestServiceCmdService.getBinderProxyCount(sTestPkgUid);
             for (int testLimit : testLimits) {
-                final CountDownLatch binderLimitLatch = createBinderLimitLatch();
+                final CountDownLatch[] binderLatches = createBinderLimitLatch();
                 // Change the BinderProxyLimit
-                sBpcTestServiceCmdService.setBinderProxyWatermarks(testLimit, baseBinderCount + 10);
+                sBpcTestServiceCmdService.setBinderProxyWatermarks(testLimit, baseBinderCount + 10,
+                        testLimit - 10);
+
+                // Trigger the new Binder Proxy warning
+                sBpcTestAppCmdService.createTestBinders(testLimit - 9 - baseBinderCount);
+                if (!binderLatches[1].await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+                    fail("Timed out waiting for uid " + sTestPkgUid + " to trigger the warning");
+                }
+
                 // Exceed the new Binder Proxy Limit
-                sBpcTestAppCmdService.createTestBinders(testLimit + 1);
-                if (!binderLimitLatch.await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+                sBpcTestAppCmdService.createTestBinders(10);
+                if (!binderLatches[0].await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
                     fail("Timed out waiting for uid " + sTestPkgUid + " to hit limit");
                 }
 
@@ -290,6 +329,7 @@ public class BinderProxyCountingTest {
     public void testRearmCallbackThreshold() throws Exception {
         final int binderProxyLimit = 2000;
         final int exceedBinderProxyLimit = binderProxyLimit + 10;
+        final int binderProxyWarning = 1900;
         final int rearmThreshold = 1800;
         try {
             sTestAppConnection = bindService(sTestAppConsumer, sTestAppIntent);
@@ -298,11 +338,19 @@ public class BinderProxyCountingTest {
             sBpcTestServiceCmdService.enableBinderProxyLimit(true);
 
             sBpcTestServiceCmdService.forceGc();
-            final CountDownLatch firstBinderLimitLatch = createBinderLimitLatch();
-            sBpcTestServiceCmdService.setBinderProxyWatermarks(binderProxyLimit, rearmThreshold);
+            int baseBinderCount = sBpcTestServiceCmdService.getBinderProxyCount(sTestPkgUid);
+            final CountDownLatch[] firstBinderLatches = createBinderLimitLatch();
+            sBpcTestServiceCmdService.setBinderProxyWatermarks(binderProxyLimit, rearmThreshold,
+                    binderProxyWarning);
+            // Trigger the Binder Proxy Waring
+            sBpcTestAppCmdService.createTestBinders(binderProxyWarning - baseBinderCount + 1);
+            if (!firstBinderLatches[1].await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+                fail("Timed out waiting for uid " + sTestPkgUid + " to trigger warning");
+            }
+
             // Exceed the Binder Proxy Limit
-            sBpcTestAppCmdService.createTestBinders(exceedBinderProxyLimit);
-            if (!firstBinderLimitLatch.await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+            sBpcTestAppCmdService.createTestBinders(exceedBinderProxyLimit - binderProxyWarning);
+            if (!firstBinderLatches[0].await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
                 fail("Timed out waiting for uid " + sTestPkgUid + " to hit limit");
             }
 
@@ -314,11 +362,20 @@ public class BinderProxyCountingTest {
             sBpcTestServiceCmdService.forceGc();
             currentBinderCount = sBpcTestServiceCmdService.getBinderProxyCount(sTestPkgUid);
 
-            final CountDownLatch secondBinderLimitLatch = createBinderLimitLatch();
+            final CountDownLatch[] secondBinderLatches = createBinderLimitLatch();
+
+            // Exceed the Binder Proxy warning which should not cause a callback since there has
+            // been no rearm
+            sBpcTestAppCmdService.createTestBinders(binderProxyWarning - currentBinderCount + 1);
+            if (secondBinderLatches[1].await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+                fail("Received BinderProxyLimitCallback for uid " + sTestPkgUid
+                        + " when the callback has not been rearmed yet");
+            }
+
             // Exceed the Binder Proxy limit which should not cause a callback since there has
             // been no rearm
-            sBpcTestAppCmdService.createTestBinders(exceedBinderProxyLimit - currentBinderCount);
-            if (secondBinderLimitLatch.await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+            sBpcTestAppCmdService.createTestBinders(exceedBinderProxyLimit - binderProxyWarning);
+            if (secondBinderLatches[0].await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
                 fail("Received BinderProxyLimitCallback for uid " + sTestPkgUid
                         + " when the callback has not been rearmed yet");
             }
@@ -330,10 +387,16 @@ public class BinderProxyCountingTest {
 
             sBpcTestServiceCmdService.forceGc();
             currentBinderCount = sBpcTestServiceCmdService.getBinderProxyCount(sTestPkgUid);
+            // Trigger the Binder Proxy Waring
+            sBpcTestAppCmdService.createTestBinders(binderProxyWarning - currentBinderCount + 1);
+            if (!secondBinderLatches[1].await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+                fail("Timed out waiting for uid " + sTestPkgUid + " to trigger warning");
+            }
+
             // Exceed the Binder Proxy limit for the last time
             sBpcTestAppCmdService.createTestBinders(exceedBinderProxyLimit - currentBinderCount);
 
-            if (!secondBinderLimitLatch.await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+            if (!secondBinderLatches[0].await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
                 fail("Timed out waiting for uid " + sTestPkgUid + " to hit limit");
             }
             sBpcTestAppCmdService.releaseTestBinders(currentBinderCount);
@@ -366,7 +429,7 @@ public class BinderProxyCountingTest {
                 // is not unexpected
             }
 
-            if (!binderDeathLatch.await(TOO_MANY_BINDERS_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+            if (!binderDeathLatch.await(TOO_MANY_BINDERS_WITH_KILL_TIMEOUT_SEC, TimeUnit.SECONDS)) {
                 sBpcTestAppCmdService.releaseSystemBinders(exceedBinderProxyLimit);
                 fail("Timed out waiting for uid " + sTestPkgUid + " to die.");
             }

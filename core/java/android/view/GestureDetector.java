@@ -26,11 +26,13 @@ import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFI
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
+import android.app.Activity;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -299,6 +301,11 @@ public class GestureDetector {
     private VelocityTracker mVelocityTracker;
 
     /**
+     * Determines strategy for velocity calculation
+     */
+    private @VelocityTracker.VelocityTrackerStrategy int mVelocityTrackerStrategy;
+
+    /**
      * Consistency verifier for debugging purposes.
      */
     private final InputEventConsistencyVerifier mInputEventConsistencyVerifier =
@@ -347,17 +354,17 @@ public class GestureDetector {
 
     /**
      * Creates a GestureDetector with the supplied listener.
-     * This variant of the constructor should be used from a non-UI thread 
+     * This variant of the constructor should be used from a non-UI thread
      * (as it allows specifying the Handler).
-     * 
+     *
      * @param listener the listener invoked for all the callbacks, this must
      * not be null.
      * @param handler the handler to use
      *
      * @throws NullPointerException if {@code listener} is null.
      *
-     * @deprecated Use {@link #GestureDetector(android.content.Context,
-     *      android.view.GestureDetector.OnGestureListener, android.os.Handler)} instead.
+     * @deprecated Use {@link #GestureDetector(Context, GestureDetector.OnGestureListener, Handler)}
+     * instead.
      */
     @Deprecated
     public GestureDetector(@NonNull OnGestureListener listener, @Nullable Handler handler) {
@@ -367,15 +374,14 @@ public class GestureDetector {
     /**
      * Creates a GestureDetector with the supplied listener.
      * You may only use this constructor from a UI thread (this is the usual situation).
-     * @see android.os.Handler#Handler()
-     * 
+     * @see Handler#Handler()
+     *
      * @param listener the listener invoked for all the callbacks, this must
      * not be null.
-     * 
+     *
      * @throws NullPointerException if {@code listener} is null.
      *
-     * @deprecated Use {@link #GestureDetector(android.content.Context,
-     *      android.view.GestureDetector.OnGestureListener)} instead.
+     * @deprecated Use {@link #GestureDetector(Context, GestureDetector.OnGestureListener)} instead.
      */
     @Deprecated
     public GestureDetector(@NonNull OnGestureListener listener) {
@@ -384,10 +390,10 @@ public class GestureDetector {
 
     /**
      * Creates a GestureDetector with the supplied listener.
-     * You may only use this constructor from a {@link android.os.Looper} thread.
-     * @see android.os.Handler#Handler()
+     * You may only use this constructor from a {@link Looper} thread.
+     * @see Handler#Handler()
      *
-     * @param context An {@link android.app.Activity} or a {@link Context} created from
+     * @param context An {@link Activity} or a {@link Context} created from
      * {@link Context#createWindowContext(int, Bundle)}
      * @param listener the listener invoked for all the callbacks, this must
      * not be null. If the listener implements the {@link OnDoubleTapListener} or
@@ -404,10 +410,10 @@ public class GestureDetector {
 
     /**
      * Creates a GestureDetector with the supplied listener that runs deferred events on the
-     * thread associated with the supplied {@link android.os.Handler}.
-     * @see android.os.Handler#Handler()
+     * thread associated with the supplied {@link Handler}.
+     * @see Handler#Handler()
      *
-     * @param context An {@link android.app.Activity} or a {@link Context} created from
+     * @param context An {@link Activity} or a {@link Context} created from
      * {@link Context#createWindowContext(int, Bundle)}
      * @param listener the listener invoked for all the callbacks, this must
      * not be null. If the listener implements the {@link OnDoubleTapListener} or
@@ -419,6 +425,31 @@ public class GestureDetector {
      */
     public GestureDetector(@Nullable @UiContext Context context,
             @NonNull OnGestureListener listener, @Nullable Handler handler) {
+        this(context, listener, handler, VelocityTracker.VELOCITY_TRACKER_STRATEGY_DEFAULT);
+    }
+
+    /**
+     * Creates a GestureDetector with the supplied listener that runs deferred events on the
+     * thread associated with the supplied {@link Handler}.
+     * @see Handler#Handler()
+     *
+     * @param context An {@link Activity} or a {@link Context} created from
+     * {@link Context#createWindowContext(int, Bundle)}
+     * @param listener the listener invoked for all the callbacks, this must
+     * not be null. If the listener implements the {@link OnDoubleTapListener} or
+     * {@link OnContextClickListener} then it will also be set as the listener for
+     * these callbacks (for example when using the {@link SimpleOnGestureListener}).
+     * @param handler the handler to use for running deferred listener events.
+     * @param velocityTrackerStrategy strategy to use for velocity calculation of scroll/fling
+     *                                events.
+     *
+     * @throws NullPointerException if {@code listener} is null.
+     *
+     * @hide
+     */
+    public GestureDetector(@Nullable @UiContext Context context,
+            @NonNull OnGestureListener listener, @Nullable Handler handler,
+            @VelocityTracker.VelocityTrackerStrategy int velocityTrackerStrategy) {
         if (handler != null) {
             mHandler = new GestureHandler(handler);
         } else {
@@ -431,15 +462,16 @@ public class GestureDetector {
         if (listener instanceof OnContextClickListener) {
             setContextClickListener((OnContextClickListener) listener);
         }
+        mVelocityTrackerStrategy = velocityTrackerStrategy;
         init(context);
     }
-    
+
     /**
      * Creates a GestureDetector with the supplied listener that runs deferred events on the
-     * thread associated with the supplied {@link android.os.Handler}.
-     * @see android.os.Handler#Handler()
+     * thread associated with the supplied {@link Handler}.
+     * @see Handler#Handler()
      *
-     * @param context An {@link android.app.Activity} or a {@link Context} created from
+     * @param context An {@link Activity} or a {@link Context} created from
      * {@link Context#createWindowContext(int, Bundle)}
      * @param listener the listener invoked for all the callbacks, this must
      * not be null.
@@ -547,7 +579,7 @@ public class GestureDetector {
         mCurrentMotionEvent = MotionEvent.obtain(ev);
 
         if (mVelocityTracker == null) {
-            mVelocityTracker = VelocityTracker.obtain();
+            mVelocityTracker = VelocityTracker.obtain(mVelocityTrackerStrategy);
         }
         mVelocityTracker.addMovement(ev);
 
@@ -841,8 +873,10 @@ public class GestureDetector {
         mHandler.removeMessages(SHOW_PRESS);
         mHandler.removeMessages(LONG_PRESS);
         mHandler.removeMessages(TAP);
-        mVelocityTracker.recycle();
-        mVelocityTracker = null;
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+        }
         mIsDoubleTapping = false;
         mStillDown = false;
         mAlwaysInTapRegion = false;

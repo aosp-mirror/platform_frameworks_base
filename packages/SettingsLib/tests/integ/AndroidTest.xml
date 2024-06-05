@@ -16,12 +16,13 @@
 <configuration description="Runs Tests for SettingsLib.">
     <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
         <option name="test-file-name" value="SettingsLibTests.apk" />
+        <option name="install-arg" value="-t" />
     </target_preparer>
 
     <option name="test-suite-tag" value="apct" />
     <option name="test-tag" value="SettingsLibTests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
-        <option name="package" value="com.android.settingslib" />
+        <option name="package" value="com.android.settingslib.tests.integ" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
         <option name="hidden-api-checks" value="false"/>
     </test>

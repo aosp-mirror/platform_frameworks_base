@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Швидке заряджання"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Повільне заряджання"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання оптимізовано, щоб захистити акумулятор"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Проблема із зарядним пристроєм"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Натисніть меню, щоб розблокувати."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання призупинено, щоб захистити акумулятор"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Перевірте зарядний пристрій"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Мережу заблоковано"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Немає SIM-карти"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Додайте SIM-карту."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM-карта відсутня або недоступна для читання. Додайте SIM-карту."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Непридатна SIM-карта."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM-карту деактивовано назавжди.\n Щоб отримати іншу, зверніться до свого постачальника послуг бездротового зв’язку."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-карту заблоковано."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM-карту заблоковано PUK-кодом."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Розблокування SIM-карти…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Після блокування входу потрібно ввести PIN-код"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Після блокування входу потрібно ввести пароль"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Після блокування входу потрібно намалювати ключ"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Оновлення встановиться під час годин неактивності"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Оновлення встановиться, коли пристрій не використовуватиметься"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Потрібен додатковий захист. PIN-код довго не використовувався."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Потрібен додатковий захист. Пароль довго не використовувався."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Потрібен додатковий захист. Ключ довго не використовувався."</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"З міркувань додаткової безпеки скористайтеся ключем"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"З міркувань додаткової безпеки скористайтеся PIN-кодом"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"З міркувань додаткової безпеки скористайтеся паролем"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Для додаткового захисту потрібно ввести PIN-код"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Для додаткового захисту потрібно ввести ключ"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Для додаткового захисту потрібно ввести пароль"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Адміністратор заблокував пристрій"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Пристрій заблоковано вручну"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Не розпізнано"</string>

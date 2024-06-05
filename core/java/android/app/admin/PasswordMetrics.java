@@ -30,6 +30,7 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSW
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.MIN_LOCK_PASSWORD_SIZE;
+import static com.android.internal.widget.LockPatternUtils.MIN_LOCK_PATTERN_SIZE;
 import static com.android.internal.widget.PasswordValidationError.CONTAINS_INVALID_CHARACTERS;
 import static com.android.internal.widget.PasswordValidationError.CONTAINS_SEQUENCE;
 import static com.android.internal.widget.PasswordValidationError.NOT_ENOUGH_DIGITS;
@@ -134,17 +135,6 @@ public final class PasswordMetrics implements Parcelable {
         }
     }
 
-    private static boolean hasInvalidCharacters(byte[] password) {
-        // Allow non-control Latin-1 characters only.
-        for (byte b : password) {
-            char c = (char) b;
-            if (c < 32 || c > 127) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -189,19 +179,15 @@ public final class PasswordMetrics implements Parcelable {
     };
 
     /**
-     * Returns the {@code PasswordMetrics} for a given credential.
-     *
-     * If the credential is a pin or a password, equivalent to
-     * {@link #computeForPasswordOrPin(byte[], boolean)}. {@code credential} cannot be null
-     * when {@code type} is
-     * {@link com.android.internal.widget.LockPatternUtils#CREDENTIAL_TYPE_PASSWORD}.
+     * Returns the {@code PasswordMetrics} for the given credential.
      */
     public static PasswordMetrics computeForCredential(LockscreenCredential credential) {
         if (credential.isPassword() || credential.isPin()) {
-            return PasswordMetrics.computeForPasswordOrPin(credential.getCredential(),
-                    credential.isPin());
+            return computeForPasswordOrPin(credential.getCredential(), credential.isPin());
         } else if (credential.isPattern())  {
-            return new PasswordMetrics(CREDENTIAL_TYPE_PATTERN);
+            PasswordMetrics metrics = new PasswordMetrics(CREDENTIAL_TYPE_PATTERN);
+            metrics.length = credential.size();
+            return metrics;
         } else if (credential.isNone()) {
             return new PasswordMetrics(CREDENTIAL_TYPE_NONE);
         } else {
@@ -210,10 +196,10 @@ public final class PasswordMetrics implements Parcelable {
     }
 
     /**
-     * Returns the {@code PasswordMetrics} for a given password or pin
+     * Returns the {@code PasswordMetrics} for the given password or pin.
      */
-    public static PasswordMetrics computeForPasswordOrPin(byte[] password, boolean isPin) {
-        // Analyse the characters used
+    private static PasswordMetrics computeForPasswordOrPin(byte[] credential, boolean isPin) {
+        // Analyze the characters used.
         int letters = 0;
         int upperCase = 0;
         int lowerCase = 0;
@@ -221,8 +207,8 @@ public final class PasswordMetrics implements Parcelable {
         int symbols = 0;
         int nonLetter = 0;
         int nonNumeric = 0;
-        final int length = password.length;
-        for (byte b : password) {
+        final int length = credential.length;
+        for (byte b : credential) {
             switch (categoryChar((char) b)) {
                 case CHAR_LOWER_CASE:
                     letters++;
@@ -247,7 +233,7 @@ public final class PasswordMetrics implements Parcelable {
         }
 
         final int credType = isPin ? CREDENTIAL_TYPE_PIN : CREDENTIAL_TYPE_PASSWORD;
-        final int seqLength = maxLengthSequence(password);
+        final int seqLength = maxLengthSequence(credential);
         return new PasswordMetrics(credType, length, letters, upperCase, lowerCase,
                 numeric, symbols, nonLetter, nonNumeric, seqLength);
     }
@@ -513,26 +499,24 @@ public final class PasswordMetrics implements Parcelable {
     }
 
     /**
-     * Validates password against minimum metrics and complexity.
+     * Validates a proposed lockscreen credential against minimum metrics and complexity.
      *
-     * @param adminMetrics - minimum metrics to satisfy admin requirements.
-     * @param minComplexity - minimum complexity imposed by the requester.
-     * @param isPin - whether it is PIN that should be only digits
-     * @param password - password to validate.
-     * @return a list of password validation errors. An empty list means the password is OK.
+     * @param adminMetrics minimum metrics to satisfy admin requirements
+     * @param minComplexity minimum complexity imposed by the requester
+     * @param credential the proposed lockscreen credential
+     *
+     * @return a list of validation errors. An empty list means the credential is OK.
      *
      * TODO: move to PasswordPolicy
      */
-    public static List<PasswordValidationError> validatePassword(
-            PasswordMetrics adminMetrics, int minComplexity, boolean isPin, byte[] password) {
-
-        if (hasInvalidCharacters(password)) {
+    public static List<PasswordValidationError> validateCredential(
+            PasswordMetrics adminMetrics, int minComplexity, LockscreenCredential credential) {
+        if (credential.hasInvalidChars()) {
             return Collections.singletonList(
                     new PasswordValidationError(CONTAINS_INVALID_CHARACTERS, 0));
         }
-
-        final PasswordMetrics enteredMetrics = computeForPasswordOrPin(password, isPin);
-        return validatePasswordMetrics(adminMetrics, minComplexity, enteredMetrics);
+        PasswordMetrics actualMetrics = computeForCredential(credential);
+        return validatePasswordMetrics(adminMetrics, minComplexity, actualMetrics);
     }
 
     /**
@@ -555,9 +539,18 @@ public final class PasswordMetrics implements Parcelable {
                 || !bucket.allowsCredType(actualMetrics.credType)) {
             return Collections.singletonList(new PasswordValidationError(WEAK_CREDENTIAL_TYPE, 0));
         }
-        if (actualMetrics.credType != CREDENTIAL_TYPE_PASSWORD
-                && actualMetrics.credType != CREDENTIAL_TYPE_PIN) {
-            return Collections.emptyList(); // Nothing to check for pattern or none.
+        if (actualMetrics.credType == CREDENTIAL_TYPE_PATTERN) {
+            // For pattern, only need to check the length against the hardcoded minimum.  If the
+            // pattern length is unavailable (e.g., PasswordMetrics that was stored on-disk before
+            // the pattern length started being included in it), assume it is okay.
+            if (actualMetrics.length != 0 && actualMetrics.length < MIN_LOCK_PATTERN_SIZE) {
+                return Collections.singletonList(new PasswordValidationError(TOO_SHORT,
+                            MIN_LOCK_PATTERN_SIZE));
+            }
+            return Collections.emptyList();
+        }
+        if (actualMetrics.credType == CREDENTIAL_TYPE_NONE) {
+            return Collections.emptyList(); // Nothing to check for none.
         }
 
         if (actualMetrics.credType == CREDENTIAL_TYPE_PIN && actualMetrics.nonNumeric > 0) {

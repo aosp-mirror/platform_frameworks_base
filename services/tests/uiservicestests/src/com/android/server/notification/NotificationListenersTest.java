@@ -15,7 +15,10 @@
  */
 package com.android.server.notification;
 
+import static android.Manifest.permission.RECEIVE_SENSITIVE_NOTIFICATIONS;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
+import static android.permission.PermissionManager.PERMISSION_GRANTED;
+import static android.service.notification.Flags.FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
@@ -47,11 +50,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.SuppressLint;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.companion.AssociationInfo;
+import android.companion.ICompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -62,7 +68,9 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.INotificationListener;
+import android.service.notification.IStatusBarNotificationHolder;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
@@ -76,11 +84,14 @@ import android.util.Xml;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.UiServiceTestCase;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -90,11 +101,16 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+@SuppressLint("GuardedBy")
 public class NotificationListenersTest extends UiServiceTestCase {
+
+    @Rule
+    public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private PackageManager mPm;
@@ -103,7 +119,8 @@ public class NotificationListenersTest extends UiServiceTestCase {
     @Mock
     private Resources mResources;
 
-    @Mock
+    // mNm is going to be a spy, so it must use doReturn.when, not when.thenReturn, as
+    // when.thenReturn will result in the real method being called
     NotificationManagerService mNm;
     @Mock
     private INotificationManager mINm;
@@ -111,6 +128,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
 
     NotificationManagerService.NotificationListeners mListeners;
 
+    private int mUid1 = 98989;
     private ComponentName mCn1 = new ComponentName("pkg", "pkg.cmp");
     private ComponentName mCn2 = new ComponentName("pkg2", "pkg2.cmp2");
     private ComponentName mUninstalledComponent = new ComponentName("pkg3",
@@ -118,15 +136,31 @@ public class NotificationListenersTest extends UiServiceTestCase {
 
     @Before
     public void setUp() throws Exception {
+        mNm = spy(new NotificationManagerService(mContext));
         MockitoAnnotations.initMocks(this);
         getContext().setMockPackageManager(mPm);
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
-        when(mNm.isInteractionVisibleToListener(any(), anyInt())).thenReturn(true);
+        doReturn(true).when(mNm).isInteractionVisibleToListener(any(), anyInt());
 
         mListeners = spy(mNm.new NotificationListeners(
                 mContext, new Object(), mock(ManagedServices.UserProfiles.class), miPm));
         when(mNm.getBinderService()).thenReturn(mINm);
+        mNm.mPackageManager = mock(IPackageManager.class);
+        PackageStateInternal psi = mock(PackageStateInternal.class);
+        mNm.mPackageManagerInternal = mPmi;
+        when(psi.getAppId()).thenReturn(mUid1);
+        when(mNm.mPackageManagerInternal.getPackageStateInternal(any())).thenReturn(psi);
+        mNm.mCompanionManager = mock(ICompanionDeviceManager.class);
+        when(mNm.mCompanionManager.getAllAssociationsForUser(anyInt()))
+                .thenReturn(new ArrayList<>());
+        mNm.mHandler = mock(NotificationManagerService.WorkerHandler.class);
+        mNm.mAssistants = mock(NotificationManagerService.NotificationAssistants.class);
+        FieldSetter.setField(mNm,
+                NotificationManagerService.class.getDeclaredField("mListeners"),
+                mListeners);
+        doReturn(android.service.notification.NotificationListenerService.TRIM_FULL)
+                .when(mListeners).getOnNotificationPostedTrim(any());
     }
 
     @Test
@@ -426,7 +460,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testOnPackageChanged_removingDisallowedPackage() {
+    public void testOnPackageChanged_removingPackage_removeFromDisallowed() {
         NotificationListenerFilter nlf = new NotificationListenerFilter(7, new ArraySet<>());
         VersionedPackage a1 = new VersionedPackage("pkg1", 243);
         NotificationListenerFilter nlf2 =
@@ -440,6 +474,25 @@ public class NotificationListenersTest extends UiServiceTestCase {
 
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn1, 0))
                 .getDisallowedPackages()).isEmpty();
+        assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn2, 0))
+                .getDisallowedPackages()).isEmpty();
+    }
+
+    @Test
+    public void testOnPackageChanged_notRemovingPackage_staysInDisallowed() {
+        NotificationListenerFilter nlf = new NotificationListenerFilter(7, new ArraySet<>());
+        VersionedPackage a1 = new VersionedPackage("pkg1", 243);
+        NotificationListenerFilter nlf2 =
+                new NotificationListenerFilter(4, new ArraySet<>(new VersionedPackage[] {a1}));
+        mListeners.setNotificationListenerFilter(Pair.create(mCn1, 0), nlf);
+        mListeners.setNotificationListenerFilter(Pair.create(mCn2, 0), nlf2);
+
+        String[] pkgs = new String[] {"pkg1"};
+        int[] uids = new int[] {243};
+        mListeners.onPackagesChanged(false, pkgs, uids);
+
+        assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn2, 0))
+                .getDisallowedPackages()).contains(a1);
     }
 
     @Test
@@ -480,11 +533,11 @@ public class NotificationListenersTest extends UiServiceTestCase {
         // Neither user0 and user1 is in the lockdown mode
         when(r0.getUser()).thenReturn(uh0);
         when(uh0.getIdentifier()).thenReturn(0);
-        when(mNm.isInLockDownMode(0)).thenReturn(false);
+        doReturn(false).when(mNm).isInLockDownMode(0);
 
         when(r1.getUser()).thenReturn(uh1);
         when(uh1.getIdentifier()).thenReturn(1);
-        when(mNm.isInLockDownMode(1)).thenReturn(false);
+        doReturn(false).when(mNm).isInLockDownMode(1);
 
         mListeners.notifyPostedLocked(r0, old0, true);
         mListeners.notifyPostedLocked(r0, old0, false);
@@ -536,12 +589,12 @@ public class NotificationListenersTest extends UiServiceTestCase {
         // Neither user0 and user1 is in the lockdown mode
         when(r0.getUser()).thenReturn(uh0);
         when(uh0.getIdentifier()).thenReturn(0);
-        when(mNm.isInLockDownMode(0)).thenReturn(false);
+        doReturn(false).when(mNm).isInLockDownMode(0);
         when(r0.getSbn()).thenReturn(sbn);
 
         when(r1.getUser()).thenReturn(uh1);
         when(uh1.getIdentifier()).thenReturn(1);
-        when(mNm.isInLockDownMode(1)).thenReturn(false);
+        doReturn(false).when(mNm).isInLockDownMode(1);
         when(r1.getSbn()).thenReturn(sbn);
 
         mListeners.notifyRemovedLocked(r0, 0, rs0);
@@ -598,9 +651,10 @@ public class NotificationListenersTest extends UiServiceTestCase {
         List<ManagedServices.ManagedServiceInfo> services = ImmutableList.of(info);
         when(mListeners.getServices()).thenReturn(services);
 
-        when(mNm.isVisibleToListener(any(), anyInt(), any())).thenReturn(true);
-        when(mNm.makeRankingUpdateLocked(info)).thenReturn(mock(NotificationRankingUpdate.class));
-        mNm.mPackageManagerInternal = mPmi;
+        doReturn(true).when(mNm).isVisibleToListener(any(), anyInt(), any());
+        doReturn(mock(NotificationRankingUpdate.class)).when(mNm).makeRankingUpdateLocked(info);
+        doReturn(false).when(mNm).isInLockDownMode(anyInt());
+        doNothing().when(mNm).updateUriPermissions(any(), any(), any(), anyInt());
 
         mListeners.notifyPostedLocked(r, null);
 
@@ -645,6 +699,203 @@ public class NotificationListenersTest extends UiServiceTestCase {
         }, 20, 50);
     }
 
+    @Test
+    public void testListenerTrusted_withPermission() throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
+        when(mNm.mPackageManager.checkUidPermission(RECEIVE_SENSITIVE_NOTIFICATIONS, mUid1))
+                .thenReturn(PERMISSION_GRANTED);
+        ManagedServices.ManagedServiceInfo info = getMockServiceInfo();
+        mListeners.onServiceAdded(info);
+        assertTrue(mListeners.isUidTrusted(mUid1));
+    }
+
+    @Test
+    public void testListenerTrusted_withSystemSignature() {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
+        when(mNm.mPackageManagerInternal.isPlatformSigned(mCn1.getPackageName())).thenReturn(true);
+        ManagedServices.ManagedServiceInfo info = getMockServiceInfo();
+        mListeners.onServiceAdded(info);
+        assertTrue(mListeners.isUidTrusted(mUid1));
+    }
+
+    @Test
+    public void testListenerTrusted_withCdmAssociation() throws Exception {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
+        mNm.mCompanionManager = mock(ICompanionDeviceManager.class);
+        AssociationInfo assocInfo = mock(AssociationInfo.class);
+        when(assocInfo.isRevoked()).thenReturn(false);
+        when(assocInfo.getPackageName()).thenReturn(mCn1.getPackageName());
+        when(assocInfo.getUserId()).thenReturn(UserHandle.getUserId(mUid1));
+        ArrayList<AssociationInfo> infos = new ArrayList<>();
+        infos.add(assocInfo);
+        when(mNm.mCompanionManager.getAllAssociationsForUser(anyInt())).thenReturn(infos);
+        ManagedServices.ManagedServiceInfo info = getMockServiceInfo();
+        mListeners.onServiceAdded(info);
+        assertTrue(mListeners.isUidTrusted(mUid1));
+    }
+
+    @Test
+    public void testListenerTrusted_ifFlagDisabled() {
+        mSetFlagsRule.disableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
+        ManagedServices.ManagedServiceInfo info = getMockServiceInfo();
+        mListeners.onServiceAdded(info);
+        assertTrue(mListeners.isUidTrusted(mUid1));
+    }
+
+    @Test
+    public void testRedaction_whenPosted() {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
+        ArrayList<ManagedServices.ManagedServiceInfo> infos = new ArrayList<>();
+        infos.add(getMockServiceInfo());
+        doReturn(infos).when(mListeners).getServices();
+        doReturn(mock(StatusBarNotification.class))
+                .when(mListeners).redactStatusBarNotification(any());
+        doReturn(false).when(mNm).isInLockDownMode(anyInt());
+        doReturn(true).when(mNm).isVisibleToListener(any(), anyInt(), any());
+        NotificationRecord r = mock(NotificationRecord.class);
+        when(r.getUser()).thenReturn(UserHandle.of(0));
+        StatusBarNotification sbn = getSbn(0);
+        NotificationRecord old = mock(NotificationRecord.class);
+        when(old.getUser()).thenReturn(UserHandle.of(0));
+        StatusBarNotification oldSbn = getSbn(1);
+        when(r.getSbn()).thenReturn(sbn);
+        when(r.hasSensitiveContent()).thenReturn(true);
+        when(old.getSbn()).thenReturn(oldSbn);
+        when(old.hasSensitiveContent()).thenReturn(true);
+
+        mListeners.notifyPostedLocked(r, old);
+        verify(mListeners, atLeast(1)).redactStatusBarNotification(eq(sbn));
+        verify(mListeners, never()).redactStatusBarNotification(eq(oldSbn));
+    }
+
+    @Test
+    public void testRedaction_whenPosted_oldRemoved() {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
+        ArrayList<ManagedServices.ManagedServiceInfo> infos = new ArrayList<>();
+        infos.add(getMockServiceInfo());
+        doReturn(infos).when(mListeners).getServices();
+        doReturn(mock(StatusBarNotification.class))
+                .when(mListeners).redactStatusBarNotification(any());
+        doReturn(false).when(mNm).isInLockDownMode(anyInt());
+        doReturn(true).when(mNm).isVisibleToListener(any(), anyInt(), any());
+        NotificationRecord r = mock(NotificationRecord.class);
+        when(r.getUser()).thenReturn(UserHandle.of(0));
+        StatusBarNotification sbn = getSbn(0);
+        NotificationRecord old = mock(NotificationRecord.class);
+        when(old.getUser()).thenReturn(UserHandle.of(0));
+        StatusBarNotification oldSbn = getSbn(1);
+        when(r.getSbn()).thenReturn(sbn);
+        when(r.hasSensitiveContent()).thenReturn(true);
+        when(old.getSbn()).thenReturn(oldSbn);
+        when(old.hasSensitiveContent()).thenReturn(true);
+
+        doReturn(true).when(mNm).isVisibleToListener(eq(oldSbn), anyInt(), any());
+        doReturn(false).when(mNm).isVisibleToListener(eq(sbn), anyInt(), any());
+        mListeners.notifyPostedLocked(r, old);
+        // When the old sbn is removed, the old should be redacted
+        verify(mListeners, atLeast(1)).redactStatusBarNotification(eq(oldSbn));
+    }
+
+    @Test
+    public void testRedaction_whenRemoved() {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
+        doReturn(mock(StatusBarNotification.class))
+                .when(mListeners).redactStatusBarNotification(any());
+        ArrayList<ManagedServices.ManagedServiceInfo> infos = new ArrayList<>();
+        infos.add(getMockServiceInfo());
+        doReturn(infos).when(mListeners).getServices();
+        doReturn(false).when(mNm).isInLockDownMode(anyInt());
+        doReturn(true).when(mNm).isVisibleToListener(any(), anyInt(), any());
+        NotificationRecord r = mock(NotificationRecord.class);
+        when(r.getUser()).thenReturn(UserHandle.of(0));
+        StatusBarNotification sbn = getSbn(0);
+        when(r.getSbn()).thenReturn(sbn);
+        when(r.hasSensitiveContent()).thenReturn(true);
+        mNm.mAssistants = mock(NotificationManagerService.NotificationAssistants.class);
+
+        mListeners.notifyRemovedLocked(r, 0, mock(NotificationStats.class));
+        verify(mListeners, atLeast(1)).redactStatusBarNotification(any());
+    }
+
+    @Test
+    public void testRedaction_noneIfFlagDisabled() {
+        mSetFlagsRule.disableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
+        ArrayList<ManagedServices.ManagedServiceInfo> infos = new ArrayList<>();
+        infos.add(getMockServiceInfo());
+        doReturn(infos).when(mListeners).getServices();
+        doReturn(false).when(mNm).isInLockDownMode(anyInt());
+        doReturn(true).when(mNm).isVisibleToListener(any(), anyInt(), any());
+        NotificationRecord r = mock(NotificationRecord.class);
+        when(r.getUser()).thenReturn(UserHandle.of(0));
+        StatusBarNotification sbn = getSbn(0);
+        when(r.getSbn()).thenReturn(sbn);
+        when(r.hasSensitiveContent()).thenReturn(true);
+        mListeners.notifyRemovedLocked(r, 0, mock(NotificationStats.class));
+        verify(mListeners, never()).redactStatusBarNotification(eq(sbn));
+    }
+
+    @Test
+    public void testListenerPost_UpdateLifetimeExtended() throws Exception {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
+
+        // Create original notification, with FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY.
+        String pkg = "pkg";
+        int uid = 9;
+        UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
+        NotificationChannel channel = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_HIGH);
+        Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setFlag(Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY, true);
+        StatusBarNotification sbn = new StatusBarNotification(pkg, pkg, 8, "tag", uid, 0,
+                nb.build(), userHandle, null, 0);
+        NotificationRecord old = new NotificationRecord(mContext, sbn, channel);
+
+        // Creates updated notification (without FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY)
+        Notification.Builder nb2 = new Notification.Builder(mContext, channel.getId())
+                .setContentTitle("new title")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setFlag(Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY, false);
+        StatusBarNotification sbn2 = new StatusBarNotification(pkg, pkg, 8, "tag", uid, 0,
+                nb2.build(), userHandle, null, 0);
+        NotificationRecord toPost = new NotificationRecord(mContext, sbn2, channel);
+
+        // Create system ui-like service.
+        ManagedServices.ManagedServiceInfo info = mListeners.new ManagedServiceInfo(
+                null, new ComponentName("a", "a"), sbn2.getUserId(), false, null, 33, 33);
+        info.isSystemUi = true;
+        INotificationListener l1 = mock(INotificationListener.class);
+        info.service = l1;
+        List<ManagedServices.ManagedServiceInfo> services = ImmutableList.of(info);
+        when(mListeners.getServices()).thenReturn(services);
+
+        FieldSetter.setField(mNm,
+                NotificationManagerService.class.getDeclaredField("mHandler"),
+                mock(NotificationManagerService.WorkerHandler.class));
+        doReturn(true).when(mNm).isVisibleToListener(any(), anyInt(), any());
+        doReturn(mock(NotificationRankingUpdate.class)).when(mNm).makeRankingUpdateLocked(info);
+        doReturn(false).when(mNm).isInLockDownMode(anyInt());
+        doNothing().when(mNm).updateUriPermissions(any(), any(), any(), anyInt());
+        doReturn(sbn2).when(mListeners).redactStatusBarNotification(sbn2);
+        doReturn(sbn2).when(mListeners).redactStatusBarNotification(any());
+
+        // The notification change is posted to the service listener.
+        mListeners.notifyPostedLocked(toPost, old);
+
+        // Verify that the post occcurs with the updated notification value.
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mNm.mHandler, times(1)).post(runnableCaptor.capture());
+        runnableCaptor.getValue().run();
+        ArgumentCaptor<IStatusBarNotificationHolder> sbnCaptor =
+                ArgumentCaptor.forClass(IStatusBarNotificationHolder.class);
+        verify(l1, times(1)).onNotificationPosted(sbnCaptor.capture(), any());
+        StatusBarNotification sbnResult = sbnCaptor.getValue().get();
+        assertThat(sbnResult.getNotification()
+                .extras.getCharSequence(Notification.EXTRA_TITLE).toString())
+                .isEqualTo("new title");
+    }
+
     /**
      * Helper method to test the thread safety of some operations.
      *
@@ -682,10 +933,8 @@ public class NotificationListenersTest extends UiServiceTestCase {
     private ManagedServices.ManagedServiceInfo getParcelingListener(
             final NotificationChannelGroup toParcel)
             throws RemoteException {
-        ManagedServices.ManagedServiceInfo i1 = mock(ManagedServices.ManagedServiceInfo.class);
-        when(i1.isSystem()).thenReturn(true);
-        INotificationListener l1 = mock(INotificationListener.class);
-        when(i1.enabledAndUserMatches(anyInt())).thenReturn(true);
+        ManagedServices.ManagedServiceInfo i1 = getMockServiceInfo();
+        INotificationListener l1 = (INotificationListener) i1.getService();
         doAnswer(invocationOnMock -> {
             try {
                 toParcel.writeToParcel(Parcel.obtain(), 0);
@@ -696,7 +945,24 @@ public class NotificationListenersTest extends UiServiceTestCase {
             }
             return null;
         }).when(l1).onNotificationChannelGroupModification(anyString(), any(), any(), anyInt());
-        when(i1.getService()).thenReturn(l1);
         return i1;
+    }
+
+    private ManagedServices.ManagedServiceInfo getMockServiceInfo() {
+        ManagedServices.ManagedServiceInfo i1 = mock(ManagedServices.ManagedServiceInfo.class);
+        when(i1.isSystem()).thenReturn(true);
+        INotificationListener l1 = mock(INotificationListener.class);
+        when(i1.enabledAndUserMatches(anyInt())).thenReturn(true);
+        when(i1.getService()).thenReturn(l1);
+        i1.service = l1;
+        i1.uid = mUid1;
+        i1.component = mCn1;
+        return i1;
+    }
+
+    private StatusBarNotification getSbn(int id) {
+        return new StatusBarNotification("pkg1", "pkg1", id, "", mUid1, 0,
+                mock(Notification.class), UserHandle.of(0), "", 0);
+
     }
 }

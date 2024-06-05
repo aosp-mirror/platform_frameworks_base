@@ -16,7 +16,9 @@
 package android.app.usage;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -24,9 +26,12 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,6 +40,7 @@ import java.util.List;
  * from which to read {@link android.app.usage.UsageEvents.Event} objects.
  */
 public final class UsageEvents implements Parcelable {
+    private static final String TAG = "UsageEvents";
 
     /** @hide */
     public static final String INSTANT_APP_PACKAGE_NAME = "android.instant_app";
@@ -349,6 +355,47 @@ public final class UsageEvents implements Parcelable {
          */
         public static final int MAX_EVENT_TYPE = 31;
 
+        /**
+         * Keep in sync with the event types defined above.
+         * @hide
+         */
+        @IntDef(flag = false, value = {
+                NONE,
+                ACTIVITY_RESUMED,
+                ACTIVITY_PAUSED,
+                END_OF_DAY,
+                CONTINUE_PREVIOUS_DAY,
+                CONFIGURATION_CHANGE,
+                SYSTEM_INTERACTION,
+                USER_INTERACTION,
+                SHORTCUT_INVOCATION,
+                CHOOSER_ACTION,
+                NOTIFICATION_SEEN,
+                STANDBY_BUCKET_CHANGED,
+                NOTIFICATION_INTERRUPTION,
+                SLICE_PINNED_PRIV,
+                SLICE_PINNED,
+                SCREEN_INTERACTIVE,
+                SCREEN_NON_INTERACTIVE,
+                KEYGUARD_SHOWN,
+                KEYGUARD_HIDDEN,
+                FOREGROUND_SERVICE_START,
+                FOREGROUND_SERVICE_STOP,
+                CONTINUING_FOREGROUND_SERVICE,
+                ROLLOVER_FOREGROUND_SERVICE,
+                ACTIVITY_STOPPED,
+                ACTIVITY_DESTROYED,
+                FLUSH_TO_DISK,
+                DEVICE_SHUTDOWN,
+                DEVICE_STARTUP,
+                USER_UNLOCKED,
+                USER_STOPPED,
+                LOCUS_ID_SET,
+                APP_COMPONENT_USED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface EventType {}
+
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
 
@@ -507,6 +554,22 @@ public final class UsageEvents implements Parcelable {
         public int mLocusIdToken = UNASSIGNED_TOKEN;
 
         /** @hide */
+        public PersistableBundle mExtras = null;
+
+        /** @hide */
+        public static class UserInteractionEventExtrasToken {
+            public int mCategoryToken = UNASSIGNED_TOKEN;
+            public int mActionToken = UNASSIGNED_TOKEN;
+
+            public UserInteractionEventExtrasToken() {
+                // Do nothing.
+            }
+        }
+
+        /** @hide */
+        public UserInteractionEventExtrasToken mUserInteractionExtrasToken = null;
+
+        /** @hide */
         @EventFlags
         public int mFlags;
 
@@ -603,6 +666,21 @@ public final class UsageEvents implements Parcelable {
          */
         public int getEventType() {
             return mEventType;
+        }
+
+        /**
+         * Retrieves a map of extended data from the event if the event is of type
+         * {@link #USER_INTERACTION}.
+         *
+         * @return the map of all extras that associated with the reported user interaction
+         *         event. The returned {@link PersistableBundle} will contain the extras
+         *         {@link UsageStatsManager#EXTRA_EVENT_CATEGORY} and
+         *         {@link UsageStatsManager#EXTRA_EVENT_ACTION}. {@link PersistableBundle#EMPTY}
+         *         will be returned if the details are not available.
+         */
+        @FlaggedApi(Flags.FLAG_USER_INTERACTION_TYPE_API)
+        public @NonNull PersistableBundle getExtras() {
+            return mExtras == null ? PersistableBundle.EMPTY : mExtras;
         }
 
         /**
@@ -703,6 +781,7 @@ public final class UsageEvents implements Parcelable {
             mBucketAndReason = orig.mBucketAndReason;
             mNotificationChannelId = orig.mNotificationChannelId;
             mLocusId = orig.mLocusId;
+            mExtras = orig.mExtras;
         }
     }
 
@@ -714,7 +793,7 @@ public final class UsageEvents implements Parcelable {
     @UnsupportedAppUsage
     private Parcel mParcel = null;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private final int mEventCount;
+    private int mEventCount;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mIndex = 0;
@@ -735,6 +814,34 @@ public final class UsageEvents implements Parcelable {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public UsageEvents(Parcel in) {
+        if (Flags.useParceledList()) {
+            readUsageEventsFromParcelWithParceledList(in);
+        } else {
+            readUsageEventsFromParcelWithBlob(in);
+        }
+
+        mIncludeTaskRoots = true;
+    }
+
+    private void readUsageEventsFromParcelWithParceledList(Parcel in) {
+        mEventCount = in.readInt();
+        mIndex = in.readInt();
+        ParcelableUsageEventList slice = in.readParcelable(getClass().getClassLoader(),
+                ParcelableUsageEventList.class);
+        if (slice != null) {
+            mEventsToWrite = slice.getList();
+        } else {
+            mEventsToWrite = new ArrayList<>();
+        }
+
+        if (mEventCount != mEventsToWrite.size()) {
+            Log.w(TAG, "Partial usage event list received: " + mEventCount + " != "
+                    + mEventsToWrite.size());
+            mEventCount = mEventsToWrite.size();
+        }
+    }
+
+    private void readUsageEventsFromParcelWithBlob(Parcel in) {
         byte[] bytes = in.readBlob();
         Parcel data = Parcel.obtain();
         data.unmarshall(bytes, 0, bytes.length);
@@ -752,7 +859,6 @@ public final class UsageEvents implements Parcelable {
             mParcel.setDataSize(mParcel.dataPosition());
             mParcel.setDataPosition(positionInParcel);
         }
-        mIncludeTaskRoots = true;
     }
 
     /**
@@ -810,6 +916,10 @@ public final class UsageEvents implements Parcelable {
             return false;
         }
 
+        if (Flags.useParceledList()) {
+            return getNextEventFromParceledList(eventOut);
+        }
+
         if (mParcel != null) {
             readEventFromParcel(mParcel, eventOut);
         } else {
@@ -821,6 +931,12 @@ public final class UsageEvents implements Parcelable {
             mParcel.recycle();
             mParcel = null;
         }
+        return true;
+    }
+
+    private boolean getNextEventFromParceledList(Event eventOut) {
+        eventOut.copyFrom(mEventsToWrite.get(mIndex));
+        mIndex++;
         return true;
     }
 
@@ -907,6 +1023,14 @@ public final class UsageEvents implements Parcelable {
             case Event.LOCUS_ID_SET:
                 p.writeString(event.mLocusId);
                 break;
+            case Event.USER_INTERACTION:
+                if (event.mExtras != null) {
+                    p.writeInt(1);
+                    p.writePersistableBundle(event.mExtras);
+                } else {
+                    p.writeInt(0);
+                }
+                break;
         }
         p.writeInt(event.mFlags);
     }
@@ -956,6 +1080,7 @@ public final class UsageEvents implements Parcelable {
         eventOut.mContentAnnotations = null;
         eventOut.mNotificationChannelId = null;
         eventOut.mLocusId = null;
+        eventOut.mExtras = null;
 
         switch (eventOut.mEventType) {
             case Event.CONFIGURATION_CHANGE:
@@ -968,7 +1093,7 @@ public final class UsageEvents implements Parcelable {
             case Event.CHOOSER_ACTION:
                 eventOut.mAction = p.readString();
                 eventOut.mContentType = p.readString();
-                eventOut.mContentAnnotations = p.createStringArray();
+                eventOut.mContentAnnotations = p.readStringArray();
                 break;
             case Event.STANDBY_BUCKET_CHANGED:
                 eventOut.mBucketAndReason = p.readInt();
@@ -978,6 +1103,11 @@ public final class UsageEvents implements Parcelable {
                 break;
             case Event.LOCUS_ID_SET:
                 eventOut.mLocusId = p.readString();
+                break;
+            case Event.USER_INTERACTION:
+                if (p.readInt() != 0) {
+                    eventOut.mExtras = p.readPersistableBundle(getClass().getClassLoader());
+                }
                 break;
         }
         eventOut.mFlags = p.readInt();
@@ -990,6 +1120,20 @@ public final class UsageEvents implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        if (Flags.useParceledList()) {
+            writeUsageEventsToParcelWithParceledList(dest, flags);
+        } else {
+            writeUsageEventsToParcelWithBlob(dest, flags);
+        }
+    }
+
+    private void writeUsageEventsToParcelWithParceledList(Parcel dest, int flags) {
+        dest.writeInt(mEventCount);
+        dest.writeInt(mIndex);
+        dest.writeParcelable(new ParcelableUsageEventList(mEventsToWrite), flags);
+    }
+
+    private void writeUsageEventsToParcelWithBlob(Parcel dest, int flags) {
         Parcel data = Parcel.obtain();
         data.writeInt(mEventCount);
         data.writeInt(mIndex);

@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Process;
@@ -68,19 +69,15 @@ class DisplayWindowPolicyControllerHelper {
     }
 
     /**
-     * @see DisplayWindowPolicyController#canContainActivities(List, int)
+     * @see DisplayWindowPolicyController#canContainActivities
      */
     public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
             @WindowConfiguration.WindowingMode int windowingMode) {
         if (mDisplayWindowPolicyController == null) {
-            for (int i = activities.size() - 1; i >= 0; i--) {
-                final ActivityInfo aInfo = activities.get(i);
-                if (aInfo.requiredDisplayCategory != null) {
-                    Slog.e(TAG,
-                            String.format("Activity with requiredDisplayCategory='%s' cannot be"
-                                            + " displayed on display %d because that display does"
-                                            + " not have a matching category",
-                                    aInfo.requiredDisplayCategory, mDisplayContent.mDisplayId));
+            for (int i = 0; i < activities.size(); ++i) {
+                // Missing controller means that this display has no categories for activity launch
+                // restriction.
+                if (hasDisplayCategory(activities.get(i))) {
                     return false;
                 }
             }
@@ -90,24 +87,29 @@ class DisplayWindowPolicyControllerHelper {
     }
 
     /**
-     * @see DisplayWindowPolicyController#canActivityBeLaunched(ActivityInfo, int, int, boolean)
+     * @see DisplayWindowPolicyController#canActivityBeLaunched
      */
     public boolean canActivityBeLaunched(ActivityInfo activityInfo,
             Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
             int launchingFromDisplayId, boolean isNewTask) {
         if (mDisplayWindowPolicyController == null) {
-            if (activityInfo.requiredDisplayCategory != null) {
-                Slog.e(TAG,
-                        String.format("Activity with requiredDisplayCategory='%s' cannot be"
-                                + " launched on display %d because that display does"
-                                + " not have a matching category",
-                                activityInfo.requiredDisplayCategory, mDisplayContent.mDisplayId));
-                return false;
-            }
-            return true;
+            // Missing controller means that this display has no categories for activity launch
+            // restriction.
+            return !hasDisplayCategory(activityInfo);
         }
         return mDisplayWindowPolicyController.canActivityBeLaunched(activityInfo, intent,
             windowingMode, launchingFromDisplayId, isNewTask);
+    }
+
+    private boolean hasDisplayCategory(ActivityInfo aInfo) {
+        if (aInfo.requiredDisplayCategory != null) {
+            Slog.d(TAG,
+                    String.format("Checking activity launch with requiredDisplayCategory='%s' on"
+                                    + " display %d, which doesn't have a matching category.",
+                            aInfo.requiredDisplayCategory, mDisplayContent.mDisplayId));
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -199,6 +201,16 @@ class DisplayWindowPolicyControllerHelper {
         return mDisplayWindowPolicyController.isEnteringPipAllowed(uid);
     }
 
+    /**
+     * @see DisplayWindowPolicyController#getCustomHomeComponent
+     */
+    @Nullable
+    public ComponentName getCustomHomeComponent() {
+        if (mDisplayWindowPolicyController == null) {
+            return null;
+        }
+        return mDisplayWindowPolicyController.getCustomHomeComponent();
+    }
 
     void dump(String prefix, PrintWriter pw) {
         if (mDisplayWindowPolicyController != null) {

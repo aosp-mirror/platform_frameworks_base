@@ -43,6 +43,7 @@ import java.util.Arrays;
  * <p>
  * This class name is slightly misleading, since it's not actually a signature.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Signature implements Parcelable {
     private final byte[] mSignature;
     private int mHashCode;
@@ -307,11 +308,27 @@ public class Signature implements Parcelable {
     }
 
     /**
-     * Test if given {@link Signature} sets are exactly equal.
-     *
+     * Test if given {@link SigningDetails} are exactly equal.
      * @hide
      */
-    public static boolean areExactMatch(Signature[] a, Signature[] b) {
+    public static boolean areExactMatch(SigningDetails ad, SigningDetails bd) {
+        return areExactArraysMatch(ad.getSignatures(), bd.getSignatures());
+    }
+
+    /**
+     * Test if given {@link SigningDetails} and {@link Signature} set are exactly equal.
+     * @hide
+     */
+    public static boolean areExactMatch(SigningDetails ad, Signature[] b) {
+        return areExactArraysMatch(ad.getSignatures(), b);
+    }
+
+
+    /**
+     * Test if given {@link Signature} sets are exactly equal.
+     * @hide
+     */
+    static boolean areExactArraysMatch(Signature[] a, Signature[] b) {
         return (ArrayUtils.size(a) == ArrayUtils.size(b)) && ArrayUtils.containsAll(a, b)
                 && ArrayUtils.containsAll(b, a);
     }
@@ -329,7 +346,12 @@ public class Signature implements Parcelable {
      *             substantially, usually a signal of something fishy going on.
      * @hide
      */
-    public static boolean areEffectiveMatch(Signature[] a, Signature[] b)
+    public static boolean areEffectiveMatch(SigningDetails a, SigningDetails b)
+            throws CertificateException {
+        return areEffectiveArraysMatch(a.getSignatures(), b.getSignatures());
+    }
+
+    static boolean areEffectiveArraysMatch(Signature[] a, Signature[] b)
             throws CertificateException {
         final CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
@@ -342,7 +364,7 @@ public class Signature implements Parcelable {
             bPrime[i] = bounce(cf, b[i]);
         }
 
-        return areExactMatch(aPrime, bPrime);
+        return areExactArraysMatch(aPrime, bPrime);
     }
 
     /**

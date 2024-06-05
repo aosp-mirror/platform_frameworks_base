@@ -19,7 +19,7 @@ package com.android.wm.shell.keyguard;
 import android.annotation.NonNull;
 import android.window.IRemoteTransition;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 /**
  * Interface exposed to SystemUI Keyguard to register handlers for running
@@ -35,7 +35,13 @@ public interface KeyguardTransitions {
      */
     default void register(
             @NonNull IRemoteTransition unlockTransition,
+            @NonNull IRemoteTransition appearTransition,
             @NonNull IRemoteTransition occludeTransition,
             @NonNull IRemoteTransition occludeByDreamTransition,
             @NonNull IRemoteTransition unoccludeTransition) {}
+
+    /**
+     * Notify whether keyguard has created a remote animation runner for next app launch.
+     */
+    default void setLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen) {}
 }

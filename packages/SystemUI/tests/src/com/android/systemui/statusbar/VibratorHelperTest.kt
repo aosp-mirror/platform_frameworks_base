@@ -5,7 +5,9 @@ import android.os.UserHandle
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.testing.AndroidTestingRunner
+import android.view.HapticFeedbackConstants
+import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.eq
@@ -24,7 +26,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import java.util.concurrent.Executor
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class VibratorHelperTest : SysuiTestCase() {
 
@@ -33,6 +35,7 @@ class VibratorHelperTest : SysuiTestCase() {
 
     @Mock lateinit var vibrator: Vibrator
     @Mock lateinit var executor: Executor
+    @Mock lateinit var view: View
     @Captor lateinit var backgroundTaskCaptor: ArgumentCaptor<Runnable>
     lateinit var vibratorHelper: VibratorHelper
 
@@ -69,6 +72,33 @@ class VibratorHelperTest : SysuiTestCase() {
     fun testVibrate4() {
         vibratorHelper.vibrate(mock(VibrationEffect::class.java))
         verifyAsync().vibrate(any(VibrationEffect::class.java))
+    }
+
+    @Test
+    fun testVibrate5() {
+        vibratorHelper.vibrate(
+            mock(VibrationEffect::class.java),
+            mock(VibrationAttributes::class.java)
+        )
+        verifyAsync().vibrate(
+            any(VibrationEffect::class.java),
+            any(VibrationAttributes::class.java)
+        )
+    }
+
+    @Test
+    fun testPerformHapticFeedback() {
+        val constant = HapticFeedbackConstants.CONFIRM
+        vibratorHelper.performHapticFeedback(view, constant)
+        verify(view).performHapticFeedback(eq(constant))
+    }
+
+    @Test
+    fun testPerformHapticFeedback_withFlags() {
+        val constant = HapticFeedbackConstants.CONFIRM
+        val flag = HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+        vibratorHelper.performHapticFeedback(view, constant, flag)
+        verify(view).performHapticFeedback(eq(constant), eq(flag))
     }
 
     @Test

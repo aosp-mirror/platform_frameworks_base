@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.unfold.util.FoldableDeviceStates
 import com.android.systemui.unfold.util.FoldableTestUtils
 import com.android.systemui.util.mockito.any
+import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,45 +38,41 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
-import java.util.Optional
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class UnfoldLatencyTrackerTest : SysuiTestCase() {
 
-    @Mock
-    lateinit var latencyTracker: LatencyTracker
+    @Mock lateinit var latencyTracker: LatencyTracker
 
-    @Mock
-    lateinit var deviceStateManager: DeviceStateManager
+    @Mock lateinit var deviceStateManager: DeviceStateManager
 
-    @Mock
-    lateinit var screenLifecycle: ScreenLifecycle
+    @Mock lateinit var screenLifecycle: ScreenLifecycle
 
-    @Captor
-    private lateinit var foldStateListenerCaptor: ArgumentCaptor<FoldStateListener>
+    @Captor private lateinit var foldStateListenerCaptor: ArgumentCaptor<FoldStateListener>
 
-    @Captor
-    private lateinit var screenLifecycleCaptor: ArgumentCaptor<ScreenLifecycle.Observer>
+    @Captor private lateinit var screenLifecycleCaptor: ArgumentCaptor<ScreenLifecycle.Observer>
 
     private lateinit var deviceStates: FoldableDeviceStates
 
     private lateinit var unfoldLatencyTracker: UnfoldLatencyTracker
 
-    private val transitionProgressProvider = TestUnfoldTransitionProvider()
+    private val transitionProgressProvider = FakeUnfoldTransitionProvider()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        unfoldLatencyTracker = UnfoldLatencyTracker(
-            latencyTracker,
-            deviceStateManager,
-            Optional.of(transitionProgressProvider),
-            context.mainExecutor,
-            context,
-            context.contentResolver,
-            screenLifecycle
-        ).apply { init() }
+        unfoldLatencyTracker =
+            UnfoldLatencyTracker(
+                    latencyTracker,
+                    deviceStateManager,
+                    Optional.of(transitionProgressProvider),
+                    context.mainExecutor,
+                    context,
+                    context.contentResolver,
+                    screenLifecycle
+                )
+                .apply { init() }
         deviceStates = FoldableTestUtils.findDeviceStates(context)
 
         verify(deviceStateManager).registerCallback(any(), foldStateListenerCaptor.capture())
@@ -107,7 +104,7 @@ class UnfoldLatencyTrackerTest : SysuiTestCase() {
     }
 
     @Test
-    fun unfold_firstFoldEventAnimationsEnabledOnScreenTurnedOnAndTransitionStarted_eventNotPropagated() {
+    fun firstFoldEventAnimationsEnabledOnScreenTurnedOnAndTransitionStarted_eventNotPropagated() {
         setAnimationsEnabled(true)
         sendFoldEvent(folded = false)
 
@@ -118,7 +115,7 @@ class UnfoldLatencyTrackerTest : SysuiTestCase() {
     }
 
     @Test
-    fun unfold_secondFoldEventAnimationsEnabledOnScreenTurnedOnAndTransitionStarted_eventPropagated() {
+    fun secondFoldEventAnimationsEnabledOnScreenTurnedOnAndTransitionStarted_eventPropagated() {
         setAnimationsEnabled(true)
         sendFoldEvent(folded = true)
         sendFoldEvent(folded = false)
@@ -131,7 +128,7 @@ class UnfoldLatencyTrackerTest : SysuiTestCase() {
     }
 
     @Test
-    fun unfold_unfoldFoldUnfoldAnimationsEnabledOnScreenTurnedOnAndTransitionStarted_eventPropagated() {
+    fun unfoldFoldUnfoldAnimationsEnabledOnScreenTurnedOnAndTransitionStarted_eventPropagated() {
         setAnimationsEnabled(true)
         sendFoldEvent(folded = false)
         sendFoldEvent(folded = true)
@@ -174,7 +171,7 @@ class UnfoldLatencyTrackerTest : SysuiTestCase() {
 
     private fun sendFoldEvent(folded: Boolean) {
         val state = if (folded) deviceStates.folded else deviceStates.unfolded
-        foldStateListenerCaptor.value.onStateChanged(state)
+        foldStateListenerCaptor.value.onDeviceStateChanged(state)
     }
 
     private fun sendScreenTurnedOnEvent() {

@@ -22,16 +22,16 @@ import android.graphics.Canvas
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
-import com.android.systemui.R
+import android.util.Log
+import com.android.systemui.Flags
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.row.ExpandableView
 
-/**
- * Root view to insert Lock screen media controls into the notification stack.
- */
+/** Root view to insert Lock screen media controls into the notification stack. */
 class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableView(context, attrs) {
 
+    override var clipHeight = 0
     var cornerRadius = 0f
-    var clipHeight = 0
     var clipRect = RectF()
     var clipPath = Path()
 
@@ -46,8 +46,8 @@ class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableVie
     }
 
     private fun updateResources() {
-        cornerRadius = context.resources
-                .getDimensionPixelSize(R.dimen.notification_corner_radius).toFloat()
+        cornerRadius =
+            context.resources.getDimensionPixelSize(R.dimen.notification_corner_radius).toFloat()
     }
 
     public override fun updateClipping() {
@@ -69,16 +69,84 @@ class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableVie
         canvas.clipPath(clipPath)
     }
 
-
-    override fun performRemoveAnimation(duration: Long, delay: Long, translationDirection: Float,
-                                        isHeadsUpAnimation: Boolean, endLocation: Float,
-                                        onFinishedRunnable: Runnable?,
-                                        animationListener: AnimatorListenerAdapter?): Long {
+    override fun performRemoveAnimation(
+            duration: Long,
+            delay: Long,
+            translationDirection: Float,
+            isHeadsUpAnimation: Boolean,
+            onStartedRunnable: Runnable?,
+            onFinishedRunnable: Runnable?,
+            animationListener: AnimatorListenerAdapter?,
+            clipSide: ClipSide
+    ): Long {
         return 0
     }
 
-    override fun performAddAnimation(delay: Long, duration: Long, isHeadsUpAppear: Boolean,
-                                     onEnd: Runnable?) {
+    override fun performAddAnimation(
+        delay: Long,
+        duration: Long,
+        isHeadsUpAppear: Boolean,
+        onEnd: Runnable?
+    ) {
         // No animation, it doesn't need it, this would be local
+    }
+
+    override fun setVisibility(visibility: Int) {
+        if (Flags.bindKeyguardMediaVisibility()) {
+            if (isVisibilityValid(visibility)) {
+                super.setVisibility(visibility)
+            }
+        } else {
+            super.setVisibility(visibility)
+        }
+
+        assertMediaContainerVisibility(visibility)
+    }
+
+    /**
+     * visibility should be aligned with MediaContainerView visibility on the keyguard.
+     */
+    private fun isVisibilityValid(visibility: Int): Boolean {
+        val currentViewState = viewState as? MediaContainerViewState ?: return true
+        val shouldBeGone = !currentViewState.shouldBeVisible
+        return if (shouldBeGone) visibility == GONE else visibility != GONE
+    }
+
+    /**
+     * b/298213983
+     * MediaContainerView's visibility is changed to VISIBLE when it should be GONE.
+     * This method check this state and logs.
+     */
+    private fun assertMediaContainerVisibility(visibility: Int) {
+        val currentViewState = viewState
+
+        if (currentViewState is MediaContainerViewState) {
+            if (!currentViewState.shouldBeVisible && visibility == VISIBLE) {
+                Log.wtf("MediaContainerView", "MediaContainerView should be GONE " +
+                        "but its visibility changed to VISIBLE")
+            }
+        }
+    }
+
+    fun setKeyguardVisibility(isVisible: Boolean) {
+        val currentViewState = viewState
+        if (currentViewState is MediaContainerViewState) {
+            currentViewState.shouldBeVisible = isVisible
+        }
+
+        visibility = if (isVisible) VISIBLE else GONE
+    }
+
+    override fun createExpandableViewState(): ExpandableViewState = MediaContainerViewState()
+
+    class MediaContainerViewState : ExpandableViewState() {
+        var shouldBeVisible: Boolean = false
+
+        override fun copyFrom(viewState: ViewState) {
+            super.copyFrom(viewState)
+            if (viewState is MediaContainerViewState) {
+                shouldBeVisible = viewState.shouldBeVisible
+            }
+        }
     }
 }

@@ -25,16 +25,16 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.complication.DreamMediaEntryComplication;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.media.controls.models.player.MediaData;
-import com.android.systemui.media.controls.pipeline.MediaDataManager;
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
+import com.android.systemui.media.controls.shared.model.MediaData;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +44,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class MediaDreamSentinelTest extends SysuiTestCase {
     @Mock
     MediaDataManager mMediaDataManager;
@@ -104,11 +104,11 @@ public class MediaDreamSentinelTest extends SysuiTestCase {
         listener.onMediaDataLoaded(mKey, mOldKey, mData, /* immediately= */true,
                 /* receivedSmartspaceCardLatency= */0, /* isSsReactived= */ false);
 
-        listener.onMediaDataRemoved(mKey);
+        listener.onMediaDataRemoved(mKey, false);
         verify(mDreamOverlayStateController, never()).removeComplication(any());
 
         when(mMediaDataManager.hasActiveMedia()).thenReturn(false);
-        listener.onMediaDataRemoved(mKey);
+        listener.onMediaDataRemoved(mKey, false);
         verify(mDreamOverlayStateController).removeComplication(eq(mMediaEntryComplication));
     }
 

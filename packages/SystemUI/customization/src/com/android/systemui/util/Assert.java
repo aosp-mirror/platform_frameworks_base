@@ -37,12 +37,60 @@ public class Assert {
         sTestThread = thread;
     }
 
+    /**
+     * Run {@code mainThreadWork} synchronously, ensuring that {@link #isMainThread()} will return
+     * {@code true} while it is running.
+     * <ol>
+     * <li>If {@link #isMainThread()} already passes, the work is simply run.
+     * <li>If the test thread is {@code null}, it will be set, the work run, and then cleared.
+     * <li>If the test thread is already set to a different thread, this call will fail the test to
+     * avoid causing spurious errors on other thread
+     * </ol>
+     */
+    @VisibleForTesting
+    public static void runWithCurrentThreadAsMainThread(Runnable mainThreadWork) {
+        if (sMainLooper.isCurrentThread()) {
+            // Already on the main thread; just run
+            mainThreadWork.run();
+            return;
+        }
+        Thread currentThread = Thread.currentThread();
+        Thread originalThread = sTestThread;
+        if (originalThread == currentThread) {
+            // test thread is already set; just run
+            mainThreadWork.run();
+            return;
+        }
+        if (originalThread != null) {
+            throw new AssertionError("Can't run with current thread (" + currentThread
+                    + ") as main thread; test thread is already set to " + originalThread);
+        }
+        sTestThread = currentThread;
+        mainThreadWork.run();
+        sTestThread = null;
+    }
+
     public static void isMainThread() {
         if (!sMainLooper.isCurrentThread()
                 && (sTestThread == null || sTestThread != Thread.currentThread())) {
             throw new IllegalStateException("should be called from the main thread."
                     + " sMainLooper.threadName=" + sMainLooper.getThread().getName()
                     + " Thread.currentThread()=" + Thread.currentThread().getName());
+        }
+    }
+
+    /**
+     * Asserts that the current thread is the same as the given thread, or that the current thread
+     * is the test thread.
+     * @param expected The looper we expected to be running on
+     */
+    public static void isCurrentThread(Looper expected) {
+        if (!expected.isCurrentThread()
+                && (sTestThread == null || sTestThread != Thread.currentThread())) {
+            throw new IllegalStateException("Called on wrong thread thread."
+                    + " wanted " + expected.getThread().getName()
+                    + " but instead got Thread.currentThread()="
+                    + Thread.currentThread().getName());
         }
     }
 

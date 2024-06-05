@@ -94,7 +94,7 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     }
 
     @Override
-    ChooserProfileDescriptor getItem(int pageIndex) {
+    public ChooserProfileDescriptor getItem(int pageIndex) {
         return mItems[pageIndex];
     }
 

@@ -17,6 +17,7 @@
 package com.android.server.grammaticalinflection;
 
 import android.app.backup.BackupManager;
+import android.content.AttributionSource;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -30,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.HashMap;
@@ -47,6 +49,7 @@ public class GrammaticalInflectionBackupHelper {
     private final PackageManager mPackageManager;
     private final GrammaticalInflectionService mGrammaticalGenderService;
     private final Clock mClock;
+    private final AttributionSource mAttributionSource;
 
     static class StagedData {
         final long mCreationTimeMillis;
@@ -58,8 +61,9 @@ public class GrammaticalInflectionBackupHelper {
         }
     }
 
-    public GrammaticalInflectionBackupHelper(GrammaticalInflectionService grammaticalGenderService,
-            PackageManager packageManager) {
+    public GrammaticalInflectionBackupHelper(AttributionSource attributionSource,
+            GrammaticalInflectionService grammaticalGenderService, PackageManager packageManager) {
+        mAttributionSource = attributionSource;
         mGrammaticalGenderService = grammaticalGenderService;
         mPackageManager = packageManager;
         mClock = Clock.systemUTC();
@@ -115,6 +119,22 @@ public class GrammaticalInflectionBackupHelper {
         }
     }
 
+    /**
+     * Returns the system-gender to be backed up as a data-blob.
+     */
+    public byte[] getSystemBackupPayload(int userId) {
+        int gender = mGrammaticalGenderService.getSystemGrammaticalGender(userId);
+        return intToByteArray(gender);
+    }
+
+    /**
+     * Restores the system-gender that were previously backed up.
+     */
+    public void applyRestoredSystemPayload(byte[] payload, int userId) {
+        int gender = convertByteArrayToInt(payload);
+        mGrammaticalGenderService.setSystemWideGrammaticalGender(gender, userId);
+    }
+
     private boolean hasSetBeforeRestoring(String pkgName, int userId) {
         return mGrammaticalGenderService.getApplicationGrammaticalGender(pkgName, userId)
                 != Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
@@ -146,7 +166,7 @@ public class GrammaticalInflectionBackupHelper {
         BackupManager.dataChanged(SYSTEM_BACKUP_PACKAGE_KEY);
     }
 
-    private byte[] convertToByteArray(HashMap<String, Integer> pkgGenderInfo) {
+    private static byte[] convertToByteArray(HashMap<String, Integer> pkgGenderInfo) {
         try (final ByteArrayOutputStream out = new ByteArrayOutputStream();
              final ObjectOutputStream objStream = new ObjectOutputStream(out)) {
             objStream.writeObject(pkgGenderInfo);
@@ -157,11 +177,22 @@ public class GrammaticalInflectionBackupHelper {
         }
     }
 
-    private HashMap<String, Integer> readFromByteArray(byte[] payload) {
+    private static byte[] intToByteArray(final int gender) {
+        ByteBuffer bb = ByteBuffer.allocate(4);
+        bb.putInt(gender);
+        return bb.array();
+    }
+
+    private static int convertByteArrayToInt(byte[] intBytes) {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(intBytes);
+        return byteBuffer.getInt();
+    }
+
+    private static HashMap<String, Integer> readFromByteArray(byte[] payload) {
         HashMap<String, Integer> data = new HashMap<>();
 
-        try (ByteArrayInputStream byteIn = new ByteArrayInputStream(payload);
-             ObjectInputStream in = new ObjectInputStream(byteIn)) {
+        try (var byteIn = new ByteArrayInputStream(payload);
+                var in = new ObjectInputStream(byteIn)) {
             data = (HashMap<String, Integer>) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
             Log.e(TAG, "cannot convert payload to HashMap.", e);
@@ -173,10 +204,10 @@ public class GrammaticalInflectionBackupHelper {
     private void cleanStagedDataForOldEntries() {
         for (int i = 0; i < mCache.size(); i++) {
             int userId = mCache.keyAt(i);
-            StagedData stagedData = mCache.get(userId);
+            StagedData stagedData = mCache.valueAt(userId);
             if (stagedData.mCreationTimeMillis
                     < mClock.millis() - STAGE_DATA_RETENTION_PERIOD.toMillis()) {
-                mCache.remove(userId);
+                mCache.removeAt(i--);
             }
         }
     }

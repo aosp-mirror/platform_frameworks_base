@@ -48,6 +48,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityRequestPreparer;
+import android.view.accessibility.Flags;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.window.ScreenCapture;
 
@@ -1286,6 +1287,15 @@ public final class AccessibilityInteractionController {
     }
 
     /**
+     * Destroy {@link AccessibilityInteractionController} and clean up the pending actions.
+     */
+    public void destroy() {
+        if (Flags.preventLeakingViewrootimpl()) {
+            mHandler.removeCallbacksAndMessages(null);
+        }
+    }
+
+    /**
      * This class encapsulates a prefetching strategy for the accessibility APIs for
      * querying window content. It is responsible to prefetch a batch of
      * AccessibilityNodeInfos in addition to the one for a requested node.
@@ -1968,21 +1978,42 @@ public final class AccessibilityInteractionController {
     }
 
     /** Attaches an accessibility overlay to the specified window. */
-    public void attachAccessibilityOverlayToWindowClientThread(SurfaceControl sc) {
+    public void attachAccessibilityOverlayToWindowClientThread(
+            SurfaceControl sc,
+            int interactionId,
+            IAccessibilityInteractionConnectionCallback callback) {
         mHandler.sendMessage(
                 obtainMessage(
                         AccessibilityInteractionController
                                 ::attachAccessibilityOverlayToWindowUiThread,
                         this,
-                        sc));
+                        sc,
+                        interactionId,
+                        callback));
     }
 
-    private void attachAccessibilityOverlayToWindowUiThread(SurfaceControl sc) {
+    private void attachAccessibilityOverlayToWindowUiThread(
+            SurfaceControl sc,
+            int interactionId,
+            IAccessibilityInteractionConnectionCallback callback) {
         SurfaceControl parent = mViewRootImpl.getSurfaceControl();
-        if (parent.isValid()) {
-            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            t.reparent(sc, parent).apply();
-            t.close();
+        if (!parent.isValid()) {
+            try {
+                callback.sendAttachOverlayResult(
+                        AccessibilityService.OVERLAY_RESULT_INTERNAL_ERROR, interactionId);
+                return;
+            } catch (RemoteException re) {
+                /* ignore - the other side will time out */
+            }
+        }
+        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        t.reparent(sc, parent).apply();
+        t.close();
+        try {
+            callback.sendAttachOverlayResult(
+                    AccessibilityService.OVERLAY_RESULT_SUCCESS, interactionId);
+        } catch (RemoteException re) {
+            /* ignore - the other side will time out */
         }
     }
 }

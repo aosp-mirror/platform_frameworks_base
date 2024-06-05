@@ -347,6 +347,11 @@ public class SyncStorageEngine {
             return target + ", enabled=" + enabled + ", syncable=" + syncable + ", backoff="
                     + backoffTime + ", delay=" + delayUntil;
         }
+
+        public String toSafeString() {
+            return target.toSafeString() + ", enabled=" + enabled + ", syncable=" + syncable
+                    + ", backoff=" + backoffTime + ", delay=" + delayUntil;
+        }
     }
 
     public static class SyncHistoryItem {
@@ -553,7 +558,7 @@ public class SyncStorageEngine {
             final int size = mAuthorities.size();
             mLogger.log("Loaded ", size, " items");
             for (int i = 0; i < size; i++) {
-                mLogger.log(mAuthorities.valueAt(i));
+                mLogger.log(mAuthorities.valueAt(i).toSafeString());
             }
         }
     }
@@ -734,7 +739,7 @@ public class SyncStorageEngine {
             Slog.d(TAG, "setSyncAutomatically: " + /* account + */" provider " + providerName
                     + ", user " + userId + " -> " + sync);
         }
-        mLogger.log("Set sync auto account=", account,
+        mLogger.log("Set sync auto account=", account.toSafeString(),
                 " user=", userId,
                 " authority=", providerName,
                 " value=", Boolean.toString(sync),
@@ -812,7 +817,8 @@ public class SyncStorageEngine {
     private void setSyncableStateForEndPoint(EndPoint target, int syncable,
             int callingUid, int callingPid) {
         AuthorityInfo aInfo;
-        mLogger.log("Set syncable ", target, " value=", Integer.toString(syncable),
+        mLogger.log("Set syncable ", target.toSafeString(),
+                " value=", Integer.toString(syncable),
                 " cuid=", callingUid,
                 " cpid=", callingPid);
         synchronized (mAuthorities) {
@@ -1754,7 +1760,7 @@ public class SyncStorageEngine {
                     eventType = parser.next();
                 } while (eventType != XmlPullParser.END_DOCUMENT);
             }
-        } catch (XmlPullParserException e) {
+        } catch (XmlPullParserException | ArrayIndexOutOfBoundsException e) {
             Slog.w(TAG, "Error reading accounts", e);
             return;
         } catch (java.io.IOException e) {
@@ -1845,7 +1851,7 @@ public class SyncStorageEngine {
     private void parseListenForTickles(TypedXmlPullParser parser) {
         int userId = 0;
         try {
-            parser.getAttributeInt(null, XML_ATTR_USER);
+            userId = parser.getAttributeInt(null, XML_ATTR_USER);
         } catch (XmlPullParserException e) {
             Slog.e(TAG, "error parsing the user for listen-for-tickles", e);
         }

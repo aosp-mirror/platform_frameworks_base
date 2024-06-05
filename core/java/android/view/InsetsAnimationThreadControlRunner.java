@@ -76,7 +76,7 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
             Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW,
                     "InsetsAsyncAnimation: " + WindowInsets.Type.toString(runner.getTypes()),
                     runner.getTypes());
-            releaseControls(mControl.getControls());
+            InsetsController.releaseControls(mControl.getControls());
             mMainThreadHandler.post(() ->
                     mOuterCallbacks.notifyFinished(InsetsAnimationThreadControlRunner.this, shown));
         }
@@ -130,12 +130,6 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
         });
     }
 
-    private void releaseControls(SparseArray<InsetsSourceControl> controls) {
-        for (int i = controls.size() - 1; i >= 0; i--) {
-            controls.valueAt(i).release(SurfaceControl::release);
-        }
-    }
-
     @Override
     @UiThread
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
@@ -143,6 +137,7 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
     }
 
     @Override
+    @Nullable
     public ImeTracker.Token getStatsToken() {
         return mControl.getStatsToken();
     }
@@ -190,5 +185,12 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
     @Override
     public int getAnimationType() {
         return mControl.getAnimationType();
+    }
+
+    @Override
+    public void updateLayoutInsetsDuringAnimation(
+            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
+        InsetsAnimationThread.getHandler().post(
+                () -> mControl.updateLayoutInsetsDuringAnimation(layoutInsetsDuringAnimation));
     }
 }

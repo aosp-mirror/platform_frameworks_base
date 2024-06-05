@@ -17,19 +17,23 @@
 package com.android.systemui.qs.tileimpl
 
 import android.content.Context
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.service.quicksettings.Tile
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.text.TextUtils
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.plugins.qs.QSIconView
+import com.android.systemui.haptics.qs.QSLongPressEffect
+import com.android.systemui.haptics.qs.qsLongPressEffect
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -37,26 +41,25 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class QSTileViewImplTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var iconView: QSIconView
     @Mock
     private lateinit var customDrawable: Drawable
 
     private lateinit var tileView: FakeTileView
     private lateinit var customDrawableView: View
     private lateinit var chevronView: View
+    private val kosmos = testKosmos()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         context.ensureTestableResources()
 
-        tileView = FakeTileView(context, iconView, false)
+        tileView = FakeTileView(context, false, kosmos.qsLongPressEffect)
         customDrawableView = tileView.requireViewById(R.id.customDrawable)
         chevronView = tileView.requireViewById(R.id.chevron)
     }
@@ -382,11 +385,169 @@ class QSTileViewImplTest : SysuiTestCase() {
         assertThat(tileView.stateDescription?.contains(unavailableString)).isTrue()
     }
 
+    @Test
+    fun onStateChange_longPressEffectActive_withInvalidDuration_doesNotInitializeEffect() {
+        val state = QSTile.State() // A state that handles longPress
+
+        // GIVEN an invalid long-press effect duration
+        tileView.constantLongPressEffectDuration = -1
+
+        // WHEN the state changes
+        tileView.changeState(state)
+
+        // THEN the long-press effect is not initialized
+        assertThat(tileView.isLongPressEffectInitialized).isFalse()
+    }
+
+    @Test
+    fun onStateChange_longPressEffectActive_withValidDuration_initializesEffect() {
+        // GIVEN a test state that handles long-press and a valid long-press effect duration
+        val state = QSTile.State()
+
+        // WHEN the state changes
+        tileView.changeState(state)
+
+        // THEN the long-press effect is initialized
+        assertThat(tileView.isLongPressEffectInitialized).isTrue()
+    }
+
+    @Test
+    fun onStateChange_fromLongPress_to_noLongPress_unBoundsTile() {
+        // GIVEN a state that no longer handles long-press
+        val state = QSTile.State()
+        state.handlesLongClick = false
+
+        // WHEN the state changes
+        tileView.changeState(state)
+
+        // THEN the view binder no longer binds the view to the long-press effect
+        assertThat(tileView.isLongPressEffectBound).isFalse()
+    }
+
+    @Test
+    fun onStateChange_fromNoLongPress_to_longPress_bindsTile() {
+        // GIVEN that the tile has changed to a state that does not handle long-press
+        val state = QSTile.State()
+        state.handlesLongClick = false
+        tileView.changeState(state)
+
+        // WHEN the state changes back to handling long-press
+        state.handlesLongClick = true
+        tileView.changeState(state)
+
+        // THEN the view is bounded to the long-press effect
+        assertThat(tileView.isLongPressEffectBound).isTrue()
+    }
+
+    @Test
+    fun onStateChange_withoutLongPressEffect_fromLongPress_to_noLongPress_neverBindsEffect() {
+        // GIVEN a tile where the long-press effect is null
+        tileView = FakeTileView(context, false, null)
+
+        // GIVEN a state that no longer handles long-press
+        val state = QSTile.State()
+        state.handlesLongClick = false
+
+        // WHEN the state changes
+        tileView.changeState(state)
+
+        // THEN the view binder does not bind the view and no effect is initialized
+        assertThat(tileView.isLongPressEffectBound).isFalse()
+        assertThat(tileView.isLongPressEffectInitialized).isFalse()
+    }
+
+    @Test
+    fun onStateChange_withoutLongPressEffect_fromNoLongPress_to_longPress_neverBindsEffect() {
+        // GIVEN a tile where the long-press effect is null
+        tileView = FakeTileView(context, false, null)
+
+        // GIVEN that the tile has changed to a state that does not handle long-press
+        val state = QSTile.State()
+        state.handlesLongClick = false
+        tileView.changeState(state)
+
+        // WHEN the state changes back to handling long-press
+        state.handlesLongClick = true
+        tileView.changeState(state)
+
+        // THEN the view binder does not bind the view and no effect is initialized
+        assertThat(tileView.isLongPressEffectBound).isFalse()
+        assertThat(tileView.isLongPressEffectInitialized).isFalse()
+    }
+
+    @Test
+    fun onPrepareForLaunch_paddingForLaunchAnimationIsConfigured() {
+        val startingWidth = 100
+        val startingHeight = 50
+        val deltaWidth = (QSTileViewImpl.LONG_PRESS_EFFECT_WIDTH_SCALE - 1f) * startingWidth
+        val deltaHeight = (QSTileViewImpl.LONG_PRESS_EFFECT_HEIGHT_SCALE - 1f) * startingHeight
+
+        // GIVEN that long-press effect properties are initialized
+        tileView.initializeLongPressProperties(startingHeight, startingWidth)
+
+        // WHEN the tile is preparing for the launch animation
+        tileView.prepareForLaunch()
+
+        // THE animation padding corresponds to the tile's growth due to the effect
+        val padding = tileView.getPaddingForLaunchAnimation()
+        assertThat(padding).isEqualTo(
+            Rect(
+                -deltaWidth.toInt() / 2,
+                -deltaHeight.toInt() / 2,
+                deltaWidth.toInt() / 2,
+                deltaHeight.toInt() / 2,
+            )
+        )
+    }
+
+    @Test
+    fun onActivityLaunchAnimationEnd_onFreshTile_longPressPropertiesAreReset() {
+        // WHEN an activity launch animation ends on a fresh tile
+        tileView.onActivityLaunchAnimationEnd()
+
+        // THEN the tile's long-press effect properties are reset by default
+        assertThat(tileView.haveLongPressPropertiesBeenReset).isTrue()
+    }
+
+    @Test
+    fun onUpdateLongPressEffectProperties_duringLongPressEffect_propertiesAreNotReset() {
+        // GIVEN a state that supports long-press
+        val state = QSTile.State()
+        tileView.changeState(state)
+
+        // WHEN the long-press effect is updating the properties
+        tileView.updateLongPressEffectProperties(1f)
+
+        // THEN the tile's long-press effect properties haven't reset
+        assertThat(tileView.haveLongPressPropertiesBeenReset).isFalse()
+    }
+
+    @Test
+    fun onActivityLaunchAnimationEnd_afterLongPressEffect_longPressPropertiesAreReset() {
+        // GIVEN a state that supports long-press and the long-press effect updating
+        val state = QSTile.State()
+        tileView.changeState(state)
+        tileView.updateLongPressEffectProperties(1f)
+
+        // WHEN an activity launch animation ends on a fresh tile
+        tileView.onActivityLaunchAnimationEnd()
+
+        // THEN the tile's long-press effect properties are reset
+        assertThat(tileView.haveLongPressPropertiesBeenReset).isTrue()
+    }
+
     class FakeTileView(
         context: Context,
-        icon: QSIconView,
-        collapsed: Boolean
-    ) : QSTileViewImpl(context, icon, collapsed) {
+        collapsed: Boolean,
+        longPressEffect: QSLongPressEffect?,
+    ) : QSTileViewImpl(
+            ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings),
+            collapsed,
+            longPressEffect,
+    ) {
+        var constantLongPressEffectDuration = 500
+
+        override fun getLongPressEffectDuration(): Int = constantLongPressEffectDuration
         fun changeState(state: QSTile.State) {
             handleStateChanged(state)
         }

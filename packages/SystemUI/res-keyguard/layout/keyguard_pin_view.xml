@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 **
-** Copyright 2012, The Android Open Source Project
+** Copyright 2023, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License")
 ** you may not use this file except in compliance with the License.
@@ -27,15 +27,17 @@
     android:clipToPadding="false"
     android:orientation="vertical"
     androidprv:layout_maxWidth="@dimen/keyguard_security_width">
-<include layout="@layout/keyguard_bouncer_message_area"/>
 
-<com.android.systemui.keyguard.bouncer.ui.BouncerMessageView
-    android:id="@+id/bouncer_message_view"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" />
+    <include layout="@layout/keyguard_bouncer_message_area"/>
 
-<androidx.constraintlayout.widget.ConstraintLayout
+    <com.android.systemui.bouncer.ui.BouncerMessageView
+        android:id="@+id/bouncer_message_view"
+        android:importantForAccessibility="noHideDescendants"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pin_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -202,16 +204,16 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:contentDescription="@string/keyboardview_keycode_enter" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <include layout="@layout/keyguard_eca"
-             android:id="@+id/keyguard_selector_fade_container"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:orientation="vertical"
-             android:layout_gravity="bottom|center_horizontal"
-             android:layout_marginTop="@dimen/keyguard_eca_top_margin"
-             android:layout_marginBottom="@dimen/keyguard_eca_bottom_margin"
-             android:gravity="center_horizontal"/>
+        android:id="@+id/keyguard_selector_fade_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginTop="@dimen/keyguard_eca_top_margin"
+        android:layout_marginBottom="@dimen/keyguard_eca_bottom_margin"
+        android:gravity="center_horizontal"/>
 
 </com.android.keyguard.KeyguardPINView>

@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility;
 
+import android.accessibilityservice.AccessibilityService;
+import android.annotation.RequiresNoPermission;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -95,6 +97,7 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
     }
 
     @Override
+    @RequiresNoPermission
     public void setFindAccessibilityNodeInfoResult(AccessibilityNodeInfo info, int interactionId) {
         synchronized (mLock) {
             if (interactionId == mInteractionId) {
@@ -112,6 +115,7 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
     }
 
     @Override
+    @RequiresNoPermission
     public void setFindAccessibilityNodeInfosResult(List<AccessibilityNodeInfo> infos,
             int interactionId) {
         synchronized (mLock) {
@@ -130,6 +134,7 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
     }
 
     @Override
+    @RequiresNoPermission
     public void setPrefetchAccessibilityNodeInfoResult(List<AccessibilityNodeInfo> infos,
                                                        int interactionId)
             throws RemoteException {
@@ -161,6 +166,7 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
     }
 
     @Override
+    @RequiresNoPermission
     public void setPerformAccessibilityActionResult(boolean succeeded, int interactionId)
             throws RemoteException {
         // There's no reason to use this class when performing actions. Do something reasonable.
@@ -168,6 +174,7 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
     }
 
     @Override
+    @RequiresNoPermission
     public void sendTakeScreenshotOfWindowError(int errorCode, int interactionId)
             throws RemoteException {
         mServiceCallback.sendTakeScreenshotOfWindowError(errorCode, interactionId);
@@ -280,5 +287,13 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
             info.setLongClickable(mNodeWithReplacementActions.isLongClickable());
             info.setDismissable(mNodeWithReplacementActions.isDismissable());
         }
+    }
+
+    @Override
+    @RequiresNoPermission
+    public void sendAttachOverlayResult(
+            @AccessibilityService.AttachOverlayResult int result, int interactionId)
+            throws RemoteException {
+        mServiceCallback.sendAttachOverlayResult(result, interactionId);
     }
 }

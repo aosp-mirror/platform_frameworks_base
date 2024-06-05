@@ -18,9 +18,7 @@ package com.android.server.permission.access
 
 import android.os.UserHandle
 
-sealed class AccessUri(
-    val scheme: String
-) {
+sealed class AccessUri(val scheme: String) {
     override fun equals(other: Any?): Boolean {
         throw NotImplementedError()
     }
@@ -34,9 +32,7 @@ sealed class AccessUri(
     }
 }
 
-data class AppOpUri(
-    val appOpName: String
-) : AccessUri(SCHEME) {
+data class AppOpUri(val appOpName: String) : AccessUri(SCHEME) {
     override fun toString(): String = "$scheme:///$appOpName"
 
     companion object {
@@ -44,10 +40,7 @@ data class AppOpUri(
     }
 }
 
-data class PackageUri(
-    val packageName: String,
-    val userId: Int
-) : AccessUri(SCHEME) {
+data class PackageUri(val packageName: String, val userId: Int) : AccessUri(SCHEME) {
     override fun toString(): String = "$scheme:///$packageName/$userId"
 
     companion object {
@@ -55,9 +48,7 @@ data class PackageUri(
     }
 }
 
-data class PermissionUri(
-    val permissionName: String
-) : AccessUri(SCHEME) {
+data class PermissionUri(val permissionName: String) : AccessUri(SCHEME) {
     override fun toString(): String = "$scheme:///$permissionName"
 
     companion object {
@@ -65,9 +56,15 @@ data class PermissionUri(
     }
 }
 
-data class UidUri(
-    val uid: Int
-) : AccessUri(SCHEME) {
+data class DevicePermissionUri(val permissionName: String, val deviceId: Int) : AccessUri(SCHEME) {
+    override fun toString(): String = "$scheme:///$permissionName/$deviceId"
+
+    companion object {
+        const val SCHEME = "device-permission"
+    }
+}
+
+data class UidUri(val uid: Int) : AccessUri(SCHEME) {
     val userId: Int
         get() = UserHandle.getUserId(uid)
 

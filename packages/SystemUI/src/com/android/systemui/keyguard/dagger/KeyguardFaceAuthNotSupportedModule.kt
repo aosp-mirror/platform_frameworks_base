@@ -16,8 +16,10 @@
 
 package com.android.systemui.keyguard.dagger
 
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
-import com.android.systemui.keyguard.domain.interactor.NoopKeyguardFaceAuthInteractor
+import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
+import com.android.systemui.deviceentry.data.repository.NoopDeviceEntryFaceAuthRepository
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.NoopDeviceEntryFaceAuthInteractor
 import dagger.Binds
 import dagger.Module
 
@@ -31,5 +33,12 @@ import dagger.Module
 @Module
 interface KeyguardFaceAuthNotSupportedModule {
     @Binds
-    fun keyguardFaceAuthInteractor(impl: NoopKeyguardFaceAuthInteractor): KeyguardFaceAuthInteractor
+    fun keyguardFaceAuthInteractor(
+        impl: NoopDeviceEntryFaceAuthInteractor
+    ): DeviceEntryFaceAuthInteractor
+
+    @Binds
+    fun deviceEntryFaceAuthRepository(
+        impl: NoopDeviceEntryFaceAuthRepository
+    ): DeviceEntryFaceAuthRepository
 }

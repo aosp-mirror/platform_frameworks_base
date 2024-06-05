@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
+
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Mockito.mock;
@@ -25,24 +27,23 @@ import android.app.Notification;
 import android.content.Context;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
-
-import dagger.Lazy;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,10 +51,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Optional;
-
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
@@ -69,6 +68,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Mock private RemoteInputUriController mRemoteInputUriController;
     @Mock private NotificationClickNotifier mClickNotifier;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
+    @Mock private PowerInteractor mPowerInteractor;
 
     private TestableNotificationRemoteInputManager mRemoteInputManager;
     private NotificationEntry mEntry;
@@ -82,13 +82,14 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 mLockscreenUserManager,
                 mSmartReplyController,
                 mVisibilityProvider,
-                () -> Optional.of(mock(CentralSurfaces.class)),
+                mPowerInteractor,
                 mStateController,
                 mRemoteInputUriController,
-                mock(RemoteInputControllerLogger.class),
+                new RemoteInputControllerLogger(logcatLogBuffer()),
                 mClickNotifier,
-                mock(ActionClickLogger.class),
-                mock(DumpManager.class));
+                new ActionClickLogger(logcatLogBuffer()),
+                mock(JavaAdapter.class),
+                mock(ShadeInteractor.class));
         mEntry = new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_NAME)
                 .setOpPkg(TEST_PACKAGE_NAME)
@@ -140,26 +141,28 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
                 NotificationVisibilityProvider visibilityProvider,
-                Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+                PowerInteractor powerInteractor,
                 StatusBarStateController statusBarStateController,
                 RemoteInputUriController remoteInputUriController,
                 RemoteInputControllerLogger remoteInputControllerLogger,
                 NotificationClickNotifier clickNotifier,
                 ActionClickLogger actionClickLogger,
-                DumpManager dumpManager) {
+                JavaAdapter javaAdapter,
+                ShadeInteractor shadeInteractor) {
             super(
                     context,
                     notifPipelineFlags,
                     lockscreenUserManager,
                     smartReplyController,
                     visibilityProvider,
-                    centralSurfacesOptionalLazy,
+                    powerInteractor,
                     statusBarStateController,
                     remoteInputUriController,
                     remoteInputControllerLogger,
                     clickNotifier,
                     actionClickLogger,
-                    dumpManager);
+                    javaAdapter,
+                    shadeInteractor);
         }
 
         public void setUpWithPresenterForTest(Callback callback,
@@ -171,3 +174,4 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
     }
 }
+

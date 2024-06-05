@@ -21,7 +21,7 @@ import android.content.Context
 import android.util.Log
 import androidx.annotation.StringRes
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.common.shared.model.Text
 
 /**

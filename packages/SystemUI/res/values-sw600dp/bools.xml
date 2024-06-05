@@ -18,4 +18,12 @@
 <resources>
     <!-- Whether to show the user switcher in quick settings when only a single user is present. -->
     <bool name="qs_show_user_switcher_for_single_user">true</bool>
+
+    <!--  Do update bouncer constraints (port or land) on rotation.
+      Needed for bouncer refactor to use motion layout, because constraints should only be
+      changed on small screens. Only used when flag "lockscreen.enable_landscape" (b/293252410)
+      is enabled
+
+      False here so bouncers constraints are not updated when rotating on large screens -->
+    <bool name="update_bouncer_constraints">false</bool>
 </resources>

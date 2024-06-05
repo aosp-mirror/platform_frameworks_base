@@ -29,18 +29,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.PendingIntent;
+import android.app.role.RoleManager;
 import android.content.Intent;
 import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -54,11 +55,14 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+import java.util.List;
+
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class QuickAccessWalletControllerTest extends SysuiTestCase {
 
+    private static final String WALLET_ROLE_HOLDER = "wallet.role.holder";
     @Mock
     private QuickAccessWalletClient mQuickAccessWalletClient;
     @Mock
@@ -68,7 +72,9 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
-    private ActivityLaunchAnimator.Controller mAnimationController;
+    private ActivityTransitionAnimator.Controller mAnimationController;
+    @Mock
+    private RoleManager mRoleManager;
     @Captor
     private ArgumentCaptor<GetWalletCardsRequest> mRequestCaptor;
     @Captor
@@ -102,7 +108,8 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
                 MoreExecutors.directExecutor(),
                 mSecureSettings,
                 mQuickAccessWalletClient,
-                mClock);
+                mClock,
+                mRoleManager);
     }
 
     @Test
@@ -110,6 +117,24 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
         mController.updateWalletPreference();
 
         assertTrue(mController.isWalletEnabled());
+    }
+
+    @Test
+    public void walletRoleAvailable_isAvailable() {
+        when(mRoleManager.isRoleAvailable(eq(RoleManager.ROLE_WALLET))).thenReturn(true);
+        when(mRoleManager.getRoleHolders(eq(RoleManager.ROLE_WALLET)))
+                .thenReturn(List.of(WALLET_ROLE_HOLDER));
+
+        assertTrue(mController.isWalletRoleAvailable());
+    }
+
+    @Test
+    public void walletRoleAvailable_isNotAvailable() {
+        when(mRoleManager.isRoleAvailable(eq(RoleManager.ROLE_WALLET))).thenReturn(false);
+        when(mRoleManager.getRoleHolders(eq(RoleManager.ROLE_WALLET)))
+                .thenReturn(List.of(WALLET_ROLE_HOLDER));
+
+        assertFalse(mController.isWalletRoleAvailable());
     }
 
     @Test
@@ -188,6 +213,25 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void queryWalletCards_walletEnabled_queryMultipleCards() {
+        mController.queryWalletCards(mCardsRetriever, 5);
+
+        verify(mQuickAccessWalletClient)
+                .getWalletCards(
+                        eq(MoreExecutors.directExecutor()), mRequestCaptor.capture(),
+                        eq(mCardsRetriever));
+
+        GetWalletCardsRequest request = mRequestCaptor.getValue();
+        assertEquals(5, mRequestCaptor.getValue().getMaxCards());
+        assertEquals(
+                mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_width),
+                request.getCardWidthPx());
+        assertEquals(
+                mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_height),
+                request.getCardHeightPx());
+    }
+
+    @Test
     public void queryWalletCards_walletFeatureNotAvailable_noQuery() {
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(false);
 
@@ -200,7 +244,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     public void getQuickAccessUiIntent_hasCards_noPendingIntent_startsWalletActivity() {
         mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, true);
         verify(mActivityStarter).startActivity(mIntentCaptor.capture(), eq(true),
-                any(ActivityLaunchAnimator.Controller.class), eq(true));
+                any(ActivityTransitionAnimator.Controller.class), eq(true));
         Intent intent = mIntentCaptor.getValue();
         assertEquals(intent.getAction(), Intent.ACTION_VIEW);
         assertEquals(
@@ -212,7 +256,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     public void getQuickAccessUiIntent_noCards_noPendingIntent_startsWalletActivity() {
         mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, false);
         verify(mActivityStarter).postStartActivityDismissingKeyguard(mIntentCaptor.capture(), eq(0),
-                any(ActivityLaunchAnimator.Controller.class));
+                any(ActivityTransitionAnimator.Controller.class));
         Intent intent = mIntentCaptor.getValue();
         assertEquals(intent.getAction(), Intent.ACTION_VIEW);
         assertEquals(
@@ -235,7 +279,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
         }).when(mQuickAccessWalletClient).getWalletPendingIntent(any(), any());
         mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, true);
         verify(mActivityStarter).postStartActivityDismissingKeyguard(mPendingIntentCaptor.capture(),
-                any(ActivityLaunchAnimator.Controller.class));
+                any(ActivityTransitionAnimator.Controller.class));
         PendingIntent pendingIntent = mPendingIntentCaptor.getValue();
         Intent intent = pendingIntent.getIntent();
         assertEquals(intent.getAction(), Intent.ACTION_VIEW);

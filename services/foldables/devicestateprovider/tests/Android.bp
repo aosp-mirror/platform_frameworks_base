@@ -1,0 +1,30 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "foldable-device-state-provider-tests",
+    srcs: ["src/**/*.java"],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+    ],
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libmultiplejvmtiagentsinterferenceagent",
+        "libstaticjvmtiagent",
+    ],
+    static_libs: [
+        "services",
+        "foldable-device-state-provider",
+        "androidx.test.rules",
+        "junit",
+        "truth",
+        "mockito-target-extended-minus-junit4",
+        "androidx.test.uiautomator_uiautomator",
+        "androidx.test.ext.junit",
+        "testables",
+    ],
+    test_suites: ["device-tests"],
+}

@@ -15,17 +15,19 @@
  */
 package com.android.systemui.flags
 
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.keyguard.WakefulnessLifecycle
-import com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP
-import com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
@@ -36,42 +38,50 @@ import org.mockito.MockitoAnnotations
 class ScreenIdleConditionTest : SysuiTestCase() {
     private lateinit var condition: ScreenIdleCondition
 
-    @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
+    @Mock private lateinit var powerInteractor: PowerInteractor
+    private val isAsleep = MutableStateFlow(false)
+
+    private val testDispatcher: TestDispatcher = StandardTestDispatcher()
+    private val testScope: TestScope = TestScope(testDispatcher)
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        condition = ScreenIdleCondition(wakefulnessLifecycle)
+        whenever(powerInteractor.isAsleep).thenReturn(isAsleep)
+        condition = ScreenIdleCondition({ powerInteractor })
     }
 
     @Test
-    fun testCondition_awake() {
-        whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_AWAKE)
+    fun testCondition_awake() =
+        testScope.runTest {
+            val canRestart by collectLastValue(condition.canRestartNow)
 
-        assertThat(condition.canRestartNow {}).isFalse()
-    }
+            isAsleep.emit(false)
 
-    @Test
-    fun testCondition_asleep() {
-        whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_ASLEEP)
-
-        assertThat(condition.canRestartNow {}).isTrue()
-    }
+            assertThat(canRestart).isFalse()
+        }
 
     @Test
-    fun testCondition_invokesRetry() {
-        whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_AWAKE)
-        var retried = false
-        val retryFn = { retried = true }
+    fun testCondition_asleep() =
+        testScope.runTest {
+            val canRestart by collectLastValue(condition.canRestartNow)
 
-        // No restart yet, but we do register a listener now.
-        assertThat(condition.canRestartNow(retryFn)).isFalse()
-        val captor = ArgumentCaptor.forClass(WakefulnessLifecycle.Observer::class.java)
-        verify(wakefulnessLifecycle).addObserver(captor.capture())
+            isAsleep.emit(true)
 
-        whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_ASLEEP)
+            assertThat(canRestart).isTrue()
+        }
 
-        captor.value.onFinishedGoingToSleep()
-        assertThat(retried).isTrue()
-    }
+    @Test
+    fun testCondition_invokesRetry() =
+        testScope.runTest {
+            val canRestart by collectLastValue(condition.canRestartNow)
+
+            isAsleep.emit(false)
+
+            assertThat(canRestart).isFalse()
+
+            isAsleep.emit(true)
+
+            assertThat(canRestart).isTrue()
+        }
 }

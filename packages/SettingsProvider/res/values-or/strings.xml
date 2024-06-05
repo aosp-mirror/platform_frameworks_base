@@ -20,6 +20,4 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"ସେଟିଂସ ଷ୍ଟୋରେଜ"</string>
-    <string name="wifi_softap_config_change" msgid="5688373762357941645">"ହଟସ୍ପଟ୍ ସେଟିଂସ ବଦଳାଯାଇଛି"</string>
-    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"ବିବରଣୀ ଦେଖିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
 </resources>

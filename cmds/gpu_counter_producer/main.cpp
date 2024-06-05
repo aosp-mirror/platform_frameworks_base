@@ -133,6 +133,12 @@ int main(int argc, char** argv) {
         daemon(0, 0);
     }
 
+    if (getenv("LD_LIBRARY_PATH") == nullptr) {
+        setenv("LD_LIBRARY_PATH", "/vendor/lib64:/vendor/lib", 0 /*override*/);
+        LOG_INFO("execv with: LD_LIBRARY_PATH=%s", getenv("LD_LIBRARY_PATH"));
+        execvpe(pname, argv, environ);
+    }
+
     if (!writeToPidFile()) {
         LOG_ERR("Could not open %s", kPidFileName);
         return 1;

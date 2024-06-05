@@ -40,7 +40,9 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.window.ScreenCapture;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+import com.android.server.display.utils.DebugUtils;
 import com.android.server.policy.WindowManagerPolicy;
 
 import libcore.io.Streams;
@@ -65,7 +67,9 @@ import java.nio.FloatBuffer;
 final class ColorFade {
     private static final String TAG = "ColorFade";
 
-    private static final boolean DEBUG = false;
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.ColorFade DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     // The layer for the electron beam surface.
     // This is currently hardcoded to be one layer above the boot animation.
@@ -138,8 +142,13 @@ final class ColorFade {
     public static final int MODE_FADE = 2;
 
     public ColorFade(int displayId) {
+        this(displayId, LocalServices.getService(DisplayManagerInternal.class));
+    }
+
+    @VisibleForTesting
+    ColorFade(int displayId, DisplayManagerInternal displayManagerInternal) {
         mDisplayId = displayId;
-        mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+        mDisplayManagerInternal = displayManagerInternal;
     }
 
     /**
@@ -398,6 +407,33 @@ final class ColorFade {
             dismissResources();
             destroySurface();
             mPrepared = false;
+        }
+    }
+
+    /**
+     * Destroys ColorFade animation and its resources
+     *
+     * This method should be called when the ColorFade is no longer in use; i.e. when
+     * the {@link #mDisplayId display} has been removed.
+     */
+    public void destroy() {
+        if (DEBUG) {
+            Slog.d(TAG, "destroy");
+        }
+        if (mPrepared) {
+            if (mCreatedResources) {
+                attachEglContext();
+                try {
+                    destroyScreenshotTexture();
+                    destroyGLShaders();
+                    destroyGLBuffers();
+                    destroyEglSurface();
+                } finally {
+                    detachEglContext();
+                }
+            }
+            destroyEglContext();
+            destroySurface();
         }
     }
 
@@ -781,6 +817,12 @@ final class ColorFade {
         if (mEglDisplay != null) {
             EGL14.eglMakeCurrent(mEglDisplay,
                     EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_CONTEXT);
+        }
+    }
+
+    private void destroyEglContext() {
+        if (mEglDisplay != null && mEglContext != null) {
+            EGL14.eglDestroyContext(mEglDisplay, mEglContext);
         }
     }
 

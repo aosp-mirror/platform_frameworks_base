@@ -20,8 +20,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -34,17 +33,21 @@ import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.rememberContext
+import com.android.settingslib.spa.framework.util.filterItem
 import com.android.settingslib.spa.framework.util.getStringArg
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spaprivileged.R
+import com.android.settingslib.spaprivileged.framework.compose.getPlaceholder
 import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.userId
+import com.android.settingslib.spaprivileged.model.enterprise.EnhancedConfirmation
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
-import com.android.settingslib.spaprivileged.template.preference.RestrictedSwitchPreference
+import com.android.settingslib.spaprivileged.model.enterprise.rememberRestrictedMode
+import com.android.settingslib.spaprivileged.template.preference.RestrictedSwitchPreferenceModel
 import kotlinx.coroutines.flow.Flow
 
 private const val ENTRY_NAME = "AppList"
@@ -141,40 +144,37 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
         listModel.transform(userIdFlow, appListFlow)
 
     override fun filter(userIdFlow: Flow<Int>, option: Int, recordListFlow: Flow<List<T>>) =
-        listModel.filter(userIdFlow, recordListFlow)
+        listModel.filter(userIdFlow, recordListFlow.filterItem { !it.isSystemOrRootUid() })
 
     @Composable
     override fun getSummary(option: Int, record: T) = getSummary(record)
 
     @Composable
-    fun getSummary(record: T): State<String> {
-        val restrictionsProvider = remember(record.app.userId) {
-            val restrictions = Restrictions(
+    fun getSummary(record: T): () -> String {
+        val restrictions = remember(record.app.userId, record.app.packageName) {
+            Restrictions(
                 userId = record.app.userId,
                 keys = listModel.switchRestrictionKeys,
-            )
-            restrictionsProviderFactory(context, restrictions)
+                enhancedConfirmation = listModel.enhancedConfirmationKey?.let {
+                    EnhancedConfirmation(
+                        key = it,
+                        packageName = record.app.packageName)
+                })
         }
-        val restrictedMode = restrictionsProvider.restrictedModeState()
+        val restrictedMode by restrictionsProviderFactory.rememberRestrictedMode(restrictions)
         val allowed = listModel.isAllowed(record)
-        return remember {
-            derivedStateOf {
-                RestrictedSwitchPreference.getSummary(
-                    context = context,
-                    restrictedMode = restrictedMode.value,
-                    summaryIfNoRestricted = getSummaryIfNoRestricted(allowed),
-                    checked = allowed,
-                ).value
-            }
-        }
+        return RestrictedSwitchPreferenceModel.getSummary(
+            context = context,
+            restrictedModeSupplier = { restrictedMode },
+            summaryIfNoRestricted = { getSummaryIfNoRestricted(allowed()) },
+            checked = allowed,
+        )
     }
 
-    private fun getSummaryIfNoRestricted(allowed: State<Boolean?>) = derivedStateOf {
-        when (allowed.value) {
-            true -> context.getString(R.string.app_permission_summary_allowed)
-            false -> context.getString(R.string.app_permission_summary_not_allowed)
-            null -> context.getString(R.string.summary_placeholder)
-        }
+    private fun getSummaryIfNoRestricted(allowed: Boolean?): String = when (allowed) {
+        true -> context.getString(R.string.app_permission_summary_allowed)
+        false -> context.getString(R.string.app_permission_summary_not_allowed)
+        null -> context.getPlaceholder()
     }
 
     @Composable

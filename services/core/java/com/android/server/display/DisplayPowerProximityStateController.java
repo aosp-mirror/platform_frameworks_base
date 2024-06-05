@@ -358,10 +358,8 @@ public final class DisplayPowerProximityStateController {
         if (DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT || mDisplayId != Display.DEFAULT_DISPLAY) {
             return;
         }
-        final DisplayDeviceConfig.SensorData proxSensor =
-                mDisplayDeviceConfig.getProximitySensor();
-        mProximitySensor = SensorUtils.findSensor(mSensorManager, proxSensor.type, proxSensor.name,
-                Sensor.TYPE_PROXIMITY);
+        mProximitySensor = SensorUtils.findSensor(mSensorManager,
+                mDisplayDeviceConfig.getProximitySensor(), Sensor.TYPE_PROXIMITY);
         if (mProximitySensor != null) {
             mProximityThreshold = Math.min(mProximitySensor.getMaximumRange(),
                     TYPICAL_PROXIMITY_THRESHOLD);

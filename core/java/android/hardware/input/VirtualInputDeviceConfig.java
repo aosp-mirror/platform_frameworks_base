@@ -19,6 +19,10 @@ package android.hardware.input;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
+import android.view.Display;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /**
  * Common configurations to create virtual input devices.
@@ -27,6 +31,15 @@ import android.os.Parcel;
  */
 @SystemApi
 public abstract class VirtualInputDeviceConfig {
+
+    /**
+     * The maximum length of a device name (in bytes in UTF-8 encoding).
+     *
+     * This limitation comes directly from uinput.
+     * See also UINPUT_MAX_NAME_SIZE in linux/uinput.h
+     */
+    private static final int DEVICE_NAME_MAX_LENGTH = 80;
+
     /** The vendor id uniquely identifies the company who manufactured the device. */
     private final int mVendorId;
     /**
@@ -44,18 +57,33 @@ public abstract class VirtualInputDeviceConfig {
         mVendorId = builder.mVendorId;
         mProductId = builder.mProductId;
         mAssociatedDisplayId = builder.mAssociatedDisplayId;
-        mInputDeviceName = builder.mInputDeviceName;
+        mInputDeviceName = Objects.requireNonNull(builder.mInputDeviceName);
+
+        if (mAssociatedDisplayId == Display.INVALID_DISPLAY) {
+            throw new IllegalArgumentException(
+                    "Display association is required for virtual input devices.");
+        }
+
+        // Comparison is greater or equal because the device name must fit into a const char*
+        // including the \0-terminator. Therefore the actual number of bytes that can be used
+        // for device name is DEVICE_NAME_MAX_LENGTH - 1
+        if (mInputDeviceName.getBytes(StandardCharsets.UTF_8).length >= DEVICE_NAME_MAX_LENGTH) {
+            throw new IllegalArgumentException("Input device name exceeds maximum length of "
+                    + DEVICE_NAME_MAX_LENGTH + "bytes: " + mInputDeviceName);
+        }
     }
 
     protected VirtualInputDeviceConfig(@NonNull Parcel in) {
         mVendorId = in.readInt();
         mProductId = in.readInt();
         mAssociatedDisplayId = in.readInt();
-        mInputDeviceName = in.readString8();
+        mInputDeviceName = Objects.requireNonNull(in.readString8());
     }
 
     /**
      * The vendor id uniquely identifies the company who manufactured the device.
+     *
+     * @see Builder#setVendorId(int) (int)
      */
     public int getVendorId() {
         return mVendorId;
@@ -64,6 +92,8 @@ public abstract class VirtualInputDeviceConfig {
     /**
      * The product id uniquely identifies which product within the address space of a given vendor,
      * identified by the device's vendor id.
+     *
+     * @see Builder#setProductId(int)
      */
     public int getProductId() {
         return mProductId;
@@ -71,6 +101,8 @@ public abstract class VirtualInputDeviceConfig {
 
     /**
      * The associated display ID of the virtual input device.
+     *
+     * @see Builder#setAssociatedDisplayId(int)
      */
     public int getAssociatedDisplayId() {
         return mAssociatedDisplayId;
@@ -78,6 +110,8 @@ public abstract class VirtualInputDeviceConfig {
 
     /**
      * The name of the virtual input device.
+     *
+     * @see Builder#setInputDeviceName(String)
      */
     @NonNull
     public String getInputDeviceName() {
@@ -91,6 +125,22 @@ public abstract class VirtualInputDeviceConfig {
         dest.writeString8(mInputDeviceName);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getName() + "( "
+                + " name=" + mInputDeviceName
+                + " vendorId=" + mVendorId
+                + " productId=" + mProductId
+                + " associatedDisplayId=" + mAssociatedDisplayId
+                + additionalFieldsToString() + ")";
+    }
+
+    /** @hide */
+    @NonNull
+    String additionalFieldsToString() {
+        return "";
+    }
+
     /**
      * A builder for {@link VirtualInputDeviceConfig}
      *
@@ -101,11 +151,12 @@ public abstract class VirtualInputDeviceConfig {
 
         private int mVendorId;
         private int mProductId;
-        private int mAssociatedDisplayId;
-        @NonNull
+        private int mAssociatedDisplayId = Display.INVALID_DISPLAY;
         private String mInputDeviceName;
 
-        /** @see VirtualInputDeviceConfig#getVendorId(). */
+        /**
+         * Sets the vendor id of the device, identifying the company who manufactured the device.
+         */
         @NonNull
         public T setVendorId(int vendorId) {
             mVendorId = vendorId;
@@ -113,24 +164,40 @@ public abstract class VirtualInputDeviceConfig {
         }
 
 
-        /** @see VirtualInputDeviceConfig#getProductId(). */
+        /**
+         * Sets the product id of the device, uniquely identifying the device within the address
+         * space of a given vendor, identified by the device's vendor id.
+         */
         @NonNull
         public T setProductId(int productId) {
             mProductId = productId;
             return self();
         }
 
-        /** @see VirtualInputDeviceConfig#getAssociatedDisplayId(). */
+        /**
+         * Sets the associated display ID of the virtual input device. Required.
+         *
+         * <p>The input device is restricted to the display with the given ID and may not send
+         * events to any other display.</p>
+         */
         @NonNull
         public T setAssociatedDisplayId(int displayId) {
             mAssociatedDisplayId = displayId;
             return self();
         }
 
-        /** @see VirtualInputDeviceConfig#getInputDeviceName(). */
+        /**
+         * Sets the name of the virtual input device. Required.
+         *
+         * <p>The name must be unique among all input devices that belong to the same virtual
+         * device.</p>
+         *
+         * <p>The maximum allowed length of the name is 80 bytes in UTF-8 encoding, enforced by
+         * {@code UINPUT_MAX_NAME_SIZE}.</p>
+         */
         @NonNull
         public T setInputDeviceName(@NonNull String deviceName) {
-            mInputDeviceName = deviceName;
+            mInputDeviceName = Objects.requireNonNull(deviceName);
             return self();
         }
 

@@ -28,7 +28,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 /**
@@ -53,8 +53,9 @@ constructor(
         if (userManager.isManagedProfile(userHandle.identifier) && !messageAlreadyDismissed()) {
             var badgedIcon: Drawable? = null
             var label: CharSequence? = null
-            val fileManager = fileManagerComponentName()
-                ?: return WorkProfileFirstRunData(defaultFileAppName(), null)
+            val fileManager =
+                fileManagerComponentName()
+                    ?: return WorkProfileFirstRunData(defaultFileAppName(), null)
             try {
                 val info = packageManager.getActivityInfo(fileManager, ComponentInfoFlags.of(0L))
                 val icon = packageManager.getActivityIcon(fileManager)
@@ -103,9 +104,7 @@ constructor(
         context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
     private fun fileManagerComponentName() =
-        ComponentName.unflattenFromString(
-            context.getString(R.string.config_sceenshotWorkProfileFilesApp)
-        )
+        ComponentName.unflattenFromString(context.getString(R.string.config_screenshotFilesApp))
 
     private fun defaultFileAppName() = context.getString(R.string.screenshot_default_files_app_name)
 

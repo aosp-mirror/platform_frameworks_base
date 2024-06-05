@@ -64,8 +64,8 @@ TEST(ResTableTest, ResourceNameIsResolved) {
   String16 defPackage("com.android.basic");
   String16 testName("@string/test1");
   uint32_t resID =
-      table.identifierForName(testName.string(), testName.size(), 0, 0,
-                              defPackage.string(), defPackage.size());
+      table.identifierForName(testName.c_str(), testName.size(), 0, 0,
+                              defPackage.c_str(), defPackage.size());
   ASSERT_NE(uint32_t(0x00000000), resID);
   ASSERT_EQ(basic::R::string::test1, resID);
 }
@@ -468,7 +468,7 @@ TEST_P(ResTableParameterizedTest, ShouldLoadSparseEntriesSuccessfully) {
   String16 name(u"com.android.sparse:integer/foo_9");
   uint32_t flags;
   uint32_t resid =
-      table.identifierForName(name.string(), name.size(), nullptr, 0, nullptr, 0, &flags);
+      table.identifierForName(name.c_str(), name.size(), nullptr, 0, nullptr, 0, &flags);
   ASSERT_NE(0u, resid);
 
   Res_value val;

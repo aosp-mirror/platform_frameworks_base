@@ -15,6 +15,7 @@
  */
 package android.hardware.fingerprint;
 
+import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IBiometricStateListener;
@@ -26,11 +27,11 @@ import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IUdfpsOverlayController;
-import android.hardware.fingerprint.ISidefpsController;
-import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
+import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintSensorConfigurations;
 import java.util.List;
 
 /**
@@ -75,7 +76,8 @@ interface IFingerprintService {
     @EnforcePermission("MANAGE_BIOMETRIC")
     void prepareForAuthentication(IBinder token, long operationId,
             IBiometricSensorReceiver sensorReceiver, in FingerprintAuthenticateOptions options, long requestId,
-            int cookie, boolean allowBackgroundAuthentication);
+            int cookie, boolean allowBackgroundAuthentication,
+            boolean isForLegacyFingerprintManager);
 
     // Starts authentication with the previously prepared client.
     @EnforcePermission("MANAGE_BIOMETRIC")
@@ -96,7 +98,7 @@ interface IFingerprintService {
     // Start fingerprint enrollment
     @EnforcePermission("MANAGE_FINGERPRINT")
     long enroll(IBinder token, in byte [] hardwareAuthToken, int userId, IFingerprintServiceReceiver receiver,
-            String opPackageName, int enrollReason);
+            String opPackageName, int enrollReason, in FingerprintEnrollOptions options);
 
     // Cancel enrollment in progress
     @EnforcePermission("MANAGE_FINGERPRINT")
@@ -172,11 +174,9 @@ interface IFingerprintService {
     @EnforcePermission("MANAGE_FINGERPRINT")
     void removeClientActiveCallback(IFingerprintClientActiveCallback callback);
 
-    // Registers all HIDL and AIDL sensors. Only HIDL sensor properties need to be provided, because
-    // AIDL sensor properties are retrieved directly from the available HALs. If no HIDL HALs exist,
-    // hidlSensors must be non-null and empty. See AuthService.java
+    //Register all available fingerprint sensors.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void registerAuthenticators(in List<FingerprintSensorPropertiesInternal> hidlSensors);
+    void registerAuthenticators(in FingerprintSensorConfigurations fingerprintSensorConfigurations);
 
     // Adds a callback which gets called when the service registers all of the fingerprint
     // authenticators. The callback is automatically removed after it's invoked.
@@ -193,19 +193,19 @@ interface IFingerprintService {
 
     // Notifies about the fingerprint UI being ready (e.g. HBM illumination is enabled).
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void onUiReady(long requestId, int sensorId);
+    void onUdfpsUiEvent(int event, long requestId, int sensorId);
 
     // Sets the controller for managing the UDFPS overlay.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     void setUdfpsOverlayController(in IUdfpsOverlayController controller);
 
-    // Sets the controller for managing the SideFPS overlay.
+    // Registers AuthenticationStateListener.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void setSidefpsController(in ISidefpsController controller);
+    void registerAuthenticationStateListener(AuthenticationStateListener listener);
 
-    // Sets the controller for managing the UDFPS overlay.
+    // Unregisters AuthenticationStateListener.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void setUdfpsOverlay(in IUdfpsOverlay controller);
+    void unregisterAuthenticationStateListener(AuthenticationStateListener listener);
 
     // Registers BiometricStateListener.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
@@ -218,5 +218,5 @@ interface IFingerprintService {
     // Internal operation used to clear fingerprint biometric scheduler.
     // Ensures that the scheduler is not stuck.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void scheduleWatchdog();
+    oneway void scheduleWatchdog();
 }

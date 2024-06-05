@@ -122,6 +122,7 @@ import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.utils.BackupEligibilityRules;
+import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 import com.android.server.testing.shadows.FrameworkShadowLooper;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowBackupDataInput;
@@ -260,7 +261,8 @@ public class KeyValueBackupTaskTest  {
         mBackupHandler = mBackupManagerService.getBackupHandler();
         mShadowBackupLooper = shadowOf(mBackupHandler.getLooper());
         ShadowEventLog.setUp();
-        mReporter = spy(new KeyValueBackupReporter(mBackupManagerService, mObserver, mMonitor));
+        mReporter = spy(new KeyValueBackupReporter(mBackupManagerService, mObserver,
+                new BackupManagerMonitorEventSender(mMonitor)));
 
         when(mPackageManagerInternal.getApplicationEnabledState(any(), anyInt()))
                 .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);

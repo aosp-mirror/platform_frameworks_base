@@ -17,43 +17,41 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Begleitgerät-Manager"</string>
-    <!-- no translation found for confirmation_title (8024993972587946678) -->
-    <skip />
+    <string name="confirmation_title" msgid="2244241995958340998">"Zulassen, dass &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; auf &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; zugreifen darf?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"Smartwatch"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Gerät „<xliff:g id="PROFILE_NAME">%1$s</xliff:g>“ auswählen, das von &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; verwaltet werden soll"</string>
-    <!-- no translation found for summary_watch (6566922405914995759) -->
-    <skip />
-    <!-- no translation found for summary_watch_single_device (7443464525873186735) -->
-    <skip />
-    <string name="profile_name_glasses" msgid="8488394059007275998">"Glass-Geräte"</string>
-    <!-- no translation found for summary_glasses (3808267780579061241) -->
-    <skip />
-    <!-- no translation found for summary_glasses_single_device (7051392780285915640) -->
-    <skip />
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"Gerät auswählen, das von &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; verwaltet werden soll"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"<xliff:g id="PROFILE_NAME">%1$s</xliff:g> zum Einrichten auswählen"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"Diese App darf dann Daten wie den Namen eines Anrufers synchronisieren und auf diese Berechtigungen auf deinem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> zugreifen"</string>
+    <string name="confirmation_title_glasses" msgid="8288346850537727333">"Zulassen, dass &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; das Gerät &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; verwalten darf?"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"Gerät"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"Diese App darf dann auf diese Berechtigungen auf deinem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> zugreifen:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; Zugriff auf diese Informationen von deinem Smartphone gewähren"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Zulassen, dass &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; die Apps auf deinem Smartphone streamt?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s hat dann Zugriff auf alle Inhalte, die auf deinem Smartphone sichtbar sind oder abgespielt werden, einschließlich Audio, Fotos, Passwörter und Nachrichten.&lt;br/&gt;&lt;br/&gt;%1$s kann so lange Apps streamen, bis du diese Berechtigung entfernst."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Geräteübergreifende Dienste"</string>
-    <string name="helper_summary_app_streaming" msgid="5977509499890099">"<xliff:g id="APP_NAME">%1$s</xliff:g> bittet für dein <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> um die Berechtigung zum Streamen von Apps zwischen deinen Geräten"</string>
+    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> bittet für dein <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> um die Berechtigung zum Streamen von Apps zwischen deinen Geräten"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> bittet für dein <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> um die Berechtigung, gegenseitig das Anzeigen und Streamen von Apps zu erlauben"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; Zugriff auf diese Informationen von deinem Smartphone gewähren"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play-Dienste"</string>
-    <string name="helper_summary_computer" msgid="9050724687678157852">"<xliff:g id="APP_NAME">%1$s</xliff:g> bittet im Namen deines <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> um die Berechtigung zum Zugriff auf die Fotos, Medien und Benachrichtigungen deines Smartphones"</string>
-    <string name="title_nearby_device_streaming" msgid="179278282547719200">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; darf diese Aktion von deinem Smartphone ausführen"</string>
-    <string name="helper_title_nearby_device_streaming" msgid="6124438217620593669">"Geräteübergreifende Dienste"</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="5538329403511524333">"<xliff:g id="APP_NAME">%1$s</xliff:g> bittet für dein Gerät (<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>) um die Berechtigung zum Streamen von Inhalten auf Geräte in der Nähe"</string>
+    <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> bittet im Namen deines <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> um die Berechtigung zum Zugriff auf die Fotos, Medien und Benachrichtigungen deines Smartphones"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Darf das Gerät &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; diese Aktion ausführen?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Zulassen, dass &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; die Apps und Systemfunktionen auf deinem Smartphone streamt?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s hat dann Zugriff auf alle Inhalte, die auf deinem Smartphone sichtbar sind oder abgespielt werden, einschließlich Audio, Fotos, Zahlungsinformationen, Passwörter und Nachrichten.&lt;br/&gt;&lt;br/&gt;%1$s kann so lange Apps und System­funktionen streamen, bis du diese Berechtigung entfernst."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> bittet für dein Gerät (<xliff:g id="DEVICE_NAME">%2$s</xliff:g>) um die Berechtigung, Apps und andere Systemfunktionen auf Geräte in der Nähe zu streamen"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"Gerät"</string>
-    <!-- no translation found for summary_generic_single_device (4735072202474939111) -->
-    <skip />
-    <!-- no translation found for summary_generic (4988130802522924650) -->
-    <skip />
+    <string name="summary_generic" msgid="1761976003668044801">"Diese App kann dann Daten wie den Namen eines Anrufers zwischen deinem Smartphone und dem ausgewählten Gerät synchronisieren"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Zulassen"</string>
     <string name="consent_no" msgid="2640796915611404382">"Nicht zulassen"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"Abbrechen"</string>
     <string name="consent_back" msgid="2560683030046918882">"Zurück"</string>
+    <string name="permission_expand" msgid="893185038020887411">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> maximieren"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> minimieren"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Apps auf &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; die gleichen Berechtigungen geben wie auf &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"Dazu können &lt;strong&gt;Mikrofon&lt;/strong&gt;, &lt;strong&gt;Kamera&lt;/strong&gt; und &lt;strong&gt;Standortzugriff&lt;/strong&gt; sowie weitere vertrauliche Berechtigungen auf &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; gehören. &lt;br/&gt;&lt;br/&gt;Du kannst diese Berechtigungen jederzeit in den Einstellungen von &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; ändern."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"App-Symbol"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"Weitere-Infos-Schaltfläche"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"Weitere Informationen"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Telefon"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Kontakte"</string>
@@ -61,19 +59,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Anrufliste"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Geräte in der Nähe"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Medienausgabe ändern"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotos und Medien"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Benachrichtigungen"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Benachrichtigungen"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Apps"</string>
-    <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"Streamen an Geräte in der Nähe"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Kann Anrufe tätigen und verwalten"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Kann auf die Anrufliste zugreifen und sie bearbeiten"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Kann SMS senden und abrufen"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Kann auf deine Kontakte zugreifen"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Kann auf deinen Kalender zugreifen"</string>
-    <string name="permission_microphone_summary" msgid="4241354865859396558">"Mit dem Mikrofon dürfen Audioaufnahmen gemacht werden"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Kann Geräte in der Nähe finden, eine Verbindung zu ihnen herstellen und ihren relativen Standort ermitteln"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Kann alle Benachrichtigungen lesen, einschließlich Informationen wie Kontakten, Nachrichten und Fotos"</string>
+    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Streaming"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Anrufe starten und verwalten"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Auf die Anrufliste zugreifen und sie bearbeiten"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS senden und ansehen"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Auf deine Kontakte zugreifen"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Auf deinen Kalender zugreifen"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Audio aufnehmen"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Geräte in der Nähe finden, eine Verbindung zu ihnen herstellen und ihren relativen Standort ermitteln"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Alle Benachrichtigungen sehen, einschließlich Informationen wie Kontakten, Nachrichten und Fotos"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Alle Benachrichtigungen sehen, einschließlich Informationen wie Kontakte, Nachrichten und Fotos&lt;br/&gt;• Benachrichtigungen senden&lt;br/&gt;&lt;br/&gt;Du kannst die Berechtigungen dieser App zum Sehen und Senden von Benachrichtigungen jederzeit unter „Einstellungen &gt; Benachrichtigungen“ ändern."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Smartphone-Apps streamen"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="5776807830582725074">"Inhalte dürfen auf ein Gerät in der Nähe gestreamt werden"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Apps und andere Systemfunktionen von deinem Smartphone streamen"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Auf eine Liste mit verfügbaren Geräten zugreifen und festlegen, welches Gerät Audio- oder Videoinhalte aus anderen Apps streamt oder überträgt"</string>
+    <string name="device_type" product="default" msgid="8268703872070046263">"Smartphone"</string>
+    <string name="device_type" product="tablet" msgid="5038791954983067774">"Tablet"</string>
 </resources>

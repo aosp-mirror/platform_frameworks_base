@@ -16,9 +16,9 @@
 
 package com.android.systemui.shade;
 
-import static com.android.keyguard.FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
+import static com.android.systemui.Flags.FLAG_SHADE_COLLAPSE_ACTIVITY_LAUNCH_FIX;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPEN;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPENING;
@@ -32,8 +32,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -46,6 +46,9 @@ import static org.mockito.Mockito.when;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.graphics.Point;
+import android.os.PowerManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
@@ -55,12 +58,14 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.R;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
@@ -193,50 +198,87 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
     @Test
     public void getVerticalSpaceForLockscreenShelf_useLockIconBottomPadding_returnsShelfHeight() {
+        enableSplitShade(/* enabled= */ false);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
                 /* lockIconPadding= */ 20,
                 /* indicationPadding= */ 0,
                 /* ambientPadding= */ 0);
 
-        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(5);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(5);
     }
 
     @Test
     public void getVerticalSpaceForLockscreenShelf_useIndicationBottomPadding_returnsZero() {
+        enableSplitShade(/* enabled= */ false);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
                 /* lockIconPadding= */ 0,
                 /* indicationPadding= */ 30,
                 /* ambientPadding= */ 0);
 
-        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
     }
 
     @Test
     public void getVerticalSpaceForLockscreenShelf_useAmbientBottomPadding_returnsZero() {
+        enableSplitShade(/* enabled= */ false);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
                 /* lockIconPadding= */ 0,
                 /* indicationPadding= */ 0,
                 /* ambientPadding= */ 40);
 
-        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
     }
 
     @Test
     public void getVerticalSpaceForLockscreenShelf_useLockIconPadding_returnsLessThanShelfHeight() {
+        enableSplitShade(/* enabled= */ false);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
                 /* lockIconPadding= */ 10,
                 /* indicationPadding= */ 8,
                 /* ambientPadding= */ 0);
 
-        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(2);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(2);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenShelf_splitShade() {
+        enableSplitShade(/* enabled= */ true);
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 10,
+                /* indicationPadding= */ 8,
+                /* ambientPadding= */ 0);
+
+        when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
     }
 
     @Test
@@ -326,6 +368,24 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    public void alternateBouncerVisible_onTouchEvent_notHandled() {
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        // GIVEN alternate bouncer is visible
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // WHEN touch DOWN event received; THEN touch is NOT handled
+        assertThat(onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
+                0 /* metaState */))).isFalse();
+
+        // WHEN touch MOVE event received; THEN touch is NOT handled
+        assertThat(onTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_MOVE, 0f /* x */, 200f /* y */,
+                0 /* metaState */))).isFalse();
+
+    }
+
+    @Test
     public void test_onTouchEvent_startTracking() {
         // GIVEN device is NOT pulsing
         mNotificationPanelViewController.setPulsing(false);
@@ -343,9 +403,32 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    public void onInterceptTouchEvent_nsslMigrationOff_userActivity() {
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
+        mTouchHandler.onInterceptTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
+                0 /* metaState */));
+
+        verify(mCentralSurfaces).userActivity();
+    }
+
+    @Test
+    public void onInterceptTouchEvent_nsslMigrationOn_userActivity_not_called() {
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
+        mTouchHandler.onInterceptTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
+                0 /* metaState */));
+
+        verify(mCentralSurfaces, times(0)).userActivity();
+    }
+
+    @Test
     public void testOnTouchEvent_expansionResumesAfterBriefTouch() {
         mFalsingManager.setIsClassifierEnabled(true);
         mFalsingManager.setIsFalseTouch(false);
+        mNotificationPanelViewController.setForceFlingAnimationForTest(true);
         // Start shade collapse with swipe up
         onTouchEvent(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
@@ -374,6 +457,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         // fling should still be called after a touch that does not exceed touch slop
         assertThat(mNotificationPanelViewController.isClosing()).isTrue();
         assertThat(mNotificationPanelViewController.isFlinging()).isTrue();
+        mNotificationPanelViewController.setForceFlingAnimationForTest(false);
     }
 
     @Test
@@ -415,11 +499,13 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         enableSplitShade(/* enabled= */ true);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         mNotificationPanelViewController.updateResources();
         assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd)
                 .isEqualTo(R.id.qs_edge_guideline);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
         mNotificationPanelViewController.updateResources();
         assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd)
                 .isEqualTo(ConstraintSet.PARENT_ID);
@@ -428,6 +514,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_splitShade_dozing_alwaysDozingOn_isCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
@@ -439,6 +526,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_splitShade_dozing_alwaysDozingOff_isNotCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
@@ -450,6 +538,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_splitShade_notDozing_alwaysDozingOn_isNotCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
@@ -461,6 +550,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_splitShade_pulsing_isNotCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         when(mNotificationListContainer.hasPulsingNotifications()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
@@ -473,6 +563,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_splitShade_notPulsing_isNotCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         when(mNotificationListContainer.hasPulsingNotifications()).thenReturn(false);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
@@ -488,6 +579,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         // The conditions below would make the clock NOT be centered on split shade.
         // On single shade it should always be centered though.
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         when(mNotificationListContainer.hasPulsingNotifications()).thenReturn(false);
         mStatusBarStateController.setState(KEYGUARD);
         setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ false);
@@ -498,6 +590,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_willPlayDelayedDoze_isCentered_thenNot() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
@@ -512,6 +605,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_willPlayDelayedDoze_notifiesKeyguardMediaController() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
@@ -523,6 +617,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_willPlayDelayedDoze_isCentered_thenStillCenteredIfNoNotifs() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
@@ -532,6 +627,23 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
         mNotificationPanelViewController.setWillPlayDelayedDozeAmountAnimation(false);
         assertKeyguardStatusViewCentered();
+    }
+
+    @Test
+    public void onKeyguardStatusViewHeightChange_animatesNextTopPaddingChangeForNSSL() {
+        ArgumentCaptor<View.OnLayoutChangeListener> captor =
+                ArgumentCaptor.forClass(View.OnLayoutChangeListener.class);
+        verify(mKeyguardStatusView).addOnLayoutChangeListener(captor.capture());
+        View.OnLayoutChangeListener listener = captor.getValue();
+
+        clearInvocations(mNotificationStackScrollLayoutController);
+
+        when(mKeyguardStatusView.getHeight()).thenReturn(0);
+        listener.onLayoutChange(mKeyguardStatusView, /* left= */ 0, /* top= */ 0, /* right= */
+                0, /* bottom= */ 0, /* oldLeft= */ 0, /* oldTop= */ 0, /* oldRight= */
+                0, /* oldBottom = */ 200);
+
+        verify(mNotificationStackScrollLayoutController).animateNextTopPaddingChange();
     }
 
     @Test
@@ -567,6 +679,33 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @EnableFlags(FLAG_SHADE_COLLAPSE_ACTIVITY_LAUNCH_FIX)
+    public void testCanBeCollapsed_expandedInKeyguard() {
+        mStatusBarStateController.setState(KEYGUARD);
+        mNotificationPanelViewController.setExpandedFraction(1f);
+
+        assertThat(mNotificationPanelViewController.canBeCollapsed()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(FLAG_SHADE_COLLAPSE_ACTIVITY_LAUNCH_FIX)
+    public void testCanBeCollapsed_expandedInShade() {
+        mStatusBarStateController.setState(SHADE);
+        mNotificationPanelViewController.setExpandedFraction(1f);
+        assertThat(mNotificationPanelViewController.canBeCollapsed()).isTrue();
+    }
+
+    @Test
+    @DisableFlags(FLAG_SHADE_COLLAPSE_ACTIVITY_LAUNCH_FIX)
+    public void testCanBeCollapsed_expandedInKeyguard_flagDisabled() {
+        mStatusBarStateController.setState(KEYGUARD);
+        mNotificationPanelViewController.setExpandedFraction(1f);
+
+        assertThat(mNotificationPanelViewController.canBeCollapsed()).isTrue();
+    }
+
+    @Test
+    @Ignore("b/341163515 - fails to clean up animators correctly")
     public void testSwipeWhileLocked_notifiesKeyguardState() {
         mStatusBarStateController.setState(KEYGUARD);
 
@@ -642,10 +781,12 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         mStatusBarStateController.setState(KEYGUARD);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController).displayClock(SMALL, /* animate */ true);
     }
@@ -657,10 +798,12 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         clearInvocations(mKeyguardStatusViewController);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController, times(2))
                 .displayClock(LARGE, /* animate */ true);
@@ -672,6 +815,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     public void testHasNotifications_switchesToLargeClockWhenEnteringSplitShade() {
         mStatusBarStateController.setState(KEYGUARD);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
 
         enableSplitShade(/* enabled= */ true);
 
@@ -682,6 +826,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     public void testNoNotifications_switchesToLargeClockWhenEnteringSplitShade() {
         mStatusBarStateController.setState(KEYGUARD);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
 
         enableSplitShade(/* enabled= */ true);
 
@@ -694,6 +839,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         enableSplitShade(/* enabled= */ true);
         clearInvocations(mKeyguardStatusViewController);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
 
         enableSplitShade(/* enabled= */ false);
 
@@ -706,6 +852,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         enableSplitShade(/* enabled= */ true);
         clearInvocations(mKeyguardStatusViewController);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
 
         enableSplitShade(/* enabled= */ false);
 
@@ -719,6 +866,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         enableSplitShade(/* enabled= */ true);
         when(mMediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         clearInvocations(mKeyguardStatusViewController);
 
         mNotificationPanelViewController.setDozing(/* dozing= */ true, /* animate= */ false);
@@ -733,11 +881,53 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         enableSplitShade(/* enabled= */ true);
         when(mMediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         clearInvocations(mKeyguardStatusViewController);
 
         mNotificationPanelViewController.setDozing(/* dozing= */ true, /* animate= */ false);
 
         verify(mKeyguardStatusViewController).displayClock(SMALL, /* animate= */ true);
+    }
+
+    @Test
+    public void onQsSetExpansionHeightCalled_qsFullyExpandedOnKeyguard_showNSSL() {
+        // GIVEN
+        mStatusBarStateController.setState(KEYGUARD);
+        when(mKeyguardBypassController.getBypassEnabled()).thenReturn(false);
+        when(mQsController.getFullyExpanded()).thenReturn(true);
+        when(mQsController.getExpanded()).thenReturn(true);
+
+        // WHEN
+        int transitionDistance = mNotificationPanelViewController.getMaxPanelTransitionDistance();
+        mNotificationPanelViewController.setExpandedHeight(transitionDistance);
+
+        // THEN
+        // We are interested in the last value of the stack alpha.
+        ArgumentCaptor<Float> alphaCaptor = ArgumentCaptor.forClass(Float.class);
+        verify(mNotificationStackScrollLayoutController, atLeastOnce())
+                .setMaxAlphaForKeyguard(alphaCaptor.capture(), any());
+        assertThat(alphaCaptor.getValue()).isEqualTo(1.0f);
+    }
+
+    @Test
+    public void onQsSetExpansionHeightCalled_qsFullyExpandedOnKeyguard_hideNSSL() {
+        // GIVEN
+        mStatusBarStateController.setState(KEYGUARD);
+        when(mKeyguardBypassController.getBypassEnabled()).thenReturn(false);
+        when(mQsController.getFullyExpanded()).thenReturn(false);
+        when(mQsController.getExpanded()).thenReturn(true);
+
+        // WHEN
+        int transitionDistance = mNotificationPanelViewController
+                .getMaxPanelTransitionDistance() / 2;
+        mNotificationPanelViewController.setExpandedHeight(transitionDistance);
+
+        // THEN
+        // We are interested in the last value of the stack alpha.
+        ArgumentCaptor<Float> alphaCaptor = ArgumentCaptor.forClass(Float.class);
+        verify(mNotificationStackScrollLayoutController, atLeastOnce())
+                .setMaxAlphaForKeyguard(alphaCaptor.capture(), any());
+        assertThat(alphaCaptor.getValue()).isEqualTo(0.0f);
     }
 
     @Test
@@ -748,8 +938,47 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         clearInvocations(mKeyguardStatusViewController);
         when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
 
         mNotificationPanelViewController.setDozing(true, false);
+
+        verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ false);
+    }
+
+    @Test
+    public void switchesToBigClockInSplitShadeOn_landFlagOn_ForceSmallClock() {
+        when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(false);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ false);
+        mNotificationPanelViewController.setDozing(false, false);
+        mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, true);
+        when(mResources.getBoolean(R.bool.force_small_clock_on_lockscreen)).thenReturn(true);
+        when(mMediaDataManager.hasActiveMedia()).thenReturn(false);
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
+        clearInvocations(mKeyguardStatusViewController);
+
+        enableSplitShade(/* enabled= */ true);
+        mNotificationPanelViewController.updateResources();
+
+        verify(mKeyguardStatusViewController).displayClock(SMALL, /* animate */ false);
+    }
+
+    @Test
+    public void switchesToBigClockInSplitShadeOn_landFlagOff_DontForceSmallClock() {
+        when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(false);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ false);
+        mNotificationPanelViewController.setDozing(false, false);
+        mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false);
+        when(mResources.getBoolean(R.bool.force_small_clock_on_lockscreen)).thenReturn(true);
+        when(mMediaDataManager.hasActiveMedia()).thenReturn(false);
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
+        clearInvocations(mKeyguardStatusViewController);
+
+        enableSplitShade(/* enabled= */ true);
+        mNotificationPanelViewController.updateResources();
 
         verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ false);
     }
@@ -763,11 +992,13 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
         // one notification + media player visible
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController).displayClock(SMALL, /* animate */ true);
 
         // only media player visible
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController, times(2)).displayClock(SMALL, true);
         verify(mKeyguardStatusViewController, never()).displayClock(LARGE, /* animate */ true);
@@ -801,37 +1032,6 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
         verify(mLockscreenShadeTransitionController).goToLockedShade(
                 /* expandedView= */null, /* needsQSAnimation= */true);
-    }
-
-    @Test
-    public void testUnlockAnimationDoesNotAffectScrim() {
-        mNotificationPanelViewController.onUnlockHintStarted();
-        verify(mScrimController).setExpansionAffectsAlpha(false);
-        mNotificationPanelViewController.onUnlockHintFinished();
-        verify(mScrimController).setExpansionAffectsAlpha(true);
-    }
-
-    @Test
-    public void testUnlockHintAnimation_runs_whenNotInPowerSaveMode_andDozeAmountIsZero() {
-        when(mPowerManager.isPowerSaveMode()).thenReturn(false);
-        when(mAmbientState.getDozeAmount()).thenReturn(0f);
-        mNotificationPanelViewController.startUnlockHintAnimation();
-        assertThat(mNotificationPanelViewController.isHintAnimationRunning()).isTrue();
-    }
-
-    @Test
-    public void testUnlockHintAnimation_doesNotRun_inPowerSaveMode() {
-        when(mPowerManager.isPowerSaveMode()).thenReturn(true);
-        mNotificationPanelViewController.startUnlockHintAnimation();
-        assertThat(mNotificationPanelViewController.isHintAnimationRunning()).isFalse();
-    }
-
-    @Test
-    public void testUnlockHintAnimation_doesNotRun_whenDozeAmountNotZero() {
-        when(mPowerManager.isPowerSaveMode()).thenReturn(false);
-        when(mAmbientState.getDozeAmount()).thenReturn(0.5f);
-        mNotificationPanelViewController.startUnlockHintAnimation();
-        assertThat(mNotificationPanelViewController.isHintAnimationRunning()).isFalse();
     }
 
     @Test
@@ -877,8 +1077,10 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
     @Test
     public void testQsExpansionChangedToDefaultWhenRotatingFromOrToSplitShade() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+
         // to make sure shade is in expanded state
-        mNotificationPanelViewController.startWaitingForExpandGesture();
+        mNotificationPanelViewController.startInputFocusTransfer();
 
         // switch to split shade from portrait (default state)
         enableSplitShade(/* enabled= */ true);
@@ -892,7 +1094,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void testPanelClosedWhenClosingQsInSplitShade() {
         mShadeExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
-                /* expanded= */ true, /* tracking= */ false, /* dragDownPxAmount= */ 0);
+                /* expanded= */ true, /* tracking= */ false);
         enableSplitShade(/* enabled= */ true);
         mNotificationPanelViewController.setExpandedFraction(1f);
 
@@ -988,65 +1190,19 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
         mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
 
-        verify(mKeyguardFaceAuthInteractor).onNotificationPanelClicked();
-        verify(mUpdateMonitor).requestFaceAuth(
-                FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
+        verify(mDeviceEntryFaceAuthInteractor).onNotificationPanelClicked();
     }
 
     @Test
-    public void onEmptySpaceClicked_notDozingAndFaceDetectionIsNotRunning_startsUnlockAnimation() {
-        StatusBarStateController.StateListener statusBarStateListener =
-                mNotificationPanelViewController.getStatusBarStateListener();
-        statusBarStateListener.onStateChanged(KEYGUARD);
-        mNotificationPanelViewController.setDozing(false, false);
-        when(mUpdateMonitor.requestFaceAuth(NOTIFICATION_PANEL_CLICKED)).thenReturn(false);
+    public void nsslFlagEnabled_allowOnlyExternalTouches() {
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
 
         // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
-        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
+        verify(mQsController, never()).disallowTouches();
 
-        verify(mNotificationStackScrollLayoutController).setUnlockHintRunning(true);
-    }
-
-    @Test
-    public void onEmptySpaceClicked_notDozingAndFaceDetectionIsRunning_doesNotStartUnlockHint() {
-        StatusBarStateController.StateListener statusBarStateListener =
-                mNotificationPanelViewController.getStatusBarStateListener();
-        statusBarStateListener.onStateChanged(KEYGUARD);
-        mNotificationPanelViewController.setDozing(false, false);
-        when(mUpdateMonitor.requestFaceAuth(NOTIFICATION_PANEL_CLICKED)).thenReturn(true);
-
-        // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
-        mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
-        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
-
-        verify(mNotificationStackScrollLayoutController, never()).setUnlockHintRunning(true);
-    }
-
-    @Test
-    public void onEmptySpaceClicked_whenDozingAndOnKeyguard_doesNotRequestFaceAuth() {
-        StatusBarStateController.StateListener statusBarStateListener =
-                mNotificationPanelViewController.getStatusBarStateListener();
-        statusBarStateListener.onStateChanged(KEYGUARD);
-        mNotificationPanelViewController.setDozing(true, false);
-
-        // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
-        mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
-        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
-
-        verify(mUpdateMonitor, never()).requestFaceAuth(anyString());
-    }
-
-    @Test
-    public void onEmptySpaceClicked_whenStatusBarShadeLocked_doesNotRequestFaceAuth() {
-        StatusBarStateController.StateListener statusBarStateListener =
-                mNotificationPanelViewController.getStatusBarStateListener();
-        statusBarStateListener.onStateChanged(SHADE_LOCKED);
-
-        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
-
-        verify(mUpdateMonitor, never()).requestFaceAuth(anyString());
-
+        mNotificationPanelViewController.handleExternalInterceptTouch(mDownMotionEvent);
+        verify(mQsController).disallowTouches();
     }
 
     @Test
@@ -1164,14 +1320,9 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
     public void shadeExpanded_whenHunIsPresent() {
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
-        assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
-    }
-
-    @Test
-    public void shadeExpanded_whenWaitingForExpandGesture() {
-        mNotificationPanelViewController.startWaitingForExpandGesture();
         assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
     }
 
@@ -1179,5 +1330,69 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     public void shadeExpanded_whenUnlockedOffscreenAnimationRunning() {
         when(mUnlockedScreenOffAnimationController.isAnimationPlaying()).thenReturn(true);
         assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void shadeExpanded_whenInputFocusTransferStarted() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+
+        mNotificationPanelViewController.startInputFocusTransfer();
+
+        assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void shadeNotExpanded_whenInputFocusTransferStartedButPanelsDisabled() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(false);
+
+        mNotificationPanelViewController.startInputFocusTransfer();
+
+        assertThat(mNotificationPanelViewController.isExpanded()).isFalse();
+    }
+
+    @Test
+    public void cancelInputFocusTransfer_shadeCollapsed() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+        mNotificationPanelViewController.startInputFocusTransfer();
+
+        mNotificationPanelViewController.cancelInputFocusTransfer();
+
+        assertThat(mNotificationPanelViewController.isExpanded()).isFalse();
+    }
+
+    @Test
+    public void finishInputFocusTransfer_shadeFlingingOpen() {
+        when(mCommandQueue.panelsEnabled()).thenReturn(true);
+        mNotificationPanelViewController.startInputFocusTransfer();
+
+        mNotificationPanelViewController.finishInputFocusTransfer(/* velocity= */ 0f);
+
+        assertThat(mNotificationPanelViewController.isFlinging()).isTrue();
+    }
+
+    @Test
+    public void getFalsingThreshold_deviceNotInteractive_isQsThreshold() {
+        PowerInteractor.Companion.setAsleepForTest(
+                mPowerInteractor, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON);
+        when(mQsController.getFalsingThreshold()).thenReturn(14);
+
+        assertThat(mNotificationPanelViewController.getFalsingThreshold()).isEqualTo(14);
+    }
+
+    @Test
+    public void getFalsingThreshold_lastWakeNotDueToTouch_isQsThreshold() {
+        PowerInteractor.Companion.setAwakeForTest(
+                mPowerInteractor, PowerManager.WAKE_REASON_POWER_BUTTON);
+        when(mQsController.getFalsingThreshold()).thenReturn(14);
+
+        assertThat(mNotificationPanelViewController.getFalsingThreshold()).isEqualTo(14);
+    }
+
+    @Test
+    public void getFalsingThreshold_lastWakeDueToTouch_greaterThanQsThreshold() {
+        PowerInteractor.Companion.setAwakeForTest(mPowerInteractor, PowerManager.WAKE_REASON_TAP);
+        when(mQsController.getFalsingThreshold()).thenReturn(14);
+
+        assertThat(mNotificationPanelViewController.getFalsingThreshold()).isGreaterThan(14);
     }
 }

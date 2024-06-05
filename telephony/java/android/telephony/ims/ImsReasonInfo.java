@@ -460,7 +460,7 @@ public final class ImsReasonInfo implements Parcelable {
      */
     public static final int CODE_LOW_BATTERY = 505;
     /**
-     * Device declined a call due to a blacklisted caller ID.
+     * Device declined a call due to a denylisted caller ID.
      */
     public static final int CODE_BLACKLISTED_CALL_ID = 506;
     // IMS -> Telephony

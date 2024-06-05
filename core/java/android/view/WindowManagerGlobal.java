@@ -16,6 +16,9 @@
 
 package android.view;
 
+import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -24,16 +27,25 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.HardwareRenderer;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
+import android.util.SparseArray;
 import android.view.inputmethod.InputMethodManager;
+import android.window.ITrustedPresentationListener;
+import android.window.InputTransferToken;
+import android.window.TrustedPresentationThresholds;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
@@ -43,6 +55,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
@@ -59,8 +72,6 @@ import java.util.function.IntConsumer;
  */
 public final class WindowManagerGlobal {
     private static final String TAG = "WindowManager";
-
-    private static boolean sUseBLASTAdapter = false;
 
     /**
      * This is the first time the window is being drawn,
@@ -99,7 +110,6 @@ public final class WindowManagerGlobal {
 
     public static final int ADD_FLAG_IN_TOUCH_MODE = 0x1;
     public static final int ADD_FLAG_APP_VISIBLE = 0x2;
-    public static final int ADD_FLAG_USE_BLAST = 0x8;
 
     /**
      * Like {@link #RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS}, but as a "hint" when adding the
@@ -146,6 +156,13 @@ public final class WindowManagerGlobal {
 
     private Runnable mSystemPropertyUpdater;
 
+    private final TrustedPresentationListener mTrustedPresentationListener =
+            new TrustedPresentationListener();
+
+    @GuardedBy("mSurfaceControlInputReceivers")
+    private final SparseArray<SurfaceControlInputReceiverInfo>
+            mSurfaceControlInputReceivers = new SparseArray<>();
+
     private WindowManagerGlobal() {
     }
 
@@ -164,17 +181,38 @@ public final class WindowManagerGlobal {
         }
     }
 
+    /**
+     * Sets {@link com.android.server.wm.WindowManagerService} for the system process.
+     * <p>
+     * It is needed to prevent possible deadlock. A possible scenario is:
+     * In system process, WMS holds {@link com.android.server.wm.WindowManagerGlobalLock} to call
+     * {@code WindowManagerGlobal} APIs and wait to lock {@code WindowManagerGlobal} itself
+     * (i.e. call {@link #getWindowManagerService()} in the global lock), while
+     * another component may lock {@code WindowManagerGlobal} and wait to lock
+     * {@link com.android.server.wm.WindowManagerGlobalLock}(i.e call {@link #addView} in the
+     * system process, which calls to {@link com.android.server.wm.WindowManagerService} API
+     * directly).
+     */
+    public static void setWindowManagerServiceForSystemProcess(@NonNull IWindowManager wms) {
+        sWindowManagerService = wms;
+    }
+
+    @Nullable
     @UnsupportedAppUsage
     public static IWindowManager getWindowManagerService() {
+        if (sWindowManagerService != null) {
+            // Use WMS directly without locking WMGlobal to prevent deadlock.
+            return sWindowManagerService;
+        }
         synchronized (WindowManagerGlobal.class) {
             if (sWindowManagerService == null) {
                 sWindowManagerService = IWindowManager.Stub.asInterface(
                         ServiceManager.getService("window"));
                 try {
+                    // Can be null if this is called before WindowManagerService is initialized.
                     if (sWindowManagerService != null) {
                         ValueAnimator.setDurationScale(
                                 sWindowManagerService.getCurrentAnimatorScale());
-                        sUseBLASTAdapter = sWindowManagerService.useBLAST();
                     }
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -214,13 +252,6 @@ public final class WindowManagerGlobal {
         synchronized (WindowManagerGlobal.class) {
             return sWindowSession;
         }
-    }
-
-    /**
-     * Whether or not to use BLAST for ViewRootImpl
-     */
-    public static boolean useBLAST() {
-        return sUseBLASTAdapter;
     }
 
     @UnsupportedAppUsage
@@ -333,7 +364,7 @@ public final class WindowManagerGlobal {
             final Context context = view.getContext();
             if (context != null
                     && (context.getApplicationInfo().flags
-                            & ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+                    & ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
                 wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
         }
@@ -491,7 +522,7 @@ public final class WindowManagerGlobal {
                     if (who != null) {
                         WindowLeaked leak = new WindowLeaked(
                                 what + " " + who + " has leaked window "
-                                + root.getView() + " that was originally added here");
+                                        + root.getView() + " that was originally added here");
                         leak.setStackTrace(root.getLocation().getStackTrace());
                         Log.e(TAG, "", leak);
                     }
@@ -799,6 +830,200 @@ public final class WindowManagerGlobal {
         }
     }
 
+    public void registerTrustedPresentationListener(@NonNull IBinder window,
+            @NonNull TrustedPresentationThresholds thresholds, Executor executor,
+            @NonNull Consumer<Boolean> listener) {
+        mTrustedPresentationListener.addListener(window, thresholds, listener, executor);
+    }
+
+    public void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
+        mTrustedPresentationListener.removeListener(listener);
+    }
+
+    private static InputChannel createInputChannel(@NonNull IBinder clientToken,
+            @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
+            @Nullable InputTransferToken inputTransferToken) {
+        InputChannel inputChannel = new InputChannel();
+        try {
+            // TODO (b/329860681): Use INVALID_DISPLAY for now because the displayId will be
+            // selected in  SurfaceFlinger. This should be cleaned up so grantInputChannel doesn't
+            // take in a displayId at all
+            WindowManagerGlobal.getWindowSession().grantInputChannel(INVALID_DISPLAY,
+                    surfaceControl, clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null,
+                    inputTransferToken, surfaceControl.getName(), inputChannel);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to create input channel", e);
+            e.rethrowAsRuntimeException();
+        }
+        return inputChannel;
+    }
+
+    private static void removeInputChannel(IBinder clientToken) {
+        try {
+            WindowManagerGlobal.getWindowSession().remove(clientToken);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to remove input channel", e);
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    InputTransferToken registerBatchedSurfaceControlInputReceiver(
+            @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
+            @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
+        IBinder clientToken = new Binder();
+        InputTransferToken inputTransferToken = new InputTransferToken();
+        InputChannel inputChannel = createInputChannel(clientToken, hostToken,
+                surfaceControl, inputTransferToken);
+
+        synchronized (mSurfaceControlInputReceivers) {
+            mSurfaceControlInputReceivers.put(surfaceControl.getLayerId(),
+                    new SurfaceControlInputReceiverInfo(clientToken,
+                            new BatchedInputEventReceiver(inputChannel, choreographer.getLooper(),
+                                    choreographer) {
+                                @Override
+                                public void onInputEvent(InputEvent event) {
+                                    boolean handled = receiver.onInputEvent(event);
+                                    finishInputEvent(event, handled);
+                                }
+                            }));
+        }
+        return inputTransferToken;
+    }
+
+    InputTransferToken registerUnbatchedSurfaceControlInputReceiver(
+            @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
+            @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
+        IBinder clientToken = new Binder();
+        InputTransferToken inputTransferToken = new InputTransferToken();
+        InputChannel inputChannel = createInputChannel(clientToken, hostToken,
+                surfaceControl, inputTransferToken);
+
+        synchronized (mSurfaceControlInputReceivers) {
+            mSurfaceControlInputReceivers.put(surfaceControl.getLayerId(),
+                    new SurfaceControlInputReceiverInfo(clientToken,
+                            new InputEventReceiver(inputChannel, looper) {
+                                @Override
+                                public void onInputEvent(InputEvent event) {
+                                    boolean handled = receiver.onInputEvent(event);
+                                    finishInputEvent(event, handled);
+                                }
+                            }));
+        }
+        return inputTransferToken;
+    }
+
+    void unregisterSurfaceControlInputReceiver(@NonNull SurfaceControl surfaceControl) {
+        SurfaceControlInputReceiverInfo surfaceControlInputReceiverInfo;
+        synchronized (mSurfaceControlInputReceivers) {
+            surfaceControlInputReceiverInfo = mSurfaceControlInputReceivers.removeReturnOld(
+                    surfaceControl.getLayerId());
+        }
+
+        if (surfaceControlInputReceiverInfo == null) {
+            Log.w(TAG, "No registered input event receiver with sc: " + surfaceControl);
+            return;
+        }
+        removeInputChannel(surfaceControlInputReceiverInfo.mClientToken);
+
+        surfaceControlInputReceiverInfo.mInputEventReceiver.dispose();
+    }
+
+    IBinder getSurfaceControlInputClientToken(@NonNull SurfaceControl surfaceControl) {
+        SurfaceControlInputReceiverInfo surfaceControlInputReceiverInfo;
+        synchronized (mSurfaceControlInputReceivers) {
+            surfaceControlInputReceiverInfo = mSurfaceControlInputReceivers.get(
+                    surfaceControl.getLayerId());
+        }
+
+        if (surfaceControlInputReceiverInfo == null) {
+            Log.w(TAG, "No registered input event receiver with sc: " + surfaceControl);
+            return null;
+        }
+        return surfaceControlInputReceiverInfo.mClientToken;
+    }
+
+    boolean transferTouchGesture(@NonNull InputTransferToken transferFromToken,
+            @NonNull InputTransferToken transferToToken) {
+        try {
+            return getWindowManagerService().transferTouchGesture(transferFromToken,
+                    transferToToken);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        return false;
+    }
+
+    private final class TrustedPresentationListener extends
+            ITrustedPresentationListener.Stub {
+        private static int sId = 0;
+        private final ArrayMap<Consumer<Boolean>, Pair<Integer, Executor>> mListeners =
+                new ArrayMap<>();
+
+        private final Object mTplLock = new Object();
+
+        private void addListener(IBinder window, TrustedPresentationThresholds thresholds,
+                Consumer<Boolean> listener, Executor executor) {
+            synchronized (mTplLock) {
+                if (mListeners.containsKey(listener)) {
+                    Log.i(TAG, "Updating listener " + listener + " thresholds to " + thresholds);
+                    removeListener(listener);
+                }
+                int id = sId++;
+                mListeners.put(listener, new Pair<>(id, executor));
+                try {
+                    WindowManagerGlobal.getWindowManagerService()
+                            .registerTrustedPresentationListener(window, this, thresholds, id);
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
+                }
+            }
+        }
+
+        private void removeListener(Consumer<Boolean> listener) {
+            synchronized (mTplLock) {
+                var removedListener = mListeners.remove(listener);
+                if (removedListener == null) {
+                    Log.i(TAG, "listener " + listener + " does not exist.");
+                    return;
+                }
+
+                try {
+                    WindowManagerGlobal.getWindowManagerService()
+                            .unregisterTrustedPresentationListener(this, removedListener.first);
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
+                }
+            }
+        }
+
+        @Override
+        public void onTrustedPresentationChanged(int[] inTrustedStateListenerIds,
+                int[] outOfTrustedStateListenerIds) {
+            ArrayList<Runnable> firedListeners = new ArrayList<>();
+            synchronized (mTplLock) {
+                mListeners.forEach((listener, idExecutorPair) -> {
+                    final var listenerId =  idExecutorPair.first;
+                    final var executor = idExecutorPair.second;
+                    for (int id : inTrustedStateListenerIds) {
+                        if (listenerId == id) {
+                            firedListeners.add(() -> executor.execute(
+                                    () -> listener.accept(/*presentationState*/true)));
+                        }
+                    }
+                    for (int id : outOfTrustedStateListenerIds) {
+                        if (listenerId == id) {
+                            firedListeners.add(() -> executor.execute(
+                                    () -> listener.accept(/*presentationState*/false)));
+                        }
+                    }
+                });
+            }
+            for (int i = 0; i < firedListeners.size(); i++) {
+                firedListeners.get(i).run();
+            }
+        }
+    }
+
     /** @hide */
     public void addWindowlessRoot(ViewRootImpl impl) {
         synchronized (mLock) {
@@ -810,7 +1035,7 @@ public final class WindowManagerGlobal {
     public void removeWindowlessRoot(ViewRootImpl impl) {
         synchronized (mLock) {
             mWindowlessRoots.remove(impl);
-	}
+        }
     }
 
     public void setRecentsAppBehindSystemBars(boolean behindSystemBars) {
@@ -818,6 +1043,17 @@ public final class WindowManagerGlobal {
             getWindowManagerService().setRecentsAppBehindSystemBars(behindSystemBars);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    private static class SurfaceControlInputReceiverInfo {
+        final IBinder mClientToken;
+        final InputEventReceiver mInputEventReceiver;
+
+        private SurfaceControlInputReceiverInfo(IBinder clientToken,
+                InputEventReceiver inputEventReceiver) {
+            mClientToken = clientToken;
+            mInputEventReceiver = inputEventReceiver;
         }
     }
 }

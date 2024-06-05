@@ -6,16 +6,19 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.permission.PermissionManager
 import android.safetycenter.SafetyCenterManager
-import android.testing.AndroidTestingRunner
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyDialogController
+import com.android.systemui.privacy.PrivacyDialogControllerV2
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.statusbar.phone.StatusIconContainer
@@ -24,6 +27,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
@@ -42,7 +46,7 @@ private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 private fun <T> any(): T = Mockito.any<T>()
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
 
     @Mock
@@ -53,6 +57,8 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
     private lateinit var privacyChip: OngoingPrivacyChip
     @Mock
     private lateinit var privacyDialogController: PrivacyDialogController
+    @Mock
+    private lateinit var privacyDialogControllerV2: PrivacyDialogControllerV2
     @Mock
     private lateinit var privacyLogger: PrivacyLogger
     @Mock
@@ -69,6 +75,8 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
     private lateinit var safetyCenterManager: SafetyCenterManager
     @Mock
     private lateinit var deviceProvisionedController: DeviceProvisionedController
+    @Mock
+    private lateinit var featureFlags: FeatureFlags
 
     private val uiExecutor = FakeExecutor(FakeSystemClock())
     private val backgroundExecutor = FakeExecutor(FakeSystemClock())
@@ -94,6 +102,7 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
                 uiEventLogger,
                 privacyChip,
                 privacyDialogController,
+                privacyDialogControllerV2,
                 privacyLogger,
                 iconContainer,
                 permissionManager,
@@ -103,7 +112,8 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
                 appOpsController,
                 broadcastDispatcher,
                 safetyCenterManager,
-                deviceProvisionedController
+                deviceProvisionedController,
+                featureFlags
         )
 
         backgroundExecutor.runAllReady()
@@ -154,17 +164,34 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testPrivacyChipClicked() {
+    fun testPrivacyChipClickedWhenNewDialogDisabledAndSafetyCenterDisabled() {
+        whenever(featureFlags.isEnabled(Flags.ENABLE_NEW_PRIVACY_DIALOG)).thenReturn(false)
         whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(false)
         controller.onParentVisible()
         val captor = argumentCaptor<View.OnClickListener>()
         verify(privacyChip).setOnClickListener(capture(captor))
         captor.value.onClick(privacyChip)
         verify(privacyDialogController).showDialog(any(Context::class.java))
+        verify(privacyDialogControllerV2, never())
+            .showDialog(any(Context::class.java), any(OngoingPrivacyChip::class.java))
     }
 
     @Test
-    fun testSafetyCenterFlag() {
+    fun testPrivacyChipClickedWhenNewDialogEnabledAndSafetyCenterDisabled() {
+        whenever(featureFlags.isEnabled(Flags.ENABLE_NEW_PRIVACY_DIALOG)).thenReturn(true)
+        whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(false)
+        controller.onParentVisible()
+        val captor = argumentCaptor<View.OnClickListener>()
+        verify(privacyChip).setOnClickListener(capture(captor))
+        captor.value.onClick(privacyChip)
+        verify(privacyDialogController).showDialog(any(Context::class.java))
+        verify(privacyDialogControllerV2, never())
+                .showDialog(any(Context::class.java), any(OngoingPrivacyChip::class.java))
+    }
+
+    @Test
+    fun testPrivacyChipClickedWhenNewDialogDisabledAndSafetyCenterEnabled() {
+        whenever(featureFlags.isEnabled(Flags.ENABLE_NEW_PRIVACY_DIALOG)).thenReturn(false)
         val receiverCaptor = argumentCaptor<BroadcastReceiver>()
         whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(true)
         verify(broadcastDispatcher).registerReceiver(capture(receiverCaptor),
@@ -178,6 +205,28 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
         val captor = argumentCaptor<View.OnClickListener>()
         verify(privacyChip).setOnClickListener(capture(captor))
         captor.value.onClick(privacyChip)
+        verify(privacyDialogController, never()).showDialog(any(Context::class.java))
+        verify(privacyDialogControllerV2, never())
+            .showDialog(any(Context::class.java), any(OngoingPrivacyChip::class.java))
+    }
+
+    @Test
+    fun testPrivacyChipClickedWhenNewDialogEnabledAndSafetyCenterEnabled() {
+        whenever(featureFlags.isEnabled(Flags.ENABLE_NEW_PRIVACY_DIALOG)).thenReturn(true)
+        val receiverCaptor = argumentCaptor<BroadcastReceiver>()
+        whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(true)
+        verify(broadcastDispatcher).registerReceiver(capture(receiverCaptor),
+                any(), any(), nullable(), anyInt(), nullable())
+        receiverCaptor.value.onReceive(
+                context,
+                Intent(SafetyCenterManager.ACTION_SAFETY_CENTER_ENABLED_CHANGED)
+        )
+        backgroundExecutor.runAllReady()
+        controller.onParentVisible()
+        val captor = argumentCaptor<View.OnClickListener>()
+        verify(privacyChip).setOnClickListener(capture(captor))
+        captor.value.onClick(privacyChip)
+        verify(privacyDialogControllerV2).showDialog(any(Context::class.java), eq(privacyChip))
         verify(privacyDialogController, never()).showDialog(any(Context::class.java))
     }
 

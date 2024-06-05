@@ -15,20 +15,24 @@
  */
 
 #include "RenderNodeDrawable.h"
+
 #include <SkPaint.h>
 #include <SkPaintFilterCanvas.h>
 #include <SkPoint.h>
 #include <SkRRect.h>
 #include <SkRect.h>
 #include <gui/TraceUtils.h>
+#include <include/effects/SkImageFilters.h>
+#ifdef __ANDROID__
+#include <include/gpu/ganesh/SkImageGanesh.h>
+#endif
+
+#include <optional>
+
 #include "RenderNode.h"
 #include "SkiaDisplayList.h"
 #include "StretchMask.h"
 #include "TransformCanvas.h"
-
-#include <include/effects/SkImageFilters.h>
-
-#include <optional>
 
 namespace android {
 namespace uirenderer {
@@ -52,6 +56,7 @@ void RenderNodeDrawable::drawBackwardsProjectedNodes(SkCanvas* canvas,
                                                      int nestLevel) const {
     LOG_ALWAYS_FATAL_IF(0 == nestLevel && !displayList.mProjectionReceiver);
     for (auto& child : displayList.mChildNodes) {
+        if (!child.getRenderNode()->isRenderable()) continue;
         const RenderProperties& childProperties = child.getNodeProperties();
 
         // immediate children cannot be projected on their parent
@@ -255,9 +260,19 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                 snapshotImage = renderNode->getLayerSurface()->makeImageSnapshot();
                 if (imageFilter) {
                     auto subset = SkIRect::MakeWH(srcBounds.width(), srcBounds.height());
-                    snapshotImage = snapshotImage->makeWithFilter(recordingContext, imageFilter,
-                                                                  subset, clipBounds.roundOut(),
-                                                                  &srcBounds, &offset);
+
+#ifdef __ANDROID__
+                    if (recordingContext) {
+                        snapshotImage = SkImages::MakeWithFilter(
+                                recordingContext, snapshotImage, imageFilter, subset,
+                                clipBounds.roundOut(), &srcBounds, &offset);
+                    } else
+#endif
+                    {
+                        snapshotImage = SkImages::MakeWithFilter(snapshotImage, imageFilter, subset,
+                                                                 clipBounds.roundOut(), &srcBounds,
+                                                                 &offset);
+                    }
                 }
             } else {
                 const auto snapshotResult = renderNode->updateSnapshotIfRequired(
@@ -362,7 +377,7 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
 }
 
 void RenderNodeDrawable::setViewProperties(const RenderProperties& properties, SkCanvas* canvas,
-                                           float* alphaMultiplier) {
+                                           float* alphaMultiplier, bool ignoreLayer) {
     if (properties.getLeft() != 0 || properties.getTop() != 0) {
         canvas->translate(properties.getLeft(), properties.getTop());
     }
@@ -378,7 +393,8 @@ void RenderNodeDrawable::setViewProperties(const RenderProperties& properties, S
             canvas->concat(*properties.getTransformMatrix());
         }
     }
-    if (Properties::getStretchEffectBehavior() == StretchEffectBehavior::UniformScale) {
+    if (Properties::getStretchEffectBehavior() == StretchEffectBehavior::UniformScale &&
+        !ignoreLayer) {
         const StretchEffect& stretch = properties.layerProperties().getStretchEffect();
         if (!stretch.isEmpty()) {
             canvas->concat(
@@ -388,10 +404,10 @@ void RenderNodeDrawable::setViewProperties(const RenderProperties& properties, S
     const bool isLayer = properties.effectiveLayerType() != LayerType::None;
     int clipFlags = properties.getClippingFlags();
     if (properties.getAlpha() < 1) {
-        if (isLayer) {
+        if (isLayer && !ignoreLayer) {
             clipFlags &= ~CLIP_TO_BOUNDS;  // bounds clipping done by layer
         }
-        if (CC_LIKELY(isLayer || !properties.getHasOverlappingRendering())) {
+        if (CC_LIKELY(isLayer || !properties.getHasOverlappingRendering()) || ignoreLayer) {
             *alphaMultiplier = properties.getAlpha();
         } else {
             // savelayer needed to create an offscreen buffer

@@ -32,6 +32,8 @@ import android.os.RemoteException;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -106,7 +108,9 @@ public final class AmbientContextManager {
             STATUS_SERVICE_UNAVAILABLE,
             STATUS_MICROPHONE_DISABLED,
             STATUS_ACCESS_DENIED
-    }) public @interface StatusCode {}
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StatusCode {}
 
     /**
      * Allows clients to retrieve the list of {@link AmbientContextEvent}s from the intent.

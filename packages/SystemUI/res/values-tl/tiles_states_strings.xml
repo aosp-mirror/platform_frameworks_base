@@ -126,6 +126,11 @@
     <item msgid="8259411607272330225">"Naka-off"</item>
     <item msgid="578444932039713369">"Naka-on"</item>
   </string-array>
+  <string-array name="tile_states_record_issue">
+    <item msgid="1727196795383575383">"Hindi available"</item>
+    <item msgid="9061144428113385092">"Naka-off"</item>
+    <item msgid="2984256114867200368">"Naka-on"</item>
+  </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"Hindi available"</item>
     <item msgid="8707481475312432575">"Naka-off"</item>
@@ -180,5 +185,10 @@
     <item msgid="3173069902082305985">"Hindi available"</item>
     <item msgid="2478289035899842865">"Naka-off"</item>
     <item msgid="5137565285664080143">"Naka-on"</item>
+  </string-array>
+  <string-array name="tile_states_hearing_devices">
+    <item msgid="1235334096484287173">"Hindi available"</item>
+    <item msgid="3079622119444911877">"Naka-off"</item>
+    <item msgid="3028994095749238254">"Naka-on"</item>
   </string-array>
 </resources>

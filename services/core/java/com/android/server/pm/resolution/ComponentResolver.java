@@ -45,6 +45,14 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.pm.pkg.component.ComponentMutateUtils;
+import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedComponent;
+import com.android.internal.pm.pkg.component.ParsedIntentInfo;
+import com.android.internal.pm.pkg.component.ParsedMainComponent;
+import com.android.internal.pm.pkg.component.ParsedProvider;
+import com.android.internal.pm.pkg.component.ParsedProviderImpl;
+import com.android.internal.pm.pkg.component.ParsedService;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.IntentResolver;
 import com.android.server.pm.Computer;
@@ -56,14 +64,6 @@ import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserStateInternal;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedComponent;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.pm.pkg.component.ParsedProviderImpl;
-import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
@@ -943,6 +943,12 @@ public class ComponentResolver extends ComponentResolverLocked implements
                 return false;
             }
 
+            if (packageState.isSystem()) {
+                // A system app can be considered in the stopped state only if it was originally
+                // scanned in the stopped state.
+                return packageState.isScannedAsStoppedSystemApp() &&
+                    packageState.getUserStateOrDefault(userId).isStopped();
+            }
             return packageState.getUserStateOrDefault(userId).isStopped();
         }
     }
@@ -951,7 +957,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
             extends MimeGroupsAwareIntentResolver<Pair<ParsedActivity, ParsedIntentInfo>, ResolveInfo> {
 
         @NonNull
-        private UserNeedsBadgingCache mUserNeedsBadging;
+        private final UserNeedsBadgingCache mUserNeedsBadging;
 
         // Default constructor
         ActivityIntentResolver(@NonNull UserManagerService userManager,

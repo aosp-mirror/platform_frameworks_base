@@ -19,6 +19,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.os.AsyncTask.Status.FINISHED;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.annotation.DimenRes;
 import android.annotation.Hide;
@@ -47,6 +48,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
@@ -60,12 +62,11 @@ import java.util.concurrent.Executor;
 /**
  * Encapsulates the data and UI elements of a bubble.
  */
-@VisibleForTesting
 public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
     /** A string suffix used in app bubbles' {@link #mKey}. */
-    private static final String KEY_APP_BUBBLE = "key_app_bubble";
+    public static final String KEY_APP_BUBBLE = "key_app_bubble";
 
     /** Whether the bubble is an app bubble. */
     private final boolean mIsAppBubble;
@@ -106,6 +107,8 @@ public class Bubble implements BubbleViewProvider {
     private BubbleExpandedView mExpandedView;
     @Nullable
     private BubbleBarExpandedView mBubbleBarExpandedView;
+    @Nullable
+    private BubbleTaskView mBubbleTaskView;
 
     private BubbleViewInfoTask mInflationTask;
     private boolean mInflateSynchronously;
@@ -302,6 +305,7 @@ public class Bubble implements BubbleViewProvider {
                 getUser().getIdentifier(),
                 getPackageName(),
                 getTitle(),
+                getAppName(),
                 isImportantConversation());
     }
 
@@ -395,6 +399,17 @@ public class Bubble implements BubbleViewProvider {
     }
 
     /**
+     * Returns the existing {@link #mBubbleTaskView} if it's not {@code null}. Otherwise a new
+     * instance of {@link BubbleTaskView} is created.
+     */
+    public BubbleTaskView getOrCreateBubbleTaskView(BubbleTaskViewFactory taskViewFactory) {
+        if (mBubbleTaskView == null) {
+            mBubbleTaskView = taskViewFactory.create();
+        }
+        return mBubbleTaskView;
+    }
+
+    /**
      * @return the ShortcutInfo id if it exists, or the metadata shortcut id otherwise.
      */
     String getShortcutId() {
@@ -416,12 +431,20 @@ public class Bubble implements BubbleViewProvider {
      * the bubble.
      */
     void cleanupExpandedView() {
+        cleanupExpandedView(true);
+    }
+
+    private void cleanupExpandedView(boolean cleanupTaskView) {
         if (mExpandedView != null) {
             mExpandedView.cleanUpExpandedState();
             mExpandedView = null;
         }
         if (mBubbleBarExpandedView != null) {
             mBubbleBarExpandedView.cleanUpExpandedState();
+            mBubbleBarExpandedView = null;
+        }
+        if (cleanupTaskView) {
+            cleanupTaskView();
         }
         if (mIntent != null) {
             mIntent.unregisterCancelListener(mIntentCancelListener);
@@ -429,11 +452,29 @@ public class Bubble implements BubbleViewProvider {
         mIntentActive = false;
     }
 
+    private void cleanupTaskView() {
+        if (mBubbleTaskView != null) {
+            mBubbleTaskView.cleanup();
+            mBubbleTaskView = null;
+        }
+    }
+
     /**
      * Call when all the views should be removed/cleaned up.
      */
-    void cleanupViews() {
-        cleanupExpandedView();
+    public void cleanupViews() {
+        ProtoLog.d(WM_SHELL_BUBBLES, "Bubble#cleanupViews=%s", getKey());
+        cleanupViews(true);
+    }
+
+    /**
+     * Call when all the views should be removed/cleaned up.
+     *
+     * <p>If we're switching between bar and floating modes, pass {@code false} on
+     * {@code cleanupTaskView} to avoid recreating it in the new mode.
+     */
+    void cleanupViews(boolean cleanupTaskView) {
+        cleanupExpandedView(cleanupTaskView);
         mIconView = null;
     }
 
@@ -468,14 +509,18 @@ public class Bubble implements BubbleViewProvider {
      *
      * @param callback the callback to notify one the bubble is ready to be displayed.
      * @param context the context for the bubble.
-     * @param controller the bubble controller.
+     * @param expandedViewManager the bubble expanded view manager.
+     * @param taskViewFactory the task view factory used to create the task view for the bubble.
+     * @param positioner the bubble positioner.
      * @param stackView the view the bubble is added to, iff showing as floating.
      * @param layerView the layer the bubble is added to, iff showing in the bubble bar.
-     * @param iconFactory the icon factory use to create images for the bubble.
+     * @param iconFactory the icon factory used to create images for the bubble.
      */
     void inflate(BubbleViewInfoTask.Callback callback,
             Context context,
-            BubbleController controller,
+            BubbleExpandedViewManager expandedViewManager,
+            BubbleTaskViewFactory taskViewFactory,
+            BubblePositioner positioner,
             @Nullable BubbleStackView stackView,
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory iconFactory,
@@ -485,7 +530,9 @@ public class Bubble implements BubbleViewProvider {
         }
         mInflationTask = new BubbleViewInfoTask(this,
                 context,
-                controller,
+                expandedViewManager,
+                taskViewFactory,
+                positioner,
                 stackView,
                 layerView,
                 iconFactory,
@@ -549,10 +596,10 @@ public class Bubble implements BubbleViewProvider {
     /**
      * Set visibility of bubble in the expanded state.
      *
-     * @param visibility {@code true} if the expanded bubble should be visible on the screen.
-     *
-     * Note that this contents visibility doesn't affect visibility at {@link android.view.View},
+     * <p>Note that this contents visibility doesn't affect visibility at {@link android.view.View},
      * and setting {@code false} actually means rendering the expanded view in transparent.
+     *
+     * @param visibility {@code true} if the expanded bubble should be visible on the screen.
      */
     @Override
     public void setTaskViewVisibility(boolean visibility) {
@@ -637,7 +684,7 @@ public class Bubble implements BubbleViewProvider {
      * @return the last time this bubble was updated or accessed, whichever is most recent.
      */
     long getLastActivity() {
-        return isAppBubble() ? Long.MAX_VALUE : Math.max(mLastUpdated, mLastAccessed);
+        return Math.max(mLastUpdated, mLastAccessed);
     }
 
     /**
@@ -851,20 +898,23 @@ public class Bubble implements BubbleViewProvider {
         return mAppIntent;
     }
 
-    boolean isAppBubble() {
+    /**
+     * Returns whether this bubble is from an app versus a notification.
+     */
+    public boolean isAppBubble() {
         return mIsAppBubble;
     }
 
-    Intent getSettingsIntent(final Context context) {
+    /** Creates open app settings intent */
+    public Intent getSettingsIntent(final Context context) {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
         final int uid = getUid(context);
         if (uid != -1) {
             intent.putExtra(Settings.EXTRA_APP_UID, uid);
         }
-        intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
     }
 
@@ -969,9 +1019,9 @@ public class Bubble implements BubbleViewProvider {
         pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
         pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());
         pw.print("  isDismissable: "); pw.println(mIsDismissable);
-        pw.println("  bubbleMetadataFlagListener null: " + (mBubbleMetadataFlagListener == null));
+        pw.println("  bubbleMetadataFlagListener null?: " + (mBubbleMetadataFlagListener == null));
         if (mExpandedView != null) {
-            mExpandedView.dump(pw);
+            mExpandedView.dump(pw, "  ");
         }
     }
 

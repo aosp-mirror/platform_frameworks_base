@@ -72,7 +72,12 @@ public abstract class NotificationViewWrapper implements TransformableView {
                 return new NotificationConversationTemplateViewWrapper(ctx, v, row);
             } else if ("call".equals(v.getTag())) {
                 return new NotificationCallTemplateViewWrapper(ctx, v, row);
+            } else if ("compactHUN".equals((v.getTag()))) {
+                return new NotificationCompactHeadsUpTemplateViewWrapper(ctx, v, row);
+            } else if ("compactMessagingHUN".equals((v.getTag()))) {
+                return new NotificationCompactMessagingTemplateViewWrapper(ctx, v, row);
             }
+
             if (row.getEntry().getSbn().getNotification().isStyle(
                     Notification.DecoratedCustomViewStyle.class)) {
                 return new NotificationDecoratedCustomViewWrapper(ctx, v, row);
@@ -311,6 +316,17 @@ public abstract class NotificationViewWrapper implements TransformableView {
     }
 
     /**
+     * Called when the user-visibility of this content wrapper has changed.
+     *
+     * @param shown true if the content of this wrapper is user-visible, meaning that the wrapped
+     *              view and all of its ancestors are visible.
+     *
+     * @see View#isShown()
+     */
+    public void onContentShown(boolean shown) {
+    }
+
+    /**
      * Called to indicate this view is removed
      */
     public void setRemoved() {
@@ -326,7 +342,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
         if (customBackgroundColor != 0) {
             return customBackgroundColor;
         }
-        return Utils.getColorAttr(mView.getContext(), android.R.attr.colorBackground)
+        return Utils.getColorAttr(mView.getContext(),
+                        com.android.internal.R.attr.materialColorSurfaceContainerHigh)
                 .getDefaultColor();
     }
 

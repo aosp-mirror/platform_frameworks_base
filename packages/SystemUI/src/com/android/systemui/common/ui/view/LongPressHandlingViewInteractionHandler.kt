@@ -33,6 +33,8 @@ class LongPressHandlingViewInteractionHandler(
     private val onLongPressDetected: (x: Int, y: Int) -> Unit,
     /** Callback reporting the a single tap gesture was detected at the given coordinates. */
     private val onSingleTapDetected: () -> Unit,
+    /** Time for the touch to be considered a long-press in ms */
+    var longPressDuration: () -> Long,
 ) {
     sealed class MotionEventModel {
         object Other : MotionEventModel()
@@ -77,7 +79,7 @@ class LongPressHandlingViewInteractionHandler(
                 cancelScheduledLongPress()
                 if (
                     event.distanceMoved <= ViewConfiguration.getTouchSlop() &&
-                        event.gestureDuration < ViewConfiguration.getLongPressTimeout()
+                        event.gestureDuration < longPressDuration()
                 ) {
                     dispatchSingleTap()
                 }
@@ -103,7 +105,7 @@ class LongPressHandlingViewInteractionHandler(
                         y = y,
                     )
                 },
-                ViewConfiguration.getLongPressTimeout().toLong(),
+                longPressDuration(),
             )
     }
 

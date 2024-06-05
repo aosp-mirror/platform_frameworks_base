@@ -18,10 +18,12 @@ package android.hardware.display;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.hardware.display.DisplayManager.VirtualDisplayFlag;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
@@ -39,7 +41,8 @@ import java.util.Set;
  * Holds configuration used to create {@link VirtualDisplay} instances.
  *
  * @see DisplayManager#createVirtualDisplay(VirtualDisplayConfig, Handler, VirtualDisplay.Callback)
- * @see MediaProjection#createVirtualDisplay
+ * @see MediaProjection#createVirtualDisplay(String, int, int, int, int, Surface,
+ * VirtualDisplay.Callback, Handler)
  */
 public final class VirtualDisplayConfig implements Parcelable {
 
@@ -54,6 +57,7 @@ public final class VirtualDisplayConfig implements Parcelable {
     private final boolean mWindowManagerMirroringEnabled;
     private ArraySet<String> mDisplayCategories = null;
     private final float mRequestedRefreshRate;
+    private final boolean mIsHomeSupported;
 
     private VirtualDisplayConfig(
             @NonNull String name,
@@ -66,7 +70,8 @@ public final class VirtualDisplayConfig implements Parcelable {
             int displayIdToMirror,
             boolean windowManagerMirroringEnabled,
             @NonNull ArraySet<String> displayCategories,
-            float requestedRefreshRate) {
+            float requestedRefreshRate,
+            boolean isHomeSupported) {
         mName = name;
         mWidth = width;
         mHeight = height;
@@ -78,6 +83,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         mWindowManagerMirroringEnabled = windowManagerMirroringEnabled;
         mDisplayCategories = displayCategories;
         mRequestedRefreshRate = requestedRefreshRate;
+        mIsHomeSupported = isHomeSupported;
     }
 
     /**
@@ -156,6 +162,18 @@ public final class VirtualDisplayConfig implements Parcelable {
     }
 
     /**
+     * Whether this virtual display supports showing home activity and wallpaper.
+     *
+     * @see Builder#setHomeSupported
+     * @hide
+     */
+    @FlaggedApi(android.companion.virtual.flags.Flags.FLAG_VDM_CUSTOM_HOME)
+    @SystemApi
+    public boolean isHomeSupported() {
+        return android.companion.virtual.flags.Flags.vdmCustomHome() && mIsHomeSupported;
+    }
+
+    /**
      * Returns the display categories.
      *
      * @see Builder#setDisplayCategories
@@ -188,6 +206,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         dest.writeBoolean(mWindowManagerMirroringEnabled);
         dest.writeArraySet(mDisplayCategories);
         dest.writeFloat(mRequestedRefreshRate);
+        dest.writeBoolean(mIsHomeSupported);
     }
 
     @Override
@@ -212,7 +231,8 @@ public final class VirtualDisplayConfig implements Parcelable {
                 && mDisplayIdToMirror == that.mDisplayIdToMirror
                 && mWindowManagerMirroringEnabled == that.mWindowManagerMirroringEnabled
                 && Objects.equals(mDisplayCategories, that.mDisplayCategories)
-                && mRequestedRefreshRate == that.mRequestedRefreshRate;
+                && mRequestedRefreshRate == that.mRequestedRefreshRate
+                && mIsHomeSupported == that.mIsHomeSupported;
     }
 
     @Override
@@ -220,7 +240,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         int hashCode = Objects.hash(
                 mName, mWidth, mHeight, mDensityDpi, mFlags, mSurface, mUniqueId,
                 mDisplayIdToMirror, mWindowManagerMirroringEnabled, mDisplayCategories,
-                mRequestedRefreshRate);
+                mRequestedRefreshRate, mIsHomeSupported);
         return hashCode;
     }
 
@@ -239,6 +259,7 @@ public final class VirtualDisplayConfig implements Parcelable {
                 + " mWindowManagerMirroringEnabled=" + mWindowManagerMirroringEnabled
                 + " mDisplayCategories=" + mDisplayCategories
                 + " mRequestedRefreshRate=" + mRequestedRefreshRate
+                + " mIsHomeSupported=" + mIsHomeSupported
                 + ")";
     }
 
@@ -254,6 +275,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         mWindowManagerMirroringEnabled = in.readBoolean();
         mDisplayCategories = (ArraySet<String>) in.readArraySet(null);
         mRequestedRefreshRate = in.readFloat();
+        mIsHomeSupported = in.readBoolean();
     }
 
     @NonNull
@@ -285,6 +307,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         private boolean mWindowManagerMirroringEnabled = false;
         private ArraySet<String> mDisplayCategories = new ArraySet<>();
         private float mRequestedRefreshRate = 0.0f;
+        private boolean mIsHomeSupported = false;
 
         /**
          * Creates a new Builder.
@@ -421,6 +444,31 @@ public final class VirtualDisplayConfig implements Parcelable {
         }
 
         /**
+         * Sets whether this display supports showing home activities and wallpaper.
+         *
+         * <p>If set to {@code true}, then the home activity relevant to this display will be
+         * automatically launched upon the display creation. If unset or set to {@code false}, the
+         * display will not host any activities upon creation.</p>
+         *
+         * <p>Note: setting to {@code true} requires the display to be trusted and to not mirror
+         * content of other displays. If the display is not trusted, or if it mirrors content of
+         * other displays, this property is ignored.</p>
+         *
+         * @param isHomeSupported whether home activities are supported on the display
+         * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED
+         * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
+         * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+         * @hide
+         */
+        @FlaggedApi(android.companion.virtual.flags.Flags.FLAG_VDM_CUSTOM_HOME)
+        @SystemApi
+        @NonNull
+        public Builder setHomeSupported(boolean isHomeSupported) {
+            mIsHomeSupported = isHomeSupported;
+            return this;
+        }
+
+        /**
          * Builds the {@link VirtualDisplayConfig} instance.
          */
         @NonNull
@@ -436,7 +484,8 @@ public final class VirtualDisplayConfig implements Parcelable {
                     mDisplayIdToMirror,
                     mWindowManagerMirroringEnabled,
                     mDisplayCategories,
-                    mRequestedRefreshRate);
+                    mRequestedRefreshRate,
+                    mIsHomeSupported);
         }
     }
 }

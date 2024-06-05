@@ -15,12 +15,11 @@
   -->
 
 <!-- Extends Framelayout -->
-<com.android.systemui.statusbar.notification.row.FooterView
+<com.android.systemui.statusbar.notification.footer.ui.view.FooterView
         xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
         android:visibility="gone">
     <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
         android:id="@+id/content"
@@ -37,31 +36,42 @@
             android:visibility="gone"
             android:textAppearance="?android:attr/textAppearanceButton"
             android:text="@string/unlock_to_see_notif_text"/>
-        <com.android.systemui.statusbar.notification.row.FooterViewButton
-            style="@style/TextAppearance.NotificationSectionHeaderButton"
-            android:id="@+id/manage_text"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginTop="12dp"
-            android:layout_gravity="start"
-            android:background="@drawable/notif_footer_btn_background"
-            android:focusable="true"
-            android:textColor="@color/notif_pill_text"
-            android:contentDescription="@string/manage_notifications_history_text"
-            android:text="@string/manage_notifications_history_text"
-        />
-        <com.android.systemui.statusbar.notification.row.FooterViewButton
-            style="@style/TextAppearance.NotificationSectionHeaderButton"
-            android:id="@+id/dismiss_text"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginTop="12dp"
-            android:layout_gravity="end"
-            android:background="@drawable/notif_footer_btn_background"
-            android:focusable="true"
-            android:textColor="@color/notif_pill_text"
-            android:contentDescription="@string/accessibility_clear_all"
-            android:text="@string/clear_all_notifications_text"
-        />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <com.android.systemui.statusbar.notification.row.FooterViewButton
+                style="@style/TextAppearance.NotificationFooterButton"
+                android:id="@+id/manage_text"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="16dp"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/dismiss_text"
+                android:background="@drawable/notif_footer_btn_background"
+                android:focusable="true"
+                android:contentDescription="@string/manage_notifications_history_text"
+                android:text="@string/manage_notifications_history_text"
+                />
+            <com.android.systemui.statusbar.notification.row.FooterViewButton
+                style="@style/TextAppearance.NotificationFooterButton"
+                android:id="@+id/dismiss_text"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/manage_text"
+                android:background="@drawable/notif_footer_btn_background"
+                android:focusable="true"
+                android:contentDescription="@string/accessibility_clear_all"
+                android:text="@string/clear_all_notifications_text"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
-</com.android.systemui.statusbar.notification.row.FooterView>
+</com.android.systemui.statusbar.notification.footer.ui.view.FooterView>

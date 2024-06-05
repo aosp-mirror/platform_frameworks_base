@@ -19,6 +19,7 @@ import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -54,6 +55,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.telecom.ClientTransactionalServiceRepository;
 import com.android.internal.telecom.ClientTransactionalServiceWrapper;
 import com.android.internal.telecom.ITelecomService;
+import com.android.server.telecom.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -224,6 +226,14 @@ public class TelecomManager {
      */
     public static final String EXTRA_DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME =
             "android.telecom.extra.DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME";
+
+    /**
+     * Optional extra to indicate a call should not be added to the call log.
+     *
+     * @hide
+     */
+    public static final String EXTRA_DO_NOT_LOG_CALL =
+            "android.telecom.extra.DO_NOT_LOG_CALL";
 
     /**
      * Extra value used with {@link #ACTION_DEFAULT_CALL_SCREENING_APP_CHANGED} broadcast to
@@ -410,6 +420,23 @@ public class TelecomManager {
      */
     public static final String EXTRA_CALL_CREATED_TIME_MILLIS =
             "android.telecom.extra.CALL_CREATED_TIME_MILLIS";
+
+    /**
+     * Extra URI that is used by a dialer to query the {@link android.provider.CallLog} content
+     * provider and associate a missed call notification with a call log entry.
+     */
+    @FlaggedApi(Flags.FLAG_ADD_CALL_URI_FOR_MISSED_CALLS)
+    public static final String EXTRA_CALL_LOG_URI =
+            "android.telecom.extra.CALL_LOG_URI";
+
+    /**
+     * Optional extra for incoming containing a long which specifies the time the
+     * call was answered by user. This value is in milliseconds.
+     * @hide
+     */
+    public static final String EXTRA_CALL_ANSWERED_TIME_MILLIS =
+            "android.telecom.extra.CALL_ANSWERED_TIME_MILLIS";
+
 
     /**
      * Optional extra for incoming and outgoing calls containing a long which specifies the Epoch
@@ -1022,8 +1049,17 @@ public class TelecomManager {
     public static final int PRESENTATION_UNAVAILABLE = 5;
 
 
+    /**
+     * Controls audio route for video calls.
+     * 0 - Use the default audio routing strategy.
+     * 1 - Disable the speaker. Route the audio to Headset or Bluetooth
+     *     or Earpiece, based on the default audio routing strategy.
+     * @hide
+     */
+    public static final String PROPERTY_VIDEOCALL_AUDIO_OUTPUT = "persist.radio.call.audio.output";
+
     /*
-     * Values for the adb property "persist.radio.videocall.audio.output"
+     * Values for the adb property "persist.radio.call.audio.output"
      */
     /** @hide */
     public static final int AUDIO_OUTPUT_ENABLE_SPEAKER = 0;
@@ -1322,6 +1358,25 @@ public class TelecomManager {
     }
 
     /**
+     * Returns a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
+     * calls. The returned list includes those accounts which have been explicitly enabled.
+     * In contrast to {@link #getCallCapablePhoneAccounts}, this also includes accounts from
+     * the calling user's {@link android.os.UserManager#getUserProfiles} profile group.
+     *
+     * @see #EXTRA_PHONE_ACCOUNT_HANDLE
+     * @return A list of {@code PhoneAccountHandle} objects.
+     *
+     * @throws IllegalStateException if telecom service is null.
+     */
+    @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_WORK_PROFILE_API_SPLIT)
+    @RequiresPermission(allOf = {android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES})
+    public @NonNull List<PhoneAccountHandle> getCallCapablePhoneAccountsAcrossProfiles() {
+        return getCallCapablePhoneAccountsAcrossProfiles(false);
+    }
+
+
+    /**
      * Returns a list of {@link PhoneAccountHandle}s for all self-managed
      * {@link ConnectionService}s owned by the calling {@link UserHandle}.
      * <p>
@@ -1379,6 +1434,34 @@ public class TelecomManager {
     }
 
     /**
+     * This API will return all {@link PhoneAccount}s the caller registered via
+     * {@link TelecomManager#registerPhoneAccount(PhoneAccount)}.  If a {@link PhoneAccount} appears
+     * to be missing from the list, Telecom has either unregistered the {@link PhoneAccount} (for
+     * cleanup purposes) or the caller registered the {@link PhoneAccount} under a different user
+     * and does not have the  {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission.
+     * <b>Note:</b> This API will only return {@link PhoneAccount}s registered by the same app.  For
+     * system Dialers that need all the {@link PhoneAccount}s registered by every application, see
+     * {@link TelecomManager#getAllPhoneAccounts()}.
+     *
+     * @return all the {@link PhoneAccount}s registered by the caller.
+     */
+    @SuppressLint("RequiresPermission")
+    @FlaggedApi(Flags.FLAG_GET_REGISTERED_PHONE_ACCOUNTS)
+    public @NonNull List<PhoneAccount> getRegisteredPhoneAccounts() {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                return service.getRegisteredPhoneAccounts(
+                        mContext.getOpPackageName(),
+                        mContext.getAttributionTag()).getList();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        throw new IllegalStateException("Telecom is not available");
+    }
+
+    /**
      * Returns a list of {@link PhoneAccountHandle}s including those which have not been enabled
      * by the user.
      *
@@ -1396,13 +1479,44 @@ public class TelecomManager {
         if (service != null) {
             try {
                 return service.getCallCapablePhoneAccounts(includeDisabledAccounts,
-                        mContext.getOpPackageName(), mContext.getAttributionTag()).getList();
+                        mContext.getOpPackageName(), mContext.getAttributionTag(), false).getList();
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#getCallCapablePhoneAccounts("
                         + includeDisabledAccounts + ")", e);
             }
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Returns a list of {@link PhoneAccountHandle}s visible to current user including those which
+     * have not been enabled by the user.
+     *
+     * @param includeDisabledAccounts When {@code true}, disabled phone accounts will be included,
+     *                                when {@code false}, only enabled phone accounts will be
+     *                                included.
+     * @return A list of {@code PhoneAccountHandle} objects.
+     *
+     * @throws IllegalStateException if telecom service is null.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_WORK_PROFILE_API_SPLIT)
+    @RequiresPermission(allOf = {android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES})
+    public @NonNull List<PhoneAccountHandle> getCallCapablePhoneAccountsAcrossProfiles(
+            boolean includeDisabledAccounts) {
+        ITelecomService service = getTelecomService();
+        if (service == null) {
+            throw new IllegalStateException("telecom service is null.");
+        }
+
+        try {
+            return service.getCallCapablePhoneAccounts(includeDisabledAccounts,
+                    mContext.getOpPackageName(), mContext.getAttributionTag(), true).getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1525,6 +1639,26 @@ public class TelecomManager {
      * {@link PhoneAccount} when the upper bound limit, 10, has already been reached.
      *
      * @param account The complete {@link PhoneAccount}.
+     * @throws UnsupportedOperationException if the caller cannot modify phone state and the device
+     * does not have the Telecom feature.
+     * @throws SecurityException if:
+     * <ol>
+     *     <li>the caller cannot modify phone state and the phone account doesn't belong to the
+     *     calling user.</li>
+     *     <li>the caller is registering a self-managed phone and either they are not allowed to
+     *     manage their own calls or if the account is call capable, a connection manager, or a
+     *     sim account.</li>
+     *     <li>the caller is registering a sim account without the ability to do so.</li>
+     *     <li>the caller is registering a multi-user phone account but isn't a system app.</li>
+     *     <li>the account can make SIM-based voice calls but the caller cannot register sim
+     *     accounts or isn't a sim call manager.</li>
+     *     <li>the account defines the EXTRA_SKIP_CALL_FILTERING extra but the caller isn't
+     *     able to modify the phone state.</li>
+     *     <li>the caller is registering an account for a different user but isn't able to
+     *     interact across users.</li>
+     *     <li>if simultaneous calling is available and the phone account package name doesn't
+     *     correspond to the simultaneous calling accounts associated with this phone account.</li>
+     * </ol>
      */
     public void registerPhoneAccount(PhoneAccount account) {
         ITelecomService service = getTelecomService();
@@ -2352,6 +2486,11 @@ public class TelecomManager {
      * <p>
      * <b>Note</b>: {@link android.app.Notification.CallStyle} notifications should be posted after
      * the call is placed in order for the notification to be non-dismissible.
+     * <p><b>Note</b>: Call Forwarding MMI codes can only be dialed by applications that are
+     * configured as the user defined default dialer or system dialer role. If a call containing a
+     * call forwarding MMI code is placed by an application that is not in one of these roles, the
+     * dialer will be launched with a UI showing the MMI code already populated so that the user can
+     * confirm the action before the call is placed.
      * @param address The address to make the call to.
      * @param extras Bundle of extras to use with the call.
      */
@@ -2658,14 +2797,21 @@ public class TelecomManager {
 
     /**
      * Determines whether there are any ongoing {@link PhoneAccount#CAPABILITY_SELF_MANAGED}
-     * calls for a given {@code packageName} and {@code userHandle}.
+     * calls for a given {@code packageName} and {@code userHandle}. If UserHandle.ALL or a user
+     * that isn't the calling user is passed in, the caller will need to have granted the ability
+     * to interact across users.
      *
      * @param packageName the package name of the app to check calls for.
-     * @param userHandle the user handle on which to check for calls.
+     * @param userHandle the user handle to check calls for.
      * @return {@code true} if there are ongoing calls, {@code false} otherwise.
+     * @throws SecurityException if the userHandle is not the calling user and the caller does not
+     * grant the ability to interact across users.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+    @RequiresPermission(allOf = {Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isInSelfManagedCall(@NonNull String packageName,
             @NonNull UserHandle userHandle) {
         ITelecomService service = getTelecomService();

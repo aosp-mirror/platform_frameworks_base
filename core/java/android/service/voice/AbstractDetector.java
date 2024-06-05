@@ -65,6 +65,13 @@ abstract class AbstractDetector implements HotwordDetector {
      */
     private final IBinder mToken = new Binder();
 
+    /**
+     * A flag controls whether attributionTag will be passed into the Identity.
+     * TODO(b/289087412): This flag will be converted and confirm to the trunk stable flag
+     * configuration.
+     */
+    static final boolean IS_IDENTITY_WITH_ATTRIBUTION_TAG = false;
+
     AbstractDetector(
             IVoiceInteractionManagerService managerService,
             Executor executor,
@@ -153,12 +160,16 @@ abstract class AbstractDetector implements HotwordDetector {
             @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
             @NonNull IHotwordRecognitionStatusCallback callback,
-            int detectorType) {
+            int detectorType,
+            @Nullable String attributionTag) {
         if (DEBUG) {
             Slog.d(TAG, "initAndVerifyDetector()");
         }
         Identity identity = new Identity();
         identity.packageName = ActivityThread.currentOpPackageName();
+        if (IS_IDENTITY_WITH_ATTRIBUTION_TAG) {
+            identity.attributionTag = attributionTag;
+        }
         try {
             mManagerService.initAndVerifyDetector(identity, options, sharedMemory, mToken, callback,
                     detectorType);
@@ -188,8 +199,12 @@ abstract class AbstractDetector implements HotwordDetector {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+        Consumer<AbstractDetector> onDestroyListener;
         synchronized (mLock) {
-            mOnDestroyListener.accept(this);
+            onDestroyListener = mOnDestroyListener;
+        }
+        if (onDestroyListener != null) {
+            onDestroyListener.accept(this);
         }
     }
 

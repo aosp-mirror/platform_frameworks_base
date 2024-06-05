@@ -38,13 +38,13 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.modules.utils.testing.TestableDeviceConfig;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.List;
@@ -86,7 +86,7 @@ public class ScreenUndimDetectorTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_UNDIMS_REQUIRED,
@@ -100,12 +100,17 @@ public class ScreenUndimDetectorTest {
         mScreenUndimDetector.systemReady(sContext);
     }
 
+    @After
+    public void tearDown() {
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
     @Test
     public void recordScreenPolicy_disabledByFlag_noop() {
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_KEEP_SCREEN_ON_ENABLED, Boolean.FALSE.toString(), false /*makeDefault*/);
+        mScreenUndimDetector.readValuesFromDeviceConfig();
 
-        setup();
         mScreenUndimDetector.recordScreenPolicy(DEFAULT_DISPLAY_GROUP, POLICY_DIM);
         mScreenUndimDetector.recordScreenPolicy(DEFAULT_DISPLAY_GROUP, POLICY_BRIGHT);
 
@@ -115,7 +120,7 @@ public class ScreenUndimDetectorTest {
     @Test
     public void recordScreenPolicy_samePolicy_noop() {
         for (int policy : ALL_POLICIES) {
-            setup();
+            resetDetector();
             mScreenUndimDetector.recordScreenPolicy(DEFAULT_DISPLAY_GROUP, policy);
             mScreenUndimDetector.recordScreenPolicy(DEFAULT_DISPLAY_GROUP, policy);
 
@@ -149,7 +154,7 @@ public class ScreenUndimDetectorTest {
                 if (from == POLICY_DIM && to == POLICY_BRIGHT) {
                     continue;
                 }
-                setup();
+                resetDetector();
                 mScreenUndimDetector.recordScreenPolicy(DEFAULT_DISPLAY_GROUP, from);
                 mScreenUndimDetector.recordScreenPolicy(DEFAULT_DISPLAY_GROUP, to);
 
@@ -290,7 +295,8 @@ public class ScreenUndimDetectorTest {
     @Test
     public void recordScreenPolicy_dimToNonBright_resets() {
         for (int to : Arrays.asList(POLICY_OFF, POLICY_DOZE)) {
-            setup();
+            resetDetector();
+
             mScreenUndimDetector.mUndimCounter = 1;
             mScreenUndimDetector.mUndimCounterStartedMillis = 123;
             mScreenUndimDetector.mWakeLock.acquire();
@@ -308,7 +314,8 @@ public class ScreenUndimDetectorTest {
     @Test
     public void recordScreenPolicy_brightToNonDim_resets() {
         for (int to : Arrays.asList(POLICY_OFF, POLICY_DOZE)) {
-            setup();
+            resetDetector();
+
             mScreenUndimDetector.mUndimCounter = 1;
             mScreenUndimDetector.mUndimCounterStartedMillis = 123;
             mScreenUndimDetector.mWakeLock.acquire();
@@ -350,5 +357,10 @@ public class ScreenUndimDetectorTest {
                 assertThat(mScreenUndimDetector.mUndimCounterStartedMillis).isNotEqualTo(0);
             }
         }
+    }
+
+    private void resetDetector() {
+        mScreenUndimDetector.reset();
+        mScreenUndimDetector.mCurrentScreenPolicy = 0;
     }
 }

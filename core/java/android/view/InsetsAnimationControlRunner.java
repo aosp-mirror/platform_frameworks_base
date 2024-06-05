@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsController.AnimationType;
+import android.view.InsetsController.LayoutInsetsDuringAnimation;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.inputmethod.ImeTracker;
 
@@ -80,6 +81,14 @@ public interface InsetsAnimationControlRunner {
      */
     @Nullable
     ImeTracker.Token getStatsToken();
+
+    /**
+     * Updates the desired layout insets during the animation.
+     *
+     * @param layoutInsetsDuringAnimation Whether the insets should be shown or hidden
+     */
+    void updateLayoutInsetsDuringAnimation(
+            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation);
 
     /**
      *

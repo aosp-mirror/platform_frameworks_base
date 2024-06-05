@@ -16,6 +16,8 @@
 
 package com.android.os.bugreports.tests;
 
+import static android.content.Context.RECEIVER_EXPORTED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertNotNull;
@@ -104,18 +106,12 @@ public class BugreportManagerTest {
     private static final String EXTRA_SCREENSHOT = "android.intent.extra.SCREENSHOT";
 
     private static final Path[] UI_TRACES_PREDUMPED = {
+            Paths.get("/data/misc/perfetto-traces/bugreport/systrace.pftrace"),
             Paths.get("/data/misc/wmtrace/ime_trace_clients.winscope"),
             Paths.get("/data/misc/wmtrace/ime_trace_managerservice.winscope"),
             Paths.get("/data/misc/wmtrace/ime_trace_service.winscope"),
             Paths.get("/data/misc/wmtrace/wm_trace.winscope"),
             Paths.get("/data/misc/wmtrace/wm_log.winscope"),
-            Paths.get("/data/misc/wmtrace/layers_trace.winscope"),
-            Paths.get("/data/misc/wmtrace/transactions_trace.winscope"),
-            Paths.get("/data/misc/wmtrace/transition_trace.winscope"),
-            Paths.get("/data/misc/wmtrace/shell_transition_trace.winscope"),
-    };
-    private static final Path[] UI_TRACES_GENERATED_DURING_BUGREPORT = {
-            Paths.get("/data/misc/wmtrace/layers_trace_from_transactions.winscope"),
     };
 
     private Handler mHandler;
@@ -210,7 +206,7 @@ public class BugreportManagerTest {
 
         mBrm.preDumpUiData();
         waitTillDumpstateExitedOrTimeout();
-        List<File> expectedPreDumpedTraceFiles = copyFilesAsRoot(UI_TRACES_PREDUMPED);
+        List<File> expectedPreDumpedTraceFiles = copyFiles(UI_TRACES_PREDUMPED);
 
         BugreportCallbackImpl callback = new BugreportCallbackImpl();
         mBrm.startBugreport(mBugreportFd, null, fullWithUsePreDumpFlag(), mExecutor,
@@ -225,7 +221,6 @@ public class BugreportManagerTest {
         assertFdsAreClosed(mBugreportFd);
 
         assertThatBugreportContainsFiles(UI_TRACES_PREDUMPED);
-        assertThatBugreportContainsFiles(UI_TRACES_GENERATED_DURING_BUGREPORT);
 
         List<File> actualPreDumpedTraceFiles = extractFilesFromBugreport(UI_TRACES_PREDUMPED);
         assertThatAllFileContentsAreEqual(actualPreDumpedTraceFiles, expectedPreDumpedTraceFiles);
@@ -240,9 +235,9 @@ public class BugreportManagerTest {
         // In some corner cases, data dumped as part of the full bugreport could be the same as the
         // pre-dumped data and this test would fail. Hence, here we create fake/artificial
         // pre-dumped data that we know it won't match with the full bugreport data.
-        createFilesWithFakeDataAsRoot(UI_TRACES_PREDUMPED, "system");
+        createFakeTraceFiles(UI_TRACES_PREDUMPED);
 
-        List<File> preDumpedTraceFiles = copyFilesAsRoot(UI_TRACES_PREDUMPED);
+        List<File> preDumpedTraceFiles = copyFiles(UI_TRACES_PREDUMPED);
 
         BugreportCallbackImpl callback = new BugreportCallbackImpl();
         mBrm.startBugreport(mBugreportFd, null, full(), mExecutor,
@@ -257,10 +252,41 @@ public class BugreportManagerTest {
         assertFdsAreClosed(mBugreportFd);
 
         assertThatBugreportContainsFiles(UI_TRACES_PREDUMPED);
-        assertThatBugreportContainsFiles(UI_TRACES_GENERATED_DURING_BUGREPORT);
 
         List<File> actualTraceFiles = extractFilesFromBugreport(UI_TRACES_PREDUMPED);
         assertThatAllFileContentsAreDifferent(preDumpedTraceFiles, actualTraceFiles);
+    }
+
+    @LargeTest
+    @Test
+    public void noPreDumpData_then_fullWithUsePreDumpFlag_ignoresFlag() throws Exception {
+        startPreDumpedUiTraces();
+
+        mBrm.preDumpUiData();
+        waitTillDumpstateExitedOrTimeout();
+
+        // Simulate lost of pre-dumped data.
+        // For example it can happen in this scenario:
+        // 1. Pre-dump data
+        // 2. Start bugreport + "use pre-dump" flag (USE AND REMOVE THE PRE-DUMP FROM DISK)
+        // 3. Start bugreport + "use pre-dump" flag (NO PRE-DUMP AVAILABLE ON DISK)
+        removeFilesIfNeeded(UI_TRACES_PREDUMPED);
+
+        // Start bugreport with "use predump" flag. Because the pre-dumped data is not available
+        // the flag will be ignored and data will be dumped as in normal flow.
+        BugreportCallbackImpl callback = new BugreportCallbackImpl();
+        mBrm.startBugreport(mBugreportFd, null, fullWithUsePreDumpFlag(), mExecutor,
+                callback);
+        shareConsentDialog(ConsentReply.ALLOW);
+        waitTillDoneOrTimeout(callback);
+
+        stopPreDumpedUiTraces();
+
+        assertThat(callback.isDone()).isTrue();
+        assertThat(mBugreportFile.length()).isGreaterThan(0L);
+        assertFdsAreClosed(mBugreportFd);
+
+        assertThatBugreportContainsFiles(UI_TRACES_PREDUMPED);
     }
 
     @Test
@@ -334,7 +360,10 @@ public class BugreportManagerTest {
         // shell UID rather than our own.
         BugreportBroadcastReceiver br = new BugreportBroadcastReceiver();
         InstrumentationRegistry.getContext()
-                .registerReceiver(br, new IntentFilter(INTENT_BUGREPORT_FINISHED));
+                .registerReceiver(
+                        br,
+                        new IntentFilter(INTENT_BUGREPORT_FINISHED),
+                        RECEIVER_EXPORTED);
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
                 .executeShellCommand("am bug-report");
 
@@ -480,15 +509,37 @@ public class BugreportManagerTest {
         return f;
     }
 
-    private static void startPreDumpedUiTraces() {
+    private static void startPreDumpedUiTraces() throws Exception {
+        // Perfetto traces
+        String perfettoConfig =
+                "buffers: {\n"
+                + "    size_kb: 2048\n"
+                + "    fill_policy: RING_BUFFER\n"
+                + "}\n"
+                + "data_sources: {\n"
+                + "    config {\n"
+                + "        name: \"android.surfaceflinger.transactions\"\n"
+                + "    }\n"
+                + "}\n"
+                + "bugreport_score: 10\n";
+        File tmp = createTempFile("tmp", ".cfg");
+        Files.write(perfettoConfig.getBytes(StandardCharsets.UTF_8), tmp);
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                "install -m 644 -o root -g root "
+                + tmp.getAbsolutePath() + " /data/misc/perfetto-configs/bugreport-manager-test.cfg"
+        );
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                "perfetto --background-wait"
+                + " --config /data/misc/perfetto-configs/bugreport-manager-test.cfg --txt"
+                + " --out /data/misc/perfetto-traces/not-used.perfetto-trace"
+        );
+
+        // Legacy traces
         InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
                 "cmd input_method tracing start"
         );
         InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
                 "cmd window tracing start"
-        );
-        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
-                "service call SurfaceFlinger 1025 i32 1"
         );
     }
 
@@ -563,19 +614,24 @@ public class BugreportManagerTest {
         return extractedFile;
     }
 
-    private static void createFilesWithFakeDataAsRoot(Path[] paths, String owner) throws Exception {
+    private static void createFakeTraceFiles(Path[] paths) throws Exception {
         File src = createTempFile("fake", ".data");
         Files.write("fake data".getBytes(StandardCharsets.UTF_8), src);
 
         for (Path path : paths) {
             InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
-                    "install -m 611 -o " + owner + " -g " + owner
-                    + " " + src.getAbsolutePath() + " " + path.toString()
+                    "install -m 644 -o system -g system "
+                    + src.getAbsolutePath() + " " + path.toString()
             );
         }
+
+        // Dumpstate executes "perfetto --save-for-bugreport" as shell
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                "chown shell:shell /data/misc/perfetto-traces/bugreport/systrace.pftrace"
+        );
     }
 
-    private static List<File> copyFilesAsRoot(Path[] paths) throws Exception {
+    private static List<File> copyFiles(Path[] paths) throws Exception {
         ArrayList<File> files = new ArrayList<File>();
         for (Path src : paths) {
             File dst = createTempFile(src.getFileName().toString(), ".copy");
@@ -585,6 +641,14 @@ public class BugreportManagerTest {
             files.add(dst);
         }
         return files;
+    }
+
+    private static void removeFilesIfNeeded(Path[] paths) throws Exception {
+        for (Path path : paths) {
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                    "rm -f " + path.toString()
+            );
+        }
     }
 
     private static ParcelFileDescriptor parcelFd(File file) throws Exception {

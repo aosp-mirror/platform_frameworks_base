@@ -31,6 +31,12 @@ license {
     ],
 }
 
+cc_aconfig_library {
+    name: "backup_flags_cc_lib",
+    host_supported: true,
+    aconfig_declarations: "backup_flags",
+}
+
 cc_defaults {
     name: "libandroidfw_defaults",
     cpp_std: "gnu++2b",
@@ -63,15 +69,21 @@ cc_library {
         "AssetsProvider.cpp",
         "AttributeResolution.cpp",
         "BigBuffer.cpp",
+        "BigBufferStream.cpp",
         "ChunkIterator.cpp",
         "ConfigDescription.cpp",
+        "FileStream.cpp",
         "Idmap.cpp",
         "LoadedArsc.cpp",
         "Locale.cpp",
         "LocaleData.cpp",
         "misc.cpp",
+        "NinePatch.cpp",
         "ObbFile.cpp",
         "PosixUtils.cpp",
+        "Png.cpp",
+        "PngChunkFilter.cpp",
+        "PngCrunch.cpp",
         "ResourceTimer.cpp",
         "ResourceTypes.cpp",
         "ResourceUtils.cpp",
@@ -84,8 +96,14 @@ cc_library {
     ],
     export_include_dirs: ["include"],
     export_shared_lib_headers: ["libz"],
-    static_libs: ["libincfs-utils"],
-    whole_static_libs: ["libincfs-utils"],
+    static_libs: [
+        "libincfs-utils",
+        "libpng",
+    ],
+    whole_static_libs: [
+        "libandroidfw_pathutils",
+        "libincfs-utils",
+    ],
     export_static_lib_headers: ["libincfs-utils"],
     target: {
         android: {
@@ -103,7 +121,10 @@ cc_library {
                 "libutils",
                 "libz",
             ],
-            static_libs: ["libziparchive_for_incfs"],
+            static_libs: [
+                "libziparchive_for_incfs",
+                "backup_flags_cc_lib",
+            ],
             static: {
                 enabled: false,
             },
@@ -135,6 +156,28 @@ cc_library {
     sanitize: {
         blocklist: "libandroidfw_blocklist.txt",
     },
+}
+
+cc_library_static {
+    name: "libandroidfw_pathutils",
+    defaults: ["libandroidfw_defaults"],
+    host_supported: true,
+    export_include_dirs: ["include_pathutils"],
+    srcs: [
+        "PathUtils.cpp",
+    ],
+    shared_libs: [
+        "libutils",
+    ],
+    target: {
+        windows: {
+            enabled: true,
+        },
+    },
+    visibility: [
+        ":__subpackages__",
+        "//frameworks/base/tools/aapt",
+    ],
 }
 
 common_test_libs = [
@@ -173,9 +216,11 @@ cc_test {
         "tests/ConfigDescription_test.cpp",
         "tests/ConfigLocale_test.cpp",
         "tests/DynamicRefTable_test.cpp",
+        "tests/FileStream_test.cpp",
         "tests/Idmap_test.cpp",
         "tests/LoadedArsc_test.cpp",
         "tests/Locale_test.cpp",
+        "tests/NinePatch_test.cpp",
         "tests/ResourceTimer_test.cpp",
         "tests/ResourceUtils_test.cpp",
         "tests/ResTable_test.cpp",
@@ -232,6 +277,7 @@ cc_benchmark {
         "tests/AssetManager2_bench.cpp",
         "tests/AttributeResolution_bench.cpp",
         "tests/CursorWindow_bench.cpp",
+        "tests/Generic_bench.cpp",
         "tests/SparseEntry_bench.cpp",
         "tests/Theme_bench.cpp",
     ],

@@ -32,9 +32,11 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.ContrastColorUtil;
+import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
+import com.android.systemui.util.DrawableDumpKt;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -51,6 +53,8 @@ public class NotificationBackgroundView extends View implements Dumpable {
     private int mTintColor;
     @Nullable private Integer mRippleColor;
     private final float[] mCornerRadii = new float[8];
+    private final float[] mFocusOverlayCornerRadii = new float[8];
+    private float mFocusOverlayStroke = 0;
     private boolean mBottomIsRounded;
     private boolean mBottomAmountClips = true;
     private int mActualHeight = -1;
@@ -59,12 +63,20 @@ public class NotificationBackgroundView extends View implements Dumpable {
     private int mExpandAnimationWidth = -1;
     private int mExpandAnimationHeight = -1;
     private int mDrawableAlpha = 255;
-    private boolean mIsPressedAllowed;
+    private final ColorStateList mLightColoredStatefulColors;
+    private final ColorStateList mDarkColoredStatefulColors;
+    private final int mNormalColor;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mDontModifyCorners = getResources().getBoolean(
-                R.bool.config_clipNotificationsToOutline);
+        mDontModifyCorners = getResources().getBoolean(R.bool.config_clipNotificationsToOutline);
+        mLightColoredStatefulColors = getResources().getColorStateList(
+                R.color.notification_state_color_light);
+        mDarkColoredStatefulColors = getResources().getColorStateList(
+                R.color.notification_state_color_dark);
+        mNormalColor = Utils.getColorAttrDefaultColor(mContext,
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh);
+        mFocusOverlayStroke = getResources().getDimension(R.dimen.notification_focus_stroke_width);
     }
 
     @Override
@@ -124,6 +136,18 @@ public class NotificationBackgroundView extends View implements Dumpable {
     }
 
     /**
+     * Stateful colors are colors that will overlay on the notification original color when one of
+     * hover states, pressed states or other similar states is activated.
+     */
+    private void setStatefulColors() {
+        if (mTintColor != mNormalColor) {
+            ColorStateList newColor = ContrastColorUtil.isColorDark(mTintColor)
+                    ? mDarkColoredStatefulColors : mLightColoredStatefulColors;
+            ((GradientDrawable) getStatefulBackgroundLayer().mutate()).setColor(newColor);
+        }
+    }
+
+    /**
      * Sets a background drawable. As we need to change our bounds independently of layout, we need
      * the notion of a background independently of the regular View background..
      */
@@ -151,13 +175,20 @@ public class NotificationBackgroundView extends View implements Dumpable {
         setCustomBackground(d);
     }
 
+    private Drawable getBaseBackgroundLayer() {
+        return ((LayerDrawable) mBackground).getDrawable(0);
+    }
+
+    private Drawable getStatefulBackgroundLayer() {
+        return ((LayerDrawable) mBackground).getDrawable(1);
+    }
+
     public void setTint(int tintColor) {
-        if (tintColor != 0) {
-            mBackground.setColorFilter(tintColor, PorterDuff.Mode.SRC_ATOP);
-        } else {
-            mBackground.clearColorFilter();
-        }
+        Drawable baseLayer = getBaseBackgroundLayer();
+        baseLayer.mutate().setTintMode(PorterDuff.Mode.SRC_ATOP);
+        baseLayer.setTint(tintColor);
         mTintColor = tintColor;
+        setStatefulColors();
         invalidate();
     }
 
@@ -210,10 +241,6 @@ public class NotificationBackgroundView extends View implements Dumpable {
 
     public void setState(int[] drawableState) {
         if (mBackground != null && mBackground.isStateful()) {
-            if (!mIsPressedAllowed) {
-                drawableState = ArrayUtils.removeInt(drawableState,
-                        com.android.internal.R.attr.state_pressed);
-            }
             mBackground.setState(drawableState);
         }
     }
@@ -266,11 +293,28 @@ public class NotificationBackgroundView extends View implements Dumpable {
         if (mDontModifyCorners) {
             return;
         }
-        if (mBackground instanceof LayerDrawable) {
-            GradientDrawable gradientDrawable =
-                    (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(0);
-            gradientDrawable.setCornerRadii(mCornerRadii);
+        if (mBackground instanceof LayerDrawable layerDrawable) {
+            int numberOfLayers = layerDrawable.getNumberOfLayers();
+            for (int i = 0; i < numberOfLayers; i++) {
+                GradientDrawable gradientDrawable = (GradientDrawable) layerDrawable.getDrawable(i);
+                gradientDrawable.setCornerRadii(mCornerRadii);
+            }
+            updateFocusOverlayRadii(layerDrawable);
         }
+    }
+
+    private void updateFocusOverlayRadii(LayerDrawable background) {
+        GradientDrawable overlay =
+                (GradientDrawable) background.findDrawableByLayerId(
+                        R.id.notification_focus_overlay);
+        for (int i = 0; i < mCornerRadii.length; i++) {
+            // in theory subtracting mFocusOverlayStroke/2 should be enough but notification
+            // background is still peeking a bit from below - probably due to antialiasing or
+            // overlay uneven scaling. So let's subtract full mFocusOverlayStroke to make sure the
+            // radius is a bit smaller and covers background corners fully
+            mFocusOverlayCornerRadii[i] = Math.max(0, mCornerRadii[i] - mFocusOverlayStroke);
+        }
+        overlay.setCornerRadii(mFocusOverlayCornerRadii);
     }
 
     /** Set the current expand animation size. */
@@ -295,10 +339,6 @@ public class NotificationBackgroundView extends View implements Dumpable {
         invalidate();
     }
 
-    public void setPressedAllowed(boolean allowed) {
-        mIsPressedAllowed = allowed;
-    }
-
     @Override
     public void dump(PrintWriter pw, @NonNull String[] args) {
         pw.println("mDontModifyCorners: " + mDontModifyCorners);
@@ -311,6 +351,16 @@ public class NotificationBackgroundView extends View implements Dumpable {
         pw.println("mActualHeight: " + mActualHeight);
         pw.println("mTintColor: " + hexColorString(mTintColor));
         pw.println("mRippleColor: " + hexColorString(mRippleColor));
-        pw.println("mBackground: " + mBackground);
+        pw.println("mBackground: " + DrawableDumpKt.dumpToString(mBackground));
+    }
+
+    /** create a concise dump of this view's colors */
+    public String toDumpString() {
+        return "<NotificationBackgroundView"
+                + " tintColor=" + hexColorString(mTintColor)
+                + " rippleColor=" + hexColorString(mRippleColor)
+                + " bgColor=" + DrawableDumpKt.getSolidColor(mBackground)
+                + ">";
+
     }
 }

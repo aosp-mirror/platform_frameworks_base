@@ -51,7 +51,7 @@ import javax.inject.Inject;
 public class FlashlightControllerImpl implements FlashlightController {
 
     private static final String TAG = "FlashlightController";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = true;
 
     private static final int DISPATCH_ERROR = 0;
     private static final int DISPATCH_CHANGED = 1;
@@ -202,10 +202,12 @@ public class FlashlightControllerImpl implements FlashlightController {
 
     private void dispatchListeners(int message, boolean argument) {
         synchronized (mListeners) {
-            final int N = mListeners.size();
+            final ArrayList<WeakReference<FlashlightController.FlashlightListener>> copy =
+                    new ArrayList<>(mListeners);
+            final int n = copy.size();
             boolean cleanup = false;
-            for (int i = 0; i < N; i++) {
-                FlashlightListener l = mListeners.get(i).get();
+            for (int i = 0; i < n; i++) {
+                FlashlightListener l = copy.get(i).get();
                 if (l != null) {
                     if (message == DISPATCH_ERROR) {
                         l.onFlashlightError();

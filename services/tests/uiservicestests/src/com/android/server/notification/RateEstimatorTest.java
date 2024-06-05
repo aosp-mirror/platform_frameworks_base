@@ -15,11 +15,11 @@
  */
 package com.android.server.notification;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import static java.util.concurrent.TimeUnit.HOURS;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;
@@ -42,110 +42,120 @@ public class RateEstimatorTest extends UiServiceTestCase {
 
     @Test
     public void testRunningTimeBackwardDoesntExplodeUpdate() throws Exception {
-        assertUpdateTime(mTestStartTime);
-        assertUpdateTime(mTestStartTime - 1000L);
+        updateAndVerifyRate(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime - 1000L);
     }
 
     @Test
     public void testRunningTimeBackwardDoesntExplodeGet() throws Exception {
-        assertUpdateTime(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime);
         final float rate = mEstimator.getRate(mTestStartTime - 1000L);
-        assertFalse(Float.isInfinite(rate));
-        assertFalse(Float.isNaN(rate));
+        assertThat(rate).isFinite();
     }
 
     @Test
     public void testInstantaneousEventsDontExplodeUpdate() throws Exception {
-        assertUpdateTime(mTestStartTime);
-        assertUpdateTime(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime);
     }
 
     @Test
     public void testInstantaneousEventsDontExplodeGet() throws Exception {
-        assertUpdateTime(mTestStartTime);
-        assertUpdateTime(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime);
         final float rate = mEstimator.getRate(mTestStartTime);
-        assertFalse(Float.isInfinite(rate));
-        assertFalse(Float.isNaN(rate));
+        assertThat(rate).isFinite();
     }
 
     @Test
     public void testInstantaneousBurstIsEstimatedUnderTwoPercent() throws Exception {
-        assertUpdateTime(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
         long nextEventTime = postEvents(eventStart, 0, 5); // five events at \inf
         final float rate = mEstimator.getRate(nextEventTime);
-        assertLessThan("Rate", rate, 20f);
+        assertThat(rate).isLessThan(20f);
     }
 
     @Test
     public void testCompactBurstIsEstimatedUnderTwoPercent() throws Exception {
-        assertUpdateTime(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
         long nextEventTime = postEvents(eventStart, 1, 5); // five events at 1000Hz
         final float rate = mEstimator.getRate(nextEventTime);
-        assertLessThan("Rate", rate, 20f);
+        assertThat(rate).isLessThan(20f);
     }
 
     @Test
     public void testSustained1000HzBurstIsEstimatedOverNinetyPercent() throws Exception {
-        assertUpdateTime(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
         long nextEventTime = postEvents(eventStart, 1, 100); // one hundred events at 1000Hz
         final float rate = mEstimator.getRate(nextEventTime);
-        assertGreaterThan("Rate", rate, 900f);
+        assertThat(rate).isGreaterThan(900f);
     }
 
     @Test
     public void testSustained100HzBurstIsEstimatedOverNinetyPercent() throws Exception {
-        assertUpdateTime(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
         long nextEventTime = postEvents(eventStart, 10, 100); // one hundred events at 100Hz
         final float rate = mEstimator.getRate(nextEventTime);
 
-        assertGreaterThan("Rate", rate, 90f);
+        assertThat(rate).isGreaterThan(90f);
     }
 
     @Test
     public void testRecoverQuicklyAfterSustainedBurst() throws Exception {
-        assertUpdateTime(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
-        long nextEventTime = postEvents(eventStart, 10, 1000); // one hundred events at 100Hz
-        final float rate = mEstimator.getRate(nextEventTime + 5000L); // two seconds later
-        assertLessThan("Rate", rate, 2f);
+        long nextEventTime = postEvents(eventStart, 10, 1000); // one thousand events at 100Hz
+        final float rate = mEstimator.getRate(nextEventTime + 5000L); // five seconds later
+        assertThat(rate).isLessThan(2f);
     }
 
     @Test
     public void testEstimateShouldNotOvershoot() throws Exception {
-        assertUpdateTime(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
-        long nextEventTime = postEvents(eventStart, 1, 1000); // one thousand events at 1000Hz
+        long nextEventTime = postEvents(eventStart, 1, 5000); // five thousand events at 1000Hz
         final float rate = mEstimator.getRate(nextEventTime);
-        assertLessThan("Rate", rate, 1000f);
+        assertThat(rate).isAtMost(1000f);
     }
 
     @Test
     public void testGetRateWithoutUpdate() throws Exception {
         final float rate = mEstimator.getRate(mTestStartTime);
-        assertLessThan("Rate", rate, 0.1f);
+        assertThat(rate).isLessThan(0.1f);
     }
 
     @Test
     public void testGetRateWithOneUpdate() throws Exception {
-        assertUpdateTime(mTestStartTime);
+        updateAndVerifyRate(mTestStartTime);
         final float rate = mEstimator.getRate(mTestStartTime+1);
-        assertLessThan("Rate", rate, 1f);
+        assertThat(rate).isLessThan(1f);
     }
 
-    private void assertLessThan(String label, float a, float b)  {
-        assertTrue(String.format("%s was %f, but should be less than %f", label, a, b), a <= b);
+    @Test
+    public void testEstimateCatchesUpQuickly() {
+        long nextEventTime = postEvents(mTestStartTime, 100, 30); // 30 events at 10Hz
+
+        final float firstBurstRate = mEstimator.getRate(nextEventTime);
+        assertThat(firstBurstRate).isWithin(2f).of(10);
+
+        nextEventTime += HOURS.toMillis(3); // 3 hours later...
+        nextEventTime = postEvents(nextEventTime, 100, 30); // same burst of 30 events at 10Hz
+
+        // Catching up. Rate is not yet 10, since we had a long period of inactivity...
+        float secondBurstRate = mEstimator.getRate(nextEventTime);
+        assertThat(secondBurstRate).isWithin(1f).of(6);
+
+        // ... but after a few more events, we are there.
+        nextEventTime = postEvents(nextEventTime, 100, 10); // 10 more events at 10Hz
+        secondBurstRate = mEstimator.getRate(nextEventTime);
+        assertThat(secondBurstRate).isWithin(1f).of(10);
     }
 
-    private void assertGreaterThan(String label, float a, float b)  {
-        assertTrue(String.format("%s was %f, but should be more than %f", label, a, b), a >= b);
-    }
-
-    /** @returns the next event time. */
+    /** @return the next event time. */
     private long postEvents(long start, long dt, int num) {
         long time = start;
         for (int i = 0; i < num; i++) {
@@ -155,9 +165,8 @@ public class RateEstimatorTest extends UiServiceTestCase {
         return time;
     }
 
-    private void assertUpdateTime(long time) {
-        final float rate = mEstimator.update(time);
-        assertFalse(Float.isInfinite(rate));
-        assertFalse(Float.isNaN(rate));
+    private void updateAndVerifyRate(long time) {
+        mEstimator.update(time);
+        assertThat(mEstimator.getRate(time)).isFinite();
     }
 }

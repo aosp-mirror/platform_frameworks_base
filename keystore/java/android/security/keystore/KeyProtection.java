@@ -16,6 +16,7 @@
 
 package android.security.keystore;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,7 +31,10 @@ import java.security.Key;
 import java.security.KeyStore.ProtectionParameter;
 import java.security.Signature;
 import java.security.cert.Certificate;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -223,6 +227,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     private final @KeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
     private final @KeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
     private final @KeyProperties.DigestEnum String[] mDigests;
+    private final @NonNull @KeyProperties.DigestEnum Set<String> mMgf1Digests;
     private final @KeyProperties.BlockModeEnum String[] mBlockModes;
     private final boolean mRandomizedEncryptionRequired;
     private final boolean mUserAuthenticationRequired;
@@ -247,6 +252,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
             @KeyProperties.EncryptionPaddingEnum String[] encryptionPaddings,
             @KeyProperties.SignaturePaddingEnum String[] signaturePaddings,
             @KeyProperties.DigestEnum String[] digests,
+            @KeyProperties.DigestEnum Set<String> mgf1Digests,
             @KeyProperties.BlockModeEnum String[] blockModes,
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
@@ -271,6 +277,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         mSignaturePaddings =
                 ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(signaturePaddings));
         mDigests = ArrayUtils.cloneIfNotEmpty(digests);
+        mMgf1Digests = mgf1Digests;
         mBlockModes = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(blockModes));
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticationRequired = userAuthenticationRequired;
@@ -378,6 +385,40 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
      */
     public boolean isDigestsSpecified() {
         return mDigests != null;
+    }
+
+    /**
+     * Returns the set of digests that can be used by the MGF1 mask generation function
+     * (e.g., {@code SHA-256}, {@code SHA-384}) with the key. Useful with the {@code RSA-OAEP}
+     * scheme.
+     * If not explicitly specified  during key generation, the default {@code SHA-1} digest is
+     * used and may be specified.
+     *
+     * <p>See {@link KeyProperties}.{@code DIGEST} constants.
+     *
+     * @throws IllegalStateException if this set has not been specified.
+     *
+     * @see #isMgf1DigestsSpecified()
+     */
+    @NonNull
+    @FlaggedApi(android.security.Flags.FLAG_MGF1_DIGEST_SETTER_V2)
+    public @KeyProperties.DigestEnum Set<String> getMgf1Digests() {
+        if (mMgf1Digests.isEmpty()) {
+            throw new IllegalStateException("Mask generation function (MGF) not specified");
+        }
+        return new HashSet(mMgf1Digests);
+    }
+
+    /**
+     * Returns {@code true} if the set of digests for the MGF1 mask generation function,
+     * with which the key can be used, has been specified. Useful with the {@code RSA-OAEP} scheme.
+     *
+     * @see #getMgf1Digests()
+     */
+    @NonNull
+    @FlaggedApi(android.security.Flags.FLAG_MGF1_DIGEST_SETTER_V2)
+    public boolean isMgf1DigestsSpecified() {
+        return !mMgf1Digests.isEmpty();
     }
 
     /**
@@ -528,7 +569,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     /**
      * Return whether this key is critical to the device encryption flow.
      *
-     * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
+     * @see Builder#setCriticalToDeviceEncryption(boolean)
      * @hide
      */
     public boolean isCriticalToDeviceEncryption() {
@@ -536,9 +577,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     }
 
     /**
-     * Returns {@code true} if the screen must be unlocked for this key to be used for decryption or
-     * signing. Encryption and signature verification will still be available when the screen is
-     * locked.
+     * Returns {@code true} if the key is authorized to be used only while the device is unlocked.
      *
      * @see Builder#setUnlockedDeviceRequired(boolean)
      */
@@ -588,6 +627,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         private @KeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
         private @KeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
         private @KeyProperties.DigestEnum String[] mDigests;
+        private @NonNull @KeyProperties.DigestEnum Set<String> mMgf1Digests =
+                Collections.emptySet();
         private @KeyProperties.BlockModeEnum String[] mBlockModes;
         private boolean mRandomizedEncryptionRequired = true;
         private boolean mUserAuthenticationRequired;
@@ -735,6 +776,30 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         @NonNull
         public Builder setDigests(@KeyProperties.DigestEnum String... digests) {
             mDigests = ArrayUtils.cloneIfNotEmpty(digests);
+            return this;
+        }
+
+        /**
+         * Sets the set of hash functions (e.g., {@code SHA-256}, {@code SHA-384}) which could be
+         * used by the mask generation function MGF1 (which is used for certain operations with
+         * the key). Attempts to use the key with any other digest for the mask generation
+         * function will be rejected.
+         *
+         * <p>This can only be specified for signing/verification keys and RSA encryption/decryption
+         * keys used with RSA OAEP padding scheme because these operations involve a mask generation
+         * function (MGF1) with a digest.
+         * The default digest for MGF1 is {@code SHA-1}, which will be specified during key import
+         * time if no digests have been explicitly provided.
+         * When using the key, the caller may not specify any digests that were not provided during
+         * key import time. The caller may specify the default digest, {@code SHA-1}, if no
+         * digests were explicitly provided during key import (but it is not necessary to do so).
+         *
+         * <p>See {@link KeyProperties}.{@code DIGEST} constants.
+         */
+        @NonNull
+        @FlaggedApi(android.security.Flags.FLAG_MGF1_DIGEST_SETTER_V2)
+        public Builder setMgf1Digests(@Nullable @KeyProperties.DigestEnum String... mgf1Digests) {
+            mMgf1Digests = Set.of(mgf1Digests);
             return this;
         }
 
@@ -972,16 +1037,16 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
          * {@link #setUserAuthenticationValidityDurationSeconds} and
          * {@link #setUserAuthenticationRequired}). Once the device has been removed from the
          * user's body, the key will be considered unauthorized and the user will need to
-         * re-authenticate to use it. For keys without an authentication validity period this
-         * parameter has no effect.
+         * re-authenticate to use it. If the device does not have an on-body sensor or the key does
+         * not have an authentication validity period, this parameter has no effect.
+         * <p>
+         * Since Android 12 (API level 31), this parameter has no effect even on devices that have
+         * an on-body sensor. A future version of Android may restore enforcement of this parameter.
+         * Meanwhile, it is recommended to not use it.
          *
-         * <p>Similarly, on devices that do not have an on-body sensor, this parameter will have no
-         * effect; the device will always be considered to be "on-body" and the key will therefore
-         * remain authorized until the validity period ends.
-         *
-         * @param remainsValid if {@code true}, and if the device supports on-body detection, key
-         * will be invalidated when the device is removed from the user's body or when the
-         * authentication validity expires, whichever occurs first.
+         * @param remainsValid if {@code true}, and if the device supports enforcement of this
+         * parameter, the key will be invalidated when the device is removed from the user's body or
+         * when the authentication validity expires, whichever occurs first.
          */
         @NonNull
         public Builder setUserAuthenticationValidWhileOnBody(boolean remainsValid) {
@@ -1038,9 +1103,10 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
          * Set whether this key is critical to the device encryption flow
          *
          * This is a special flag only available to system servers to indicate the current key
-         * is part of the device encryption flow.
+         * is part of the device encryption flow. Setting this flag causes the key to not
+         * be cryptographically bound to the LSKF even if the key is otherwise authentication
+         * bound.
          *
-         * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
          * @hide
          */
         public Builder setCriticalToDeviceEncryption(boolean critical) {
@@ -1049,11 +1115,49 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         }
 
         /**
-         * Sets whether the keystore requires the screen to be unlocked before allowing decryption
-         * using this key. If this is set to {@code true}, any attempt to decrypt or sign using this
-         * key while the screen is locked will fail. A locked device requires a PIN, password,
-         * biometric, or other trusted factor to access. While the screen is locked, the key can
-         * still be used for encryption or signature verification.
+         * Sets whether this key is authorized to be used only while the device is unlocked.
+         * <p>
+         * The device is considered to be locked for a user when the user's apps are currently
+         * inaccessible and some form of lock screen authentication is required to regain access to
+         * them. For the full definition, see {@link KeyguardManager#isDeviceLocked()}.
+         * <p>
+         * Public key operations aren't restricted by {@code setUnlockedDeviceRequired(true)} and
+         * may be performed even while the device is locked. In Android 11 (API level 30) and lower,
+         * encryption and verification operations with symmetric keys weren't restricted either.
+         * <p>
+         * Keys that use {@code setUnlockedDeviceRequired(true)} can be imported and generated even
+         * while the device is locked, as long as the device has been unlocked at least once since
+         * the last reboot. However, such keys cannot be used (except for the unrestricted
+         * operations mentioned above) until the device is unlocked. Apps that need to encrypt data
+         * while the device is locked such that it can only be decrypted while the device is
+         * unlocked can generate a key and encrypt the data in software, import the key into
+         * Keystore using {@code setUnlockedDeviceRequired(true)}, and zeroize the original key.
+         * <p>
+         * {@code setUnlockedDeviceRequired(true)} is related to but distinct from
+         * {@link #setUserAuthenticationRequired(boolean) setUserAuthenticationRequired(true)}.
+         * {@code setUnlockedDeviceRequired(true)} requires that the device be unlocked, whereas
+         * {@code setUserAuthenticationRequired(true)} requires that a specific type of strong
+         * authentication has happened within a specific time period. They may be used together or
+         * separately; there are cases in which one requirement can be satisfied but not the other.
+         * <p>
+         * <b>Warning:</b> Be careful using {@code setUnlockedDeviceRequired(true)} on Android 14
+         * (API level 34) and lower, since the following bugs existed in Android 12 through 14:
+         * <ul>
+         *   <li>When the user didn't have a secure lock screen, unlocked-device-required keys
+         *   couldn't be generated, imported, or used.</li>
+         *   <li>When the user's secure lock screen was removed, all of that user's
+         *   unlocked-device-required keys were automatically deleted.</li>
+         *   <li>Unlocking the device with a non-strong biometric, such as face on many devices,
+         *   didn't re-authorize the use of unlocked-device-required keys.</li>
+         *   <li>Unlocking the device with a biometric didn't re-authorize the use of
+         *   unlocked-device-required keys in profiles that share their parent user's lock.</li>
+         * </ul>
+         * These issues are fixed in Android 15, so apps can avoid them by using
+         * {@code setUnlockedDeviceRequired(true)} only on Android 15 and higher.
+         * Apps that use both {@code setUnlockedDeviceRequired(true)} and
+         * {@link #setUserAuthenticationRequired(boolean) setUserAuthenticationRequired(true)}
+         * are unaffected by the first two issues, since the first two issues describe expected
+         * behavior for {@code setUserAuthenticationRequired(true)}.
          */
         @NonNull
         public Builder setUnlockedDeviceRequired(boolean unlockedDeviceRequired) {
@@ -1141,6 +1245,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
                     mEncryptionPaddings,
                     mSignaturePaddings,
                     mDigests,
+                    mMgf1Digests,
                     mBlockModes,
                     mRandomizedEncryptionRequired,
                     mUserAuthenticationRequired,

@@ -68,9 +68,8 @@ struct OverlayableChunk {
 class PackageFlattener {
  public:
   PackageFlattener(IAaptContext* context, const ResourceTablePackageView& package,
-                   const std::map<size_t, std::string>* shared_libs,
-                   SparseEntriesMode sparse_entries,
-                   bool compact_entries,
+                   const ResourceTable::ReferencedPackages* shared_libs,
+                   SparseEntriesMode sparse_entries, bool compact_entries,
                    bool collapse_key_stringpool,
                    const std::set<ResourceName>& name_collapse_exemptions,
                    bool deduplicate_entry_values)
@@ -145,10 +144,9 @@ class PackageFlattener {
   // 2) the entries will be accessed on platforms U+, and
   // 3) all entry keys can be encoded in 16 bits
   bool UseCompactEntries(const ConfigDescription& config, std::vector<FlatEntry>* entries) const {
-    return compact_entries_ &&
-        (context_->GetMinSdkVersion() > SDK_TIRAMISU || config.sdkVersion > SDK_TIRAMISU) &&
-        std::none_of(entries->cbegin(), entries->cend(),
-          [](const auto& e) { return e.entry_key >= std::numeric_limits<uint16_t>::max(); });
+    return compact_entries_ && context_->GetMinSdkVersion() > SDK_TIRAMISU &&
+      std::none_of(entries->cbegin(), entries->cend(),
+        [](const auto& e) { return e.entry_key >= std::numeric_limits<uint16_t>::max(); });
   }
 
   std::unique_ptr<ResEntryWriter> GetResEntryWriter(bool dedup, bool compact, BigBuffer* buffer) {
@@ -383,9 +381,9 @@ class PackageFlattener {
     return true;
   }
 
-  bool FlattenTypeSpec(const ResourceTableTypeView& type,
-                       const std::vector<ResourceTableEntryView>& sorted_entries,
-                       BigBuffer* buffer) {
+  ResTable_typeSpec* FlattenTypeSpec(const ResourceTableTypeView& type,
+                                     const std::vector<ResourceTableEntryView>& sorted_entries,
+                                     BigBuffer* buffer) {
     ChunkWriter type_spec_writer(buffer);
     ResTable_typeSpec* spec_header =
         type_spec_writer.StartChunk<ResTable_typeSpec>(RES_TABLE_TYPE_SPEC_TYPE);
@@ -393,7 +391,7 @@ class PackageFlattener {
 
     if (sorted_entries.empty()) {
       type_spec_writer.Finish();
-      return true;
+      return spec_header;
     }
 
     // We can't just take the size of the vector. There may be holes in the
@@ -429,7 +427,7 @@ class PackageFlattener {
       }
     }
     type_spec_writer.Finish();
-    return true;
+    return spec_header;
   }
 
   bool FlattenTypes(BigBuffer* buffer) {
@@ -452,7 +450,8 @@ class PackageFlattener {
       expected_type_id++;
       type_pool_.MakeRef(type.named_type.to_string());
 
-      if (!FlattenTypeSpec(type, type.entries, buffer)) {
+      const auto type_spec_header = FlattenTypeSpec(type, type.entries, buffer);
+      if (!type_spec_header) {
         return false;
       }
 
@@ -513,6 +512,10 @@ class PackageFlattener {
           return false;
         }
       }
+
+      // And now we can update the type entries count in the typeSpec header.
+      type_spec_header->typesCount = android::util::HostToDevice16(uint16_t(std::min<uint32_t>(
+          config_to_entry_list_map.size(), std::numeric_limits<uint16_t>::max())));
     }
     return true;
   }
@@ -548,7 +551,7 @@ class PackageFlattener {
   IAaptContext* context_;
   android::IDiagnostics* diag_;
   const ResourceTablePackageView package_;
-  const std::map<size_t, std::string>* shared_libs_;
+  const ResourceTable::ReferencedPackages* shared_libs_;
   SparseEntriesMode sparse_entries_;
   bool compact_entries_;
   android::StringPool type_pool_;

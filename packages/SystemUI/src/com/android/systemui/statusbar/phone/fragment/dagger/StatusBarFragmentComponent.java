@@ -18,8 +18,9 @@ package com.android.systemui.statusbar.phone.fragment.dagger;
 
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.RootView;
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
-import com.android.systemui.statusbar.phone.LightsOutNotifController;
+import com.android.systemui.statusbar.phone.LegacyLightsOutNotifController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
@@ -27,10 +28,10 @@ import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarDemoMode;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
-import java.util.Set;
-
 import dagger.BindsInstance;
 import dagger.Subcomponent;
+
+import java.util.Set;
 
 /**
  * A subcomponent that gets re-created each time we create a new {@link CollapsedStatusBarFragment}.
@@ -54,7 +55,7 @@ public interface StatusBarFragmentComponent {
     @Subcomponent.Factory
     interface Factory {
         StatusBarFragmentComponent create(
-                @BindsInstance CollapsedStatusBarFragment collapsedStatusBarFragment);
+                @BindsInstance @RootView PhoneStatusBarView phoneStatusBarView);
     }
 
     /**
@@ -78,7 +79,9 @@ public interface StatusBarFragmentComponent {
         getBatteryMeterViewController().init();
         getHeadsUpAppearanceController().init();
         getPhoneStatusBarViewController().init();
-        getLightsOutNotifController().init();
+        if (!NotificationsLiveDataStoreRefactor.isEnabled()) {
+            getLegacyLightsOutNotifController().init();
+        }
         getStatusBarDemoMode().init();
     }
 
@@ -101,7 +104,7 @@ public interface StatusBarFragmentComponent {
 
     /** */
     @StatusBarFragmentScope
-    LightsOutNotifController getLightsOutNotifController();
+    LegacyLightsOutNotifController getLegacyLightsOutNotifController();
 
     /** */
     @StatusBarFragmentScope

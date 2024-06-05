@@ -223,8 +223,8 @@ public class AccessibilityTraceManager implements AccessibilityTrace {
         pw.println("            IAccessibilityInteractionConnection");
         pw.println("            IAccessibilityInteractionConnectionCallback");
         pw.println("            IRemoteMagnificationAnimationCallback");
-        pw.println("            IWindowMagnificationConnection");
-        pw.println("            IWindowMagnificationConnectionCallback");
+        pw.println("            IMagnificationConnection");
+        pw.println("            IMagnificationConnectionCallback");
         pw.println("            WindowManagerInternal");
         pw.println("            WindowsForAccessibilityCallback");
         pw.println("            MagnificationCallbacks");

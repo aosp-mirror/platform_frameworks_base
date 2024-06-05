@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_system_ui_please_use_a_more_specific_subteam_if_possible_",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_packages_SystemUI_license"
@@ -25,6 +26,12 @@ java_library {
     sdk_version: "current",
     name: "PluginCoreLib",
     srcs: ["src/**/*.java"],
+    optimize: {
+        proguard_flags_files: ["proguard.flags"],
+        // Ensure downstream clients that reference this as a shared lib
+        // inherit the appropriate flags to preserve annotations.
+        export_proguard_flags_files: true,
+    },
 
     // Enforce that the library is built against java 8 so that there are
     // no compatibility issues with launcher

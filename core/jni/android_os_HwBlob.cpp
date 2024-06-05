@@ -265,7 +265,7 @@ jobject JHwBlob::NewObject(JNIEnv *env, size_t size) {
     //   justify passing such a large amount of data over this path. So the
     //   alternative (updating the constructor and other code to accept other
     //   types, should also probably not be taken in this case).
-    CHECK_LE(size, std::numeric_limits<jint>::max());
+    CHECK_LE(size, static_cast<size_t>(std::numeric_limits<jint>::max()));
 
     return env->NewObject(clazz.get(), constructID, static_cast<jint>(size));
 }

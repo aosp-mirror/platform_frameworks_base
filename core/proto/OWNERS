@@ -11,16 +11,16 @@ zhouwenjie@google.com
 # Frameworks
 ogunwale@google.com
 jjaggi@google.com
-kwekua@google.com
 roosa@google.com
-per-file package_item_info.proto = toddke@google.com,patb@google.com
+per-file package_item_info.proto = file:/PACKAGE_MANAGER_OWNERS
 per-file usagestatsservice.proto, usagestatsservice_v2.proto = file:/core/java/android/app/usage/OWNERS
 per-file apphibernationservice.proto = file:/core/java/android/apphibernation/OWNERS
 per-file android/hardware/sensorprivacy.proto = ntmyren@google.com,evanseverson@google.com
 per-file background_install_control.proto = wenhaowang@google.com,georgechan@google.com,billylau@google.com
+per-file android/content/intent.proto = file:/PACKAGE_MANAGER_OWNERS
+per-file android/hardware/location/context_hub_info.proto = file:/services/core/java/com/android/server/location/contexthub/OWNERS
 
 # Biometrics
-jaggies@google.com
 jbolinger@google.com
 
 # Launcher
@@ -31,5 +31,3 @@ jreck@google.com
 
 # Accessibility
 pweaver@google.com
-hongmingjin@google.com
-cbrower@google.com

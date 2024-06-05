@@ -26,6 +26,7 @@ import dagger.Module;
  */
 @Module
 public abstract class NotificationRowModule {
+
     /**
      * Provides notification row content binder instance.
      */
@@ -41,4 +42,20 @@ public abstract class NotificationRowModule {
     @SysUISingleton
     public abstract NotifRemoteViewCache provideNotifRemoteViewCache(
             NotifRemoteViewCacheImpl cacheImpl);
+
+    /**
+     * Provides notification remote view factory container
+     */
+    @Binds
+    @SysUISingleton
+    public abstract NotifRemoteViewsFactoryContainer provideNotifRemoteViewsFactoryContainer(
+            NotifRemoteViewsFactoryContainerImpl containerImpl);
+
+    /**
+     * Provides heads up style manager
+     */
+    @Binds
+    @SysUISingleton
+    public abstract HeadsUpStyleProvider provideHeadsUpStyleManager(
+            HeadsUpStyleProviderImpl headsUpStyleManagerImpl);
 }

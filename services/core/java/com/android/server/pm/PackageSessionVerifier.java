@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.PARSE_APEX;
+
 import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
@@ -41,10 +43,11 @@ import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.InstallLocationUtils;
+import com.android.internal.pm.parsing.PackageParser2;
+import com.android.internal.pm.parsing.PackageParserException;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
-import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.rollback.RollbackManagerInternal;
 
 import java.io.File;
@@ -398,8 +401,8 @@ final class PackageSessionVerifier {
             final ParsedPackage parsedPackage;
             try (PackageParser2 packageParser = mPackageParserSupplier.get()) {
                 File apexFile = new File(apexInfo.modulePath);
-                parsedPackage = packageParser.parsePackage(apexFile, 0, false);
-            } catch (PackageManagerException e) {
+                parsedPackage = packageParser.parsePackage(apexFile, PARSE_APEX, false);
+            } catch (PackageParserException e) {
                 throw new PackageManagerException(
                         PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
                         "Failed to parse APEX package " + apexInfo.modulePath + " : " + e, e);

@@ -47,6 +47,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -96,7 +97,7 @@ public class LockPatternUtils {
     public static final int MIN_LOCK_PATTERN_SIZE = 4;
 
     /**
-     * The minimum size of a valid password.
+     * The minimum size of a valid password or PIN.
      */
     public static final int MIN_LOCK_PASSWORD_SIZE = 4;
 
@@ -160,9 +161,17 @@ public class LockPatternUtils {
      */
     public static final int VERIFY_FLAG_REQUEST_GK_PW_HANDLE = 1 << 0;
 
+    /**
+     * Flag provided to {@link #verifyCredential(LockscreenCredential, int, int)} . If set, the
+     * method writes the password data to the repair mode file after the credential is verified
+     * successfully.
+     */
+    public static final int VERIFY_FLAG_WRITE_REPAIR_MODE_PW = 1 << 1;
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {
-            VERIFY_FLAG_REQUEST_GK_PW_HANDLE
+            VERIFY_FLAG_REQUEST_GK_PW_HANDLE,
+            VERIFY_FLAG_WRITE_REPAIR_MODE_PW
     })
     public @interface VerifyFlag {}
 
@@ -171,7 +180,11 @@ public class LockPatternUtils {
      */
     public static final int USER_FRP = UserHandle.USER_NULL + 1;
 
-    public final static String PATTERN_EVER_CHOSEN_KEY = "lockscreen.patterneverchosen";
+    /**
+     * Special user id for triggering the exiting repair mode verification flow.
+     */
+    public static final int USER_REPAIR_MODE = UserHandle.USER_NULL + 2;
+
     public final static String PASSWORD_TYPE_KEY = "lockscreen.password_type";
     @Deprecated
     public final static String PASSWORD_TYPE_ALTERNATE_KEY = "lockscreen.password_type_alternate";
@@ -200,6 +213,8 @@ public class LockPatternUtils {
 
     public static final String CURRENT_LSKF_BASED_PROTECTOR_ID_KEY = "sp-handle";
     public static final String PASSWORD_HISTORY_DELIMITER = ",";
+
+    private static final String GSI_RUNNING_PROP = "ro.gsid.image_running";
 
     /**
      * drives the pin auto confirmation feature availability in code logic.
@@ -318,11 +333,17 @@ public class LockPatternUtils {
 
     @UnsupportedAppUsage
     public LockPatternUtils(Context context) {
+        this(context, null);
+    }
+
+    @VisibleForTesting
+    public LockPatternUtils(Context context, ILockSettings lockSettings) {
         mContext = context;
         mContentResolver = context.getContentResolver();
 
         Looper looper = Looper.myLooper();
         mHandler = looper != null ? new Handler(looper) : null;
+        mLockSettingsService = lockSettings;
     }
 
     @UnsupportedAppUsage
@@ -389,7 +410,7 @@ public class LockPatternUtils {
 
     @UnsupportedAppUsage
     public void reportFailedPasswordAttempt(int userId) {
-        if (userId == USER_FRP && frpCredentialEnabled(mContext)) {
+        if (isSpecialUserId(mContext, userId, /* checkDeviceSupported= */ true)) {
             return;
         }
         getDevicePolicyManager().reportFailedPasswordAttempt(userId);
@@ -398,7 +419,7 @@ public class LockPatternUtils {
 
     @UnsupportedAppUsage
     public void reportSuccessfulPasswordAttempt(int userId) {
-        if (userId == USER_FRP && frpCredentialEnabled(mContext)) {
+        if (isSpecialUserId(mContext, userId, /* checkDeviceSupported= */ true)) {
             return;
         }
         getDevicePolicyManager().reportSuccessfulPasswordAttempt(userId);
@@ -406,21 +427,21 @@ public class LockPatternUtils {
     }
 
     public void reportPasswordLockout(int timeoutMs, int userId) {
-        if (userId == USER_FRP && frpCredentialEnabled(mContext)) {
+        if (isSpecialUserId(mContext, userId, /* checkDeviceSupported= */ true)) {
             return;
         }
         getTrustManager().reportUnlockLockout(timeoutMs, userId);
     }
 
     public int getCurrentFailedPasswordAttempts(int userId) {
-        if (userId == USER_FRP && frpCredentialEnabled(mContext)) {
+        if (isSpecialUserId(mContext, userId, /* checkDeviceSupported= */ true)) {
             return 0;
         }
         return getDevicePolicyManager().getCurrentFailedPasswordAttempts(userId);
     }
 
     public int getMaximumFailedPasswordsForWipe(int userId) {
-        if (userId == USER_FRP && frpCredentialEnabled(mContext)) {
+        if (isSpecialUserId(mContext, userId, /* checkDeviceSupported= */ true)) {
             return 0;
         }
         return getDevicePolicyManager().getMaximumFailedPasswordsForWipe(
@@ -597,16 +618,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Return true if the user has ever chosen a pattern.  This is true even if the pattern is
-     * currently cleared.
-     *
-     * @return True if the user has ever chosen a pattern.
-     */
-    public boolean isPatternEverChosen(int userId) {
-        return getBoolean(PATTERN_EVER_CHOSEN_KEY, false, userId);
-    }
-
-    /**
      * Returns the length of the PIN set by a particular user.
      * @param userId user id of the user whose pin length we have to return
      * @return
@@ -638,13 +649,6 @@ public class LockPatternUtils {
             Log.e(TAG, "Could not store PIN length on disk " + e);
             return false;
         }
-    }
-    /**
-     * Records that the user has chosen a pattern at some time, even if the pattern is
-     * currently cleared.
-     */
-    public void reportPatternWasChosen(int userId) {
-        setBoolean(PATTERN_EVER_CHOSEN_KEY, true, userId);
     }
 
     /**
@@ -757,6 +761,17 @@ public class LockPatternUtils {
         }
     }
 
+    /** Returns the credential type corresponding to the given PIN or password quality. */
+    public static int pinOrPasswordQualityToCredentialType(int quality) {
+        if (isQualityAlphabeticPassword(quality)) {
+            return CREDENTIAL_TYPE_PASSWORD;
+        }
+        if (isQualityNumericPin(quality)) {
+            return CREDENTIAL_TYPE_PIN;
+        }
+        throw new IllegalArgumentException("Quality is neither Pin nor password: " + quality);
+    }
+
     /**
      * Save a new lockscreen credential.
      *
@@ -771,7 +786,6 @@ public class LockPatternUtils {
      * and return false if the given credential is wrong.
      * @throws RuntimeException if password change encountered an unrecoverable error.
      * @throws UnsupportedOperationException secure lockscreen is not supported on this device.
-     * @throws IllegalArgumentException if new credential is too short.
      */
     public boolean setLockCredential(@NonNull LockscreenCredential newCredential,
             @NonNull LockscreenCredential savedCredential, int userHandle) {
@@ -779,7 +793,6 @@ public class LockPatternUtils {
             throw new UnsupportedOperationException(
                     "This operation requires the lock screen feature.");
         }
-        newCredential.checkLength();
 
         try {
             if (!getLockSettings().setLockCredential(newCredential, savedCredential, userHandle)) {
@@ -890,10 +903,23 @@ public class LockPatternUtils {
     }
 
     /**
-     * Returns true if {@code userHandle} is a managed profile with separate challenge.
+     * Returns true if {@code userHandle} is a profile with separate challenge.
+     * <p>
+     * Returns false if {@code userHandle} is a profile with unified challenge, a profile whose
+     * credential is not shareable with its parent, or a non-profile user.
      */
     public boolean isSeparateProfileChallengeEnabled(int userHandle) {
         return isCredentialSharableWithParent(userHandle) && hasSeparateChallenge(userHandle);
+    }
+
+    /**
+     * Returns true if {@code userHandle} is a profile with unified challenge.
+     * <p>
+     * Returns false if {@code userHandle} is a profile with separate challenge, a profile whose
+     * credential is not shareable with its parent, or a non-profile user.
+     */
+    public boolean isProfileWithUnifiedChallenge(int userHandle) {
+        return isCredentialSharableWithParent(userHandle) && !hasSeparateChallenge(userHandle);
     }
 
     /**
@@ -991,7 +1017,7 @@ public class LockPatternUtils {
                 }
                 @Override
                 public boolean shouldBypassCache(Integer userHandle) {
-                    return userHandle == USER_FRP;
+                    return isSpecialUserId(userHandle);
                 }
             };
 
@@ -1055,7 +1081,7 @@ public class LockPatternUtils {
      */
     @UnsupportedAppUsage
     public boolean isVisiblePatternEnabled(int userId) {
-        return getBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, false, userId);
+        return getBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, true, userId);
     }
 
     /**
@@ -1088,13 +1114,6 @@ public class LockPatternUtils {
      */
     public boolean isPinEnhancedPrivacyEverChosen(int userId) {
         return getString(LOCK_PIN_ENHANCED_PRIVACY, userId) != null;
-    }
-
-    /**
-     * Set whether the visible password is enabled for cryptkeeper screen.
-     */
-    public void setVisiblePasswordEnabled(boolean enabled, int userId) {
-        // No longer does anything.
     }
 
     /**
@@ -1550,7 +1569,6 @@ public class LockPatternUtils {
             throw new UnsupportedOperationException(
                     "This operation requires the lock screen feature.");
         }
-        credential.checkLength();
         LockSettingsInternal localService = getLockSettingsInternal();
 
         return localService.setLockCredentialWithToken(credential, tokenHandle, token, userHandle);
@@ -1597,7 +1615,8 @@ public class LockPatternUtils {
                         STRONG_AUTH_REQUIRED_AFTER_TIMEOUT,
                         STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
                         STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT,
-                        SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED})
+                        SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED,
+                        SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST})
         @Retention(RetentionPolicy.SOURCE)
         public @interface StrongAuthFlags {}
 
@@ -1623,7 +1642,8 @@ public class LockPatternUtils {
 
         /**
          * Strong authentication is required because the user has been locked out after too many
-         * attempts.
+         * attempts using primary auth methods (i.e. PIN/pattern/password) from the lock screen,
+         * Android Settings, and BiometricPrompt where user authentication is required.
          */
         public static final int STRONG_AUTH_REQUIRED_AFTER_LOCKOUT = 0x8;
 
@@ -1656,12 +1676,23 @@ public class LockPatternUtils {
         public static final int SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED = 0x100;
 
         /**
+         * Some authentication is required because adaptive auth has requested to lock device due to
+         * repeated failed primary auth (i.e. PIN/pattern/password) or biometric auth attempts which
+         * can come from Android Settings or BiometricPrompt where user authentication is required,
+         * in addition to from the lock screen. When a risk is determined, adaptive auth will
+         * proactively prompt the lock screen and will require users to re-enter the device with
+         * either primary auth or biometric auth (if not prohibited by other flags).
+         */
+        public static final int SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST = 0x200;
+
+        /**
          * Strong auth flags that do not prevent biometric methods from being accepted as auth.
          * If any other flags are set, biometric authentication is disabled.
          */
         private static final int ALLOWING_BIOMETRIC = STRONG_AUTH_NOT_REQUIRED
                 | SOME_AUTH_REQUIRED_AFTER_USER_REQUEST
-                | SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED;
+                | SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED
+                | SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 
         private final SparseIntArray mStrongAuthRequiredForUser = new SparseIntArray();
         private final H mHandler;
@@ -1847,6 +1878,64 @@ public class LockPatternUtils {
     }
 
     /**
+     * Return {@code true} if repair mode is supported by the device.
+     */
+    public static boolean isRepairModeSupported(Context context) {
+        return context.getResources().getBoolean(
+                com.android.internal.R.bool.config_repairModeSupported);
+    }
+
+    /**
+     * Return {@code true} if repair mode is active on the device.
+     */
+    public static boolean isRepairModeActive(Context context) {
+        return Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.REPAIR_MODE_ACTIVE, /* def= */ 0) > 0;
+    }
+
+    /**
+     * Return {@code true} if repair mode is supported by the device and the user has been granted
+     * admin privileges.
+     */
+    public static boolean canUserEnterRepairMode(Context context, UserInfo info) {
+        return info != null && info.isAdmin() && isRepairModeSupported(context);
+    }
+
+    /**
+     * Return {@code true} if GSI is running on the device.
+     */
+    public static boolean isGsiRunning() {
+        return SystemProperties.getInt(GSI_RUNNING_PROP, 0) > 0;
+    }
+
+    /**
+     * Return {@code true} if the given user id is a special user such as {@link #USER_FRP}.
+     */
+    public static boolean isSpecialUserId(int userId) {
+        return isSpecialUserId(/* context= */ null, userId, /* checkDeviceSupported= */ false);
+    }
+
+    /**
+     * Return {@code true} if the given user id is a special user for the verification flow.
+     *
+     * @param checkDeviceSupported {@code true} to check the specified user is supported
+     *                             by the device.
+     */
+    private static boolean isSpecialUserId(@Nullable Context context, int userId,
+            boolean checkDeviceSupported) {
+        switch (userId) {
+            case USER_FRP:
+                if (checkDeviceSupported) return frpCredentialEnabled(context);
+                return true;
+
+            case USER_REPAIR_MODE:
+                if (checkDeviceSupported) return isRepairModeSupported(context);
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * Attempt to rederive the unified work challenge for the specified profile user and unlock the
      * user. If successful, this would allow the user to leave quiet mode automatically without
      * additional user authentication.
@@ -1875,8 +1964,30 @@ public class LockPatternUtils {
         }
     }
 
+    /**
+     * If the user is not secured, ie doesn't have an LSKF, then decrypt the user's synthetic
+     * password and use it to unlock various cryptographic keys associated with the user.  This
+     * primarily includes unlocking the user's credential-encrypted (CE) storage.  It also includes
+     * unlocking the user's Keystore super keys, and deriving or decrypting the vendor auth secret
+     * and sending it to the AuthSecret HAL in order to unlock Secure Element firmware updates.
+     * <p>
+     * These tasks would normally be done when the LSKF is verified.  This method is where these
+     * tasks are done when the user doesn't have an LSKF.  It's called when the user is started.
+     * <p>
+     * Except on permission denied, this method doesn't throw an exception on failure.  However, the
+     * last thing that it does is unlock CE storage, and whether CE storage has been successfully
+     * unlocked can be determined by {@link StorageManager#isCeStorageUnlocked()}.
+     * <p>
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     *
+     * @param userId the ID of the user whose keys to unlock
+     */
     public void unlockUserKeyIfUnsecured(@UserIdInt int userId) {
-        getLockSettingsInternal().unlockUserKeyIfUnsecured(userId);
+        try {
+            getLockSettings().unlockUserKeyIfUnsecured(userId);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
     }
 
     public void createNewUser(@UserIdInt int userId, int userSerialNumber) {

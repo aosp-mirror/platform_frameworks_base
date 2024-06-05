@@ -24,10 +24,10 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.util.settings.GlobalSettings;
 
-import javax.inject.Named;
-
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Named;
 
 @Module
 public interface QSFlagsModule {

@@ -35,7 +35,6 @@ import android.view.DisplayInfo;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.settings.FakeDisplayTracker;
@@ -57,9 +56,10 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     @Mock
     private NavigationBarController mNavigationBarController;
     @Mock
-    private KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
+    private ConnectedDisplayKeyguardPresentation.Factory
+            mConnectedDisplayKeyguardPresentationFactory;
     @Mock
-    private KeyguardDisplayManager.KeyguardPresentation mKeyguardPresentation;
+    private ConnectedDisplayKeyguardPresentation mConnectedDisplayKeyguardPresentation;
     @Mock
     private KeyguardDisplayManager.DeviceStateHelper mDeviceStateHelper;
     @Mock
@@ -69,7 +69,6 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     private Executor mBackgroundExecutor = Runnable::run;
     private KeyguardDisplayManager mManager;
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
-
     // The default and secondary displays are both in the default group
     private Display mDefaultDisplay;
     private Display mSecondaryDisplay;
@@ -81,10 +80,12 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mManager = spy(new KeyguardDisplayManager(mContext, () -> mNavigationBarController,
-                mKeyguardStatusViewComponentFactory, mDisplayTracker, mMainExecutor,
-                mBackgroundExecutor, mDeviceStateHelper, mKeyguardStateController));
-        doReturn(mKeyguardPresentation).when(mManager).createPresentation(any());
-
+                mDisplayTracker, mMainExecutor, mBackgroundExecutor, mDeviceStateHelper,
+                mKeyguardStateController, mConnectedDisplayKeyguardPresentationFactory));
+        doReturn(mConnectedDisplayKeyguardPresentation).when(
+                mConnectedDisplayKeyguardPresentationFactory).create(any());
+        doReturn(mConnectedDisplayKeyguardPresentation).when(mManager)
+                .createPresentation(any());
         mDefaultDisplay = new Display(DisplayManagerGlobal.getInstance(), Display.DEFAULT_DISPLAY,
                 new DisplayInfo(), DEFAULT_DISPLAY_ADJUSTMENTS);
         mSecondaryDisplay = new Display(DisplayManagerGlobal.getInstance(),
@@ -137,5 +138,15 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
         when(mDeviceStateHelper.isConcurrentDisplayActive(mSecondaryDisplay)).thenReturn(true);
         when(mKeyguardStateController.isOccluded()).thenReturn(true);
         verify(mManager, never()).createPresentation(eq(mSecondaryDisplay));
+    }
+
+    @Test
+    public void testShow_presentationCreated() {
+        when(mManager.createPresentation(any())).thenCallRealMethod();
+        mDisplayTracker.setAllDisplays(new Display[]{mDefaultDisplay, mSecondaryDisplay});
+
+        mManager.show();
+
+        verify(mConnectedDisplayKeyguardPresentationFactory).create(eq(mSecondaryDisplay));
     }
 }

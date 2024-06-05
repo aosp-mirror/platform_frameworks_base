@@ -19,7 +19,7 @@ package com.android.server.locksettings;
 import static android.content.Context.USER_SERVICE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
-import static com.android.internal.widget.LockPatternUtils.USER_FRP;
+import static com.android.internal.widget.LockPatternUtils.isSpecialUserId;
 
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
@@ -34,6 +34,7 @@ import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.service.persistentdata.PersistentDataBlockManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -45,7 +46,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
-import com.android.server.PersistentDataBlockManagerInternal;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -89,6 +90,9 @@ class LockSettingsStorage {
     private static final String REBOOT_ESCROW_SERVER_BLOB_FILE = "reboot.escrow.server.blob.key";
 
     private static final String SYNTHETIC_PASSWORD_DIRECTORY = "spblob/";
+
+    private static final String REPAIR_MODE_DIRECTORY = "repair-mode/";
+    private static final String REPAIR_MODE_PERSISTENT_FILE = "pst";
 
     private static final Object DEFAULT = new Object();
 
@@ -390,6 +394,29 @@ class LockSettingsStorage {
         }
     }
 
+    @VisibleForTesting
+    File getRepairModePersistentDataFile() {
+        final File directory = new File(Environment.getMetadataDirectory(), REPAIR_MODE_DIRECTORY);
+        return new File(directory, REPAIR_MODE_PERSISTENT_FILE);
+    }
+
+    public PersistentData readRepairModePersistentData() {
+        final byte[] data = readFile(getRepairModePersistentDataFile());
+        if (data == null) {
+            return PersistentData.NONE;
+        }
+        return PersistentData.fromBytes(data);
+    }
+
+    public void writeRepairModePersistentData(int persistentType, int userId, byte[] payload) {
+        writeFile(getRepairModePersistentDataFile(),
+                PersistentData.toBytes(persistentType, userId, /* qualityForUi= */0, payload));
+    }
+
+    public void deleteRepairModePersistentData() {
+        deleteFile(getRepairModePersistentDataFile());
+    }
+
     /**
      * Writes the synthetic password state file for the given user ID, protector ID, and state name.
      * If the file already exists, then it is atomically replaced.
@@ -475,10 +502,10 @@ class LockSettingsStorage {
         final UserInfo parentInfo = um.getProfileParent(userId);
 
         if (parentInfo == null) {
-            // This user owns its lock settings files - safe to delete them
+            // Delete files specific to non-profile users.
             deleteFile(getRebootEscrowFile(userId));
         } else {
-            // Managed profile
+            // Delete files specific to profile users.
             removeChildProfileLock(userId);
         }
 
@@ -510,7 +537,8 @@ class LockSettingsStorage {
     }
 
     public void setString(String key, String value, int userId) {
-        Preconditions.checkArgument(userId != USER_FRP, "cannot store lock settings for FRP user");
+        Preconditions.checkArgument(!isSpecialUserId(userId),
+                "cannot store lock settings for special user: %d", userId);
 
         writeKeyValue(key, value, userId);
         if (ArrayUtils.contains(SETTINGS_TO_BACKUP, key)) {
@@ -535,7 +563,7 @@ class LockSettingsStorage {
     }
 
     public String getString(String key, String defaultValue, int userId) {
-        if (userId == USER_FRP) {
+        if (isSpecialUserId(userId)) {
             return null;
         }
         return readKeyValue(key, defaultValue, userId);
@@ -560,6 +588,10 @@ class LockSettingsStorage {
         return mPersistentDataBlockManagerInternal;
     }
 
+    /**
+     * Writes main user credential handle to the persistent data block, to enable factory reset
+     * protection to be deactivated with the credential.
+     */
     public void writePersistentDataBlock(int persistentType, int userId, int qualityForUi,
             byte[] payload) {
         PersistentDataBlockManagerInternal persistentDataBlock = getPersistentDataBlockManager();
@@ -583,6 +615,42 @@ class LockSettingsStorage {
         }
     }
 
+    public void deactivateFactoryResetProtectionWithoutSecret() {
+        PersistentDataBlockManagerInternal persistentDataBlock = getPersistentDataBlockManager();
+        if (persistentDataBlock != null) {
+            persistentDataBlock.deactivateFactoryResetProtectionWithoutSecret();
+        } else {
+            Slog.wtf(TAG, "Failed to get PersistentDataBlockManagerInternal");
+        }
+    }
+
+    public boolean isFactoryResetProtectionActive() {
+        PersistentDataBlockManager persistentDataBlockManager =
+                mContext.getSystemService(PersistentDataBlockManager.class);
+        if (persistentDataBlockManager != null) {
+            return persistentDataBlockManager.isFactoryResetProtectionActive();
+        } else {
+            Slog.wtf(TAG, "Failed to get PersistentDataBlockManager");
+            // This should never happen, but in the event it does, let's not block the user.  This
+            // may be the wrong call, since if an attacker can find a way to prevent us from
+            // getting the PersistentDataBlockManager they can defeat FRP, but if they can block
+            // access to PersistentDataBlockManager they must have compromised the system and we've
+            // probably already lost this battle.
+            return false;
+        }
+    }
+
+    /**
+     * Provides a concrete data structure to represent the minimal information from
+     * a user's LSKF-based SP protector that is needed to verify the user's LSKF,
+     * in combination with the corresponding Gatekeeper enrollment or Weaver slot.
+     * It can be stored in {@link com.android.server.PersistentDataBlockService} for
+     * FRP to live across factory resets not initiated via the Settings UI.
+     * Written to {@link #REPAIR_MODE_PERSISTENT_FILE} to support verification for
+     * exiting repair mode, since the device runs with an empty data partition in
+     * repair mode and the same credential be provided to exit repair mode is
+     * required.
+     */
     public static class PersistentData {
         static final byte VERSION_1 = 1;
         static final int VERSION_1_HEADER_SIZE = 1 + 1 + 4 + 4;
@@ -683,6 +751,19 @@ class LockSettingsStorage {
             } else {
                 pw.println("[Not found]");
             }
+            pw.decreaseIndent();
+        }
+        // Dump repair mode file states
+        final File repairModeFile = getRepairModePersistentDataFile();
+        if (repairModeFile.exists()) {
+            pw.println(TextUtils.formatSimple("Repair Mode [%s]:", repairModeFile.getParent()));
+            pw.increaseIndent();
+            pw.println(TextUtils.formatSimple("%6d %s %s", repairModeFile.length(),
+                    LockSettingsService.timestampToString(repairModeFile.lastModified()),
+                    repairModeFile.getName()));
+            final PersistentData data = readRepairModePersistentData();
+            pw.println(TextUtils.formatSimple("type: %d, user id: %d, payload size: %d",
+                    data.type, data.userId, data.payload != null ? data.payload.length : 0));
             pw.decreaseIndent();
         }
     }

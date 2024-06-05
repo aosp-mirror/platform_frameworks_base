@@ -21,13 +21,13 @@
             android:layout_height="wrap_content"
             android:scrollbarAlwaysDrawVerticalTrack="true"
             android:scrollIndicators="top|bottom"
-            android:fillViewport="true"
-            style="?android:attr/buttonBarStyle">
+            android:fillViewport="true">
     <com.android.packageinstaller.ButtonBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layoutDirection="locale"
         android:orientation="horizontal"
+        style="?android:attr/buttonBarStyle"
         android:gravity="start">
 
         <Button

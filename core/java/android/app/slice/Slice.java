@@ -41,7 +41,12 @@ import java.util.Objects;
  *
  * <p>They are constructed using {@link Builder} in a tree structure
  * that provides the OS some information about how the content should be displayed.
+ * @deprecated Slice framework has been deprecated, it will not receive any updates from
+ *          {@link android.os.Build.VANILLA_ICE_CREAM} and forward. If you are looking for a
+ *          framework that sends displayable data from one app to another, consider using
+ *          {@link android.app.appsearch.AppSearchManager}.
  */
+@Deprecated
 public final class Slice implements Parcelable {
 
     /**
@@ -195,13 +200,6 @@ public final class Slice implements Parcelable {
      */
     public static final String EXTRA_TOGGLE_STATE = "android.app.slice.extra.TOGGLE_STATE";
     /**
-     * Key to retrieve an extra added to an intent when the value of a slider is changed.
-     * @deprecated remove once support lib is update to use EXTRA_RANGE_VALUE instead
-     * @removed
-     */
-    @Deprecated
-    public static final String EXTRA_SLIDER_VALUE = "android.app.slice.extra.SLIDER_VALUE";
-    /**
      * Key to retrieve an extra added to an intent when the value of an input range is changed.
      */
     public static final String EXTRA_RANGE_VALUE = "android.app.slice.extra.RANGE_VALUE";
@@ -222,13 +220,6 @@ public final class Slice implements Parcelable {
      * Expected to be on an item of format {@link SliceItem#FORMAT_INT}.
      */
     public static final String SUBTYPE_COLOR = "color";
-    /**
-     * Subtype to tag an item as representing a slider.
-     * @deprecated remove once support lib is update to use SUBTYPE_RANGE instead
-     * @removed
-     */
-    @Deprecated
-    public static final String SUBTYPE_SLIDER = "slider";
     /**
      * Subtype to tag an item as representing a range.
      * Expected to be on an item of format {@link SliceItem#FORMAT_SLICE} containing
@@ -352,22 +343,18 @@ public final class Slice implements Parcelable {
 
     /**
      * A Builder used to construct {@link Slice}s
+     * @deprecated Slice framework has been deprecated, it will not receive any updates from
+     *          {@link android.os.Build.VANILLA_ICE_CREAM} and forward. If you are looking for a
+     *          framework that sends displayable data from one app to another, consider using
+     *          {@link android.app.appsearch.AppSearchManager}.
      */
+    @Deprecated
     public static class Builder {
 
         private final Uri mUri;
         private ArrayList<SliceItem> mItems = new ArrayList<>();
         private @SliceHint ArrayList<String> mHints = new ArrayList<>();
         private SliceSpec mSpec;
-
-        /**
-         * @deprecated TO BE REMOVED
-         * @removed
-         */
-        @Deprecated
-        public Builder(@NonNull Uri uri) {
-            mUri = uri;
-        }
 
         /**
          * Create a builder which will construct a {@link Slice} for the given Uri.
@@ -409,15 +396,6 @@ public final class Slice implements Parcelable {
          */
         public Builder addHints(@SliceHint List<String> hints) {
             mHints.addAll(hints);
-            return this;
-        }
-
-        /**
-         * @deprecated TO BE REMOVED
-         * @removed
-         */
-        public Builder setSpec(SliceSpec spec) {
-            mSpec = spec;
             return this;
         }
 
@@ -495,16 +473,6 @@ public final class Slice implements Parcelable {
                 @SliceHint List<String> hints) {
             mItems.add(new SliceItem(value, SliceItem.FORMAT_INT, subType, hints));
             return this;
-        }
-
-        /**
-         * @deprecated TO BE REMOVED.
-         * @removed
-         */
-        @Deprecated
-        public Slice.Builder addTimestamp(long time, @Nullable @SliceSubtype String subType,
-                @SliceHint List<String> hints) {
-            return addLong(time, subType, hints);
         }
 
         /**

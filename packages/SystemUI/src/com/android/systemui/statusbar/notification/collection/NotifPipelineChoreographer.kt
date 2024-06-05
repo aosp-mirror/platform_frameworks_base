@@ -51,7 +51,7 @@ interface NotifPipelineChoreographer {
 object NotifPipelineChoreographerModule
 
 @Module
-private interface PrivateModule {
+interface PrivateModule {
     @Binds
     fun bindChoreographer(impl: NotifPipelineChoreographerImpl): NotifPipelineChoreographer
 }
@@ -59,7 +59,7 @@ private interface PrivateModule {
 private const val TIMEOUT_MS: Long = 100
 
 @SysUISingleton
-private class NotifPipelineChoreographerImpl @Inject constructor(
+class NotifPipelineChoreographerImpl @Inject constructor(
     private val viewChoreographer: Choreographer,
     @Main private val executor: DelayableExecutor
 ) : NotifPipelineChoreographer {

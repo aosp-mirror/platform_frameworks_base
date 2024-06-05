@@ -17,7 +17,8 @@ package com.android.systemui.keyguard
 
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenListener
-import com.android.systemui.util.traceSection
+import com.android.app.tracing.traceSection
+import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,7 +30,7 @@ class LifecycleScreenStatusProvider @Inject constructor(screenLifecycle: ScreenL
         screenLifecycle.addObserver(this)
     }
 
-    private val listeners: MutableList<ScreenListener> = mutableListOf()
+    private val listeners: MutableList<ScreenListener> = CopyOnWriteArrayList()
 
     override fun removeCallback(listener: ScreenListener) {
         listeners.remove(listener)

@@ -17,6 +17,7 @@
 
 package android.companion;
 
+import android.annotation.FlaggedApi;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,9 +36,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
- * A service that receives calls from the system when the associated companion device appears
- * nearby or is connected, as well as when the device is no longer "present" or connected.
- * See {@link #onDeviceAppeared(AssociationInfo)}/{@link #onDeviceDisappeared(AssociationInfo)}.
+ * A service that receives calls from the system with device events.
  *
  * <p>
  * Companion applications must create a service that {@code extends}
@@ -120,6 +119,7 @@ public abstract class CompanionDeviceService extends Service {
      * {@link android.Manifest.permission#BIND_COMPANION_DEVICE_SERVICE}</p>
      */
     public static final String SERVICE_INTERFACE = "android.companion.CompanionDeviceService";
+
 
     private final Stub mRemote = new Stub();
 
@@ -247,6 +247,7 @@ public abstract class CompanionDeviceService extends Service {
                 .detachSystemDataTransport(associationId);
     }
 
+    // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
      * Called by system whenever a device associated with this app is connected.
      *
@@ -259,6 +260,7 @@ public abstract class CompanionDeviceService extends Service {
         }
     }
 
+    // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
      * Called by system whenever a device associated with this app is disconnected.
      *
@@ -269,6 +271,17 @@ public abstract class CompanionDeviceService extends Service {
         if (!associationInfo.isSelfManaged()) {
             onDeviceDisappeared(associationInfo.getDeviceMacAddressAsString());
         }
+    }
+
+    /**
+     * Called by the system during device events.
+     *
+     * @see CompanionDeviceManager#startObservingDevicePresence(ObservingDevicePresenceRequest)
+     */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
+    @MainThread
+    public void onDevicePresenceEvent(@NonNull DevicePresenceEvent event) {
+        // Do nothing. Companion apps can override this function.
     }
 
     @Nullable
@@ -303,6 +316,13 @@ public abstract class CompanionDeviceService extends Service {
         @Override
         public void onDeviceDisappeared(AssociationInfo associationInfo) {
             mMainHandler.postAtFrontOfQueue(() -> mService.onDeviceDisappeared(associationInfo));
+        }
+
+        @Override
+        public void onDevicePresenceEvent(DevicePresenceEvent event) {
+            if (Flags.devicePresence()) {
+                mMainHandler.postAtFrontOfQueue(() -> mService.onDevicePresenceEvent(event));
+            }
         }
     }
 }

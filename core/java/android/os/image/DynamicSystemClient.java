@@ -52,7 +52,7 @@ import java.util.concurrent.Executor;
  *
  * After the installation is completed, the device will be running in the new system on next the
  * reboot. Then, when the user reboots the device again, it will leave {@code DynamicSystem} and go
- * back to the original system. While running in {@code DynamicSystem}, persitent storage for
+ * back to the original system. While running in {@code DynamicSystem}, persistent storage for
  * factory reset protection (FRP) remains unchanged. Since the user is running the new system with
  * a temporarily created data partition, their original user data are kept unchanged.</p>
  *
@@ -208,6 +208,13 @@ public class DynamicSystemClient {
      */
     public static final String ACTION_HIDE_NOTIFICATION =
             "android.os.image.action.HIDE_NOTIFICATION";
+
+    /**
+     * Intent action: notify the service to post a status update when keyguard is dismissed.
+     * @hide
+     */
+    public static final String ACTION_NOTIFY_KEYGUARD_DISMISSED =
+            "android.os.image.action.NOTIFY_KEYGUARD_DISMISSED";
 
     /*
      * Intent Keys

@@ -170,8 +170,8 @@ class ScreenshotDetectionControllerTest {
     private class ComponentInfoFlagMatcher(
         @PackageManager.ComponentInfoFlagsBits val mask: Int, val value: Int
     ): ArgumentMatcher<PackageManager.ComponentInfoFlags> {
-        override fun matches(flags: PackageManager.ComponentInfoFlags): Boolean {
-            return (mask.toLong() and flags.value) == value.toLong()
+        override fun matches(flags: PackageManager.ComponentInfoFlags?): Boolean {
+            return flags != null && (mask.toLong() and flags.value) == value.toLong()
         }
 
         override fun toString(): String{

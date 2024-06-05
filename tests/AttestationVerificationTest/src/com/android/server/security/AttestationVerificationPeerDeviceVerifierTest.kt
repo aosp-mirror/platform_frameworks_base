@@ -9,21 +9,28 @@ import android.security.attestationverification.AttestationVerificationManager.R
 import android.security.attestationverification.AttestationVerificationManager.RESULT_SUCCESS
 import android.security.attestationverification.AttestationVerificationManager.TYPE_CHALLENGE
 import android.security.attestationverification.AttestationVerificationManager.TYPE_PUBLIC_KEY
+import android.util.IndentingPrintWriter
+import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.server.security.AttestationVerificationManagerService.DumpLogger
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 import java.io.ByteArrayOutputStream
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.security.cert.Certificate
 import java.security.cert.CertificateFactory
 import java.security.cert.TrustAnchor
 import java.security.cert.X509Certificate
 import java.time.LocalDate
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
+
 
 /** Test for Peer Device attestation verifier. */
 @SmallTest
@@ -31,6 +38,7 @@ import java.time.LocalDate
 class AttestationVerificationPeerDeviceVerifierTest {
     private val certificateFactory = CertificateFactory.getInstance("X.509")
     @Mock private lateinit var context: Context
+    private val dumpLogger = DumpLogger()
     private lateinit var trustAnchors: HashSet<TrustAnchor>
 
     @Before
@@ -44,37 +52,50 @@ class AttestationVerificationPeerDeviceVerifierTest {
         }
     }
 
+    @After
+    fun dumpAndLog() {
+        val dump = dumpLogger.getDump()
+        Log.d(TAG, "$dump")
+    }
+
     @Test
     fun verifyAttestation_returnsSuccessTypeChallenge() {
         val verifier = AttestationVerificationPeerDeviceVerifier(
-            context, trustAnchors, false, LocalDate.of(2022, 2, 1),
-            LocalDate.of(2021, 8, 1))
+            context, dumpLogger, trustAnchors, false, LocalDate.of(2022, 2, 1),
+            LocalDate.of(2021, 8, 1)
+        )
         val challengeRequirements = Bundle()
         challengeRequirements.putByteArray(PARAM_CHALLENGE, "player456".encodeToByteArray())
 
-        val result = verifier.verifyAttestation(TYPE_CHALLENGE, challengeRequirements,
-            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray())
+        val result = verifier.verifyAttestation(
+            TYPE_CHALLENGE, challengeRequirements,
+            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
+        )
         assertThat(result).isEqualTo(RESULT_SUCCESS)
     }
 
     @Test
     fun verifyAttestation_returnsSuccessLocalPatchOlderThanOneYear() {
         val verifier = AttestationVerificationPeerDeviceVerifier(
-            context, trustAnchors, false, LocalDate.of(2022, 2, 1),
-            LocalDate.of(2021, 1, 1))
+            context, dumpLogger, trustAnchors, false, LocalDate.of(2022, 2, 1),
+            LocalDate.of(2021, 1, 1)
+        )
         val challengeRequirements = Bundle()
         challengeRequirements.putByteArray(PARAM_CHALLENGE, "player456".encodeToByteArray())
 
-        val result = verifier.verifyAttestation(TYPE_CHALLENGE, challengeRequirements,
-            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray())
+        val result = verifier.verifyAttestation(
+            TYPE_CHALLENGE, challengeRequirements,
+            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
+        )
         assertThat(result).isEqualTo(RESULT_SUCCESS)
     }
 
     @Test
     fun verifyAttestation_returnsSuccessTypePublicKey() {
         val verifier = AttestationVerificationPeerDeviceVerifier(
-            context, trustAnchors, false, LocalDate.of(2022, 2, 1),
-            LocalDate.of(2021, 8, 1))
+            context, dumpLogger, trustAnchors, false, LocalDate.of(2022, 2, 1),
+            LocalDate.of(2021, 8, 1)
+        )
 
         val leafCert =
             (TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToCerts() as List)[0]
@@ -84,61 +105,75 @@ class AttestationVerificationPeerDeviceVerifierTest {
 
         val result = verifier.verifyAttestation(
             TYPE_PUBLIC_KEY, pkRequirements,
-            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray())
+            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
+        )
         assertThat(result).isEqualTo(RESULT_SUCCESS)
     }
 
     @Test
     fun verifyAttestation_returnsSuccessOwnedBySystem() {
         val verifier = AttestationVerificationPeerDeviceVerifier(
-                context, trustAnchors, false, LocalDate.of(2022, 2, 1),
-                LocalDate.of(2021, 1, 1))
+            context, dumpLogger, trustAnchors, false, LocalDate.of(2022, 2, 1),
+            LocalDate.of(2021, 1, 1)
+        )
         val challengeRequirements = Bundle()
         challengeRequirements.putByteArray(PARAM_CHALLENGE, "activeUnlockValid".encodeToByteArray())
         challengeRequirements.putBoolean("android.key_owned_by_system", true)
 
-        val result = verifier.verifyAttestation(TYPE_CHALLENGE, challengeRequirements,
-                TEST_OWNED_BY_SYSTEM_FILENAME.fromPEMFileToByteArray())
+        val result = verifier.verifyAttestation(
+            TYPE_CHALLENGE, challengeRequirements,
+            TEST_OWNED_BY_SYSTEM_FILENAME.fromPEMFileToByteArray()
+        )
+
         assertThat(result).isEqualTo(RESULT_SUCCESS)
     }
 
     @Test
     fun verifyAttestation_returnsFailureOwnedBySystem() {
         val verifier = AttestationVerificationPeerDeviceVerifier(
-                context, trustAnchors, false, LocalDate.of(2022, 2, 1),
-                LocalDate.of(2021, 1, 1))
+            context, dumpLogger, trustAnchors, false, LocalDate.of(2022, 2, 1),
+            LocalDate.of(2021, 1, 1)
+        )
         val challengeRequirements = Bundle()
         challengeRequirements.putByteArray(PARAM_CHALLENGE, "player456".encodeToByteArray())
         challengeRequirements.putBoolean("android.key_owned_by_system", true)
 
-        val result = verifier.verifyAttestation(TYPE_CHALLENGE, challengeRequirements,
-                TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray())
+        val result = verifier.verifyAttestation(
+            TYPE_CHALLENGE, challengeRequirements,
+            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
+        )
         assertThat(result).isEqualTo(RESULT_FAILURE)
     }
 
     @Test
     fun verifyAttestation_returnsFailurePatchDateNotWithinOneYearLocalPatch() {
         val verifier = AttestationVerificationPeerDeviceVerifier(
-            context, trustAnchors, false, LocalDate.of(2023, 3, 1),
-            LocalDate.of(2023, 2, 1))
+            context, dumpLogger, trustAnchors, false, LocalDate.of(2023, 3, 1),
+            LocalDate.of(2023, 2, 1)
+        )
         val challengeRequirements = Bundle()
         challengeRequirements.putByteArray(PARAM_CHALLENGE, "player456".encodeToByteArray())
 
-        val result = verifier.verifyAttestation(TYPE_CHALLENGE, challengeRequirements,
-            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray())
+        val result = verifier.verifyAttestation(
+            TYPE_CHALLENGE, challengeRequirements,
+            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
+        )
         assertThat(result).isEqualTo(RESULT_FAILURE)
     }
 
     @Test
     fun verifyAttestation_returnsFailureTrustedAnchorEmpty() {
         val verifier = AttestationVerificationPeerDeviceVerifier(
-            context, HashSet(), false, LocalDate.of(2022, 1, 1),
-            LocalDate.of(2022, 1, 1))
+            context, dumpLogger, HashSet(), false, LocalDate.of(2022, 1, 1),
+            LocalDate.of(2022, 1, 1)
+        )
         val challengeRequirements = Bundle()
         challengeRequirements.putByteArray(PARAM_CHALLENGE, "player456".encodeToByteArray())
 
-        val result = verifier.verifyAttestation(TYPE_CHALLENGE, challengeRequirements,
-            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray())
+        val result = verifier.verifyAttestation(
+            TYPE_CHALLENGE, challengeRequirements,
+            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
+        )
         assertThat(result).isEqualTo(RESULT_FAILURE)
     }
 
@@ -151,32 +186,39 @@ class AttestationVerificationPeerDeviceVerifierTest {
         }
 
         val verifier = AttestationVerificationPeerDeviceVerifier(
-            context, badTrustAnchors, false, LocalDate.of(2022, 1, 1),
-            LocalDate.of(2022, 1, 1))
+            context, dumpLogger, badTrustAnchors, false, LocalDate.of(2022, 1, 1),
+            LocalDate.of(2022, 1, 1)
+        )
         val challengeRequirements = Bundle()
         challengeRequirements.putByteArray(PARAM_CHALLENGE, "player456".encodeToByteArray())
 
-        val result = verifier.verifyAttestation(TYPE_CHALLENGE, challengeRequirements,
-            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray())
+        val result = verifier.verifyAttestation(
+            TYPE_CHALLENGE, challengeRequirements,
+            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
+        )
         assertThat(result).isEqualTo(RESULT_FAILURE)
     }
 
     fun verifyAttestation_returnsFailureChallenge() {
         val verifier = AttestationVerificationPeerDeviceVerifier(
-            context, trustAnchors, false, LocalDate.of(2022, 1, 1),
-            LocalDate.of(2022, 1, 1))
+            context, dumpLogger, trustAnchors, false, LocalDate.of(2022, 1, 1),
+            LocalDate.of(2022, 1, 1)
+        )
         val challengeRequirements = Bundle()
         challengeRequirements.putByteArray(PARAM_CHALLENGE, "wrong".encodeToByteArray())
 
-        val result = verifier.verifyAttestation(TYPE_CHALLENGE, challengeRequirements,
-            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray())
+        val result = verifier.verifyAttestation(
+            TYPE_CHALLENGE, challengeRequirements,
+            TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME.fromPEMFileToByteArray()
+        )
         assertThat(result).isEqualTo(RESULT_FAILURE)
     }
 
     private fun String.fromPEMFileToCerts(): Collection<Certificate> {
         return certificateFactory.generateCertificates(
             InstrumentationRegistry.getInstrumentation().getContext().getResources().getAssets()
-                .open(this))
+                .open(this)
+        )
     }
 
     private fun String.fromPEMFileToByteArray(): ByteArray {
@@ -188,6 +230,12 @@ class AttestationVerificationPeerDeviceVerifierTest {
         return bos.toByteArray()
     }
 
+    private fun DumpLogger.getDump(): String {
+        val sw = StringWriter()
+        this.dumpTo(IndentingPrintWriter(PrintWriter(sw), " "))
+        return sw.toString()
+    }
+
     class TestActivity : Activity() {
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
@@ -195,6 +243,7 @@ class AttestationVerificationPeerDeviceVerifierTest {
     }
 
     companion object {
+        private const val TAG = "AVFTest"
         private const val TEST_ROOT_CERT_FILENAME = "test_root_certs.pem"
         private const val TEST_ATTESTATION_WITH_ROOT_CERT_FILENAME =
             "test_attestation_with_root_certs.pem"

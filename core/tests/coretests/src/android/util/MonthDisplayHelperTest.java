@@ -16,18 +16,26 @@
 
 package android.util;
 
-import androidx.test.filters.SmallTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.TestCase;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Calendar;
 
 /**
  * Unit tests for {@link MonthDisplayHelper}.
  */
-public class MonthDisplayHelperTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class MonthDisplayHelperTest {
 
 
+    @Test
     @SmallTest
     public void testFirstDayOfMonth() {
 
@@ -40,12 +48,14 @@ public class MonthDisplayHelperTest extends TestCase {
                 new MonthDisplayHelper(2007, Calendar.SEPTEMBER).getFirstDayOfMonth());
     }
 
+    @Test
     @SmallTest
     public void testNumberOfDaysInCurrentMonth() {
         assertEquals(30,
                 new MonthDisplayHelper(2007, Calendar.SEPTEMBER).getNumberOfDaysInMonth());
     }
 
+    @Test
     @SmallTest
     public void testMonthRows() {
         MonthDisplayHelper helper = new MonthDisplayHelper(2007, Calendar.SEPTEMBER);
@@ -59,6 +69,7 @@ public class MonthDisplayHelperTest extends TestCase {
 
     }
 
+    @Test
     @SmallTest
     public void testMonthRowsWeekStartsMonday() {
         MonthDisplayHelper helper = new MonthDisplayHelper(2007,
@@ -74,6 +85,7 @@ public class MonthDisplayHelperTest extends TestCase {
                 helper.getDigitsForRow(5));
     }
 
+    @Test
     @SmallTest
     public void testMonthRowsWeekStartsSaturday() {
         MonthDisplayHelper helper = new MonthDisplayHelper(2007,
@@ -98,6 +110,7 @@ public class MonthDisplayHelperTest extends TestCase {
                 helper.getDigitsForRow(4));
     }
 
+    @Test
     @SmallTest
     public void testGetDayAt() {
         MonthDisplayHelper helper = new MonthDisplayHelper(2007,
@@ -109,6 +122,7 @@ public class MonthDisplayHelperTest extends TestCase {
         assertEquals(2, helper.getDayAt(5, 2));
     }
 
+    @Test
     @SmallTest
     public void testPrevMonth() {
         MonthDisplayHelper helper = new MonthDisplayHelper(2007,
@@ -124,6 +138,7 @@ public class MonthDisplayHelperTest extends TestCase {
                 helper.getDigitsForRow(0));
     }
 
+    @Test
     @SmallTest
     public void testPrevMonthRollOver() {
         MonthDisplayHelper helper = new MonthDisplayHelper(2007,
@@ -135,6 +150,7 @@ public class MonthDisplayHelperTest extends TestCase {
         assertEquals(Calendar.DECEMBER, helper.getMonth());
     }
 
+    @Test
     @SmallTest
     public void testNextMonth() {
         MonthDisplayHelper helper = new MonthDisplayHelper(2007,
@@ -150,6 +166,7 @@ public class MonthDisplayHelperTest extends TestCase {
                 helper.getDigitsForRow(0));
     }
 
+    @Test
     @SmallTest
     public void testGetRowOf() {
         MonthDisplayHelper helper = new MonthDisplayHelper(2007,
@@ -162,6 +179,7 @@ public class MonthDisplayHelperTest extends TestCase {
         assertEquals(3, helper.getRowOf(19));
     }
 
+    @Test
     @SmallTest
     public void testGetColumnOf() {
         MonthDisplayHelper helper = new MonthDisplayHelper(2007,
@@ -174,6 +192,7 @@ public class MonthDisplayHelperTest extends TestCase {
         assertEquals(0, helper.getColumnOf(26));
     }
 
+    @Test
     @SmallTest
     public void testWithinCurrentMonth() {
         MonthDisplayHelper helper = new MonthDisplayHelper(2007,

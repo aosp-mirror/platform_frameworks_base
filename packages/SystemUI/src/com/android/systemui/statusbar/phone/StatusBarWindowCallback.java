@@ -15,6 +15,9 @@
  */
 package com.android.systemui.statusbar.phone;
 
+import com.android.systemui.util.annotations.WeaklyReferencedCallback;
+
+@WeaklyReferencedCallback
 public interface StatusBarWindowCallback {
     /**
      * Invoked when the internal state of NotificationShadeWindowControllerImpl changes.

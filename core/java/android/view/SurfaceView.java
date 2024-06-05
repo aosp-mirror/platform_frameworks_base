@@ -16,10 +16,13 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_OVERLAY_SUBLAYER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_SUBLAYER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAYER;
 
+import android.annotation.FlaggedApi;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -36,11 +39,14 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.RenderNode;
+import android.hardware.input.InputManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -49,11 +55,14 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
 import android.window.SurfaceSyncGroup;
 
+import com.android.graphics.hwui.flags.Flags;
 import com.android.internal.view.SurfaceCallbackHelper;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -153,6 +162,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_POSITION = false;
 
+    private static final long FORWARD_BACK_KEY_TOLERANCE_MS = 100;
+
     @UnsupportedAppUsage(
             maxTargetSdk = Build.VERSION_CODES.TIRAMISU,
             publicAlternatives = "Track {@link SurfaceHolder#addCallback} instead")
@@ -178,6 +189,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     final Rect mScreenRect = new Rect();
     private final SurfaceSession mSurfaceSession = new SurfaceSession();
+    private final boolean mLimitedHdrEnabled = Flags.limitedHdr();
 
     SurfaceControl mSurfaceControl;
     SurfaceControl mBackgroundControl;
@@ -187,6 +199,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private int mRequestedSurfaceLifecycleStrategy = SURFACE_LIFECYCLE_DEFAULT;
     @SurfaceLifecycleStrategy
     private int mSurfaceLifecycleStrategy = SURFACE_LIFECYCLE_DEFAULT;
+
+    private float mRequestedHdrHeadroom = 0.f;
+    private float mHdrHeadroom = 0.f;
 
     /**
      * We use this lock to protect access to mSurfaceControl. Both are accessed on the UI
@@ -301,6 +316,63 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private SurfaceControl mBlastSurfaceControl;
     private BLASTBufferQueue mBlastBufferQueue;
+
+    private final ConcurrentLinkedQueue<WindowManager.LayoutParams> mEmbeddedWindowParams =
+            new ConcurrentLinkedQueue<>();
+
+    private final ISurfaceControlViewHostParent mSurfaceControlViewHostParent =
+            new ISurfaceControlViewHostParent.Stub() {
+        @Override
+        public void updateParams(WindowManager.LayoutParams[] childAttrs) {
+            mEmbeddedWindowParams.clear();
+            mEmbeddedWindowParams.addAll(Arrays.asList(childAttrs));
+
+            if (isAttachedToWindow()) {
+                runOnUiThread(() -> {
+                    if (mParent != null) {
+                        mParent.recomputeViewAttributes(SurfaceView.this);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void forwardBackKeyToParent(@NonNull KeyEvent keyEvent) {
+                runOnUiThread(() -> {
+                    if (!isAttachedToWindow() || keyEvent.getKeyCode() != KeyEvent.KEYCODE_BACK) {
+                        return;
+                    }
+                    final ViewRootImpl vri = getViewRootImpl();
+                    if (vri == null) {
+                        return;
+                    }
+                    final InputManager inputManager = mContext.getSystemService(InputManager.class);
+                    if (inputManager == null) {
+                        return;
+                    }
+                    // Check that the event was created recently.
+                    final long timeDiff = SystemClock.uptimeMillis() - keyEvent.getEventTime();
+                    if (timeDiff > FORWARD_BACK_KEY_TOLERANCE_MS) {
+                        Log.e(TAG, "Ignore the input event that exceed the tolerance time, "
+                                + "exceed " + timeDiff + "ms");
+                        return;
+                    }
+                    if (inputManager.verifyInputEvent(keyEvent) == null) {
+                        Log.e(TAG, "Received invalid input event");
+                        return;
+                    }
+                    try {
+                        vri.processingBackKey(true);
+                        vri.enqueueInputEvent(keyEvent, null /* receiver */, 0 /* flags */,
+                                true /* processImmediately */);
+                    } finally {
+                        vri.processingBackKey(false);
+                    }
+                });
+        }
+    };
+
+    private final boolean mRtDrivenClipping = Flags.clipSurfaceviews();
 
     public SurfaceView(Context context) {
         this(context, null);
@@ -548,6 +620,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     public void setClipBounds(Rect clipBounds) {
         super.setClipBounds(clipBounds);
 
+        if (mRtDrivenClipping && isHardwareAccelerated()) {
+            return;
+        }
+
         if (!mClipSurfaceToBounds || mSurfaceControl == null) {
             return;
         }
@@ -751,6 +827,45 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         updateSurface();
     }
 
+
+    /**
+     * Sets the desired amount of HDR headroom to be used when HDR content is presented on this
+     * SurfaceView.
+     *
+     * <p>By default the system will choose an amount of HDR headroom that is appropriate
+     * for the underlying device capabilities & bit-depth of the panel. However, for some types
+     * of content this can end up being more headroom than necessary or desired. An example
+     * would be a messaging app or gallery thumbnail view where some amount of HDR pop is desired
+     * without overly influencing the perceived brightness of the majority SDR content. This can
+     * also be used to animate in/out of an HDR range for smoother transitions.</p>
+     *
+     * <p>Note: The actual amount of HDR headroom that will be given is subject to a variety
+     * of factors such as ambient conditions, display capabilities, or bit-depth limitations.
+     * See {@link Display#getHdrSdrRatio()} for more information as well as how to query the
+     * current value.</p>
+     *
+     * @param desiredHeadroom The amount of HDR headroom that is desired. Must be >= 1.0 (no HDR)
+     *                        and <= 10,000.0. Passing 0.0 will reset to the default, automatically
+     *                        chosen value.
+     * @see Display#getHdrSdrRatio()
+     */
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_LIMITED_HDR)
+    public void setDesiredHdrHeadroom(
+            @FloatRange(from = 0.0f, to = 10000.0) float desiredHeadroom) {
+        if (!Float.isFinite(desiredHeadroom)) {
+            throw new IllegalArgumentException("desiredHeadroom must be finite: "
+                    + desiredHeadroom);
+        }
+        if (desiredHeadroom != 0 && (desiredHeadroom < 1.0f || desiredHeadroom > 10000.0f)) {
+            throw new IllegalArgumentException(
+                    "desiredHeadroom must be 0.0 or in the range [1.0, 10000.0f], received: "
+                            + desiredHeadroom);
+        }
+        mRequestedHdrHeadroom = desiredHeadroom;
+        updateSurface();
+        invalidate();
+    }
+
     private void updateOpaqueFlag() {
         if (!PixelFormat.formatHasAlpha(mRequestedFormat)) {
             mSurfaceFlags |= SurfaceControl.OPAQUE;
@@ -801,9 +916,18 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mBlastSurfaceControl = null;
             }
 
-            if (releaseSurfacePackage && mSurfacePackage != null) {
-                mSurfacePackage.release();
-                mSurfacePackage = null;
+            if (mSurfacePackage != null) {
+                try {
+                    mSurfacePackage.getRemoteInterface().attachParentInterface(null);
+                    mEmbeddedWindowParams.clear();
+                } catch (RemoteException e) {
+                    Log.d(TAG, "Failed to remove parent interface from SCVH. Likely SCVH is "
+                            + "already dead");
+                }
+                if (releaseSurfacePackage) {
+                    mSurfacePackage.release();
+                    mSurfacePackage = null;
+                }
             }
 
             applyTransactionOnVriDraw(transaction);
@@ -827,7 +951,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private boolean performSurfaceTransaction(ViewRootImpl viewRoot, Translator translator,
             boolean creating, boolean sizeChanged, boolean hintChanged, boolean relativeZChanged,
-            Transaction surfaceUpdateTransaction) {
+            boolean hdrHeadroomChanged, Transaction surfaceUpdateTransaction) {
         boolean realSizeChanged = false;
 
         mSurfaceLock.lock();
@@ -862,6 +986,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
             updateBackgroundVisibility(surfaceUpdateTransaction);
             updateBackgroundColor(surfaceUpdateTransaction);
+            if (mLimitedHdrEnabled && (hdrHeadroomChanged || creating)) {
+                surfaceUpdateTransaction.setDesiredHdrHeadroom(
+                        mBlastSurfaceControl, mHdrHeadroom);
+            }
             if (isAboveParent()) {
                 float alpha = getAlpha();
                 surfaceUpdateTransaction.setAlpha(mSurfaceControl, alpha);
@@ -882,15 +1010,17 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             }
             if (sizeChanged || creating || !isHardwareAccelerated()) {
 
-                // Set a window crop when creating the surface or changing its size to
-                // crop the buffer to the surface size since the buffer producer may
-                // use SCALING_MODE_SCALE and submit a larger size than the surface
-                // size.
-                if (mClipSurfaceToBounds && mClipBounds != null) {
-                    surfaceUpdateTransaction.setWindowCrop(mSurfaceControl, mClipBounds);
-                } else {
-                    surfaceUpdateTransaction.setWindowCrop(mSurfaceControl, mSurfaceWidth,
-                            mSurfaceHeight);
+                if (!mRtDrivenClipping || !isHardwareAccelerated()) {
+                    // Set a window crop when creating the surface or changing its size to
+                    // crop the buffer to the surface size since the buffer producer may
+                    // use SCALING_MODE_SCALE and submit a larger size than the surface
+                    // size.
+                    if (mClipSurfaceToBounds && mClipBounds != null) {
+                        surfaceUpdateTransaction.setWindowCrop(mSurfaceControl, mClipBounds);
+                    } else {
+                        surfaceUpdateTransaction.setWindowCrop(mSurfaceControl, mSurfaceWidth,
+                                mSurfaceHeight);
+                    }
                 }
 
                 surfaceUpdateTransaction.setDesintationFrame(mBlastSurfaceControl, mSurfaceWidth,
@@ -908,7 +1038,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             mScreenRect.height() / (float) mSurfaceHeight /*postScaleY*/);
                 }
                 if (DEBUG_POSITION) {
-                    Log.d(TAG, String.format(
+                    Log.d(TAG, TextUtils.formatSimple(
                             "%d performSurfaceTransaction %s "
                                 + "position = [%d, %d, %d, %d] surfaceSize = %dx%d",
                             System.identityHashCode(this),
@@ -1004,11 +1134,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         final boolean relativeZChanged = mSubLayer != mRequestedSubLayer;
         final boolean surfaceLifecycleStrategyChanged =
                 mSurfaceLifecycleStrategy != mRequestedSurfaceLifecycleStrategy;
+        final boolean hdrHeadroomChanged = mHdrHeadroom != mRequestedHdrHeadroom;
 
         if (creating || formatChanged || sizeChanged || visibleChanged
                 || alphaChanged || windowVisibleChanged || positionChanged
                 || layoutSizeChanged || hintChanged || relativeZChanged || !mAttachedToWindow
-                || surfaceLifecycleStrategyChanged) {
+                || surfaceLifecycleStrategyChanged || hdrHeadroomChanged) {
 
             if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
                     + "Changes: creating=" + creating
@@ -1036,6 +1167,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
                 final int previousSurfaceLifecycleStrategy = mSurfaceLifecycleStrategy;
                 mSurfaceLifecycleStrategy = mRequestedSurfaceLifecycleStrategy;
+                mHdrHeadroom = mRequestedHdrHeadroom;
 
                 mScreenRect.left = mWindowSpaceLeft;
                 mScreenRect.top = mWindowSpaceTop;
@@ -1071,7 +1203,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 }
 
                 final boolean realSizeChanged = performSurfaceTransaction(viewRoot, translator,
-                        creating, sizeChanged, hintChanged, relativeZChanged,
+                        creating, sizeChanged, hintChanged, relativeZChanged, hdrHeadroomChanged,
                         surfaceUpdateTransaction);
 
                 try {
@@ -1307,7 +1439,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
                     .setName(name)
                     .setLocalOwnerView(this)
-                    .setParent(viewRoot.getBoundsLayer())
+                    .setParent(viewRoot.updateAndGetBoundsLayer(surfaceUpdateTransaction))
                     .setCallsite("SurfaceView.updateSurface")
                     .setContainerLayer()
                     .build();
@@ -1420,6 +1552,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private final Rect mRTLastReportedPosition = new Rect();
+    private final Rect mRTLastSetCrop = new Rect();
 
     private class SurfaceViewPositionUpdateListener implements RenderNode.PositionUpdateListener {
         private final int mRtSurfaceWidth;
@@ -1455,6 +1588,54 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                                     / (float) mRtSurfaceHeight /*postScaleY*/);
 
                     mPositionChangedTransaction.show(mSurfaceControl);
+                }
+                applyOrMergeTransaction(mPositionChangedTransaction, frameNumber);
+            } catch (Exception ex) {
+                Log.e(TAG, "Exception from repositionChild", ex);
+            }
+        }
+
+        @Override
+        public void positionChanged(long frameNumber, int left, int top, int right, int bottom,
+                int clipLeft, int clipTop, int clipRight, int clipBottom) {
+            try {
+                if (DEBUG_POSITION) {
+                    Log.d(TAG, String.format(
+                            "%d updateSurfacePosition RenderWorker, frameNr = %d, "
+                                    + "position = [%d, %d, %d, %d] clip = [%d, %d, %d, %d] "
+                                    + "surfaceSize = %dx%d",
+                            System.identityHashCode(SurfaceView.this), frameNumber,
+                            left, top, right, bottom, clipLeft, clipTop, clipRight, clipBottom,
+                            mRtSurfaceWidth, mRtSurfaceHeight));
+                }
+                synchronized (mSurfaceControlLock) {
+                    if (mSurfaceControl == null) return;
+
+                    mRTLastReportedPosition.set(left, top, right, bottom);
+                    final float postScaleX = mRTLastReportedPosition.width()
+                            / (float) mRtSurfaceWidth;
+                    final float postScaleY = mRTLastReportedPosition.height()
+                            / (float) mRtSurfaceHeight;
+                    onSetSurfacePositionAndScale(mPositionChangedTransaction, mSurfaceControl,
+                            mRTLastReportedPosition.left /*positionLeft*/,
+                            mRTLastReportedPosition.top /*positionTop*/,
+                            postScaleX, postScaleY);
+
+                    mRTLastSetCrop.set((int) (clipLeft / postScaleX), (int) (clipTop / postScaleY),
+                            (int) Math.ceil(clipRight / postScaleX),
+                            (int) Math.ceil(clipBottom / postScaleY));
+                    if (DEBUG_POSITION) {
+                        Log.d(TAG, String.format("Setting layer crop = [%d, %d, %d, %d] "
+                                        + "from scale %f, %f", mRTLastSetCrop.left,
+                                mRTLastSetCrop.top, mRTLastSetCrop.right, mRTLastSetCrop.bottom,
+                                postScaleX, postScaleY));
+                    }
+                    mPositionChangedTransaction.setCrop(mSurfaceControl, mRTLastSetCrop);
+                    if (mRTLastSetCrop.isEmpty()) {
+                        mPositionChangedTransaction.hide(mSurfaceControl);
+                    } else {
+                        mPositionChangedTransaction.show(mSurfaceControl);
+                    }
                 }
                 applyOrMergeTransaction(mPositionChangedTransaction, frameNumber);
             } catch (Exception ex) {
@@ -1765,7 +1946,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      * be passed from the host process to the client process.
      *
      * @return The token
+     * @deprecated Use {@link AttachedSurfaceControl#getInputTransferToken()} instead.
      */
+    @Deprecated
     public @Nullable IBinder getHostToken() {
         final ViewRootImpl viewRoot = getViewRootImpl();
         if (viewRoot == null) {
@@ -1854,6 +2037,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             applyTransactionOnVriDraw(transaction);
         }
         mSurfacePackage = p;
+        try {
+            mSurfacePackage.getRemoteInterface().attachParentInterface(
+                    mSurfaceControlViewHostParent);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Failed to attach parent interface to SCVH. Likely SCVH is already dead.");
+        }
 
         if (isFocused()) {
             requestEmbeddedFocus(true);
@@ -1963,7 +2152,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
         try {
             viewRoot.mWindowSession.grantEmbeddedWindowFocus(viewRoot.mWindow,
-                    mSurfacePackage.getInputToken(), gainFocus);
+                    mSurfacePackage.getInputTransferToken(), gainFocus);
         } catch (Exception e) {
             Log.e(TAG, System.identityHashCode(this)
                     + "Exception requesting focus on embedded window", e);
@@ -2012,6 +2201,21 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
             long frameNumber = mBlastBufferQueue.getLastAcquiredFrameNum() + 1;
             mBlastBufferQueue.mergeWithNextTransaction(transaction, frameNumber);
+        }
+    }
+
+    @Override
+    void performCollectViewAttributes(AttachInfo attachInfo, int visibility) {
+        super.performCollectViewAttributes(attachInfo, visibility);
+        if (mEmbeddedWindowParams.isEmpty()) {
+            return;
+        }
+
+        for (WindowManager.LayoutParams embeddedWindowAttr : mEmbeddedWindowParams) {
+            if ((embeddedWindowAttr.flags & FLAG_KEEP_SCREEN_ON) == FLAG_KEEP_SCREEN_ON) {
+                attachInfo.mKeepScreenOn = true;
+                break;
+            }
         }
     }
 }

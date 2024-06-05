@@ -34,6 +34,7 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -48,10 +49,11 @@ import javax.tools.Diagnostic.Kind;
  * subclasses.
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
+@SupportedOptions(IndexableProcessor.PACKAGE_KEY)
 @SupportedAnnotationTypes({"com.android.settingslib.search.SearchIndexable"})
 public class IndexableProcessor extends AbstractProcessor {
 
-    private static final String PACKAGE = "com.android.settingslib.search";
+    private static final String SETTINGSLIB_SEARCH_PACKAGE = "com.android.settingslib.search";
     private static final String CLASS_BASE = "SearchIndexableResourcesBase";
     private static final String CLASS_MOBILE = "SearchIndexableResourcesMobile";
     private static final String CLASS_TV = "SearchIndexableResourcesTv";
@@ -59,6 +61,9 @@ public class IndexableProcessor extends AbstractProcessor {
     private static final String CLASS_AUTO = "SearchIndexableResourcesAuto";
     private static final String CLASS_ARC = "SearchIndexableResourcesArc";
 
+    static final String PACKAGE_KEY = "com.android.settingslib.search.processor.package";
+
+    private String mPackage;
     private Filer mFiler;
     private Messager mMessager;
     private boolean mRanOnce;
@@ -72,7 +77,8 @@ public class IndexableProcessor extends AbstractProcessor {
         }
         mRanOnce = true;
 
-        final ClassName searchIndexableData = ClassName.get(PACKAGE, "SearchIndexableData");
+        final ClassName searchIndexableData =
+                ClassName.get(SETTINGSLIB_SEARCH_PACKAGE, "SearchIndexableData");
 
         final FieldSpec providers = FieldSpec.builder(
                 ParameterizedTypeName.get(
@@ -130,7 +136,7 @@ public class IndexableProcessor extends AbstractProcessor {
                         builder = arcConstructorBuilder;
                     }
                     builder.addCode(
-                            "$N(new SearchIndexableData($L.class, $L"
+                            "$N(new com.android.settingslib.search.SearchIndexableData($L.class, $L"
                                     + ".SEARCH_INDEX_DATA_PROVIDER));\n",
                             addIndex, className, className);
                 } else {
@@ -150,50 +156,51 @@ public class IndexableProcessor extends AbstractProcessor {
 
         final TypeSpec baseClass = TypeSpec.classBuilder(CLASS_BASE)
                 .addModifiers(Modifier.PUBLIC)
-                .addSuperinterface(ClassName.get(PACKAGE, "SearchIndexableResources"))
+                .addSuperinterface(
+                        ClassName.get(SETTINGSLIB_SEARCH_PACKAGE, "SearchIndexableResources"))
                 .addField(providers)
                 .addMethod(baseConstructorBuilder.build())
                 .addMethod(addIndex)
                 .addMethod(getProviderValues)
                 .build();
-        final JavaFile searchIndexableResourcesBase = JavaFile.builder(PACKAGE, baseClass).build();
+        final JavaFile searchIndexableResourcesBase = JavaFile.builder(mPackage, baseClass).build();
 
-        final JavaFile searchIndexableResourcesMobile = JavaFile.builder(PACKAGE,
+        final JavaFile searchIndexableResourcesMobile = JavaFile.builder(mPackage,
                 TypeSpec.classBuilder(CLASS_MOBILE)
                         .addModifiers(Modifier.PUBLIC)
-                        .superclass(ClassName.get(PACKAGE, baseClass.name))
+                        .superclass(ClassName.get(mPackage, baseClass.name))
                         .addMethod(mobileConstructorBuilder.build())
                         .build())
                 .build();
 
-        final JavaFile searchIndexableResourcesTv = JavaFile.builder(PACKAGE,
+        final JavaFile searchIndexableResourcesTv = JavaFile.builder(mPackage,
                 TypeSpec.classBuilder(CLASS_TV)
                         .addModifiers(Modifier.PUBLIC)
-                        .superclass(ClassName.get(PACKAGE, baseClass.name))
+                        .superclass(ClassName.get(mPackage, baseClass.name))
                         .addMethod(tvConstructorBuilder.build())
                         .build())
                 .build();
 
-        final JavaFile searchIndexableResourcesWear = JavaFile.builder(PACKAGE,
+        final JavaFile searchIndexableResourcesWear = JavaFile.builder(mPackage,
                 TypeSpec.classBuilder(CLASS_WEAR)
                         .addModifiers(Modifier.PUBLIC)
-                        .superclass(ClassName.get(PACKAGE, baseClass.name))
+                        .superclass(ClassName.get(mPackage, baseClass.name))
                         .addMethod(wearConstructorBuilder.build())
                         .build())
                 .build();
 
-        final JavaFile searchIndexableResourcesAuto = JavaFile.builder(PACKAGE,
+        final JavaFile searchIndexableResourcesAuto = JavaFile.builder(mPackage,
                 TypeSpec.classBuilder(CLASS_AUTO)
                         .addModifiers(Modifier.PUBLIC)
-                        .superclass(ClassName.get(PACKAGE, baseClass.name))
+                        .superclass(ClassName.get(mPackage, baseClass.name))
                         .addMethod(autoConstructorBuilder.build())
                         .build())
                 .build();
 
-        final JavaFile searchIndexableResourcesArc = JavaFile.builder(PACKAGE,
+        final JavaFile searchIndexableResourcesArc = JavaFile.builder(mPackage,
                 TypeSpec.classBuilder(CLASS_ARC)
                         .addModifiers(Modifier.PUBLIC)
-                        .superclass(ClassName.get(PACKAGE, baseClass.name))
+                        .superclass(ClassName.get(mPackage, baseClass.name))
                         .addMethod(arcConstructorBuilder.build())
                         .build())
                 .build();
@@ -214,6 +221,8 @@ public class IndexableProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
+        mPackage = processingEnvironment.getOptions()
+                .getOrDefault(PACKAGE_KEY, SETTINGSLIB_SEARCH_PACKAGE);
         mFiler = processingEnvironment.getFiler();
         mMessager = processingEnvironment.getMessager();
     }

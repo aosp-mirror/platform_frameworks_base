@@ -16,13 +16,13 @@
 
 package android.content.pm;
 
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.Activity;
-import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
@@ -36,12 +36,12 @@ import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Printer;
 import android.window.OnBackInvokedCallback;
 
 import com.android.internal.util.Parcelling;
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -55,6 +55,7 @@ import java.util.Set;
  * from the AndroidManifest.xml's &lt;activity&gt; and
  * &lt;receiver&gt; tags.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ActivityInfo extends ComponentInfo implements Parcelable {
 
     private static final Parcelling.BuiltIn.ForStringSet sForStringSet =
@@ -236,6 +237,109 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      */
     @Nullable
     public String requiredDisplayCategory;
+
+    /**
+     * Constant corresponding to {@code none} in the
+     * {@link android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     * @hide
+     */
+    public static final int CONTENT_URI_PERMISSION_NONE = 0;
+
+    /**
+     * Constant corresponding to {@code read} in the
+     * {@link android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     * @hide
+     */
+    public static final int CONTENT_URI_PERMISSION_READ = 1;
+
+    /**
+     * Constant corresponding to {@code write} in the
+     * {@link android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     * @hide
+     */
+    public static final int CONTENT_URI_PERMISSION_WRITE = 2;
+
+    /**
+     * Constant corresponding to {@code readOrWrite} in the
+     * {@link android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     * @hide
+     */
+    public static final int CONTENT_URI_PERMISSION_READ_OR_WRITE = 3;
+
+    /**
+     * Constant corresponding to {@code readAndWrite} in the
+     * {@link android.R.attr#requireContentUriPermissionFromCaller} attribute.
+     * @hide
+     */
+    public static final int CONTENT_URI_PERMISSION_READ_AND_WRITE = 4;
+
+    /** @hide */
+    @SuppressWarnings("SwitchIntDef")
+    public static boolean isRequiredContentUriPermissionRead(
+            @RequiredContentUriPermission int permission) {
+        return switch (permission) {
+            case CONTENT_URI_PERMISSION_READ_AND_WRITE, CONTENT_URI_PERMISSION_READ_OR_WRITE,
+                    CONTENT_URI_PERMISSION_READ -> true;
+            default -> false;
+        };
+    }
+
+    /** @hide */
+    @SuppressWarnings("SwitchIntDef")
+    public static boolean isRequiredContentUriPermissionWrite(
+            @RequiredContentUriPermission int permission) {
+        return switch (permission) {
+            case CONTENT_URI_PERMISSION_READ_AND_WRITE, CONTENT_URI_PERMISSION_READ_OR_WRITE,
+                    CONTENT_URI_PERMISSION_WRITE -> true;
+            default -> false;
+        };
+    }
+
+    /** @hide */
+    @IntDef(prefix = "CONTENT_URI_PERMISSION_", value = {
+            CONTENT_URI_PERMISSION_NONE,
+            CONTENT_URI_PERMISSION_READ,
+            CONTENT_URI_PERMISSION_WRITE,
+            CONTENT_URI_PERMISSION_READ_OR_WRITE,
+            CONTENT_URI_PERMISSION_READ_AND_WRITE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RequiredContentUriPermission {
+    }
+
+    private String requiredContentUriPermissionToFullString(
+            @RequiredContentUriPermission int permission) {
+        return switch (permission) {
+            case CONTENT_URI_PERMISSION_NONE -> "CONTENT_URI_PERMISSION_NONE";
+            case CONTENT_URI_PERMISSION_READ -> "CONTENT_URI_PERMISSION_READ";
+            case CONTENT_URI_PERMISSION_WRITE -> "CONTENT_URI_PERMISSION_WRITE";
+            case CONTENT_URI_PERMISSION_READ_OR_WRITE -> "CONTENT_URI_PERMISSION_READ_OR_WRITE";
+            case CONTENT_URI_PERMISSION_READ_AND_WRITE -> "CONTENT_URI_PERMISSION_READ_AND_WRITE";
+            default -> "unknown=" + permission;
+        };
+    }
+
+    /** @hide */
+    public static String requiredContentUriPermissionToShortString(
+            @RequiredContentUriPermission int permission) {
+        return switch (permission) {
+            case CONTENT_URI_PERMISSION_NONE -> "none";
+            case CONTENT_URI_PERMISSION_READ -> "read";
+            case CONTENT_URI_PERMISSION_WRITE -> "write";
+            case CONTENT_URI_PERMISSION_READ_OR_WRITE -> "read or write";
+            case CONTENT_URI_PERMISSION_READ_AND_WRITE -> "read and write";
+            default -> "unknown=" + permission;
+        };
+    }
+
+    /**
+     * Specifies permissions necessary to launch this activity when passing content URIs. The
+     * default value is {@code none}, meaning no specific permissions are required. Setting this
+     * attribute restricts activity invocation based on the invoker's permissions.
+     * @hide
+     */
+    @RequiredContentUriPermission
+    public int requireContentUriPermissionFromCaller;
 
     /**
      * Activity can not be resized and always occupies the fullscreen area with all windows fully
@@ -1098,6 +1202,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
+    @FlaggedApi(Flags.FLAG_APP_COMPAT_PROPERTIES_API)
     public static final long OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED =
             273509367L; // buganizer id
 
@@ -1174,6 +1280,26 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             264301586L; // buganizer id
 
     /**
+     * Excludes the packages the override is applied to from the camera compatibility treatment
+     * in free-form windowing mode for fixed-orientation apps.
+     *
+     * <p>In free-form windowing mode, the compatibility treatment emulates running on a portrait
+     * device by letterboxing the app window and changing the camera characteristics to what apps
+     * commonly expect in a portrait device: 90 and 270 degree sensor rotation for back and front
+     * cameras, respectively, and setting display rotation to 0.
+     *
+     * <p>Use this flag to disable the compatibility treatment for apps that do not respond well to
+     * the treatment.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT =
+            314961188L;
+
+    /**
      * This change id forces the packages it is applied to sandbox {@link android.view.View} API to
      * an activity bounds for:
      *
@@ -1185,8 +1311,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * <p>For {@link android.view.View#getWindowVisibleDisplayFrame} and
      * {@link android.view.View}#getWindowDisplayFrame this sandboxing is happening indirectly
      * through
-     * {@link android.view.ViewRootImpl}#getWindowVisibleDisplayFrame,
-     * {@link android.view.ViewRootImpl}#getDisplayFrame respectively.
+     * {@code android.view.ViewRootImpl#getWindowVisibleDisplayFrame},
+     * {@code android.view.ViewRootImpl#getDisplayFrame} respectively.
      *
      * <p>Some applications assume that they occupy the whole screen and therefore use the display
      * coordinates in their calculations as if an activity is  positioned in the top-left corner of
@@ -1204,12 +1330,15 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     /**
      * This change id is the gatekeeper for all treatments that force a given min aspect ratio.
      * Enabling this change will allow the following min aspect ratio treatments to be applied:
-     * OVERRIDE_MIN_ASPECT_RATIO_MEDIUM
-     * OVERRIDE_MIN_ASPECT_RATIO_LARGE
+     * <ul>
+     *  <li>OVERRIDE_MIN_ASPECT_RATIO_MEDIUM
+     *  <li>OVERRIDE_MIN_ASPECT_RATIO_LARGE
+     * </ul>
      *
      * If OVERRIDE_MIN_ASPECT_RATIO is applied, the min aspect ratio given in the app's manifest
      * will be overridden to the largest enabled aspect ratio treatment unless the app's manifest
-     * value is higher.
+     * value is higher. By default, this will only apply to activities with fixed portrait
+     * orientation if OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY is not explicitly disabled.
      * @hide
      */
     @ChangeId
@@ -1217,6 +1346,17 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @Disabled
     @TestApi
     public static final long OVERRIDE_MIN_ASPECT_RATIO = 174042980L; // buganizer id
+
+    /**
+     * This change id restricts treatments that force a given min aspect ratio to
+     * only when an app is connected to the camera
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA = 325586858L; // buganizer id
 
     /**
      * This change id restricts treatments that force a given min aspect ratio to activities
@@ -1389,12 +1529,54 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L;
 
     /**
+     * Enables {@link #SCREEN_ORIENTATION_USER} which overrides any orientation requested
+     * by the activity. Fixed orientation apps can be overridden to fullscreen on large
+     * screen devices with ignoreOrientationRequest enabled with this override.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_ANY_ORIENTATION_TO_USER = 310816437L;
+
+    /**
      * Compares activity window layout min width/height with require space for multi window to
      * determine if it can be put into multi window mode.
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     private static final long CHECK_MIN_WIDTH_HEIGHT_FOR_MULTI_WINDOW = 197654537L;
+
+    /**
+     * The activity is targeting a SDK version that should receive the changed behavior of
+     * configuration insets decouple.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long INSETS_DECOUPLED_CONFIGURATION_ENFORCED = 151861875L;
+
+    /**
+     * When enabled, the activity will receive configuration decoupled from system bar insets.
+     *
+     * <p>This will only apply if the activity is targeting SDK level 34 or earlier versions.
+     *
+     * <p>This will only in effect if the device is trying to provide a different value by default
+     * other than the legacy value, i.e., the
+     * {@code Flags.allowsScreenSizeDecoupledFromStatusBarAndCutout()} is set to true.
+     *
+     * <p>If the {@code Flags.insetsDecoupledConfiguration()} is also set to true, all apps
+     * targeting SDK level 35 or later, and apps with this override flag will receive the insets
+     * decoupled configuration.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION = 327313645L;
 
     /**
      * Optional set of a certificates identifying apps that are allowed to embed this activity. From
@@ -1572,6 +1754,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         mMinAspectRatio = orig.mMinAspectRatio;
         supportsSizeChanges = orig.supportsSizeChanges;
         requiredDisplayCategory = orig.requiredDisplayCategory;
+        requireContentUriPermissionFromCaller = orig.requireContentUriPermissionFromCaller;
     }
 
     /**
@@ -1770,8 +1953,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     public boolean isChangeEnabled(long changeId) {
-        return CompatChanges.isChangeEnabled(changeId, applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid));
+        return applicationInfo.isChangeEnabled(changeId);
     }
 
     /** @hide */
@@ -1929,6 +2111,11 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (requiredDisplayCategory != null) {
             pw.println(prefix + "requiredDisplayCategory=" + requiredDisplayCategory);
         }
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
+            pw.println(prefix + "requireContentUriPermissionFromCaller="
+                    + requiredContentUriPermissionToFullString(
+                            requireContentUriPermissionFromCaller));
+        }
         super.dumpBack(pw, prefix, dumpFlags);
     }
 
@@ -1976,6 +2163,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeBoolean(supportsSizeChanges);
         sForStringSet.parcel(mKnownActivityEmbeddingCerts, dest, flags);
         dest.writeString8(requiredDisplayCategory);
+        dest.writeInt(requireContentUriPermissionFromCaller);
     }
 
     /**
@@ -2102,6 +2290,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             mKnownActivityEmbeddingCerts = null;
         }
         requiredDisplayCategory = source.readString8();
+        requireContentUriPermissionFromCaller = source.readInt();
     }
 
     /**

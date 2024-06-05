@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.hardware.broadcastradio.ConfigFlag;
 import android.hardware.broadcastradio.IBroadcastRadio;
+import android.hardware.broadcastradio.ProgramListChunk;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
@@ -28,9 +29,9 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.broadcastradio.RadioEventLogger;
 import com.android.server.broadcastradio.RadioServiceUserController;
 import com.android.server.utils.Slogf;
 
@@ -44,7 +45,7 @@ final class TunerSession extends ITuner.Stub {
 
     private final Object mLock = new Object();
 
-    private final RadioLogger mLogger;
+    private final RadioEventLogger mLogger;
     private final RadioModule mModule;
     final int mUserId;
     final android.hardware.radio.ITunerCallback mCallback;
@@ -69,7 +70,7 @@ final class TunerSession extends ITuner.Stub {
         mUserId = Binder.getCallingUserHandle().getIdentifier();
         mCallback = Objects.requireNonNull(callback, "callback cannot be null");
         mUid = Binder.getCallingUid();
-        mLogger = new RadioLogger(TAG, TUNER_EVENT_LOGGER_QUEUE_SIZE);
+        mLogger = new RadioEventLogger(TAG, TUNER_EVENT_LOGGER_QUEUE_SIZE);
     }
 
     @Override
@@ -297,7 +298,7 @@ final class TunerSession extends ITuner.Stub {
         }
     }
 
-    void onMergedProgramListUpdateFromHal(ProgramList.Chunk mergedChunk) {
+    void onMergedProgramListUpdateFromHal(ProgramListChunk mergedChunk) {
         List<ProgramList.Chunk> clientUpdateChunks;
         synchronized (mLock) {
             if (mProgramInfoCache == null) {
@@ -433,7 +434,7 @@ final class TunerSession extends ITuner.Stub {
         }
     }
 
-    void dumpInfo(IndentingPrintWriter pw) {
+    void dumpInfo(android.util.IndentingPrintWriter pw) {
         pw.printf("TunerSession\n");
 
         pw.increaseIndent();

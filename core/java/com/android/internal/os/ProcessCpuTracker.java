@@ -337,6 +337,12 @@ public class ProcessCpuTracker {
 
     @UnsupportedAppUsage
     public void update() {
+        synchronized (this) {
+            updateLocked();
+        }
+    }
+
+    private void updateLocked() {
         if (DEBUG) Slog.v(TAG, "Update: " + this);
 
         final long nowUptime = SystemClock.uptimeMillis();

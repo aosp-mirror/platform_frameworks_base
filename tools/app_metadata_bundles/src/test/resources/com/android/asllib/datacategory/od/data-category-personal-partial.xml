@@ -1,0 +1,13 @@
+<pbundle_as_map name="personal">
+    <pbundle_as_map name="name">
+        <int-array name="purposes" num="2">
+            <item value="2" />
+            <item value="3" />
+        </int-array>
+    </pbundle_as_map>
+    <pbundle_as_map name="email_address">
+        <int-array name="purposes" num="1">
+            <item value="2" />
+        </int-array>
+    </pbundle_as_map>
+</pbundle_as_map>

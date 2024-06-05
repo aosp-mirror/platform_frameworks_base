@@ -24,15 +24,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Bundle;
-import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +41,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class TileAdapterDelegateTest extends SysuiTestCase {
 
     private static final int MOVE_TO_POSITION_ID = R.id.accessibility_action_qs_move_to_position;
@@ -136,6 +136,7 @@ public class TileAdapterDelegateTest extends SysuiTestCase {
         AccessibilityNodeInfoCompat.AccessibilityActionCompat action =
                 getActionForId(mInfo, AccessibilityNodeInfo.ACTION_CLICK);
         assertThat(action.getLabel().toString()).contains(expectedString);
+        assertThat(mInfo.isClickable()).isTrue();
     }
 
     @Test
@@ -152,10 +153,11 @@ public class TileAdapterDelegateTest extends SysuiTestCase {
         AccessibilityNodeInfoCompat.AccessibilityActionCompat action =
                 getActionForId(mInfo, AccessibilityNodeInfo.ACTION_CLICK);
         assertThat(action.getLabel().toString()).contains(expectedString);
+        assertThat(mInfo.isClickable()).isTrue();
     }
 
     @Test
-    public void testNoClickAction() {
+    public void testNoClickActionAndNotClickable() {
         mView.setTag(mHolder);
         when(mHolder.canTakeAccessibleAction()).thenReturn(true);
         when(mHolder.canAdd()).thenReturn(false);
@@ -167,6 +169,7 @@ public class TileAdapterDelegateTest extends SysuiTestCase {
         AccessibilityNodeInfoCompat.AccessibilityActionCompat action =
                 getActionForId(mInfo, AccessibilityNodeInfo.ACTION_CLICK);
         assertThat(action).isNull();
+        assertThat(mInfo.isClickable()).isFalse();
     }
 
     @Test

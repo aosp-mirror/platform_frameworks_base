@@ -16,102 +16,51 @@
 
 <!-- Colors specific to Theme.DeviceDefault on watches, as specified via themes_device_default.xml
      Note: These colors specifically proide a darker, high-contrast UI that is suitable for
-     wearables with respect to 'glanceability'. OEM customization is supported within this set. -->
+     wearables with respect to 'glanceability'. -->
 <resources>
     <!--
        accent_device_default_dark
-         > from values/colors_material/accent_material_dark
-         > from values/colors_material/material_deep_teal_200
-         = #ff80cbc4
-         ! replaced with custom color #5E97F6
-         ! OEMS can customize as per specification
+         > from values/system_accent1_100
+         ! replaced with color/system_accent1_400
     -->
-    <color name="accent_device_default_dark">#5E97F6</color>
+    <color name="accent_device_default_dark">@color/system_accent1_400</color>
 
     <!--
        foreground_device_default_dark
          - introduced to avoid coupling to foreground_material_dark
          - colorForeground typically falls through Theme.DeviceDefault to Theme.Material
          ! fixed as white for optimal glanceability/contrast
-         ! OEMs should not customize
     -->
     <color name="foreground_device_default_dark">@color/white</color>
 
     <!--
        background_device_default_dark
-         > from values/colors_material/background_material_dark
-         > from values/colors_material/material_grey_850
-         = #ff303030
+         > from values/system_neutral1_900
          ! replaced with custom color #000000
-         ! OEMs can customized as per specification
-           (derived from accent color, constrained by brightness)
     -->
     <color name="background_device_default_dark">#000000</color>
 
-    <!--
-       background_floating_device_default_dark
-         > from values/colors_material/background_floating_material_dark
-         > from values/colors_material/material_grey_800
-         = #ff424242
-         ! replaced with custom color #1D2E4D
-           (derived from accent color, constrained by brightness)
-    -->
-    <color name="background_floating_device_default_dark">#1D2E4D</color>
+    <!-- Derived from accent color at 20% luminance -->
+    <color name="background_floating_device_default_dark">@color/system_accent1_800</color>
 
     <!--
-       primary_device_default_dark
-         > from values/colors_material/primary_material_dark
-         > from values/colors_material/material_grey_900
-         = #ff212121
-         ! replaced with custom color #808080
-         ! OEMs can customize as per specification
-           (derived from background color + foreground @ 50% opacity)
-    -->
-    <color name="primary_device_default_dark">#808080</color>
+        primary_device_default_dark
+          > from values/colors/system_neutral1_900
+          ! replaced with system_neutral1_500
+     -->
+    <color name="primary_device_default_dark">@color/system_neutral1_500</color>
 
-    <!--
-       primary_dark_device_default_dark
-         > from values/colors_material/primary_dark_material_dark
-         = @color/black
-         ! replaced with custom color #333333
-         ! OEMS can customize as per specification
-           (derived from background color + foreground @ 20% opacity)
-    -->
-    <color name="primary_dark_device_default_dark">#333333</color>
+    <!-- Currently matches the "surface dark" definition for phones. -->
+    <color name="surface_dark">@color/system_neutral1_800</color>
 
     <!--
        button_normal_device_default_dark
-         - uses ?attr/disabledAlpha and ?attr/colorPrimaryDark to draw state list
+         - uses ?attr/disabledAlpha and ?attr/colorSurface to draw state list
            (used as colorButtonNormal attribute in theme)
          - see color-watch/btn_watch_default_dark.xml
     -->
     <color name="button_normal_device_default_dark">@color/btn_watch_default_dark</color>
 
-    <!--
-       error_color_device_default_dark
-         - introduced to avoid coupling to error_color_mtterial (also #F4511E)
-         - colorError typically falls through Theme.DeviceDefault to Theme.Material
-         ! OEMs can customize as per specification
-    -->
-    <color name="error_color_device_default_dark">#F4511E</color>
-
-    <!-- no customization required/suggested below this point -->
-
-    <!--
-       background_cache_hint_selector_device_default
-         - note that this is based off of colors/background_cache_hint_selector_device_default
-           xml drawable
-         - uses ?attr/colorBackground and transparency to draw
-         - no color customization required here
-    -->
-
-    <!-- deprecated for Wear
-         these overrides exist only for compatibility with existing
-         WTS theme test heuristics, based on the previous modifications
-         to the material theme, they should not be used for customization
-         as they are not exposed via publicly accessible attributes -->
-    <color name="accent_device_default_dark_60_percent_opacity">#995E97f6</color>
-    <color name="accent_device_default_700">#5385DB</color>
-    <color name="accent_device_default_light">#75A4F5</color>
-    <color name="accent_device_default_50">#93B7F5</color>
+    <!-- Matches the Wear Compose error color. -->
+    <color name="error_color_device_default_dark">#FF746E</color>
 </resources>

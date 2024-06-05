@@ -17,7 +17,6 @@
 package com.android.packageinstaller;
 
 import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
-import static android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.Manifest;
@@ -48,7 +47,10 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.text.Html;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -70,7 +72,7 @@ import java.util.List;
  * Based on the user response the package is then installed by launching InstallAppConfirm
  * sub activity. All state transitions are handled in this activity
  */
-public class PackageInstallerActivity extends AlertActivity {
+public class PackageInstallerActivity extends Activity {
     private static final String TAG = "PackageInstaller";
 
     private static final int REQUEST_TRUST_EXTERNAL_SOURCE = 1;
@@ -81,6 +83,8 @@ public class PackageInstallerActivity extends AlertActivity {
     static final String EXTRA_CALLING_ATTRIBUTION_TAG = "EXTRA_CALLING_ATTRIBUTION_TAG";
     static final String EXTRA_ORIGINAL_SOURCE_INFO = "EXTRA_ORIGINAL_SOURCE_INFO";
     static final String EXTRA_STAGED_SESSION_ID = "EXTRA_STAGED_SESSION_ID";
+    static final String EXTRA_APP_SNIPPET = "EXTRA_APP_SNIPPET";
+    static final String EXTRA_IS_TRUSTED_SOURCE = "EXTRA_IS_TRUSTED_SOURCE";
     private static final String ALLOW_UNKNOWN_SOURCES_KEY =
             PackageInstallerActivity.class.getName() + "ALLOW_UNKNOWN_SOURCES_KEY";
 
@@ -89,7 +93,10 @@ public class PackageInstallerActivity extends AlertActivity {
     private Uri mOriginatingURI;
     private Uri mReferrerURI;
     private int mOriginatingUid = Process.INVALID_UID;
-    private String mOriginatingPackage; // The package name corresponding to #mOriginatingUid
+    /**
+     * The package name corresponding to #mOriginatingUid
+     */
+    private String mOriginatingPackage;
     private int mActivityResultCode = Activity.RESULT_CANCELED;
     private int mPendingUserActionReason = -1;
 
@@ -133,29 +140,35 @@ public class PackageInstallerActivity extends AlertActivity {
     // Would the mOk button be enabled if this activity would be resumed
     private boolean mEnableOk = false;
 
+    private AlertDialog mDialog;
+
     private void startInstallConfirm() {
         TextView viewToEnable;
 
         if (mAppInfo != null) {
-            viewToEnable = requireViewById(R.id.install_confirm_question_update);
+            viewToEnable = mDialog.requireViewById(R.id.install_confirm_question_update);
 
             final CharSequence existingUpdateOwnerLabel = getExistingUpdateOwnerLabel();
-            final CharSequence requestedUpdateOwnerLabel = getApplicationLabel(mCallingPackage);
+            final CharSequence requestedUpdateOwnerLabel = getApplicationLabel(mOriginatingPackage);
             if (!TextUtils.isEmpty(existingUpdateOwnerLabel)
                     && mPendingUserActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP) {
-                viewToEnable.setText(
+                String updateOwnerString =
                         getString(R.string.install_confirm_question_update_owner_reminder,
-                                requestedUpdateOwnerLabel, existingUpdateOwnerLabel));
+                                requestedUpdateOwnerLabel, existingUpdateOwnerLabel);
+                Spanned styledUpdateOwnerString =
+                        Html.fromHtml(updateOwnerString, Html.FROM_HTML_MODE_LEGACY);
+                viewToEnable.setText(styledUpdateOwnerString);
                 mOk.setText(R.string.update_anyway);
             } else {
                 mOk.setText(R.string.update);
             }
         } else {
             // This is a new application with no permissions.
-            viewToEnable = requireViewById(R.id.install_confirm_question);
+            viewToEnable = mDialog.requireViewById(R.id.install_confirm_question);
         }
 
         viewToEnable.setVisibility(View.VISIBLE);
+        viewToEnable.setMovementMethod(new ScrollingMovementMethod());
 
         mEnableOk = true;
         mOk.setEnabled(true);
@@ -163,11 +176,14 @@ public class PackageInstallerActivity extends AlertActivity {
     }
 
     private CharSequence getExistingUpdateOwnerLabel() {
+        return getApplicationLabel(getExistingUpdateOwner());
+    }
+
+    private String getExistingUpdateOwner() {
         try {
             final String packageName = mPkgInfo.packageName;
             final InstallSourceInfo sourceInfo = mPm.getInstallSourceInfo(packageName);
-            final String existingUpdateOwner = sourceInfo.getUpdateOwnerPackageName();
-            return getApplicationLabel(existingUpdateOwner);
+            return sourceInfo.getUpdateOwnerPackageName();
         } catch (NameNotFoundException e) {
             return null;
         }
@@ -259,6 +275,15 @@ public class PackageInstallerActivity extends AlertActivity {
     }
 
     private String getPackageNameForUid(int sourceUid) {
+        // If the sourceUid belongs to the system downloads provider, we explicitly return the
+        // name of the Download Manager package. This is because its UID is shared with multiple
+        // packages, resulting in uncertainty about which package will end up first in the list
+        // of packages associated with this UID
+        ApplicationInfo systemDownloadProviderInfo = PackageUtil.getSystemDownloadsProviderInfo(
+                                                        mPm, sourceUid);
+        if (systemDownloadProviderInfo != null) {
+            return systemDownloadProviderInfo.packageName;
+        }
         String[] packagesForUid = mPm.getPackagesForUid(sourceUid);
         if (packagesForUid == null) {
             return null;
@@ -276,22 +301,19 @@ public class PackageInstallerActivity extends AlertActivity {
         return packagesForUid[0];
     }
 
-    private boolean isInstallRequestFromUnknownSource(Intent intent) {
-        if (mCallingPackage != null && intent.getBooleanExtra(
-                Intent.EXTRA_NOT_UNKNOWN_SOURCE, false)) {
-            if (mSourceInfo != null && mSourceInfo.isPrivilegedApp()) {
-                // Privileged apps can bypass unknown sources check if they want.
-                return false;
-            }
-        }
-        if (mSourceInfo != null && checkPermission(Manifest.permission.INSTALL_PACKAGES,
-                -1 /* pid */, mSourceInfo.uid) == PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
-        return true;
-    }
-
     private void initiateInstall() {
+        final String existingUpdateOwner = getExistingUpdateOwner();
+        if (mSessionId == SessionInfo.INVALID_ID &&
+            !TextUtils.isEmpty(existingUpdateOwner) &&
+            !TextUtils.equals(existingUpdateOwner, mOriginatingPackage)) {
+            // Since update ownership is being changed, the system will request another
+            // user confirmation shortly. Thus, we don't need to ask the user to confirm
+            // installation here.
+            startInstall();
+            return;
+        }
+
+        // Proceed with user confirmation as we are not changing the update-owner in this install.
         String pkgName = mPkgInfo.packageName;
         // Check if there is already a package on the device with this name
         // but it has been renamed to something else.
@@ -356,8 +378,7 @@ public class PackageInstallerActivity extends AlertActivity {
         mCallingPackage = intent.getStringExtra(EXTRA_CALLING_PACKAGE);
         mCallingAttributionTag = intent.getStringExtra(EXTRA_CALLING_ATTRIBUTION_TAG);
         mSourceInfo = intent.getParcelableExtra(EXTRA_ORIGINAL_SOURCE_INFO);
-        mOriginatingUid = intent.getIntExtra(Intent.EXTRA_ORIGINATING_UID,
-                Process.INVALID_UID);
+        mOriginatingUid = intent.getIntExtra(Intent.EXTRA_ORIGINATING_UID, Process.INVALID_UID);
         mOriginatingPackage = (mOriginatingUid != Process.INVALID_UID)
                 ? getPackageNameForUid(mOriginatingUid) : null;
 
@@ -366,9 +387,9 @@ public class PackageInstallerActivity extends AlertActivity {
             final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
                     -1 /* defaultValue */);
             final SessionInfo info = mInstaller.getSessionInfo(sessionId);
-            String resolvedPath = info.getResolvedBaseApkPath();
+            String resolvedPath = info != null ? info.getResolvedBaseApkPath() : null;
             if (info == null || !info.isSealed() || resolvedPath == null) {
-                Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
+                Log.w(TAG, "Session " + sessionId + " in funky state; ignoring");
                 finish();
                 return;
             }
@@ -383,7 +404,7 @@ public class PackageInstallerActivity extends AlertActivity {
                     -1 /* defaultValue */);
             final SessionInfo info = mInstaller.getSessionInfo(sessionId);
             if (info == null || !info.isPreApprovalRequested()) {
-                Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
+                Log.w(TAG, "Session " + sessionId + " in funky state; ignoring");
                 finish();
                 return;
             }
@@ -429,7 +450,7 @@ public class PackageInstallerActivity extends AlertActivity {
         if (mLocalLOGV) Log.i(TAG, "onResume(): mAppSnippet=" + mAppSnippet);
 
         if (mAppSnippet != null) {
-            // load dummy layout with OK button disabled until we override this layout in
+            // load placeholder layout with OK button disabled until we override this layout in
             // startInstallConfirm
             bindUi();
             checkIfAllowedAndInitiateInstall();
@@ -459,17 +480,21 @@ public class PackageInstallerActivity extends AlertActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         while (!mActiveUnknownSourcesListeners.isEmpty()) {
             unregister(mActiveUnknownSourcesListeners.get(0));
         }
+        if (mDialog != null) {
+            mDialog.dismiss();
+        }
+        super.onDestroy();
     }
 
     private void bindUi() {
-        mAlert.setIcon(mAppSnippet.icon);
-        mAlert.setTitle(mAppSnippet.label);
-        mAlert.setView(R.layout.install_content_view);
-        mAlert.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.install),
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(mAppSnippet.icon);
+        builder.setTitle(mAppSnippet.label);
+        builder.setView(R.layout.install_content_view);
+        builder.setPositiveButton(getString(R.string.install),
                 (ignored, ignored2) -> {
                     if (mOk.isEnabled()) {
                         if (mSessionId != -1) {
@@ -479,20 +504,26 @@ public class PackageInstallerActivity extends AlertActivity {
                             startInstall();
                         }
                     }
-                }, null);
-        mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel),
+                });
+        builder.setNegativeButton(getString(R.string.cancel),
                 (ignored, ignored2) -> {
                     // Cancel and finish
                     setActivityResult(RESULT_CANCELED);
                     finish();
-                }, null);
-        setupAlert();
+                });
+        builder.setOnCancelListener(dialog -> {
+            // Cancel and finish
+            setActivityResult(RESULT_CANCELED);
+            finish();
+        });
+        mDialog = builder.create();
+        mDialog.show();
 
-        mOk = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
+        mOk = mDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         mOk.setEnabled(false);
 
         if (!mOk.isInTouchMode()) {
-            mAlert.getButton(DialogInterface.BUTTON_NEGATIVE).requestFocus();
+            mDialog.getButton(DialogInterface.BUTTON_NEGATIVE).requestFocus();
         }
     }
 
@@ -517,7 +548,7 @@ public class PackageInstallerActivity extends AlertActivity {
      * Check if it is allowed to install the package and initiate install if allowed.
      */
     private void checkIfAllowedAndInitiateInstall() {
-        if (mAllowUnknownSources || !isInstallRequestFromUnknownSource(getIntent())) {
+        if (mAllowUnknownSources || getIntent().getBooleanExtra(EXTRA_IS_TRUSTED_SOURCE, false)) {
             if (mLocalLOGV) Log.i(TAG, "install allowed");
             initiateInstall();
         } else {
@@ -595,7 +626,7 @@ public class PackageInstallerActivity extends AlertActivity {
                 CharSequence label = mPm.getApplicationLabel(mPkgInfo.applicationInfo);
                 if (mLocalLOGV) Log.i(TAG, "creating snippet for " + label);
                 mAppSnippet = new PackageUtil.AppSnippet(label,
-                        mPm.getApplicationIcon(mPkgInfo.applicationInfo));
+                        mPm.getApplicationIcon(mPkgInfo.applicationInfo), getBaseContext());
             } break;
 
             case ContentResolver.SCHEME_FILE: {
@@ -633,7 +664,7 @@ public class PackageInstallerActivity extends AlertActivity {
         mPkgInfo = generateStubPackageInfo(info.getAppPackageName());
         mAppSnippet = new PackageUtil.AppSnippet(info.getAppLabel(),
                 info.getAppIcon() != null ? new BitmapDrawable(getResources(), info.getAppIcon())
-                        : getPackageManager().getDefaultActivityIcon());
+                        : getPackageManager().getDefaultActivityIcon(), getBaseContext());
         return true;
     }
 
@@ -692,6 +723,9 @@ public class PackageInstallerActivity extends AlertActivity {
         }
         if (stagedSessionId > 0) {
             newIntent.putExtra(EXTRA_STAGED_SESSION_ID, stagedSessionId);
+        }
+        if (mAppSnippet != null) {
+            newIntent.putExtra(EXTRA_APP_SNIPPET, mAppSnippet);
         }
         newIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
         if (mLocalLOGV) Log.i(TAG, "downloaded app uri=" + mPackageURI);
@@ -789,7 +823,14 @@ public class PackageInstallerActivity extends AlertActivity {
             }
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (!isDestroyed()) {
-                    startActivity(getIntent().addFlags(FLAG_ACTIVITY_REORDER_TO_FRONT));
+                    startActivity(getIntent());
+                    // The start flag (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP) doesn't
+                    // work for the multiple user case, i.e. the caller task user and started
+                    // Activity user are not the same. To avoid having multiple PIAs in the task,
+                    // finish the current PackageInstallerActivity
+                    // Because finish() is overridden to set the installation result, we must use
+                    // the original finish() method, or the confirmation dialog fails to appear.
+                    PackageInstallerActivity.super.finish();
                 }
             }, 500);
 

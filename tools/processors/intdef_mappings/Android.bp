@@ -38,7 +38,7 @@ java_test_host {
 
     static_libs: [
         "compile-testing-prebuilt",
-        "truth-prebuilt",
+        "truth",
         "junit",
         "guava",
         "libintdef-annotation-processor",

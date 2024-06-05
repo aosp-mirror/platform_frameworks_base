@@ -16,22 +16,30 @@
 
 package com.android.server.security.rkp;
 
+import android.content.Context;
 import android.hardware.security.keymint.DeviceInfo;
 import android.hardware.security.keymint.IRemotelyProvisionedComponent;
 import android.hardware.security.keymint.MacedPublicKey;
 import android.hardware.security.keymint.ProtectedData;
 import android.hardware.security.keymint.RpcHardwareInfo;
+import android.os.CancellationSignal;
+import android.os.OutcomeReceiver;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ShellCommand;
+import android.security.rkp.service.RegistrationProxy;
+import android.security.rkp.service.RemotelyProvisionedKey;
 import android.util.IndentingPrintWriter;
-
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.time.Duration;
 import java.util.Base64;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import co.nstant.in.cbor.CborDecoder;
 import co.nstant.in.cbor.CborEncoder;
@@ -49,21 +57,22 @@ class RemoteProvisioningShellCommand extends ShellCommand {
             + "  Show this message.\n"
             + "dump\n"
             + "  Dump service diagnostics.\n"
-            + "list [--min-version MIN_VERSION]\n"
+            + "list\n"
             + "  List the names of the IRemotelyProvisionedComponent instances.\n"
             + "csr [--challenge CHALLENGE] NAME\n"
             + "  Generate and print a base64-encoded CSR from the named\n"
             + "  IRemotelyProvisionedComponent. A base64-encoded challenge can be provided,\n"
-            + "  or else it defaults to an empty challenge.\n";
+            + "  or else it defaults to an empty challenge.\n"
+            + "certify NAME\n"
+            + "  Output the PEM-encoded certificate chain provisioned for the named\n"
+            + "  IRemotelyProvisionedComponent.\n";
 
-    @VisibleForTesting
     static final String EEK_ED25519_BASE64 = "goRDoQEnoFgqpAEBAycgBiFYIJm57t1e5FL2hcZMYtw+YatXSH11N"
             + "ymtdoAy0rPLY1jZWEAeIghLpLekyNdOAw7+uK8UTKc7b6XN3Np5xitk/pk5r3bngPpmAIUNB5gqrJFcpyUUS"
             + "QY0dcqKJ3rZ41pJ6wIDhEOhASegWE6lAQECWCDQrsEVyirPc65rzMvRlh1l6LHd10oaN7lDOpfVmd+YCAM4G"
             + "CAEIVggvoXnRsSjQlpA2TY6phXQLFh+PdwzAjLS/F4ehyVfcmBYQJvPkOIuS6vRGLEOjl0gJ0uEWP78MpB+c"
             + "gWDvNeCvvpkeC1UEEvAMb9r6B414vAtzmwvT/L1T6XUg62WovGHWAQ=";
 
-    @VisibleForTesting
     static final String EEK_P256_BASE64 = "goRDoQEmoFhNpQECAyYgASFYIPcUituX9MxT79JkEcTjdR9mH6RxDGzP"
             + "+glGgHSHVPKtIlggXn9b9uzk9hnM/xM3/Q+hyJPbGAZ2xF3m12p3hsMtr49YQC+XjkL7vgctlUeFR5NAsB/U"
             + "m0ekxESp8qEHhxDHn8sR9L+f6Dvg5zRMFfx7w34zBfTRNDztAgRgehXgedOK/ySEQ6EBJqBYcaYBAgJYIDVz"
@@ -74,14 +83,20 @@ class RemoteProvisioningShellCommand extends ShellCommand {
     private static final int ERROR = -1;
     private static final int SUCCESS = 0;
 
+    private static final Duration BIND_TIMEOUT = Duration.ofSeconds(10);
+    private static final int KEY_ID = 452436;
+
+    private final Context mContext;
+    private final int mCallerUid;
     private final Injector mInjector;
 
-    RemoteProvisioningShellCommand() {
-        this(new Injector());
+    RemoteProvisioningShellCommand(Context context, int callerUid) {
+        this(context, callerUid, new Injector());
     }
 
-    @VisibleForTesting
-    RemoteProvisioningShellCommand(Injector injector) {
+    RemoteProvisioningShellCommand(Context context, int callerUid, Injector injector) {
+        mContext = context;
+        mCallerUid = callerUid;
         mInjector = injector;
     }
 
@@ -102,6 +117,8 @@ class RemoteProvisioningShellCommand extends ShellCommand {
                     return list();
                 case "csr":
                     return csr();
+                case "certify":
+                    return certify();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -134,7 +151,9 @@ class RemoteProvisioningShellCommand extends ShellCommand {
             pw.println("supportedEekCurve=" + info.supportedEekCurve);
         }
         pw.println("uniqueId=" + info.uniqueId);
-        pw.println("supportedNumKeysInCsr=" + info.supportedNumKeysInCsr);
+        if (info.versionNumber >= 3) {
+            pw.println("supportedNumKeysInCsr=" + info.supportedNumKeysInCsr);
+        }
     }
 
     private int list() throws RemoteException {
@@ -153,7 +172,7 @@ class RemoteProvisioningShellCommand extends ShellCommand {
                     challenge = Base64.getDecoder().decode(getNextArgRequired());
                     break;
                 default:
-                    getErrPrintWriter().println("error: unknown option");
+                    getErrPrintWriter().println("error: unknown option " + opt);
                     return ERROR;
             }
         }
@@ -230,7 +249,45 @@ class RemoteProvisioningShellCommand extends ShellCommand {
         return new CborDecoder(bais).decodeNext();
     }
 
-    @VisibleForTesting
+    private int certify() throws Exception {
+        String name = getNextArgRequired();
+
+        Executor executor = mContext.getMainExecutor();
+        CancellationSignal cancellationSignal = new CancellationSignal();
+        OutcomeFuture<RemotelyProvisionedKey> key = new OutcomeFuture<>();
+        mInjector.getRegistrationProxy(mContext, mCallerUid, name, executor)
+                .getKeyAsync(KEY_ID, cancellationSignal, executor, key);
+        byte[] encodedCertChain = key.join().getEncodedCertChain();
+        ByteArrayInputStream is = new ByteArrayInputStream(encodedCertChain);
+        PrintWriter pw = getOutPrintWriter();
+        for (Certificate cert : CertificateFactory.getInstance("X.509").generateCertificates(is)) {
+            String encoded = Base64.getEncoder().encodeToString(cert.getEncoded());
+            pw.println("-----BEGIN CERTIFICATE-----");
+            pw.println(encoded.replaceAll("(.{64})", "$1\n").stripTrailing());
+            pw.println("-----END CERTIFICATE-----");
+        }
+        return SUCCESS;
+    }
+
+    /** Treat an OutcomeReceiver as a future for use in synchronous code. */
+    private static class OutcomeFuture<T> implements OutcomeReceiver<T, Exception> {
+        private CompletableFuture<T> mFuture = new CompletableFuture<>();
+
+        @Override
+          public void onResult(T result) {
+            mFuture.complete(result);
+        }
+
+        @Override
+        public void onError(Exception e) {
+            mFuture.completeExceptionally(e);
+        }
+
+        public T join() {
+            return mFuture.join();
+        }
+    }
+
     static class Injector {
         String[] getIrpcNames() {
             return ServiceManager.getDeclaredInstances(IRemotelyProvisionedComponent.DESCRIPTOR);
@@ -245,6 +302,15 @@ class RemoteProvisioningShellCommand extends ShellCommand {
                 throw new IllegalArgumentException("failed to find " + irpc);
             }
             return binder;
+        }
+
+        RegistrationProxy getRegistrationProxy(
+                Context context, int callerUid, String name, Executor executor) {
+            String irpc = IRemotelyProvisionedComponent.DESCRIPTOR + "/" + name;
+            OutcomeFuture<RegistrationProxy> registration = new OutcomeFuture<>();
+            RegistrationProxy.createAsync(
+                    context, callerUid, irpc, BIND_TIMEOUT, executor, registration);
+            return registration.join();
         }
     }
 }

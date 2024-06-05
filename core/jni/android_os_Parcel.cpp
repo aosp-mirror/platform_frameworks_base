@@ -661,6 +661,35 @@ static void android_os_Parcel_appendFrom(JNIEnv* env, jclass clazz, jlong thisNa
     return;
 }
 
+static jboolean android_os_Parcel_hasBinders(JNIEnv* env, jclass clazz, jlong nativePtr) {
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel != NULL) {
+        bool result;
+        status_t err = parcel->hasBinders(&result);
+        if (err != NO_ERROR) {
+            signalExceptionForError(env, clazz, err);
+            return JNI_FALSE;
+        }
+        return result ? JNI_TRUE : JNI_FALSE;
+    }
+    return JNI_FALSE;
+}
+
+static jboolean android_os_Parcel_hasBindersInRange(JNIEnv* env, jclass clazz, jlong nativePtr,
+                                                    jint offset, jint length) {
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel != NULL) {
+        bool result;
+        status_t err = parcel->hasBindersInRange(offset, length, &result);
+        if (err != NO_ERROR) {
+            signalExceptionForError(env, clazz, err);
+            return JNI_FALSE;
+        }
+        return result ? JNI_TRUE : JNI_FALSE;
+    }
+    return JNI_FALSE;
+}
+
 static jboolean android_os_Parcel_hasFileDescriptors(jlong nativePtr)
 {
     jboolean ret = JNI_FALSE;
@@ -691,7 +720,7 @@ static jboolean android_os_Parcel_hasFileDescriptorsInRange(JNIEnv* env, jclass 
 
 // String tries to allocate itself on the stack, within a known size, but will
 // make a heap allocation if not.
-template <size_t StackReserve>
+template <jsize StackReserve>
 class StackString {
 public:
     StackString(JNIEnv* env, jstring str) : mEnv(env), mJStr(str) {
@@ -806,7 +835,7 @@ static jboolean android_os_Parcel_replaceCallingWorkSourceUid(jlong nativePtr, j
 }
 
 // ----------------------------------------------------------------------------
-
+// clang-format off
 static const JNINativeMethod gParcelMethods[] = {
     // @CriticalNative
     {"nativeMarkSensitive",       "(J)V", (void*)android_os_Parcel_markSensitive},
@@ -886,6 +915,9 @@ static const JNINativeMethod gParcelMethods[] = {
     // @CriticalNative
     {"nativeHasFileDescriptors",  "(J)Z", (void*)android_os_Parcel_hasFileDescriptors},
     {"nativeHasFileDescriptorsInRange",  "(JII)Z", (void*)android_os_Parcel_hasFileDescriptorsInRange},
+
+    {"nativeHasBinders",  "(J)Z", (void*)android_os_Parcel_hasBinders},
+    {"nativeHasBindersInRange",  "(JII)Z", (void*)android_os_Parcel_hasBindersInRange},
     {"nativeWriteInterfaceToken", "(JLjava/lang/String;)V", (void*)android_os_Parcel_writeInterfaceToken},
     {"nativeEnforceInterface",    "(JLjava/lang/String;)V", (void*)android_os_Parcel_enforceInterface},
 
@@ -900,6 +932,7 @@ static const JNINativeMethod gParcelMethods[] = {
     // @CriticalNative
     {"nativeReplaceCallingWorkSourceUid", "(JI)Z", (void*)android_os_Parcel_replaceCallingWorkSourceUid},
 };
+// clang-format on
 
 const char* const kParcelPathName = "android/os/Parcel";
 

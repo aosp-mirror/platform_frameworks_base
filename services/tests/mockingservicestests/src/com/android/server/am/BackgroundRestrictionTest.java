@@ -113,6 +113,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.role.RoleManager;
 import android.app.usage.AppStandbyInfo;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -125,6 +126,7 @@ import android.os.BatteryManagerInternal;
 import android.os.BatteryStatsInternal;
 import android.os.BatteryUsageStats;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.Process;
 import android.os.RemoteException;
@@ -320,6 +322,7 @@ public final class BackgroundRestrictionTest {
     private BindServiceEventListener mBindServiceEventListener;
 
     private Context mContext = getInstrumentation().getTargetContext();
+    private Handler mDefaultHandler = new Handler(Looper.getMainLooper());
     private TestBgRestrictionInjector mInjector;
     private AppRestrictionController mBgRestrictionController;
     private AppBatteryTracker mAppBatteryTracker;
@@ -345,10 +348,6 @@ public final class BackgroundRestrictionTest {
         mActivityManagerService.mConstants = mActivityManagerConstants;
         mPhoneCarrierPrivileges = new PhoneCarrierPrivileges(
                 mInjector.getTelephonyManager(), MOCK_PRIVILEGED_PACKAGES.length);
-        for (int i = 0; i < MOCK_PRIVILEGED_PACKAGES.length; i++) {
-            mPhoneCarrierPrivileges.addNewPrivilegePackages(i,
-                    MOCK_PRIVILEGED_PACKAGES[i], MOCK_PRIVILEGED_UIDS[i]);
-        }
 
         doReturn(PROCESS_STATE_FOREGROUND_SERVICE).when(mActivityManagerInternal)
                 .getUidProcessState(anyInt());
@@ -2435,10 +2434,19 @@ public final class BackgroundRestrictionTest {
     private void setPermissionState(String packageName, int uid, String perm, boolean granted) {
         doReturn(granted ? PERMISSION_GRANTED : PERMISSION_DENIED)
                 .when(mPermissionManagerServiceInternal)
-                .checkUidPermission(uid, perm);
+                .checkUidPermission(uid, perm, Context.DEVICE_ID_DEFAULT);
         doReturn(granted ? PERMISSION_GRANTED : PERMISSION_DENIED)
                 .when(mPermissionManagerServiceInternal)
-                .checkPermission(packageName, perm, UserHandle.getUserId(uid));
+                .checkPermission(
+                        packageName, perm, VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
+                        UserHandle.getUserId(uid));
+        try {
+            doReturn(granted ? PERMISSION_GRANTED : PERMISSION_DENIED)
+                    .when(mIActivityManager)
+                    .checkPermission(perm, Process.INVALID_PID, uid);
+        } catch (RemoteException e) {
+            // Ignore.
+        }
     }
 
     private void setAppOpState(String packageName, int uid, int op, boolean granted) {
@@ -3038,6 +3046,11 @@ public final class BackgroundRestrictionTest {
 
     @Test
     public void testCarrierPrivilegedAppListener() throws Exception {
+        for (int i = 0; i < MOCK_PRIVILEGED_PACKAGES.length; i++) {
+            mPhoneCarrierPrivileges.addNewPrivilegePackages(i,
+                    MOCK_PRIVILEGED_PACKAGES[i], MOCK_PRIVILEGED_UIDS[i]);
+        }
+
         final long shortMs = 1_000L;
         for (int i = 0; i < MOCK_PRIVILEGED_PACKAGES.length; i++) {
             verifyPotentialSystemExemptionReason(REASON_CARRIER_PRIVILEGED_APP,
@@ -3346,6 +3359,11 @@ public final class BackgroundRestrictionTest {
         }
 
         @Override
+        Handler getDefaultHandler() {
+            return mDefaultHandler;
+        }
+
+        @Override
         boolean isTest() {
             return true;
         }
@@ -3434,6 +3452,16 @@ public final class BackgroundRestrictionTest {
         @Override
         IAppOpsService getIAppOpsService() {
             return BackgroundRestrictionTest.this.mIAppOpsService;
+        }
+
+        @Override
+        int checkPermission(String perm, int pid, int uid) {
+            try {
+                return BackgroundRestrictionTest.this.mIActivityManager.checkPermission(
+                        perm, pid, uid);
+            } catch (RemoteException e) {
+                return PERMISSION_DENIED;
+            }
         }
     }
 

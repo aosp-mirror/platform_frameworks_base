@@ -18,12 +18,26 @@ package com.android.internal.util;
 
 import static com.android.internal.util.CharSequences.forAsciiBytes;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.TestCase;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
-public class CharSequencesTest extends TestCase {
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = CharSequences.class)
+public class CharSequencesTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    @Test
     @SmallTest
     public void testCharSequences() {
         String s = "Hello Bob";

@@ -160,7 +160,7 @@ public final class BeginGetCredentialResponse implements Parcelable {
          *
          * <p> Note that as a provider service you will only be able to set a remote entry if :
          * - Provider service possesses the
-         * {@link Manifest.permission.PROVIDE_REMOTE_CREDENTIALS} permission.
+         * {@link Manifest.permission#PROVIDE_REMOTE_CREDENTIALS} permission.
          * - Provider service is configured as the provider that can provide remote entries.
          *
          * If the above conditions are not met, setting back {@link BeginGetCredentialResponse}

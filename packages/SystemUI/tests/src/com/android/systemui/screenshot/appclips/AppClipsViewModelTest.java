@@ -33,6 +33,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.net.Uri;
 import android.os.Process;
 import android.os.UserHandle;
+import android.view.Display;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -99,8 +100,8 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
 
     @Test
     public void saveScreenshot_throwsError_shouldUpdateErrorWithFailed() {
-        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null),
-                eq(USER_HANDLE))).thenReturn(
+        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null), eq(USER_HANDLE),
+                eq(Display.DEFAULT_DISPLAY))).thenReturn(
                 Futures.immediateFailedFuture(new ExecutionException(new Throwable())));
 
         mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT, USER_HANDLE);
@@ -113,8 +114,9 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
 
     @Test
     public void saveScreenshot_failsSilently_shouldUpdateErrorWithFailed() {
-        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null),
-                eq(USER_HANDLE))).thenReturn(Futures.immediateFuture(new ImageExporter.Result()));
+        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null), eq(USER_HANDLE),
+                eq(Display.DEFAULT_DISPLAY))).thenReturn(
+                Futures.immediateFuture(new ImageExporter.Result()));
 
         mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT, USER_HANDLE);
         waitForIdleSync();
@@ -128,8 +130,8 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
     public void saveScreenshot_succeeds_shouldUpdateResultWithUri() {
         ImageExporter.Result result = new ImageExporter.Result();
         result.uri = FAKE_URI;
-        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null),
-                eq(USER_HANDLE))).thenReturn(Futures.immediateFuture(result));
+        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null), eq(USER_HANDLE),
+                eq(Display.DEFAULT_DISPLAY))).thenReturn(Futures.immediateFuture(result));
 
         mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT, USER_HANDLE);
         waitForIdleSync();

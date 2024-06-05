@@ -16,6 +16,9 @@
 
 package android.service.autofill;
 
+import android.os.IBinder;
+import android.service.autofill.ConvertCredentialRequest;
+import android.service.autofill.IConvertCredentialCallback;
 import android.service.autofill.FillRequest;
 import android.service.autofill.IFillCallback;
 import android.service.autofill.ISaveCallback;
@@ -30,6 +33,9 @@ import com.android.internal.os.IResultReceiver;
 oneway interface IAutoFillService {
     void onConnectedStateChanged(boolean connected);
     void onFillRequest(in FillRequest request, in IFillCallback callback);
+    void onFillCredentialRequest(in FillRequest request, in IFillCallback callback,
+        in IBinder client);
     void onSaveRequest(in SaveRequest request, in ISaveCallback callback);
     void onSavedPasswordCountRequest(in IResultReceiver receiver);
+    void onConvertCredentialRequest(in ConvertCredentialRequest convertCredentialRequest, in IConvertCredentialCallback convertCredentialCallback);
 }

@@ -1,0 +1,171 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+// Visibility only for ravenwood prototype uses.
+genrule_defaults {
+    name: "ravenwood-internal-only-visibility-genrule",
+    visibility: [
+        ":__subpackages__",
+        "//frameworks/base",
+        "//frameworks/base/ravenwood:__subpackages__",
+    ],
+}
+
+// Visibility only for ravenwood prototype uses.
+java_defaults {
+    name: "ravenwood-internal-only-visibility-java",
+    visibility: [
+        ":__subpackages__",
+        "//frameworks/base",
+        "//frameworks/base/ravenwood:__subpackages__",
+    ],
+}
+
+// Visibility only for ravenwood prototype uses.
+filegroup_defaults {
+    name: "ravenwood-internal-only-visibility-filegroup",
+    visibility: [
+        ":__subpackages__",
+        "//frameworks/base",
+        "//frameworks/base/ravenwood:__subpackages__",
+    ],
+}
+
+// This library contains the standard hoststubgen annotations.
+// This is only for the prototype. The productionized version is "ravenwood-annotations".
+java_library {
+    name: "hoststubgen-annotations",
+    defaults: ["ravenwood-internal-only-visibility-java"],
+    srcs: [
+        "annotations-src/**/*.java",
+    ],
+    host_supported: true,
+
+    sdk_version: "core_current",
+}
+
+// This library contains helper classes used in the host side test environment at runtime.
+// This library is _not_ specific to Android APIs.
+java_library_host {
+    name: "hoststubgen-helper-runtime",
+    defaults: ["ravenwood-internal-only-visibility-java"],
+    srcs: [
+        "helper-runtime-src/**/*.java",
+    ],
+    libs: [
+        "junit",
+    ],
+    static_libs: [
+        "guava",
+    ],
+    jarjar_rules: "jarjar-rules.txt",
+}
+
+java_library {
+    name: "hoststubgen-helper-runtime.ravenwood",
+    defaults: ["ravenwood-internal-only-visibility-java"],
+    srcs: [
+        "helper-runtime-src/**/*.java",
+    ],
+    libs: [
+        "junit",
+    ],
+    static_libs: [
+        "guava",
+    ],
+    jarjar_rules: "jarjar-rules.txt",
+}
+
+// For sharing the code with other tools
+java_library_host {
+    name: "hoststubgen-lib",
+    defaults: ["ravenwood-internal-only-visibility-java"],
+    srcs: ["src/**/*.kt"],
+    static_libs: [
+        "hoststubgen-helper-runtime",
+    ],
+    libs: [
+        "junit",
+        "ow2-asm",
+        "ow2-asm-analysis",
+        "ow2-asm-commons",
+        "ow2-asm-tree",
+        "ow2-asm-util",
+    ],
+}
+
+// Host-side stub generator tool.
+java_binary_host {
+    name: "hoststubgen",
+    main_class: "com.android.hoststubgen.HostStubGenMain",
+    static_libs: [
+        "hoststubgen-lib",
+        "junit",
+        "ow2-asm",
+        "ow2-asm-analysis",
+        "ow2-asm-commons",
+        "ow2-asm-tree",
+        "ow2-asm-util",
+    ],
+    visibility: ["//visibility:public"],
+}
+
+java_test_host {
+    name: "hoststubgentest",
+    // main_class: "com.android.hoststubgen.Main",
+    srcs: ["test/**/*.kt"],
+    static_libs: [
+        "hoststubgen",
+        "truth",
+    ],
+    test_suites: ["general-tests"],
+    visibility: ["//visibility:private"],
+}
+
+// File that contains the standard command line argumetns to hoststubgen.
+// This is only for the prototype. The productionized version is "ravenwood-standard-options".
+filegroup {
+    name: "hoststubgen-standard-options",
+    defaults: ["ravenwood-internal-only-visibility-filegroup"],
+    srcs: [
+        "hoststubgen-standard-options.txt",
+    ],
+}
+
+hoststubgen_common_options = "$(location hoststubgen) " +
+    // "--in-jar $(location :framework-all) " +
+    // "--policy-override-file $(location framework-policy-override.txt) " +
+    "@$(location :hoststubgen-standard-options) " +
+
+    "--out-stub-jar $(location host_stub.jar) " +
+    "--out-impl-jar $(location host_impl.jar) " +
+
+    // "--keep-all-classes " + // Used it for an experiment. See KeepAllClassesFilter.
+    "--gen-keep-all-file $(location hoststubgen_keep_all.txt) " +
+    "--gen-input-dump-file $(location hoststubgen_dump.txt) " +
+    ""
+
+// Common defaults for stub generation.
+// This one is not specific to Android APIs.
+genrule_defaults {
+    name: "hoststubgen-command-defaults",
+    tools: ["hoststubgen"],
+    srcs: [
+        ":hoststubgen-standard-options",
+    ],
+    // Create two jar files.
+    out: [
+        "host_stub.jar",
+        "host_impl.jar",
+
+        // Following files are created just as FYI.
+        "hoststubgen_keep_all.txt",
+        "hoststubgen_dump.txt",
+    ],
+}

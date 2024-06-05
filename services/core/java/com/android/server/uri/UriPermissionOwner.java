@@ -155,18 +155,22 @@ public class UriPermissionOwner {
 
     public void removeReadPermission(UriPermission perm) {
         synchronized (this) {
-            mReadPerms.remove(perm);
-            if (mReadPerms.isEmpty()) {
-                mReadPerms = null;
+            if (mReadPerms != null) {
+                mReadPerms.remove(perm);
+                if (mReadPerms.isEmpty()) {
+                    mReadPerms = null;
+                }
             }
         }
     }
 
     public void removeWritePermission(UriPermission perm) {
         synchronized (this) {
-            mWritePerms.remove(perm);
-            if (mWritePerms.isEmpty()) {
-                mWritePerms = null;
+            if (mWritePerms != null) {
+                mWritePerms.remove(perm);
+                if (mWritePerms.isEmpty()) {
+                    mWritePerms = null;
+                }
             }
         }
     }

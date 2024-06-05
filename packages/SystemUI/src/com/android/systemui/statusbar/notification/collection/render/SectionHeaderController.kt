@@ -21,7 +21,7 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.notification.dagger.HeaderClickAction
 import com.android.systemui.statusbar.notification.dagger.HeaderText
@@ -38,7 +38,7 @@ interface SectionHeaderController {
 }
 
 @SectionHeaderScope
-internal class SectionHeaderNodeControllerImpl @Inject constructor(
+class SectionHeaderNodeControllerImpl @Inject constructor(
     @NodeLabel override val nodeLabel: String,
     private val layoutInflater: LayoutInflater,
     @HeaderText @StringRes private val headerTextResId: Int,
@@ -95,7 +95,7 @@ internal class SectionHeaderNodeControllerImpl @Inject constructor(
     }
 
     override fun onViewAdded() {
-        headerView?.isContentVisible = true
+        headerView?.setContentVisibleAnimated(true)
     }
 
     override val view: View

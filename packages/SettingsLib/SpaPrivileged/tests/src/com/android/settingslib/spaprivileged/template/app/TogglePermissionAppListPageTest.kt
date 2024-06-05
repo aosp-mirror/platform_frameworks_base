@@ -19,7 +19,6 @@ package com.android.settingslib.spaprivileged.template.app
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -27,9 +26,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.testutils.FakeNavControllerWrapper
 import com.android.settingslib.spaprivileged.R
+import com.android.settingslib.spaprivileged.framework.compose.getPlaceholder
 import com.android.settingslib.spaprivileged.model.enterprise.NoRestricted
 import com.android.settingslib.spaprivileged.tests.testutils.FakeRestrictionsProvider
 import com.android.settingslib.spaprivileged.tests.testutils.TestAppRecord
@@ -71,10 +70,9 @@ class TogglePermissionAppListPageTest {
         fakeRestrictionsProvider.restrictedMode = NoRestricted
         val listModel = TestTogglePermissionAppListModel(isAllowed = true)
 
-        val summaryState = getSummary(listModel)
+        val summary = getSummary(listModel)
 
-        assertThat(summaryState.value)
-            .isEqualTo(context.getString(R.string.app_permission_summary_allowed))
+        assertThat(summary).isEqualTo(context.getString(R.string.app_permission_summary_allowed))
     }
 
     @Test
@@ -82,9 +80,9 @@ class TogglePermissionAppListPageTest {
         fakeRestrictionsProvider.restrictedMode = NoRestricted
         val listModel = TestTogglePermissionAppListModel(isAllowed = false)
 
-        val summaryState = getSummary(listModel)
+        val summary = getSummary(listModel)
 
-        assertThat(summaryState.value)
+        assertThat(summary)
             .isEqualTo(context.getString(R.string.app_permission_summary_not_allowed))
     }
 
@@ -93,11 +91,9 @@ class TogglePermissionAppListPageTest {
         fakeRestrictionsProvider.restrictedMode = NoRestricted
         val listModel = TestTogglePermissionAppListModel(isAllowed = null)
 
-        val summaryState = getSummary(listModel)
+        val summary = getSummary(listModel)
 
-        assertThat(summaryState.value).isEqualTo(
-            context.getString(R.string.summary_placeholder)
-        )
+        assertThat(summary).isEqualTo(context.getPlaceholder())
     }
 
     @Test
@@ -109,7 +105,7 @@ class TogglePermissionAppListPageTest {
                     AppListItemModel(
                         record = listModel.transformItem(APP),
                         label = LABEL,
-                        summary = stateOf(SUMMARY),
+                        summary = { SUMMARY },
                     ).AppItem()
                 }
             }
@@ -153,12 +149,12 @@ class TogglePermissionAppListPageTest {
             restrictionsProviderFactory = { _, _ -> fakeRestrictionsProvider },
         )
 
-    private fun getSummary(listModel: TestTogglePermissionAppListModel): State<String> {
-        lateinit var summary: State<String>
+    private fun getSummary(listModel: TestTogglePermissionAppListModel): String {
+        lateinit var summary: () -> String
         composeTestRule.setContent {
             summary = createInternalAppListModel(listModel).getSummary(record = TestAppRecord(APP))
         }
-        return summary
+        return summary()
     }
 
     private companion object {

@@ -16,11 +16,13 @@
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "ImageReader_JNI"
+#define ATRACE_TAG ATRACE_TAG_CAMERA
 #include "android_media_Utils.h"
 #include <cutils/atomic.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
 #include <utils/List.h>
+#include <utils/Trace.h>
 #include <utils/String8.h>
 
 #include <cstdio>
@@ -223,6 +225,7 @@ JNIImageReaderContext::~JNIImageReaderContext() {
 
 void JNIImageReaderContext::onFrameAvailable(const BufferItem& /*item*/)
 {
+    ATRACE_CALL();
     ALOGV("%s: frame available", __FUNCTION__);
     bool needsDetach = false;
     JNIEnv* env = getJNIEnv(&needsDetach);
@@ -617,7 +620,7 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image) {
                         "match the ImageReader's configured buffer format 0x%x.",
                         bufferFormat, ctx->getBufferFormat());
                 jniThrowException(env, "java/lang/UnsupportedOperationException",
-                        msg.string());
+                        msg.c_str());
                 return -1;
             }
         }
@@ -795,7 +798,7 @@ static jobjectArray ImageReader_createImagePlanes(JNIEnv* env, jobject /*thiz*/,
         String8 msg;
         msg.appendFormat("Format 0x%x is opaque, thus not writable, the number of planes (%d)"
                 " must be 0", halReaderFormat, numPlanes);
-        jniThrowException(env, "java/lang/IllegalArgumentException", msg.string());
+        jniThrowException(env, "java/lang/IllegalArgumentException", msg.c_str());
         return NULL;
     }
 
@@ -860,7 +863,7 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
         String8 msg;
         msg.appendFormat("Format 0x%x is opaque, thus not writable, the number of planes (%d)"
                 " must be 0", halReaderFormat, numPlanes);
-        jniThrowException(env, "java/lang/IllegalArgumentException", msg.string());
+        jniThrowException(env, "java/lang/IllegalArgumentException", msg.c_str());
         return NULL;
     }
 

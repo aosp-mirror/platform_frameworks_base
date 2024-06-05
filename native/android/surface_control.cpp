@@ -367,7 +367,7 @@ void ASurfaceTransaction_reparent(ASurfaceTransaction* aSurfaceTransaction,
 
 void ASurfaceTransaction_setVisibility(ASurfaceTransaction* aSurfaceTransaction,
                                        ASurfaceControl* aSurfaceControl,
-                                       int8_t visibility) {
+                                       ASurfaceTransactionVisibility visibility) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
 
@@ -496,7 +496,7 @@ void ASurfaceTransaction_setScale(ASurfaceTransaction* aSurfaceTransaction,
 
 void ASurfaceTransaction_setBufferTransparency(ASurfaceTransaction* aSurfaceTransaction,
                                                ASurfaceControl* aSurfaceControl,
-                                               int8_t transparency) {
+                                               ASurfaceTransactionTransparency transparency) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     CHECK_NOT_NULL(aSurfaceControl);
 
@@ -644,6 +644,24 @@ void ASurfaceTransaction_setExtendedRangeBrightness(ASurfaceTransaction* aSurfac
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
 
     transaction->setExtendedRangeBrightness(surfaceControl, currentBufferRatio, desiredRatio);
+}
+
+void ASurfaceTransaction_setDesiredHdrHeadroom(ASurfaceTransaction* aSurfaceTransaction,
+                                               ASurfaceControl* aSurfaceControl,
+                                               float desiredRatio) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    if (!isfinite(desiredRatio) || (desiredRatio < 1.0f && desiredRatio > 0.0f)) {
+        LOG_ALWAYS_FATAL("setDesiredHdrHeadroom, desiredRatio isn't finite && >= 1.0f or 0, got %f",
+                         desiredRatio);
+        return;
+    }
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    transaction->setDesiredHdrHeadroom(surfaceControl, desiredRatio);
 }
 
 void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,

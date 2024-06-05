@@ -17,6 +17,7 @@
 
 <com.android.systemui.statusbar.notification.row.NotificationInfo
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/notification_guts"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -102,7 +103,7 @@ asked for it -->
             android:contentDescription="@string/notification_app_settings"
             android:src="@drawable/ic_info"
             android:layout_toStartOf="@id/info"
-            android:tint="@color/notification_guts_link_icon_tint"/>
+            android:tint="?androidprv:attr/materialColorPrimary"/>
         <ImageButton
             android:id="@+id/info"
             android:layout_width="@dimen/notification_importance_toggle_size"
@@ -111,7 +112,7 @@ asked for it -->
             android:contentDescription="@string/notification_more_settings"
             android:background="@drawable/ripple_drawable_20dp"
             android:src="@drawable/ic_settings"
-            android:tint="?android:attr/colorAccent"
+            android:tint="?androidprv:attr/materialColorPrimary"
             android:layout_alignParentEnd="true" />
 
     </LinearLayout>

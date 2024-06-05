@@ -25,6 +25,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.asIndenting
+import com.android.systemui.util.annotations.WeaklyReferencedCallback
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.withIncreasedIndent
 import java.io.PrintWriter
@@ -144,6 +145,7 @@ class PrivacyConfig @Inject constructor(
         ipw.flush()
     }
 
+    @WeaklyReferencedCallback
     interface Callback {
         fun onFlagMicCameraChanged(flag: Boolean) {}
 

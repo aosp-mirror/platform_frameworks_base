@@ -1,0 +1,62 @@
+package: "com.android.server.backup"
+container: "system"
+
+flag {
+    name: "enable_skipping_restore_launched_apps"
+    namespace: "onboarding"
+    description: "Enforce behavior determined by BackupTransport implementation on whether to skip "
+            "restore for apps that have been launched."
+    bug: "308401499"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_metrics_system_backup_agents"
+    namespace: "onboarding"
+    description: "Enable SystemBackupAgent to collect B&R agent metrics by passing an instance of "
+            "the logger to each BackupHelper."
+    bug: "296844513"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_max_size_writes_to_pipes"
+    namespace: "onboarding"
+    description: "Enables the write buffer to pipes to be of maximum size."
+    bug: "265976737"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_clear_pipe_after_restore_file"
+    namespace: "onboarding"
+    description: "Enables clearing the pipe buffer after restoring a single file to a BackupAgent."
+    bug: "320633449"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_v_to_u_restore_for_system_components_in_allowlist"
+    namespace: "onboarding"
+    description: "Enables system components to opt in to support restore in V to U downgrade "
+            "scenario without opting in for restoreAnyVersion."
+    bug: "324233962"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_increase_datatypes_for_agent_logging"
+    namespace: "onboarding"
+    description: "Increase the number of a supported datatypes that an agent can define for its "
+            "logger."
+    bug: "296844513"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_increased_bmm_logging_for_restore_at_install"
+    namespace: "onboarding"
+    description: "Increase BMM logging coverage in restore at install flow."
+    bug: "331749778"
+    is_fixed_read_only: true
+}

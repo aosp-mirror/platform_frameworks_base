@@ -22,6 +22,7 @@ import android.app.StatusBarManager
 import android.content.Context
 import android.content.res.Resources
 import android.content.res.XmlResourceParser
+import android.graphics.Insets
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.view.Display
@@ -29,12 +30,12 @@ import android.view.DisplayCutout
 import android.view.View
 import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.app.animation.Interpolators
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
@@ -45,6 +46,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
+import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeHeaderController.Companion.DEFAULT_CLOCK_INTENT
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
@@ -52,8 +54,10 @@ import com.android.systemui.shade.ShadeHeaderController.Companion.QS_HEADER_CONS
 import com.android.systemui.shade.carrier.ShadeCarrierGroup
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
-import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
+import com.android.systemui.statusbar.phone.StatusOverlayHoverListenerFactory
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController
+import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.NextAlarmController
@@ -92,8 +96,8 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     @Mock(answer = Answers.RETURNS_MOCKS) private lateinit var view: MotionLayout
     @Mock private lateinit var statusIcons: StatusIconContainer
     @Mock private lateinit var statusBarIconController: StatusBarIconController
-    @Mock private lateinit var iconManagerFactory: StatusBarIconController.TintedIconManager.Factory
-    @Mock private lateinit var iconManager: StatusBarIconController.TintedIconManager
+    @Mock private lateinit var iconManagerFactory: TintedIconManager.Factory
+    @Mock private lateinit var iconManager: TintedIconManager
     @Mock private lateinit var mShadeCarrierGroupController: ShadeCarrierGroupController
     @Mock
     private lateinit var mShadeCarrierGroupControllerBuilder: ShadeCarrierGroupController.Builder
@@ -122,11 +126,13 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     @Mock private lateinit var qsBatteryModeController: QsBatteryModeController
     @Mock private lateinit var nextAlarmController: NextAlarmController
     @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var mStatusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
     var viewVisibility = View.GONE
     var viewAlpha = 1f
 
+    private val systemIconsHoverContainer = LinearLayout(context)
     private lateinit var shadeHeaderController: ShadeHeaderController
     private lateinit var carrierIconSlots: List<String>
     private val configurationController = FakeConfigurationController()
@@ -140,12 +146,16 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         whenever<TextView>(view.requireViewById(R.id.date)).thenReturn(date)
         whenever(date.context).thenReturn(mockedContext)
 
-        whenever<ShadeCarrierGroup>(view.requireViewById(R.id.carrier_group)).thenReturn(carrierGroup)
+        whenever<ShadeCarrierGroup>(view.requireViewById(R.id.carrier_group))
+            .thenReturn(carrierGroup)
 
         whenever<BatteryMeterView>(view.requireViewById(R.id.batteryRemainingIcon))
             .thenReturn(batteryMeterView)
 
-        whenever<StatusIconContainer>(view.requireViewById(R.id.statusIcons)).thenReturn(statusIcons)
+        whenever<StatusIconContainer>(view.requireViewById(R.id.statusIcons))
+            .thenReturn(statusIcons)
+        whenever<View>(view.requireViewById(R.id.hover_system_icons_container))
+            .thenReturn(systemIconsHoverContainer)
 
         viewContext = Mockito.spy(context)
         whenever(view.context).thenReturn(viewContext)
@@ -191,6 +201,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
                 qsBatteryModeController,
                 nextAlarmController,
                 activityStarter,
+                mStatusOverlayHoverListenerFactory
             )
         whenever(view.isAttachedToWindow).thenReturn(true)
         shadeHeaderController.init()
@@ -237,8 +248,19 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         whenever(mShadeCarrierGroupController.isSingleCarrier).thenReturn(false)
 
         makeShadeVisible()
+        shadeHeaderController.qsExpandedFraction = 1.0f
 
         verify(statusIcons).addIgnoredSlots(carrierIconSlots)
+    }
+
+    @Test
+    fun dualCarrier_enablesCarrierIconsInStatusIcons_qsExpanded() {
+        whenever(mShadeCarrierGroupController.isSingleCarrier).thenReturn(false)
+
+        makeShadeVisible()
+        shadeHeaderController.qsExpandedFraction = 0.0f
+
+        verify(statusIcons, times(2)).removeIgnoredSlots(carrierIconSlots)
     }
 
     @Test
@@ -437,6 +459,17 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         shadeHeaderController.largeScreenActive = false
 
         verify(view).setTransition(ShadeHeaderController.HEADER_TRANSITION_ID)
+    }
+
+    @Test
+    fun testLargeScreenActive_collapseActionRun_onSystemIconsHoverContainerClick() {
+        shadeHeaderController.largeScreenActive = true
+        var wasRun = false
+        shadeHeaderController.shadeCollapseAction = Runnable { wasRun = true }
+
+        systemIconsHoverContainer.performClick()
+
+        assertThat(wasRun).isTrue()
     }
 
     @Test
@@ -901,12 +934,16 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         return windowInsets
     }
 
-    private fun mockInsetsProvider(
-        insets: Pair<Int, Int> = 0 to 0,
-        cornerCutout: Boolean = false,
-    ) {
+    private fun mockInsetsProvider(insets: Pair<Int, Int> = 0 to 0, cornerCutout: Boolean = false) {
         whenever(insetsProvider.getStatusBarContentInsetsForCurrentRotation())
-            .thenReturn(insets.toAndroidPair())
+            .thenReturn(
+                Insets.of(
+                    /* left= */ insets.first,
+                    /* top= */ 0,
+                    /* right= */ insets.second,
+                    /* bottom= */ 0
+                )
+            )
         whenever(insetsProvider.currentRotationHasCornerCutout()).thenReturn(cornerCutout)
     }
 
@@ -951,7 +988,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
             )
             .thenReturn(EMPTY_CHANGES)
         whenever(insetsProvider.getStatusBarContentInsetsForCurrentRotation())
-            .thenReturn(Pair(0, 0).toAndroidPair())
+            .thenReturn(Insets.NONE)
         whenever(insetsProvider.currentRotationHasCornerCutout()).thenReturn(false)
         setupCurrentInsets(null)
     }

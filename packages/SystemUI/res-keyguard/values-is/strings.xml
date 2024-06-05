@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Í hleðslu"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hröð hleðsla"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hæg hleðsla"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hleðsla fínstillt til að vernda rafhlöðuna"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Vandamál með hleðslubúnað"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Ýttu á valmyndarhnappinn til að taka úr lás."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hleðsla í bið til að vernda rafhlöðuna"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Athugaðu hleðslubúnaðinn"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Net læst"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Ekkert SIM-kort"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Bæta við SIM-korti."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM-kort vantar eða er ekki læsilegt. Bæta við SIM-korti."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Ónothæft SIM-kort."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM-kortið þitt var gert varanlega óvirkt.\n Hafðu samband við símafyrirtækið þitt til að fá nýtt SIM-kort."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-kort er læst."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM-kort er læst með PUK-númeri."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Opnar SIM-kort…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"PIN-númers er krafist eftir læsingu"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Aðgangsorðs er krafist eftir læsingu"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Mynsturs er krafist eftir læsingu"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Uppfærslan verður sett upp í aðgerðaleysi"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Uppfærslan verður sett upp þegar tækið er ekki í notkun"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Viðbótaröryggis krafist. PIN-númer var ekki notað um hríð."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Viðbótaröryggis krafist. Aðgangsorð var ekki notað um hríð."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Viðbótaröryggis krafist. Mynstur var ekki notað um hríð."</string>
@@ -112,9 +108,12 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Mynsturs er krafist eftir að tækið er endurræst"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"PIN-númers er krafist eftir að tækið er endurræst"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Aðgangsorðs er krafist eftir að tækið er endurræst"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Fyrir aukið öryggi skaltu nota mynstur í staðinn"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Fyrir aukið öryggi skaltu nota PIN-númer í staðinn"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Fyrir aukið öryggi skaltu nota aðgangsorð í staðinn"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Til að auka öryggi skaltu nota mynstur í staðinn"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Til að auka öryggi skaltu nota PIN-númer í staðinn"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Til að auka öryggi skaltu nota aðgangsorð í staðinn"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"PIN-númers er krafist af öryggisástæðum"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Mynsturs er krafist af öryggisástæðum"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Aðgangsorðs er krafist af öryggisástæðum"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Kerfisstjóri læsti tæki"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Tækinu var læst handvirkt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Þekktist ekki"</string>

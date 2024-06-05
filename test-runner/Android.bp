@@ -14,29 +14,19 @@
 // limitations under the License.
 //
 
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
 // Build the android.test.runner library
 // =====================================
-package {
-    // See: http://go/android-license-faq
-    default_applicable_licenses: ["frameworks_base_test-runner_license"],
-}
-
-license {
-    name: "frameworks_base_test-runner_license",
-    visibility: [":__subpackages__"],
-    license_kinds: [
-        "SPDX-license-identifier-Apache-2.0",
-        "SPDX-license-identifier-CPL-1.0",
-    ],
-    license_text: [
-        "src/junit/cpl-v10.html",
-    ],
-}
-
 java_sdk_library {
     name: "android.test.runner",
 
-    srcs: [":android-test-runner-sources"],
+    srcs: [
+        ":android-test-runner-sources",
+        ":frameworks-base-test-junit-runner",
+    ],
 
     errorprone: {
         javacflags: ["-Xep:DepAnn:ERROR"],
@@ -79,12 +69,13 @@ java_library {
     ],
 }
 
-// Make the current.txt available for use by the cts/tests/signature tests.
+// Make the current.txt available for use by the cts/tests/signature and /vendor tests.
 // ========================================================================
 filegroup {
     name: "android-test-runner-current.txt",
     visibility: [
         "//cts/tests/signature/api",
+        "//vendor:__subpackages__",
     ],
     srcs: [
         "api/current.txt",

@@ -16,42 +16,47 @@
 
 package com.android.credentialmanager.createflow
 
+import android.credentials.flags.Flags.selectorUiImprovementsEnabled
+import android.hardware.biometrics.BiometricPrompt
+import android.os.CancellationSignal
 import android.text.TextUtils
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
-import com.android.credentialmanager.common.BaseEntry
-import com.android.credentialmanager.common.CredentialType
+import com.android.credentialmanager.common.BiometricError
+import com.android.credentialmanager.common.BiometricFlowType
+import com.android.credentialmanager.common.BiometricPromptState
+import com.android.credentialmanager.model.EntryInfo
+import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetDefaults
+import com.android.credentialmanager.common.runBiometricFlowForCreate
 import com.android.credentialmanager.common.ui.ActionButton
 import com.android.credentialmanager.common.ui.BodyMediumText
 import com.android.credentialmanager.common.ui.BodySmallText
@@ -62,13 +67,12 @@ import com.android.credentialmanager.common.ui.Entry
 import com.android.credentialmanager.common.ui.HeadlineIcon
 import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.ModalBottomSheet
-import com.android.credentialmanager.common.ui.MoreAboutPasskeySectionHeader
 import com.android.credentialmanager.common.ui.MoreOptionTopAppBar
 import com.android.credentialmanager.common.ui.SheetContainerCard
-import com.android.credentialmanager.common.ui.PasskeyBenefitRow
 import com.android.credentialmanager.common.ui.HeadlineText
 import com.android.credentialmanager.logging.CreateCredentialEvent
-import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
+import com.android.credentialmanager.model.creation.CreateOptionInfo
+import com.android.credentialmanager.model.creation.RemoteInfo
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 
 @Composable
@@ -85,11 +89,6 @@ fun CreateCredentialScreen(
             when (viewModel.uiState.providerActivityState) {
                 ProviderActivityState.NOT_APPLICABLE -> {
                     when (createCredentialUiState.currentScreenState) {
-                        CreateScreenState.PASSKEY_INTRO -> PasskeyIntroCard(
-                                onConfirm = viewModel::createFlowOnConfirmIntro,
-                                onLearnMore = viewModel::createFlowOnLearnMore,
-                                onLog = { viewModel.logUiEvent(it) },
-                        )
                         CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
                                 requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
                                 enabledProviderList = createCredentialUiState.enabledProviders,
@@ -103,6 +102,64 @@ fun CreateCredentialScreen(
                                 onMoreOptionsSelected =
                                 viewModel::createFlowOnMoreOptionsSelectedOnCreationSelection,
                                 onLog = { viewModel.logUiEvent(it) },
+                        )
+                        CreateScreenState.BIOMETRIC_SELECTION ->
+                            BiometricSelectionPage(
+                                biometricEntry = createCredentialUiState
+                                    .activeEntry?.activeEntryInfo,
+                                onCancelFlowAndFinish = viewModel::onUserCancel,
+                                onIllegalScreenStateAndFinish = viewModel::onIllegalUiState,
+                                onMoreOptionSelected =
+                                viewModel::createFlowOnMoreOptionsOnlySelectedOnCreationSelection,
+                                requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
+                                enabledProviderInfo = createCredentialUiState
+                                        .activeEntry?.activeProvider!!,
+                                onBiometricEntrySelected =
+                                viewModel::createFlowOnEntrySelected,
+                                fallbackToOriginalFlow =
+                                viewModel::fallbackFromBiometricToNormalFlow,
+                                getBiometricPromptState =
+                                viewModel::getBiometricPromptStateStatus,
+                                onBiometricPromptStateChange =
+                                viewModel::onBiometricPromptStateChange,
+                                getBiometricCancellationSignal =
+                                viewModel::getBiometricCancellationSignal,
+                                onLog = { viewModel.logUiEvent(it) },
+                            )
+                        CreateScreenState.MORE_OPTIONS_SELECTION_ONLY -> MoreOptionsSelectionCard(
+                                requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
+                                enabledProviderList = createCredentialUiState.enabledProviders,
+                                disabledProviderList = createCredentialUiState.disabledProviders,
+                                sortedCreateOptionsPairs =
+                                createCredentialUiState.sortedCreateOptionsPairs,
+                                onBackCreationSelectionButtonSelected =
+                                viewModel::createFlowOnBackCreationSelectionButtonSelected,
+                                onOptionSelected =
+                                viewModel::createFlowOnEntrySelectedFromMoreOptionScreen,
+                                onDisabledProvidersSelected =
+                                viewModel::createFlowOnLaunchSettings,
+                                onRemoteEntrySelected = viewModel::createFlowOnEntrySelected,
+                                onLog = { viewModel.logUiEvent(it) },
+                                customTopAppBar = { MoreOptionTopAppBar(
+                                        text = stringResource(
+                                                R.string.save_credential_to_title,
+                                                when (createCredentialUiState.requestDisplayInfo
+                                                        .type) {
+                                                    CredentialType.PASSKEY ->
+                                                        stringResource(R.string.passkey)
+                                                    CredentialType.PASSWORD ->
+                                                        stringResource(R.string.password)
+                                                    CredentialType.UNKNOWN -> stringResource(
+                                                            R.string.sign_in_info)
+                                                }
+                                        ),
+                                        onNavigationIconClicked = viewModel::onUserCancel,
+                                        bottomPadding = 16.dp,
+                                        navigationIcon = Icons.Filled.Close,
+                                        navigationIconContentDescription = stringResource(
+                                                R.string.accessibility_close_button
+                                        )
+                                )}
                         )
                         CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
                                 requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
@@ -140,11 +197,6 @@ fun CreateCredentialScreen(
                                 createCredentialUiState.activeEntry?.activeEntryInfo!!,
                                 onOptionSelected = viewModel::createFlowOnEntrySelected,
                                 onConfirm = viewModel::createFlowOnConfirmEntrySelected,
-                                onLog = { viewModel.logUiEvent(it) },
-                        )
-                        CreateScreenState.MORE_ABOUT_PASSKEYS_INTRO -> MoreAboutPasskeysIntroCard(
-                                onBackPasskeyIntroButtonSelected =
-                                viewModel::createFlowOnBackPasskeyIntroButtonSelected,
                                 onLog = { viewModel.logUiEvent(it) },
                         )
                     }
@@ -186,104 +238,41 @@ fun CreateCredentialScreen(
 }
 
 @Composable
-fun PasskeyIntroCard(
-    onConfirm: () -> Unit,
-    onLearnMore: () -> Unit,
-    onLog: @Composable (UiEventEnum) -> Unit,
-) {
-    SheetContainerCard {
-        item {
-            val onboardingImageResource = remember {
-                mutableStateOf(R.drawable.ic_passkeys_onboarding)
-            }
-            if (isSystemInDarkTheme()) {
-                onboardingImageResource.value = R.drawable.ic_passkeys_onboarding_dark
-            } else {
-                onboardingImageResource.value = R.drawable.ic_passkeys_onboarding
-            }
-            Row(
-                modifier = Modifier.wrapContentHeight().fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                Image(
-                    painter = painterResource(onboardingImageResource.value),
-                    contentDescription = null,
-                    modifier = Modifier.size(316.dp, 168.dp)
-                )
-            }
-        }
-        item { Divider(thickness = 16.dp, color = Color.Transparent) }
-        item { HeadlineText(text = stringResource(R.string.passkey_creation_intro_title)) }
-        item { Divider(thickness = 16.dp, color = Color.Transparent) }
-        item {
-            PasskeyBenefitRow(
-                leadingIconPainter = painterResource(R.drawable.ic_passkeys_onboarding_password),
-                text = stringResource(R.string.passkey_creation_intro_body_password),
-            )
-        }
-        item { Divider(thickness = 16.dp, color = Color.Transparent) }
-        item {
-            PasskeyBenefitRow(
-                leadingIconPainter = painterResource(R.drawable.ic_passkeys_onboarding_fingerprint),
-                text = stringResource(R.string.passkey_creation_intro_body_fingerprint),
-            )
-        }
-        item { Divider(thickness = 16.dp, color = Color.Transparent) }
-        item {
-            PasskeyBenefitRow(
-                leadingIconPainter = painterResource(R.drawable.ic_passkeys_onboarding_device),
-                text = stringResource(R.string.passkey_creation_intro_body_device),
-            )
-        }
-        item { Divider(thickness = 24.dp, color = Color.Transparent) }
-
-        item {
-            CtaButtonRow(
-                leftButton = {
-                    ActionButton(
-                        stringResource(R.string.string_learn_more),
-                        onClick = onLearnMore
-                    )
-                },
-                rightButton = {
-                    ConfirmButton(
-                        stringResource(R.string.string_continue),
-                        onClick = onConfirm
-                    )
-                },
-            )
-        }
-    }
-    onLog(CreateCredentialEvent.CREDMAN_CREATE_CRED_PASSKEY_INTRO)
-}
-
-@Composable
 fun MoreOptionsSelectionCard(
-        requestDisplayInfo: RequestDisplayInfo,
-        enabledProviderList: List<EnabledProviderInfo>,
-        disabledProviderList: List<DisabledProviderInfo>?,
-        sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
-        onBackCreationSelectionButtonSelected: () -> Unit,
-        onOptionSelected: (ActiveEntry) -> Unit,
-        onDisabledProvidersSelected: () -> Unit,
-        onRemoteEntrySelected: (BaseEntry) -> Unit,
-        onLog: @Composable (UiEventEnum) -> Unit,
+    requestDisplayInfo: RequestDisplayInfo,
+    enabledProviderList: List<EnabledProviderInfo>,
+    disabledProviderList: List<DisabledProviderInfo>?,
+    sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
+    onBackCreationSelectionButtonSelected: () -> Unit,
+    onOptionSelected: (ActiveEntry) -> Unit,
+    onDisabledProvidersSelected: () -> Unit,
+    onRemoteEntrySelected: (EntryInfo) -> Unit,
+    onLog: @Composable (UiEventEnum) -> Unit,
+    customTopAppBar: (@Composable() () -> Unit)? = null
 ) {
     SheetContainerCard(topAppBar = {
-        MoreOptionTopAppBar(
-            text = stringResource(
-                R.string.save_credential_to_title,
-                when (requestDisplayInfo.type) {
-                    CredentialType.PASSKEY ->
-                        stringResource(R.string.passkey)
-                    CredentialType.PASSWORD ->
-                        stringResource(R.string.password)
-                    CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
-                }
-            ),
-            onNavigationIconClicked = onBackCreationSelectionButtonSelected,
-            bottomPadding = 16.dp,
-        )
+        if (customTopAppBar != null) {
+            customTopAppBar()
+        } else {
+            MoreOptionTopAppBar(
+                    text = stringResource(
+                            R.string.save_credential_to_title,
+                            when (requestDisplayInfo.type) {
+                                CredentialType.PASSKEY ->
+                                    stringResource(R.string.passkey)
+                                CredentialType.PASSWORD ->
+                                    stringResource(R.string.password)
+                                CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
+                            }
+                    ),
+                    onNavigationIconClicked = onBackCreationSelectionButtonSelected,
+                    bottomPadding = 16.dp,
+                    navigationIcon = Icons.Filled.ArrowBack,
+                    navigationIconContentDescription = stringResource(
+                            R.string.accessibility_back_arrow_button
+                    )
+            )
+        }
     }) {
         // bottom padding already
         item {
@@ -378,14 +367,14 @@ fun NonDefaultUsageConfirmationCard(
 
 @Composable
 fun CreationSelectionCard(
-        requestDisplayInfo: RequestDisplayInfo,
-        enabledProviderList: List<EnabledProviderInfo>,
-        providerInfo: EnabledProviderInfo,
-        createOptionInfo: CreateOptionInfo,
-        onOptionSelected: (BaseEntry) -> Unit,
-        onConfirm: () -> Unit,
-        onMoreOptionsSelected: () -> Unit,
-        onLog: @Composable (UiEventEnum) -> Unit,
+    requestDisplayInfo: RequestDisplayInfo,
+    enabledProviderList: List<EnabledProviderInfo>,
+    providerInfo: EnabledProviderInfo,
+    createOptionInfo: CreateOptionInfo,
+    onOptionSelected: (EntryInfo) -> Unit,
+    onConfirm: () -> Unit,
+    onMoreOptionsSelected: () -> Unit,
+    onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     SheetContainerCard {
         item {
@@ -399,23 +388,24 @@ fun CreationSelectionCard(
         item { Divider(thickness = 16.dp, color = Color.Transparent) }
         item {
             HeadlineText(
-                text = when (requestDisplayInfo.type) {
-                    CredentialType.PASSKEY -> stringResource(
-                        R.string.choose_create_option_passkey_title,
-                        requestDisplayInfo.appName
-                    )
-                    CredentialType.PASSWORD -> stringResource(
-                        R.string.choose_create_option_password_title,
-                        requestDisplayInfo.appName
-                    )
-                    CredentialType.UNKNOWN -> stringResource(
-                        R.string.choose_create_option_sign_in_title,
-                        requestDisplayInfo.appName
-                    )
-                }
+                text = stringResource(
+                    getCreateTitleResCode(requestDisplayInfo),
+                    requestDisplayInfo.appName)
             )
         }
         item { Divider(thickness = 24.dp, color = Color.Transparent) }
+
+        val footerDescription = createOptionInfo.footerDescription
+        if (selectorUiImprovementsEnabled()) {
+            if (!footerDescription.isNullOrBlank()) {
+                item {
+                    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                        BodyMediumText(text = footerDescription)
+                    }
+                }
+                item { Divider(thickness = 24.dp, color = Color.Transparent) }
+            }
+        }
         item {
             CredentialContainerCard {
                 PrimaryCreateOptionRow(
@@ -453,18 +443,19 @@ fun CreationSelectionCard(
                 },
             )
         }
-        val footerDescription = createOptionInfo.footerDescription
-        if (footerDescription != null && footerDescription.length > 0) {
-            item {
-                Divider(
-                    thickness = 1.dp,
-                    color = LocalAndroidColorScheme.current.colorOutlineVariant,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
-            }
-            item {
-                Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                    BodySmallText(text = footerDescription)
+        if (!selectorUiImprovementsEnabled()) {
+            if (footerDescription != null && footerDescription.length > 0) {
+                item {
+                    Divider(
+                        thickness = 1.dp,
+                        color = LocalAndroidColorScheme.current.outlineVariant,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+                item {
+                    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                        BodySmallText(text = footerDescription)
+                    }
                 }
             }
         }
@@ -474,11 +465,11 @@ fun CreationSelectionCard(
 
 @Composable
 fun ExternalOnlySelectionCard(
-        requestDisplayInfo: RequestDisplayInfo,
-        activeRemoteEntry: BaseEntry,
-        onOptionSelected: (BaseEntry) -> Unit,
-        onConfirm: () -> Unit,
-        onLog: @Composable (UiEventEnum) -> Unit,
+    requestDisplayInfo: RequestDisplayInfo,
+    activeRemoteEntry: EntryInfo,
+    onOptionSelected: (EntryInfo) -> Unit,
+    onConfirm: () -> Unit,
+    onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     SheetContainerCard {
         item { HeadlineIcon(imageVector = Icons.Outlined.QrCodeScanner) }
@@ -520,72 +511,16 @@ fun ExternalOnlySelectionCard(
 }
 
 @Composable
-fun MoreAboutPasskeysIntroCard(
-    onBackPasskeyIntroButtonSelected: () -> Unit,
-    onLog: @Composable (UiEventEnum) -> Unit,
-) {
-    SheetContainerCard(
-        topAppBar = {
-            MoreOptionTopAppBar(
-                text = stringResource(R.string.more_about_passkeys_title),
-                onNavigationIconClicked = onBackPasskeyIntroButtonSelected,
-                bottomPadding = 0.dp,
-            )
-        },
-    ) {
-        item {
-            MoreAboutPasskeySectionHeader(
-                text = stringResource(R.string.passwordless_technology_title)
-            )
-            Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                BodyMediumText(text = stringResource(R.string.passwordless_technology_detail))
-            }
-        }
-        item {
-            Divider(thickness = 8.dp, color = Color.Transparent)
-            MoreAboutPasskeySectionHeader(
-                text = stringResource(R.string.public_key_cryptography_title)
-            )
-            Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                BodyMediumText(text = stringResource(R.string.public_key_cryptography_detail))
-            }
-        }
-        item {
-            Divider(thickness = 8.dp, color = Color.Transparent)
-            MoreAboutPasskeySectionHeader(
-                text = stringResource(R.string.improved_account_security_title)
-            )
-            Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                BodyMediumText(text = stringResource(R.string.improved_account_security_detail))
-            }
-        }
-        item {
-            Divider(thickness = 8.dp, color = Color.Transparent)
-            MoreAboutPasskeySectionHeader(
-                text = stringResource(R.string.seamless_transition_title)
-            )
-            Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                BodyMediumText(text = stringResource(R.string.seamless_transition_detail))
-            }
-        }
-    }
-    onLog(CreateCredentialEvent.CREDMAN_CREATE_CRED_MORE_ABOUT_PASSKEYS_INTRO)
-}
-
-@Composable
 fun PrimaryCreateOptionRow(
     requestDisplayInfo: RequestDisplayInfo,
-    entryInfo: BaseEntry,
-    onOptionSelected: (BaseEntry) -> Unit
+    entryInfo: EntryInfo,
+    onOptionSelected: (EntryInfo) -> Unit
 ) {
     Entry(
         onClick = { onOptionSelected(entryInfo) },
-        iconImageBitmap =
-        if (entryInfo is CreateOptionInfo && entryInfo.profileIcon != null) {
-            entryInfo.profileIcon.toBitmap().asImageBitmap()
-        } else {
-            requestDisplayInfo.typeIcon.toBitmap().asImageBitmap()
-        },
+        iconImageBitmap = ((entryInfo as? CreateOptionInfo)?.profileIcon
+            ?: requestDisplayInfo.typeIcon)
+            .toBitmap().asImageBitmap(),
         shouldApplyIconImageBitmapTint = !(entryInfo is CreateOptionInfo &&
             entryInfo.profileIcon != null),
         entryHeadlineText = requestDisplayInfo.title,
@@ -627,32 +562,33 @@ fun MoreOptionsInfoRow(
         entryThirdLineText =
         if (requestDisplayInfo.type == CredentialType.PASSKEY ||
             requestDisplayInfo.type == CredentialType.PASSWORD) {
-            if (createOptionInfo.passwordCount != null &&
-                createOptionInfo.passkeyCount != null
-            ) {
+            val passwordCount = createOptionInfo.passwordCount
+            val passkeyCount = createOptionInfo.passkeyCount
+            if (passwordCount != null && passkeyCount != null) {
                 stringResource(
                     R.string.more_options_usage_passwords_passkeys,
-                    createOptionInfo.passwordCount,
-                    createOptionInfo.passkeyCount
+                    passwordCount,
+                    passkeyCount
                 )
-            } else if (createOptionInfo.passwordCount != null) {
+            } else if (passwordCount != null) {
                 stringResource(
                     R.string.more_options_usage_passwords,
-                    createOptionInfo.passwordCount
+                    passwordCount
                 )
-            } else if (createOptionInfo.passkeyCount != null) {
+            } else if (passkeyCount != null) {
                 stringResource(
                     R.string.more_options_usage_passkeys,
-                    createOptionInfo.passkeyCount
+                    passkeyCount
                 )
             } else {
                 null
             }
         } else {
-            if (createOptionInfo.totalCredentialCount != null) {
+            val totalCredentialCount = createOptionInfo.totalCredentialCount
+            if (totalCredentialCount != null) {
                 stringResource(
                     R.string.more_options_usage_credentials,
-                    createOptionInfo.totalCredentialCount
+                    totalCredentialCount
                 )
             } else {
                 null
@@ -688,4 +624,46 @@ fun RemoteEntryRow(
         iconImageVector = Icons.Outlined.QrCodeScanner,
         entryHeadlineText = stringResource(R.string.another_device),
     )
+}
+
+@Composable
+internal fun BiometricSelectionPage(
+    biometricEntry: EntryInfo?,
+    onMoreOptionSelected: () -> Unit,
+    requestDisplayInfo: RequestDisplayInfo,
+    enabledProviderInfo: EnabledProviderInfo,
+    onBiometricEntrySelected: (
+        EntryInfo,
+        BiometricPrompt.AuthenticationResult?,
+        BiometricError?
+    ) -> Unit,
+    onCancelFlowAndFinish: () -> Unit,
+    onIllegalScreenStateAndFinish: (String) -> Unit,
+    fallbackToOriginalFlow: (BiometricFlowType) -> Unit,
+    getBiometricPromptState: () -> BiometricPromptState,
+    onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
+    getBiometricCancellationSignal: () -> CancellationSignal,
+    onLog: @Composable (UiEventEnum) -> Unit
+) {
+    if (biometricEntry == null) {
+        fallbackToOriginalFlow(BiometricFlowType.CREATE)
+        return
+    }
+    val biometricFlowCalled = runBiometricFlowForCreate(
+        biometricEntry = biometricEntry,
+        context = LocalContext.current,
+        openMoreOptionsPage = onMoreOptionSelected,
+        sendDataToProvider = onBiometricEntrySelected,
+        onCancelFlowAndFinish = onCancelFlowAndFinish,
+        getBiometricPromptState = getBiometricPromptState,
+        onBiometricPromptStateChange = onBiometricPromptStateChange,
+        createRequestDisplayInfo = requestDisplayInfo,
+        createProviderInfo = enabledProviderInfo,
+        onBiometricFailureFallback = fallbackToOriginalFlow,
+        onIllegalStateAndFinish = onIllegalScreenStateAndFinish,
+        getBiometricCancellationSignal = getBiometricCancellationSignal
+    )
+    if (biometricFlowCalled) {
+        onLog(CreateCredentialEvent.CREDMAN_CREATE_CRED_BIOMETRIC_FLOW_LAUNCHED)
+    }
 }

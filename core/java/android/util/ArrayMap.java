@@ -21,8 +21,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 
 import com.android.internal.util.ArrayUtils;
 
-import libcore.util.EmptyArray;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -55,6 +53,7 @@ import java.util.function.BiFunction;
  *
  * <p>This structure is <b>NOT</b> thread-safe.</p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ArrayMap<K, V> implements Map<K, V> {
     private static final boolean DEBUG = false;
     private static final String TAG = "ArrayMap";

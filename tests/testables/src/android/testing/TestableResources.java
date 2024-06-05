@@ -15,14 +15,18 @@
 package android.testing;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.Log;
 import android.util.SparseArray;
 
 import org.mockito.invocation.InvocationOnMock;
+
+import java.util.Arrays;
 
 /**
  * Provides a version of Resources that defaults to all existing resources, but can have ids
@@ -51,6 +55,16 @@ public class TestableResources {
      */
     public Resources getResources() {
         return mResources;
+    }
+
+    /**
+     * Sets a configuration for {@link #getResources()} to return to allow custom configs to
+     * be set and tested.
+     *
+     * @param configuration the configuration to return from resources.
+     */
+    public void overrideConfiguration(Configuration configuration) {
+        when(mResources.getConfiguration()).thenReturn(configuration);
     }
 
     /**
@@ -91,6 +105,15 @@ public class TestableResources {
                     if (index >= 0) {
                         Object value = mOverrides.valueAt(index);
                         if (value == null) throw new Resources.NotFoundException();
+                        // Support for Resources.getString(resId, Object... formatArgs)
+                        if (value instanceof String
+                                && invocationOnMock.getMethod().getName().equals("getString")
+                                && invocationOnMock.getArguments().length > 1) {
+                            value = String.format(mResources.getConfiguration().getLocales().get(0),
+                                    (String) value,
+                                    Arrays.copyOfRange(invocationOnMock.getArguments(), 1,
+                                            invocationOnMock.getArguments().length));
+                        }
                         return value;
                     }
                 } catch (Resources.NotFoundException e) {

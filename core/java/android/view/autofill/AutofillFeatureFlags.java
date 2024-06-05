@@ -100,21 +100,16 @@ public class AutofillFeatureFlags {
 
     // START CREDENTIAL MANAGER FLAGS //
     /**
-     * (deprecated) Indicates whether credential manager tagged views should be ignored from
-     * autofill structures.This flag is further gated by
-     * {@link #DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED}
-     *
-     * TODO(b/280661772): Remove this flag once API change is allowed
+     * Indicates whether credential manager tagged views should be ignored from autofill structures.
+     * This flag is further gated by {@link #DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED}
      */
     public static final String DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_IGNORE_VIEWS =
             "autofill_credential_manager_ignore_views";
 
     /**
-     * (deprecated) Indicates CredentialManager feature enabled or not.
+     * Indicates CredentialManager feature enabled or not.
      * This is the overall feature flag. Individual behavior of credential manager may be controlled
      * via a different flag, but gated by this flag.
-     *
-     * TODO(b/280661772): Remove this flag once API change is allowed
      */
     public static final String DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED =
             "autofill_credential_manager_enabled";
@@ -214,6 +209,63 @@ public class AutofillFeatureFlags {
         DEVICE_CONFIG_INCLUDE_ALL_VIEWS_IN_ASSIST_STRUCTURE =
             "include_all_views_in_assist_structure";
 
+    /**
+     * Whether to always include WebView in assist structure. WebView is a container view that
+     * providers "virtual" views. We want to always include such a container view since it can
+     * contain arbitrary views in it, some of which could be fillable.
+     *
+     * @hide
+     */
+    public static final String
+            DEVICE_CONFIG_ALWAYS_INCLUDE_WEBVIEW_IN_ASSIST_STRUCTURE =
+            "always_include_webview_in_assist_structure";
+
+    /**
+     * Whether to include invisible views in the assist structure. Including invisible views can fix
+     * some cases in which Session is destroyed earlier than it is suppose to.
+     *
+     * <p>See
+     * frameworks/base/services/autofill/bugfixes.aconfig#include_invisible_view_group_in_assist_structure
+     * for more information.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_INCLUDE_INVISIBLE_VIEW_GROUP_IN_ASSIST_STRUCTURE =
+            "include_invisible_view_group_in_assist_structure";
+
+    /**
+     * Bugfix flag, Autofill should ignore views resetting to empty states.
+     *
+     * See frameworks/base/services/autofill/bugfixes.aconfig#ignore_view_state_reset_to_empty
+     * for more information.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_IGNORE_VIEW_STATE_RESET_TO_EMPTY =
+            "ignore_view_state_reset_to_empty";
+
+    /**
+     * Bugfix flag, Autofill should ignore view updates if an Auth intent is showing.
+     *
+     * See frameworks/base/services/autofill/bugfixes.aconfig#relayout
+     * for more information.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_IGNORE_RELAYOUT_WHEN_AUTH_PENDING =
+            "ignore_relayout_auth_pending";
+
+    /**
+     * Bugfix flag, Autofill should only fill in value from current session.
+     *
+     * See frameworks/base/services/autofill/bugfixes.aconfig#fill_fields_from_current_session_only
+     * for more information
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_FILL_FIELDS_FROM_CURRENT_SESSION_ONLY =
+            "fill_fields_from_current_session_only";
+
     // END AUTOFILL FOR ALL APPS FLAGS //
 
 
@@ -249,6 +301,16 @@ public class AutofillFeatureFlags {
 
     // END AUTOFILL PCC CLASSIFICATION FLAGS
 
+    /**
+     * Define the max input length for autofill to show suggesiton UI
+     *
+     * E.g. if flag is set to 3, autofill will only show suggestions when user inputs less than 3
+     * characters
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_MAX_INPUT_LENGTH_FOR_AUTOFILL =
+            "max_input_length_for_autofill";
 
     /**
      * Sets a value of delay time to show up the inline tooltip view.
@@ -265,6 +327,8 @@ public class AutofillFeatureFlags {
 
 
     // CREDENTIAL MANAGER DEFAULTS
+    // Credential manager is enabled by default so as to allow testing by app developers
+    private static final boolean DEFAULT_CREDENTIAL_MANAGER_ENABLED = true;
     private static final boolean DEFAULT_CREDENTIAL_MANAGER_SUPPRESS_FILL_AND_SAVE_DIALOG = true;
     // END CREDENTIAL MANAGER DEFAULTS
 
@@ -287,6 +351,10 @@ public class AutofillFeatureFlags {
             DEFAULT_AFAA_SHOULD_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE = true;
     // END AUTOFILL FOR ALL APPS DEFAULTS
 
+    /**
+     * @hide
+     */
+    public static final int DEFAULT_MAX_INPUT_LENGTH_FOR_AUTOFILL = 3;
     private AutofillFeatureFlags() {};
 
     /**
@@ -321,12 +389,24 @@ public class AutofillFeatureFlags {
 
     /* starts credman flag getter function */
     /**
+     * Whether the Credential Manager feature is enabled or not
+     *
+     * @hide
+     */
+    public static boolean isCredentialManagerEnabled() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_ENABLED,
+                DEFAULT_CREDENTIAL_MANAGER_ENABLED);
+    }
+
+    /**
      * Whether credential manager tagged views should not trigger fill dialog requests.
      *
      * @hide
      */
     public static boolean isFillAndSaveDialogDisabledForCredentialManager() {
-        return DeviceConfig.getBoolean(
+        return isCredentialManagerEnabled() && DeviceConfig.getBoolean(
                     DeviceConfig.NAMESPACE_AUTOFILL,
                     DEVICE_CONFIG_AUTOFILL_CREDENTIAL_MANAGER_SUPPRESS_FILL_AND_SAVE_DIALOG,
                     DEFAULT_CREDENTIAL_MANAGER_SUPPRESS_FILL_AND_SAVE_DIALOG);
@@ -432,6 +512,44 @@ public class AutofillFeatureFlags {
             DEVICE_CONFIG_INCLUDE_ALL_VIEWS_IN_ASSIST_STRUCTURE, false);
     }
 
+    /** @hide */
+    public static boolean shouldAlwaysIncludeWebviewInAssistStructure() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_ALWAYS_INCLUDE_WEBVIEW_IN_ASSIST_STRUCTURE, true);
+    }
+
+    /** @hide */
+    public static boolean shouldIncludeInvisibleViewInAssistStructure() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_INCLUDE_INVISIBLE_VIEW_GROUP_IN_ASSIST_STRUCTURE,
+                false);
+    }
+
+    /** @hide */
+    public static boolean shouldIgnoreViewStateResetToEmpty() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_IGNORE_VIEW_STATE_RESET_TO_EMPTY,
+                true);
+    }
+
+    /** @hide */
+    public static boolean shouldIgnoreRelayoutWhenAuthPending() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_IGNORE_RELAYOUT_WHEN_AUTH_PENDING,
+                false);
+    }
+
+    /** @hide **/
+    public static boolean shouldFillFieldsFromCurrentSessionOnly() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_FILL_FIELDS_FROM_CURRENT_SESSION_ONLY,
+                false);
+    }
 
     /**
      * Whether should enable multi-line filter

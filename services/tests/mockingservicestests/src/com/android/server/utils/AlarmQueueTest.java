@@ -259,6 +259,29 @@ public class AlarmQueueTest {
     }
 
     @Test
+    public void testMinTimeBetweenAlarms_freshAlarm() {
+        final AlarmQueue<String> alarmQueue = createAlarmQueue(true, 5 * MINUTE_IN_MILLIS);
+        final long fixedTimeElapsed = mInjector.getElapsedRealtime();
+
+        InOrder inOrder = inOrder(mAlarmManager);
+
+        final String pkg1 = "com.android.test.1";
+        final String pkg2 = "com.android.test.2";
+        alarmQueue.addAlarm(pkg1, fixedTimeElapsed + MINUTE_IN_MILLIS);
+        inOrder.verify(mAlarmManager, timeout(1000).times(1)).setExact(
+                anyInt(), eq(fixedTimeElapsed + MINUTE_IN_MILLIS), eq(ALARM_TAG), any(), any());
+
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+
+        alarmQueue.onAlarm();
+        // Minimum of 5 minutes between alarms, so the next alarm should be 5 minutes after the
+        // first.
+        alarmQueue.addAlarm(pkg2, fixedTimeElapsed + 2 * MINUTE_IN_MILLIS);
+        inOrder.verify(mAlarmManager, timeout(1000).times(1)).setExact(
+                anyInt(), eq(fixedTimeElapsed + 6 * MINUTE_IN_MILLIS), eq(ALARM_TAG), any(), any());
+    }
+
+    @Test
     public void testOnAlarm() {
         final AlarmQueue<String> alarmQueue = createAlarmQueue(true, 0);
         final long nowElapsed = mInjector.getElapsedRealtime();

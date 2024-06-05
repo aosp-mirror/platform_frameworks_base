@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.RECENT_WITH_EXCLUDED;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -27,8 +28,6 @@ import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
-import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.os.Process.NOBODY_UID;
 
@@ -47,12 +46,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -72,6 +72,7 @@ import android.os.SystemClock;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.SparseBooleanArray;
 import android.view.Surface;
 import android.window.TaskSnapshot;
@@ -91,6 +92,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Build/Install/Run:
@@ -449,24 +451,14 @@ public class RecentTasksTest extends WindowTestsBase {
         final int uid = 10123;
         final Task task1 = createTaskBuilder(".Task1").build();
         final ComponentName componentName = getUniqueComponentName();
-        task1.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE,
-                componentName);
+        task1.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid);
         mRecentTasks.add(task1);
 
         // Add another task to recents, and make sure the previous task was removed.
         final Task task2 = createTaskBuilder(".Task2").build();
-        task2.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE,
-                componentName);
+        task2.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid);
         mRecentTasks.add(task2);
         assertEquals(1, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
-                true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().size());
-
-        // Add another single-instance task to recents, and make sure no task is removed.
-        final Task task3 = createTaskBuilder(".Task3").build();
-        task3.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid,
-                LAUNCH_SINGLE_INSTANCE, componentName);
-        mRecentTasks.add(task3);
-        assertEquals(2, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
                 true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().size());
     }
 
@@ -535,20 +527,20 @@ public class RecentTasksTest extends WindowTestsBase {
         mTaskPersister.mUserTaskIdsOverride.put(1, true);
         mTaskPersister.mUserTaskIdsOverride.put(2, true);
         mTaskPersister.mUserTasksOverride = new ArrayList<>();
-        mTaskPersister.mUserTasksOverride.add(createTaskBuilder(".UserTask1").build());
-        mTaskPersister.mUserTasksOverride.add(createTaskBuilder(".UserTask2").build());
+        mTaskPersister.mUserTasksOverride.add(mTasks.get(0));
+        mTaskPersister.mUserTasksOverride.add(mTasks.get(1));
 
         // Assert no user tasks are initially loaded
         assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).hasLength(0);
 
         // Load user 0 tasks
-        mRecentTasks.loadUserRecentsLocked(TEST_USER_0_ID);
+        mRecentTasks.loadRecentTasksIfNeeded(TEST_USER_0_ID);
         assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).asList().contains(TEST_USER_0_ID);
         assertTrue(mRecentTasks.containsTaskId(1, TEST_USER_0_ID));
         assertTrue(mRecentTasks.containsTaskId(2, TEST_USER_0_ID));
 
         // Load user 1 tasks
-        mRecentTasks.loadUserRecentsLocked(TEST_USER_1_ID);
+        mRecentTasks.loadRecentTasksIfNeeded(TEST_USER_1_ID);
         assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).asList().contains(TEST_USER_0_ID);
         assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).asList().contains(TEST_USER_1_ID);
         assertTrue(mRecentTasks.containsTaskId(1, TEST_USER_0_ID));
@@ -570,6 +562,38 @@ public class RecentTasksTest extends WindowTestsBase {
                 .doesNotContain(TEST_USER_0_ID);
         assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).asList()
                 .doesNotContain(TEST_USER_1_ID);
+    }
+
+    @Test
+    public void testTasksWithCorrectOrderOfLastActiveTime() {
+        mRecentTasks.setOnlyTestVisibleRange();
+        mRecentTasks.unloadUserDataFromMemoryLocked(TEST_USER_0_ID);
+
+        // Setup some tasks for the user
+        mTaskPersister.mUserTaskIdsOverride = new SparseBooleanArray();
+        mTaskPersister.mUserTaskIdsOverride.put(1, true);
+        mTaskPersister.mUserTaskIdsOverride.put(2, true);
+        mTaskPersister.mUserTaskIdsOverride.put(3, true);
+        mTaskPersister.mUserTasksOverride = new ArrayList<>();
+        mTaskPersister.mUserTasksOverride.add(mTasks.get(0));
+        mTaskPersister.mUserTasksOverride.add(mTasks.get(1));
+        mTaskPersister.mUserTasksOverride.add(mTasks.get(2));
+
+        // Assert no user tasks are initially loaded
+        assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).hasLength(0);
+
+        // Load tasks
+        mRecentTasks.loadRecentTasksIfNeeded(TEST_USER_0_ID);
+        assertThat(mRecentTasks.usersWithRecentsLoadedLocked()).asList().contains(TEST_USER_0_ID);
+
+        // Sort the time descendingly so the order should be in-sync with task recency (most
+        // recent to least recent)
+        List<Task> tasksSortedByTime = mRecentTasks.getRawTasks().stream()
+                .sorted((o1, o2) -> Long.compare(o2.lastActiveTime, o1.lastActiveTime))
+                .collect(Collectors.toList());
+
+        assertTrue("Task order is not in sync with its recency",
+                mRecentTasks.getRawTasks().equals(tasksSortedByTime));
     }
 
     @Test
@@ -1040,14 +1064,25 @@ public class RecentTasksTest extends WindowTestsBase {
 
         // If the task has a non-stopped activity, the removal will wait for its onDestroy.
         final Task task = tasks.get(0);
+        final ActivityRecord bottom = new ActivityBuilder(mAtm).setTask(task).build();
         final ActivityRecord top = new ActivityBuilder(mAtm).setTask(task).build();
-        top.lastVisibleTime = 123;
+        bottom.lastVisibleTime = top.lastVisibleTime = 123;
         top.setState(ActivityRecord.State.RESUMED, "test");
         mRecentTasks.removeTasksByPackageName(task.getBasePackageName(), TEST_USER_0_ID);
         assertTrue(task.mKillProcessesOnDestroyed);
         top.setState(ActivityRecord.State.DESTROYING, "test");
+        bottom.destroyed("test");
+        assertTrue("Wait for all destroyed", task.mKillProcessesOnDestroyed);
         top.destroyed("test");
-        assertFalse(task.mKillProcessesOnDestroyed);
+        assertFalse("Consume kill", task.mKillProcessesOnDestroyed);
+
+        // If the process is died, the state should be cleared.
+        final Task lastTask = tasks.get(0);
+        lastTask.intent.setComponent(top.mActivityComponent);
+        lastTask.addChild(top);
+        lastTask.mKillProcessesOnDestroyed = true;
+        top.handleAppDied();
+        assertFalse(lastTask.mKillProcessesOnDestroyed);
     }
 
     @Test
@@ -1136,6 +1171,65 @@ public class RecentTasksTest extends WindowTestsBase {
         TaskChangeNotificationController controller =
                 mAtm.getTaskChangeNotificationController();
         verify(controller, times(2)).notifyTaskListUpdated();
+    }
+
+    @Test
+    public void addTask_taskAlreadyInRecentsMovedToTop_callsTaskNotificationController() {
+        final Task firstTask = createTaskBuilder(".Task").build();
+        final Task secondTask = createTaskBuilder(".Task2").build();
+
+        mRecentTasks.add(firstTask);
+        mRecentTasks.add(secondTask);
+
+        TaskChangeNotificationController controller =
+                mAtm.getTaskChangeNotificationController();
+        clearInvocations(controller);
+
+        // Add firstTask back to top
+        mRecentTasks.add(firstTask);
+        verify(controller).notifyTaskListUpdated();
+    }
+
+    @Test
+    public void addTask_taskAlreadyInRecentsOnTop_doesNotNotify() {
+        final Task firstTask = createTaskBuilder(".Task").build();
+        final Task secondTask = createTaskBuilder(".Task2").build();
+
+        mRecentTasks.add(firstTask);
+        mRecentTasks.add(secondTask);
+
+        TaskChangeNotificationController controller =
+                mAtm.getTaskChangeNotificationController();
+        clearInvocations(controller);
+
+        // Add secondTask to top again
+        mRecentTasks.add(secondTask);
+        verifyZeroInteractions(controller);
+    }
+
+    @Test
+    public void addTask_tasksAreAddedAccordingToZOrder() {
+        final Task firstTask = new TaskBuilder(mSupervisor).setTaskId(1)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .setCreateActivity(true).build();
+        final Task secondTask = new TaskBuilder(mSupervisor).setTaskId(2)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .setCreateActivity(true).build();
+
+        assertEquals(-1, firstTask.compareTo(secondTask));
+
+        // initial addition when tasks are created
+        mRecentTasks.add(firstTask);
+        mRecentTasks.add(secondTask);
+
+        assertRecentTasksOrder(secondTask, firstTask);
+
+        // Tasks are added in a different order
+        mRecentTasks.add(secondTask);
+        mRecentTasks.add(firstTask);
+
+        // order in recents don't change as first task has lower z-order
+        assertRecentTasksOrder(secondTask, firstTask);
     }
 
     @Test
@@ -1307,8 +1401,6 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     private List<RecentTaskInfo> getRecentTasks(int flags) {
-        doNothing().when(mRecentTasks).loadUserRecentsLocked(anyInt());
-        doReturn(true).when(mRecentTasks).isUserRunning(anyInt(), anyInt());
         return mRecentTasks.getRecentTasks(MAX_VALUE, flags, true /* getTasksAllowed */,
                 TEST_USER_0_ID, 0 /* callingUid */).getList();
     }
@@ -1356,11 +1448,10 @@ public class RecentTasksTest extends WindowTestsBase {
         });
         assertSecurityException(expectCallable,
                 () -> mAtm.startActivityFromRecents(0, new Bundle()));
-        assertSecurityException(expectCallable, () -> mAtm.getTaskSnapshot(0, true, false));
+        assertSecurityException(expectCallable, () -> mAtm.getTaskSnapshot(0, true));
         assertSecurityException(expectCallable, () -> mAtm.registerTaskStackListener(null));
         assertSecurityException(expectCallable,
                 () -> mAtm.unregisterTaskStackListener(null));
-        assertSecurityException(expectCallable, () -> mAtm.getTaskDescription(0));
         assertSecurityException(expectCallable, () -> mAtm.cancelTaskWindowTransition(0));
         assertSecurityException(expectCallable, () -> mAtm.startRecentsActivity(null, 0,
                 null));
@@ -1478,19 +1569,20 @@ public class RecentTasksTest extends WindowTestsBase {
         }
 
         @Override
-        SparseBooleanArray loadPersistedTaskIdsForUser(int userId) {
+        SparseBooleanArray readPersistedTaskIdsFromFileForUser(int userId) {
             if (mUserTaskIdsOverride != null) {
                 return mUserTaskIdsOverride;
             }
-            return super.loadPersistedTaskIdsForUser(userId);
+            return super.readPersistedTaskIdsFromFileForUser(userId);
         }
 
         @Override
-        List<Task> restoreTasksForUserLocked(int userId, SparseBooleanArray preaddedTasks) {
+        ArrayList<Task> restoreTasksForUserLocked(int userId, RecentTaskFiles recentTaskFiles,
+                IntArray existedTaskIds) {
             if (mUserTasksOverride != null) {
                 return mUserTasksOverride;
             }
-            return super.restoreTasksForUserLocked(userId, preaddedTasks);
+            return super.restoreTasksForUserLocked(userId, recentTaskFiles, existedTaskIds);
         }
     }
 

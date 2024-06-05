@@ -16,10 +16,14 @@
 
 package com.android.server;
 
+import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,7 +34,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
+import android.os.Build;
 import android.os.BundleMerger;
 import android.os.Debug;
 import android.os.DropBoxManager;
@@ -66,6 +70,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ObjectUtils;
 import com.android.server.DropBoxManagerInternal.EntrySource;
+import com.android.server.feature.flags.Flags;
 
 import libcore.io.IoUtils;
 
@@ -89,11 +94,18 @@ import java.util.zip.GZIPOutputStream;
  * Clients use {@link DropBoxManager} to access this service.
  */
 public final class DropBoxManagerService extends SystemService {
+    /**
+     * For Android U and earlier versions, apps can continue to use the READ_LOGS permission,
+     * but for all subsequent versions, the READ_DROPBOX_DATA permission must be used.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private static final long ENFORCE_READ_DROPBOX_DATA = 296060945L;
     private static final String TAG = "DropBoxManagerService";
     private static final int DEFAULT_AGE_SECONDS = 3 * 86400;
     private static final int DEFAULT_MAX_FILES = 1000;
     private static final int DEFAULT_MAX_FILES_LOWRAM = 300;
-    private static final int DEFAULT_QUOTA_KB = 10 * 1024;
+    public static final int DEFAULT_QUOTA_KB = Build.IS_USERDEBUG ? 20 * 1024 : 10 * 1024;
     private static final int DEFAULT_QUOTA_PERCENT = 10;
     private static final int DEFAULT_RESERVE_PERCENT = 0;
     private static final int QUOTA_RESCAN_MILLIS = 5000;
@@ -109,7 +121,6 @@ public final class DropBoxManagerService extends SystemService {
     // Tags that we should drop by default.
     private static final List<String> DISABLED_BY_DEFAULT_TAGS =
             List.of("data_app_wtf", "system_app_wtf", "system_server_wtf");
-
     // TODO: This implementation currently uses one file per entry, which is
     // inefficient for smallish entries -- consider using a single queue file
     // per tag (or even globally) instead.
@@ -163,6 +174,16 @@ public final class DropBoxManagerService extends SystemService {
             }.start();
         }
     };
+
+    private static final BundleMerger sDropboxEntryAddedExtrasMerger;
+    static {
+        sDropboxEntryAddedExtrasMerger = new BundleMerger();
+        sDropboxEntryAddedExtrasMerger.setDefaultMergeStrategy(BundleMerger.STRATEGY_FIRST);
+        sDropboxEntryAddedExtrasMerger.setMergeStrategy(DropBoxManager.EXTRA_TIME,
+                BundleMerger.STRATEGY_COMPARABLE_MAX);
+        sDropboxEntryAddedExtrasMerger.setMergeStrategy(DropBoxManager.EXTRA_DROPPED_COUNT,
+                BundleMerger.STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD);
+    }
 
     private final IDropBoxManagerService.Stub mStub = new IDropBoxManagerService.Stub() {
         @Override
@@ -272,7 +293,7 @@ public final class DropBoxManagerService extends SystemService {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SEND_BROADCAST:
-                    prepareAndSendBroadcast((Intent) msg.obj, null);
+                    prepareAndSendBroadcast((Intent) msg.obj, false);
                     break;
                 case MSG_SEND_DEFERRED_BROADCAST:
                     Intent deferredIntent;
@@ -280,19 +301,43 @@ public final class DropBoxManagerService extends SystemService {
                         deferredIntent = mDeferredMap.remove((String) msg.obj);
                     }
                     if (deferredIntent != null) {
-                        prepareAndSendBroadcast(deferredIntent,
-                                createBroadcastOptions(deferredIntent));
+                        prepareAndSendBroadcast(deferredIntent, true);
                     }
                     break;
             }
         }
 
-        private void prepareAndSendBroadcast(Intent intent, Bundle options) {
+        private void prepareAndSendBroadcast(Intent intent, boolean deferrable) {
             if (!DropBoxManagerService.this.mBooted) {
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             }
-            getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                    android.Manifest.permission.READ_LOGS, options);
+            final BroadcastOptions options = BroadcastOptions.makeBasic();
+            if (Flags.enableReadDropboxPermission()) {
+                options.setRequireCompatChange(ENFORCE_READ_DROPBOX_DATA, true);
+                if (deferrable) {
+                    final String matchingKey = intent.getStringExtra(DropBoxManager.EXTRA_TAG)
+                            + "-READ_DROPBOX_DATA";
+                    setBroadcastOptionsForDeferral(options, matchingKey);
+                }
+                getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
+                        Manifest.permission.READ_DROPBOX_DATA, options.toBundle());
+
+                options.setRequireCompatChange(ENFORCE_READ_DROPBOX_DATA, false);
+                if (deferrable) {
+                    final String matchingKey = intent.getStringExtra(DropBoxManager.EXTRA_TAG)
+                            + "-READ_LOGS";
+                    setBroadcastOptionsForDeferral(options, matchingKey);
+                }
+                getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
+                        Manifest.permission.READ_LOGS, options.toBundle());
+            } else {
+                if (deferrable) {
+                    final String matchingKey = intent.getStringExtra(DropBoxManager.EXTRA_TAG);
+                    setBroadcastOptionsForDeferral(options, matchingKey);
+                }
+                getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
+                        android.Manifest.permission.READ_LOGS, options.toBundle());
+            }
         }
 
         private Intent createIntent(String tag, long time) {
@@ -303,21 +348,12 @@ public final class DropBoxManagerService extends SystemService {
             return dropboxIntent;
         }
 
-        private Bundle createBroadcastOptions(Intent intent) {
-            final BundleMerger extrasMerger = new BundleMerger();
-            extrasMerger.setDefaultMergeStrategy(BundleMerger.STRATEGY_FIRST);
-            extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_TIME,
-                    BundleMerger.STRATEGY_COMPARABLE_MAX);
-            extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_DROPPED_COUNT,
-                    BundleMerger.STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD);
-
-            return BroadcastOptions.makeBasic()
-                    .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED)
+        private void setBroadcastOptionsForDeferral(BroadcastOptions options, String matchingKey) {
+            options.setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED)
                     .setDeliveryGroupMatchingKey(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED,
-                            intent.getStringExtra(DropBoxManager.EXTRA_TAG))
-                    .setDeliveryGroupExtrasMerger(extrasMerger)
-                    .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
-                    .toBundle();
+                            matchingKey)
+                    .setDeliveryGroupExtrasMerger(sDropboxEntryAddedExtrasMerger)
+                    .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
         }
 
         /**
@@ -572,9 +608,16 @@ public final class DropBoxManagerService extends SystemService {
             return true;
         }
 
+
+        String permission = Manifest.permission.READ_LOGS;
+        if (Flags.enableReadDropboxPermission()
+                && CompatChanges.isChangeEnabled(ENFORCE_READ_DROPBOX_DATA, callingUid)) {
+            permission = Manifest.permission.READ_DROPBOX_DATA;
+        }
+
         // Callers always need this permission
-        getContext().enforceCallingOrSelfPermission(
-                android.Manifest.permission.READ_LOGS, TAG);
+        getContext().enforceCallingOrSelfPermission(permission, TAG);
+
 
         // Callers also need the ability to read usage statistics
         switch (getContext().getSystemService(AppOpsManager.class).noteOp(

@@ -18,19 +18,24 @@ package android.window;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
 import android.annotation.CallSuper;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
+
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -89,6 +94,19 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     @TaskFragmentTransitionType
     public static final int TASK_FRAGMENT_TRANSIT_CHANGE = TRANSIT_CHANGE;
 
+
+    /**
+     * The task fragment drag resize transition used by activity embedding.
+     *
+     * This value is also used in Transitions.TRANSIT_TASK_FRAGMENT_DRAG_RESIZE and must not
+     * conflict with other predefined transition types.
+     *
+     * @hide
+     */
+    @WindowManager.TransitionType
+    @TaskFragmentTransitionType
+    public static final int TASK_FRAGMENT_TRANSIT_DRAG_RESIZE = TRANSIT_FIRST_CUSTOM + 17;
+
     /**
      * Introduced a sub set of {@link WindowManager.TransitionType} for the types that are used for
      * TaskFragment transition.
@@ -102,6 +120,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
             TASK_FRAGMENT_TRANSIT_OPEN,
             TASK_FRAGMENT_TRANSIT_CLOSE,
             TASK_FRAGMENT_TRANSIT_CHANGE,
+            TASK_FRAGMENT_TRANSIT_DRAG_RESIZE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TaskFragmentTransitionType {}
@@ -140,12 +159,34 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     }
 
     /**
-     * Registers a TaskFragmentOrganizer to manage TaskFragments.
+     * Registers a {@link TaskFragmentOrganizer} to manage TaskFragments.
      */
     @CallSuper
     public void registerOrganizer() {
+        // TODO(b/302420256) point to registerOrganizer(boolean) when flag is removed.
         try {
-            getController().registerOrganizer(mInterface);
+            getController().registerOrganizer(mInterface, false /* isSystemOrganizer */);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers a {@link TaskFragmentOrganizer} to manage TaskFragments.
+     *
+     * Registering a system organizer requires MANAGE_ACTIVITY_TASKS permission, and the organizer
+     * will have additional system capabilities, including: (1) it will receive SurfaceControl for
+     * the organized TaskFragment, and (2) it needs to update the
+     * {@link android.view.SurfaceControl} following the window change accordingly.
+     *
+     * @hide
+     */
+    @CallSuper
+    @RequiresPermission(value = "android.permission.MANAGE_ACTIVITY_TASKS", conditional = true)
+    @FlaggedApi(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG)
+    public void registerOrganizer(boolean isSystemOrganizer) {
+        try {
+            getController().registerOrganizer(mInterface, isSystemOrganizer);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -249,7 +290,31 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
         }
         wct.setTaskFragmentOrganizer(mInterface);
         try {
-            getController().applyTransaction(wct, transitionType, shouldApplyIndependently);
+            getController().applyTransaction(
+                    wct, transitionType, shouldApplyIndependently, null /* remoteTransition */);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Applies a transaction with a {@link RemoteTransition}. Only a system organizer is allowed to
+     * use {@link RemoteTransition}. See {@link TaskFragmentOrganizer#registerOrganizer(boolean)}.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG)
+    public void applySystemTransaction(@NonNull WindowContainerTransaction wct,
+            @TaskFragmentTransitionType int transitionType,
+            @Nullable RemoteTransition remoteTransition) {
+        if (wct.isEmpty()) {
+            return;
+        }
+        wct.setTaskFragmentOrganizer(mInterface);
+        try {
+            getController().applyTransaction(
+                    wct, transitionType, remoteTransition != null /* shouldApplyIndependently */,
+                    remoteTransition);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.render
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
@@ -46,7 +47,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
     private val sectionsFeatureManager: NotificationSectionsFeatureManager = mock()
     private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider = mock()
     private val viewBarn: NotifViewBarn = mock()
-    private val logger: NodeSpecBuilderLogger = mock()
+    private val logger = NodeSpecBuilderLogger(mock(), logcatLogBuffer())
 
     private var rootController: NodeController = buildFakeController("rootController")
     private var headerController0: NodeController = buildFakeController("header0")

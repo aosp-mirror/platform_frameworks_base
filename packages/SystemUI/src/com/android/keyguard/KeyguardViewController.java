@@ -24,10 +24,9 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.shade.ShadeExpansionStateManager;
-import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 /**
  *  Interface to control Keyguard View. It should be implemented by KeyguardViewManagers, which
@@ -119,12 +118,20 @@ public interface KeyguardViewController {
     boolean isUnlockWithWallpaper();
 
     /**
+     * @return Whether the bouncer over dream is showing. Note that the bouncer over dream is
+     * handled independently of the rest of the notification panel. As a result, setting this state
+     * via {@link CentralSurfaces#setBouncerShowing(boolean)} leads to unintended side effects from
+     * states modified behind the dream.
+     */
+    boolean isBouncerShowingOverDream();
+
+    /**
      * @return Whether subtle animation should be used for unlocking the device.
      */
     boolean shouldSubtleWindowAnimationsForUnlock();
 
     /**
-     * Starts the animation before we dismiss Keyguard, i.e. an disappearing animation on the
+     * Starts the animation before we dismiss Keyguard, i.e. a disappearing animation on the
      * security view of the bouncer.
      *
      * @param finishRunnable the runnable to be run after the animation finished, or {@code null} if
@@ -178,9 +185,8 @@ public interface KeyguardViewController {
      * Registers the CentralSurfaces to which this Keyguard View is mounted.
      */
     void registerCentralSurfaces(CentralSurfaces centralSurfaces,
-            ShadeViewController shadeViewController,
+            ShadeLockscreenInteractor shadeLockscreenInteractor,
             @Nullable ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
-            View notificationContainer,
-            KeyguardBypassController bypassController);
+            View notificationContainer);
 }

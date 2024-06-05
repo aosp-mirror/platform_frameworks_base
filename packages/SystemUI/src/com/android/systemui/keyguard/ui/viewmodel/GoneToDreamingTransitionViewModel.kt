@@ -19,8 +19,11 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_DREAMING_DURATION
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
@@ -30,18 +33,22 @@ import kotlinx.coroutines.flow.Flow
 class GoneToDreamingTransitionViewModel
 @Inject
 constructor(
-    private val interactor: KeyguardTransitionInteractor,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) {
 
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = TO_DREAMING_DURATION,
-            transitionFlow = interactor.goneToDreamingTransition,
-        )
+        animationFlow
+            .setup(
+                duration = TO_DREAMING_DURATION,
+                edge = Edge.create(from = Scenes.Gone, to = DREAMING),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = GONE, to = DREAMING),
+            )
 
     /** Lockscreen views y-translation */
     fun lockscreenTranslationY(translatePx: Int): Flow<Float> {
-        return transitionAnimation.createFlow(
+        return transitionAnimation.sharedFlow(
             duration = 500.milliseconds,
             onStep = { it * translatePx },
             // Reset on cancel or finish
@@ -53,7 +60,7 @@ constructor(
 
     /** Lockscreen views alpha */
     val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.createFlow(
+        transitionAnimation.sharedFlow(
             duration = 250.milliseconds,
             onStep = { 1f - it },
         )

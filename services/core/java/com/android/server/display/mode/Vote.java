@@ -16,13 +16,18 @@
 
 package com.android.server.display.mode;
 
-import android.view.SurfaceControl;
+import android.annotation.NonNull;
 
-final class Vote {
+import com.android.server.display.config.SupportedModeData;
+
+import java.util.ArrayList;
+import java.util.List;
+
+interface Vote {
     // DEFAULT_RENDER_FRAME_RATE votes for render frame rate [0, DEFAULT]. As the lowest
     // priority vote, it's overridden by all other considerations. It acts to set a default
     // frame rate for a device.
-    static final int PRIORITY_DEFAULT_RENDER_FRAME_RATE = 0;
+    int PRIORITY_DEFAULT_RENDER_FRAME_RATE = 0;
 
     // PRIORITY_FLICKER_REFRESH_RATE votes for a single refresh rate like [60,60], [90,90] or
     // null. It is used to set a preferred refresh rate value in case the higher priority votes
@@ -30,18 +35,21 @@ final class Vote {
     static final int PRIORITY_FLICKER_REFRESH_RATE = 1;
 
     // High-brightness-mode may need a specific range of refresh-rates to function properly.
-    static final int PRIORITY_HIGH_BRIGHTNESS_MODE = 2;
+    int PRIORITY_HIGH_BRIGHTNESS_MODE = 2;
 
     // SETTING_MIN_RENDER_FRAME_RATE is used to propose a lower bound of the render frame rate.
     // It votes [minRefreshRate, Float.POSITIVE_INFINITY]
-    static final int PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE = 3;
+    int PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE = 3;
+
+    // User setting preferred display resolution.
+    int PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE = 4;
 
     // APP_REQUEST_RENDER_FRAME_RATE_RANGE is used to for internal apps to limit the render
     // frame rate in certain cases, mostly to preserve power.
     // @see android.view.WindowManager.LayoutParams#preferredMinRefreshRate
     // @see android.view.WindowManager.LayoutParams#preferredMaxRefreshRate
     // It votes to [preferredMinRefreshRate, preferredMaxRefreshRate].
-    static final int PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE = 4;
+    int PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE = 5;
 
     // We split the app request into different priorities in case we can satisfy one desire
     // without the other.
@@ -67,126 +75,141 @@ final class Vote {
     // The preferred refresh rate is set on the main surface of the app outside of
     // DisplayModeDirector.
     // @see com.android.server.wm.WindowState#updateFrameRateSelectionPriorityIfNeeded
-    static final int PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE = 5;
-    static final int PRIORITY_APP_REQUEST_SIZE = 6;
+    int PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE = 6;
 
-    // SETTING_PEAK_RENDER_FRAME_RATE has a high priority and will restrict the bounds of the
-    // rest of low priority voters. It votes [0, max(PEAK, MIN)]
-    static final int PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE = 7;
+    int PRIORITY_APP_REQUEST_SIZE = 7;
+
+    // PRIORITY_USER_SETTING_PEAK_REFRESH_RATE restricts physical refresh rate to
+    // [0, max(PEAK, MIN)], depending on user settings peakRR/minRR values
+    int PRIORITY_USER_SETTING_PEAK_REFRESH_RATE = 8;
+
+    // PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE has a higher priority than
+    // PRIORITY_USER_SETTING_PEAK_REFRESH_RATE and will limit render rate to [0, max(PEAK, MIN)]
+    // in case physical refresh rate vote is discarded (due to other high priority votes),
+    // render rate vote can still apply
+    int PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE = 9;
+
+    // Restrict all displays to 60Hz when external display is connected. It votes [59Hz, 61Hz].
+    int PRIORITY_SYNCHRONIZED_REFRESH_RATE = 10;
+
+    // Restrict displays max available resolution and refresh rates. It votes [0, LIMIT]
+    int PRIORITY_LIMIT_MODE = 11;
 
     // To avoid delay in switching between 60HZ -> 90HZ when activating LHBM, set refresh
     // rate to max value (same as for PRIORITY_UDFPS) on lock screen
-    static final int PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE = 8;
+    int PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE = 12;
 
     // For concurrent displays we want to limit refresh rate on all displays
-    static final int PRIORITY_LAYOUT_LIMITED_FRAME_RATE = 9;
+    int PRIORITY_LAYOUT_LIMITED_FRAME_RATE = 13;
 
-    // LOW_POWER_MODE force the render frame rate to [0, 60HZ] if
+    // For internal application to limit display modes to specific ids
+    int PRIORITY_SYSTEM_REQUESTED_MODES = 14;
+
+    // PRIORITY_LOW_POWER_MODE_MODES limits display modes to specific refreshRate-vsync pairs if
     // Settings.Global.LOW_POWER_MODE is on.
-    static final int PRIORITY_LOW_POWER_MODE = 10;
+    // Lower priority that PRIORITY_LOW_POWER_MODE_RENDER_RATE and if discarded (due to other
+    // higher priority votes), render rate limit can still apply
+    int PRIORITY_LOW_POWER_MODE_MODES = 15;
+
+    // PRIORITY_LOW_POWER_MODE_RENDER_RATE force the render frame rate to [0, 60HZ] if
+    // Settings.Global.LOW_POWER_MODE is on.
+    int PRIORITY_LOW_POWER_MODE_RENDER_RATE = 16;
 
     // PRIORITY_FLICKER_REFRESH_RATE_SWITCH votes for disabling refresh rate switching. If the
     // higher priority voters' result is a range, it will fix the rate to a single choice.
     // It's used to avoid refresh rate switches in certain conditions which may result in the
     // user seeing the display flickering when the switches occur.
-    static final int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 11;
+    int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 17;
 
     // Force display to [0, 60HZ] if skin temperature is at or above CRITICAL.
-    static final int PRIORITY_SKIN_TEMPERATURE = 12;
+    int PRIORITY_SKIN_TEMPERATURE = 18;
 
     // The proximity sensor needs the refresh rate to be locked in order to function, so this is
     // set to a high priority.
-    static final int PRIORITY_PROXIMITY = 13;
+    int PRIORITY_PROXIMITY = 19;
 
     // The Under-Display Fingerprint Sensor (UDFPS) needs the refresh rate to be locked in order
     // to function, so this needs to be the highest priority of all votes.
-    static final int PRIORITY_UDFPS = 14;
+    int PRIORITY_UDFPS = 20;
 
     // Whenever a new priority is added, remember to update MIN_PRIORITY, MAX_PRIORITY, and
     // APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, as well as priorityToString.
 
-    static final int MIN_PRIORITY = PRIORITY_DEFAULT_RENDER_FRAME_RATE;
-    static final int MAX_PRIORITY = PRIORITY_UDFPS;
+    int MIN_PRIORITY = PRIORITY_DEFAULT_RENDER_FRAME_RATE;
+    int MAX_PRIORITY = PRIORITY_UDFPS;
 
     // The cutoff for the app request refresh rate range. Votes with priorities lower than this
     // value will not be considered when constructing the app request refresh rate range.
-    static final int APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF =
+    int APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF =
             PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE;
 
     /**
      * A value signifying an invalid width or height in a vote.
      */
-    static final int INVALID_SIZE = -1;
+    int INVALID_SIZE = -1;
 
-    /**
-     * The requested width of the display in pixels, or INVALID_SIZE;
-     */
-    public final int width;
-    /**
-     * The requested height of the display in pixels, or INVALID_SIZE;
-     */
-    public final int height;
-    /**
-     * Information about the refresh rate frame rate ranges DM would like to set the display to.
-     */
-    public final SurfaceControl.RefreshRateRanges refreshRateRanges;
-
-    /**
-     * Whether refresh rate switching should be disabled (i.e. the refresh rate range is
-     * a single value).
-     */
-    public final boolean disableRefreshRateSwitching;
-
-    /**
-     * The preferred refresh rate selected by the app. It is used to validate that the summary
-     * refresh rate ranges include this value, and are not restricted by a lower priority vote.
-     */
-    public final float appRequestBaseModeRefreshRate;
+    void updateSummary(@NonNull VoteSummary summary);
 
     static Vote forPhysicalRefreshRates(float minRefreshRate, float maxRefreshRate) {
-        return new Vote(INVALID_SIZE, INVALID_SIZE, minRefreshRate, maxRefreshRate, 0,
-                Float.POSITIVE_INFINITY,
-                minRefreshRate == maxRefreshRate, 0f);
+        return new CombinedVote(
+                List.of(
+                        new RefreshRateVote.PhysicalVote(minRefreshRate, maxRefreshRate),
+                        new DisableRefreshRateSwitchingVote(minRefreshRate == maxRefreshRate)
+                )
+        );
     }
 
     static Vote forRenderFrameRates(float minFrameRate, float maxFrameRate) {
-        return new Vote(INVALID_SIZE, INVALID_SIZE, 0, Float.POSITIVE_INFINITY, minFrameRate,
-                maxFrameRate,
-                false, 0f);
+        return new RefreshRateVote.RenderVote(minFrameRate, maxFrameRate);
     }
 
     static Vote forSize(int width, int height) {
-        return new Vote(width, height, 0, Float.POSITIVE_INFINITY, 0, Float.POSITIVE_INFINITY,
-                false,
-                0f);
+        return new SizeVote(width, height, width, height);
+    }
+
+    static Vote forSizeAndPhysicalRefreshRatesRange(int minWidth, int minHeight,
+            int width, int height, float minRefreshRate, float maxRefreshRate) {
+        return new CombinedVote(
+                List.of(
+                        new SizeVote(width, height, minWidth, minHeight),
+                        new RefreshRateVote.PhysicalVote(minRefreshRate, maxRefreshRate),
+                        new DisableRefreshRateSwitchingVote(minRefreshRate == maxRefreshRate)
+                )
+        );
     }
 
     static Vote forDisableRefreshRateSwitching() {
-        return new Vote(INVALID_SIZE, INVALID_SIZE, 0, Float.POSITIVE_INFINITY, 0,
-                Float.POSITIVE_INFINITY, true,
-                0f);
+        return new DisableRefreshRateSwitchingVote(true);
     }
 
     static Vote forBaseModeRefreshRate(float baseModeRefreshRate) {
-        return new Vote(INVALID_SIZE, INVALID_SIZE, 0, Float.POSITIVE_INFINITY, 0,
-                Float.POSITIVE_INFINITY, false,
-                baseModeRefreshRate);
+        return new BaseModeRefreshRateVote(baseModeRefreshRate);
     }
 
-    private Vote(int width, int height,
-            float minPhysicalRefreshRate,
-            float maxPhysicalRefreshRate,
-            float minRenderFrameRate,
-            float maxRenderFrameRate,
-            boolean disableRefreshRateSwitching,
-            float baseModeRefreshRate) {
-        this.width = width;
-        this.height = height;
-        this.refreshRateRanges = new SurfaceControl.RefreshRateRanges(
-                new SurfaceControl.RefreshRateRange(minPhysicalRefreshRate, maxPhysicalRefreshRate),
-                new SurfaceControl.RefreshRateRange(minRenderFrameRate, maxRenderFrameRate));
-        this.disableRefreshRateSwitching = disableRefreshRateSwitching;
-        this.appRequestBaseModeRefreshRate = baseModeRefreshRate;
+    static Vote forRequestedRefreshRate(float refreshRate) {
+        return new RequestedRefreshRateVote(refreshRate);
+    }
+
+    static Vote forSupportedRefreshRates(List<SupportedModeData> supportedModes) {
+        if (supportedModes.isEmpty()) {
+            return null;
+        }
+        List<SupportedRefreshRatesVote.RefreshRates> rates = new ArrayList<>();
+        for (SupportedModeData data : supportedModes) {
+            rates.add(new SupportedRefreshRatesVote.RefreshRates(data.refreshRate, data.vsyncRate));
+        }
+        return new SupportedRefreshRatesVote(rates);
+    }
+
+    static Vote forSupportedModes(List<Integer> modeIds) {
+        return new SupportedModesVote(modeIds);
+    }
+
+    static Vote forSupportedRefreshRatesAndDisableSwitching(
+            List<SupportedRefreshRatesVote.RefreshRates> supportedRefreshRates) {
+        return new CombinedVote(
+                List.of(forDisableRefreshRateSwitching(),
+                        new SupportedRefreshRatesVote(supportedRefreshRates)));
     }
 
     static String priorityToString(int priority) {
@@ -207,31 +230,34 @@ final class Vote {
                 return "PRIORITY_HIGH_BRIGHTNESS_MODE";
             case PRIORITY_PROXIMITY:
                 return "PRIORITY_PROXIMITY";
-            case PRIORITY_LOW_POWER_MODE:
-                return "PRIORITY_LOW_POWER_MODE";
+            case PRIORITY_LOW_POWER_MODE_MODES:
+                return "PRIORITY_LOW_POWER_MODE_MODES";
+            case PRIORITY_LOW_POWER_MODE_RENDER_RATE:
+                return "PRIORITY_LOW_POWER_MODE_RENDER_RATE";
             case PRIORITY_SKIN_TEMPERATURE:
                 return "PRIORITY_SKIN_TEMPERATURE";
             case PRIORITY_UDFPS:
                 return "PRIORITY_UDFPS";
             case PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE:
                 return "PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE";
+            case PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE:
+                return "PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE";
+            case PRIORITY_LIMIT_MODE:
+                return "PRIORITY_LIMIT_MODE";
+            case PRIORITY_SYNCHRONIZED_REFRESH_RATE:
+                return "PRIORITY_SYNCHRONIZED_REFRESH_RATE";
+            case PRIORITY_USER_SETTING_PEAK_REFRESH_RATE:
+                return "PRIORITY_USER_SETTING_PEAK_REFRESH_RATE";
             case PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE:
                 return "PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE";
             case PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE:
                 return "PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE";
             case PRIORITY_LAYOUT_LIMITED_FRAME_RATE:
                 return "PRIORITY_LAYOUT_LIMITED_FRAME_RATE";
+            case PRIORITY_SYSTEM_REQUESTED_MODES:
+                return "PRIORITY_SYSTEM_REQUESTED_MODES";
             default:
                 return Integer.toString(priority);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Vote: {"
-                + "width: " + width + ", height: " + height
-                + ", refreshRateRanges: " + refreshRateRanges
-                + ", disableRefreshRateSwitching: " + disableRefreshRateSwitching
-                + ", appRequestBaseModeRefreshRate: "  + appRequestBaseModeRefreshRate + "}";
     }
 }

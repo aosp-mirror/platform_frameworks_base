@@ -30,7 +30,9 @@ import static com.android.server.hdmi.DeviceSelectActionFromPlayback.STATE_WAIT_
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -118,6 +120,16 @@ public class DeviceSelectActionFromPlaybackTest {
                     boolean isPowerStandbyOrTransient() {
                         return false;
                     }
+
+                    @Override
+                    boolean isPowerStandby() {
+                        return false;
+                    }
+
+                    @Override
+                    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                        // do nothing
+                    }
                 };
 
 
@@ -125,6 +137,7 @@ public class DeviceSelectActionFromPlaybackTest {
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
+        mNativeWrapper.setPhysicalAddress(0x0000);
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
@@ -138,7 +151,7 @@ public class DeviceSelectActionFromPlaybackTest {
 
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
-        mNativeWrapper.setPhysicalAddress(0x0000);
+
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
         mTestLooper.dispatchAll();

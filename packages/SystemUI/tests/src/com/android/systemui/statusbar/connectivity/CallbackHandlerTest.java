@@ -22,14 +22,14 @@ import static org.mockito.Matchers.eq;
 
 import android.os.HandlerThread;
 import android.telephony.SubscriptionInfo;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.NetworkController.EmergencyListener;
-import com.android.systemui.tests.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -179,7 +179,7 @@ public class CallbackHandlerTest extends SysuiTestCase {
     @Test
     public void testSignalCallback_setIsAirplaneMode() {
         IconState state =
-                new IconState(true, R.drawable.stat_sys_airplane_mode, "Test Description");
+                new IconState(true, com.android.settingslib.R.drawable.stat_sys_airplane_mode, "Test Description");
         mHandler.setIsAirplaneMode(state);
         waitForCallbacks();
 

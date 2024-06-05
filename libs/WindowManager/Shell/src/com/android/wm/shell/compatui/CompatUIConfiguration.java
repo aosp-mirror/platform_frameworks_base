@@ -24,8 +24,8 @@ import android.provider.DeviceConfig;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.dagger.WMSingleton;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 
 import javax.inject.Inject;
 
@@ -71,6 +71,8 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
     private static final String HAS_SEEN_VERTICAL_REACHABILITY_EDUCATION_KEY_PREFIX =
             "has_seen_vertical_reachability_education";
 
+    private static final int MAX_PERCENTAGE_VAL = 100;
+
     /**
      * The {@link SharedPreferences} instance for the restart dialog and the reachability
      * education.
@@ -81,6 +83,12 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
      * The {@link SharedPreferences} instance for the letterbox education dialog.
      */
     private final SharedPreferences mLetterboxEduSharedPreferences;
+
+    /**
+     * The minimum tolerance of the percentage of activity bounds within its task to hide
+     * size compat restart button.
+     */
+    private final int mHideSizeCompatRestartButtonTolerance;
 
     // Whether the extended restart dialog is enabled
     private boolean mIsRestartDialogEnabled;
@@ -106,6 +114,9 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
                 R.bool.config_letterboxIsRestartDialogEnabled);
         mIsReachabilityEducationEnabled = context.getResources().getBoolean(
                 R.bool.config_letterboxIsReachabilityEducationEnabled);
+        final int tolerance = context.getResources().getInteger(
+                R.integer.config_letterboxRestartButtonHideTolerance);
+        mHideSizeCompatRestartButtonTolerance = getHideSizeCompatRestartButtonTolerance(tolerance);
         mIsLetterboxRestartDialogAllowed = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_WINDOW_MANAGER, KEY_ENABLE_LETTERBOX_RESTART_DIALOG,
                 DEFAULT_VALUE_ENABLE_LETTERBOX_RESTART_DIALOG);
@@ -179,6 +190,14 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
                     || !hasSeenVerticalReachabilityEducation(taskInfo));
     }
 
+    int getHideSizeCompatRestartButtonTolerance() {
+        return mHideSizeCompatRestartButtonTolerance;
+    }
+
+    int getDefaultHideRestartButtonTolerance() {
+        return MAX_PERCENTAGE_VAL;
+    }
+
     boolean getHasSeenLetterboxEducation(int userId) {
         return mLetterboxEduSharedPreferences
                 .getBoolean(dontShowLetterboxEduKey(userId), /* default= */ false);
@@ -216,6 +235,15 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
                     KEY_ENABLE_LETTERBOX_REACHABILITY_EDUCATION,
                     DEFAULT_VALUE_ENABLE_LETTERBOX_REACHABILITY_EDUCATION);
         }
+    }
+
+    // Returns the minimum tolerance of the percentage of activity bounds within its task to hide
+    // size compat restart button. Value lower than 0 or higher than 100 will be ignored.
+    // 100 is the default value where the activity has to fit exactly within the task to allow
+    // size compat restart button to be hidden. 0 means size compat restart button will always
+    // be hidden.
+    private int getHideSizeCompatRestartButtonTolerance(int tolerance) {
+        return tolerance < 0 || tolerance > MAX_PERCENTAGE_VAL ? MAX_PERCENTAGE_VAL : tolerance;
     }
 
     private boolean isReachabilityEducationEnabled() {

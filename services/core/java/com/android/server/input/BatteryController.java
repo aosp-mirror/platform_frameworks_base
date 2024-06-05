@@ -46,7 +46,6 @@ import android.view.InputDevice;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.input.BatteryController.UEventManager.UEventBatteryListener;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -102,8 +101,9 @@ final class BatteryController {
     @GuardedBy("mLock")
     private BluetoothBatteryManager.BluetoothBatteryListener mBluetoothBatteryListener;
 
-    BatteryController(Context context, NativeInputManagerService nativeService, Looper looper) {
-        this(context, nativeService, looper, new UEventManager() {},
+    BatteryController(Context context, NativeInputManagerService nativeService, Looper looper,
+            UEventManager uEventManager) {
+        this(context, nativeService, looper, uEventManager,
                 new LocalBluetoothBatteryManager(context, looper));
     }
 
@@ -567,7 +567,7 @@ final class BatteryController {
         private BluetoothAdapter.OnMetadataChangedListener mBluetoothMetadataListener;
 
         @Nullable
-        private UEventBatteryListener mUEventBatteryListener;
+        private BatteryController.UEventBatteryListener mUEventBatteryListener;
 
         DeviceMonitor(int deviceId) {
             mState = new State(deviceId);
@@ -630,7 +630,7 @@ final class BatteryController {
                 return;
             }
             final int deviceId = mState.deviceId;
-            mUEventBatteryListener = new UEventBatteryListener() {
+            mUEventBatteryListener = new BatteryController.UEventBatteryListener() {
                 @Override
                 public void onBatteryUEvent(long eventTime) {
                     handleUEventNotification(deviceId, eventTime);
@@ -898,40 +898,25 @@ final class BatteryController {
         }
     }
 
-    // An interface used to change the API of UEventObserver to a more test-friendly format.
     @VisibleForTesting
-    interface UEventManager {
-
-        @VisibleForTesting
-        abstract class UEventBatteryListener {
-            private final UEventObserver mObserver = new UEventObserver() {
-                @Override
-                public void onUEvent(UEvent event) {
-                    final long eventTime = SystemClock.uptimeMillis();
-                    if (DEBUG) {
-                        Slog.d(TAG,
-                                "UEventListener: Received UEvent: "
-                                        + event + " eventTime: " + eventTime);
-                    }
-                    if (!"CHANGE".equalsIgnoreCase(event.get("ACTION"))
-                            || !"POWER_SUPPLY".equalsIgnoreCase(event.get("SUBSYSTEM"))) {
-                        // Disregard any UEvents that do not correspond to battery changes.
-                        return;
-                    }
-                    UEventBatteryListener.this.onBatteryUEvent(eventTime);
-                }
-            };
-
-            public abstract void onBatteryUEvent(long eventTime);
+    abstract static class UEventBatteryListener extends UEventManager.UEventListener {
+        @Override
+        public void onUEvent(UEventObserver.UEvent event) {
+            final long eventTime = SystemClock.uptimeMillis();
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "UEventListener: Received UEvent: "
+                                + event + " eventTime: " + eventTime);
+            }
+            if (!"CHANGE".equalsIgnoreCase(event.get("ACTION"))
+                    || !"POWER_SUPPLY".equalsIgnoreCase(event.get("SUBSYSTEM"))) {
+                // Disregard any UEvents that do not correspond to battery changes.
+                return;
+            }
+            UEventBatteryListener.this.onBatteryUEvent(eventTime);
         }
 
-        default void addListener(UEventBatteryListener listener, String match) {
-            listener.mObserver.startObserving(match);
-        }
-
-        default void removeListener(UEventBatteryListener listener) {
-            listener.mObserver.stopObserving();
-        }
+        public abstract void onBatteryUEvent(long eventTime);
     }
 
     // An interface used to change the API of adding a bluetooth battery listener to a more

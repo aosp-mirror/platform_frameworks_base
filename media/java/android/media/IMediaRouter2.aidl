@@ -19,6 +19,7 @@ package android.media;
 import android.media.MediaRoute2Info;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
+import android.os.UserHandle;
 
 /**
  * @hide

@@ -53,8 +53,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
-import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -455,6 +455,31 @@ public class LockSettingsStorageTests {
         assertEquals(0, PersistentData.TYPE_NONE);
         assertEquals(1, PersistentData.TYPE_SP_GATEKEEPER);
         assertEquals(2, PersistentData.TYPE_SP_WEAVER);
+    }
+
+    @Test
+    public void testRepairMode_emptyPersistentData() {
+        assertSame(PersistentData.NONE, mStorage.readPersistentDataBlock());
+    }
+
+    @Test
+    public void testRepairMode_writeGatekeeperPersistentData() {
+        mStorage.writeRepairModePersistentData(
+                PersistentData.TYPE_SP_GATEKEEPER, SOME_USER_ID, PAYLOAD);
+
+        final PersistentData data = mStorage.readRepairModePersistentData();
+        assertEquals(PersistentData.TYPE_SP_GATEKEEPER, data.type);
+        assertArrayEquals(PAYLOAD, data.payload);
+    }
+
+    @Test
+    public void testRepairMode_writeWeaverPersistentData() {
+        mStorage.writeRepairModePersistentData(
+                PersistentData.TYPE_SP_WEAVER, SOME_USER_ID, PAYLOAD);
+
+        final PersistentData data = mStorage.readRepairModePersistentData();
+        assertEquals(PersistentData.TYPE_SP_WEAVER, data.type);
+        assertArrayEquals(PAYLOAD, data.payload);
     }
 
     private static void assertArrayEquals(byte[] expected, byte[] actual) {

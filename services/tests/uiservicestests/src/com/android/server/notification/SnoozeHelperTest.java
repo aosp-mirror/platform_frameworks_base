@@ -44,10 +44,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.IntArray;
 import android.util.Xml;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.modules.utils.TypedXmlPullParser;
@@ -540,6 +540,29 @@ public class SnoozeHelperTest extends UiServiceTestCase {
 
         mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM, true);
         verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r, true);
+    }
+
+    @Test
+    public void testRepostAll() throws Exception {
+        final int profileId = 11;
+        final int otherUserId = 2;
+        IntArray userIds = new IntArray();
+        userIds.add(UserHandle.USER_SYSTEM);
+        userIds.add(profileId);
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        NotificationRecord r2 = getNotificationRecord("pkg", 2, "two", UserHandle.SYSTEM);
+        NotificationRecord r3 = getNotificationRecord("pkg", 3, "three", UserHandle.of(profileId));
+        NotificationRecord r4 = getNotificationRecord("pkg", 4, "four", UserHandle.of(otherUserId));
+        mSnoozeHelper.snooze(r,  1000);
+        mSnoozeHelper.snooze(r2, 1000);
+        mSnoozeHelper.snooze(r3, 1000);
+        mSnoozeHelper.snooze(r4, 1000);
+
+        mSnoozeHelper.repostAll(userIds);
+
+        verify(mCallback, times(3)).repost(anyInt(), any(), anyBoolean());
+        // All notifications were reposted, except the one for otherUserId
+        assertThat(mSnoozeHelper.getSnoozed()).containsExactly(r4);
     }
 
     @Test

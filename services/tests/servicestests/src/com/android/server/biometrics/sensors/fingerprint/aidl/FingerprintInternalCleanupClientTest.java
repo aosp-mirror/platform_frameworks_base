@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.Fingerprint;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
 
@@ -41,7 +42,6 @@ import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -70,9 +70,9 @@ public class FingerprintInternalCleanupClientTest {
             InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
 
     @Mock
-    private AidlSession mAidlSession;
+    ISession mSession;
     @Mock
-    private ISession mSession;
+    private AidlSession mAidlSession;
     @Mock
     private BiometricLogger mLogger;
     @Mock
@@ -87,15 +87,16 @@ public class FingerprintInternalCleanupClientTest {
 
     @Before
     public void setup() {
-        when(mAidlSession.getSession()).thenReturn(mSession);
         mAddedIds = new ArrayList<>();
+
+        when(mAidlSession.getSession()).thenReturn(mSession);
     }
 
-    @Ignore("TODO(b/229015801): verify cleanup behavior")
     @Test
     public void removesUnknownTemplate() throws Exception {
         mClient = createClient();
 
+        final ArgumentCaptor<int[]> captor = ArgumentCaptor.forClass(int[].class);
         final List<Fingerprint> templates = List.of(
                 new Fingerprint("one", 1, 1),
                 new Fingerprint("two", 2, 1)
@@ -108,8 +109,8 @@ public class FingerprintInternalCleanupClientTest {
             mClient.getCurrentRemoveClient().onRemoved(templates.get(i), 0);
         }
 
+        verify(mSession).enumerateEnrollments();
         assertThat(mAddedIds).isEmpty();
-        final ArgumentCaptor<int[]> captor = ArgumentCaptor.forClass(int[].class);
         verify(mSession, times(2)).removeEnrollments(captor.capture());
         assertThat(captor.getAllValues().stream()
                 .flatMap(x -> Arrays.stream(x).boxed())
@@ -132,13 +133,15 @@ public class FingerprintInternalCleanupClientTest {
             mClient.getCurrentEnumerateClient().onEnumerationResult(templates.get(i), i);
         }
 
+        verify(mSession).enumerateEnrollments();
         assertThat(mAddedIds).containsExactly(1, 2);
         verify(mSession, never()).removeEnrollments(any());
         verify(mCallback).onClientFinished(eq(mClient), eq(true));
     }
 
     @Test
-    public void cleanupUnknownHalTemplatesAfterEnumerationWhenVirtualIsDisabled() {
+    public void cleanupUnknownHalTemplatesAfterEnumerationWhenVirtualIsDisabled()
+            throws RemoteException {
         mClient = createClient();
 
         final List<Fingerprint> templates = List.of(
@@ -150,6 +153,8 @@ public class FingerprintInternalCleanupClientTest {
         for (int i = templates.size() - 1; i >= 0; i--) {
             mClient.getCurrentEnumerateClient().onEnumerationResult(templates.get(i), i);
         }
+
+        verify(mSession).enumerateEnrollments();
         // The first template is removed after enumeration
         assertThat(mClient.getUnknownHALTemplates().size()).isEqualTo(2);
 

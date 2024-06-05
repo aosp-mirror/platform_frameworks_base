@@ -18,9 +18,11 @@ package com.android.systemui.camera
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.provider.MediaStore
 import android.text.TextUtils
-import com.android.systemui.R
+import com.android.systemui.res.R
+import android.util.Log
 
 class CameraIntents {
     companion object {
@@ -28,28 +30,33 @@ class CameraIntents {
         val DEFAULT_INSECURE_CAMERA_INTENT_ACTION = MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA
         private val VIDEO_CAMERA_INTENT_ACTION = MediaStore.INTENT_ACTION_VIDEO_CAMERA
         const val EXTRA_LAUNCH_SOURCE = "com.android.systemui.camera_launch_source"
+        const val TAG = "CameraIntents"
 
         @JvmStatic
-        fun getOverrideCameraPackage(context: Context): String? {
-            context.resources.getString(R.string.config_cameraGesturePackage)?.let {
-                if (!TextUtils.isEmpty(it)) {
-                    return it
+        fun getOverrideCameraPackage(context: Context, userId: Int): String? {
+            val packageName = context.resources.getString(R.string.config_cameraGesturePackage)!!
+            try {
+                if (!TextUtils.isEmpty(packageName)
+                        && context.packageManager.getApplicationInfoAsUser(packageName, 0, userId).enabled ?: false) {
+                    return packageName
                 }
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.w(TAG, "Missing cameraGesturePackage $packageName", e)
             }
             return null
         }
 
         @JvmStatic
-        fun getInsecureCameraIntent(context: Context): Intent {
+        fun getInsecureCameraIntent(context: Context, userId: Int): Intent {
             val intent = Intent(DEFAULT_INSECURE_CAMERA_INTENT_ACTION)
-            getOverrideCameraPackage(context)?.let { intent.setPackage(it) }
+            getOverrideCameraPackage(context, userId)?.let { intent.setPackage(it) }
             return intent
         }
 
         @JvmStatic
-        fun getSecureCameraIntent(context: Context): Intent {
+        fun getSecureCameraIntent(context: Context, userId: Int): Intent {
             val intent = Intent(DEFAULT_SECURE_CAMERA_INTENT_ACTION)
-            getOverrideCameraPackage(context)?.let { intent.setPackage(it) }
+            getOverrideCameraPackage(context, userId)?.let { intent.setPackage(it) }
             return intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
         }
 
@@ -65,7 +72,7 @@ class CameraIntents {
 
         /** Returns an [Intent] that can be used to start the camera in video mode. */
         @JvmStatic
-        fun getVideoCameraIntent(): Intent {
+        fun getVideoCameraIntent(userId: Int): Intent {
             return Intent(VIDEO_CAMERA_INTENT_ACTION)
         }
     }

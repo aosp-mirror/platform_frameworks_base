@@ -43,6 +43,15 @@ public class TestableNotificationManagerService extends NotificationManagerServi
     @Nullable
     Boolean mIsVisibleToListenerReturnValue = null;
 
+    ComponentPermissionChecker permissionChecker;
+
+    private static class SensitiveLog {
+        public boolean hasPosted;
+        public boolean hasSensitiveContent;
+        public long lifetime;
+    }
+    public SensitiveLog lastSensitiveLog = null;
+
     TestableNotificationManagerService(Context context, NotificationRecordLogger logger,
             InstanceIdSequence notificationInstanceIdSequence) {
         super(context, logger, notificationInstanceIdSequence);
@@ -50,6 +59,15 @@ public class TestableNotificationManagerService extends NotificationManagerServi
 
     RankingHelper getRankingHelper() {
         return mRankingHelper;
+    }
+
+    /**
+     * Sets {@link #isSystemUid} and {@link #isSystemAppId} to {@code false}, so that calls to NMS
+     * methods don't succeed {@link #isCallingUidSystem()} and similar checks.
+     */
+    void setCallerIsNormalPackage() {
+        isSystemUid = false;
+        isSystemAppId = false;
     }
 
     @Override
@@ -71,7 +89,7 @@ public class TestableNotificationManagerService extends NotificationManagerServi
     }
 
     @Override
-    protected boolean isCallerIsSystemOrSystemUi() {
+    protected boolean isCallerSystemOrSystemUi() {
         countSystemChecks++;
         return isSystemUid || isSystemAppId;
     }
@@ -150,6 +168,21 @@ public class TestableNotificationManagerService extends NotificationManagerServi
         return super.isVisibleToListener(sbn, notificationType, listener);
     }
 
+    @Override
+    protected int checkComponentPermission(String permission, int uid, int owningUid,
+            boolean exported) {
+        return permissionChecker.check(permission, uid, owningUid, exported);
+    }
+
+    @Override
+    protected void logSensitiveAdjustmentReceived(boolean hasPosted, boolean hasSensitiveContent,
+            int lifetimeMs) {
+        lastSensitiveLog = new SensitiveLog();
+        lastSensitiveLog.hasPosted = hasPosted;
+        lastSensitiveLog.hasSensitiveContent = hasSensitiveContent;
+        lastSensitiveLog.lifetime = lifetimeMs;
+    }
+
     public class StrongAuthTrackerFake extends NotificationManagerService.StrongAuthTracker {
         private int mGetStrongAuthForUserReturnValue = 0;
         StrongAuthTrackerFake(Context context) {
@@ -164,5 +197,18 @@ public class TestableNotificationManagerService extends NotificationManagerServi
         public int getStrongAuthForUser(int userId) {
             return mGetStrongAuthForUserReturnValue;
         }
+    }
+
+    public boolean checkLastSensitiveLog(boolean hasPosted, boolean hasSensitive, int lifetime) {
+        if (lastSensitiveLog == null) {
+            return false;
+        }
+        return hasPosted == lastSensitiveLog.hasPosted
+                && hasSensitive == lastSensitiveLog.hasSensitiveContent
+                && lifetime == lastSensitiveLog.lifetime;
+    }
+
+    public interface ComponentPermissionChecker {
+        int check(String permission, int uid, int owningUid, boolean exported);
     }
 }

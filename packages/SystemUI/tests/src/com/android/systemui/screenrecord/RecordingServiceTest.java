@@ -16,9 +16,11 @@
 
 package com.android.systemui.screenrecord;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -26,22 +28,25 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.app.ActivityOptions.LaunchCookie;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.media.MediaProjectionCaptureTarget;
+import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,20 +82,38 @@ public class RecordingServiceTest extends SysuiTestCase {
     private UserContextProvider mUserContextTracker;
     @Captor
     private ArgumentCaptor<Runnable> mRunnableCaptor;
-    private KeyguardDismissUtil mKeyguardDismissUtil = new KeyguardDismissUtil() {
-        public void executeWhenUnlocked(ActivityStarter.OnDismissAction action,
-                boolean requiresShadeOpen) {
-            action.onDismiss();
-        }
-    };
+    @Mock
+    private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private SysuiStatusBarStateController mStatusBarStateController;
+    @Mock
+    private ActivityStarter mActivityStarter;
+
+    private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
+
+    private KeyguardDismissUtil mKeyguardDismissUtil = new KeyguardDismissUtil(
+            mKeyguardStateController, mStatusBarStateController, mActivityStarter);
 
     private RecordingService mRecordingService;
+
+    private class RecordingServiceTestable extends RecordingService {
+        RecordingServiceTestable(
+                RecordingController controller, Executor executor,
+                Handler handler, UiEventLogger uiEventLogger,
+                NotificationManager notificationManager,
+                UserContextProvider userContextTracker, KeyguardDismissUtil keyguardDismissUtil) {
+            super(controller, executor, handler,
+                    uiEventLogger, notificationManager, userContextTracker, keyguardDismissUtil);
+            attachBaseContext(mContext);
+        }
+    }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mRecordingService = Mockito.spy(new RecordingService(mController, mExecutor, mHandler,
-                mUiEventLogger, mNotificationManager, mUserContextTracker, mKeyguardDismissUtil));
+        mRecordingService = Mockito.spy(new RecordingServiceTestable(mController, mExecutor,
+                mHandler, mUiEventLogger, mNotificationManager,
+                mUserContextTracker, mKeyguardDismissUtil));
 
         // Return actual context info
         doReturn(mContext).when(mRecordingService).getApplicationContext();
@@ -123,7 +146,8 @@ public class RecordingServiceTest extends SysuiTestCase {
 
     @Test
     public void testLogStartPartialRecording() {
-        MediaProjectionCaptureTarget target = new MediaProjectionCaptureTarget(new Binder());
+        MediaProjectionCaptureTarget target =
+                new MediaProjectionCaptureTarget(new LaunchCookie(), 12345);
         Intent startIntent = RecordingService.getStartIntent(mContext, 0, 0, false, target);
         mRecordingService.onStartCommand(startIntent, 0, 0);
 
@@ -143,7 +167,7 @@ public class RecordingServiceTest extends SysuiTestCase {
 
     @Test
     public void testLogStopFromNotificationIntent() {
-        Intent stopIntent = RecordingService.getNotificationIntent(mContext);
+        Intent stopIntent = mRecordingService.getNotificationIntent(mContext);
         mRecordingService.onStartCommand(stopIntent, 0, 0);
 
         // Verify that we log the correct event
@@ -160,8 +184,7 @@ public class RecordingServiceTest extends SysuiTestCase {
         Intent startIntent = RecordingService.getStartIntent(mContext, 0, 0, false, null);
         mRecordingService.onStartCommand(startIntent, 0, 0);
 
-        // Then the state is set to not recording
-        verify(mController).updateState(false);
+        assertUpdateState(false);
     }
 
     @Test
@@ -179,7 +202,7 @@ public class RecordingServiceTest extends SysuiTestCase {
 
         mRecordingService.onStopped();
 
-        verify(mController).updateState(false);
+        assertUpdateState(false);
     }
 
     @Test
@@ -235,8 +258,21 @@ public class RecordingServiceTest extends SysuiTestCase {
         verify(mExecutor).execute(mRunnableCaptor.capture());
         mRunnableCaptor.getValue().run();
 
-        // Then the state is set to not recording and we cancel the notification
-        verify(mController).updateState(false);
+        assertUpdateState(false);
         verify(mNotificationManager).cancelAsUser(any(), anyInt(), any());
+    }
+
+    private void assertUpdateState(boolean state) {
+        // Then the state is set to not recording, and we cancel the notification
+        // non SYSTEM user doesn't have the reference to the correct controller,
+        // so a broadcast is sent in case of non SYSTEM user.
+        if (UserHandle.USER_SYSTEM == mContext.getUserId()) {
+            verify(mController).updateState(state);
+        } else {
+            ArgumentCaptor<Intent> argumentCaptor = ArgumentCaptor.forClass(Intent.class);
+            verify(mRecordingService).sendBroadcast(argumentCaptor.capture(), eq(PERMISSION_SELF));
+            assertEquals(RecordingController.INTENT_UPDATE_STATE,
+                    argumentCaptor.getValue().getAction());
+        }
     }
 }

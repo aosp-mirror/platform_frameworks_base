@@ -16,11 +16,18 @@
 
 package android.util;
 
+import static com.android.window.flags.Flags.FLAG_DENSITY_390_API;
+
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.FontScaleConverter;
 import android.os.SystemProperties;
 import android.view.WindowManager;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * A structure describing general information about a display, such as its
@@ -39,6 +46,36 @@ import android.view.WindowManager;
  *
  */
 public class DisplayMetrics {
+
+    @IntDef(prefix = { "DENSITY_" }, value = {
+            DENSITY_LOW,
+            DENSITY_140,
+            DENSITY_MEDIUM,
+            DENSITY_180,
+            DENSITY_200,
+            DENSITY_TV,
+            DENSITY_220,
+            DENSITY_HIGH,
+            DENSITY_260,
+            DENSITY_280,
+            DENSITY_300,
+            DENSITY_XHIGH,
+            DENSITY_340,
+            DENSITY_360,
+            DENSITY_390,
+            DENSITY_400,
+            DENSITY_420,
+            DENSITY_440,
+            DENSITY_450,
+            DENSITY_XXHIGH,
+            DENSITY_520,
+            DENSITY_560,
+            DENSITY_600,
+            DENSITY_XXXHIGH,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface DensityDpi{}
+
     /**
      * Standard quantized DPI for low-density screens.
      */
@@ -142,6 +179,15 @@ public class DisplayMetrics {
      * on the system to scale their {@link #DENSITY_XXHIGH} assets for them.
      */
     public static final int DENSITY_360 = 360;
+
+    /**
+     * Intermediate density for screens that sit somewhere between
+     * {@link #DENSITY_XHIGH} (320 dpi) and {@link #DENSITY_XXHIGH} (480 dpi).
+     * This is not a density that applications should target, instead relying
+     * on the system to scale their {@link #DENSITY_XXHIGH} assets for them.
+     */
+    @FlaggedApi(FLAG_DENSITY_390_API)
+    public static final int DENSITY_390 = 390;
 
     /**
      * Intermediate density for screens that sit somewhere between
@@ -275,9 +321,14 @@ public class DisplayMetrics {
      */
     public float density;
     /**
-     * The screen density expressed as dots-per-inch.  May be either
-     * {@link #DENSITY_LOW}, {@link #DENSITY_MEDIUM}, or {@link #DENSITY_HIGH}.
+     * The screen density expressed as dots-per-inch. May be any one of the
+     * {@code DENSITY_} constants defined above.
+     *
+     * New constants are frequently added, and constants added on new Android
+     * versions may be backported to previous Android versions, so applications
+     * should not strongly rely on density matching one of the enum constants.
      */
+    @DensityDpi
     public int densityDpi;
     /**
      * A scaling factor for fonts displayed on the display.  This is the same

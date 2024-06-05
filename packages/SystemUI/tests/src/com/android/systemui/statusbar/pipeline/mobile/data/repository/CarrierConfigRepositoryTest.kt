@@ -152,13 +152,11 @@ class CarrierConfigRepositoryTest : SysuiTestCase() {
         }
 
     private fun sendConfig(subId: Int) {
-        fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
-            receiver.onReceive(
-                context,
-                Intent(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)
-                    .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, subId)
-            )
-        }
+        fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+            context,
+            Intent(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)
+                .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, subId),
+        )
     }
 
     companion object {

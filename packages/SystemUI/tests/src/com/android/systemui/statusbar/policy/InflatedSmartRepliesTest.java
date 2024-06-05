@@ -37,8 +37,8 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
@@ -64,7 +64,7 @@ import java.util.List;
 public class InflatedSmartRepliesTest extends SysuiTestCase {
 
     private static final Intent TEST_INTENT = new Intent("com.android.SMART_REPLY_VIEW_ACTION");
-    private static final Intent WHITELISTED_TEST_INTENT =
+    private static final Intent ALLOWLISTED_TEST_INTENT =
             new Intent("com.android.WHITELISTED_TEST_ACTION");
 
     @Mock private SmartReplyConstants mSmartReplyConstants;
@@ -343,7 +343,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
 
         assertThat(smartReplyState.getSmartReplies().choices)
                 .containsExactlyElementsIn(mEntry.getSmartReplies()).inOrder();
-        // Since no apps are whitelisted no actions should be shown.
+        // Since no apps are allowlisted no actions should be shown.
         assertThat(smartReplyState.getSmartActions().actions).isEmpty();
         assertThat(smartReplyState.getSuppressedActions()).isNull();
         assertThat(smartReplyState.getHasPhishingAction()).isFalse();
@@ -358,7 +358,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         allowedResolveInfo.activityInfo.packageName = allowedPackage;
         when(mPackageManagerWrapper
                 .resolveActivity(
-                        argThat(intent -> WHITELISTED_TEST_INTENT.getAction().equals(
+                        argThat(intent -> ALLOWLISTED_TEST_INTENT.getAction().equals(
                                 intent.getAction())),
                         anyInt() /* flags */))
                 .thenReturn(allowedResolveInfo);
@@ -368,7 +368,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         // suggestions.
         setupAppGeneratedReplies(null /* smartReplies */);
         ArrayList<Notification.Action> actions = new ArrayList<>();
-        actions.add(createAction("allowed action", WHITELISTED_TEST_INTENT));
+        actions.add(createAction("allowed action", ALLOWLISTED_TEST_INTENT));
         actions.add(createAction("non-allowed action", TEST_INTENT));
 
         modifyRanking(mEntry)
@@ -379,7 +379,7 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
         InflatedSmartReplyState smartReplyState =
                 mSmartReplyStateInflater.chooseSmartRepliesAndActions(mEntry);
 
-        // Only the action for the whitelisted package should be allowed.
+        // Only the action for the allowlisted package should be allowed.
         assertThat(smartReplyState.getSmartActions().actions)
                 .containsExactly(mEntry.getSmartActions().get(0));
         assertThat(smartReplyState.getSuppressedActions()).isNull();

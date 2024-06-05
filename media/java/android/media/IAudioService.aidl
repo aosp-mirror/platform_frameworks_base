@@ -18,6 +18,7 @@ package android.media;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
+import android.content.AttributionSource;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioFormat;
@@ -28,6 +29,7 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.BluetoothProfileConnectionInfo;
+import android.media.FadeManagerConfiguration;
 import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioModeDispatcher;
@@ -37,6 +39,7 @@ import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.ICommunicationDeviceDispatcher;
 import android.media.IDeviceVolumeBehaviorDispatcher;
 import android.media.IDevicesForAttributesCallback;
+import android.media.ILoudnessCodecUpdatesDispatcher;
 import android.media.IMuteAwaitConnectionCallback;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IPreferredMixerAttributesDispatcher;
@@ -51,9 +54,12 @@ import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerOutputCallback;
 import android.media.IStreamAliasingDispatcher;
 import android.media.IVolumeController;
+import android.media.LoudnessCodecInfo;
 import android.media.PlayerBase;
 import android.media.VolumeInfo;
 import android.media.VolumePolicy;
+import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
@@ -136,7 +142,7 @@ interface IAudioService {
     @UnsupportedAppUsage
     int getStreamMaxVolume(int streamType);
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SETTINGS_PRIVILEGED", "MODIFY_AUDIO_ROUTING"})
     List<AudioVolumeGroup> getAudioVolumeGroups();
 
     @EnforcePermission(anyOf={"MODIFY_AUDIO_SETTINGS_PRIVILEGED", "MODIFY_AUDIO_ROUTING"})
@@ -221,6 +227,7 @@ interface IAudioService {
 
     boolean isSurroundFormatEnabled(int audioFormat);
 
+    @EnforcePermission("WRITE_SETTINGS")
     boolean setEncodedSurroundMode(int mode);
 
     int getEncodedSurroundMode(int targetSdkVersion);
@@ -260,6 +267,7 @@ interface IAudioService {
 
     void forceVolumeControlStream(int streamType, IBinder cb);
 
+    @EnforcePermission("REMOTE_AUDIO_PLAYBACK")
     void setRingtonePlayer(IRingtonePlayer player);
     IRingtonePlayer getRingtonePlayer();
     int getUiSoundsStreamType();
@@ -299,7 +307,7 @@ interface IAudioService {
 
     void disableSafeMediaVolume(String callingPackage);
 
-    void lowerVolumeToRs1(String callingPackage);
+    oneway void lowerVolumeToRs1(String callingPackage);
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     float getOutputRs2UpperBound();
@@ -322,6 +330,31 @@ interface IAudioService {
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     boolean isCsdEnabled();
 
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean isCsdAsAFeatureAvailable();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean isCsdAsAFeatureEnabled();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    oneway void setCsdAsAFeatureEnabled(boolean csdToggleValue);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    oneway void setBluetoothAudioDeviceCategory_legacy(in String address, boolean isBle,
+            int deviceCategory);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    int getBluetoothAudioDeviceCategory_legacy(in String address, boolean isBle);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean setBluetoothAudioDeviceCategory(in String address, int deviceCategory);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    int getBluetoothAudioDeviceCategory(in String address);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean isBluetoothAudioDeviceCategoryFixed(in String address);
+
     int setHdmiSystemAudioSupported(boolean on);
 
     boolean isHdmiSystemAudioSupported();
@@ -329,15 +362,23 @@ interface IAudioService {
     String registerAudioPolicy(in AudioPolicyConfig policyConfig,
             in IAudioPolicyCallback pcb, boolean hasFocusListener, boolean isFocusPolicy,
             boolean isTestFocusPolicy,
-            boolean isVolumeController, in IMediaProjection projection);
+            boolean isVolumeController, in IMediaProjection projection,
+            in AttributionSource attributionSource);
 
     oneway void unregisterAudioPolicyAsync(in IAudioPolicyCallback pcb);
+
+    List<AudioMix> getRegisteredPolicyMixes();
 
     void unregisterAudioPolicy(in IAudioPolicyCallback pcb);
 
     int addMixForPolicy(in AudioPolicyConfig policyConfig, in IAudioPolicyCallback pcb);
 
     int removeMixForPolicy(in AudioPolicyConfig policyConfig, in IAudioPolicyCallback pcb);
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    int updateMixingRulesForPolicy(in AudioMix[] mixesToUpdate,
+                                   in AudioMixingRule[] updatedMixingRules,
+                                   in IAudioPolicyCallback pcb);
 
     int setFocusPropertiesForPolicy(int duckingBehavior, in IAudioPolicyCallback pcb);
 
@@ -362,8 +403,17 @@ interface IAudioService {
     int dispatchFocusChange(in AudioFocusInfo afi, in int focusChange,
             in IAudioPolicyCallback pcb);
 
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    int dispatchFocusChangeWithFade(in AudioFocusInfo afi,
+            in int focusChange,
+            in IAudioPolicyCallback pcb,
+            in List<AudioFocusInfo> otherActiveAfis,
+            in FadeManagerConfiguration transientFadeMgrConfig);
+
     oneway void playerHasOpPlayAudio(in int piid, in boolean hasOpPlayAudio);
 
+    @EnforcePermission("BLUETOOTH_STACK")
     void handleBluetoothActiveDeviceChanged(in BluetoothDevice newDevice,
             in BluetoothDevice previousDevice, in BluetoothProfileConnectionInfo info);
 
@@ -473,6 +523,10 @@ interface IAudioService {
             in String packageName, int uid, int pid, in UserHandle userHandle,
             int targetSdkVersion);
 
+    oneway void adjustVolume(int direction, int flags);
+
+    oneway void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags);
+
     boolean isMusicActive(in boolean remotely);
 
     int getDeviceMaskForStream(in int streamType);
@@ -510,6 +564,23 @@ interface IAudioService {
             in AudioAttributes aa, in String callingPackageName);
 
     long getFadeOutDurationOnFocusLossMillis(in AudioAttributes aa);
+
+    @EnforcePermission("QUERY_AUDIO_STATE")
+    /* Returns a List<Integer> */
+    @SuppressWarnings(value = {"untyped-collection"})
+    List getFocusDuckedUidsForTest();
+
+    @EnforcePermission("QUERY_AUDIO_STATE")
+    long getFocusFadeOutDurationForTest();
+
+    @EnforcePermission("QUERY_AUDIO_STATE")
+    long getFocusUnmuteDelayAfterFadeOutForTest();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean enterAudioFocusFreezeForTest(IBinder cb, in int[] uids);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean exitAudioFocusFreezeForTest(IBinder cb);
 
     void registerModeDispatcher(IAudioModeDispatcher dispatcher);
 
@@ -682,4 +753,35 @@ interface IAudioService {
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
     boolean isBluetoothVariableLatencyEnabled();
+
+    void registerLoudnessCodecUpdatesDispatcher(in ILoudnessCodecUpdatesDispatcher dispatcher);
+
+    void unregisterLoudnessCodecUpdatesDispatcher(in ILoudnessCodecUpdatesDispatcher dispatcher);
+
+    oneway void startLoudnessCodecUpdates(int sessionId);
+
+    oneway void stopLoudnessCodecUpdates(int sessionId);
+
+    oneway void addLoudnessCodecInfo(int sessionId, int mediaCodecHash,
+            in LoudnessCodecInfo codecInfo);
+
+    oneway void removeLoudnessCodecInfo(int sessionId, in LoudnessCodecInfo codecInfo);
+
+    PersistableBundle getLoudnessParams(in LoudnessCodecInfo codecInfo);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    int setFadeManagerConfigurationForFocusLoss(in FadeManagerConfiguration fmcForFocusLoss);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    int clearFadeManagerConfigurationForFocusLoss();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    FadeManagerConfiguration getFadeManagerConfigurationForFocusLoss();
+
+    @EnforcePermission("QUERY_AUDIO_STATE")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.QUERY_AUDIO_STATE)")
+    boolean shouldNotificationSoundPlay(in AudioAttributes aa);
 }

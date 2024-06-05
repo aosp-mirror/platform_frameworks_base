@@ -26,13 +26,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Handler;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.Executor;
 
@@ -69,8 +73,11 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRootRect = new Rect();
     private final int[] mTmpLocation = new int[2];
+    private final Rect mBoundsOnScreen = new Rect();
     private final TaskViewTaskController mTaskViewTaskController;
     private Region mObscuredTouchRegion;
+    private Insets mCaptionInsets;
+    private Handler mHandler;
 
     public TaskView(Context context, TaskViewTaskController taskViewTaskController) {
         super(context, null, 0, 0, true /* disableBackgroundLayer */);
@@ -78,6 +85,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         // TODO(b/266736992): Think about a better way to set the TaskViewBase on the
         //  TaskViewTaskController and vice-versa
         mTaskViewTaskController.setTaskViewBase(this);
+        mHandler = Handler.getMain();
         getHolder().addCallback(this);
     }
 
@@ -112,16 +120,23 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
+        if (mTaskViewTaskController.isUsingShellTransitions()) {
+            // No need for additional work as it is already taken care of during
+            // prepareOpenAnimation().
+            return;
+        }
         onLocationChanged();
         if (taskInfo.taskDescription != null) {
-            setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
+            final int bgColor = taskInfo.taskDescription.getBackgroundColor();
+            runOnViewThread(() -> setResizeBackgroundColor(bgColor));
         }
     }
 
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
         if (taskInfo.taskDescription != null) {
-            setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
+            final int bgColor = taskInfo.taskDescription.getBackgroundColor();
+            runOnViewThread(() -> setResizeBackgroundColor(bgColor));
         }
     }
 
@@ -140,7 +155,14 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     public void setResizeBgColor(SurfaceControl.Transaction t, int bgColor) {
-        setResizeBackgroundColor(t, bgColor);
+        if (mHandler.getLooper().isCurrentThread()) {
+            // We can only use the transaction if it can updated synchronously, otherwise the tx
+            // will be applied immediately after but also used/updated on the view thread which
+            // will lead to a race and/or crash
+            runOnViewThread(() -> setResizeBackgroundColor(t, bgColor));
+        } else {
+            runOnViewThread(() -> setResizeBackgroundColor(bgColor));
+        }
     }
 
     /**
@@ -166,6 +188,25 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      */
     public void setObscuredTouchRegion(Region obscuredRegion) {
         mObscuredTouchRegion = obscuredRegion;
+    }
+
+    /**
+     * Sets a region of the task to inset to allow for a caption bar. Currently only top insets
+     * are supported.
+     * <p>
+     * This region will be factored in as an area of taskview that is not touchable activity
+     * content (i.e. you don't need to additionally set {@link #setObscuredTouchRect(Rect)} for
+     * the caption area).
+     *
+     * @param captionInsets the insets to apply to task view.
+     */
+    public void setCaptionInsets(Insets captionInsets) {
+        mCaptionInsets = captionInsets;
+        if (captionInsets == null) {
+            // If captions are null we can set them now; otherwise they'll get set in
+            // onComputeInternalInsets.
+            mTaskViewTaskController.setCaptionInsets(null);
+        }
     }
 
     /**
@@ -230,6 +271,15 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         getLocationInWindow(mTmpLocation);
         mTmpRect.set(mTmpLocation[0], mTmpLocation[1],
                 mTmpLocation[0] + getWidth(), mTmpLocation[1] + getHeight());
+        if (mCaptionInsets != null) {
+            mTmpRect.inset(mCaptionInsets);
+            getBoundsOnScreen(mBoundsOnScreen);
+            mTaskViewTaskController.setCaptionInsets(new Rect(
+                    mBoundsOnScreen.left,
+                    mBoundsOnScreen.top,
+                    mBoundsOnScreen.right + getWidth(),
+                    mBoundsOnScreen.top + mCaptionInsets.top));
+        }
         inoutInfo.touchableRegion.op(mTmpRect, Region.Op.DIFFERENCE);
 
         if (mObscuredTouchRegion != null) {
@@ -241,17 +291,39 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
+        mHandler = getHandler();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
+        mHandler = Handler.getMain();
     }
 
     /** Returns the task info for the task in the TaskView. */
     @Nullable
     public ActivityManager.RunningTaskInfo getTaskInfo() {
         return mTaskViewTaskController.getTaskInfo();
+    }
+
+    /**
+     * Sets the handler, only for testing.
+     */
+    @VisibleForTesting
+    void setHandler(Handler viewHandler) {
+        mHandler = viewHandler;
+    }
+
+    /**
+     * Ensures that the given runnable runs on the view's thread.
+     */
+    private void runOnViewThread(Runnable r) {
+        if (mHandler.getLooper().isCurrentThread()) {
+            r.run();
+        } else {
+            // If this call is not from the same thread as the view, then post it
+            mHandler.post(r);
+        }
     }
 }

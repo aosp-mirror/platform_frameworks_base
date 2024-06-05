@@ -139,6 +139,16 @@ public final class HdmiControlManager {
     public static final String EXTRA_LOCALE = "android.hardware.hdmi.extra.LOCALE";
 
     /**
+     * Broadcast Action: Active Source status was recovered by the device.
+     * <p>Send when device becomes the current active source such that the activity
+     * HdmiCecActiveSourceLostActivity can be finished and cleared from the screen.
+     * <p>Requires {@link android.Manifest.permission#HDMI_CEC} to receive.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ON_ACTIVE_SOURCE_RECOVERED_DISMISS_UI =
+            "android.hardware.hdmi.action.ON_ACTIVE_SOURCE_RECOVERED_DISMISS_UI";
+    /**
      * Volume value for mute state.
      */
     public static final int AVR_VOLUME_MUTED = 101;
@@ -149,6 +159,7 @@ public final class HdmiControlManager {
     public static final int POWER_STATUS_TRANSIENT_TO_ON = 2;
     public static final int POWER_STATUS_TRANSIENT_TO_STANDBY = 3;
 
+    /** @removed mistakenly exposed previously */
     @IntDef ({
         RESULT_SUCCESS,
         RESULT_TIMEOUT,
@@ -159,6 +170,7 @@ public final class HdmiControlManager {
         RESULT_INCORRECT_MODE,
         RESULT_COMMUNICATION_FAILED,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface ControlCallbackResult {}
 
     /** Control operation is successfully handled by the framework. */
@@ -1135,6 +1147,7 @@ public final class HdmiControlManager {
         CEC_SETTING_NAME_QUERY_SAD_MAX,
         SETTING_NAME_EARC_ENABLED,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface SettingName {}
 
     /**
@@ -1157,6 +1170,7 @@ public final class HdmiControlManager {
             CEC_SETTING_NAME_QUERY_SAD_WMAPRO,
             CEC_SETTING_NAME_QUERY_SAD_MAX,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface CecSettingSad {}
 
     // True if we have a logical device of type playback hosted in the system.
@@ -1338,9 +1352,6 @@ public final class HdmiControlManager {
 
     /**
      * Get a snapshot of the real-time status of the devices on the CEC bus.
-     *
-     * <p>This only applies to devices with switch functionality, which are devices with one
-     * or more than one HDMI inputs.
      *
      * @return a list of {@link HdmiDeviceInfo} of the connected CEC devices on the CEC bus. An
      * empty list will be returned if there is none.

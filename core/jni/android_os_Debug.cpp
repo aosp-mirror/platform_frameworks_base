@@ -16,97 +16,51 @@
 
 #define LOG_TAG "android.os.Debug"
 
+#include "android_os_Debug.h"
+
+#include <android-base/file.h>
+#include <android-base/logging.h>
+#include <android-base/properties.h>
+#include <android-base/strings.h>
 #include <assert.h>
+#include <binderdebug/BinderDebug.h>
+#include <bionic/malloc.h>
 #include <ctype.h>
+#include <debuggerd/client.h>
+#include <dmabufinfo/dmabuf_sysfs_stats.h>
+#include <dmabufinfo/dmabufinfo.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#include <log/log.h>
 #include <malloc.h>
+#include <meminfo/androidprocheaps.h>
+#include <meminfo/procmeminfo.h>
+#include <meminfo/sysmeminfo.h>
+#include <memtrack/memtrack.h>
+#include <memunreachable/memunreachable.h>
+#include <nativehelper/JNIPlatformHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
+#include <utils/String8.h>
+#include <utils/misc.h>
+#include <vintf/KernelConfigs.h>
 
 #include <iomanip>
 #include <string>
 #include <vector>
 
-#include <android-base/logging.h>
-#include <android-base/properties.h>
-#include <bionic/malloc.h>
-#include <debuggerd/client.h>
-#include <log/log.h>
-#include <utils/misc.h>
-#include <utils/String8.h>
-
-#include <nativehelper/JNIPlatformHelp.h>
-#include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
-#include <dmabufinfo/dmabuf_sysfs_stats.h>
-#include <dmabufinfo/dmabufinfo.h>
-#include <meminfo/procmeminfo.h>
-#include <meminfo/sysmeminfo.h>
-#include <memtrack/memtrack.h>
-#include <memunreachable/memunreachable.h>
-#include <android-base/strings.h>
-#include "android_os_Debug.h"
-#include <vintf/VintfObject.h>
 
 namespace android
 {
 
-enum {
-    HEAP_UNKNOWN,
-    HEAP_DALVIK,
-    HEAP_NATIVE,
-
-    HEAP_DALVIK_OTHER,
-    HEAP_STACK,
-    HEAP_CURSOR,
-    HEAP_ASHMEM,
-    HEAP_GL_DEV,
-    HEAP_UNKNOWN_DEV,
-    HEAP_SO,
-    HEAP_JAR,
-    HEAP_APK,
-    HEAP_TTF,
-    HEAP_DEX,
-    HEAP_OAT,
-    HEAP_ART,
-    HEAP_UNKNOWN_MAP,
-    HEAP_GRAPHICS,
-    HEAP_GL,
-    HEAP_OTHER_MEMTRACK,
-
-    // Dalvik extra sections (heap).
-    HEAP_DALVIK_NORMAL,
-    HEAP_DALVIK_LARGE,
-    HEAP_DALVIK_ZYGOTE,
-    HEAP_DALVIK_NON_MOVING,
-
-    // Dalvik other extra sections.
-    HEAP_DALVIK_OTHER_LINEARALLOC,
-    HEAP_DALVIK_OTHER_ACCOUNTING,
-    HEAP_DALVIK_OTHER_ZYGOTE_CODE_CACHE,
-    HEAP_DALVIK_OTHER_APP_CODE_CACHE,
-    HEAP_DALVIK_OTHER_COMPILER_METADATA,
-    HEAP_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE,
-
-    // Boot vdex / app dex / app vdex
-    HEAP_DEX_BOOT_VDEX,
-    HEAP_DEX_APP_DEX,
-    HEAP_DEX_APP_VDEX,
-
-    // App art, boot art.
-    HEAP_ART_APP,
-    HEAP_ART_BOOT,
-
-    _NUM_HEAP,
-    _NUM_EXCLUSIVE_HEAP = HEAP_OTHER_MEMTRACK+1,
-    _NUM_CORE_HEAP = HEAP_NATIVE+1
-};
+using namespace android::meminfo;
 
 struct stat_fields {
     jfieldID pss_field;
@@ -145,18 +99,6 @@ static stat_field_names stat_field_names[_NUM_CORE_HEAP] = {
 
 static jfieldID otherStats_field;
 static jfieldID hasSwappedOutPss_field;
-
-struct stats_t {
-    int pss;
-    int swappablePss;
-    int rss;
-    int privateDirty;
-    int sharedDirty;
-    int privateClean;
-    int sharedClean;
-    int swappedOut;
-    int swappedOutPss;
-};
 
 #define BINDER_STATS "/proc/binder/stats"
 
@@ -240,189 +182,14 @@ static int read_memtrack_memory(int pid, struct graphics_memory_pss* graphics_me
     return err;
 }
 
-static bool load_maps(int pid, stats_t* stats, bool* foundSwapPss)
-{
-    *foundSwapPss = false;
-    uint64_t prev_end = 0;
-    int prev_heap = HEAP_UNKNOWN;
-
-    std::string smaps_path = base::StringPrintf("/proc/%d/smaps", pid);
-    auto vma_scan = [&](const meminfo::Vma& vma) {
-        int which_heap = HEAP_UNKNOWN;
-        int sub_heap = HEAP_UNKNOWN;
-        bool is_swappable = false;
-        std::string name;
-        if (base::EndsWith(vma.name, " (deleted)")) {
-            name = vma.name.substr(0, vma.name.size() - strlen(" (deleted)"));
-        } else {
-            name = vma.name;
-        }
-
-        uint32_t namesz = name.size();
-        if (base::StartsWith(name, "[heap]")) {
-            which_heap = HEAP_NATIVE;
-        } else if (base::StartsWith(name, "[anon:libc_malloc]")) {
-            which_heap = HEAP_NATIVE;
-        } else if (base::StartsWith(name, "[anon:scudo:")) {
-            which_heap = HEAP_NATIVE;
-        } else if (base::StartsWith(name, "[anon:GWP-ASan")) {
-            which_heap = HEAP_NATIVE;
-        } else if (base::StartsWith(name, "[stack")) {
-            which_heap = HEAP_STACK;
-        } else if (base::StartsWith(name, "[anon:stack_and_tls:")) {
-            which_heap = HEAP_STACK;
-        } else if (base::EndsWith(name, ".so")) {
-            which_heap = HEAP_SO;
-            is_swappable = true;
-        } else if (base::EndsWith(name, ".jar")) {
-            which_heap = HEAP_JAR;
-            is_swappable = true;
-        } else if (base::EndsWith(name, ".apk")) {
-            which_heap = HEAP_APK;
-            is_swappable = true;
-        } else if (base::EndsWith(name, ".ttf")) {
-            which_heap = HEAP_TTF;
-            is_swappable = true;
-        } else if ((base::EndsWith(name, ".odex")) ||
-                (namesz > 4 && strstr(name.c_str(), ".dex") != nullptr)) {
-            which_heap = HEAP_DEX;
-            sub_heap = HEAP_DEX_APP_DEX;
-            is_swappable = true;
-        } else if (base::EndsWith(name, ".vdex")) {
-            which_heap = HEAP_DEX;
-            // Handle system@framework@boot and system/framework/boot|apex
-            if ((strstr(name.c_str(), "@boot") != nullptr) ||
-                    (strstr(name.c_str(), "/boot") != nullptr) ||
-                    (strstr(name.c_str(), "/apex") != nullptr)) {
-                sub_heap = HEAP_DEX_BOOT_VDEX;
-            } else {
-                sub_heap = HEAP_DEX_APP_VDEX;
-            }
-            is_swappable = true;
-        } else if (base::EndsWith(name, ".oat")) {
-            which_heap = HEAP_OAT;
-            is_swappable = true;
-        } else if (base::EndsWith(name, ".art") || base::EndsWith(name, ".art]")) {
-            which_heap = HEAP_ART;
-            // Handle system@framework@boot* and system/framework/boot|apex*
-            if ((strstr(name.c_str(), "@boot") != nullptr) ||
-                    (strstr(name.c_str(), "/boot") != nullptr) ||
-                    (strstr(name.c_str(), "/apex") != nullptr)) {
-                sub_heap = HEAP_ART_BOOT;
-            } else {
-                sub_heap = HEAP_ART_APP;
-            }
-            is_swappable = true;
-        } else if (base::StartsWith(name, "/dev/")) {
-            which_heap = HEAP_UNKNOWN_DEV;
-            if (base::StartsWith(name, "/dev/kgsl-3d0")) {
-                which_heap = HEAP_GL_DEV;
-            } else if (base::StartsWith(name, "/dev/ashmem/CursorWindow")) {
-                which_heap = HEAP_CURSOR;
-            } else if (base::StartsWith(name, "/dev/ashmem/jit-zygote-cache")) {
-                which_heap = HEAP_DALVIK_OTHER;
-                sub_heap = HEAP_DALVIK_OTHER_ZYGOTE_CODE_CACHE;
-            } else if (base::StartsWith(name, "/dev/ashmem")) {
-                which_heap = HEAP_ASHMEM;
-            }
-        } else if (base::StartsWith(name, "/memfd:jit-cache")) {
-          which_heap = HEAP_DALVIK_OTHER;
-          sub_heap = HEAP_DALVIK_OTHER_APP_CODE_CACHE;
-        } else if (base::StartsWith(name, "/memfd:jit-zygote-cache")) {
-          which_heap = HEAP_DALVIK_OTHER;
-          sub_heap = HEAP_DALVIK_OTHER_ZYGOTE_CODE_CACHE;
-        } else if (base::StartsWith(name, "[anon:")) {
-            which_heap = HEAP_UNKNOWN;
-            if (base::StartsWith(name, "[anon:dalvik-")) {
-                which_heap = HEAP_DALVIK_OTHER;
-                if (base::StartsWith(name, "[anon:dalvik-LinearAlloc")) {
-                    sub_heap = HEAP_DALVIK_OTHER_LINEARALLOC;
-                } else if (base::StartsWith(name, "[anon:dalvik-alloc space") ||
-                        base::StartsWith(name, "[anon:dalvik-main space")) {
-                    // This is the regular Dalvik heap.
-                    which_heap = HEAP_DALVIK;
-                    sub_heap = HEAP_DALVIK_NORMAL;
-                } else if (base::StartsWith(name,
-                            "[anon:dalvik-large object space") ||
-                        base::StartsWith(
-                            name, "[anon:dalvik-free list large object space")) {
-                    which_heap = HEAP_DALVIK;
-                    sub_heap = HEAP_DALVIK_LARGE;
-                } else if (base::StartsWith(name, "[anon:dalvik-non moving space")) {
-                    which_heap = HEAP_DALVIK;
-                    sub_heap = HEAP_DALVIK_NON_MOVING;
-                } else if (base::StartsWith(name, "[anon:dalvik-zygote space")) {
-                    which_heap = HEAP_DALVIK;
-                    sub_heap = HEAP_DALVIK_ZYGOTE;
-                } else if (base::StartsWith(name, "[anon:dalvik-indirect ref")) {
-                    sub_heap = HEAP_DALVIK_OTHER_INDIRECT_REFERENCE_TABLE;
-                } else if (base::StartsWith(name, "[anon:dalvik-jit-code-cache") ||
-                        base::StartsWith(name, "[anon:dalvik-data-code-cache")) {
-                    sub_heap = HEAP_DALVIK_OTHER_APP_CODE_CACHE;
-                } else if (base::StartsWith(name, "[anon:dalvik-CompilerMetadata")) {
-                    sub_heap = HEAP_DALVIK_OTHER_COMPILER_METADATA;
-                } else {
-                    sub_heap = HEAP_DALVIK_OTHER_ACCOUNTING;  // Default to accounting.
-                }
-            }
-        } else if (namesz > 0) {
-            which_heap = HEAP_UNKNOWN_MAP;
-        } else if (vma.start == prev_end && prev_heap == HEAP_SO) {
-            // bss section of a shared library
-            which_heap = HEAP_SO;
-        }
-
-        prev_end = vma.end;
-        prev_heap = which_heap;
-
-        const meminfo::MemUsage& usage = vma.usage;
-        if (usage.swap_pss > 0 && *foundSwapPss != true) {
-            *foundSwapPss = true;
-        }
-
-        uint64_t swapable_pss = 0;
-        if (is_swappable && (usage.pss > 0)) {
-            float sharing_proportion = 0.0;
-            if ((usage.shared_clean > 0) || (usage.shared_dirty > 0)) {
-                sharing_proportion = (usage.pss - usage.uss) / (usage.shared_clean + usage.shared_dirty);
-            }
-            swapable_pss = (sharing_proportion * usage.shared_clean) + usage.private_clean;
-        }
-
-        stats[which_heap].pss += usage.pss;
-        stats[which_heap].swappablePss += swapable_pss;
-        stats[which_heap].rss += usage.rss;
-        stats[which_heap].privateDirty += usage.private_dirty;
-        stats[which_heap].sharedDirty += usage.shared_dirty;
-        stats[which_heap].privateClean += usage.private_clean;
-        stats[which_heap].sharedClean += usage.shared_clean;
-        stats[which_heap].swappedOut += usage.swap;
-        stats[which_heap].swappedOutPss += usage.swap_pss;
-        if (which_heap == HEAP_DALVIK || which_heap == HEAP_DALVIK_OTHER ||
-                which_heap == HEAP_DEX || which_heap == HEAP_ART) {
-            stats[sub_heap].pss += usage.pss;
-            stats[sub_heap].swappablePss += swapable_pss;
-            stats[sub_heap].rss += usage.rss;
-            stats[sub_heap].privateDirty += usage.private_dirty;
-            stats[sub_heap].sharedDirty += usage.shared_dirty;
-            stats[sub_heap].privateClean += usage.private_clean;
-            stats[sub_heap].sharedClean += usage.shared_clean;
-            stats[sub_heap].swappedOut += usage.swap;
-            stats[sub_heap].swappedOutPss += usage.swap_pss;
-        }
-    };
-
-    return meminfo::ForEachVmaFromFile(smaps_path, vma_scan);
-}
-
 static jboolean android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         jint pid, jobject object)
 {
     bool foundSwapPss;
-    stats_t stats[_NUM_HEAP];
+    AndroidHeapStats stats[_NUM_HEAP];
     memset(&stats, 0, sizeof(stats));
 
-    if (!load_maps(pid, stats, &foundSwapPss)) {
+    if (!ExtractAndroidHeapStats(pid, stats, &foundSwapPss)) {
         return JNI_FALSE;
     }
 
@@ -563,6 +330,51 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
 static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
 {
     return android_os_Debug_getPssPid(env, clazz, getpid(), NULL, NULL);
+}
+
+static jlong android_os_Debug_getRssPid(JNIEnv* env, jobject clazz, jint pid,
+                                        jlongArray outMemtrack) {
+    jlong rss = 0;
+    jlong memtrack = 0;
+
+    struct graphics_memory_pss graphics_mem;
+    if (read_memtrack_memory(pid, &graphics_mem) == 0) {
+        rss = memtrack = graphics_mem.graphics + graphics_mem.gl + graphics_mem.other;
+    }
+
+    ::android::meminfo::ProcMemInfo proc_mem(pid);
+    uint64_t status_rss;
+    if (proc_mem.StatusVmRSS(&status_rss)) {
+        rss += status_rss;
+    } else {
+        return 0;
+    }
+
+    if (outMemtrack != NULL) {
+        int outLen = env->GetArrayLength(outMemtrack);
+        if (outLen >= 1) {
+            jlong* outMemtrackArray = env->GetLongArrayElements(outMemtrack, 0);
+            if (outMemtrackArray != NULL) {
+                outMemtrackArray[0] = memtrack;
+                if (outLen >= 2) {
+                    outMemtrackArray[1] = graphics_mem.graphics;
+                }
+                if (outLen >= 3) {
+                    outMemtrackArray[2] = graphics_mem.gl;
+                }
+                if (outLen >= 4) {
+                    outMemtrackArray[3] = graphics_mem.other;
+                }
+            }
+            env->ReleaseLongArrayElements(outMemtrack, outMemtrackArray, 0);
+        }
+    }
+
+    return rss;
+}
+
+static jlong android_os_Debug_getRss(JNIEnv* env, jobject clazz) {
+    return android_os_Debug_getRssPid(env, clazz, getpid(), NULL);
 }
 
 // The 1:1 mapping of MEMINFO_* enums here must match with the constants from
@@ -769,6 +581,15 @@ static bool dumpTraces(JNIEnv* env, jint pid, jstring fileName, jint timeoutSecs
         return false;
     }
 
+    std::string binderState;
+    android::status_t status = android::getBinderTransactions(pid, binderState);
+    if (status == android::OK) {
+        if (!android::base::WriteStringToFd(binderState, fd)) {
+            PLOG(ERROR) << "Failed to dump binder state info for pid: " << pid;
+        }
+    } else {
+        PLOG(ERROR) << "Failed to get binder state info for pid: " << pid << " status: " << status;
+    }
     int res = dump_backtrace_to_file_timeout(pid, dumpType, timeoutSecs, fd);
     if (fdatasync(fd.get()) != 0) {
         PLOG(ERROR) << "Failed flushing trace.";
@@ -959,14 +780,17 @@ static jboolean android_os_Debug_isVmapStack(JNIEnv *env, jobject clazz)
     } cfg_state = CONFIG_UNKNOWN;
 
     if (cfg_state == CONFIG_UNKNOWN) {
-        auto runtime_info = vintf::VintfObject::GetInstance()->getRuntimeInfo(
-                vintf::RuntimeInfo::FetchFlag::CONFIG_GZ);
-        CHECK(runtime_info != nullptr) << "Kernel configs cannot be fetched. b/151092221";
-        const std::map<std::string, std::string>& configs = runtime_info->kernelConfigs();
+        std::map<std::string, std::string> configs;
+        const status_t result = android::kernelconfigs::LoadKernelConfigs(&configs);
+        CHECK(result == OK) << "Kernel configs could not be fetched. b/151092221";
         std::map<std::string, std::string>::const_iterator it = configs.find("CONFIG_VMAP_STACK");
         cfg_state = (it != configs.end() && it->second == "y") ? CONFIG_SET : CONFIG_UNSET;
     }
     return cfg_state == CONFIG_SET;
+}
+
+static jboolean android_os_Debug_logAllocatorStats(JNIEnv*, jobject) {
+    return mallopt(M_LOG_STATS, 0) == 1 ? JNI_TRUE : JNI_FALSE;
 }
 
 /*
@@ -974,62 +798,44 @@ static jboolean android_os_Debug_isVmapStack(JNIEnv *env, jobject clazz)
  */
 
 static const JNINativeMethod gMethods[] = {
-    { "getNativeHeapSize",      "()J",
-            (void*) android_os_Debug_getNativeHeapSize },
-    { "getNativeHeapAllocatedSize", "()J",
-            (void*) android_os_Debug_getNativeHeapAllocatedSize },
-    { "getNativeHeapFreeSize",  "()J",
-            (void*) android_os_Debug_getNativeHeapFreeSize },
-    { "getMemoryInfo",          "(Landroid/os/Debug$MemoryInfo;)V",
-            (void*) android_os_Debug_getDirtyPages },
-    { "getMemoryInfo",          "(ILandroid/os/Debug$MemoryInfo;)Z",
-            (void*) android_os_Debug_getDirtyPagesPid },
-    { "getPss",                 "()J",
-            (void*) android_os_Debug_getPss },
-    { "getPss",                 "(I[J[J)J",
-            (void*) android_os_Debug_getPssPid },
-    { "getMemInfo",             "([J)V",
-            (void*) android_os_Debug_getMemInfo },
-    { "dumpNativeHeap",         "(Ljava/io/FileDescriptor;)V",
-            (void*) android_os_Debug_dumpNativeHeap },
-    { "dumpNativeMallocInfo",   "(Ljava/io/FileDescriptor;)V",
-            (void*) android_os_Debug_dumpNativeMallocInfo },
-    { "getBinderSentTransactions", "()I",
-            (void*) android_os_Debug_getBinderSentTransactions },
-    { "getBinderReceivedTransactions", "()I",
-            (void*) android_os_getBinderReceivedTransactions },
-    { "getBinderLocalObjectCount", "()I",
-            (void*)android_os_Debug_getLocalObjectCount },
-    { "getBinderProxyObjectCount", "()I",
-            (void*)android_os_Debug_getProxyObjectCount },
-    { "getBinderDeathObjectCount", "()I",
-            (void*)android_os_Debug_getDeathObjectCount },
-    { "dumpJavaBacktraceToFileTimeout", "(ILjava/lang/String;I)Z",
-            (void*)android_os_Debug_dumpJavaBacktraceToFileTimeout },
-    { "dumpNativeBacktraceToFileTimeout", "(ILjava/lang/String;I)Z",
-            (void*)android_os_Debug_dumpNativeBacktraceToFileTimeout },
-    { "getUnreachableMemory", "(IZ)Ljava/lang/String;",
-            (void*)android_os_Debug_getUnreachableMemory },
-    { "getZramFreeKb", "()J",
-            (void*)android_os_Debug_getFreeZramKb },
-    { "getIonHeapsSizeKb", "()J",
-            (void*)android_os_Debug_getIonHeapsSizeKb },
-    { "getDmabufTotalExportedKb", "()J",
-            (void*)android_os_Debug_getDmabufTotalExportedKb },
-    { "getGpuPrivateMemoryKb", "()J",
-            (void*)android_os_Debug_getGpuPrivateMemoryKb },
-    { "getDmabufHeapTotalExportedKb", "()J",
-            (void*)android_os_Debug_getDmabufHeapTotalExportedKb },
-    { "getIonPoolsSizeKb", "()J",
-            (void*)android_os_Debug_getIonPoolsSizeKb },
-    { "getDmabufMappedSizeKb", "()J",
-            (void*)android_os_Debug_getDmabufMappedSizeKb },
-    { "getDmabufHeapPoolsSizeKb", "()J",
-            (void*)android_os_Debug_getDmabufHeapPoolsSizeKb },
-    { "getGpuTotalUsageKb", "()J",
-            (void*)android_os_Debug_getGpuTotalUsageKb },
-    { "isVmapStack", "()Z",
-            (void*)android_os_Debug_isVmapStack },
+        {"getNativeHeapSize", "()J", (void*)android_os_Debug_getNativeHeapSize},
+        {"getNativeHeapAllocatedSize", "()J", (void*)android_os_Debug_getNativeHeapAllocatedSize},
+        {"getNativeHeapFreeSize", "()J", (void*)android_os_Debug_getNativeHeapFreeSize},
+        {"getMemoryInfo", "(Landroid/os/Debug$MemoryInfo;)V",
+         (void*)android_os_Debug_getDirtyPages},
+        {"getMemoryInfo", "(ILandroid/os/Debug$MemoryInfo;)Z",
+         (void*)android_os_Debug_getDirtyPagesPid},
+        {"getPss", "()J", (void*)android_os_Debug_getPss},
+        {"getPss", "(I[J[J)J", (void*)android_os_Debug_getPssPid},
+        {"getRss", "()J", (void*)android_os_Debug_getRss},
+        {"getRss", "(I[J)J", (void*)android_os_Debug_getRssPid},
+        {"getMemInfo", "([J)V", (void*)android_os_Debug_getMemInfo},
+        {"dumpNativeHeap", "(Ljava/io/FileDescriptor;)V", (void*)android_os_Debug_dumpNativeHeap},
+        {"dumpNativeMallocInfo", "(Ljava/io/FileDescriptor;)V",
+         (void*)android_os_Debug_dumpNativeMallocInfo},
+        {"getBinderSentTransactions", "()I", (void*)android_os_Debug_getBinderSentTransactions},
+        {"getBinderReceivedTransactions", "()I", (void*)android_os_getBinderReceivedTransactions},
+        {"getBinderLocalObjectCount", "()I", (void*)android_os_Debug_getLocalObjectCount},
+        {"getBinderProxyObjectCount", "()I", (void*)android_os_Debug_getProxyObjectCount},
+        {"getBinderDeathObjectCount", "()I", (void*)android_os_Debug_getDeathObjectCount},
+        {"dumpJavaBacktraceToFileTimeout", "(ILjava/lang/String;I)Z",
+         (void*)android_os_Debug_dumpJavaBacktraceToFileTimeout},
+        {"dumpNativeBacktraceToFileTimeout", "(ILjava/lang/String;I)Z",
+         (void*)android_os_Debug_dumpNativeBacktraceToFileTimeout},
+        {"getUnreachableMemory", "(IZ)Ljava/lang/String;",
+         (void*)android_os_Debug_getUnreachableMemory},
+        {"getZramFreeKb", "()J", (void*)android_os_Debug_getFreeZramKb},
+        {"getIonHeapsSizeKb", "()J", (void*)android_os_Debug_getIonHeapsSizeKb},
+        {"getDmabufTotalExportedKb", "()J", (void*)android_os_Debug_getDmabufTotalExportedKb},
+        {"getGpuPrivateMemoryKb", "()J", (void*)android_os_Debug_getGpuPrivateMemoryKb},
+        {"getDmabufHeapTotalExportedKb", "()J",
+         (void*)android_os_Debug_getDmabufHeapTotalExportedKb},
+        {"getIonPoolsSizeKb", "()J", (void*)android_os_Debug_getIonPoolsSizeKb},
+        {"getDmabufMappedSizeKb", "()J", (void*)android_os_Debug_getDmabufMappedSizeKb},
+        {"getDmabufHeapPoolsSizeKb", "()J", (void*)android_os_Debug_getDmabufHeapPoolsSizeKb},
+        {"getGpuTotalUsageKb", "()J", (void*)android_os_Debug_getGpuTotalUsageKb},
+        {"isVmapStack", "()Z", (void*)android_os_Debug_isVmapStack},
+        {"logAllocatorStats", "()Z", (void*)android_os_Debug_logAllocatorStats},
 };
 
 int register_android_os_Debug(JNIEnv *env)

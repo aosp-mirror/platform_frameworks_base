@@ -108,6 +108,10 @@ void DeviceInfo::setSupportFp16ForHdr(bool supportFp16ForHdr) {
     get()->mSupportFp16ForHdr = supportFp16ForHdr;
 }
 
+void DeviceInfo::setSupportRgba10101010ForHdr(bool supportRgba10101010ForHdr) {
+    get()->mSupportRgba10101010ForHdr = supportRgba10101010ForHdr;
+}
+
 void DeviceInfo::setSupportMixedColorSpaces(bool supportMixedColorSpaces) {
     get()->mSupportMixedColorSpaces = supportMixedColorSpaces;
 }

@@ -20,16 +20,21 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.DisabledOnRavenwood;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Log;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,6 +50,9 @@ import java.util.Objects;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class BundleTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private Log.TerribleFailureHandler mWtfHandler;
 
     @After
@@ -115,6 +123,15 @@ public class BundleTest {
     }
 
     @Test
+    public void testEmpty() throws Exception {
+        assertNotNull(Bundle.EMPTY);
+        assertEquals(0, Bundle.EMPTY.size());
+
+        new Bundle(Bundle.EMPTY);
+    }
+
+    @Test
+    @IgnoreUnderRavenwood(blockedBy = ParcelFileDescriptor.class)
     public void testCreateFromParcel() throws Exception {
         boolean withFd;
         Parcel p;
@@ -295,6 +312,7 @@ public class BundleTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void kindofEquals_lazyValuesAndDifferentClassLoaders_returnsFalse() {
         Parcelable p1 = new CustomParcelable(13, "Tiramisu");
         Parcelable p2 = new CustomParcelable(13, "Tiramisu");
@@ -350,6 +368,7 @@ public class BundleTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void readWriteLengthMismatch_logsWtf() throws Exception {
         mWtfHandler = Log.setWtfHandler((tag, e, system) -> {
             throw new RuntimeException(e);
@@ -364,6 +383,7 @@ public class BundleTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void getParcelable_whenThrowingAndNotDefusing_throws() throws Exception {
         Bundle.setShouldDefuse(false);
         Bundle bundle = new Bundle();
@@ -376,6 +396,7 @@ public class BundleTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void getParcelable_whenThrowingAndDefusing_returnsNull() throws Exception {
         Bundle.setShouldDefuse(true);
         Bundle bundle = new Bundle();
@@ -391,6 +412,7 @@ public class BundleTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void getParcelable_whenThrowingAndDefusing_leavesElement() throws Exception {
         Bundle.setShouldDefuse(true);
         Bundle bundle = new Bundle();
@@ -422,6 +444,42 @@ public class BundleTest {
         bundle.isEmpty();
         // Nothing thrown
         assertThat(bundle.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisabledOnRavenwood(blockedBy = Parcel.class)
+    public void parcelledBundleWithBinder_shouldReturnHasBindersTrue() throws Exception {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("test", new CustomParcelable(13, "Tiramisu"));
+        bundle.putBinder("test_binder",
+                new IBinderWorkSourceNestedService.Stub() {
+
+                    public int[] nestedCallWithWorkSourceToSet(int uidToBlame) {
+                        return new int[0];
+                    }
+
+                    public int[] nestedCall() {
+                        return new int[0];
+                    }
+                });
+        Bundle bundle2 = new Bundle(getParcelledBundle(bundle));
+        assertEquals(bundle2.hasBinders(), Bundle.STATUS_BINDERS_PRESENT);
+
+        bundle2.putParcelable("test2", new CustomParcelable(13, "Tiramisu"));
+        assertEquals(bundle2.hasBinders(), Bundle.STATUS_BINDERS_UNKNOWN);
+    }
+
+    @Test
+    @DisabledOnRavenwood(blockedBy = Parcel.class)
+    public void parcelledBundleWithoutBinder_shouldReturnHasBindersFalse() throws Exception {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("test", new CustomParcelable(13, "Tiramisu"));
+        Bundle bundle2 = new Bundle(getParcelledBundle(bundle));
+        //Should fail to load with framework classloader.
+        assertEquals(bundle2.hasBinders(), Bundle.STATUS_BINDERS_NOT_PRESENT);
+
+        bundle2.putParcelable("test2", new CustomParcelable(13, "Tiramisu"));
+        assertEquals(bundle2.hasBinders(), Bundle.STATUS_BINDERS_UNKNOWN);
     }
 
     private Bundle getMalformedBundle() {
@@ -499,6 +557,7 @@ public class BundleTest {
             public CustomParcelable createFromParcel(Parcel in) {
                 return new CustomParcelable(in);
             }
+
             @Override
             public CustomParcelable[] newArray(int size) {
                 return new CustomParcelable[size];

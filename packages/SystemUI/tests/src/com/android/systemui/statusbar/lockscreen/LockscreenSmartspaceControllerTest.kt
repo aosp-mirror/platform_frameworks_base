@@ -30,7 +30,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.UserHandle
+import android.platform.test.annotations.DisableFlags
 import android.provider.Settings
+import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
@@ -38,22 +40,25 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceConfigPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.plugins.WeatherData
+import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.smartspace.ui.viewmodel.SmartspaceViewModel
+import com.android.systemui.smartspace.viewmodel.smartspaceViewModelFactory
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecution
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -80,6 +85,7 @@ import java.util.Optional
 import java.util.concurrent.Executor
 
 @SmallTest
+@RunWithLooper(setAsMainLooper = true)
 class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     companion object {
         const val SMARTSPACE_TIME_TOO_EARLY = 1000L
@@ -181,6 +187,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var dateSmartspaceView: SmartspaceView
     private lateinit var weatherSmartspaceView: SmartspaceView
     private lateinit var smartspaceView: SmartspaceView
+    private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
+    private lateinit var smartspaceViewModelFactory: SmartspaceViewModel.Factory
 
     private val clock = FakeSystemClock()
     private val executor = FakeExecutor(clock)
@@ -205,10 +213,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        // Todo(b/261760571): flip the flag value here when feature is launched, and update relevant
-        //  tests.
-        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(false)
-
         `when`(secureSettings.getUriFor(PRIVATE_LOCKSCREEN_SETTING))
                 .thenReturn(fakePrivateLockscreenSettingUri)
         `when`(secureSettings.getUriFor(NOTIF_ON_LOCKSCREEN_SETTING))
@@ -230,6 +234,15 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         setAllowPrivateNotifications(userHandleSecondary, true)
         setShowNotifications(userHandlePrimary, true)
 
+        // Use the real wakefulness lifecycle instead of a mock
+        wakefulnessLifecycle = WakefulnessLifecycle(
+            context,
+            /* wallpaper= */ null,
+            clock,
+            dumpManager
+        )
+        smartspaceViewModelFactory = testKosmos().smartspaceViewModelFactory
+
         controller = LockscreenSmartspaceController(
                 context,
                 featureFlags,
@@ -245,6 +258,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 deviceProvisionedController,
                 keyguardBypassController,
                 keyguardUpdateMonitor,
+                wakefulnessLifecycle,
+                smartspaceViewModelFactory,
                 dumpManager,
                 execution,
                 executor,
@@ -260,17 +275,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         deviceProvisionedListener = deviceProvisionedCaptor.value
     }
 
-    @Test(expected = RuntimeException::class)
-    fun testBuildAndConnectWeatherView_throwsIfDecouplingDisabled() {
-        // GIVEN the feature flag is disabled
-        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(false)
-
-        // WHEN we try to build the view
-        controller.buildAndConnectWeatherView(fakeParent)
-
-        // THEN an exception is thrown
-    }
-
     @Test
     fun testBuildAndConnectView_connectsOnlyAfterDeviceIsProvisioned() {
         // GIVEN an unprovisioned device and an attempt to connect
@@ -278,7 +282,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         `when`(deviceProvisionedController.isCurrentUserSetup).thenReturn(false)
 
         // WHEN a connection attempt is made and view is attached
-        val view = controller.buildAndConnectView(fakeParent)
+        val view = controller.buildAndConnectView(fakeParent)!!
         controller.stateChangeListener.onViewAttachedToWindow(view)
 
         // THEN no session is created
@@ -332,6 +336,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         clearInvocations(plugin)
 
         // WHEN the session is closed
+        controller.stateChangeListener.onViewDetachedFromWindow(dateSmartspaceView as View)
+        controller.stateChangeListener.onViewDetachedFromWindow(weatherSmartspaceView as View)
         controller.stateChangeListener.onViewDetachedFromWindow(smartspaceView as View)
         controller.disconnect()
 
@@ -376,20 +382,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         configChangeListener.onThemeChanged()
 
         // We update the new text color to match the wallpaper color
-        verify(smartspaceView).setPrimaryTextColor(anyInt())
-    }
-
-    @Test
-    fun testThemeChange_ifDecouplingEnabled_updatesTextColor() {
-        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(true)
-
-        // GIVEN a connected smartspace session
-        connectSession()
-
-        // WHEN the theme changes
-        configChangeListener.onThemeChanged()
-
-        // We update the new text color to match the wallpaper color
         verify(dateSmartspaceView).setPrimaryTextColor(anyInt())
         verify(weatherSmartspaceView).setPrimaryTextColor(anyInt())
         verify(smartspaceView).setPrimaryTextColor(anyInt())
@@ -397,20 +389,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
     @Test
     fun testDozeAmountChange_updatesView() {
-        // GIVEN a connected smartspace session
-        connectSession()
-
-        // WHEN the doze amount changes
-        statusBarStateListener.onDozeAmountChanged(0.1f, 0.7f)
-
-        // We pass that along to the view
-        verify(smartspaceView).setDozeAmount(0.7f)
-    }
-
-    @Test
-    fun testDozeAmountChange_ifDecouplingEnabled_updatesViews() {
-        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(true)
-
         // GIVEN a connected smartspace session
         connectSession()
 
@@ -472,7 +450,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testAllTargetsAreFilteredExceptWeatherWhenNotificationsAreDisabled() {
+    fun testAllTargetsAreFilteredInclWeatherWhenNotificationsAreDisabled() {
         // GIVEN the active user doesn't allow any notifications on lockscreen
         setShowNotifications(userHandlePrimary, false)
         connectSession()
@@ -488,7 +466,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         sessionListener.onTargetsAvailable(targets)
 
         // THEN all non-sensitive content is still shown
-        verify(plugin).onTargetsAvailable(eq(listOf(targets[3])))
+        verify(plugin).onTargetsAvailable(emptyList())
     }
 
     @Test
@@ -519,8 +497,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testSessionListener_ifDecouplingEnabled_weatherTargetIsFilteredOut() {
-        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(true)
+    fun testSessionListener_weatherTargetIsFilteredOut() {
         connectSession()
 
         // WHEN we receive a list of targets
@@ -670,8 +647,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testSessionListener_ifDecouplingEnabled_weatherDataUpdates() {
-        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(true)
+    fun testSessionListener_weatherDataUpdates() {
         connectSession()
 
         clock.setCurrentTimeMillis(SMARTSPACE_TIME_JUST_RIGHT)
@@ -695,33 +671,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             w.description == "Flurries" &&
                     w.state == WeatherData.WeatherStateIcon.FLURRIES &&
                     w.temperature == 0 && w.useCelsius
-        })
-    }
-
-    @Test
-    fun testSessionListener_ifDecouplingDisabled_weatherDataUpdates() {
-        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(false)
-        connectSession()
-
-        clock.setCurrentTimeMillis(SMARTSPACE_TIME_JUST_RIGHT)
-        // WHEN we receive a list of targets
-        val targets = listOf(
-                makeWeatherTargetWithExtras(
-                        id = 1,
-                        userHandle = userHandlePrimary,
-                        description = "Sunny",
-                        state = WeatherData.WeatherStateIcon.SUNNY.id,
-                        temperature = "32",
-                        useCelsius = false),
-                makeTarget(2, userHandlePrimary, isSensitive = true)
-        )
-
-        sessionListener.onTargetsAvailable(targets)
-
-        verify(keyguardUpdateMonitor).sendWeatherData(argThat { w ->
-            w.description == "Sunny" &&
-                    w.state == WeatherData.WeatherStateIcon.SUNNY &&
-                    w.temperature == 32 && !w.useCelsius
         })
     }
 
@@ -781,6 +730,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         connectSession()
 
         // WHEN we are told to cleanup
+        controller.stateChangeListener.onViewDetachedFromWindow(dateSmartspaceView as View)
+        controller.stateChangeListener.onViewDetachedFromWindow(weatherSmartspaceView as View)
         controller.stateChangeListener.onViewDetachedFromWindow(smartspaceView as View)
         controller.disconnect()
 
@@ -816,16 +767,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testWeatherViewUsesSameSession() {
-        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(true)
-        // GIVEN a connected session
-        connectSession()
-
-        // No checks is needed here, since connectSession() already checks internally that
-        // createSmartspaceSession is invoked only once.
-    }
-
-    @Test
     fun testViewGetInitializedWithBypassEnabledState() {
         // GIVEN keyguard bypass is enabled.
         `when`(keyguardBypassController.bypassEnabled).thenReturn(true)
@@ -839,6 +780,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @RunWithLooper(setAsMainLooper = false)
     fun testConnectAttemptBeforeInitializationShouldNotCreateSession() {
         // GIVEN an uninitalized smartspaceView
         // WHEN the device is provisioned
@@ -852,32 +794,64 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(configurationController, never()).addCallback(any())
     }
 
+    @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_SMARTSPACE_LOCKSCREEN_VIEWMODEL)
+    fun testWakefulnessLifecycleDispatch_wake_setsSmartspaceScreenOnTrue() {
+        // Connect session
+        connectSession()
+
+        // Add mock views
+        val mockSmartspaceView = mock(SmartspaceView::class.java)
+        controller.smartspaceViews.add(mockSmartspaceView)
+
+        // Initiate wakefulness change
+        wakefulnessLifecycle.dispatchStartedWakingUp(0)
+
+        // Verify smartspace views receive screen on
+        verify(mockSmartspaceView).setScreenOn(true)
+    }
+
+    @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_SMARTSPACE_LOCKSCREEN_VIEWMODEL)
+    fun testWakefulnessLifecycleDispatch_sleep_setsSmartspaceScreenOnFalse() {
+        // Connect session
+        connectSession()
+
+        // Add mock views
+        val mockSmartspaceView = mock(SmartspaceView::class.java)
+        controller.smartspaceViews.add(mockSmartspaceView)
+
+        // Initiate wakefulness change
+        wakefulnessLifecycle.dispatchFinishedGoingToSleep()
+
+        // Verify smartspace views receive screen on
+        verify(mockSmartspaceView).setScreenOn(false)
+    }
+
     private fun connectSession() {
-        if (controller.isDateWeatherDecoupled()) {
-            val dateView = controller.buildAndConnectDateView(fakeParent)
-            dateSmartspaceView = dateView as SmartspaceView
-            fakeParent.addView(dateView)
-            controller.stateChangeListener.onViewAttachedToWindow(dateView)
+        val dateView = controller.buildAndConnectDateView(fakeParent)
+        dateSmartspaceView = dateView as SmartspaceView
+        fakeParent.addView(dateView)
+        controller.stateChangeListener.onViewAttachedToWindow(dateView)
 
-            verify(dateSmartspaceView).setUiSurface(
-                    BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
-            verify(dateSmartspaceView).registerDataProvider(datePlugin)
+        verify(dateSmartspaceView).setUiSurface(
+                BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+        verify(dateSmartspaceView).registerDataProvider(datePlugin)
 
-            verify(dateSmartspaceView).setPrimaryTextColor(anyInt())
-            verify(dateSmartspaceView).setDozeAmount(0.5f)
+        verify(dateSmartspaceView).setPrimaryTextColor(anyInt())
+        verify(dateSmartspaceView).setDozeAmount(0.5f)
 
-            val weatherView = controller.buildAndConnectWeatherView(fakeParent)
-            weatherSmartspaceView = weatherView as SmartspaceView
-            fakeParent.addView(weatherView)
-            controller.stateChangeListener.onViewAttachedToWindow(weatherView)
+        val weatherView = controller.buildAndConnectWeatherView(fakeParent)
+        weatherSmartspaceView = weatherView as SmartspaceView
+        fakeParent.addView(weatherView)
+        controller.stateChangeListener.onViewAttachedToWindow(weatherView)
 
-            verify(weatherSmartspaceView).setUiSurface(
-                    BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
-            verify(weatherSmartspaceView).registerDataProvider(weatherPlugin)
+        verify(weatherSmartspaceView).setUiSurface(
+                BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
+        verify(weatherSmartspaceView).registerDataProvider(weatherPlugin)
 
-            verify(weatherSmartspaceView).setPrimaryTextColor(anyInt())
-            verify(weatherSmartspaceView).setDozeAmount(0.5f)
-        }
+        verify(weatherSmartspaceView).setPrimaryTextColor(anyInt())
+        verify(weatherSmartspaceView).setDozeAmount(0.5f)
 
         val view = controller.buildAndConnectView(fakeParent)
         smartspaceView = view as SmartspaceView
@@ -918,10 +892,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(smartspaceView).setPrimaryTextColor(anyInt())
         verify(smartspaceView).setDozeAmount(0.5f)
 
-        if (controller.isDateWeatherDecoupled()) {
-            clearInvocations(dateSmartspaceView)
-            clearInvocations(weatherSmartspaceView)
-        }
+        clearInvocations(dateSmartspaceView)
+        clearInvocations(weatherSmartspaceView)
         clearInvocations(smartspaceView)
     }
 

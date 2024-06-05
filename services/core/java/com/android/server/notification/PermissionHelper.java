@@ -16,7 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
@@ -25,6 +24,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -196,19 +196,21 @@ public final class PermissionHelper {
             int uid = mPackageManager.getPackageUid(packageName, 0, userId);
             boolean currentlyGranted = hasPermission(uid);
             if (grant && !currentlyGranted) {
-                mPermManager.grantRuntimePermission(packageName, NOTIFICATION_PERMISSION, userId);
+                mPermManager.grantRuntimePermission(packageName, NOTIFICATION_PERMISSION,
+                        VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId);
             } else if (!grant && currentlyGranted) {
                 mPermManager.revokeRuntimePermission(packageName, NOTIFICATION_PERMISSION,
-                        userId, TAG);
+                        VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId, TAG);
             }
             int flagMask = FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_USER_FIXED;
-            flagMask = userSet || !grant ? flagMask | FLAG_PERMISSION_GRANTED_BY_DEFAULT : flagMask;
             if (userSet) {
-                mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        flagMask, FLAG_PERMISSION_USER_SET, true, userId);
+                mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION, flagMask,
+                        FLAG_PERMISSION_USER_SET, true,
+                        VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId);
             } else {
                 mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        flagMask, 0, true, userId);
+                        flagMask, 0, true, VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
+                        userId);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not reach system server", e);
@@ -236,7 +238,7 @@ public final class PermissionHelper {
         try {
             try {
                 int flags = mPermManager.getPermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        userId);
+                        VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId);
                 return (flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0
                         || (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0;
             } catch (RemoteException e) {
@@ -253,7 +255,7 @@ public final class PermissionHelper {
         try {
             try {
                 int flags = mPermManager.getPermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        userId);
+                        VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId);
                 return (flags & (PackageManager.FLAG_PERMISSION_USER_SET
                         | PackageManager.FLAG_PERMISSION_USER_FIXED)) != 0;
             } catch (RemoteException e) {
@@ -270,7 +272,7 @@ public final class PermissionHelper {
         try {
             try {
                 int flags = mPermManager.getPermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        userId);
+                        VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT, userId);
                 return (flags & (PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT
                         | PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE)) != 0;
             } catch (RemoteException e) {

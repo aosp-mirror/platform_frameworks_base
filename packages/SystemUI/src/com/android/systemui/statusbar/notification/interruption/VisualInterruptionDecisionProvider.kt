@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.systemui.statusbar.notification.interruption
 
+import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.CoreStartable
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 
 /**
@@ -24,7 +27,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
  * pulsing while the device is dozing), displaying the notification as a bubble, and launching a
  * full-screen intent for the notification.
  */
-interface VisualInterruptionDecisionProvider {
+interface VisualInterruptionDecisionProvider : CoreStartable {
     /**
      * Represents the decision to visually interrupt or not.
      *
@@ -50,18 +53,76 @@ interface VisualInterruptionDecisionProvider {
         val wouldInterruptWithoutDnd: Boolean
     }
 
+    /** Initializes the provider. */
+    override fun start() {}
+
     /**
-     * Adds a [component][suppressor] that can suppress visual interruptions.
+     * Adds a [NotificationInterruptSuppressor] that can suppress visual interruptions.
      *
-     * This class may call suppressors in any order.
+     * This method may be called before [start] has been called.
+     *
+     * This class may call suppressors, conditions, and filters in any order.
      *
      * @param[suppressor] the suppressor to add
      */
-    fun addSuppressor(suppressor: NotificationInterruptSuppressor)
+    fun addLegacySuppressor(suppressor: NotificationInterruptSuppressor)
+
+    /**
+     * Removes a previously-added suppressor.
+     *
+     * This method may be called before [start] has been called.
+     *
+     * @param[suppressor] the suppressor to remove
+     */
+    @VisibleForTesting fun removeLegacySuppressor(suppressor: NotificationInterruptSuppressor)
+
+    /**
+     * Adds a [VisualInterruptionCondition] that can suppress visual interruptions without examining
+     * individual notifications.
+     *
+     * This method may be called before [start] has been called.
+     *
+     * This class may call suppressors, conditions, and filters in any order.
+     *
+     * @param[condition] the condition to add
+     */
+    fun addCondition(condition: VisualInterruptionCondition)
+
+    /**
+     * Removes a previously-added condition.
+     *
+     * This method may be called before [start] has been called.
+     *
+     * @param[condition] the condition to remove
+     */
+    @VisibleForTesting fun removeCondition(condition: VisualInterruptionCondition)
+
+    /**
+     * Adds a [VisualInterruptionFilter] that can suppress visual interruptions based on individual
+     * notifications.
+     *
+     * This method may be called before [start] has been called.
+     *
+     * This class may call suppressors, conditions, and filters in any order.
+     *
+     * @param[filter] the filter to add
+     */
+    fun addFilter(filter: VisualInterruptionFilter)
+
+    /**
+     * Removes a previously-added filter.
+     *
+     * This method may be called before [start] has been called.
+     *
+     * @param[filter] the filter to remove
+     */
+    @VisibleForTesting fun removeFilter(filter: VisualInterruptionFilter)
 
     /**
      * Decides whether a [notification][entry] should display as heads-up or not, but does not log
      * that decision.
+     *
+     * [start] must be called before this method can be called.
      *
      * @param[entry] the notification that this decision is about
      * @return the decision to display that notification as heads-up or not
@@ -78,6 +139,8 @@ interface VisualInterruptionDecisionProvider {
      * If the device is dozing, the decision will consider whether the notification should "pulse"
      * (wake the screen up and display the ambient view of the notification).
      *
+     * [start] must be called before this method can be called.
+     *
      * @see[makeUnloggedHeadsUpDecision]
      *
      * @param[entry] the notification that this decision is about
@@ -91,6 +154,8 @@ interface VisualInterruptionDecisionProvider {
      *
      * The returned decision can be logged by passing it to [logFullScreenIntentDecision].
      *
+     * [start] must be called before this method can be called.
+     *
      * @see[makeAndLogHeadsUpDecision]
      *
      * @param[entry] the notification that this decision is about
@@ -101,12 +166,16 @@ interface VisualInterruptionDecisionProvider {
     /**
      * Logs a previous [decision] to launch a full-screen intent or not.
      *
+     * [start] must be called before this method can be called.
+     *
      * @param[decision] the decision to log
      */
     fun logFullScreenIntentDecision(decision: FullScreenIntentDecision)
 
     /**
      * Decides whether a [notification][entry] should display as a bubble or not.
+     *
+     * [start] must be called before this method can be called.
      *
      * @param[entry] the notification that this decision is about
      * @return the decision to display that notification as a bubble or not

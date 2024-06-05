@@ -41,8 +41,8 @@ import android.widget.FrameLayout.LayoutParams;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
@@ -242,7 +242,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     public void onLayout() {
         mIconsPlaced = false; // Force icons to be re-placed
         setMenuLocation();
-        mParent.removeListener();
+        mParent.setLayoutListener(null);
     }
 
     private void createMenuViews(boolean resetState) {

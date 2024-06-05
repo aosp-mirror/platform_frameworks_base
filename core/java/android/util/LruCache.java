@@ -18,6 +18,7 @@ package android.util;
 
 import android.compat.annotation.UnsupportedAppUsage;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -61,6 +62,7 @@ import java.util.Map;
  * of <a href="http://developer.android.com/sdk/compatibility-library.html">Android's
  * Support Package</a> for earlier releases.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class LruCache<K, V> {
     @UnsupportedAppUsage
     private final LinkedHashMap<K, V> map;
@@ -208,7 +210,7 @@ public class LruCache<K, V> {
                     break;
                 }
 
-                Map.Entry<K, V> toEvict = map.eldest();
+                Map.Entry<K, V> toEvict = eldest();
                 if (toEvict == null) {
                     break;
                 }
@@ -222,6 +224,16 @@ public class LruCache<K, V> {
 
             entryRemoved(true, key, value, null);
         }
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private Map.Entry<K, V> eldest() {
+        return map.eldest();
+    }
+
+    private Map.Entry<K, V> eldest$ravenwood() {
+        final Iterator<Map.Entry<K, V>> it = map.entrySet().iterator();
+        return it.hasNext() ? it.next() : null;
     }
 
     /**

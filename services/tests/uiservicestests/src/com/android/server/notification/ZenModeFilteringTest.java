@@ -39,18 +39,23 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.Flags;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager.Policy;
 import android.media.AudioAttributes;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenPolicy;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.NotificationMessagingUtil;
@@ -58,6 +63,7 @@ import com.android.server.UiServiceTestCase;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -75,6 +81,9 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
     @Mock private TelephonyManager mTelephonyManager;
 
     private long mTestStartTime;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() {
@@ -525,5 +534,27 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
                         different, null, 0, 0, 0));
+    }
+
+    @Test
+    public void testAllowChannels_priorityPackage() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+
+        // Notification with package priority = PRIORITY_MAX (assigned to indicate canBypassDnd)
+        NotificationRecord r = getNotificationRecord();
+        r.setPackagePriority(Notification.PRIORITY_MAX);
+
+        // Create a policy to allow channels through, which means shouldIntercept is false
+        ZenModeConfig config = new ZenModeConfig();
+        Policy policy = config.toNotificationPolicy(new ZenPolicy.Builder()
+                .allowPriorityChannels(true)
+                .build());
+        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
+
+        // Now create a policy which does not allow priority channels:
+        policy = config.toNotificationPolicy(new ZenPolicy.Builder()
+                .allowPriorityChannels(false)
+                .build());
+        assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
     }
 }

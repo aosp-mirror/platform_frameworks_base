@@ -20,8 +20,8 @@ import android.content.Context
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.Gravity
-import com.android.systemui.R
 import com.android.systemui.plugins.DarkIconDispatcher
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.BaseStatusBarFrameLayout
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
@@ -51,13 +51,23 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
     override fun getSlot() = slot
 
     override fun onDarkChanged(areas: ArrayList<Rect>?, darkIntensity: Float, tint: Int) {
+        // nop
+    }
+
+    override fun onDarkChangedWithContrast(areas: ArrayList<Rect>, tint: Int, contrastTint: Int) {
         val newTint = DarkIconDispatcher.getTint(areas, this, tint)
-        binding.onIconTintChanged(newTint)
+        val contrast = DarkIconDispatcher.getInverseTint(areas, this, contrastTint)
+
+        binding.onIconTintChanged(newTint, contrast)
         binding.onDecorTintChanged(newTint)
     }
 
     override fun setStaticDrawableColor(color: Int) {
-        binding.onIconTintChanged(color)
+        // nop
+    }
+
+    override fun setStaticDrawableColor(color: Int, foregroundColor: Int) {
+        binding.onIconTintChanged(color, foregroundColor)
     }
 
     override fun setDecorColor(color: Int) {
@@ -93,7 +103,7 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
      *
      * Creates a dot view, and uses [bindingCreator] to get and set the binding.
      */
-    fun initView(slot: String, bindingCreator: () -> ModernStatusBarViewBinding) {
+    open fun initView(slot: String, bindingCreator: () -> ModernStatusBarViewBinding) {
         // The dot view requires [slot] to be set, and the [binding] may require an instantiated dot
         // view. So, this is the required order.
         this.slot = slot
@@ -101,12 +111,7 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
         this.binding = bindingCreator.invoke()
     }
 
-    /**
-     * Creates a [StatusBarIconView] that is always in DOT mode and adds it to this view.
-     *
-     * Mostly duplicated from [com.android.systemui.statusbar.StatusBarWifiView] and
-     * [com.android.systemui.statusbar.StatusBarMobileView].
-     */
+    /** Creates a [StatusBarIconView] that is always in DOT mode and adds it to this view. */
     private fun initDotView() {
         // TODO(b/238425913): Could we just have this dot view be part of the layout with a dot
         //  drawable so we don't need to inflate it manually? Would that not work with animations?
@@ -118,7 +123,7 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
                 it.visibleState = STATE_DOT
             }
 
-        val width = mContext.resources.getDimensionPixelSize(R.dimen.status_bar_icon_size)
+        val width = mContext.resources.getDimensionPixelSize(R.dimen.status_bar_icon_size_sp)
         val lp = LayoutParams(width, width)
         lp.gravity = Gravity.CENTER_VERTICAL or Gravity.START
         addView(dotView, lp)

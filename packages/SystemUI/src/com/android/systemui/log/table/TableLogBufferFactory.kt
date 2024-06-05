@@ -61,8 +61,7 @@ constructor(
                 bgDispatcher,
                 coroutineScope,
             )
-        dumpManager.registerNormalDumpable(name, tableBuffer)
-        tableBuffer.init()
+        dumpManager.registerTableLogBuffer(name, tableBuffer)
         return tableBuffer
     }
 

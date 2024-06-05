@@ -12,14 +12,17 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.FontSizeUtils;
-import com.android.systemui.R;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
 import com.android.systemui.qs.tileimpl.QSTileViewImplKt;
+import com.android.systemui.res.R;
 
 import java.util.ArrayList;
 
@@ -51,8 +54,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     protected int mResourceColumns;
     private float mSquishinessFraction = 1f;
     protected int mLastTileBottom;
-
     protected TextView mTempTextView;
+    private final Boolean mIsSmallLandscapeLockscreenEnabled =
+            RefactorFlag.forView(Flags.LOCKSCREEN_ENABLE_LANDSCAPE).isEnabled();
 
     public TileLayout(Context context) {
         this(context, null);
@@ -94,10 +98,22 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         return false;
     }
 
+    @VisibleForTesting
+    @Override
+    public int getMinRows() {
+        return mMinRows;
+    }
+
     @Override
     public boolean setMaxColumns(int maxColumns) {
         mMaxColumns = maxColumns;
         return updateColumns();
+    }
+
+    @VisibleForTesting
+    @Override
+    public int getMaxColumns() {
+        return mMaxColumns;
     }
 
     public void addTile(TileRecord tile) {
@@ -107,6 +123,11 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     protected void addTileView(TileRecord tile) {
+        // Re-using tile views might lead to having out-of-date squishiness. This is fixed by
+        // making sure we set the correct squishiness value when added to the layout.
+        if (tile.tileView instanceof HeightOverrideable) {
+            ((HeightOverrideable) tile.tileView).setSquishinessFraction(mSquishinessFraction);
+        }
         addView(tile.tileView);
     }
 
@@ -127,12 +148,18 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     public boolean updateResources() {
         Resources res = getResources();
-        mResourceColumns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
+        int columns = useSmallLandscapeLockscreenResources()
+                ? res.getInteger(R.integer.small_land_lockscreen_quick_settings_num_columns)
+                : res.getInteger(R.integer.quick_settings_num_columns);
+        mResourceColumns = Math.max(1, columns);
         mResourceCellHeight = res.getDimensionPixelSize(mResourceCellHeightResId);
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mSidePadding = useSidePadding() ? mCellMarginHorizontal / 2 : 0;
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
-        mMaxAllowedRows = Math.max(1, getResources().getInteger(R.integer.quick_settings_max_rows));
+        int rows = useSmallLandscapeLockscreenResources()
+                ? res.getInteger(R.integer.small_land_lockscreen_quick_settings_max_rows)
+                : res.getInteger(R.integer.quick_settings_max_rows);
+        mMaxAllowedRows = Math.max(1, rows);
         if (mLessRows) {
             mMaxAllowedRows = Math.max(mMinRows, mMaxAllowedRows - 1);
         }
@@ -144,6 +171,17 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             return true;
         }
         return false;
+    }
+
+    // TODO (b/293252410) remove condition here when flag is launched
+    //  Instead update quick_settings_num_columns and quick_settings_max_rows to be the same as
+    //  the small_land_lockscreen_quick_settings_num_columns or
+    //  small_land_lockscreen_quick_settings_max_rows respectively whenever
+    //  is_small_screen_landscape is true.
+    //  Then, only use quick_settings_num_columns and quick_settings_max_rows.
+    private boolean useSmallLandscapeLockscreenResources() {
+        return mIsSmallLandscapeLockscreenEnabled
+                && mContext.getResources().getBoolean(R.bool.is_small_screen_landscape);
     }
 
     protected boolean useSidePadding() {
@@ -327,6 +365,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
                 ((HeightOverrideable) record.tileView).setSquishinessFraction(mSquishinessFraction);
             }
         }
+    }
+
+    public float getSquishinessFraction() {
+        return mSquishinessFraction;
     }
 
     @Override

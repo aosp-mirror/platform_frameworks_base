@@ -85,24 +85,24 @@ static jlong CreateGuardedApkAssets(AssetManager2::ApkAssetsPtr assets) {
 
 static void DeleteGuardedApkAssets(Guarded<AssetManager2::ApkAssetsPtr>& apk_assets) {
   apk_assets.safeDelete([&apk_assets](AssetManager2::ApkAssetsPtr* assets) {
-      if (!assets) {
-          ALOGW("ApkAssets: Double delete of native assets object %p, ignored", &apk_assets);
-      } else if (!*assets) {
-          ALOGW("ApkAssets: Empty native assets pointer in native assets object %p", &apk_assets);
-      } else {
-          // |RefBase| increments |StrongCount| for each |sp<>| instance, and |WeakCount| for
-          // both |sp<>| and |wp<>| instances. This means the actual |wp<>| instance count
-          // is |WeakCount - StrongCount|.
-          const auto useCount = (*assets)->getStrongCount();
-          const auto weakCount = (*assets)->getWeakRefs()->getWeakCount() - useCount;
-          if (useCount > 1) {
-              ALOGW("ApkAssets: Deleting an object '%s' with %d > 1 strong and %d weak references",
-                    (*assets)->GetDebugName().c_str(), int(useCount), int(weakCount));
-          } else if (weakCount > 0) {
-              ALOGW("ApkAssets: Deleting an ApkAssets object '%s' with %d weak references",
-                    (*assets)->GetDebugName().c_str(), int(weakCount));
-          }
+    if (!assets) {
+      ALOGW("ApkAssets: Double delete of native assets object %p, ignored", &apk_assets);
+    } else if (!*assets) {
+      ALOGW("ApkAssets: Empty native assets pointer in native assets object %p", &apk_assets);
+    } else {
+      // |RefBase| increments |StrongCount| for each |sp<>| instance, and |WeakCount| for
+      // both |sp<>| and |wp<>| instances. This means the actual |wp<>| instance count
+      // is |WeakCount - StrongCount|.
+      const auto useCount = (*assets)->getStrongCount();
+      const auto weakCount = (*assets)->getWeakRefs()->getWeakCount() - useCount;
+      if (useCount > 1) {
+        ALOGW("ApkAssets: Deleting an object '%s' with %d > 1 strong and %d weak references",
+              (*assets)->GetDebugName().c_str(), int(useCount), int(weakCount));
+      } else if (weakCount > 0) {
+        ALOGW("ApkAssets: Deleting an ApkAssets object '%s' with %d weak references",
+              (*assets)->GetDebugName().c_str(), int(weakCount));
       }
+    }
   });
   delete &apk_assets;
 }
@@ -395,8 +395,8 @@ static jlong NativeLoadFromFdOffset(JNIEnv* env, jclass /*clazz*/, const format_
 static jlong NativeLoadEmpty(JNIEnv* env, jclass /*clazz*/, jint flags, jobject assets_provider) {
   auto apk_assets = ApkAssets::Load(LoaderAssetsProvider::Create(env, assets_provider), flags);
   if (apk_assets == nullptr) {
-    const std::string error_msg = base::StringPrintf("Failed to load empty assets with provider %p",
-                                                     (void*)assets_provider);
+    const std::string error_msg =
+        base::StringPrintf("Failed to load empty assets with provider %p", (void*)assets_provider);
     jniThrowException(env, "java/io/IOException", error_msg.c_str());
     return 0;
   }

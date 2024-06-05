@@ -18,10 +18,16 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.log.LogLevel.VERBOSE
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
+import com.android.systemui.log.core.LogLevel.VERBOSE
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 private val TAG = KeyguardTransitionAuditLogger::class.simpleName!!
@@ -31,16 +37,47 @@ private val TAG = KeyguardTransitionAuditLogger::class.simpleName!!
 class KeyguardTransitionAuditLogger
 @Inject
 constructor(
-    @Application private val scope: CoroutineScope,
+    @Background private val scope: CoroutineScope,
     private val interactor: KeyguardTransitionInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val logger: KeyguardLogger,
+    private val powerInteractor: PowerInteractor,
+    private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
+    private val keyguardRootViewModel: KeyguardRootViewModel,
+    private val shadeInteractor: ShadeInteractor,
+    private val keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) {
 
     fun start() {
         scope.launch {
-            keyguardInteractor.wakefulnessModel.collect {
+            powerInteractor.detailedWakefulness.collect {
                 logger.log(TAG, VERBOSE, "WakefulnessModel", it)
+            }
+        }
+
+        scope.launch {
+            sharedNotificationContainerViewModel.isOnLockscreen.collect {
+                logger.log(TAG, VERBOSE, "Notif: isOnLockscreen", it)
+            }
+        }
+
+        scope.launch {
+            shadeInteractor.isUserInteracting.collect {
+                logger.log(TAG, VERBOSE, "Shade: isUserInteracting", it)
+            }
+        }
+
+        if (!SceneContainerFlag.isEnabled) {
+            scope.launch {
+                sharedNotificationContainerViewModel.bounds.debounce(20L).collect {
+                    logger.log(TAG, VERBOSE, "Notif: bounds (debounced)", it)
+                }
+            }
+        }
+
+        scope.launch {
+            sharedNotificationContainerViewModel.isOnLockscreenWithoutShade.collect {
+                logger.log(TAG, VERBOSE, "Notif: isOnLockscreenWithoutShade", it)
             }
         }
 
@@ -67,32 +104,56 @@ constructor(
         }
 
         scope.launch {
+            keyguardInteractor.isKeyguardGoingAway.collect {
+                logger.log(TAG, VERBOSE, "isKeyguardGoingAway", it)
+            }
+        }
+
+        scope.launch {
             keyguardInteractor.isKeyguardOccluded.collect {
                 logger.log(TAG, VERBOSE, "isOccluded", it)
             }
         }
 
         scope.launch {
-            interactor.finishedKeyguardTransitionStep.collect {
-                logger.log(TAG, VERBOSE, "Finished transition", it)
+            keyguardInteractor.keyguardTranslationY.collect {
+                logger.log(TAG, VERBOSE, "keyguardTranslationY", it)
             }
         }
 
         scope.launch {
-            interactor.canceledKeyguardTransitionStep.collect {
-                logger.log(TAG, VERBOSE, "Canceled transition", it)
+            keyguardRootViewModel.burnInModel.debounce(20L).collect {
+                logger.log(TAG, VERBOSE, "BurnInModel (debounced)", it)
             }
         }
 
         scope.launch {
-            interactor.startedKeyguardTransitionStep.collect {
-                logger.log(TAG, VERBOSE, "Started transition", it)
+            keyguardInteractor.isKeyguardDismissible.collect {
+                logger.log(TAG, VERBOSE, "isDismissible", it)
+            }
+        }
+
+        scope.launch {
+            keyguardInteractor.isKeyguardShowing.collect {
+                logger.log(TAG, VERBOSE, "isShowing", it)
             }
         }
 
         scope.launch {
             keyguardInteractor.dozeTransitionModel.collect {
                 logger.log(TAG, VERBOSE, "Doze transition", it)
+            }
+        }
+
+        scope.launch {
+            keyguardInteractor.onCameraLaunchDetected.collect {
+                logger.log(TAG, VERBOSE, "onCameraLaunchDetected", it)
+            }
+        }
+
+        scope.launch {
+            keyguardOcclusionInteractor.showWhenLockedActivityInfo.collect {
+                logger.log(TAG, VERBOSE, "showWhenLockedActivityInfo", it)
             }
         }
     }

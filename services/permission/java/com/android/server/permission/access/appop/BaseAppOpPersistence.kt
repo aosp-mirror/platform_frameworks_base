@@ -16,11 +16,13 @@
 
 package com.android.server.permission.access.appop
 
-import android.util.Log
+import android.util.Slog
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
+import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.attributeInt
 import com.android.server.permission.access.util.attributeInterned
 import com.android.server.permission.access.util.forEachTag
@@ -30,29 +32,27 @@ import com.android.server.permission.access.util.tag
 import com.android.server.permission.access.util.tagName
 
 abstract class BaseAppOpPersistence {
-    abstract fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int)
+    abstract fun BinaryXmlPullParser.parseUserState(state: MutableAccessState, userId: Int)
 
     abstract fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int)
 
-    protected fun BinaryXmlPullParser.parseAppOps(appOpModes: IndexedMap<String, Int>) {
+    protected fun BinaryXmlPullParser.parseAppOps(appOpModes: MutableIndexedMap<String, Int>) {
         forEachTag {
             when (tagName) {
                 TAG_APP_OP -> parseAppOp(appOpModes)
-                else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
+                else -> Slog.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
             }
         }
     }
 
-    private fun BinaryXmlPullParser.parseAppOp(appOpModes: IndexedMap<String, Int>) {
+    private fun BinaryXmlPullParser.parseAppOp(appOpModes: MutableIndexedMap<String, Int>) {
         val name = getAttributeValueOrThrow(ATTR_NAME).intern()
         val mode = getAttributeIntOrThrow(ATTR_MODE)
         appOpModes[name] = mode
     }
 
     protected fun BinaryXmlSerializer.serializeAppOps(appOpModes: IndexedMap<String, Int>) {
-        appOpModes.forEachIndexed { _, name, mode ->
-            serializeAppOp(name, mode)
-        }
+        appOpModes.forEachIndexed { _, name, mode -> serializeAppOp(name, mode) }
     }
 
     private fun BinaryXmlSerializer.serializeAppOp(name: String, mode: Int) {

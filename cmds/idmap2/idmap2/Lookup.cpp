@@ -16,9 +16,9 @@
 
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 #include <iterator>
 #include <memory>
-#include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -94,7 +94,7 @@ void PrintValue(AssetManager2* const am, const AssetManager2::SelectedValue& val
       const ResStringPool* pool = am->GetStringPoolForCookie(value.cookie);
       out->append("\"");
       if (auto str = pool->string8ObjectAt(value.data); str.ok()) {
-        out->append(*str);
+        out->append(str->c_str());
       }
     } break;
     default:
@@ -230,7 +230,7 @@ Result<Unit> Lookup(const std::vector<std::string>& args) {
     if (!value) {
       return Error(value.GetError(), "resource 0x%08x not found", *resid);
     }
-    std::cout << *value << std::endl;
+    std::cout << *value << '\n';
   }
 
   return Unit{};

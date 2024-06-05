@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.admin.flags.Flags;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -54,6 +55,9 @@ public final class PackagePolicyKey extends PolicyKey {
     @TestApi
     public PackagePolicyKey(@NonNull String key, @NonNull String packageName) {
         super(key);
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
+            PolicySizeVerifier.enforceMaxPackageNameLength(packageName);
+        }
         mPackageName = Objects.requireNonNull((packageName));
     }
 

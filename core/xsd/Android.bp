@@ -13,3 +13,14 @@ xsd_config {
     api_dir: "schema",
     package_name: "com.android.xml.permission.configfile",
 }
+
+xsd_config {
+    name: "xsd-vibrator-persistence",
+    srcs: ["vibrator/vibration/vibration.xsd"],
+    api_dir: "vibrator/vibration/schema",
+    package_name: "com.android.internal.vibrator.persistence",
+    root_elements: [
+        "vibration-effect",
+        "vibration-select",
+    ],
+}

@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -35,9 +37,13 @@ import android.telephony.Annotation.DataState;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.data.ApnSetting;
 import android.telephony.data.DataCallResponse;
+import android.telephony.data.Qos;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.TelephonyUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 
@@ -59,11 +65,60 @@ import java.util.Objects;
 public final class PreciseDataConnectionState implements Parcelable {
     private final @TransportType int mTransportType;
     private final int mId;
+    private final int mNetId;
     private final @DataState int mState;
     private final @NetworkType int mNetworkType;
     private final @DataFailureCause int mFailCause;
     private final LinkProperties mLinkProperties;
     private final ApnSetting mApnSetting;
+    private final Qos mDefaultQos;
+    private final @NetworkValidationStatus int mNetworkValidationStatus;
+
+    /** @hide */
+    @IntDef(prefix = "NETWORK_VALIDATION_", value = {
+            NETWORK_VALIDATION_UNSUPPORTED,
+            NETWORK_VALIDATION_NOT_REQUESTED,
+            NETWORK_VALIDATION_IN_PROGRESS,
+            NETWORK_VALIDATION_SUCCESS,
+            NETWORK_VALIDATION_FAILURE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NetworkValidationStatus {}
+
+    /**
+     * Unsupported. The unsupported state is used when the data network cannot support the network
+     * validation function for the current data connection state.
+     */
+    @FlaggedApi(Flags.FLAG_NETWORK_VALIDATION)
+    public static final int NETWORK_VALIDATION_UNSUPPORTED = 0;
+
+    /**
+     * Not Requested. The not requested status is used when the data network supports the network
+     * validation function, but no network validation is being performed yet.
+     */
+    @FlaggedApi(Flags.FLAG_NETWORK_VALIDATION)
+    public static final int NETWORK_VALIDATION_NOT_REQUESTED = 1;
+
+    /**
+     * In progress. The in progress state is used when the network validation process for the data
+     * network is in progress. This state is followed by either success or failure.
+     */
+    @FlaggedApi(Flags.FLAG_NETWORK_VALIDATION)
+    public static final int NETWORK_VALIDATION_IN_PROGRESS = 2;
+
+    /**
+     * Success. The Success status is used when network validation has been completed for the data
+     * network and the result is successful.
+     */
+    @FlaggedApi(Flags.FLAG_NETWORK_VALIDATION)
+    public static final int NETWORK_VALIDATION_SUCCESS = 3;
+
+    /**
+     * Failure. The Failure status is used when network validation has been completed for the data
+     * network and the result is failure.
+     */
+    @FlaggedApi(Flags.FLAG_NETWORK_VALIDATION)
+    public static final int NETWORK_VALIDATION_FAILURE = 4;
 
     /**
      * Constructor
@@ -80,12 +135,12 @@ public final class PreciseDataConnectionState implements Parcelable {
                                       @ApnType int apnTypes, @NonNull String apn,
                                       @Nullable LinkProperties linkProperties,
                                       @DataFailureCause int failCause) {
-        this(AccessNetworkConstants.TRANSPORT_TYPE_INVALID, -1, state, networkType,
+        this(AccessNetworkConstants.TRANSPORT_TYPE_INVALID, -1, -1, state, networkType,
                 linkProperties, failCause, new ApnSetting.Builder()
                         .setApnTypeBitmask(apnTypes)
                         .setApnName(apn)
                         .setEntryName(apn)
-                        .build());
+                        .build(), null, NETWORK_VALIDATION_UNSUPPORTED);
     }
 
 
@@ -101,18 +156,24 @@ public final class PreciseDataConnectionState implements Parcelable {
      *        code indicating the cause of the failure.
      * @param apnSetting If there is a valid APN for this Data Connection, then the APN Settings;
      *        if there is no valid APN setting for the specific type, then this will be null
+     * @param defaultQos If there is a valid QoS for the default bearer supporting this data call,
+     *        (supported for LTE and NR), then this is specified. Otherwise it should be null.
      */
-    private PreciseDataConnectionState(@TransportType int transportType, int id,
+    private PreciseDataConnectionState(@TransportType int transportType, int id, int netId,
             @DataState int state, @NetworkType int networkType,
             @Nullable LinkProperties linkProperties, @DataFailureCause int failCause,
-            @Nullable ApnSetting apnSetting) {
+            @Nullable ApnSetting apnSetting, @Nullable Qos defaultQos,
+            @NetworkValidationStatus int networkValidationStatus) {
         mTransportType = transportType;
         mId = id;
+        mNetId = netId;
         mState = state;
         mNetworkType = networkType;
         mLinkProperties = linkProperties;
         mFailCause = failCause;
         mApnSetting = apnSetting;
+        mDefaultQos = defaultQos;
+        mNetworkValidationStatus = networkValidationStatus;
     }
 
     /**
@@ -123,11 +184,20 @@ public final class PreciseDataConnectionState implements Parcelable {
     private PreciseDataConnectionState(Parcel in) {
         mTransportType = in.readInt();
         mId = in.readInt();
+        mNetId = in.readInt();
         mState = in.readInt();
         mNetworkType = in.readInt();
-        mLinkProperties = in.readParcelable(LinkProperties.class.getClassLoader(), android.net.LinkProperties.class);
+        mLinkProperties = in.readParcelable(
+                LinkProperties.class.getClassLoader(),
+                android.net.LinkProperties.class);
         mFailCause = in.readInt();
-        mApnSetting = in.readParcelable(ApnSetting.class.getClassLoader(), android.telephony.data.ApnSetting.class);
+        mApnSetting = in.readParcelable(
+                ApnSetting.class.getClassLoader(),
+                android.telephony.data.ApnSetting.class);
+        mDefaultQos = in.readParcelable(
+                Qos.class.getClassLoader(),
+                android.telephony.data.Qos.class);
+        mNetworkValidationStatus = in.readInt();
     }
 
     /**
@@ -174,6 +244,14 @@ public final class PreciseDataConnectionState implements Parcelable {
      */
     public int getId() {
         return mId;
+    }
+
+    /**
+     * @return the current TelephonyNetworkAgent ID. {@code -1} if no network agent.
+     * @hide
+     */
+    public int getNetId() {
+        return mNetId;
     }
 
     /**
@@ -263,6 +341,30 @@ public final class PreciseDataConnectionState implements Parcelable {
         return mApnSetting;
     }
 
+    /**
+     * Return the QoS for the default bearer of this data connection.
+     *
+     * @return the default QoS if known or {@code null} if it is unknown. If the value is reported
+     * for LTE, then it will be an {@link android.telephony.data.EpsQos EpsQos}. If the value is
+     * reported for 5G, then it will be an {@link android.telehpony.data.NrQos NrQos}. Otherwise it
+     * shall always be {@code null}.
+     *
+     * @hide
+     */
+    public @Nullable Qos getDefaultQos() {
+        return mDefaultQos;
+    }
+
+    /**
+     * Returns the network validation state.
+     *
+     * @return the network validation status of the data call
+     */
+    @FlaggedApi(Flags.FLAG_NETWORK_VALIDATION)
+    public @NetworkValidationStatus int getNetworkValidationStatus() {
+        return mNetworkValidationStatus;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -272,11 +374,14 @@ public final class PreciseDataConnectionState implements Parcelable {
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeInt(mTransportType);
         out.writeInt(mId);
+        out.writeInt(mNetId);
         out.writeInt(mState);
         out.writeInt(mNetworkType);
         out.writeParcelable(mLinkProperties, flags);
         out.writeInt(mFailCause);
         out.writeParcelable(mApnSetting, flags);
+        out.writeParcelable(mDefaultQos, flags);
+        out.writeInt(mNetworkValidationStatus);
     }
 
     public static final @NonNull Parcelable.Creator<PreciseDataConnectionState> CREATOR
@@ -293,8 +398,8 @@ public final class PreciseDataConnectionState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTransportType, mId, mState, mNetworkType, mFailCause,
-                mLinkProperties, mApnSetting);
+        return Objects.hash(mTransportType, mId, mNetId, mState, mNetworkType, mFailCause,
+                mLinkProperties, mApnSetting, mDefaultQos, mNetworkValidationStatus);
     }
 
 
@@ -305,11 +410,14 @@ public final class PreciseDataConnectionState implements Parcelable {
         PreciseDataConnectionState that = (PreciseDataConnectionState) o;
         return mTransportType == that.mTransportType
                 && mId == that.mId
+                && mNetId == that.mNetId
                 && mState == that.mState
                 && mNetworkType == that.mNetworkType
                 && mFailCause == that.mFailCause
                 && Objects.equals(mLinkProperties, that.mLinkProperties)
-                && Objects.equals(mApnSetting, that.mApnSetting);
+                && Objects.equals(mApnSetting, that.mApnSetting)
+                && Objects.equals(mDefaultQos, that.mDefaultQos)
+                && mNetworkValidationStatus == that.mNetworkValidationStatus;
     }
 
     @NonNull
@@ -317,16 +425,41 @@ public final class PreciseDataConnectionState implements Parcelable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(" state: " + TelephonyUtils.dataStateToString(mState));
-        sb.append(", transport: "
-                + AccessNetworkConstants.transportTypeToString(mTransportType));
-        sb.append(", id: " + mId);
-        sb.append(", network type: " + TelephonyManager.getNetworkTypeName(mNetworkType));
-        sb.append(", APN Setting: " + mApnSetting);
-        sb.append(", link properties: " + mLinkProperties);
-        sb.append(", fail cause: " + DataFailCause.toString(mFailCause));
+        sb.append(" state: ").append(TelephonyUtils.dataStateToString(mState));
+        sb.append(", transport: ").append(
+                AccessNetworkConstants.transportTypeToString(mTransportType));
+        sb.append(", id: ").append(mId);
+        sb.append(", netId: ").append(mNetId);
+        sb.append(", network type: ").append(TelephonyManager.getNetworkTypeName(mNetworkType));
+        sb.append(", APN Setting: ").append(mApnSetting);
+        sb.append(", link properties: ").append(mLinkProperties);
+        sb.append(", default QoS: ").append(mDefaultQos);
+        sb.append(", fail cause: ").append(DataFailCause.toString(mFailCause));
+        sb.append(", network validation status: ").append(
+                networkValidationStatusToString(mNetworkValidationStatus));
 
         return sb.toString();
+    }
+
+    /**
+     * Convert a network validation status to string.
+     *
+     * @param networkValidationStatus network validation status.
+     * @return string of validation status.
+     *
+     * @hide
+     */
+    @NonNull
+    public static String networkValidationStatusToString(
+            @NetworkValidationStatus int networkValidationStatus) {
+        switch (networkValidationStatus) {
+            case NETWORK_VALIDATION_UNSUPPORTED: return "unsupported";
+            case NETWORK_VALIDATION_NOT_REQUESTED: return "not requested";
+            case NETWORK_VALIDATION_IN_PROGRESS: return "in progress";
+            case NETWORK_VALIDATION_SUCCESS: return "success";
+            case NETWORK_VALIDATION_FAILURE: return "failure";
+            default: return Integer.toString(networkValidationStatus);
+        }
     }
 
     /**
@@ -344,6 +477,11 @@ public final class PreciseDataConnectionState implements Parcelable {
          */
         private int mId = -1;
 
+        /**
+         * The current TelephonyNetworkAgent ID. {@code -1} if no network agent.
+         */
+        private int mNetworkAgentId = -1;
+
         /** The state of the data connection */
         private @DataState int mState = TelephonyManager.DATA_UNKNOWN;
 
@@ -351,7 +489,7 @@ public final class PreciseDataConnectionState implements Parcelable {
         private @NetworkType int mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
         /** If the data connection is connected, the properties of the connection */
-        private @Nullable LinkProperties mLinkProperties = null;
+        private @Nullable LinkProperties mLinkProperties;
 
         /**
          * In case a procedure related to this data connection fails, a non-zero error code
@@ -360,7 +498,14 @@ public final class PreciseDataConnectionState implements Parcelable {
         private @DataFailureCause int mFailCause = DataFailCause.NONE;
 
         /** The APN Setting for this data connection */
-        private @Nullable ApnSetting mApnSetting = null;
+        private @Nullable ApnSetting mApnSetting;
+
+        /** The Default QoS for this EPS/5GS bearer or null otherwise */
+        private @Nullable Qos mDefaultQos;
+
+        /** The network validation status for the data connection. */
+        private @NetworkValidationStatus int mNetworkValidationStatus =
+                NETWORK_VALIDATION_UNSUPPORTED;
 
         /**
          * Set the transport type of the data connection.
@@ -381,6 +526,17 @@ public final class PreciseDataConnectionState implements Parcelable {
          */
         public @NonNull Builder setId(int id) {
             mId = id;
+            return this;
+        }
+
+        /**
+         * Set the id of the data connection.
+         *
+         * @param agentId The id of the data connection
+         * @return The builder
+         */
+        public @NonNull Builder setNetworkAgentId(int agentId) {
+            mNetworkAgentId = agentId;
             return this;
         }
 
@@ -441,13 +597,40 @@ public final class PreciseDataConnectionState implements Parcelable {
         }
 
         /**
+         * Set the default QoS for this data connection.
+         *
+         * @param qos The qos information, if any, associated with the default bearer of the
+         * data connection.
+         * @return The builder
+         * @hide
+         */
+        public @NonNull Builder setDefaultQos(@Nullable Qos qos) {
+            mDefaultQos = qos;
+            return this;
+        }
+
+        /**
+         * Set the network validation state for the data connection.
+         *
+         * @param networkValidationStatus the network validation status of the data call
+         * @return The builder
+         */
+        @FlaggedApi(Flags.FLAG_NETWORK_VALIDATION)
+        public @NonNull Builder setNetworkValidationStatus(
+                @NetworkValidationStatus int networkValidationStatus) {
+            mNetworkValidationStatus = networkValidationStatus;
+            return this;
+        }
+
+        /**
          * Build the {@link PreciseDataConnectionState} instance.
          *
          * @return The {@link PreciseDataConnectionState} instance
          */
         public PreciseDataConnectionState build() {
-            return new PreciseDataConnectionState(mTransportType, mId, mState, mNetworkType,
-                    mLinkProperties, mFailCause, mApnSetting);
+            return new PreciseDataConnectionState(mTransportType, mId, mNetworkAgentId, mState,
+                    mNetworkType, mLinkProperties, mFailCause, mApnSetting, mDefaultQos,
+                    mNetworkValidationStatus);
         }
     }
 }

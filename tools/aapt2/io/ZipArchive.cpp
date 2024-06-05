@@ -63,7 +63,7 @@ std::unique_ptr<IData> ZipFile::OpenAsData() {
   }
 }
 
-std::unique_ptr<io::InputStream> ZipFile::OpenInputStream() {
+std::unique_ptr<android::InputStream> ZipFile::OpenInputStream() {
   return OpenAsData();
 }
 
@@ -73,6 +73,14 @@ const android::Source& ZipFile::GetSource() const {
 
 bool ZipFile::WasCompressed() {
   return zip_entry_.method != kCompressStored;
+}
+
+bool ZipFile::GetModificationTime(struct tm* buf) const {
+  if (buf == nullptr) {
+    return false;
+  }
+  *buf = zip_entry_.GetModificationTime();
+  return true;
 }
 
 ZipFileCollectionIterator::ZipFileCollectionIterator(

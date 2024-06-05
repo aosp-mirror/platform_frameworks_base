@@ -18,6 +18,7 @@ package com.android.server.display.mode;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -30,11 +31,15 @@ class VotesStorage {
     private static final String TAG = "VotesStorage";
     // Special ID used to indicate that given vote is to be applied globally, rather than to a
     // specific display.
-    private static final int GLOBAL_ID = -1;
+    @VisibleForTesting
+    static final int GLOBAL_ID = -1;
 
     private boolean mLoggingEnabled;
 
     private final Listener mListener;
+
+    @Nullable
+    private final VotesStatsReporter mVotesStatsReporter;
 
     private final Object mStorageLock = new Object();
     // A map from the display ID to the collection of votes and their priority. The latter takes
@@ -43,8 +48,9 @@ class VotesStorage {
     @GuardedBy("mStorageLock")
     private final SparseArray<SparseArray<Vote>> mVotesByDisplay = new SparseArray<>();
 
-    VotesStorage(@NonNull Listener listener) {
+    VotesStorage(@NonNull Listener listener, @Nullable VotesStatsReporter votesStatsReporter) {
         mListener = listener;
+        mVotesStatsReporter = votesStatsReporter;
     }
     /** sets logging enabled/disabled for this class */
     void setLoggingEnabled(boolean loggingEnabled) {
@@ -90,6 +96,7 @@ class VotesStorage {
                     + ", vote=" + vote);
             return;
         }
+        boolean changed = false;
         SparseArray<Vote> votes;
         synchronized (mStorageLock) {
             if (mVotesByDisplay.contains(displayId)) {
@@ -98,16 +105,62 @@ class VotesStorage {
                 votes = new SparseArray<>();
                 mVotesByDisplay.put(displayId, votes);
             }
-            if (vote != null) {
+            var currentVote = votes.get(priority);
+            if (vote != null && !vote.equals(currentVote)) {
                 votes.put(priority, vote);
-            } else {
+                changed = true;
+            } else if (vote == null && currentVote != null) {
                 votes.remove(priority);
+                changed = true;
             }
         }
         if (mLoggingEnabled) {
             Slog.i(TAG, "Updated votes for display=" + displayId + " votes=" + votes);
         }
-        mListener.onChanged();
+        if (changed) {
+            if (mVotesStatsReporter != null) {
+                mVotesStatsReporter.reportVoteChanged(displayId, priority, vote);
+            }
+            mListener.onChanged();
+        }
+    }
+
+    /** removes all votes with certain priority from vote storage */
+    void removeAllVotesForPriority(int priority) {
+        if (mLoggingEnabled) {
+            Slog.i(TAG, "removeAllVotesForPriority(priority="
+                    + Vote.priorityToString(priority) + ")");
+        }
+        if (priority < Vote.MIN_PRIORITY || priority > Vote.MAX_PRIORITY) {
+            Slog.w(TAG, "Received an invalid priority, ignoring:"
+                    + " priority=" + Vote.priorityToString(priority));
+            return;
+        }
+        IntArray removedVotesDisplayIds = new IntArray();
+        synchronized (mStorageLock) {
+            int size = mVotesByDisplay.size();
+            for (int i = 0; i < size; i++) {
+                SparseArray<Vote> votes = mVotesByDisplay.valueAt(i);
+                if (votes.get(priority) != null) {
+                    votes.remove(priority);
+                    removedVotesDisplayIds.add(mVotesByDisplay.keyAt(i));
+                }
+            }
+        }
+        if (mLoggingEnabled) {
+            Slog.i(TAG, "Removed votes with priority=" + priority
+                    + " for displays=" + removedVotesDisplayIds);
+        }
+        int removedVotesSize = removedVotesDisplayIds.size();
+        if (removedVotesSize > 0) {
+            if (mVotesStatsReporter != null) {
+                for (int i = 0; i < removedVotesSize; i++) {
+                    mVotesStatsReporter.reportVoteChanged(
+                            removedVotesDisplayIds.get(i), priority, null);
+                }
+            }
+            mListener.onChanged();
+        }
     }
 
     /** dump class values, for debugging */

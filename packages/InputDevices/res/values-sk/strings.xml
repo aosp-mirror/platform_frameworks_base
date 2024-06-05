@@ -50,4 +50,8 @@
     <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"bieloruské"</string>
     <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"mongolské"</string>
     <string name="keyboard_layout_georgian" msgid="4596185456863747454">"gruzínske"</string>
+    <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"thajčina (Kedmanee)"</string>
+    <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"thajčina (Pattachote)"</string>
+    <string name="keyboard_layout_serbian_latin" msgid="3128791759390046571">"srbčina (latinka)"</string>
+    <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"čiernohorčina (latinka)"</string>
 </resources>

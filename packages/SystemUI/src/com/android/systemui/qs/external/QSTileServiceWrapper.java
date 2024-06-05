@@ -19,16 +19,20 @@ import android.os.IBinder;
 import android.service.quicksettings.IQSTileService;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 
 public class QSTileServiceWrapper {
     private static final String TAG = "IQSTileServiceWrapper";
 
+    @NonNull
     private final IQSTileService mService;
 
-    public QSTileServiceWrapper(IQSTileService service) {
+    public QSTileServiceWrapper(@NonNull IQSTileService service) {
         mService = service;
     }
 
+    // This can never be null, as it's the constructor parameter and it's final
+    @NonNull
     public IBinder asBinder() {
         return mService.asBinder();
     }

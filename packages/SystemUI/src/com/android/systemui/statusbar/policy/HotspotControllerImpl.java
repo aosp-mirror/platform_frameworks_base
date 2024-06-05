@@ -32,11 +32,11 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.internal.util.ConcurrentUtils;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 
 import java.io.PrintWriter;

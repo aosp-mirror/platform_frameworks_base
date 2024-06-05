@@ -1,0 +1,57 @@
+// Copyright (C) 2018 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Error: Cannot get the name of the license module in the
+// ./Android.bp file.
+// If no such license module exists, please add one there first.
+// Then reset the default_applicable_licenses property below with the license module name.
+package {
+    // See: http://go/android-license-faq
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test_helper_app {
+    name: "OverlayHostTests_NonPlatformSignatureOverlay",
+    sdk_version: "current",
+    test_suites: ["device-tests"],
+    aaptflags: [
+        "--custom-package com.android.server.om.hosttest.signature_overlay_bad",
+    ],
+}
+
+android_test_helper_app {
+    name: "OverlayHostTests_PlatformSignatureStaticOverlay",
+    sdk_version: "current",
+    test_suites: ["device-tests"],
+    certificate: "platform",
+    manifest: "static/AndroidManifest.xml",
+    aaptflags: [
+        "--custom-package com.android.server.om.hosttest.signature_overlay_static",
+    ],
+}
+
+android_test_helper_app {
+    name: "OverlayHostTests_PlatformSignatureOverlay",
+    sdk_version: "current",
+    test_suites: ["device-tests"],
+    certificate: "platform",
+    aaptflags: [
+        "--custom-package",
+        "com.android.server.om.hosttest.signature_overlay_v1",
+        "--version-code",
+        "1",
+        "--version-name",
+        "v1",
+    ],
+}

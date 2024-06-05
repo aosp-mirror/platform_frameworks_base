@@ -5,8 +5,10 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
+import android.app.StatusBarManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,29 +21,37 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.voice.VisualQueryAttentionResult;
 import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
 
 import com.android.internal.app.AssistUtils;
+import com.android.internal.app.IVisualQueryDetectionAttentionListener;
+import com.android.internal.app.IVisualQueryRecognitionStatusListener;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.R;
+import com.android.systemui.assist.domain.interactor.AssistInteractor;
 import com.android.systemui.assist.ui.DefaultUiController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.settings.SecureSettings;
 
-import javax.inject.Inject;
-
 import dagger.Lazy;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Class to manage everything related to assist in SystemUI.
@@ -78,6 +88,18 @@ public class AssistManager {
         void hide();
     }
 
+    /**
+     * An interface for a listener that receives notification that visual query attention has
+     * either been gained or lost.
+     */
+    public interface VisualQueryAttentionListener {
+        /** Called when visual query attention has been gained. */
+        void onAttentionGained();
+
+        /** Called when visual query attention has been lost. */
+        void onAttentionLost();
+    }
+
     private static final String TAG = "AssistManager";
 
     // Note that VERBOSE logging may leak PII (e.g. transcription contents).
@@ -105,6 +127,8 @@ public class AssistManager {
             AssistUtils.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS;
     public static final int INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS =
             AssistUtils.INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS;
+    public static final int INVOCATION_TYPE_NAV_HANDLE_LONG_PRESS =
+            AssistUtils.INVOCATION_TYPE_NAV_HANDLE_LONG_PRESS;
 
     public static final int DISMISS_REASON_INVOCATION_CANCELLED = 1;
     public static final int DISMISS_REASON_TAP = 2;
@@ -117,16 +141,42 @@ public class AssistManager {
     protected final Context mContext;
     private final AssistDisclosure mAssistDisclosure;
     private final PhoneStateMonitor mPhoneStateMonitor;
+    private final OverviewProxyService mOverviewProxyService;
     private final UiController mUiController;
     protected final Lazy<SysUiState> mSysUiState;
     protected final AssistLogger mAssistLogger;
     private final UserTracker mUserTracker;
     private final DisplayTracker mDisplayTracker;
     private final SecureSettings mSecureSettings;
+    private final SelectedUserInteractor mSelectedUserInteractor;
+    private final ActivityManager mActivityManager;
+    private final AssistInteractor mInteractor;
 
     private final DeviceProvisionedController mDeviceProvisionedController;
+
+    private final List<VisualQueryAttentionListener> mVisualQueryAttentionListeners =
+            new ArrayList<>();
+
+    private final IVisualQueryDetectionAttentionListener mVisualQueryDetectionAttentionListener =
+            new IVisualQueryDetectionAttentionListener.Stub() {
+                @Override
+                public void onAttentionGained(VisualQueryAttentionResult attentionResult) {
+                    // TODO (b/319132184): Implemented this with different types.
+                    handleVisualAttentionChanged(true);
+                }
+
+                @Override
+                public void onAttentionLost(int interactionIntention) {
+                    //TODO (b/319132184): Implemented this with different types.
+                    handleVisualAttentionChanged(false);
+                }
+            };
+
     private final CommandQueue mCommandQueue;
     protected final AssistUtils mAssistUtils;
+
+    // Invocation types that should be sent over OverviewProxy instead of handled here.
+    private int[] mAssistOverrideInvocationTypes;
 
     @Inject
     public AssistManager(
@@ -142,25 +192,33 @@ public class AssistManager {
             @Main Handler uiHandler,
             UserTracker userTracker,
             DisplayTracker displayTracker,
-            SecureSettings secureSettings) {
+            SecureSettings secureSettings,
+            SelectedUserInteractor selectedUserInteractor,
+            ActivityManager activityManager,
+            AssistInteractor interactor) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
         mAssistUtils = assistUtils;
         mAssistDisclosure = new AssistDisclosure(context, uiHandler);
+        mOverviewProxyService = overviewProxyService;
         mPhoneStateMonitor = phoneStateMonitor;
         mAssistLogger = assistLogger;
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
         mSecureSettings = secureSettings;
+        mSelectedUserInteractor = selectedUserInteractor;
+        mActivityManager = activityManager;
+        mInteractor = interactor;
 
         registerVoiceInteractionSessionListener();
+        registerVisualQueryRecognitionStatusListener();
 
         mUiController = defaultUiController;
 
         mSysUiState = sysUiState;
 
-        overviewProxyService.addCallback(new OverviewProxyService.OverviewProxyListener() {
+        mOverviewProxyService.addCallback(new OverviewProxyService.OverviewProxyListener() {
             @Override
             public void onAssistantProgress(float progress) {
                 // Progress goes from 0 to 1 to indicate how close the assist gesture is to
@@ -223,6 +281,23 @@ public class AssistManager {
     }
 
     public void startAssist(Bundle args) {
+        if (mActivityManager.getLockTaskModeState() == ActivityManager.LOCK_TASK_MODE_LOCKED) {
+            return;
+        }
+        if (shouldOverrideAssist(args)) {
+            try {
+                if (mOverviewProxyService.getProxy() == null) {
+                    Log.w(TAG, "No OverviewProxyService to invoke assistant override");
+                    return;
+                }
+                mOverviewProxyService.getProxy().onAssistantOverrideInvoked(
+                        args.getInt(INVOCATION_TYPE_KEY));
+            } catch (RemoteException e) {
+                Log.w(TAG, "Unable to invoke assistant via OverviewProxyService override", e);
+            }
+            return;
+        }
+
         final ComponentName assistComponent = getAssistInfo();
         if (assistComponent == null) {
             return;
@@ -243,7 +318,33 @@ public class AssistManager {
                 assistComponent,
                 legacyDeviceState);
         logStartAssistLegacy(legacyInvocationType, legacyDeviceState);
+        mInteractor.onAssistantStarted(legacyInvocationType);
         startAssistInternal(args, assistComponent, isService);
+    }
+
+    private boolean shouldOverrideAssist(Bundle args) {
+        if (args == null || !args.containsKey(INVOCATION_TYPE_KEY)) {
+            return false;
+        }
+
+        int invocationType = args.getInt(INVOCATION_TYPE_KEY);
+        return shouldOverrideAssist(invocationType);
+    }
+
+    /** @return true if the invocation type should be handled by OverviewProxy instead of SysUI. */
+    public boolean shouldOverrideAssist(int invocationType) {
+        return mAssistOverrideInvocationTypes != null
+                && Arrays.stream(mAssistOverrideInvocationTypes).anyMatch(
+                    override -> override == invocationType);
+    }
+
+    /**
+     * @param invocationTypes The invocation types that will henceforth be handled via
+     *                        OverviewProxy (Launcher); other invocation types should be handled by
+     *                        this class.
+     */
+    public void setAssistantOverridesRequested(int[] invocationTypes) {
+        mAssistOverrideInvocationTypes = invocationTypes;
     }
 
     /** Called when the user is performing an assistant invocation action (e.g. Active Edge) */
@@ -262,6 +363,24 @@ public class AssistManager {
 
     public void hideAssist() {
         mAssistUtils.hideCurrentSession();
+    }
+
+    /**
+     * Add the given {@link VisualQueryAttentionListener} to the list of listeners awaiting
+     * notification of gaining/losing visual query attention.
+     */
+    public void addVisualQueryAttentionListener(VisualQueryAttentionListener listener) {
+        if (!mVisualQueryAttentionListeners.contains(listener)) {
+            mVisualQueryAttentionListeners.add(listener);
+        }
+    }
+
+    /**
+     * Remove the given {@link VisualQueryAttentionListener} from the list of listeners awaiting
+     * notification of gaining/losing visual query attention.
+     */
+    public void removeVisualQueryAttentionListener(VisualQueryAttentionListener listener) {
+        mVisualQueryAttentionListeners.remove(listener);
     }
 
     private void startAssistInternal(Bundle args, @NonNull ComponentName assistComponent,
@@ -324,6 +443,55 @@ public class AssistManager {
                 null, null);
     }
 
+    private void registerVisualQueryRecognitionStatusListener() {
+        if (!mContext.getResources()
+                .getBoolean(R.bool.config_enableVisualQueryAttentionDetection)) {
+            return;
+        }
+
+        mAssistUtils.subscribeVisualQueryRecognitionStatus(
+                new IVisualQueryRecognitionStatusListener.Stub() {
+                    @Override
+                    public void onStartPerceiving() {
+                        mAssistUtils.enableVisualQueryDetection(
+                                mVisualQueryDetectionAttentionListener);
+                        final StatusBarManager statusBarManager =
+                                mContext.getSystemService(StatusBarManager.class);
+                        if (statusBarManager != null) {
+                            statusBarManager.setIcon("assist_attention",
+                                    R.drawable.ic_assistant_attention_indicator,
+                                    0, "Attention Icon for Assistant");
+                            statusBarManager.setIconVisibility("assist_attention", false);
+                        }
+                    }
+
+                    @Override
+                    public void onStopPerceiving() {
+                        // Treat this as a signal that attention has been lost (and inform listeners
+                        // accordingly).
+                        handleVisualAttentionChanged(false);
+                        mAssistUtils.disableVisualQueryDetection();
+                        final StatusBarManager statusBarManager =
+                                mContext.getSystemService(StatusBarManager.class);
+                        if (statusBarManager != null) {
+                            statusBarManager.removeIcon("assist_attention");
+                        }
+                    }
+                });
+    }
+
+    // TODO (b/319132184): Implemented this with different types.
+    private void handleVisualAttentionChanged(boolean attentionGained) {
+        final StatusBarManager statusBarManager = mContext.getSystemService(StatusBarManager.class);
+        if (statusBarManager != null) {
+            statusBarManager.setIconVisibility("assist_attention", attentionGained);
+        }
+        mVisualQueryAttentionListeners.forEach(
+                attentionGained
+                        ? VisualQueryAttentionListener::onAttentionGained
+                        : VisualQueryAttentionListener::onAttentionLost);
+    }
+
     public void launchVoiceAssistFromKeyguard() {
         mAssistUtils.launchVoiceAssistFromKeyguard();
     }
@@ -348,7 +516,7 @@ public class AssistManager {
 
     @Nullable
     private ComponentName getAssistInfo() {
-        return getAssistInfoForUser(KeyguardUpdateMonitor.getCurrentUser());
+        return getAssistInfoForUser(mSelectedUserInteractor.getSelectedUserId());
     }
 
     public void showDisclosure() {

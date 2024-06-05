@@ -41,12 +41,15 @@ import dalvik.annotation.optimization.CriticalNative;
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
+import java.util.WeakHashMap;
 
 public final class Bitmap implements Parcelable {
     private static final String TAG = "Bitmap";
@@ -120,6 +123,11 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    private static final WeakHashMap<Bitmap, Void> sAllBitmaps = new WeakHashMap<>();
+
+    /**
      * Private constructor that must receive an already allocated native bitmap
      * int (pointer).
      */
@@ -162,6 +170,9 @@ public final class Bitmap implements Parcelable {
                     Bitmap.class.getClassLoader(), nativeGetNativeFinalizer(), allocationByteCount);
         }
         registry.registerNativeAllocation(this, nativeBitmap);
+        synchronized (Bitmap.class) {
+          sAllBitmaps.put(this, null);
+        }
     }
 
     /**
@@ -454,6 +465,11 @@ public final class Bitmap implements Parcelable {
      * how pixels are stored. This affects the quality (color depth) as
      * well as the ability to display transparent/translucent colors.
      */
+    // It's touched by Graphics.cpp, so we need to make this enum usable on Ravenwood.
+    // Otherwise, all the ctors would throw, which would make the class unloadable
+    // because the static initializer needs the enum members because of `sConfigs`.
+    // TODO: Remove it once we expose the outer class.
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public enum Config {
         // these native values must match up with the enum in SkBitmap.h
 
@@ -479,7 +495,8 @@ public final class Bitmap implements Parcelable {
          * This configuration may be useful when using opaque bitmaps
          * that do not require high color fidelity.
          *
-         * <p>Use this formula to pack into 16 bits:</p>
+         * <p>When accessing directly via #copyPixelsFromBuffer or #copyPixelsToBuffer,
+         *    use this formula to pack into 16 bits:</p>
          * <pre class="prettyprint">
          * short color = (R & 0x1f) << 11 | (G & 0x3f) << 5 | (B & 0x1f);
          * </pre>
@@ -516,7 +533,8 @@ public final class Bitmap implements Parcelable {
          * This configuration is very flexible and offers the best
          * quality. It should be used whenever possible.
          *
-         * <p>Use this formula to pack into 32 bits:</p>
+         * <p>When accessing directly via #copyPixelsFromBuffer or #copyPixelsToBuffer,
+         *    use this formula to pack into 32 bits:</p>
          * <pre class="prettyprint">
          * int color = (A & 0xff) << 24 | (B & 0xff) << 16 | (G & 0xff) << 8 | (R & 0xff);
          * </pre>
@@ -531,7 +549,8 @@ public final class Bitmap implements Parcelable {
          * This configuration is particularly suited for wide-gamut and
          * HDR content.
          *
-         * <p>Use this formula to pack into 64 bits:</p>
+         * <p>When accessing directly via #copyPixelsFromBuffer or #copyPixelsToBuffer,
+         *    use this formula to pack into 64 bits:</p>
          * <pre class="prettyprint">
          * long color = (A & 0xffff) << 48 | (B & 0xffff) << 32 | (G & 0xffff) << 16 | (R & 0xffff);
          * </pre>
@@ -556,7 +575,8 @@ public final class Bitmap implements Parcelable {
          * blending, such that the memory cost is the same as ARGB_8888 while enabling higher color
          * precision.
          *
-         * <p>Use this formula to pack into 32 bits:</p>
+         * <p>When accessing directly via #copyPixelsFromBuffer or #copyPixelsToBuffer,
+         *  use this formula to pack into 32 bits:</p>
          * <pre class="prettyprint">
          * int color = (A & 0x3) << 30 | (B & 0x3ff) << 20 | (G & 0x3ff) << 10 | (R & 0x3ff);
          * </pre>
@@ -782,10 +802,13 @@ public final class Bitmap implements Parcelable {
     @Nullable
     public static Bitmap wrapHardwareBuffer(@NonNull HardwareBuffer hardwareBuffer,
             @Nullable ColorSpace colorSpace) {
-        if ((hardwareBuffer.getUsage() & HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE) == 0) {
+        final long usage = hardwareBuffer.getUsage();
+        if ((usage & HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE) == 0) {
             throw new IllegalArgumentException("usage flags must contain USAGE_GPU_SAMPLED_IMAGE.");
         }
-        int format = hardwareBuffer.getFormat();
+        if ((usage & HardwareBuffer.USAGE_PROTECTED_CONTENT) != 0) {
+            throw new IllegalArgumentException("Bitmap is not compatible with protected buffers");
+        }
         if (colorSpace == null) {
             colorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
         }
@@ -1503,6 +1526,86 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    private static final class DumpData {
+        private int count;
+        private int format;
+        private long[] natives;
+        private byte[][] buffers;
+        private int max;
+
+        public DumpData(@NonNull CompressFormat format, int max) {
+            this.max = max;
+            this.format = format.nativeInt;
+            this.natives = new long[max];
+            this.buffers = new byte[max][];
+            this.count = 0;
+        }
+
+        public void add(long nativePtr, byte[] buffer) {
+            natives[count] = nativePtr;
+            buffers[count] = buffer;
+            count = (count >= max) ? max : count + 1;
+        }
+
+        public int size() {
+            return count;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    private static DumpData dumpData = null;
+
+
+    /**
+     * @hide
+     *
+     * Dump all the bitmaps with their contents compressed into dumpData
+     *
+     * @param format  format of the compressed image, null to clear dump data
+     */
+    public static void dumpAll(@Nullable String format) {
+        if (format == null) {
+            /* release the dump data */
+            dumpData = null;
+            return;
+        }
+        final CompressFormat fmt;
+        if (format.equals("jpg") || format.equals("jpeg")) {
+            fmt = CompressFormat.JPEG;
+        } else if (format.equals("png")) {
+            fmt = CompressFormat.PNG;
+        } else if (format.equals("webp")) {
+            fmt = CompressFormat.WEBP_LOSSLESS;
+        } else {
+            Log.w(TAG, "No bitmaps dumped: unrecognized format " + format);
+            return;
+        }
+
+        final ArrayList<Bitmap> allBitmaps;
+        synchronized (Bitmap.class) {
+          allBitmaps = new ArrayList<>(sAllBitmaps.size());
+          for (Bitmap bitmap : sAllBitmaps.keySet()) {
+            if (bitmap != null && !bitmap.isRecycled()) {
+              allBitmaps.add(bitmap);
+            }
+          }
+        }
+
+        dumpData = new DumpData(fmt, allBitmaps.size());
+        for (Bitmap bitmap : allBitmaps) {
+            ByteArrayOutputStream bas = new ByteArrayOutputStream();
+            if (bitmap.compress(fmt, 90, bas)) {
+                dumpData.add(bitmap.getNativeInstance(), bas.toByteArray());
+            }
+        }
+        Log.i(TAG, dumpData.size() + "/" + allBitmaps.size() + " bitmaps dumped");
+    }
+
+    /**
      * Number of bytes of temp storage we use for communicating between the
      * native compressor and the java OutputStream.
      */
@@ -1776,7 +1879,7 @@ public final class Bitmap implements Parcelable {
      * If the bitmap's internal config is in one of the public formats, return
      * that config, otherwise return null.
      */
-    @NonNull
+    @Nullable
     public final Config getConfig() {
         if (mRecycled) {
             Log.w(TAG, "Called getConfig() on a recycle()'d bitmap! This is undefined behavior!");

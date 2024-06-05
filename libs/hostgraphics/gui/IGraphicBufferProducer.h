@@ -17,9 +17,8 @@
 #ifndef ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
 #define ANDROID_GUI_IGRAPHICBUFFERPRODUCER_H
 
-#include <utils/RefBase.h>
-
 #include <ui/GraphicBuffer.h>
+#include <utils/RefBase.h>
 
 namespace android {
 
@@ -31,6 +30,10 @@ public:
         // Disconnect any API originally connected from the process calling disconnect.
         AllLocal
     };
+
+    virtual int query(int what, int* value) = 0;
+
+    virtual status_t requestBuffer(int slot, sp<GraphicBuffer>* buf) = 0;
 };
 
 } // namespace android

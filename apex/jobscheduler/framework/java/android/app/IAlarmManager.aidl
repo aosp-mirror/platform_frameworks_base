@@ -33,8 +33,10 @@ interface IAlarmManager {
     void set(String callingPackage, int type, long triggerAtTime, long windowLength,
             long interval, int flags, in PendingIntent operation, in IAlarmListener listener,
             String listenerTag, in WorkSource workSource, in AlarmManager.AlarmClockInfo alarmClock);
+    @EnforcePermission("SET_TIME")
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean setTime(long millis);
+    @EnforcePermission("SET_TIME_ZONE")
     void setTimeZone(String zone);
     void remove(in PendingIntent operation, in IAlarmListener listener);
     void removeAll(String packageName);
@@ -43,5 +45,6 @@ interface IAlarmManager {
     AlarmManager.AlarmClockInfo getNextAlarmClock(int userId);
     boolean canScheduleExactAlarms(String packageName);
     boolean hasScheduleExactAlarm(String packageName, int userId);
+    @EnforcePermission("DUMP")
     int getConfigVersion();
 }

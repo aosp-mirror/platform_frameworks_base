@@ -24,7 +24,7 @@ import java.lang.annotation.Retention;
 import javax.inject.Scope;
 
 /**
- * Scope annotation for singleton items within the CentralSurfacesComponent.
+ * Scope annotation for singleton items within the {@link KeyguardBouncerComponent}.
  */
 @Documented
 @Retention(RUNTIME)

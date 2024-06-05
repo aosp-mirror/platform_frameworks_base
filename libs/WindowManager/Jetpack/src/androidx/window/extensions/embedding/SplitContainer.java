@@ -25,6 +25,7 @@ import android.window.TaskFragmentParentInfo;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.window.extensions.core.util.function.Function;
 
 /**
@@ -32,7 +33,7 @@ import androidx.window.extensions.core.util.function.Function;
  */
 class SplitContainer {
     @NonNull
-    private final TaskFragmentContainer mPrimaryContainer;
+    private TaskFragmentContainer mPrimaryContainer;
     @NonNull
     private final TaskFragmentContainer mSecondaryContainer;
     @NonNull
@@ -46,17 +47,35 @@ class SplitContainer {
     @NonNull
     private final IBinder mToken;
 
+    /**
+     * Whether the selection of which container is primary can be changed at runtime. Runtime
+     * updates is currently possible only for {@link SplitPinContainer}
+     *
+     * @see SplitPinContainer
+     */
+    private final boolean mIsPrimaryContainerMutable;
+
     SplitContainer(@NonNull TaskFragmentContainer primaryContainer,
             @NonNull Activity primaryActivity,
             @NonNull TaskFragmentContainer secondaryContainer,
             @NonNull SplitRule splitRule,
             @NonNull SplitAttributes splitAttributes) {
+        this(primaryContainer, primaryActivity, secondaryContainer, splitRule, splitAttributes,
+                false /* isPrimaryContainerMutable */);
+    }
+
+    SplitContainer(@NonNull TaskFragmentContainer primaryContainer,
+            @NonNull Activity primaryActivity,
+            @NonNull TaskFragmentContainer secondaryContainer,
+            @NonNull SplitRule splitRule,
+            @NonNull SplitAttributes splitAttributes, boolean isPrimaryContainerMutable) {
         mPrimaryContainer = primaryContainer;
         mSecondaryContainer = secondaryContainer;
         mSplitRule = splitRule;
         mDefaultSplitAttributes = splitRule.getDefaultSplitAttributes();
         mCurrentSplitAttributes = splitAttributes;
         mToken = new Binder("SplitContainer");
+        mIsPrimaryContainerMutable = isPrimaryContainerMutable;
 
         if (shouldFinishPrimaryWithSecondary(splitRule)) {
             if (mPrimaryContainer.getRunningActivityCount() == 1
@@ -72,6 +91,13 @@ class SplitContainer {
         if (shouldFinishSecondaryWithPrimary(splitRule)) {
             mPrimaryContainer.addContainerToFinishOnExit(mSecondaryContainer);
         }
+    }
+
+    void setPrimaryContainer(@NonNull TaskFragmentContainer primaryContainer) {
+        if (!mIsPrimaryContainerMutable) {
+            throw new IllegalStateException("Cannot update primary TaskFragmentContainer");
+        }
+        mPrimaryContainer = primaryContainer;
     }
 
     @NonNull
@@ -161,10 +187,21 @@ class SplitContainer {
         return (mSplitRule instanceof SplitPlaceholderRule);
     }
 
-    @NonNull
-    SplitInfo toSplitInfo() {
-        return new SplitInfo(mPrimaryContainer.toActivityStack(),
-                mSecondaryContainer.toActivityStack(), mCurrentSplitAttributes, mToken);
+    /**
+     * Returns the SplitInfo representing this container.
+     *
+     * @return the SplitInfo representing this container if the underlying TaskFragmentContainers
+     * are stable, or {@code null} if any TaskFragmentContainer is in an intermediate state.
+     */
+    @Nullable
+    SplitInfo toSplitInfoIfStable() {
+        final ActivityStack primaryActivityStack = mPrimaryContainer.toActivityStackIfStable();
+        final ActivityStack secondaryActivityStack = mSecondaryContainer.toActivityStackIfStable();
+        if (primaryActivityStack == null || secondaryActivityStack == null) {
+            return null;
+        }
+        return new SplitInfo(primaryActivityStack, secondaryActivityStack,
+                mCurrentSplitAttributes, SplitInfo.Token.createFromBinder(mToken));
     }
 
     static boolean shouldFinishPrimaryWithSecondary(@NonNull SplitRule splitRule) {

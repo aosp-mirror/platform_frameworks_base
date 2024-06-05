@@ -1,0 +1,20 @@
+package: "com.android.server.power.feature.flags"
+container: "system"
+
+# Important: Flags must be accessed through PowerManagerFlags.
+
+flag {
+    name: "enable_early_screen_timeout_detector"
+    namespace: "power"
+    description: "Feature flag for Early Screen Timeout detector"
+    bug: "309861917"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "improve_wakelock_latency"
+    namespace: "power"
+    description: "Feature flag for tracking the optimizations to improve the latency of acquiring and releasing a wakelock."
+    bug: "339590565"
+    is_fixed_read_only: true
+}

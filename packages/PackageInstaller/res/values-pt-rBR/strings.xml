@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"App instalado."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Quer instalar esse app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Quer atualizar esse app?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Atualizar este app com <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nEste app normalmente recebe atualizações de <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Se você usa uma fonte diferente, o smartphone vai aceitar outras fontes para fazer as próximas atualizações. A funcionalidade do app pode mudar."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Atualizar este app de &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Este app costuma receber atualizações de &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Ao usar uma fonte diferente, as próximas atualizações poderão ser feitas com qualquer fonte no tablet. A funcionalidade do app pode mudar.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Atualizar este app de &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Este app costuma receber atualizações de &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Ao usar uma fonte diferente, as próximas atualizações poderão ser feitas com qualquer fonte na TV. A funcionalidade do app pode mudar.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Atualizar este app de &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Este app costuma receber atualizações de &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Ao atualizar usando uma origem diferente, as próximas atualizações poderão ser feitas com qualquer origem no seu smartphone. A funcionalidade do app pode mudar.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"O app não foi instalado."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"A instalação do pacote foi bloqueada."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Como o pacote tem um conflito com um pacote já existente, o app não foi instalado."</string>
@@ -42,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Apps desconhecidos não podem ser instalados por este usuário"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Este usuário não tem permissão para instalar apps"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="archive" msgid="4447791830199354721">"Arquivar"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Atualizar mesmo assim"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Gerenciar apps"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Sem espaço"</string>
@@ -56,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Desinstalar atualização"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> é parte do seguinte app:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Você quer desinstalar este app?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"Seus dados pessoais serão salvos"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Arquivar esse app para todos os usuários? Seus dados pessoais serão salvos"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Arquivar esse app no seu perfil de trabalho? Seus dados pessoais serão salvos"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Arquivar esse app para <xliff:g id="USERNAME">%1$s</xliff:g>? Seus dados pessoais serão salvos"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Você quer desinstalar esse app do seu espaço particular? Seus dados pessoais serão salvos"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Quer desinstalar este app para "<b>"todos"</b>" os usuários? O aplicativo e os dados dele serão removidos para "<b>"todos"</b>" os usuários do dispositivo."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Quer desinstalar este app para o usuário <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Você quer desinstalar esse app do seu perfil de trabalho?"</string>
@@ -64,6 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Manter <xliff:g id="SIZE">%1$s</xliff:g> de dados do app."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Quer excluir este app?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Quer desinstalar este app? O clone <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> também vai ser excluído."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Você quer desinstalar esse app do seu espaço particular?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Executando desinstalações"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Falha nas desinstalações"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Desinstalando…"</string>
@@ -83,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"Gerenciar usuários"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"Não foi possível desinstalar <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Ocorreu um problema ao analisar o pacote."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"As ações de instalar/desinstalar não são compatíveis com o Android Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Testando app…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Desconhecido"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Para sua segurança, o tablet não tem permissão para instalar apps desconhecidos dessa fonte. Você pode mudar isso nas configurações."</string>
@@ -95,10 +102,30 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Seu tablet e seus dados pessoais estão mais vulneráveis a ataques de apps desconhecidos. Ao instalar esse app, você concorda que é responsável por qualquer perda de dados ou dano ao dispositivo causados pelo uso desses apps."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Sua TV e seus dados pessoais estão mais vulneráveis a ataques de apps desconhecidos. Ao instalar esse app, você concorda que é responsável por qualquer perda de dados ou dano ao dispositivo causados pelo uso desses apps."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"Arquivar <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Continuar"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Configurações"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instalando/desinstalando apps do Wear"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Notificação de app instalado"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Instalação concluída"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"“<xliff:g id="APPNAME">%1$s</xliff:g>” instalado"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Restaurar <xliff:g id="APPNAME">%1$s</xliff:g> usando o app <xliff:g id="INSTALLERNAME">%2$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"O download desse app será feito em segundo plano"</string>
+    <string name="restore" msgid="8460854736328970444">"Restaurar"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Você está off-line"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"Para restaurar o app, confira sua conexão de Internet e tente de novo"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Algo deu errado"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Ocorreu um problema ao tentar restaurar este app"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Armazenamento insuficiente"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Para restaurar o app, libere espaço no dispositivo. Armazenamento necessário: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Ação necessária"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Siga as próximas etapas para restaurar este app"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"A <xliff:g id="INSTALLERNAME">%1$s</xliff:g> está desativada"</string>
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"Para restaurar o app, ative a <xliff:g id="INSTALLERNAME">%1$s</xliff:g> nas Configurações"</string>
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"A <xliff:g id="INSTALLERNAME">%1$s</xliff:g> não está instalada"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Para restaurar o app, instale a <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Continuar"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Limpar armazenamento"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Configurações"</string>
+    <string name="close" msgid="5214897374055647996">"Fechar"</string>
 </resources>

@@ -14,62 +14,61 @@
      limitations under the License.
 -->
 
-<ScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/user_info_editor"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/user_info_scroll"
-    android:padding="16dp">
-
-    <LinearLayout
+    android:baselineAligned="false"
+    android:orientation="vertical">
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+        <ImageView
+            android:id="@+id/user_photo"
+            android:layout_width="@dimen/user_photo_size_in_user_info_dialog"
+            android:layout_height="@dimen/user_photo_size_in_user_info_dialog"
+            android:contentDescription="@string/user_image_photo_selector"
+            android:scaleType="fitCenter"/>
+        <ImageView
+            android:id="@+id/add_a_photo_icon"
+            android:layout_width="@dimen/add_a_photo_icon_size_in_user_info_dialog"
+            android:layout_height="@dimen/add_a_photo_icon_size_in_user_info_dialog"
+            android:src="@drawable/add_a_photo_circled"
+            android:layout_gravity="bottom|right"/>
+    </FrameLayout>
+    <TextView
+        android:id="@+id/edit_user_info_message"
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:baselineAligned="false"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/user_info_title"
-            android:gravity="center"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/EditUserDialogTitle"
-            android:text="@string/user_info_settings_title"
-            android:textDirection="locale"/>
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center">
-            <ImageView
-                android:id="@+id/user_photo"
-                android:layout_width="@dimen/user_photo_size_in_user_info_dialog"
-                android:layout_height="@dimen/user_photo_size_in_user_info_dialog"
-                android:contentDescription="@string/user_image_photo_selector"
-                android:scaleType="fitCenter"/>
-            <ImageView
-                android:id="@+id/add_a_photo_icon"
-                android:layout_width="@dimen/add_a_photo_icon_size_in_user_info_dialog"
-                android:layout_height="@dimen/add_a_photo_icon_size_in_user_info_dialog"
-                android:src="@drawable/add_a_photo_circled"
-                android:layout_gravity="bottom|right"/>
-        </FrameLayout>
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginTop="24dp"
+        android:textAppearance="@style/android:TextAppearance.Material.Body1"
+        android:text="@string/edit_user_info_message"
+        />
 
-        <EditText
-            android:id="@+id/user_name"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/user_name_height_in_user_info_dialog"
-            android:layout_gravity="center"
-            android:minWidth="200dp"
-            android:layout_marginStart="6dp"
-            android:minHeight="@dimen/min_tap_target_size"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textAlignment="viewStart"
-            android:inputType="text|textCapWords"
-            android:selectAllOnFocus="true"
-            android:hint="@string/user_nickname"
-            android:maxLength="100"/>
+    <EditText
+        android:id="@+id/user_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:minWidth="200dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginTop="24dp"
+        android:minHeight="@dimen/min_tap_target_size"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textAlignment="viewStart"
+        android:inputType="text|textCapWords"
+        android:selectAllOnFocus="true"
+        android:hint="@string/user_nickname"
+        android:maxLength="100"/>
 
-    </LinearLayout>
+</LinearLayout>
 
-</ScrollView>
 

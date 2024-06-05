@@ -284,6 +284,7 @@ struct BinaryPrimitive : public TransformableItem<BinaryPrimitive, BaseItem<Bina
   bool Equals(const Value* value) const override;
   bool Flatten(android::Res_value* out_value) const override;
   void Print(std::ostream* out) const override;
+  static const char* DecideFormat(float f);
   void PrettyPrint(text::Printer* printer) const override;
 };
 

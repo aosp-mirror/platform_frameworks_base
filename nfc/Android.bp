@@ -1,0 +1,89 @@
+package {
+    default_team: "trendy_team_fwk_nfc",
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "framework-nfc-non-updatable-sources",
+    path: "java",
+    srcs: [
+        "java/android/nfc/NfcServiceManager.java",
+        "java/android/nfc/cardemulation/ApduServiceInfo.aidl",
+        "java/android/nfc/cardemulation/ApduServiceInfo.java",
+        "java/android/nfc/cardemulation/NfcFServiceInfo.aidl",
+        "java/android/nfc/cardemulation/NfcFServiceInfo.java",
+        "java/android/nfc/cardemulation/AidGroup.aidl",
+        "java/android/nfc/cardemulation/AidGroup.java",
+    ],
+}
+
+filegroup {
+    name: "framework-nfc-updatable-sources",
+    path: "java",
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.aidl",
+    ],
+    exclude_srcs: [
+        ":framework-nfc-non-updatable-sources",
+    ],
+}
+
+java_sdk_library {
+    name: "framework-nfc",
+    libs: [
+        "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
+        "framework-permission-s",
+        "framework-permission",
+    ],
+    static_libs: [
+        "android.nfc.flags-aconfig-java",
+        "android.permission.flags-aconfig-java",
+    ],
+    srcs: [
+        ":framework-nfc-updatable-sources",
+        ":framework-nfc-javastream-protos",
+    ],
+    defaults: ["framework-module-defaults"],
+    sdk_version: "module_current",
+    min_sdk_version: "current",
+    installable: true,
+    optimize: {
+        enabled: false,
+    },
+    hostdex: true, // for hiddenapi check
+    permitted_packages: [
+        "android.nfc",
+        "com.android.nfc",
+    ],
+    hidden_api_packages: [
+        "com.android.nfc",
+    ],
+    impl_library_visibility: [
+        "//frameworks/base:__subpackages__",
+        "//cts/hostsidetests/multidevices/nfc:__subpackages__",
+        "//cts/tests/tests/nfc",
+        "//packages/apps/Nfc:__subpackages__",
+    ],
+    jarjar_rules: ":nfc-jarjar-rules",
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.nfcservices",
+    ],
+    aconfig_declarations: [
+        "android.nfc.flags-aconfig",
+    ],
+}
+
+filegroup {
+    name: "nfc-jarjar-rules",
+    srcs: ["jarjar-rules.txt"],
+}

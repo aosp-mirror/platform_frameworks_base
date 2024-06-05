@@ -137,9 +137,19 @@ public class NoOpAudioSystemAdapter extends AudioSystemAdapter {
     }
 
     @Override
+    public int setVolumeIndexForAttributes(AudioAttributes attributes, int index, int device) {
+        return AudioSystem.AUDIO_STATUS_OK;
+    }
+
+    @Override
     @NonNull
     public ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
             @NonNull AudioAttributes attributes, boolean forVolume) {
         return new ArrayList<>();
+    }
+
+    @Override
+    public int setMasterMute(boolean muted) {
+        return AudioSystem.AUDIO_STATUS_OK;
     }
 }

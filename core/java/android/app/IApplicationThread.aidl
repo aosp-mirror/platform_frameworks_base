@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.ActivityOptions.SceneTransitionInfo;
 import android.app.ContentProviderHolder;
 import android.app.IInstrumentationWatcher;
 import android.app.IUiAutomationConnection;
@@ -48,6 +49,8 @@ import android.os.SharedMemory;
 import android.view.autofill.AutofillId;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationSpec;
+import android.window.ITaskFragmentOrganizer;
+import android.window.TaskFragmentTransaction;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
@@ -78,6 +81,7 @@ oneway interface IApplicationThread {
     void scheduleStopService(IBinder token);
     void bindApplication(in String packageName, in ApplicationInfo info,
             in String sdkSandboxClientAppVolumeUuid, in String sdkSandboxClientAppPackage,
+            in boolean isSdkInSandbox,
             in ProviderInfoList providerList, in ComponentName testName,
             in ProfilerInfo profilerInfo, in Bundle testArguments,
             IInstrumentationWatcher testWatcher, IUiAutomationConnection uiAutomationConnection,
@@ -86,7 +90,7 @@ oneway interface IApplicationThread {
             in CompatibilityInfo compatInfo, in Map services,
             in Bundle coreSettings, in String buildSerial, in AutofillOptions autofillOptions,
             in ContentCaptureOptions contentCaptureOptions, in long[] disabledCompatChanges,
-            in SharedMemory serializedSystemFontMap,
+            in long[] loggableCompatChanges, in SharedMemory serializedSystemFontMap,
             long startRequestedElapsedTime, long startRequestedUptime);
     void runIsolatedEntryPoint(in String entryPoint, in String[] entryPointArgs);
     void scheduleExit();
@@ -111,11 +115,12 @@ oneway interface IApplicationThread {
     void scheduleCreateBackupAgent(in ApplicationInfo app,
             int backupMode, int userId, int operationType);
     void scheduleDestroyBackupAgent(in ApplicationInfo app, int userId);
-    void scheduleOnNewActivityOptions(IBinder token, in Bundle options);
+    void scheduleOnNewSceneTransitionInfo(IBinder token, in SceneTransitionInfo info);
     void scheduleSuicide();
     void dispatchPackageBroadcast(int cmd, in String[] packages);
     void scheduleCrash(in String msg, int typeId, in Bundle extras);
-    void dumpHeap(boolean managed, boolean mallocInfo, boolean runGc, in String path,
+    void dumpHeap(boolean managed, boolean mallocInfo, boolean runGc,
+            in String dumpBitmaps, in String path,
             in ParcelFileDescriptor fd, in RemoteCallback finishCallback);
     void dumpActivity(in ParcelFileDescriptor fd, IBinder servicetoken, in String prefix,
             in String[] args);
@@ -128,7 +133,7 @@ oneway interface IApplicationThread {
     void scheduleTrimMemory(int level);
     void dumpMemInfo(in ParcelFileDescriptor fd, in Debug.MemoryInfo mem, boolean checkin,
             boolean dumpInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable,
-            in String[] args);
+            boolean dumpAllocatorLogs, in String[] args);
     void dumpMemInfoProto(in ParcelFileDescriptor fd, in Debug.MemoryInfo mem,
             boolean dumpInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable,
             in String[] args);
@@ -156,6 +161,8 @@ oneway interface IApplicationThread {
     void scheduleApplicationInfoChanged(in ApplicationInfo ai);
     void setNetworkBlockSeq(long procStateSeq);
     void scheduleTransaction(in ClientTransaction transaction);
+    void scheduleTaskFragmentTransaction(in ITaskFragmentOrganizer organizer,
+            in TaskFragmentTransaction transaction);
     void requestDirectActions(IBinder activityToken, IVoiceInteractor intractor,
             in RemoteCallback cancellationCallback, in RemoteCallback callback);
     void performDirectAction(IBinder activityToken, String actionId,
@@ -172,5 +179,6 @@ oneway interface IApplicationThread {
             in TranslationSpec targetSpec, in List<AutofillId> viewIds,
             in UiTranslationSpec uiTranslationSpec);
     void scheduleTimeoutService(IBinder token, int startId);
+    void scheduleTimeoutServiceForType(IBinder token, int startId, int fgsType);
     void schedulePing(in RemoteCallback pong);
 }

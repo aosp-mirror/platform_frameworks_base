@@ -18,7 +18,6 @@
 #define ANDROID_GUI_CONSUMERBASE_H
 
 #include <gui/BufferItem.h>
-
 #include <utils/RefBase.h>
 
 namespace android {
@@ -28,6 +27,7 @@ public:
     struct FrameAvailableListener : public virtual RefBase {
         // See IConsumerListener::onFrame{Available,Replaced}
         virtual void onFrameAvailable(const BufferItem& item) = 0;
+
         virtual void onFrameReplaced(const BufferItem& /* item */) {}
     };
 };

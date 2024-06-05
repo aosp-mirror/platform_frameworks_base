@@ -31,6 +31,7 @@ import android.view.View.ACCESSIBILITY_LIVE_REGION_NONE
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.DimenRes
@@ -39,7 +40,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Text.Companion.loadText
@@ -49,6 +49,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
@@ -57,6 +58,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.view.ViewUtil
 import com.android.systemui.util.wakelock.WakeLock
+import java.time.Duration
 import javax.inject.Inject
 
 /**
@@ -88,7 +90,7 @@ constructor(
     private val chipbarAnimator: ChipbarAnimator,
     private val falsingManager: FalsingManager,
     private val falsingCollector: FalsingCollector,
-    private val swipeChipbarAwayGestureHandler: SwipeChipbarAwayGestureHandler?,
+    private val swipeChipbarAwayGestureHandler: SwipeChipbarAwayGestureHandler,
     private val viewUtil: ViewUtil,
     private val vibratorHelper: VibratorHelper,
     wakeLockBuilder: WakeLock.Builder,
@@ -228,6 +230,18 @@ constructor(
         chipInnerView.contentDescription =
             "$loadedIconDesc${newInfo.text.loadText(context)}$endItemDesc"
         chipInnerView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_ASSERTIVE
+        // Set minimum duration between content changes to 1 second in order to announce quick
+        // state changes.
+        chipInnerView.accessibilityDelegate =
+            object : View.AccessibilityDelegate() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfo
+                ) {
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                    info.minDurationBetweenContentChanges = Duration.ofMillis(1000)
+                }
+            }
         maybeGetAccessibilityFocus(newInfo, currentView)
 
         // ---- Haptics ----
@@ -289,10 +303,6 @@ constructor(
     }
 
     private fun updateGestureListening() {
-        if (swipeChipbarAwayGestureHandler == null) {
-            return
-        }
-
         val currentDisplayInfo = getCurrentDisplayInfo()
         if (currentDisplayInfo != null && currentDisplayInfo.info.allowSwipeToDismiss) {
             swipeChipbarAwayGestureHandler.setViewFetcher { currentDisplayInfo.view }

@@ -40,6 +40,6 @@ public class ConfigNetworkSecurityPolicy extends libcore.net.NetworkSecurityPoli
 
     @Override
     public boolean isCertificateTransparencyVerificationRequired(String hostname) {
-        return false;
+        return mConfig.isCertificateTransparencyVerificationRequired(hostname);
     }
 }

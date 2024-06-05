@@ -231,8 +231,10 @@
     <string name="NetworkPreferenceSwitchSummary">Try changing preferred network. Tap to change.</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
     <string name="EmergencyCallWarningTitle">Emergency calling unavailable</string>
-    <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningSummary">Can\u2019t make emergency calls over Wi\u2011Fi</string>
+    <!-- Displayed to tell the user that emergency calls might not be available; this is shown to
+         the user when only WiFi calling is available and the carrier does not support emergency
+         calls over WiFi calling. -->
+    <string name="EmergencyCallWarningSummary">Emergency calls require a mobile network</string>
 
     <!-- Telephony notification channel name for a channel containing network alert notifications. -->
     <string name="notification_channel_network_alert">Alerts</string>
@@ -396,6 +398,39 @@
     <!-- Displayed when the call forwarding query was set but forwarding is not enabled. -->
     <string name="cfTemplateRegisteredTime"><xliff:g id="bearer_service_code">{0}</xliff:g>: Not forwarded</string>
 
+    <!-- Title of the cellular network security safety center source's status. -->
+    <string name="scCellularNetworkSecurityTitle">Mobile network security</string>
+    <!-- Summary of the cellular network security safety center source's status. -->
+    <string name="scCellularNetworkSecuritySummary">Encryption, notifications for unencrypted networks</string>
+    <!-- Link passed to safety center for the Learn More button on notifications -->
+    <!-- DO NOT TRANSLATE -->
+    <string name="scCellularNetworkSecurityLearnMore" translatable="false"></string>
+    <!-- Title of the safety center issue and notification when the phone's identifier is shared over the network. -->
+    <string name="scIdentifierDisclosureIssueTitle">Device ID accessed</string>
+    <!-- Summary of the safety center notification when the phone's identifier is shared over the network. -->
+    <string name="scIdentifierDisclosureIssueSummaryNotification">At <xliff:g id="disclosure_time">%1$s</xliff:g>, a nearby network recorded your device\'s unique ID (IMSI or IMEI) while using your <xliff:g id="disclosure_network">%2$s</xliff:g> SIM</string>
+    <!-- Summary of the safety center detail card when the phone's identifier is shared over the network. -->
+    <string name="scIdentifierDisclosureIssueSummary">At <xliff:g id="disclosure_time">%1$s</xliff:g>, a nearby network recorded your device\'s unique ID (IMSI or IMEI) while using your <xliff:g id="disclosure_network">%2$s</xliff:g> SIM.\n\nThis means that your location, activity, or identity have been logged. This is common practice but may be an issue for people concerned about privacy.</string>
+
+    <!-- Title of the safety center issue and notification when the phone restores an encrypted connection to the network. -->
+    <string name="scNullCipherIssueEncryptedTitle">Connected to encrypted network <xliff:g id="network_name">%1$s</xliff:g></string>
+    <!-- Summary of the safety center issue and notification when the phone restores an encrypted connection to the network. -->
+    <string name="scNullCipherIssueEncryptedSummary"><xliff:g id="network_name">%1$s</xliff:g> SIM connection is more secure now</string>
+    <!-- Title of the safety center issue and notification when a connected network is not using encryption. -->
+
+    <string name="scNullCipherIssueNonEncryptedTitle">Connected to unencrypted network</string>
+    <!-- Summary of the safety center notification when a connected network is not using encryption.  -->
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification">Calls, messages, and data are currently more vulnerable while using your <xliff:g id="network_name">%1$s</xliff:g> SIM</string>
+    <!-- Summary of the safety center issue when a connected network is not using encryption.  -->
+    <string name="scNullCipherIssueNonEncryptedSummary">Calls, messages, and data are currently more vulnerable while using your <xliff:g id="network_name">%1$s</xliff:g> SIM.\n\nWhen your connection is encrypted again, you\'ll get another notification.</string>
+
+    <!-- Label for the button that links to the cellular network security settings. -->
+    <string name="scNullCipherIssueActionSettings">Mobile network security settings</string>
+    <!-- Label for the button that links to education resourcess about cellular network security settings. -->
+    <string name="scNullCipherIssueActionLearnMore">Learn more</string>
+    <!-- Label for the button to acknowledge the user is connected to an encrypted network again in cellular network security settings. -->
+    <string name="scNullCipherIssueActionGotIt">Got it</string>
+
     <!-- android.net.http Error strings --> <skip />
     <!-- Displayed when a feature code (non-phone number) is dialed and completes successfully. -->
     <string name="fcComplete">Feature code complete.</string>
@@ -492,6 +527,13 @@
     <string name="work_profile_deleted_reason_maximum_password_failure">Too many password attempts</string>
     <!-- Shows up as the reason for the work profile deletion when the admin of an organization-owend device relinquishes it. [CHAR LIMIT=NONE] -->
     <string name="device_ownership_relinquished">Admin relinquished device for personal use</string>
+
+    <!-- Private space deleted by IT admin notification--> <skip />
+    <!-- Shows up in the notification's title when the system deletes the private space due to admin policy. [CHAR LIMIT=NONE] -->
+    <string name="private_space_deleted_by_admin">Private space removed</string>
+    <!-- Content text for an expanded notification. The Title of the notification is "Private space removed".
+        This further explains that the private space is deleted by the system as a result of the current admin policy. [CHAR LIMIT=NONE]-->
+    <string name="private_space_deleted_by_admin_details">Your organisation does not allow private spaces on this managed device.</string>
 
     <!-- Content title for a notification. This notification indicates that the device is managed
          and network logging was activated by a device owner. [CHAR LIMIT=NONE]-->
@@ -759,6 +801,9 @@
     <!-- The divider symbol between different parts of the notification header including spaces. not translatable [CHAR LIMIT=3] -->
     <string name="notification_header_divider_symbol_with_spaces" translatable="false">" • "</string>
 
+    <!-- Text for inline reply button for compact conversation heads ups -->
+    <string name="notification_compact_heads_up_reply">Reply</string>
+
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">New notification</string>
 
@@ -825,6 +870,9 @@
     <!-- Text shown when viewing channel settings for notifications related to accessibility
          security policy. [CHAR_LIMIT=NONE]-->
     <string name="notification_channel_accessibility_security_policy">Accessibility usage</string>
+
+    <!-- Text shown when viewing channel settings for notifications related to displays -->
+    <string name="notification_channel_display">Display</string>
 
     <!-- Label for foreground service notification when one app is running.
     [CHAR LIMIT=NONE BACKUP_MESSAGE_ID=6826789589341671842] -->
@@ -989,6 +1037,9 @@
     <!-- The title to use when a dream is opened in preview mode. [CHAR LIMIT=NONE] -->
     <string name="dream_preview_title">Preview, <xliff:g id="dream_name" example="Clock">%1$s</xliff:g></string>
 
+    <!-- The title to use when a dream is open in accessibility mode to let users know to double tap to dismiss the dream  [CHAR LIMIT=32] -->
+    <string name="dream_accessibility_action_click">dismiss</string>
+
     <!--  Permissions -->
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1071,6 +1122,12 @@
          want to allow the application to do this. -->
     <string name="permdesc_manageOngoingCalls">Allows an app to see details about ongoing calls
          on your device and to control these calls.</string>
+
+    <!-- Title for an application permission, listed so that the user can access the last known cell id provided by telephony. -->
+    <string name="permlab_accessLastKnownCellId">Access last known cell identity.</string>
+    <!-- Description on an application permission, listed so that the user can access the last known cell id provided by telephony -->
+    <string name="permdesc_accessLastKnownCellId">Allows an app to access to the last known
+        cell identity provided by telephony.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCellBroadcasts">read cell broadcast messages</string>
@@ -1243,6 +1300,11 @@
     <string name="permlab_foregroundServiceFileManagement">run foreground service with the type \"fileManagement\"</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_foregroundServiceFileManagement">Allows the app to make use of foreground services with the type \"fileManagement\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceMediaProcessing">run foreground service with the type \"mediaProcessing\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceMediaProcessing">Allows the app to make use of foreground services with the type \"mediaProcessing\"</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_foregroundServiceSpecialUse">run foreground service with the type \"specialUse\"</string>
@@ -1444,6 +1506,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permdesc_cameraOpenCloseListener">This app can receive callbacks when any camera device is being opened (by what application) or closed.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_cameraHeadlessSystemUser">Allow an application or service to access camera as Headless System User.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_cameraHeadlessSystemUser">This app can access camera as Headless System User.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_vibrate">control vibration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1551,6 +1618,11 @@
     <string name="permlab_setWallpaper">set wallpaper</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_setWallpaper">Allows the app to set the system wallpaper.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessHiddenProfile">Access hidden profiles</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessHiddenProfile">Allows the app to access hidden profiles.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setWallpaperHints">adjust your wallpaper size</string>
@@ -1711,6 +1783,12 @@
       with Near Field Communication (NFC) tags, cards, and readers.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_nfcTransactionEvent">Secure Element transaction event</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_nfcTransactionEvent">Allows the app to receive information about
+      transactions happening on a Secure Element.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_disableKeyguard">disable your screen lock</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_disableKeyguard">Allows the app to disable the
@@ -1789,6 +1867,8 @@
     <string name="biometric_error_user_canceled">Authentication canceled</string>
     <!-- Message shown by the biometric dialog when biometric is not recognized -->
     <string name="biometric_not_recognized">Not recognized</string>
+    <!-- Message shown by the biometric dialog when face is not recognized [CHAR LIMIT=50] -->
+    <string name="biometric_face_not_recognized">Face not recognized</string>
     <!-- Message shown when biometric authentication has been canceled [CHAR LIMIT=50] -->
     <string name="biometric_error_canceled">Authentication canceled</string>
     <!-- Message returned to applications if BiometricPrompt setAllowDeviceCredentials is enabled but no pin, pattern, or password is set. [CHAR LIMIT=NONE] -->
@@ -1804,7 +1884,7 @@
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Press firmly on the sensor</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
-    <string name="fingerprint_acquired_insufficient">Can\u2019t recognize fingerprint. Try again.</string>
+    <string name="fingerprint_acquired_insufficient">Fingerprint not recognized. Try again.</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
     <string name="fingerprint_acquired_imager_dirty">Clean fingerprint sensor and try again</string>
     <string name="fingerprint_acquired_imager_dirty_alt">Clean sensor and try again</string>
@@ -1829,6 +1909,8 @@
     <string name="fingerprint_error_not_match">Fingerprint not recognized</string>
     <!-- Message shown when UDFPS fails to match -->
     <string name="fingerprint_udfps_error_not_match">Fingerprint not recognized</string>
+    <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
+    <string name="fingerprint_dialog_use_fingerprint_instead">Face not recognized. Use fingerprint instead.</string>
 
     <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
     <string name="fingerprint_authenticated">Fingerprint authenticated</string>
@@ -1838,15 +1920,15 @@
     <string name="face_authenticated_confirmation_required">Face authenticated, please press confirm</string>
 
     <!-- Error message shown when the fingerprint hardware can't be accessed -->
-    <string name="fingerprint_error_hw_not_available">Fingerprint hardware not available.</string>
+    <string name="fingerprint_error_hw_not_available">Fingerprint hardware not available</string>
     <!-- Error message shown when the fingerprint hardware has run out of room for storing fingerprints -->
     <string name="fingerprint_error_no_space">Can\u2019t set up fingerprint</string>
     <!-- Error message shown when the fingerprint hardware timer has expired and the user needs to restart the operation. -->
     <string name="fingerprint_error_timeout">Fingerprint setup timed out. Try again.</string>
     <!-- Generic error message shown when the fingerprint operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user-->
-    <string name="fingerprint_error_canceled">Fingerprint operation canceled.</string>
+    <string name="fingerprint_error_canceled">Fingerprint operation canceled</string>
     <!-- Generic error message shown when the fingerprint authentication operation is canceled due to user input. Generally not shown to the user -->
-    <string name="fingerprint_error_user_canceled">Fingerprint operation canceled by user.</string>
+    <string name="fingerprint_error_user_canceled">Fingerprint operation canceled by user</string>
     <!-- Generic error message shown when the fingerprint operation fails because too many attempts have been made. -->
     <string name="fingerprint_error_lockout">Too many attempts. Use screen lock instead.</string>
     <!-- Generic error message shown when the fingerprint operation fails because strong authentication is required -->
@@ -1854,13 +1936,13 @@
     <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
     <string name="fingerprint_error_unable_to_process">Can\u2019t process fingerprint. Try again.</string>
     <!-- Generic error message shown when the user has no enrolled fingerprints -->
-    <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled.</string>
+    <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled</string>
     <!-- Generic error message shown when the app requests fingerprint authentication on a device without a sensor -->
-    <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor.</string>
+    <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor</string>
     <!-- Generic error message shown when fingerprint is not available due to a security vulnerability. [CHAR LIMIT=50] -->
-    <string name="fingerprint_error_security_update_required">Sensor temporarily disabled.</string>
+    <string name="fingerprint_error_security_update_required">Sensor temporarily disabled</string>
     <!-- Generic error message shown when fingerprint needs calibration [CHAR LIMIT=150] -->
-    <string name="fingerprint_error_bad_calibration">Can\u2019t use fingerprint sensor. Visit a repair provider</string>
+    <string name="fingerprint_error_bad_calibration">Can\u2019t use fingerprint sensor. Visit a repair provider.</string>
     <!-- Generic error message shown when the power button has been pressed. [CHAR LIMIT=150] -->
     <string name="fingerprint_error_power_pressed">Power button pressed</string>
 
@@ -1885,22 +1967,22 @@
     <!-- Content description which should be used for the fingerprint icon. -->
     <string name="fingerprint_icon_content_description">Fingerprint icon</string>
 
+    <!-- Notification name shown when the system requires the user to set up device unlock. [CHAR LIMIT=NONE] -->
+    <string name="device_unlock_notification_name">Device unlock</string>
+    <!-- Notification title shown when the system suggests the user to set up another way to unlock. [CHAR LIMIT=NONE] -->
+    <string name="alternative_unlock_setup_notification_title">Try another way to unlock</string>
+    <!-- Notification content shown when the system suggests the user to enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="alternative_face_setup_notification_content">Use Face Unlock when your fingerprint isn\'t recognized, like when your fingers are wet</string>
+    <!-- Notification content shown when the system suggests the user to enroll their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="alternative_fp_setup_notification_content">Use Fingerprint Unlock when your face isn\'t recognized, like when there\'s not enough light</string>
     <!-- Notification name shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_name">Face Unlock</string>
     <!-- Notification title shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_title">Issue with Face Unlock</string>
     <!-- Notification content shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_content">Tap to delete your face model, then add your face again</string>
-    <!-- Title of a notification that directs the user to set up Face Unlock by enrolling their face. [CHAR LIMIT=NONE] -->
-    <string name="face_setup_notification_title">Set up Face Unlock</string>
-    <!-- Contents of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
-    <string name="face_setup_notification_content">Unlock your phone by looking at it</string>
     <!-- Error message indicating that the camera privacy sensor has been turned on [CHAR LIMIT=NONE] -->
     <string name="face_sensor_privacy_enabled">To use Face Unlock, turn on <b>Camera access</b> in Settings > Privacy</string>
-    <!-- Title of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
-    <string name="fingerprint_setup_notification_title">Set up more ways to unlock</string>
-    <!-- Contents of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
-    <string name="fingerprint_setup_notification_content">Tap to add a fingerprint</string>
 
     <!-- Notification name shown when the system requires the user to re-calibrate their fingerprint. [CHAR LIMIT=NONE] -->
     <string name="fingerprint_recalibrate_notification_name">Fingerprint Unlock</string>
@@ -1936,7 +2018,7 @@
     <!-- Message shown during face acquisition when the sensor needs to be recalibrated [CHAR LIMIT=50] -->
     <string name="face_acquired_recalibrate">Please re-enroll your face.</string>
     <!-- Message shown during face enrollment when a different person's face is detected [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_different">Can\u2019t recognize face. Try again.</string>
+    <string name="face_acquired_too_different">Face not recognized. Try again.</string>
     <!-- Message shown during face enrollment when the face is too similar to a previous acquisition [CHAR LIMIT=50] -->
     <string name="face_acquired_too_similar">Change the position of your head slightly</string>
     <!-- Message shown during acqusition when the user's face is turned too far left or right [CHAR LIMIT=50] -->
@@ -2192,6 +2274,11 @@
     <string name="permlab_updatePackagesWithoutUserAction">update app without user action</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
     <string name="permdesc_updatePackagesWithoutUserAction">Allows the holder to update the app it previously installed without user action</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_writeVerificationStateE2eeContactKeys">update the verification states of E2EE contact keys owned by other apps</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
+    <string name="permdesc_writeVerificationStateE2eeContactKeys">Allows the app to update the verification states of E2EE contact keys owned by other apps</string>
 
     <!-- Policy administration -->
 
@@ -3184,6 +3271,12 @@
     <!-- Title for EditText context menu [CHAR LIMIT=20] -->
     <string name="editTextMenuTitle">Text actions</string>
 
+    <!-- Error shown when a user uses a stylus to try handwriting on a text field which doesn't support stylus handwriting. [CHAR LIMIT=TOAST] -->
+    <string name="error_handwriting_unsupported">Handwriting is not supported in this field</string>
+
+    <!-- Error shown when a user uses a stylus to try handwriting on a password text field which doesn't support stylus handwriting. [CHAR LIMIT=TOAST] -->
+    <string name="error_handwriting_unsupported_password">Handwriting is not supported in password fields</string>
+
     <!-- Content description of the back button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="input_method_nav_back_button_desc">Back</string>
     <!-- Content description of the switch input method button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -3790,7 +3883,7 @@
          keyboard is connected -->
     <string name="show_ime">Keep it on screen while physical keyboard is active</string>
     <!-- Title of the physical keyboard category in the input method selector [CHAR LIMIT=30] -->
-    <string name="hardware">Show virtual keyboard</string>
+    <string name="hardware">Use on-screen keyboard</string>
 
     <!-- Title of the notification to prompt the user to configure physical keyboard settings. [CHAR LIMIT=NOTIF_TITLE] -->
     <string name="select_keyboard_layout_notification_title">Configure <xliff:g id="device_name" example="Foobar USB Keyboard">%s</xliff:g></string>
@@ -4683,6 +4776,13 @@
     <string name="accessibility_dialog_button_allow">Allow</string>
     <!-- String for the deny button in accessibility permission dialog. [CHAR LIMIT=10] -->
     <string name="accessibility_dialog_button_deny">Deny</string>
+    <!-- String for the uninstall button in accessibility permission dialog. -->
+    <string name="accessibility_dialog_button_uninstall">Uninstall</string>
+    <!-- Warning shown when user input has been blocked due to another app overlaying screen
+         content. Since we don't know what the app is showing on top of the input target, we
+         can't verify user consent. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_dialog_touch_filtered_warning">An app is obscuring the permission
+        request so your response cannot be verified.</string>
 
     <!-- Title for accessibility select shortcut menu dialog. [CHAR LIMIT=100] -->
     <string name="accessibility_select_shortcut_menu_title">Tap a feature to start using it:</string>
@@ -5080,6 +5180,13 @@
     -->
     <string name="clone_profile_label_badge">Clone <xliff:g id="label" example="Messenger">%1$s</xliff:g></string>
 
+    <!--
+        Used to wrap a label for content description for a Private profile, e.g. "Private Messenger"
+        instead of Messenger when the Messenger app is installed in Private Profile.
+        [CHAR LIMIT=20]
+    -->
+    <string name="private_profile_label_badge">Private <xliff:g id="label" example="Messenger">%1$s</xliff:g></string>
+
     <!-- DO NOT TRANSLATE -->
     <string name="time_placeholder">--</string>
 
@@ -5103,7 +5210,7 @@
     <string name="lock_to_app_unlock_password">Ask for password before unpinning</string>
 
     <!-- Notification shown when device owner silently installs a package [CHAR LIMIT=NONE] -->
-    <string name="package_installed_device_owner">Installed by your admin</string>
+    <string name="package_installed_device_owner">Installed by your admin.\nGo to settings to view granted permissions</string>
     <!-- Notification shown when device owner silently updates a package [CHAR LIMIT=NONE] -->
     <string name="package_updated_device_owner">Updated by your admin</string>
     <!-- Notification shown when device owner silently deletes a package [CHAR LIMIT=NONE] -->
@@ -5220,6 +5327,20 @@
     <!-- Zen mode - name of default automatic calendar time-based rule that is triggered every night (when sleeping). [CHAR LIMIT=40] -->
     <string name="zen_mode_default_every_night_name">Sleeping</string>
 
+    <!-- Zen mode - Trigger description of the rule, indicating which app owns it. [CHAR_LIMIT=100] -->
+    <string name="zen_mode_implicit_trigger_description">Managed by <xliff:g id="app_name">%1$s</xliff:g></string>
+    <!-- Zen mode - Condition summary when a rule is activated due to a call to setInterruptionFilter(). [CHAR_LIMIT=NONE] -->
+    <string name="zen_mode_implicit_activated">On</string>
+    <!-- Zen mode - Condition summary when a rule is deactivated due to a call to setInterruptionFilter(). [CHAR_LIMIT=NONE] -->
+    <string name="zen_mode_implicit_deactivated">Off</string>
+
+    <!-- [CHAR LIMIT=40] General divider text when concatenating multiple items in a text summary, used for the trigger description of a Zen mode -->
+    <string name="zen_mode_trigger_summary_divider_text">,\u0020</string>
+    <!-- [CHAR LIMIT=40] General template for a symbolic start - end range in a text summary, used for the trigger description of a Zen mode -->
+    <string name="zen_mode_trigger_summary_range_symbol_combination"><xliff:g id="start" example="Sun">%1$s</xliff:g> - <xliff:g id="end" example="Thu">%2$s</xliff:g></string>
+    <!-- [CHAR LIMIT=40] Event-based rule calendar option value for any calendar, used for the trigger description of a Zen mode -->
+    <string name="zen_mode_trigger_event_calendar_any">Any calendar</string>
+
     <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
     <string name="muted_by"><xliff:g id="third_party">%1$s</xliff:g> is muting some sounds</string>
 
@@ -5256,6 +5377,12 @@
 
     <!-- Content description of the expand button icon in the notification when expanded.-->
     <string name="expand_button_content_description_expanded">Collapse</string>
+
+    <!-- A11y announcement when a view is collapsed. -->
+    <string name="content_description_collapsed">Collapsed</string>
+
+    <!-- A11y announcement when a view is expanded. -->
+    <string name="content_description_expanded">Expanded</string>
 
     <!-- Accessibility action description on the expand button. -->
     <string name="expand_action_accessibility">toggle expansion</string>
@@ -5361,6 +5488,13 @@
     <!-- Title for button to launch the personal safety app to make an emergency call    -->
     <string name="work_mode_emergency_call_button">Emergency</string>
 
+    <!-- Title of the alert dialog prompting the user to set up a screen lock [CHAR LIMIT=30] -->
+    <string name="set_up_screen_lock_title">Set a screen lock</string>
+    <!-- Action label for the dialog prompting the user to set up a screen lock [CHAR LIMIT=30] -->
+    <string name="set_up_screen_lock_action_label">Set screen lock</string>
+    <!-- Message shown in the dialog prompting the user to set up a screen lock to access private space [CHAR LIMIT=120] -->
+    <string name="private_space_set_up_screen_lock_message">To use your private space, set a screen lock on this device</string>
+
     <!-- Title of the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=50] -->
     <string name="app_blocked_title">App is not available</string>
     <!-- Default message shown in the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=NONE] -->
@@ -5371,7 +5505,7 @@
     <!-- Title of the dialog shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title"><xliff:g id="activity" example="Permission dialog">%1$s</xliff:g> unavailable</string>
     <!-- Title of the dialog shown when the permissioncontroller is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_title_for_permission_dialog">Permission needed</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog">Permission request suppressed</string>
     <!-- Title of the dialog shown when the camera permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title_for_camera_dialog">Camera unavailable</string>
     <!-- Title of the dialog shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
@@ -5392,6 +5526,12 @@
     <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
+    <!-- Message shown when a runtime permission request is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv">This app is requesting additional permissions, but permissions can’t be granted in a streaming session. Grant the permission on your Android TV device first.</string>
+    <!-- Message shown when a runtime permission request is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet">This app is requesting additional permissions, but permissions can’t be granted in a streaming session. Grant the permission on your tablet first.</string>
+    <!-- Message shown when a runtime permission request is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_request" product="default">This app is requesting additional permissions, but permissions can’t be granted in a streaming session. Grant the permission on your phone first.</string>
     <!-- Message shown when an app being streamed to another device requests authentication such as via the biometrics API, and the user needs to complete the on their device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv">This app is requesting additional security. Try on your Android TV device instead.</string>
     <!-- Message shown when an app being streamed to another device requests authentication such as via the biometrics API, and the user needs to complete the on their device. [CHAR LIMIT=NONE] -->
@@ -5545,7 +5685,7 @@
     <!-- Title for the autofill update dialog shown when the the contents of the activity can be updated
          in an autofill service, and the service knows what the activity represents, and it represents 3 types of
          data (for example, username, password and credit card info) [CHAR LIMIT=NONE] -->
-    <string name="autofill_update_title_with_3types">Update these items in <b><xliff:g id="label" example="MyPass">%4$s</xliff:g></b>: <xliff:g id="type" example="Username">%1$s</xliff:g>, <xliff:g id="type" example="Password">%2$s</xliff:g>, and <xliff:g id="type" example="Credit Card">%3$s</xliff:g> ?</string>
+    <string name="autofill_update_title_with_3types">Update these items in <b><xliff:g id="label" example="MyPass">%4$s</xliff:g></b>: <xliff:g id="type" example="Username">%1$s</xliff:g>, <xliff:g id="type" example="Password">%2$s</xliff:g>, and <xliff:g id="type" example="Credit Card">%3$s</xliff:g>?</string>
 
     <!-- Label for the autofill save button [CHAR LIMIT=NONE] -->
     <string name="autofill_save_yes">Save</string>
@@ -5729,6 +5869,10 @@
     <string name="dynamic_mode_notification_title">Battery Saver turned on</string>
     <!-- Summary of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
     <string name="dynamic_mode_notification_summary">Reducing battery usage to extend battery life</string>
+    <!-- Title of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
+    <string name="dynamic_mode_notification_title_v2">Battery Saver is on</string>
+    <!-- Summary of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
+    <string name="dynamic_mode_notification_summary_v2">Battery Saver is turned on to extend battery life</string>
 
     <!-- Battery saver strings -->
     <!-- The user visible name of the notification channel for battery saver notifications [CHAR_LIMIT=80] -->
@@ -5847,8 +5991,6 @@
     <string name="accessibility_system_action_dpad_right_label">Dpad Right</string>
     <!-- Label for Dpad center action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_dpad_center_label">Dpad Center</string>
-    <!-- Accessibility description of caption view -->
-    <string name="accessibility_freeform_caption">Caption bar of <xliff:g id="app_name">%1$s</xliff:g>.</string>
 
     <!-- Text to tell the user that a package has been forced by themselves in the RESTRICTED bucket. [CHAR LIMIT=NONE] -->
     <string name="as_app_forced_to_restricted_bucket">
@@ -5920,6 +6062,10 @@
     <!-- Dialog text.  Shown when the user is unable to send a text message from a personal app due to restrictions set
          by their organization, and so must switch to a work app or cancel. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_sms_information">Your organization only allows you to send messages from work apps</string>
+    <!-- Dialog text. Shown as when redirecting Calls from Private Space to the main user. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_private_space_phone_information">"You can only make phone calls from your personal Phone app. Calls made with personal Phone will be added to your personal call history."</string>
+    <!-- Dialog text. Shown as when redirecting SMS and MMS messages from Private Space to the main user. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_private_space_messages_information">"You can only send SMS messages from your personal Messages app."</string>
     <!-- Button option. Open the link in the personal browser. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_use_personal_browser">Use personal browser</string>
     <!-- Button option. Open the link in the work browser. [CHAR LIMIT=NONE] -->
@@ -6262,6 +6408,13 @@ ul.</string>
     <!-- Toast message that is shown when the user mutes the microphone from the keyboard. [CHAR LIMIT=TOAST] -->
     <string name="mic_access_off_toast">Microphone is blocked</string>
 
+    <!-- Title of connected display unavailable notifications. [CHAR LIMIT=NONE] -->
+    <string name="connected_display_unavailable_notification_title">Can\'t mirror to display</string>
+    <!-- Content of connected display unavailable notification. [CHAR LIMIT=NONE] -->
+    <string name="connected_display_unavailable_notification_content">Use a different cable and try again</string>
+    <!-- Content of connected display unavailable due to thermals notification. [CHAR LIMIT=NONE] -->
+    <string name="connected_display_thermally_unavailable_notification_content">Your device is too warm and can\'t mirror to the display until it cools down</string>
+
     <!-- Name of concurrent display notifications. [CHAR LIMIT=NONE] -->
     <string name="concurrent_display_notification_name">Dual screen</string>
     <!-- Title of concurrent display active notification. [CHAR LIMIT=NONE] -->
@@ -6311,4 +6464,51 @@ ul.</string>
     <!-- Communal profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
     <string name="profile_label_communal">Communal</string>
 
+    <!-- Accessibility label for managed profile user type [CHAR LIMIT=30] -->
+    <string name="accessibility_label_managed_profile">Work profile</string>
+    <!-- Accessibility label for private profile user type [CHAR LIMIT=30] -->
+    <string name="accessibility_label_private_profile">Private space</string>
+    <!-- Accessibility label for clone profile user type [CHAR LIMIT=30] -->
+    <string name="accessibility_label_clone_profile">Clone</string>
+    <!-- Accessibility label for clone profile user type [CHAR LIMIT=30] -->
+    <string name="accessibility_label_communal_profile">Communal</string>
+
+    <!-- Notification message used when a notification's normal message contains sensitive information [CHAR_LIMIT=NOTIF_BODY] -->
+    <string name="redacted_notification_message">Sensitive notification content hidden</string>
+    <!-- Notification action title used instead of a notification's normal title sensitive [CHAR_LIMIT=NOTIF_BODY] -->
+    <string name="redacted_notification_action_title"></string>
+
+    <!-- Toast when an app's content is hidden from screen share (user can still see content) due to potential security risks of showing the content (such as a password or OTP) - [CHAR_LIMIT=TOAST] -->
+    <string name="screen_not_shared_sensitive_content">App content hidden from screen share for security</string>
+
+    <!-- Satellite related messages -->
+    <!-- Notification title when satellite service is connected. -->
+    <string name="satellite_notification_title">Auto connected to satellite</string>
+    <!-- Notification summary when satellite service is connected. [CHAR LIMIT=NONE] -->
+    <string name="satellite_notification_summary">You can send and receive messages without a mobile or Wi-Fi network</string>
+    <!-- Invoke "What to expect" dialog of messaging application -->
+    <string name="satellite_notification_open_message">Open Messages</string>
+    <!-- Invoke Satellite setting activity of Settings -->
+    <string name="satellite_notification_how_it_works">How it works</string>
+    <!-- Initial/System provided label shown for an app which gets unarchived. [CHAR LIMIT=64]. -->
+    <string name="unarchival_session_app_label">Pending...</string>
+
+    <!-- Fingerprint dangling notification title -->
+    <string name="fingerprint_dangling_notification_title">Set up Fingerprint Unlock again</string>
+    <!-- Fingerprint dangling notification content for only 1 fingerprint deleted -->
+    <string name="fingerprint_dangling_notification_msg_1"><xliff:g id="fingerprint">%s</xliff:g> wasn\'t working well and was deleted</string>
+    <!-- Fingerprint dangling notification content for more than 1 fingerprints deleted -->
+    <string name="fingerprint_dangling_notification_msg_2"><xliff:g id="fingerprint">%1$s</xliff:g> and <xliff:g id="fingerprint">%2$s</xliff:g> weren\'t working well and were deleted</string>
+    <!-- Fingerprint dangling notification content for only 1 fingerprint deleted and no fingerprint left-->
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1"><xliff:g id="fingerprint">%s</xliff:g> wasn\'t working well and was deleted. Set it up again to unlock your phone with fingerprint.</string>
+    <!-- Fingerprint dangling notification content for more than 1 fingerprints deleted and no fingerprint left  -->
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2"><xliff:g id="fingerprint">%1$s</xliff:g> and <xliff:g id="fingerprint">%2$s</xliff:g> weren\'t working well and were deleted. Set them up again to unlock your phone with your fingerprint.</string>
+    <!-- Face dangling notification title -->
+    <string name="face_dangling_notification_title">Set up Face Unlock again</string>
+    <!-- Face dangling notification content -->
+    <string name="face_dangling_notification_msg">Your face model wasn\'t working well and was deleted. Set it up again to unlock your phone with face.</string>
+    <!-- Biometric dangling notification "set up" action button -->
+    <string name="biometric_dangling_notification_action_set_up">Set up</string>
+    <!-- Biometric dangling notification "Not now" action button -->
+    <string name="biometric_dangling_notification_action_not_now">Not now</string>
 </resources>

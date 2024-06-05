@@ -29,6 +29,7 @@ import android.util.ArrayMap;
  *
  * {@hide}
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class LocalServices {
     private LocalServices() {}
 
@@ -67,6 +68,16 @@ public final class LocalServices {
     public static <T> void removeServiceForTest(Class<T> type) {
         synchronized (sLocalServiceObjects) {
             sLocalServiceObjects.remove(type);
+        }
+    }
+
+    /**
+     * Remove all known service instances, must be only used in tests.
+     */
+    @VisibleForTesting
+    public static void removeAllServicesForTest() {
+        synchronized (sLocalServiceObjects) {
+            sLocalServiceObjects.clear();
         }
     }
 }

@@ -32,16 +32,20 @@ class SystemUIIssueRegistry : IssueRegistry() {
                 BindServiceOnMainThreadDetector.ISSUE,
                 BroadcastSentViaContextDetector.ISSUE,
                 CleanArchitectureDependencyViolationDetector.ISSUE,
+                CollectAsStateDetector.ISSUE,
                 DumpableNotRegisteredDetector.ISSUE,
+                FlowDetector.SHARED_FLOW_CREATION,
                 SlowUserQueryDetector.ISSUE_SLOW_USER_ID_QUERY,
                 SlowUserQueryDetector.ISSUE_SLOW_USER_INFO_QUERY,
                 NonInjectedMainThreadDetector.ISSUE,
                 RegisterReceiverViaContextDetector.ISSUE,
                 SoftwareBitmapDetector.ISSUE,
                 NonInjectedServiceDetector.ISSUE,
+                SingletonAndroidComponentDetector.ISSUE,
                 StaticSettingsProviderDetector.ISSUE,
                 DemotingTestWithoutBugDetector.ISSUE,
                 TestFunctionNameViolationDetector.ISSUE,
+                MissingApacheLicenseDetector.ISSUE,
             )
 
     override val api: Int

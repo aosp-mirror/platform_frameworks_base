@@ -54,6 +54,7 @@ public abstract class InputEventReceiver {
             InputChannel inputChannel, MessageQueue messageQueue);
     private static native void nativeDispose(long receiverPtr);
     private static native void nativeFinishInputEvent(long receiverPtr, int seq, boolean handled);
+    private static native boolean nativeProbablyHasInput(long receiverPtr);
     private static native void nativeReportTimeline(long receiverPtr, int inputEventId,
             long gpuCompletedTime, long presentTime);
     private static native boolean nativeConsumeBatchedInputEvents(long receiverPtr,
@@ -89,6 +90,17 @@ public abstract class InputEventReceiver {
         } finally {
             super.finalize();
         }
+    }
+
+    /**
+     * Checks the receiver for input availability.
+     * May return false negatives.
+     */
+    public boolean probablyHasInput() {
+        if (mReceiverPtr == 0) {
+            return false;
+        }
+        return nativeProbablyHasInput(mReceiverPtr);
     }
 
     /**
@@ -259,12 +271,29 @@ public abstract class InputEventReceiver {
         return mInputChannel.getToken();
     }
 
+    private String getShortDescription(InputEvent event) {
+        if (event instanceof MotionEvent motion) {
+            return "MotionEvent " + MotionEvent.actionToString(motion.getAction()) + " deviceId="
+                    + motion.getDeviceId() + " source=0x"
+                    + Integer.toHexString(motion.getSource()) +  " historySize="
+                    + motion.getHistorySize();
+        } else if (event instanceof KeyEvent key) {
+            return "KeyEvent " + KeyEvent.actionToString(key.getAction())
+                    + " deviceId=" + key.getDeviceId();
+        } else {
+            Log.wtf(TAG, "Illegal InputEvent type: " + event);
+            return "InputEvent";
+        }
+    }
+
     // Called from native code.
     @SuppressWarnings("unused")
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void dispatchInputEvent(int seq, InputEvent event) {
+        Trace.traceBegin(Trace.TRACE_TAG_INPUT, "dispatchInputEvent " + getShortDescription(event));
         mSeqMap.put(event.getSequenceNumber(), seq);
         onInputEvent(event);
+        Trace.traceEnd(Trace.TRACE_TAG_INPUT);
     }
 
     /**
@@ -277,15 +306,5 @@ public abstract class InputEventReceiver {
         writer.println(prefix + " mInputChannel: " + mInputChannel);
         writer.println(prefix + " mSeqMap: " + mSeqMap);
         writer.println(prefix + " mReceiverPtr:\n" + nativeDump(mReceiverPtr, prefix + "  "));
-    }
-
-    /**
-     * Factory for InputEventReceiver
-     */
-    public interface Factory {
-        /**
-         * Create a new InputReceiver for a given inputChannel
-         */
-        InputEventReceiver createInputEventReceiver(InputChannel inputChannel, Looper looper);
     }
 }

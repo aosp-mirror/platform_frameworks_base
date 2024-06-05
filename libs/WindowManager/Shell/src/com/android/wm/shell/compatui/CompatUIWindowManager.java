@@ -16,15 +16,17 @@
 
 package com.android.wm.shell.compatui;
 
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+import static android.view.WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
 import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
-import android.app.TaskInfo.CameraCompatControlState;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.Log;
@@ -33,11 +35,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController.CompatUICallback;
+import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
 
 import java.util.function.Consumer;
 
@@ -67,6 +71,8 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     @VisibleForTesting
     CompatUILayout mLayout;
 
+    private final float mHideScmTolerance;
+
     CompatUIWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue, CompatUICallback callback,
             ShellTaskOrganizer.TaskListener taskListener, DisplayLayout displayLayout,
@@ -74,11 +80,17 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
             Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> onRestartButtonClicked) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mCallback = callback;
-        mHasSizeCompat = taskInfo.topActivityInSizeCompat;
-        mCameraCompatControlState = taskInfo.cameraCompatControlState;
+        mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
+        if (Flags.enableDesktopWindowingMode() && Flags.enableWindowingDynamicInitialBounds()) {
+            // Don't show the SCM button for freeform tasks
+            mHasSizeCompat &= !taskInfo.isFreeform();
+        }
+        mCameraCompatControlState =
+                taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState;
         mCompatUIHintsState = compatUIHintsState;
         mCompatUIConfiguration = compatUIConfiguration;
         mOnRestartButtonClicked = onRestartButtonClicked;
+        mHideScmTolerance = mCompatUIConfiguration.getHideSizeCompatRestartButtonTolerance();
     }
 
     @Override
@@ -98,7 +110,8 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected boolean eligibleToShowLayout() {
-        return mHasSizeCompat || shouldShowCameraControl();
+        return (mHasSizeCompat && shouldShowSizeCompatRestartButton(getLastTaskInfo()))
+                || shouldShowCameraControl();
     }
 
     @Override
@@ -126,8 +139,13 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
             boolean canShow) {
         final boolean prevHasSizeCompat = mHasSizeCompat;
         final int prevCameraCompatControlState = mCameraCompatControlState;
-        mHasSizeCompat = taskInfo.topActivityInSizeCompat;
-        mCameraCompatControlState = taskInfo.cameraCompatControlState;
+        mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
+        if (Flags.enableDesktopWindowingMode() && Flags.enableWindowingDynamicInitialBounds()) {
+            // Don't show the SCM button for freeform tasks
+            mHasSizeCompat &= !taskInfo.isFreeform();
+        }
+        mCameraCompatControlState =
+                taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState;
 
         if (!super.updateCompatInfo(taskInfo, taskListener, canShow)) {
             return false;
@@ -207,6 +225,39 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         updateSurfacePosition(positionX, positionY);
     }
 
+    @VisibleForTesting
+    boolean shouldShowSizeCompatRestartButton(@NonNull TaskInfo taskInfo) {
+        // Always show button if display is phone sized.
+        if (!Flags.allowHideScmButton() || taskInfo.configuration.smallestScreenWidthDp
+                < LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP) {
+            return true;
+        }
+
+        final int letterboxWidth = taskInfo.appCompatTaskInfo.topActivityLetterboxWidth;
+        final int letterboxHeight = taskInfo.appCompatTaskInfo.topActivityLetterboxHeight;
+        final Rect stableBounds = getTaskStableBounds();
+        final int appWidth = stableBounds.width();
+        final int appHeight = stableBounds.height();
+        // App is floating, should always show restart button.
+        if (appWidth > letterboxWidth && appHeight > letterboxHeight) {
+            return true;
+        }
+        // If app fills the width of the display, don't show restart button (for landscape apps)
+        // if device has a custom tolerance value.
+        if (mHideScmTolerance != mCompatUIConfiguration.getDefaultHideRestartButtonTolerance()
+                && appWidth == letterboxWidth)  {
+            return false;
+        }
+
+        final int letterboxArea = letterboxWidth * letterboxHeight;
+        final int taskArea = appWidth * appHeight;
+        if (letterboxArea == 0 || taskArea == 0) {
+            return false;
+        }
+        final float percentageAreaOfLetterboxInTask = (float) letterboxArea / taskArea * 100;
+        return percentageAreaOfLetterboxInTask < mHideScmTolerance;
+    }
+
     private void updateVisibilityOfViews() {
         if (mLayout == null) {
             return;
@@ -234,16 +285,5 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     private boolean shouldShowCameraControl() {
         return mCameraCompatControlState != CAMERA_COMPAT_CONTROL_HIDDEN
                 && mCameraCompatControlState != CAMERA_COMPAT_CONTROL_DISMISSED;
-    }
-
-    /**
-     * A class holding the state of the compat UI hints, which is shared between all compat UI
-     * window managers.
-     */
-    static class CompatUIHintsState {
-        @VisibleForTesting
-        boolean mHasShownSizeCompatHint;
-        @VisibleForTesting
-        boolean mHasShownCameraCompatHint;
     }
 }

@@ -17,23 +17,37 @@
 package com.android.systemui.statusbar.notification.icon
 
 import android.app.Notification
+import android.app.Notification.MessagingStyle
 import android.app.Person
 import android.content.pm.LauncherApps
+import android.graphics.drawable.AdaptiveIconDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import com.android.app.tracing.traceSection
 import com.android.internal.statusbar.StatusBarIcon
-import com.android.systemui.R
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Inflates and updates icons associated with notifications
@@ -43,44 +57,55 @@ import javax.inject.Inject
  * icons and keeping the icon assets themselves up to date as notifications change.
  *
  * TODO: Much of this code was copied whole-sale in order to get it out of NotificationEntry.
- *  Long-term, it should probably live somewhere in the content inflation pipeline.
+ *   Long-term, it should probably live somewhere in the content inflation pipeline.
  */
 @SysUISingleton
-class IconManager @Inject constructor(
+class IconManager
+@Inject
+constructor(
     private val notifCollection: CommonNotifCollection,
     private val launcherApps: LauncherApps,
-    private val iconBuilder: IconBuilder
+    private val iconBuilder: IconBuilder,
+    @Application private val applicationCoroutineScope: CoroutineScope,
+    @Background private val bgCoroutineContext: CoroutineContext,
+    @Main private val mainCoroutineContext: CoroutineContext,
 ) : ConversationIconManager {
     private var unimportantConversationKeys: Set<String> = emptySet()
+    /**
+     * A map of running jobs for fetching the person avatar from launcher. The key is the
+     * notification entry key.
+     */
+    private var launcherPeopleAvatarIconJobs: ConcurrentHashMap<String, Job> =
+        ConcurrentHashMap<String, Job>()
 
     fun attach() {
         notifCollection.addCollectionListener(entryListener)
     }
 
-    private val entryListener = object : NotifCollectionListener {
-        override fun onEntryInit(entry: NotificationEntry) {
-            entry.addOnSensitivityChangedListener(sensitivityListener)
+    private val entryListener =
+        object : NotifCollectionListener {
+            override fun onEntryInit(entry: NotificationEntry) {
+                entry.addOnSensitivityChangedListener(sensitivityListener)
+            }
+
+            override fun onEntryCleanUp(entry: NotificationEntry) {
+                entry.removeOnSensitivityChangedListener(sensitivityListener)
+            }
+
+            override fun onRankingApplied() {
+                // rankings affect whether a conversation is important, which can change the icons
+                recalculateForImportantConversationChange()
+            }
         }
 
-        override fun onEntryCleanUp(entry: NotificationEntry) {
-            entry.removeOnSensitivityChangedListener(sensitivityListener)
-        }
-
-        override fun onRankingApplied() {
-            // rankings affect whether a conversation is important, which can change the icons
-            recalculateForImportantConversationChange()
-        }
-    }
-
-    private val sensitivityListener = NotificationEntry.OnSensitivityChangedListener {
-        entry -> updateIconsSafe(entry)
-    }
+    private val sensitivityListener =
+        NotificationEntry.OnSensitivityChangedListener { entry -> updateIconsSafe(entry) }
 
     private fun recalculateForImportantConversationChange() {
         for (entry in notifCollection.allNotifs) {
             val isImportant = isImportantConversation(entry)
-            if (entry.icons.areIconsAvailable &&
-                isImportant != entry.icons.isImportantConversation
+            if (
+                entry.icons.areIconsAvailable && isImportant != entry.icons.isImportantConversation
             ) {
                 updateIconsSafe(entry)
             }
@@ -95,46 +120,35 @@ class IconManager @Inject constructor(
      * @throws InflationException Exception if required icons are not valid or specified
      */
     @Throws(InflationException::class)
-    fun createIcons(entry: NotificationEntry) {
-        // Construct the status bar icon view.
-        val sbIcon = iconBuilder.createIconView(entry)
-        sbIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
+    fun createIcons(entry: NotificationEntry) =
+        traceSection("IconManager.createIcons") {
+            // Construct the status bar icon view.
+            val sbIcon = iconBuilder.createIconView(entry)
+            sbIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
 
-        // Construct the shelf icon view.
-        val shelfIcon = iconBuilder.createIconView(entry)
-        shelfIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
-        shelfIcon.visibility = View.INVISIBLE
+            // Construct the shelf icon view.
+            val shelfIcon = iconBuilder.createIconView(entry)
+            shelfIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
+            shelfIcon.visibility = View.INVISIBLE
 
-        // Construct the aod icon view.
-        val aodIcon = iconBuilder.createIconView(entry)
-        aodIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
-        aodIcon.setIncreasedSize(true)
+            // Construct the aod icon view.
+            val aodIcon = iconBuilder.createIconView(entry)
+            aodIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
+            aodIcon.setIncreasedSize(true)
 
-        // Construct the centered icon view.
-        val centeredIcon = if (entry.sbn.notification.isMediaNotification) {
-            iconBuilder.createIconView(entry).apply {
-                scaleType = ImageView.ScaleType.CENTER_INSIDE
+            // Set the icon views' icons
+            val (normalIconDescriptor, sensitiveIconDescriptor) = getIconDescriptors(entry)
+
+            try {
+                setIcon(entry, normalIconDescriptor, sbIcon)
+                setIcon(entry, sensitiveIconDescriptor, shelfIcon)
+                setIcon(entry, sensitiveIconDescriptor, aodIcon)
+                entry.icons = IconPack.buildPack(sbIcon, shelfIcon, aodIcon, entry.icons)
+            } catch (e: InflationException) {
+                entry.icons = IconPack.buildEmptyPack(entry.icons)
+                throw e
             }
-        } else {
-            null
         }
-
-        // Set the icon views' icons
-        val (normalIconDescriptor, sensitiveIconDescriptor) = getIconDescriptors(entry)
-
-        try {
-            setIcon(entry, normalIconDescriptor, sbIcon)
-            setIcon(entry, sensitiveIconDescriptor, shelfIcon)
-            setIcon(entry, sensitiveIconDescriptor, aodIcon)
-            if (centeredIcon != null) {
-                setIcon(entry, normalIconDescriptor, centeredIcon)
-            }
-            entry.icons = IconPack.buildPack(sbIcon, shelfIcon, aodIcon, centeredIcon, entry.icons)
-        } catch (e: InflationException) {
-            entry.icons = IconPack.buildEmptyPack(entry.icons)
-            throw e
-        }
-    }
 
     /**
      * Update the notification icons.
@@ -143,35 +157,43 @@ class IconManager @Inject constructor(
      * @throws InflationException Exception if required icons are not valid or specified
      */
     @Throws(InflationException::class)
-    fun updateIcons(entry: NotificationEntry) {
-        if (!entry.icons.areIconsAvailable) {
-            return
-        }
-        entry.icons.smallIconDescriptor = null
-        entry.icons.peopleAvatarDescriptor = null
+    fun updateIcons(entry: NotificationEntry, usingCache: Boolean = false) =
+        traceSection("IconManager.updateIcons") {
+            if (!entry.icons.areIconsAvailable) {
+                return@traceSection
+            }
 
-        val (normalIconDescriptor, sensitiveIconDescriptor) = getIconDescriptors(entry)
+            if (usingCache && !Flags.notificationsBackgroundIcons()) {
+                Log.wtf(
+                    TAG,
+                    "Updating using the cache is not supported when the " +
+                        "notifications_background_icons flag is off"
+                )
+            }
+            if (!usingCache || !Flags.notificationsBackgroundIcons()) {
+                entry.icons.smallIconDescriptor = null
+                entry.icons.peopleAvatarDescriptor = null
+            }
 
-        entry.icons.statusBarIcon?.let {
-            it.notification = entry.sbn
-            setIcon(entry, normalIconDescriptor, it)
-        }
+            val (normalIconDescriptor, sensitiveIconDescriptor) = getIconDescriptors(entry)
+            val notificationContentDescription =
+                entry.sbn.notification?.let { iconBuilder.getIconContentDescription(it) }
 
-        entry.icons.shelfIcon?.let {
-            it.notification = entry.sbn
-            setIcon(entry, normalIconDescriptor, it)
-        }
+            entry.icons.statusBarIcon?.let {
+                it.setNotification(entry.sbn, notificationContentDescription)
+                setIcon(entry, normalIconDescriptor, it)
+            }
 
-        entry.icons.aodIcon?.let {
-            it.notification = entry.sbn
-            setIcon(entry, sensitiveIconDescriptor, it)
-        }
+            entry.icons.shelfIcon?.let {
+                it.setNotification(entry.sbn, notificationContentDescription)
+                setIcon(entry, sensitiveIconDescriptor, it)
+            }
 
-        entry.icons.centeredIcon?.let {
-            it.notification = entry.sbn
-            setIcon(entry, sensitiveIconDescriptor, it)
+            entry.icons.aodIcon?.let {
+                it.setNotification(entry.sbn, notificationContentDescription)
+                setIcon(entry, sensitiveIconDescriptor, it)
+            }
         }
-    }
 
     private fun updateIconsSafe(entry: NotificationEntry) {
         try {
@@ -183,62 +205,98 @@ class IconManager @Inject constructor(
     }
 
     @Throws(InflationException::class)
-    private fun getIconDescriptors(
-        entry: NotificationEntry
-    ): Pair<StatusBarIcon, StatusBarIcon> {
-        val iconDescriptor = getIconDescriptor(entry, false /* redact */)
-        val sensitiveDescriptor = if (entry.isSensitive) {
-            getIconDescriptor(entry, true /* redact */)
-        } else {
-            iconDescriptor
-        }
+    private fun getIconDescriptors(entry: NotificationEntry): Pair<StatusBarIcon, StatusBarIcon> {
+        val iconDescriptor = getIconDescriptor(entry, redact = false)
+        val sensitiveDescriptor =
+            if (entry.isSensitive.value) {
+                getIconDescriptor(entry, redact = true)
+            } else {
+                iconDescriptor
+            }
         return Pair(iconDescriptor, sensitiveDescriptor)
     }
 
     @Throws(InflationException::class)
-    private fun getIconDescriptor(
-        entry: NotificationEntry,
-        redact: Boolean
-    ): StatusBarIcon {
-        val n = entry.sbn.notification
-        val showPeopleAvatar = isImportantConversation(entry) && !redact
+    private fun getIconDescriptor(entry: NotificationEntry, redact: Boolean): StatusBarIcon {
+        val showPeopleAvatar = !redact && isImportantConversation(entry)
 
+        // If the descriptor is already cached, return it
+        getCachedIconDescriptor(entry, showPeopleAvatar)?.also {
+            return it
+        }
+
+        val n = entry.sbn.notification
+        var usingMonochromeAppIcon = false
+        val icon: Icon?
+        if (showPeopleAvatar) {
+            icon = createPeopleAvatar(entry)
+        } else if (android.app.Flags.notificationsUseMonochromeAppIcon()) {
+            if (n.shouldUseAppIcon()) {
+                icon =
+                    getMonochromeAppIcon(entry)?.also { usingMonochromeAppIcon = true }
+                        ?: n.smallIcon
+            } else {
+                icon = n.smallIcon
+            }
+        } else {
+            icon = n.smallIcon
+        }
+
+        if (icon == null) {
+            throw InflationException("No icon in notification from ${entry.sbn.packageName}")
+        }
+
+        val sbi = icon.toStatusBarIcon(entry)
+        cacheIconDescriptor(entry, sbi, showPeopleAvatar, usingMonochromeAppIcon)
+        return sbi
+    }
+
+    private fun getCachedIconDescriptor(
+        entry: NotificationEntry,
+        showPeopleAvatar: Boolean
+    ): StatusBarIcon? {
         val peopleAvatarDescriptor = entry.icons.peopleAvatarDescriptor
+        val appIconDescriptor = entry.icons.appIconDescriptor
         val smallIconDescriptor = entry.icons.smallIconDescriptor
 
         // If cached, return corresponding cached values
-        if (showPeopleAvatar && peopleAvatarDescriptor != null) {
-            return peopleAvatarDescriptor
-        } else if (!showPeopleAvatar && smallIconDescriptor != null) {
-            return smallIconDescriptor
+        return when {
+            showPeopleAvatar && peopleAvatarDescriptor != null -> peopleAvatarDescriptor
+            android.app.Flags.notificationsUseMonochromeAppIcon() && appIconDescriptor != null ->
+                appIconDescriptor
+            smallIconDescriptor != null -> smallIconDescriptor
+            else -> null
         }
+    }
 
-        val icon =
-                (if (showPeopleAvatar) {
-                    createPeopleAvatar(entry)
-                } else {
-                    n.smallIcon
-                }) ?: throw InflationException(
-                        "No icon in notification from " + entry.sbn.packageName)
-
-        val ic = StatusBarIcon(
-                entry.sbn.user,
-                entry.sbn.packageName,
-                icon,
-                n.iconLevel,
-                n.number,
-                iconBuilder.getIconContentDescription(n))
-
-        // Cache if important conversation.
-        if (isImportantConversation(entry)) {
+    private fun cacheIconDescriptor(
+        entry: NotificationEntry,
+        descriptor: StatusBarIcon,
+        showPeopleAvatar: Boolean,
+        usingMonochromeAppIcon: Boolean
+    ) {
+        if (android.app.Flags.notificationsUseAppIcon() ||
+            android.app.Flags.notificationsUseMonochromeAppIcon()
+        ) {
+            // If either of the new icon flags is enabled, we cache the icon all the time.
             if (showPeopleAvatar) {
-                entry.icons.peopleAvatarDescriptor = ic
+                entry.icons.peopleAvatarDescriptor = descriptor
+            } else if (usingMonochromeAppIcon) {
+                // When notificationsUseMonochromeAppIcon is enabled, we use the appIconDescriptor.
+                entry.icons.appIconDescriptor = descriptor
             } else {
-                entry.icons.smallIconDescriptor = ic
+                // When notificationsUseAppIcon is enabled, the app icon overrides the small icon.
+                // But either way, it's a good idea to cache the descriptor.
+                entry.icons.smallIconDescriptor = descriptor
+            }
+        } else if (isImportantConversation(entry)) {
+            // Old approach: cache only if important conversation.
+            if (showPeopleAvatar) {
+                entry.icons.peopleAvatarDescriptor = descriptor
+            } else {
+                entry.icons.smallIconDescriptor = descriptor
             }
         }
-
-        return ic
     }
 
     @Throws(InflationException::class)
@@ -254,20 +312,98 @@ class IconManager @Inject constructor(
         }
     }
 
-    @Throws(InflationException::class)
-    private fun createPeopleAvatar(entry: NotificationEntry): Icon? {
-        var ic: Icon? = null
+    private fun Icon.toStatusBarIcon(entry: NotificationEntry): StatusBarIcon {
+        val n = entry.sbn.notification
+        return StatusBarIcon(
+            entry.sbn.user,
+            entry.sbn.packageName,
+            /* icon = */ this,
+            n.iconLevel,
+            n.number,
+            iconBuilder.getIconContentDescription(n)
+        )
+    }
 
-        val shortcut = entry.ranking.conversationShortcutInfo
-        if (shortcut != null) {
-            ic = launcherApps.getShortcutIcon(shortcut)
+    // TODO(b/335211019): Should we merge this with the method in GroupHelper?
+    private fun getMonochromeAppIcon(entry: NotificationEntry): Icon? {
+        // TODO(b/335211019): This should be done in the background.
+        var monochromeIcon: Icon? = null
+        try {
+            val appIcon: Drawable = iconBuilder.getAppIcon(entry.sbn.notification)
+            if (appIcon is AdaptiveIconDrawable) {
+                if (appIcon.monochrome != null) {
+                    monochromeIcon =
+                        Icon.createWithResourceAdaptiveDrawable(
+                            /* resPackage = */ entry.sbn.packageName,
+                            /* resId = */ appIcon.sourceDrawableResId,
+                            /* useMonochrome = */ true,
+                            /* inset = */ -3.0f * AdaptiveIconDrawable.getExtraInsetFraction()
+                        )
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to getAppIcon() in getMonochromeAppIcon()", e)
+        }
+        return monochromeIcon
+    }
+
+    private suspend fun getLauncherShortcutIconForPeopleAvatar(entry: NotificationEntry) =
+        withContext(bgCoroutineContext) {
+            var icon: Icon? = null
+            val shortcut = entry.ranking.conversationShortcutInfo
+            if (shortcut != null) {
+                try {
+                    icon = launcherApps.getShortcutIcon(shortcut)
+                } catch (e: Exception) {
+                    Log.e(
+                        TAG,
+                        "Error calling LauncherApps#getShortcutIcon for notification $entry: $e"
+                    )
+                }
+            }
+
+            // Once we have the icon, updating it should happen on the main thread.
+            if (icon != null) {
+                withContext(mainCoroutineContext) {
+                    val iconDescriptor = icon.toStatusBarIcon(entry)
+
+                    // Cache the value
+                    entry.icons.peopleAvatarDescriptor = iconDescriptor
+
+                    // Update the icons using the cached value
+                    updateIcons(entry = entry, usingCache = true)
+                }
+            }
         }
 
-        // Fall back to extract from message
+    @Throws(InflationException::class)
+    private fun createPeopleAvatar(entry: NotificationEntry): Icon {
+        var ic: Icon? = null
+
+        if (Flags.notificationsBackgroundIcons()) {
+            // Ideally we want to get the icon from launcher, but this is a binder transaction that
+            // may take longer so let's kick it off on a background thread and use a placeholder in
+            // the meantime.
+            // Cancel the previous job if necessary.
+            launcherPeopleAvatarIconJobs[entry.key]?.cancel()
+            launcherPeopleAvatarIconJobs[entry.key] =
+                applicationCoroutineScope
+                    .launch { getLauncherShortcutIconForPeopleAvatar(entry) }
+                    .apply { invokeOnCompletion { launcherPeopleAvatarIconJobs.remove(entry.key) } }
+        } else {
+            val shortcut = entry.ranking.conversationShortcutInfo
+            if (shortcut != null) {
+                ic = launcherApps.getShortcutIcon(shortcut)
+            }
+        }
+
+        // Try to extract from message
         if (ic == null) {
             val extras: Bundle = entry.sbn.notification.extras
-            val messages = Notification.MessagingStyle.Message.getMessagesFromBundleArray(
-                    extras.getParcelableArray(Notification.EXTRA_MESSAGES))
+            val messages =
+                MessagingStyle.Message.getMessagesFromBundleArray(
+                    extras.getParcelableArray(Notification.EXTRA_MESSAGES)
+                )
             val user = extras.getParcelable<Person>(Notification.EXTRA_MESSAGING_PERSON)
             for (i in messages.indices.reversed()) {
                 val message = messages[i]
@@ -296,8 +432,8 @@ class IconManager @Inject constructor(
 
     /**
      * Determines if this icon shows a conversation based on the sensitivity of the icon, its
-     * context and the user's indicated sensitivity preference. If we're using a fall back icon
-     * of the small icon, we don't consider this to be showing a conversation
+     * context and the user's indicated sensitivity preference. If we're using a fall back icon of
+     * the small icon, we don't consider this to be showing a conversation
      *
      * @param iconView The icon that shows the conversation.
      */
@@ -307,16 +443,20 @@ class IconManager @Inject constructor(
         iconDescriptor: StatusBarIcon
     ): Boolean {
         val usedInSensitiveContext =
-                iconView === entry.icons.shelfIcon || iconView === entry.icons.aodIcon
+            iconView === entry.icons.shelfIcon || iconView === entry.icons.aodIcon
         val isSmallIcon = iconDescriptor.icon.equals(entry.sbn.notification.smallIcon)
-        return isImportantConversation(entry) && !isSmallIcon &&
-                (!usedInSensitiveContext || !entry.isSensitive)
+        return isImportantConversation(entry) &&
+            !isSmallIcon &&
+            (!usedInSensitiveContext || !entry.isSensitive.value)
     }
 
     private fun isImportantConversation(entry: NotificationEntry): Boolean {
+        // Also verify that the Notification is MessagingStyle, since we're going to access
+        // MessagingStyle-specific data (EXTRA_MESSAGES, EXTRA_MESSAGING_PERSON).
         return entry.ranking.channel != null &&
-                entry.ranking.channel.isImportantConversation &&
-                entry.key !in unimportantConversationKeys
+            entry.ranking.channel.isImportantConversation &&
+            entry.sbn.notification.isStyle(MessagingStyle::class.java) &&
+            entry.key !in unimportantConversationKeys
     }
 
     override fun setUnimportantConversations(keys: Collection<String>) {
@@ -334,8 +474,8 @@ private const val TAG = "IconManager"
 interface ConversationIconManager {
     /**
      * Sets the complete current set of notification keys which should (for the purposes of icon
-     * presentation) be considered unimportant.  This tells the icon manager to remove the avatar
-     * of a group from which the priority notification has been removed.
+     * presentation) be considered unimportant. This tells the icon manager to remove the avatar of
+     * a group from which the priority notification has been removed.
      */
     fun setUnimportantConversations(keys: Collection<String>)
 }

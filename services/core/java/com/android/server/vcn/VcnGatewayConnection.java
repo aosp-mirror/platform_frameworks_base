@@ -915,9 +915,11 @@ public class VcnGatewayConnection extends StateMachine {
             // TODO(b/180132994): explore safely removing this Thread check
             mVcnContext.ensureRunningOnLooperThread();
 
-            logInfo(
-                    "Selected underlying network changed: "
-                            + (underlying == null ? null : underlying.network));
+            if (!UnderlyingNetworkRecord.isSameNetwork(mUnderlying, underlying)) {
+                logInfo(
+                        "Selected underlying network changed: "
+                                + (underlying == null ? null : underlying.network));
+            }
 
             // TODO(b/179091925): Move the delayed-message handling to BaseState
 
@@ -1222,6 +1224,14 @@ public class VcnGatewayConnection extends StateMachine {
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     void setSafeModeAlarm() {
+        final boolean isFlagSafeModeConfigEnabled = mVcnContext.getFeatureFlags().safeModeConfig();
+        logVdbg("isFlagSafeModeConfigEnabled " + isFlagSafeModeConfigEnabled);
+
+        if (isFlagSafeModeConfigEnabled && !mConnectionConfig.isSafeModeEnabled()) {
+            logVdbg("setSafeModeAlarm: safe mode disabled");
+            return;
+        }
+
         logVdbg("Setting safe mode alarm; mCurrentToken: " + mCurrentToken);
 
         // Only schedule a NEW alarm if none is already set.
@@ -1234,9 +1244,28 @@ public class VcnGatewayConnection extends StateMachine {
                 createScheduledAlarm(
                         SAFEMODE_TIMEOUT_ALARM,
                         delayedMessage,
-                        mVcnContext.isInTestMode()
-                                ? TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS_TEST_MODE)
-                                : TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS));
+                        getSafeModeTimeoutMs(mVcnContext, mLastSnapshot, mSubscriptionGroup));
+    }
+
+    /** Gets the safe mode timeout */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static long getSafeModeTimeoutMs(
+            VcnContext vcnContext, TelephonySubscriptionSnapshot snapshot, ParcelUuid subGrp) {
+        final int defaultSeconds =
+                vcnContext.isInTestMode()
+                        ? SAFEMODE_TIMEOUT_SECONDS_TEST_MODE
+                        : SAFEMODE_TIMEOUT_SECONDS;
+
+        final PersistableBundleWrapper carrierConfig = snapshot.getCarrierConfigForSubGrp(subGrp);
+        int resultSeconds = defaultSeconds;
+
+        if (vcnContext.isFlagSafeModeTimeoutConfigEnabled() && carrierConfig != null) {
+            resultSeconds =
+                    carrierConfig.getInt(
+                            VcnManager.VCN_SAFE_MODE_TIMEOUT_SECONDS_KEY, defaultSeconds);
+        }
+
+        return TimeUnit.SECONDS.toMillis(resultSeconds);
     }
 
     private void cancelSafeModeAlarm() {
@@ -1881,6 +1910,12 @@ public class VcnGatewayConnection extends StateMachine {
                 // Transforms do not need to be persisted; the IkeSession will keep them alive
                 mIpSecManager.applyTunnelModeTransform(tunnelIface, direction, transform);
 
+                if (direction == IpSecManager.DIRECTION_IN
+                        && mVcnContext.isFlagNetworkMetricMonitorEnabled()
+                        && mVcnContext.isFlagIpSecTransformStateEnabled()) {
+                    mUnderlyingNetworkController.updateInboundTransform(mUnderlying, transform);
+                }
+
                 // For inbound transforms, additionally allow forwarded traffic to bridge to DUN (as
                 // needed)
                 final Set<Integer> exposedCaps = mConnectionConfig.getAllExposedCapabilities();
@@ -1889,7 +1924,7 @@ public class VcnGatewayConnection extends StateMachine {
                     mIpSecManager.applyTunnelModeTransform(
                             tunnelIface, IpSecManager.DIRECTION_FWD, transform);
                 }
-            } catch (IOException e) {
+            } catch (IOException | IllegalArgumentException e) {
                 logInfo("Transform application failed for network " + token, e);
                 sessionLost(token, e);
             }
@@ -2545,8 +2580,12 @@ public class VcnGatewayConnection extends StateMachine {
      * Dumps the state of this VcnGatewayConnection for logging and debugging purposes.
      *
      * <p>PII and credentials MUST NEVER be dumped here.
+     *
+     * <p>This method is not thread safe and MUST run on the VCN thread.
      */
     public void dump(IndentingPrintWriter pw) {
+        mVcnContext.ensureRunningOnLooperThread();
+
         pw.println("VcnGatewayConnection (" + mConnectionConfig.getGatewayConnectionName() + "):");
         pw.increaseIndent();
 
@@ -2566,6 +2605,19 @@ public class VcnGatewayConnection extends StateMachine {
 
         mUnderlyingNetworkController.dump(pw);
         pw.println();
+
+        if (mIkeSession == null) {
+            pw.println("mIkeSession: null");
+        } else {
+            pw.println("mIkeSession:");
+
+            // Add a try catch block in case IkeSession#dump is not thread-safe
+            try {
+                mIkeSession.dump(pw);
+            } catch (Exception e) {
+                Slog.wtf(TAG, "Failed to dump IkeSession: " + e);
+            }
+        }
 
         pw.decreaseIndent();
     }
@@ -2869,6 +2921,11 @@ public class VcnGatewayConnection extends StateMachine {
         /** Sets the underlying network used by the IkeSession. */
         public void setNetwork(@NonNull Network network) {
             mImpl.setNetwork(network);
+        }
+
+        /** Dumps the state of the IkeSession */
+        public void dump(@NonNull IndentingPrintWriter pw) {
+            mImpl.dump(pw);
         }
     }
 

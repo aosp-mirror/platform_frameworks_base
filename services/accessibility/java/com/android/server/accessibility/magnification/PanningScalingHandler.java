@@ -28,8 +28,10 @@ import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.view.ViewConfiguration;
 
 import com.android.internal.R;
+import com.android.server.accessibility.Flags;
 
 /**
  * Handles the behavior while receiving scaling and panning gestures if it's enabled.
@@ -43,6 +45,7 @@ class PanningScalingHandler extends
     private static final String TAG = "PanningScalingHandler";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    // TODO(b/312372035): Revisit the scope of usage of the interface
     interface MagnificationDelegate {
         boolean processScroll(int displayId, float distanceX, float distanceY);
         void setScale(int displayId, float scale);
@@ -70,7 +73,13 @@ class PanningScalingHandler extends
         mMaxScale = maxScale;
         mMinScale = minScale;
         mBlockScroll = blockScroll;
-        mScaleGestureDetector = new ScaleGestureDetector(context, this, Handler.getMain());
+        if (Flags.pinchZoomZeroMinSpan()) {
+            mScaleGestureDetector = new ScaleGestureDetector(context,
+                    ViewConfiguration.get(context).getScaledTouchSlop() * 2,
+                    /* minSpan= */ 0, Handler.getMain(), this);
+        } else {
+            mScaleGestureDetector = new ScaleGestureDetector(context, this, Handler.getMain());
+        }
         mScrollGestureDetector = new GestureDetector(context, this, Handler.getMain());
         mScaleGestureDetector.setQuickScaleEnabled(false);
         mMagnificationDelegate = magnificationDelegate;

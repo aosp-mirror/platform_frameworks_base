@@ -16,6 +16,8 @@
 
 package com.android.systemui.media.dialog;
 
+import static com.android.settingslib.flags.Flags.legacyLeAudioSharing;
+
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeBroadcastAssistant;
@@ -42,12 +44,10 @@ import androidx.annotation.NonNull;
 import androidx.core.graphics.drawable.IconCompat;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.settingslib.media.BluetoothMediaDevice;
-import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.qrcode.QrCodeGenerator;
-import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import com.google.zxing.WriterException;
@@ -237,7 +237,11 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
 
     MediaOutputBroadcastDialog(Context context, boolean aboveStatusbar,
             BroadcastSender broadcastSender, MediaOutputController mediaOutputController) {
-        super(context, broadcastSender, mediaOutputController);
+        super(
+                context,
+                broadcastSender,
+                mediaOutputController, /* includePlaybackAndAppMetadata */
+                true);
         mAdapter = new MediaOutputAdapter(mMediaOutputController);
         // TODO(b/226710953): Move the part to MediaOutputBaseDialog for every class
         //  that extends MediaOutputBaseDialog
@@ -261,7 +265,10 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
             mMediaOutputController.registerLeBroadcastAssistantServiceCallback(mExecutor,
                     mBroadcastAssistantCallback);
         }
-        connectBroadcastWithActiveDevice();
+        /* Add local source broadcast to connected capable devices that may be possible receivers
+         * of stream.
+         */
+        startBroadcastWithConnectedDevices();
     }
 
     @Override
@@ -394,30 +401,26 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         }
     }
 
-    void connectBroadcastWithActiveDevice() {
+    void startBroadcastWithConnectedDevices() {
         //get the Metadata, and convert to BT QR code format.
         BluetoothLeBroadcastMetadata broadcastMetadata = getBroadcastMetadata();
         if (broadcastMetadata == null) {
             Log.e(TAG, "Error: There is no broadcastMetadata.");
             return;
         }
-        MediaDevice mediaDevice = mMediaOutputController.getCurrentConnectedMediaDevice();
-        if (mediaDevice == null || !(mediaDevice instanceof BluetoothMediaDevice)
-                || !mediaDevice.isBLEDevice()) {
-            Log.e(TAG, "Error: There is no active BT LE device.");
-            return;
-        }
-        BluetoothDevice sink = ((BluetoothMediaDevice) mediaDevice).getCachedDevice().getDevice();
-        Log.d(TAG, "The broadcastMetadata broadcastId: " + broadcastMetadata.getBroadcastId()
-                + ", the device: " + sink.getAnonymizedAddress());
 
-        if (mMediaOutputController.isThereAnyBroadcastSourceIntoSinkDevice(sink)) {
-            Log.d(TAG, "The sink device has the broadcast source now.");
-            return;
-        }
-        if (!mMediaOutputController.addSourceIntoSinkDeviceWithBluetoothLeAssistant(sink,
-                broadcastMetadata, /*isGroupOp=*/ true)) {
-            Log.e(TAG, "Error: Source add failed");
+        for (BluetoothDevice sink : mMediaOutputController.getConnectedBroadcastSinkDevices()) {
+            Log.d(TAG, "The broadcastMetadata broadcastId: " + broadcastMetadata.getBroadcastId()
+                    + ", the device: " + sink.getAnonymizedAddress());
+
+            if (mMediaOutputController.isThereAnyBroadcastSourceIntoSinkDevice(sink)) {
+                Log.d(TAG, "The sink device has the broadcast source now.");
+                return;
+            }
+            if (!mMediaOutputController.addSourceIntoSinkDeviceWithBluetoothLeAssistant(sink,
+                    broadcastMetadata, /*isGroupOp=*/ false)) {
+                Log.e(TAG, "Error: Source add failed");
+            }
         }
     }
 
@@ -491,6 +494,7 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
 
     @Override
     public boolean isBroadcastSupported() {
+        if (!legacyLeAudioSharing()) return false;
         boolean isBluetoothLeDevice = false;
         if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
             isBluetoothLeDevice = mMediaOutputController.isBluetoothLeDevice(

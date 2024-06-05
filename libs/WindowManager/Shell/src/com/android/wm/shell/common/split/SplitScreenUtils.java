@@ -22,12 +22,18 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.Rect;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 
 /** Helper utility class for split screen components to use. */
@@ -84,9 +90,48 @@ public class SplitScreenUtils {
         return taskInfo != null ? taskInfo.userId : -1;
     }
 
-    /** Returns true if package names and user ids match. */
-    public static boolean samePackage(String packageName1, String packageName2,
-            int userId1, int userId2) {
-        return (packageName1 != null && packageName1.equals(packageName2)) && (userId1 == userId2);
+    /** Generates a common log message for split screen failures */
+    public static String splitFailureMessage(String caller, String reason) {
+        return "(" + caller + ") Splitscreen aborted: " + reason;
+    }
+
+    /**
+     * Returns whether left/right split is allowed in portrait.
+     */
+    public static boolean allowLeftRightSplitInPortrait(Resources res) {
+        return Flags.enableLeftRightSplitInPortrait() && res.getBoolean(
+                com.android.internal.R.bool.config_leftRightSplitInPortrait);
+    }
+
+    /**
+     * Returns whether left/right split is supported in the given configuration.
+     */
+    public static boolean isLeftRightSplit(boolean allowLeftRightSplitInPortrait,
+            Configuration config) {
+        // Compare the max bounds sizes as on near-square devices, the insets may result in a
+        // configuration in the other orientation
+        final boolean isLargeScreen = config.smallestScreenWidthDp >= 600;
+        final Rect maxBounds = config.windowConfiguration.getMaxBounds();
+        final boolean isLandscape = maxBounds.width() >= maxBounds.height();
+        return isLeftRightSplit(allowLeftRightSplitInPortrait, isLargeScreen, isLandscape);
+    }
+
+    /**
+     * Returns whether left/right split is supported in the given configuration state. This method
+     * is useful for cases where we need to calculate this given last saved state.
+     */
+    public static boolean isLeftRightSplit(boolean allowLeftRightSplitInPortrait,
+            boolean isLargeScreen, boolean isLandscape) {
+        if (allowLeftRightSplitInPortrait && isLargeScreen) {
+            return !isLandscape;
+        } else {
+            return isLandscape;
+        }
+    }
+
+    /** Returns the specified background color that matches a RunningTaskInfo. */
+    public static Color getResizingBackgroundColor(ActivityManager.RunningTaskInfo taskInfo) {
+        final int taskBgColor = taskInfo.taskDescription.getBackgroundColor();
+        return Color.valueOf(taskBgColor == -1 ? Color.WHITE : taskBgColor);
     }
 }

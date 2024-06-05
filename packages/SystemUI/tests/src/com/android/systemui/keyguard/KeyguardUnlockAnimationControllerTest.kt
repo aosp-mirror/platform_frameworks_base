@@ -6,15 +6,18 @@ import android.app.WindowConfiguration
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.PowerManager
-import android.testing.AndroidTestingRunner
+import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import android.view.ViewRootImpl
+import android.view.WindowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
@@ -43,12 +46,14 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 import java.util.function.Predicate
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @SmallTest
 class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
 
+    @Mock
+    private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var keyguardViewMediator: KeyguardViewMediator
     @Mock
@@ -97,16 +102,16 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         keyguardUnlockAnimationController = KeyguardUnlockAnimationController(
-            context, keyguardStateController, { keyguardViewMediator }, keyguardViewController,
+            windowManager, context.resources,
+            keyguardStateController, { keyguardViewMediator }, keyguardViewController,
             featureFlags, { biometricUnlockController }, statusBarStateController,
             notificationShadeWindowController, powerManager, wallpaperManager
         )
         keyguardUnlockAnimationController.setLauncherUnlockController(
-            launcherUnlockAnimationController)
+            "", launcherUnlockAnimationController)
 
         whenever(keyguardViewController.viewRootImpl).thenReturn(mock(ViewRootImpl::class.java))
         whenever(powerManager.isInteractive).thenReturn(true)
-        whenever(wallpaperManager.isLockscreenLiveWallpaperEnabled).thenReturn(false)
 
         // All of these fields are final, so we can't mock them, but are needed so that the surface
         // appear amount setter doesn't short circuit.
@@ -131,6 +136,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
      * surface, or the user will see the wallpaper briefly as the app animates in.
      */
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun noSurfaceAnimation_ifWakeAndUnlocking() {
         whenever(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
 
@@ -321,6 +327,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
      * If we are not wake and unlocking, we expect the unlock animation to play normally.
      */
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun surfaceAnimation_multipleTargets() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
                 arrayOf(remoteTarget1, remoteTarget2),
@@ -359,6 +366,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun surfaceBehindAlphaOverriddenTo0_ifNotInteractive() {
         whenever(powerManager.isInteractive).thenReturn(false)
 
@@ -385,13 +393,12 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         // We expect that we've set the surface behind to alpha = 0f since we're not interactive.
         assertEquals(0f, params.alpha)
         assertTrue(params.matrix.isIdentity)
-        assertEquals("Wallpaper surface was expected to have opacity 0",
-                0f, captorWp.getLastValue().alpha)
 
         verifyNoMoreInteractions(surfaceTransactionApplier)
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun surfaceBehindAlphaNotOverriddenTo0_ifInteractive() {
         whenever(powerManager.isInteractive).thenReturn(true)
 

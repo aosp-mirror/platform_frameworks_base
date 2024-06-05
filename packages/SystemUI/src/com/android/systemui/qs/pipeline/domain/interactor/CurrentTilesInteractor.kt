@@ -27,8 +27,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.nano.SystemUIProtoDump
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.qs.QSFactory
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.external.CustomTile
@@ -37,14 +35,19 @@ import com.android.systemui.qs.external.TileLifecycleManager
 import com.android.systemui.qs.external.TileServiceKey
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository
 import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepository
+import com.android.systemui.qs.pipeline.data.repository.MinimumTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
 import com.android.systemui.qs.pipeline.domain.model.TileModel
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
+import com.android.systemui.qs.tiles.di.NewQSTileFactory
 import com.android.systemui.qs.toProto
+import com.android.systemui.retail.data.repository.RetailModeRepository
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.pairwise
+import dagger.Lazy
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -56,6 +59,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -111,6 +116,10 @@ interface CurrentTilesInteractor : ProtoDumpable {
      * @see TileSpecRepository.setTiles
      */
     fun setTiles(specs: List<TileSpec>)
+
+    companion object {
+        val POSITION_AT_END: Int = TileSpecRepository.POSITION_AT_END
+    }
 }
 
 /**
@@ -128,7 +137,10 @@ constructor(
     private val tileSpecRepository: TileSpecRepository,
     private val installedTilesComponentRepository: InstalledTilesComponentRepository,
     private val userRepository: UserRepository,
+    private val minimumTilesRepository: MinimumTilesRepository,
+    private val retailModeRepository: RetailModeRepository,
     private val customTileStatePersister: CustomTileStatePersister,
+    private val newQSTileFactory: Lazy<NewQSTileFactory>,
     private val tileFactory: QSFactory,
     private val customTileAddedRepository: CustomTileAddedRepository,
     private val tileLifecycleManagerFactory: TileLifecycleManager.Factory,
@@ -137,7 +149,7 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
     private val logger: QSPipelineLogger,
-    featureFlags: FeatureFlags,
+    private val featureFlags: QSPipelineFlagsRepository,
 ) : CurrentTilesInteractor {
 
     private val _currentSpecsAndTiles: MutableStateFlow<List<TileModel>> =
@@ -168,8 +180,16 @@ constructor(
             installedTilesComponentRepository.getInstalledTilesComponents(it)
         }
 
+    private val minTiles: Int
+        get() =
+            if (retailModeRepository.inRetailMode) {
+                1
+            } else {
+                minimumTilesRepository.minNumberOfTiles
+            }
+
     init {
-        if (featureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)) {
+        if (featureFlags.pipelineEnabled) {
             startTileCollection()
         }
     }
@@ -251,17 +271,23 @@ constructor(
                         val resolvedSpecs = newTileMap.keys.toList()
                         specsToTiles.clear()
                         specsToTiles.putAll(newTileMap)
-                        _currentSpecsAndTiles.value =
+                        val newResolvedTiles =
                             newTileMap
                                 .filter { it.value is TileOrNotInstalled.Tile }
                                 .map {
                                     TileModel(it.key, (it.value as TileOrNotInstalled.Tile).tile)
                                 }
+
+                        _currentSpecsAndTiles.value = newResolvedTiles
                         logger.logTilesNotInstalled(
                             newTileMap.filter { it.value is TileOrNotInstalled.NotInstalled }.keys,
                             newUser
                         )
-                        if (resolvedSpecs != newTileList) {
+                        if (newResolvedTiles.size < minTiles) {
+                            // We ended up with not enough tiles (some may be not installed).
+                            // Prepend the default set of tiles
+                            launch { tileSpecRepository.prependDefault(currentUser.value) }
+                        } else if (resolvedSpecs != newTileList) {
                             // There were some tiles that couldn't be created. Change the value in
                             // the
                             // repository
@@ -273,7 +299,9 @@ constructor(
     }
 
     override fun addTile(spec: TileSpec, position: Int) {
-        scope.launch {
+        scope.launch(backgroundDispatcher) {
+            // Block until the list is not empty
+            currentTiles.filter { it.isNotEmpty() }.first()
             tileSpecRepository.addTile(userRepository.getSelectedUserInfo().id, spec, position)
         }
     }
@@ -313,7 +341,7 @@ constructor(
 
     override fun dumpProto(systemUIProtoDump: SystemUIProtoDump, args: Array<String>) {
         val data =
-            currentTiles.value.map { it.tile.state }.mapNotNull { it.toProto() }.toTypedArray()
+            currentTiles.value.map { it.tile.state }.mapNotNull { it?.toProto() }.toTypedArray()
         systemUIProtoDump.tiles = data
     }
 
@@ -328,12 +356,19 @@ constructor(
     }
 
     private suspend fun createTile(spec: TileSpec): QSTile? {
-        val tile = withContext(mainDispatcher) { tileFactory.createTile(spec.spec) }
+        val tile =
+            withContext(mainDispatcher) {
+                if (featureFlags.tilesEnabled) {
+                    newQSTileFactory.get().createTile(spec.spec)
+                } else {
+                    null
+                }
+                    ?: tileFactory.createTile(spec.spec)
+            }
         if (tile == null) {
             logger.logTileNotFoundInFactory(spec)
             return null
         } else {
-            tile.tileSpec = spec.spec
             return if (!tile.isAvailable) {
                 logger.logTileDestroyed(
                     spec,

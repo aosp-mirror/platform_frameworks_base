@@ -26,6 +26,7 @@ import java.io.OutputStream;
  * An OutputStream that does Base64 encoding on the data written to
  * it, writing the resulting data to another OutputStream.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Base64OutputStream extends FilterOutputStream {
     private final Base64.Coder coder;
     private final int flags;

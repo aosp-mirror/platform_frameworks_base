@@ -102,7 +102,7 @@ public:
     bool write(uint64_t fieldId, long val);
     bool write(uint64_t fieldId, long long val);
     bool write(uint64_t fieldId, bool val);
-    bool write(uint64_t fieldId, std::string val);
+    bool write(uint64_t fieldId, std::string_view val);
     bool write(uint64_t fieldId, const char* val, size_t size);
 
     /**

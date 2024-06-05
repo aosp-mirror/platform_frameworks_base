@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.icon;
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
-import android.app.ActivityManager;
-import android.app.Notification;
+package com.android.systemui.statusbar.notification.icon
+
+import android.app.ActivityManager
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.Person
@@ -25,10 +27,11 @@ import android.content.pm.LauncherApps
 import android.content.pm.ShortcutInfo
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
+import android.os.Bundle
 import android.os.SystemClock
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner;
 import androidx.test.InstrumentationRegistry
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.AuxiliaryPersistenceWrapperTest.Companion.any
@@ -36,27 +39,31 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import org.junit.Assert.assertEquals
+import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Test
-
-import org.junit.runner.RunWith;
+import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
-class IconManagerTest: SysuiTestCase() {
+@RunWith(AndroidJUnit4::class)
+class IconManagerTest : SysuiTestCase() {
     companion object {
-        private const val TEST_PACKAGE_NAME = "test";
-        private const val TEST_UID = 0;
+        private const val TEST_PACKAGE_NAME = "test"
+
+        private const val TEST_UID = 0
     }
 
-
     private var id = 0
-    private val context = InstrumentationRegistry.getTargetContext();
+    private val context = InstrumentationRegistry.getTargetContext()
+
     @Mock private lateinit var shortcut: ShortcutInfo
     @Mock private lateinit var shortcutIc: Icon
     @Mock private lateinit var messageIc: Icon
@@ -67,6 +74,11 @@ class IconManagerTest: SysuiTestCase() {
 
     @Mock private lateinit var notifCollection: CommonNotifCollection
     @Mock private lateinit var launcherApps: LauncherApps
+
+    private val testDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
+    private val mainContext = testScope.coroutineContext
+    private val bgContext = testScope.backgroundScope.coroutineContext
 
     private val iconBuilder = IconBuilder(context)
 
@@ -84,111 +96,168 @@ class IconManagerTest: SysuiTestCase() {
         `when`(shortcut.icon).thenReturn(shortcutIc)
         `when`(launcherApps.getShortcutIcon(shortcut)).thenReturn(shortcutIc)
 
-        iconManager = IconManager(notifCollection, launcherApps, iconBuilder)
+        iconManager =
+            IconManager(
+                notifCollection,
+                launcherApps,
+                iconBuilder,
+                testScope,
+                bgContext,
+                mainContext,
+            )
     }
 
     @Test
     fun testCreateIcons_importantConversation_shortcutIcon() {
-        val entry = notificationEntry(true, true, true)
+        val entry =
+            notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = true)
         entry?.channel?.isImportantConversation = true
-        entry?.let {
-            iconManager.createIcons(it)
-        }
-        assertEquals(entry?.icons?.statusBarIcon?.sourceIcon, shortcutIc)
+        entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
+        assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(shortcutIc)
     }
 
     @Test
     fun testCreateIcons_importantConversation_messageIcon() {
-        val entry = notificationEntry(false, true, true)
+        val entry =
+            notificationEntry(hasShortcut = false, hasMessageSenderIcon = true, hasLargeIcon = true)
         entry?.channel?.isImportantConversation = true
-        entry?.let {
-            iconManager.createIcons(it)
-        }
-        assertEquals(entry?.icons?.statusBarIcon?.sourceIcon, messageIc)
+        entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
+        assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(messageIc)
     }
 
     @Test
     fun testCreateIcons_importantConversation_largeIcon() {
-        val entry = notificationEntry(false, false, true)
+        val entry =
+            notificationEntry(
+                hasShortcut = false,
+                hasMessageSenderIcon = false,
+                hasLargeIcon = true
+            )
         entry?.channel?.isImportantConversation = true
-        entry?.let {
-            iconManager.createIcons(it)
-        }
-        assertEquals(entry?.icons?.statusBarIcon?.sourceIcon, largeIc)
+        entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
+        assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(largeIc)
     }
 
     @Test
     fun testCreateIcons_importantConversation_smallIcon() {
-        val entry = notificationEntry(false, false, false)
+        val entry =
+            notificationEntry(
+                hasShortcut = false,
+                hasMessageSenderIcon = false,
+                hasLargeIcon = false
+            )
         entry?.channel?.isImportantConversation = true
-        entry?.let {
-            iconManager.createIcons(it)
-        }
-        assertEquals(entry?.icons?.statusBarIcon?.sourceIcon, smallIc)
+        entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
+        assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(smallIc)
+    }
+
+    @Test
+    fun testCreateIcons_importantConversationWithoutMessagingStyle() {
+        val entry =
+            notificationEntry(
+                hasShortcut = true,
+                hasMessageSenderIcon = true,
+                useMessagingStyle = false,
+                hasLargeIcon = true
+            )
+        entry?.channel?.isImportantConversation = true
+        entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
+        assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(smallIc)
     }
 
     @Test
     fun testCreateIcons_notImportantConversation() {
-        val entry = notificationEntry(true, true, true)
-        entry?.let {
-            iconManager.createIcons(it)
-        }
-        assertEquals(entry?.icons?.statusBarIcon?.sourceIcon, smallIc)
+        val entry =
+            notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = true)
+        entry?.let { iconManager.createIcons(it) }
+        assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(smallIc)
     }
 
     @Test
     fun testCreateIcons_sensitiveImportantConversation() {
-        val entry = notificationEntry(true, false, false)
-        entry?.setSensitive(true, true);
+        val entry =
+            notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = false)
+        entry?.setSensitive(true, true)
         entry?.channel?.isImportantConversation = true
-        entry?.let {
-            iconManager.createIcons(it)
-        }
-        assertEquals(entry?.icons?.statusBarIcon?.sourceIcon, shortcutIc)
-        assertEquals(entry?.icons?.shelfIcon?.sourceIcon, smallIc)
-        assertEquals(entry?.icons?.aodIcon?.sourceIcon, smallIc)
+        entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
+        assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(shortcutIc)
+        assertThat(entry?.icons?.shelfIcon?.sourceIcon).isEqualTo(smallIc)
+        assertThat(entry?.icons?.aodIcon?.sourceIcon).isEqualTo(smallIc)
+    }
+
+    @Test
+    fun testUpdateIcons_sensitiveImportantConversation() {
+        val entry =
+            notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = false)
+        entry?.setSensitive(true, true)
+        entry?.channel?.isImportantConversation = true
+        entry?.let { iconManager.createIcons(it) }
+        // Updating the icons after creation shouldn't break anything
+        entry?.let { iconManager.updateIcons(it) }
+        testScope.runCurrent()
+        assertThat(entry?.icons?.statusBarIcon?.sourceIcon).isEqualTo(shortcutIc)
+        assertThat(entry?.icons?.shelfIcon?.sourceIcon).isEqualTo(smallIc)
+        assertThat(entry?.icons?.aodIcon?.sourceIcon).isEqualTo(smallIc)
     }
 
     @Test
     fun testUpdateIcons_sensitivityChange() {
-        val entry = notificationEntry(true, false, false)
+        val entry =
+            notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = false)
         entry?.channel?.isImportantConversation = true
-        entry?.setSensitive(true, true);
-        entry?.let {
-            iconManager.createIcons(it)
-        }
-        assertEquals(entry?.icons?.aodIcon?.sourceIcon, smallIc)
-        entry?.setSensitive(false, false);
-        entry?.let {
-            iconManager.updateIcons(it)
-        }
-        assertEquals(entry?.icons?.shelfIcon?.sourceIcon, shortcutIc)
+        entry?.setSensitive(true, true)
+        entry?.let { iconManager.createIcons(it) }
+        testScope.runCurrent()
+        assertThat(entry?.icons?.aodIcon?.sourceIcon).isEqualTo(smallIc)
+        entry?.setSensitive(false, false)
+        entry?.let { iconManager.updateIcons(it) }
+        testScope.runCurrent()
+        assertThat(entry?.icons?.shelfIcon?.sourceIcon).isEqualTo(shortcutIc)
     }
 
     private fun notificationEntry(
-            hasShortcut: Boolean,
-            hasMessage: Boolean,
-            hasLargeIcon: Boolean
+        hasShortcut: Boolean,
+        hasMessageSenderIcon: Boolean,
+        useMessagingStyle: Boolean = true,
+        hasLargeIcon: Boolean
     ): NotificationEntry? {
-        val n = Notification.Builder(mContext, "id")
+        val n =
+            Notification.Builder(mContext, "id")
                 .setSmallIcon(smallIc)
                 .setContentTitle("Title")
                 .setContentText("Text")
 
-        if (hasMessage) {
-            n.style = Notification.MessagingStyle("")
-                    .addMessage(Notification.MessagingStyle.Message(
-                            "",
-                            SystemClock.currentThreadTimeMillis(),
-                            Person.Builder().setIcon(messageIc).build()
-                    ))
+        val messagingStyle =
+            Notification.MessagingStyle("")
+                .addMessage(
+                    Notification.MessagingStyle.Message(
+                        "",
+                        SystemClock.currentThreadTimeMillis(),
+                        Person.Builder()
+                            .setIcon(if (hasMessageSenderIcon) messageIc else null)
+                            .build()
+                    )
+                )
+        if (useMessagingStyle) {
+            n.style = messagingStyle
+        } else {
+            val bundle = Bundle()
+            messagingStyle.addExtras(bundle, false, 0) // Set extras but not EXTRA_TEMPLATE
+            n.addExtras(bundle)
         }
 
         if (hasLargeIcon) {
             n.setLargeIcon(largeIc)
         }
 
-        val builder = NotificationEntryBuilder()
+        val builder =
+            NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_NAME)
                 .setOpPkg(TEST_PACKAGE_NAME)
                 .setUid(TEST_UID)
@@ -203,7 +272,7 @@ class IconManagerTest: SysuiTestCase() {
 
         val entry = builder.build()
         entry.row = row
-        entry.setSensitive(false, true);
+        entry.setSensitive(false, true)
         return entry
     }
 }

@@ -86,8 +86,8 @@ public final class BiometricContextProvider implements BiometricContext {
     @Nullable private final Handler mHandler;
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     private int mFoldState = IBiometricContextListener.FoldState.UNKNOWN;
-
     private int mDisplayState = AuthenticateOptions.DISPLAY_STATE_UNKNOWN;
+    private boolean mIsHardwareIgnoringTouches = false;
     @VisibleForTesting
     final BroadcastReceiver mDockStateReceiver = new BroadcastReceiver() {
         @Override
@@ -116,14 +116,24 @@ public final class BiometricContextProvider implements BiometricContext {
             service.setBiometicContextListener(new IBiometricContextListener.Stub() {
                 @Override
                 public void onFoldChanged(int foldState) {
-                    mFoldState = foldState;
-                    // no need to notify, not sent to HAL
+                    if (mFoldState != foldState) {
+                        mFoldState = foldState;
+                        notifyChanged();
+                    }
                 }
 
                 @Override
                 public void onDisplayStateChanged(int displayState) {
                     if (displayState != mDisplayState) {
                         mDisplayState = displayState;
+                        notifyChanged();
+                    }
+                }
+
+                @Override
+                public void onHardwareIgnoreTouchesChanged(boolean shouldIgnore) {
+                    if (mIsHardwareIgnoringTouches != shouldIgnore) {
+                        mIsHardwareIgnoringTouches = shouldIgnore;
                         notifyChanged();
                     }
                 }
@@ -213,12 +223,20 @@ public final class BiometricContextProvider implements BiometricContext {
     }
 
     @Override
+    public boolean isHardwareIgnoringTouches() {
+        return mIsHardwareIgnoringTouches;
+    }
+
+    @Override
     public void subscribe(@NonNull OperationContextExt context,
-            @NonNull Consumer<OperationContext> consumer) {
-        mSubscribers.put(context, consumer);
-        // TODO(b/294161627) Combine the getContext/subscribe APIs to avoid race
-        if (context.getDisplayState() != getDisplayState()) {
-            consumer.accept(context.update(this, context.isCrypto()).toAidlContext());
+            @NonNull Consumer<OperationContext> startHalConsumer,
+            @NonNull Consumer<OperationContext> updateContextConsumer,
+            @Nullable AuthenticateOptions options) {
+        mSubscribers.put(updateContext(context, context.isCrypto()), updateContextConsumer);
+        if (options != null) {
+            startHalConsumer.accept(context.toAidlContext(options));
+        } else {
+            startHalConsumer.accept(context.toAidlContext());
         }
     }
 
@@ -252,8 +270,10 @@ public final class BiometricContextProvider implements BiometricContext {
                 + "bp session: " + getBiometricPromptSessionInfo() + ", "
                 + "displayState: " + getDisplayState() + ", "
                 + "isAwake: " + isAwake() +  ", "
+                + "isHardwareIgnoring: " + isHardwareIgnoringTouches() +  ", "
                 + "isDisplayOn: " + isDisplayOn() +  ", "
                 + "dock: " + getDockedState() + ", "
-                + "rotation: " + getCurrentRotation() + "]";
+                + "rotation: " + getCurrentRotation() + ", "
+                + "foldState: " + mFoldState + "]";
     }
 }

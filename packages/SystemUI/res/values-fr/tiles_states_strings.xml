@@ -88,8 +88,8 @@
   </string-array>
   <string-array name="tile_states_color_correction">
     <item msgid="2840507878437297682">"Indisponible"</item>
-    <item msgid="1909756493418256167">"Désactivé"</item>
-    <item msgid="4531508423703413340">"Activé"</item>
+    <item msgid="1909756493418256167">"Désactivée"</item>
+    <item msgid="4531508423703413340">"Activée"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Indisponible"</item>
@@ -125,6 +125,11 @@
     <item msgid="1085836626613341403">"Indisponible"</item>
     <item msgid="8259411607272330225">"Désactivé"</item>
     <item msgid="578444932039713369">"Activé"</item>
+  </string-array>
+  <string-array name="tile_states_record_issue">
+    <item msgid="1727196795383575383">"Non disponible"</item>
+    <item msgid="9061144428113385092">"Désactivé"</item>
+    <item msgid="2984256114867200368">"Activé"</item>
   </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"Indisponible"</item>
@@ -180,5 +185,10 @@
     <item msgid="3173069902082305985">"Non disponible"</item>
     <item msgid="2478289035899842865">"Désactivé"</item>
     <item msgid="5137565285664080143">"Activé"</item>
+  </string-array>
+  <string-array name="tile_states_hearing_devices">
+    <item msgid="1235334096484287173">"Non disponible"</item>
+    <item msgid="3079622119444911877">"Désactivé"</item>
+    <item msgid="3028994095749238254">"Activé"</item>
   </string-array>
 </resources>

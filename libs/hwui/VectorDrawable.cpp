@@ -16,6 +16,7 @@
 
 #include "VectorDrawable.h"
 
+#include <gui/TraceUtils.h>
 #include <math.h>
 #include <string.h>
 #include <utils/Log.h>
@@ -26,12 +27,7 @@
 #include "SkSamplingOptions.h"
 #include "SkScalar.h"
 #include "hwui/Paint.h"
-
-#ifdef __ANDROID__
 #include "renderthread/RenderThread.h"
-#endif
-
-#include <gui/TraceUtils.h>
 #include "utils/Macros.h"
 #include "utils/VectorDrawableUtils.h"
 
@@ -544,7 +540,7 @@ bool Tree::allocateBitmapIfNeeded(Cache& cache, int width, int height) {
 }
 
 bool Tree::canReuseBitmap(Bitmap* bitmap, int width, int height) {
-    return bitmap && width <= bitmap->width() && height <= bitmap->height();
+    return bitmap && width == bitmap->width() && height == bitmap->height();
 }
 
 void Tree::onPropertyChanged(TreeProperties* prop) {

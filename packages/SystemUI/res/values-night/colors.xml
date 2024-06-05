@@ -33,7 +33,7 @@
     <!-- The color of the text inside a notification -->
     <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_dark</color>
 
-    <color name="notif_pill_text">@color/material_dynamic_neutral95</color>
+    <color name="notif_pill_text">@android:color/system_on_surface_dark</color>
 
     <color name="notification_guts_link_icon_tint">@color/GM2_grey_500</color>
     <color name="notification_guts_sub_text_color">@color/GM2_grey_300</color>
@@ -77,6 +77,7 @@
     <color name="biometric_dialog_gray">#ffcccccc</color>
     <color name="biometric_dialog_accent">@color/material_dynamic_primary70</color>
     <color name="biometric_dialog_error">#fff28b82</color> <!-- red 300 -->
+    <color name="biometric_dialog_face_checkmark">#5bb974</color> <!-- green 400 -->
 
     <color name="GM2_green_500">#FF41Af6A</color>
     <color name="GM2_blue_500">#5195EA</color>
@@ -93,6 +94,8 @@
     <color name="qs_user_switcher_selected_avatar_icon_color">#202124</color>
     <!-- Color of background circle of user avatars in quick settings user switcher -->
     <color name="qs_user_switcher_avatar_background">#3C4043</color>
+    <!-- Color of border for keyguard password input when focused -->
+    <color name="bouncer_password_focus_color">@*android:color/system_secondary_dark</color>
 
     <!-- Accessibility floating menu -->
     <color name="accessibility_floating_menu_background">#B3000000</color> <!-- 70% -->
@@ -104,4 +107,7 @@
     <!-- Internet Dialog -->
     <color name="connected_network_primary_color">@color/material_dynamic_primary80</color>
     <color name="connected_network_secondary_color">@color/material_dynamic_secondary80</color>
+
+    <!-- Keyboard shortcut helper dialog -->
+    <color name="ksh_key_item_color">@*android:color/system_on_surface_variant_dark</color>
 </resources>

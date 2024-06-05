@@ -45,18 +45,12 @@
     <!-- Allow PIP to resize to a slightly bigger state upon touch/showing the menu -->
     <bool name="config_pipEnableResizeForMenu">true</bool>
 
-    <!-- Allow PIP to resize via dragging the corner of PiP. -->
-    <bool name="config_pipEnableDragCornerResize">false</bool>
-
-    <!-- PiP minimum size, which is a % based off the shorter side of display width and height -->
-    <fraction name="config_pipShortestEdgePercent">40%</fraction>
-
-    <!-- Show PiP enter split icon, which allows apps to directly enter splitscreen from PiP. -->
-    <bool name="config_pipEnableEnterSplitButton">false</bool>
-
     <!-- Time (duration in milliseconds) that the shell waits for an app to close the PiP by itself
          if a custom action is present before closing it. -->
     <integer name="config_pipForceCloseDelay">1000</integer>
+
+    <!-- Allow PIP to resize via pinch gesture. -->
+    <bool name="config_pipEnablePinchResize">true</bool>
 
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
@@ -83,16 +77,55 @@
     <!-- Animation duration when exit starting window: reveal app -->
     <integer name="starting_window_app_reveal_anim_duration">266</integer>
 
+    <!-- Default animation type when hiding the starting window. The possible values are:
+          - 0 for radial vanish + slide up
+          - 1 for fade out -->
+    <integer name="starting_window_exit_animation_type">0</integer>
+
     <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
          These values are in DPs and will be converted to pixel sizes internally. -->
     <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">
         16x16
     </string>
 
+    <!-- Default percentages for the PIP size logic.
+         1. Determine max widths
+         Subtract width of system UI and default padding from the shortest edge of the device.
+         This is the max width.
+         2. Calculate Default and Mins
+         Default is config_pipSystemPreferredDefaultSizePercent of max-width/height.
+         Min is config_pipSystemPreferredMinimumSizePercent of it. -->
+    <item name="config_pipSystemPreferredDefaultSizePercent" format="float" type="dimen">0.6</item>
+    <item name="config_pipSystemPreferredMinimumSizePercent" format="float" type="dimen">0.5</item>
+    <!-- Default percentages for the PIP size logic when the Display is close to square.
+         This is used instead when the display is square-ish, like fold-ables when unfolded,
+         to make sure that default PiP does not cover the hinge (halfway of the display).
+         0. Determine if the display is square-ish
+         If min(displayWidth, displayHeight) / max(displayWidth, displayHeight) is greater than
+         config_pipSquareDisplayThresholdForSystemPreferredSize, we use the percent for
+         square display listed below.
+         1. Determine max widths
+         Subtract width of system UI and default padding from the shortest edge of the device.
+         This is the max width.
+         2. Calculate Default and Mins
+         Default is config_pipSystemPreferredDefaultSizePercentForSquareDisplay of max-width/height.
+         Min is config_pipSystemPreferredMinimumSizePercentForSquareDisplay of it. -->
+    <item name="config_pipSquareDisplayThresholdForSystemPreferredSize"
+        format="float" type="dimen">0.95</item>
+    <item name="config_pipSystemPreferredDefaultSizePercentForSquareDisplay"
+        format="float" type="dimen">0.5</item>
+    <item name="config_pipSystemPreferredMinimumSizePercentForSquareDisplay"
+        format="float" type="dimen">0.4</item>
+
     <!-- The percentage of the screen width to use for the default width or height of
          picture-in-picture windows. Regardless of the percent set here, calculated size will never
-         be smaller than @dimen/default_minimal_size_pip_resizable_task. -->
+         be smaller than @dimen/default_minimal_size_pip_resizable_task.
+         This is used in legacy spec, use config_pipSystemPreferredDefaultSizePercent instead. -->
     <item name="config_pictureInPictureDefaultSizePercent" format="float" type="dimen">0.23</item>
+
+    <!-- PiP minimum size, which is a % based off the shorter side of display width and height.
+         This is used in legacy spec, use config_pipSystemPreferredMinimumSizePercent instead. -->
+    <fraction name="config_pipShortestEdgePercent">40%</fraction>
 
     <!-- The default aspect ratio for picture-in-picture windows. -->
     <item name="config_pictureInPictureDefaultAspectRatio" format="float" type="dimen">
@@ -126,6 +159,24 @@
     <!-- Whether the additional education about reachability is enabled -->
     <bool name="config_letterboxIsReachabilityEducationEnabled">false</bool>
 
+    <!-- The minimum tolerance of the percentage of activity bounds within its task to hide
+         size compat restart button. Value lower than 0 or higher than 100 will be ignored.
+         100 is the default value where the activity has to fit exactly within the task to allow
+         size compat restart button to be hidden. 0 means size compat restart button will always
+         be hidden. -->
+    <integer name="config_letterboxRestartButtonHideTolerance">100</integer>
+
     <!-- Whether DragAndDrop capability is enabled -->
     <bool name="config_enableShellDragDrop">true</bool>
+
+    <!-- Whether this device allows to use the appIcon as a fallback icon for the splash screen
+        window. If false, the splash screen will be a solid color splash screen whenever the
+        app has not provided a windowSplashScreenAnimatedIcon. -->
+    <bool name="config_canUseAppIconForSplashScreen">true</bool>
+
+    <!-- Whether CompatUIController is enabled -->
+    <bool name="config_enableCompatUIController">true</bool>
+
+    <!-- Whether pointer pilfer is required to start back animation. -->
+    <bool name="config_backAnimationRequiresPointerPilfer">true</bool>
 </resources>

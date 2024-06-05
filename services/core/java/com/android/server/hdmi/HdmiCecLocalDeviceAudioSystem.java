@@ -21,6 +21,7 @@ import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
 import static com.android.server.hdmi.Constants.ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
 import static com.android.server.hdmi.Constants.PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
 import static com.android.server.hdmi.Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
+import static com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 import android.annotation.Nullable;
 import android.content.ActivityNotFoundException;
@@ -200,7 +201,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         if (WAKE_ON_HOTPLUG && connected) {
             mService.wakeUp();
         }
-        if (mService.getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
+        HdmiPortInfo portInfo = mService.getPortInfo(portId);
+        if (portInfo != null && portInfo.getType() == HdmiPortInfo.PORT_OUTPUT) {
             mCecMessageCache.flushAll();
             if (!connected) {
                 if (isSystemAudioActivated()) {
@@ -231,11 +233,20 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         super.disableDevice(initiatedByCec, callback);
         assertRunOnServiceThread();
         mService.unregisterTvInputCallback(mTvInputCallback);
+        // Removing actions and invoking the callback is similar to
+        // HdmiCecLocalDevicePlayback#disableDevice and HdmiCecLocalDeviceTv#disableDevice,
+        // with the difference that in those classes only specific actions are removed and
+        // here we remove all actions. We don't expect any issues with removing all actions
+        // at this time, but we have to pay attention in the future.
+        removeAllActions();
+        // Call the callback instantly or else it will be called 5 seconds later.
+        checkIfPendingActionsCleared();
     }
 
     @Override
     @ServiceThreadOnly
-    protected void onStandby(boolean initiatedByCec, int standbyAction) {
+    protected void onStandby(boolean initiatedByCec, int standbyAction,
+            StandbyCompletedCallback callback) {
         assertRunOnServiceThread();
         // Invalidate the internal active source record when goes to standby
         // This set will also update mIsActiveSource
@@ -248,7 +259,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                     Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL,
                     isSystemAudioActivated() ? "true" : "false");
         }
-        terminateSystemAudioMode();
+        terminateSystemAudioMode(callback);
     }
 
     @Override
@@ -306,6 +317,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         if ((systemAudioOnPowerOnProp == ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON)
                 || ((systemAudioOnPowerOnProp == USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON)
                 && lastSystemAudioControlStatus && isSystemAudioControlFeatureEnabled())) {
+            if (hasAction(SystemAudioInitiationActionFromAvr.class)) {
+                Slog.i(TAG, "SystemAudioInitiationActionFromAvr is in progress. Restarting.");
+                removeAction(SystemAudioInitiationActionFromAvr.class);
+            }
             addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
         }
     }
@@ -1021,6 +1036,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     void onSystemAudioControlFeatureSupportChanged(boolean enabled) {
         setSystemAudioControlFeatureEnabled(enabled);
         if (enabled) {
+            if (hasAction(SystemAudioInitiationActionFromAvr.class)) {
+                Slog.i(TAG, "SystemAudioInitiationActionFromAvr is in progress. Restarting.");
+                removeAction(SystemAudioInitiationActionFromAvr.class);
+            }
             addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
         }
     }
@@ -1084,9 +1103,16 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     protected void terminateSystemAudioMode() {
+        terminateSystemAudioMode(null);
+    }
+
+    // Since this method is not just called during the standby process, the callback should be
+    // generalized in the future.
+    protected void terminateSystemAudioMode(StandbyCompletedCallback callback) {
         // remove pending initiation actions
         removeAction(SystemAudioInitiationActionFromAvr.class);
         if (!isSystemAudioActivated()) {
+            invokeStandbyCompletedCallback(callback);
             return;
         }
 
@@ -1094,7 +1120,13 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             // send <Set System Audio Mode> [“Off”]
             mService.sendCecCommand(
                     HdmiCecMessageBuilder.buildSetSystemAudioMode(
-                            getDeviceInfo().getLogicalAddress(), Constants.ADDR_BROADCAST, false));
+                            getDeviceInfo().getLogicalAddress(), Constants.ADDR_BROADCAST, false),
+                    new SendMessageCallback() {
+                        @Override
+                        public void onSendCompleted(int error) {
+                            invokeStandbyCompletedCallback(callback);
+                        }
+                    });
         }
     }
 

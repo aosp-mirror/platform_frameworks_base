@@ -16,21 +16,22 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.telephony.DomainSelectionService.SelectionAttributes;
+
+import com.android.internal.telephony.flags.Flags;
 
 /**
  * Implemented as part of the {@link DomainSelectionService} to implement domain selection
- * for a specific use case.
+ * for a specific use case and receive signals from the framework to reselect a new domain
+ * when a previous domain selection fails or finish a selection when the call connects successfully.
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_USE_OEM_DOMAIN_SELECTION_SERVICE)
 public interface DomainSelector {
-    /**
-     * Cancel an ongoing selection operation. It is up to the DomainSelectionService
-     * to clean up all ongoing operations with the framework.
-     */
-    void cancelSelection();
-
     /**
      * Reselect a domain due to the call not setting up properly.
      *

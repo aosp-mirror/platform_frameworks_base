@@ -16,6 +16,7 @@
 
 package com.android.server.job;
 
+import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -26,6 +27,7 @@ import android.os.Binder;
 import android.os.UserHandle;
 
 import com.android.modules.utils.BasicShellCommandHandler;
+import com.android.server.job.controllers.JobStatus;
 
 import java.io.PrintWriter;
 
@@ -58,12 +60,20 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                     return cancelJob(pw);
                 case "monitor-battery":
                     return monitorBattery(pw);
+                case "disable-flex-policy":
+                    return disableFlexPolicy(pw);
+                case "enable-flex-policy":
+                    return enableFlexPolicy(pw);
+                case "get-aconfig-flag-state":
+                    return getAconfigFlagState(pw);
                 case "get-battery-seq":
                     return getBatterySeq(pw);
                 case "get-battery-charging":
                     return getBatteryCharging(pw);
                 case "get-battery-not-low":
                     return getBatteryNotLow(pw);
+                case "get-config-value":
+                    return getConfigValue(pw);
                 case "get-estimated-download-bytes":
                     return getEstimatedNetworkBytes(pw, BYTE_OPTION_DOWNLOAD);
                 case "get-estimated-upload-bytes":
@@ -80,10 +90,14 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                     return getJobState(pw);
                 case "heartbeat":
                     return doHeartbeat(pw);
+                case "cache-config-changes":
+                    return cacheConfigChanges(pw);
                 case "reset-execution-quota":
                     return resetExecutionQuota(pw);
                 case "reset-schedule-quota":
                     return resetScheduleQuota(pw);
+                case "reset-flex-policy":
+                    return resetFlexPolicy(pw);
                 case "stop":
                     return stop(pw);
                 case "trigger-dock-state":
@@ -98,13 +112,16 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
     }
 
     private void checkPermission(String operation) throws Exception {
+        checkPermission(operation, Manifest.permission.CHANGE_APP_IDLE_STATE);
+    }
+
+    private void checkPermission(String operation, String permission) throws Exception {
         final int uid = Binder.getCallingUid();
         if (uid == 0) {
             // Root can do anything.
             return;
         }
-        final int perm = mPM.checkUidPermission(
-                "android.permission.CHANGE_APP_IDLE_STATE", uid);
+        final int perm = mPM.checkUidPermission(permission, uid);
         if (perm != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Uid " + uid
                     + " not permitted to " + operation);
@@ -180,7 +197,7 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
                 case "-u":
                 case "--user":
-                    userId = Integer.parseInt(getNextArgRequired());
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
                     break;
 
                 case "-n":
@@ -197,6 +214,10 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         if (force && satisfied) {
             pw.println("Cannot specify both --force and --satisfied");
             return -1;
+        }
+
+        if (userId == UserHandle.USER_CURRENT) {
+            userId = ActivityManager.getCurrentUser();
         }
 
         final String pkgName = getNextArgRequired();
@@ -332,6 +353,96 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         return 0;
     }
 
+    private int disableFlexPolicy(PrintWriter pw) throws Exception {
+        checkPermission("disable flex policy");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInternal.setFlexPolicy(true, 0);
+            pw.println("Set flex policy to 0");
+            return 0;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private int enableFlexPolicy(PrintWriter pw) throws Exception {
+        checkPermission("enable flex policy");
+
+        int enabled = 0;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-o":
+                case "--option":
+                    final String constraint = getNextArgRequired();
+                    switch (constraint) {
+                        case "battery-not-low":
+                            enabled |= JobStatus.CONSTRAINT_BATTERY_NOT_LOW;
+                            break;
+                        case "charging":
+                            enabled |= JobStatus.CONSTRAINT_CHARGING;
+                            break;
+                        case "connectivity":
+                            enabled |= JobStatus.CONSTRAINT_CONNECTIVITY;
+                            break;
+                        case "idle":
+                            enabled |= JobStatus.CONSTRAINT_IDLE;
+                            break;
+                        default:
+                            pw.println("Unsupported option: " + constraint);
+                            return -1;
+                    }
+                    break;
+
+                default:
+                    pw.println("Error: unknown option '" + opt + "'");
+                    return -1;
+            }
+        }
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInternal.setFlexPolicy(true, enabled);
+            pw.println("Set flex policy to " + enabled);
+            return 0;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private int getAconfigFlagState(PrintWriter pw) throws Exception {
+        checkPermission("get aconfig flag state", Manifest.permission.DUMP);
+
+        final String flagName = getNextArgRequired();
+
+        switch (flagName) {
+            case android.app.job.Flags.FLAG_ENFORCE_MINIMUM_TIME_WINDOWS:
+                pw.println(android.app.job.Flags.enforceMinimumTimeWindows());
+                break;
+            case android.app.job.Flags.FLAG_JOB_DEBUG_INFO_APIS:
+                pw.println(android.app.job.Flags.jobDebugInfoApis());
+                break;
+            case com.android.server.job.Flags.FLAG_BATCH_ACTIVE_BUCKET_JOBS:
+                pw.println(com.android.server.job.Flags.batchActiveBucketJobs());
+                break;
+            case com.android.server.job.Flags.FLAG_BATCH_CONNECTIVITY_JOBS_PER_NETWORK:
+                pw.println(com.android.server.job.Flags.batchConnectivityJobsPerNetwork());
+                break;
+            case com.android.server.job.Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT:
+                pw.println(com.android.server.job.Flags.doNotForceRushExecutionAtBoot());
+                break;
+            case android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION:
+                pw.println(android.app.job.Flags.backupJobsExemption());
+                break;
+            default:
+                pw.println("Unknown flag: " + flagName);
+                break;
+        }
+        return 0;
+    }
+
     private int getBatterySeq(PrintWriter pw) {
         int seq = mInternal.getBatterySeq();
         pw.println(seq);
@@ -348,6 +459,20 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         boolean val = mInternal.isBatteryNotLow();
         pw.println(val);
         return 0;
+    }
+
+    private int getConfigValue(PrintWriter pw) throws Exception {
+        checkPermission("get device config value", Manifest.permission.DUMP);
+
+        final String key = getNextArgRequired();
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            pw.println(mInternal.getConfigValue(key));
+            return 0;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private int getEstimatedNetworkBytes(PrintWriter pw, int byteOption) throws Exception {
@@ -498,6 +623,41 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
         pw.println("Heartbeat command is no longer supported");
         return -1;
+    }
+
+    private int cacheConfigChanges(PrintWriter pw) throws Exception {
+        checkPermission("change config caching", Manifest.permission.DUMP);
+        String opt = getNextArgRequired();
+        boolean enabled;
+        if ("on".equals(opt)) {
+            enabled = true;
+        } else if ("off".equals(opt)) {
+            enabled = false;
+        } else {
+            getErrPrintWriter().println("Error: unknown option " + opt);
+            return 1;
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInternal.setCacheConfigChanges(enabled);
+            pw.println("Config caching " + (enabled ? "enabled" : "disabled"));
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+        return 0;
+    }
+
+    private int resetFlexPolicy(PrintWriter pw) throws Exception {
+        checkPermission("reset flex policy");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInternal.setFlexPolicy(false, 0);
+            pw.println("Reset flex policy to its default state");
+            return 0;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private int resetExecutionQuota(PrintWriter pw) throws Exception {
@@ -686,15 +846,33 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("         is null (no namespace).");
         pw.println("  heartbeat [num]");
         pw.println("    No longer used.");
+        pw.println("  cache-config-changes [on|off]");
+        pw.println("    Control caching the set of most recently processed config flags.");
+        pw.println("    Off by default.  Turning on makes get-config-value useful.");
         pw.println("  monitor-battery [on|off]");
         pw.println("    Control monitoring of all battery changes.  Off by default.  Turning");
         pw.println("    on makes get-battery-seq useful.");
+        pw.println("  enable-flex-policy --option <option>");
+        pw.println("    Enable flex policy with the specified options. Supported options are");
+        pw.println("    battery-not-low, charging, connectivity, idle.");
+        pw.println("    Multiple enable options can be specified (e.g.");
+        pw.println("    enable-flex-policy --option battery-not-low --option charging");
+        pw.println("  disable-flex-policy");
+        pw.println("    Turn off flex policy so that it does not affect job execution.");
+        pw.println("  reset-flex-policy");
+        pw.println("    Resets the flex policy to its default state.");
+        pw.println("  get-aconfig-flag-state FULL_FLAG_NAME");
+        pw.println("    Return the state of the specified aconfig flag, if known. The flag name");
+        pw.println("         must be fully qualified.");
         pw.println("  get-battery-seq");
         pw.println("    Return the last battery update sequence number that was received.");
         pw.println("  get-battery-charging");
         pw.println("    Return whether the battery is currently considered to be charging.");
         pw.println("  get-battery-not-low");
         pw.println("    Return whether the battery is currently considered to not be low.");
+        pw.println("  get-config-value KEY");
+        pw.println("    Return the most recently processed and cached config value for the KEY.");
+        pw.println("    Only useful if caching is turned on with cache-config-changes.");
         pw.println("  get-estimated-download-bytes [-u | --user USER_ID]"
                 + " [-n | --namespace NAMESPACE] PACKAGE JOB_ID");
         pw.println("    Return the most recent estimated download bytes for the job.");

@@ -17,9 +17,12 @@
 package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.CoreStartable
-import com.android.systemui.keyguard.bouncer.data.repository.BouncerMessageRepository
-import com.android.systemui.keyguard.bouncer.data.repository.BouncerMessageRepositoryImpl
-import com.android.systemui.keyguard.bouncer.domain.interactor.BouncerMessageAuditLogger
+import com.android.systemui.bouncer.data.repository.BouncerMessageRepository
+import com.android.systemui.bouncer.data.repository.BouncerMessageRepositoryImpl
+import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
+import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepositoryImpl
+import com.android.systemui.bouncer.domain.interactor.BouncerMessageAuditLogger
+import com.android.systemui.keyguard.ui.binder.SideFpsProgressBarViewBinder
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -28,6 +31,16 @@ import dagger.multibindings.IntoMap
 @Module
 interface KeyguardRepositoryModule {
     @Binds fun keyguardRepository(impl: KeyguardRepositoryImpl): KeyguardRepository
+
+    @Binds
+    @IntoMap
+    @ClassKey(SideFpsProgressBarViewBinder::class)
+    fun bindSideFpsProgressBarViewBinder(viewBinder: SideFpsProgressBarViewBinder): CoreStartable
+
+    @Binds
+    fun keyguardSurfaceBehindRepository(
+        impl: KeyguardSurfaceBehindRepositoryImpl
+    ): KeyguardSurfaceBehindRepository
 
     @Binds
     fun keyguardTransitionRepository(
@@ -61,4 +74,11 @@ interface KeyguardRepositoryModule {
     fun bind(impl: BouncerMessageAuditLogger): CoreStartable
 
     @Binds fun trustRepository(impl: TrustRepositoryImpl): TrustRepository
+
+    @Binds fun keyguardClockRepository(impl: KeyguardClockRepositoryImpl): KeyguardClockRepository
+
+    @Binds
+    fun keyguardSmartspaceRepository(
+        impl: KeyguardSmartspaceRepositoryImpl
+    ): KeyguardSmartspaceRepository
 }

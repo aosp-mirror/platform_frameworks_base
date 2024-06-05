@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
@@ -683,6 +684,36 @@ public interface ViewParent {
      * @hide
      */
     default void subtractObscuredTouchableRegion(Region touchableRegion, View view) {
+    }
+
+    /**
+     * Compute the region where the child can receive the {@link MotionEvent}s from the root view.
+     *
+     * <p> Given region where the child will accept {@link MotionEvent}s.
+     * Modify the region to the unblocked region where the child can receive the
+     * {@link MotionEvent}s from the view root.
+     * </p>
+     *
+     * <p> The given region is always clipped by the bounds of the parent views. When there are
+     * on-going {@link MotionEvent}s, this method also makes use of the event dispatching results to
+     * determine whether a sibling view will also block the child's hit region.
+     * </p>
+     *
+     * @param child a child View, whose hit region we want to compute.
+     * @param region the initial hit region where the child view will handle {@link MotionEvent}s,
+     *              defined in the child coordinates. Will be overwritten to the result hit region.
+     * @param matrix the matrix that maps the given child view's coordinates to the region
+     *               coordinates. It will be modified to a matrix that maps window coordinates to
+     *               the result region's coordinates.
+     * @param isHover if true it will return the hover events' hit region, otherwise it will
+     *               return the touch events' hit region.
+     * @return true if the returned region is not empty.
+     * @hide
+     */
+    default boolean getChildLocalHitRegion(@NonNull View child, @NonNull Region region,
+            @NonNull Matrix matrix, boolean isHover) {
+        region.setEmpty();
+        return false;
     }
 
     /**

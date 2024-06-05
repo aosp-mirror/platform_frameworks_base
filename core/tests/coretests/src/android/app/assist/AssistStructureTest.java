@@ -22,11 +22,20 @@ import static android.view.View.IMPORTANT_FOR_AUTOFILL_YES;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import android.app.assist.AssistStructure.ViewNode;
 import android.app.assist.AssistStructure.ViewNodeBuilder;
 import android.app.assist.AssistStructure.ViewNodeParcelable;
 import android.content.Context;
+import android.credentials.CredentialOption;
+import android.credentials.GetCredentialException;
+import android.credentials.GetCredentialRequest;
+import android.credentials.GetCredentialResponse;
+import android.os.Bundle;
 import android.os.LocaleList;
+import android.os.OutcomeReceiver;
 import android.os.Parcel;
 import android.os.SystemClock;
 import android.text.InputFilter;
@@ -38,6 +47,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
@@ -74,6 +84,28 @@ public class AssistStructureTest {
     private static final int BIG_VIEW_SIZE = 10_000_000;
     private static final char BIG_VIEW_CHAR = '6';
     private static final String BIG_STRING = repeat(BIG_VIEW_CHAR, BIG_VIEW_SIZE);
+
+    private static final GetCredentialRequest GET_CREDENTIAL_REQUEST = new
+            GetCredentialRequest.Builder(Bundle.EMPTY)
+            .addCredentialOption(new CredentialOption(
+                    "TYPE_OPTION",
+                    new Bundle(),
+                    new Bundle(),
+                    false))
+            .build();
+
+    private static final OutcomeReceiver<GetCredentialResponse,
+            GetCredentialException> GET_CREDENTIAL_REQUEST_CALLBACK = new OutcomeReceiver<>() {
+                @Override
+                public void onResult(@NonNull GetCredentialResponse response) {
+                    // Do nothing
+                }
+
+                @Override
+                public void onError(@NonNull GetCredentialException e) {
+                    // Do nothing
+                }
+            };
     // Cannot be much big because it could hang test due to blocking GC
     private static final int NUMBER_SMALL_VIEWS = 10_000;
 
@@ -224,6 +256,56 @@ public class AssistStructureTest {
     }
 
     @Test
+    public void testViewNodeParcelableForCredentialManager() {
+        Log.d(TAG, "Adding view with " + BIG_VIEW_SIZE + " chars");
+
+        View view = newCredentialView();
+        mActivity.addView(view);
+        waitUntilViewsAreLaidOff();
+
+        assertThat(view.getViewRootImpl()).isNotNull();
+        ViewNodeBuilder viewStructure = new ViewNodeBuilder();
+        viewStructure.setAutofillId(view.getAutofillId());
+        viewStructure.setPendingCredentialRequest(view.getPendingCredentialRequest(),
+                view.getPendingCredentialCallback());
+        view.onProvideAutofillStructure(viewStructure, /* flags= */ 0);
+        ViewNodeParcelable viewNodeParcelable = new ViewNodeParcelable(viewStructure.getViewNode());
+
+        // Check properties on "original" view node.
+        assertCredentialView(viewNodeParcelable.getViewNode());
+
+        // Check properties on "cloned" view node.
+        ViewNodeParcelable clone = cloneThroughParcel(viewNodeParcelable);
+        assertCredentialView(clone.getViewNode());
+    }
+
+    @Test
+    public void testViewNodeClearCredentialManagerRequest() {
+        Log.d(TAG, "Adding view with " + BIG_VIEW_SIZE + " chars");
+
+        View view = newCredentialView();
+        mActivity.addView(view);
+        waitUntilViewsAreLaidOff();
+
+        assertThat(view.getViewRootImpl()).isNotNull();
+        ViewNodeBuilder viewStructure = new ViewNodeBuilder();
+        if (view.getPendingCredentialRequest() != null
+                && view.getPendingCredentialCallback() != null) {
+            viewStructure.setPendingCredentialRequest(view.getPendingCredentialRequest(),
+                    view.getPendingCredentialCallback());
+        }
+
+        assertEquals(viewStructure.getPendingCredentialRequest(), GET_CREDENTIAL_REQUEST);
+        assertEquals(viewStructure.getPendingCredentialCallback(),
+                GET_CREDENTIAL_REQUEST_CALLBACK);
+
+        viewStructure.clearCredentialManagerRequest();
+
+        assertNull(viewStructure.getPendingCredentialRequest());
+        assertNull(viewStructure.getPendingCredentialCallback());
+    }
+
+    @Test
     public void testViewNodeParcelableForAutofill() {
         Log.d(TAG, "Adding view with " + BIG_VIEW_SIZE + " chars");
 
@@ -307,6 +389,14 @@ public class AssistStructureTest {
         EditText view = new EditText(mContext);
         view.setText("Big Hint in Little View");
         view.setAutofillHints(BIG_STRING);
+        view.setPendingCredentialRequest(GET_CREDENTIAL_REQUEST, GET_CREDENTIAL_REQUEST_CALLBACK);
+        return view;
+    }
+
+    private EditText newCredentialView() {
+        EditText view = new EditText(mContext);
+        view.setText("Credential Request");
+        view.setPendingCredentialRequest(GET_CREDENTIAL_REQUEST, GET_CREDENTIAL_REQUEST_CALLBACK);
         return view;
     }
 
@@ -316,6 +406,7 @@ public class AssistStructureTest {
         assertThat(view.getIdEntry()).isNull();
         assertThat(view.getAutofillId()).isNotNull();
         assertThat(view.getText().toString()).isEqualTo("Big Hint in Little View");
+        assertThat(view.getText().toString()).isEqualTo("Big Hint in Little View");
 
         String[] hints = view.getAutofillHints();
         assertThat(hints.length).isEqualTo(1);
@@ -324,6 +415,17 @@ public class AssistStructureTest {
         assertThat(hint.length()).isEqualTo(BIG_VIEW_SIZE);
         assertThat(hint.charAt(0)).isEqualTo(BIG_VIEW_CHAR);
         assertThat(hint.charAt(BIG_VIEW_SIZE - 1)).isEqualTo(BIG_VIEW_CHAR);
+    }
+
+    private void assertCredentialView(ViewNode view) {
+        assertThat(view.getClassName()).isEqualTo(EditText.class.getName());
+        assertThat(view.getChildCount()).isEqualTo(0);
+        assertThat(view.getIdEntry()).isNull();
+        assertThat(view.getAutofillId()).isNotNull();
+        assertThat(view.getText().toString()).isEqualTo("Big Hint in Little View");
+
+        assertThat(view.getPendingCredentialRequest()).isEqualTo(GET_CREDENTIAL_REQUEST);
+        assertThat(view.getPendingCredentialCallback()).isEqualTo(GET_CREDENTIAL_REQUEST_CALLBACK);
     }
 
     /**

@@ -16,13 +16,23 @@
 
 package com.android.internal.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Run with:
  atest /android/pi-dev/frameworks/base/core/tests/coretests/src/com/android/internal/util/ParseUtilsTest.java
  */
-public class ParseUtilsTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class ParseUtilsTest {
+    private static final float DELTA_FLOAT = 0.0f;
+    private static final double DELTA_DOUBLE = 0.0d;
+
+    @Test
     public void testParseInt() {
         assertEquals(1, ParseUtils.parseInt(null, 1));
         assertEquals(1, ParseUtils.parseInt("", 1));
@@ -33,6 +43,7 @@ public class ParseUtilsTest extends TestCase {
         assertEquals(-2, ParseUtils.parseInt("-2", 1));
     }
 
+    @Test
     public void testParseIntWithBase() {
         assertEquals(1, ParseUtils.parseIntWithBase(null, 10, 1));
         assertEquals(1, ParseUtils.parseIntWithBase("", 10, 1));
@@ -45,6 +56,7 @@ public class ParseUtilsTest extends TestCase {
         assertEquals(-3, ParseUtils.parseIntWithBase("-10", 3, 1));
     }
 
+    @Test
     public void testParseLong() {
         assertEquals(1L, ParseUtils.parseLong(null, 1));
         assertEquals(1L, ParseUtils.parseLong("", 1));
@@ -52,6 +64,7 @@ public class ParseUtilsTest extends TestCase {
         assertEquals(2L, ParseUtils.parseLong("2", 1));
     }
 
+    @Test
     public void testParseLongWithBase() {
         assertEquals(1L, ParseUtils.parseLongWithBase(null, 10, 1));
         assertEquals(1L, ParseUtils.parseLongWithBase("", 10, 1));
@@ -69,20 +82,23 @@ public class ParseUtilsTest extends TestCase {
         assertEquals(10_000_000_000L, ParseUtils.parseLongWithBase(null, 10, 10_000_000_000L));
     }
 
+    @Test
     public void testParseFloat() {
-        assertEquals(0.5f, ParseUtils.parseFloat(null, 0.5f));
-        assertEquals(0.5f, ParseUtils.parseFloat("", 0.5f));
-        assertEquals(0.5f, ParseUtils.parseFloat("1x", 0.5f));
-        assertEquals(1.5f, ParseUtils.parseFloat("1.5", 0.5f));
+        assertEquals(0.5f, ParseUtils.parseFloat(null, 0.5f), DELTA_FLOAT);
+        assertEquals(0.5f, ParseUtils.parseFloat("", 0.5f), DELTA_FLOAT);
+        assertEquals(0.5f, ParseUtils.parseFloat("1x", 0.5f), DELTA_FLOAT);
+        assertEquals(1.5f, ParseUtils.parseFloat("1.5", 0.5f), DELTA_FLOAT);
     }
 
+    @Test
     public void testParseDouble() {
-        assertEquals(0.5, ParseUtils.parseDouble(null, 0.5));
-        assertEquals(0.5, ParseUtils.parseDouble("", 0.5));
-        assertEquals(0.5, ParseUtils.parseDouble("1x", 0.5));
-        assertEquals(1.5, ParseUtils.parseDouble("1.5", 0.5));
+        assertEquals(0.5, ParseUtils.parseDouble(null, 0.5), DELTA_DOUBLE);
+        assertEquals(0.5, ParseUtils.parseDouble("", 0.5), DELTA_DOUBLE);
+        assertEquals(0.5, ParseUtils.parseDouble("1x", 0.5), DELTA_DOUBLE);
+        assertEquals(1.5, ParseUtils.parseDouble("1.5", 0.5), DELTA_DOUBLE);
     }
 
+    @Test
     public void testParseBoolean() {
         assertEquals(false, ParseUtils.parseBoolean(null, false));
         assertEquals(true, ParseUtils.parseBoolean(null, true));

@@ -34,7 +34,7 @@ import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
-import android.view.View;
+import android.util.Log;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
@@ -44,9 +44,9 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.notification.EnableZenModeDialog;
 import com.android.systemui.Prefs;
-import com.android.systemui.R;
 import com.android.systemui.animation.DialogCuj;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -55,10 +55,11 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.dialog.QSZenModeDialogMetricsLogger;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.settings.SecureSettings;
@@ -80,8 +81,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     private final ZenModeController mController;
     private final SharedPreferences mSharedPreferences;
-    private final SettingObserver mSettingZenDuration;
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final UserSettingObserver mSettingZenDuration;
+    private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final QSZenModeDialogMetricsLogger mQSZenDialogMetricsLogger;
 
     private boolean mListening;
@@ -100,15 +101,15 @@ public class DndTile extends QSTileImpl<BooleanState> {
             ZenModeController zenModeController,
             @Main SharedPreferences sharedPreferences,
             SecureSettings secureSettings,
-            DialogLaunchAnimator dialogLaunchAnimator
+            DialogTransitionAnimator dialogTransitionAnimator
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = zenModeController;
         mSharedPreferences = sharedPreferences;
         mController.observe(getLifecycle(), mZenCallback);
-        mDialogLaunchAnimator = dialogLaunchAnimator;
-        mSettingZenDuration = new SettingObserver(secureSettings, mUiHandler,
+        mDialogTransitionAnimator = dialogTransitionAnimator;
+        mSettingZenDuration = new UserSettingObserver(secureSettings, mUiHandler,
                 Settings.Secure.ZEN_DURATION, getHost().getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
@@ -146,12 +147,12 @@ public class DndTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         // Zen is currently on
         if (mState.value) {
             mController.setZen(ZEN_MODE_OFF, null, TAG);
         } else {
-            enableZenMode(view);
+            enableZenMode(expandable);
         }
     }
 
@@ -161,7 +162,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
         mSettingZenDuration.setUserId(newUserId);
     }
 
-    private void enableZenMode(@Nullable View view) {
+    private void enableZenMode(@Nullable Expandable expandable) {
         int zenDuration = mSettingZenDuration.getValue();
         boolean showOnboarding = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0
@@ -182,11 +183,17 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 case Settings.Secure.ZEN_DURATION_PROMPT:
                     mUiHandler.post(() -> {
                         Dialog dialog = makeZenModeDialog();
-                        if (view != null) {
-                            mDialogLaunchAnimator.showFromView(dialog, view, new DialogCuj(
+                        if (expandable != null) {
+                            DialogTransitionAnimator.Controller controller =
+                                    expandable.dialogTransitionController(new DialogCuj(
                                             InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                                            INTERACTION_JANK_TAG),
-                                    /* animateBackgroundBoundsChange= */ false);
+                                            INTERACTION_JANK_TAG));
+                            if (controller != null) {
+                                mDialogTransitionAnimator.show(dialog,
+                                        controller, /* animateBackgroundBoundsChange= */ false);
+                            } else {
+                                dialog.show();
+                            }
                         } else {
                             dialog.show();
                         }
@@ -216,8 +223,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleSecondaryClick(@Nullable View view) {
-        handleLongClick(view);
+    protected void handleSecondaryClick(@Nullable Expandable expandable) {
+        handleLongClick(expandable);
     }
 
     @Override
@@ -315,6 +322,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     private final ZenModeController.Callback mZenCallback = new ZenModeController.Callback() {
         public void onZenChanged(int zen) {
+            Log.d(TAG, "Zen changed to " + zen + ". Requesting refresh of tile.");
             refreshState(zen);
         }
     };

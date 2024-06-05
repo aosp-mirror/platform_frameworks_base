@@ -17,6 +17,8 @@
 package com.android.systemui.mediaprojection.appselector.data
 
 import android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE
+import android.content.pm.UserInfo
+import android.os.UserManager
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.kotlin.getOrNull
@@ -41,26 +43,42 @@ constructor(
     @Background private val coroutineDispatcher: CoroutineDispatcher,
     @Background private val backgroundExecutor: Executor,
     private val recentTasks: Optional<RecentTasks>,
-    private val userTracker: UserTracker
+    private val userTracker: UserTracker,
+    private val userManager: UserManager,
 ) : RecentTaskListProvider {
 
     private val recents by lazy { recentTasks.getOrNull() }
 
     override suspend fun loadRecentTasks(): List<RecentTask> =
         withContext(coroutineDispatcher) {
-            val rawRecentTasks: List<GroupedRecentTaskInfo> = recents?.getTasks() ?: emptyList()
-
-            rawRecentTasks
-                .flatMap { listOfNotNull(it.taskInfo1, it.taskInfo2) }
-                .map {
+            val groupedTasks: List<GroupedRecentTaskInfo> = recents?.getTasks() ?: emptyList()
+            // Note: the returned task list is from the most-recent to least-recent order.
+            // The last foreground task is at index 1, because at index 0 will be our app selector.
+            val foregroundGroup = groupedTasks.elementAtOrNull(1)
+            val foregroundTaskId1 = foregroundGroup?.taskInfo1?.taskId
+            val foregroundTaskId2 = foregroundGroup?.taskInfo2?.taskId
+            val foregroundTaskIds = listOfNotNull(foregroundTaskId1, foregroundTaskId2)
+            groupedTasks.flatMap {
+                val task1 =
                     RecentTask(
-                        it.taskId,
-                        it.userId,
-                        it.topActivity,
-                        it.baseIntent?.component,
-                        it.taskDescription?.backgroundColor
+                        it.taskInfo1,
+                        it.taskInfo1.taskId in foregroundTaskIds && it.taskInfo1.isVisible,
+                        userManager.getUserInfo(it.taskInfo1.userId).toUserType(),
+                        it.splitBounds
                     )
-                }
+
+                val task2 =
+                    if (it.taskInfo2 != null) {
+                        RecentTask(
+                            it.taskInfo2!!,
+                            it.taskInfo2!!.taskId in foregroundTaskIds && it.taskInfo2!!.isVisible,
+                            userManager.getUserInfo(it.taskInfo2!!.userId).toUserType(),
+                            it.splitBounds
+                        )
+                    } else null
+
+                listOfNotNull(task1, task2)
+            }
         }
 
     private suspend fun RecentTasks.getTasks(): List<GroupedRecentTaskInfo> =
@@ -73,5 +91,16 @@ constructor(
             ) { tasks ->
                 continuation.resume(tasks)
             }
+        }
+
+    private fun UserInfo.toUserType(): RecentTask.UserType =
+        if (isCloneProfile) {
+            RecentTask.UserType.CLONED
+        } else if (isManagedProfile) {
+            RecentTask.UserType.WORK
+        } else if (isPrivateProfile) {
+            RecentTask.UserType.PRIVATE
+        } else {
+            RecentTask.UserType.STANDARD
         }
 }

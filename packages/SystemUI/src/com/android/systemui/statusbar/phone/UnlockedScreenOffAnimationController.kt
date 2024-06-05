@@ -12,16 +12,23 @@ import android.view.Display
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager.fixScale
+import com.android.app.animation.Interpolators
+import com.android.app.tracing.namedRunnable
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.systemui.DejankUtils
-import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.lightRevealMigration
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealScrim
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
 import com.android.systemui.statusbar.notification.AnimatableProperty
@@ -29,8 +36,8 @@ import com.android.systemui.statusbar.notification.PropertyAnimator
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.TraceUtils
 import com.android.systemui.util.settings.GlobalSettings
+import dagger.Lazy
 import javax.inject.Inject
 
 /**
@@ -39,10 +46,8 @@ import javax.inject.Inject
  */
 private const val ANIMATE_IN_KEYGUARD_DELAY = 600L
 
-/**
- * Duration for the light reveal portion of the animation.
- */
-private const val LIGHT_REVEAL_ANIMATION_DURATION = 750L
+/** Duration for the light reveal portion of the animation. */
+private const val LIGHT_REVEAL_ANIMATION_DURATION = 500L
 
 /**
  * Controller for the unlocked screen off animation, which runs when the device is going to sleep
@@ -52,19 +57,24 @@ private const val LIGHT_REVEAL_ANIMATION_DURATION = 750L
  * and then animates in the AOD UI.
  */
 @SysUISingleton
-class UnlockedScreenOffAnimationController @Inject constructor(
+class UnlockedScreenOffAnimationController
+@Inject
+constructor(
     private val context: Context,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
     private val statusBarStateControllerImpl: StatusBarStateControllerImpl,
-    private val keyguardViewMediatorLazy: dagger.Lazy<KeyguardViewMediator>,
+    private val keyguardViewMediatorLazy: Lazy<KeyguardViewMediator>,
     private val keyguardStateController: KeyguardStateController,
-    private val dozeParameters: dagger.Lazy<DozeParameters>,
+    private val dozeParameters: Lazy<DozeParameters>,
     private val globalSettings: GlobalSettings,
+    private val notifShadeWindowControllerLazy: Lazy<NotificationShadeWindowController>,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val powerManager: PowerManager,
-    private val handler: Handler = Handler()
+    private val shadeLockscreenInteractorLazy: Lazy<ShadeLockscreenInteractor>,
+    private val panelExpansionInteractorLazy: Lazy<PanelExpansionInteractor>,
+    private val handler: Handler = Handler(),
 ) : WakefulnessLifecycle.Observer, ScreenOffAnimation {
-    private lateinit var mCentralSurfaces: CentralSurfaces
+    private lateinit var centralSurfaces: CentralSurfaces
     /**
      * Whether or not [initialize] has been called to provide us with the StatusBar,
      * NotificationPanelViewController, and LightRevealSrim so that we can run the unlocked screen
@@ -86,76 +96,88 @@ class UnlockedScreenOffAnimationController @Inject constructor(
      */
     private var decidedToAnimateGoingToSleep: Boolean? = null
 
-    private val lightRevealAnimator = ValueAnimator.ofFloat(1f, 0f).apply {
-        duration = LIGHT_REVEAL_ANIMATION_DURATION
-        interpolator = Interpolators.LINEAR
-        addUpdateListener {
-            if (lightRevealScrim.revealEffect !is CircleReveal) {
-                lightRevealScrim.revealAmount = it.animatedValue as Float
-            }
-            if (lightRevealScrim.isScrimAlmostOccludes &&
-                    interactionJankMonitor.isInstrumenting(CUJ_SCREEN_OFF)) {
-                // ends the instrument when the scrim almost occludes the screen.
-                // because the following janky frames might not be perceptible.
-                interactionJankMonitor.end(CUJ_SCREEN_OFF)
-            }
-        }
-        addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationCancel(animation: Animator) {
+    private val lightRevealAnimator =
+        ValueAnimator.ofFloat(1f, 0f).apply {
+            duration = LIGHT_REVEAL_ANIMATION_DURATION
+            interpolator = Interpolators.LINEAR
+            addUpdateListener {
+                if (lightRevealMigration()) return@addUpdateListener
                 if (lightRevealScrim.revealEffect !is CircleReveal) {
-                    lightRevealScrim.revealAmount = 1f
+                    lightRevealScrim.revealAmount = it.animatedValue as Float
+                }
+                if (
+                    lightRevealScrim.isScrimAlmostOccludes &&
+                        interactionJankMonitor.isInstrumenting(CUJ_SCREEN_OFF)
+                ) {
+                    // ends the instrument when the scrim almost occludes the screen.
+                    // because the following janky frames might not be perceptible.
+                    interactionJankMonitor.end(CUJ_SCREEN_OFF)
                 }
             }
+            addListener(
+                object : AnimatorListenerAdapter() {
+                    override fun onAnimationCancel(animation: Animator) {
+                        if (lightRevealMigration()) return
+                        if (lightRevealScrim.revealEffect !is CircleReveal) {
+                            lightRevealScrim.revealAmount = 1f
+                        }
+                    }
 
-            override fun onAnimationEnd(animation: Animator) {
-                lightRevealAnimationPlaying = false
-                interactionJankMonitor.end(CUJ_SCREEN_OFF)
-            }
+                    override fun onAnimationEnd(animation: Animator) {
+                        lightRevealAnimationPlaying = false
+                        interactionJankMonitor.end(CUJ_SCREEN_OFF)
+                    }
 
-            override fun onAnimationStart(animation: Animator) {
-                interactionJankMonitor.begin(
-                    mCentralSurfaces.notificationShadeWindowView, CUJ_SCREEN_OFF)
-            }
-        })
-    }
+                    override fun onAnimationStart(animation: Animator) {
+                        interactionJankMonitor.begin(
+                            notifShadeWindowControllerLazy.get().windowRootView,
+                            CUJ_SCREEN_OFF
+                        )
+                    }
+                }
+            )
+        }
 
     // FrameCallback used to delay starting the light reveal animation until the next frame
-    private val startLightRevealCallback = TraceUtils.namedRunnable("startLightReveal") {
-        lightRevealAnimator.start()
-    }
-
-    val animatorDurationScaleObserver = object : ContentObserver(null) {
-        override fun onChange(selfChange: Boolean) {
-            updateAnimatorDurationScale()
+    private val startLightRevealCallback =
+        namedRunnable("startLightReveal") {
+            lightRevealAnimationPlaying = true
+            lightRevealAnimator.start()
         }
-    }
+
+    private val animatorDurationScaleObserver =
+        object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                updateAnimatorDurationScale()
+            }
+        }
 
     override fun initialize(
         centralSurfaces: CentralSurfaces,
+        shadeViewController: ShadeViewController,
         lightRevealScrim: LightRevealScrim
     ) {
         this.initialized = true
         this.lightRevealScrim = lightRevealScrim
-        this.mCentralSurfaces = centralSurfaces
+        this.centralSurfaces = centralSurfaces
 
         updateAnimatorDurationScale()
-        globalSettings.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
-                /* notify for descendants */ false,
-                animatorDurationScaleObserver)
+        globalSettings.registerContentObserverSync(
+            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+            /* notify for descendants */ false,
+            animatorDurationScaleObserver
+        )
         wakefulnessLifecycle.addObserver(this)
     }
 
     fun updateAnimatorDurationScale() {
-        animatorDurationScale = fixScale(
-                globalSettings.getFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 1f))
+        animatorDurationScale =
+            fixScale(globalSettings.getFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 1f))
     }
 
-    override fun shouldDelayKeyguardShow(): Boolean =
-        shouldPlayAnimation()
+    override fun shouldDelayKeyguardShow(): Boolean = shouldPlayAnimation()
 
-    override fun isKeyguardShowDelayed(): Boolean =
-        isAnimationPlaying()
+    override fun isKeyguardShowDelayed(): Boolean = isAnimationPlaying()
 
     /**
      * Animates in the provided keyguard view, ending in the same position that it will be in on
@@ -176,15 +198,21 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // We animate the Y properly separately using the PropertyAnimator, as the panel
         // view also needs to update the end position.
         PropertyAnimator.cancelAnimation(keyguardView, AnimatableProperty.Y)
-        PropertyAnimator.setProperty(keyguardView, AnimatableProperty.Y, currentY,
-                AnimationProperties().setDuration(duration.toLong()),
-                true /* animate */)
+        PropertyAnimator.setProperty(
+            keyguardView,
+            AnimatableProperty.Y,
+            currentY,
+            AnimationProperties().setDuration(duration.toLong()),
+            true /* animate */
+        )
 
         // Cancel any existing CUJs before starting the animation
         interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
         PropertyAnimator.cancelAnimation(keyguardView, AnimatableProperty.ALPHA)
         PropertyAnimator.setProperty(
-            keyguardView, AnimatableProperty.ALPHA, 1f,
+            keyguardView,
+            AnimatableProperty.ALPHA,
+            1f,
             AnimationProperties()
                 .setDelay(0)
                 .setDuration(duration.toLong())
@@ -196,7 +224,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
                     // Tell the CentralSurfaces to become keyguard for real - we waited on that
                     // since it is slow and would have caused the animation to jank.
-                    mCentralSurfaces.updateIsKeyguard()
+                    centralSurfaces.updateIsKeyguard()
 
                     // Run the callback given to us by the KeyguardVisibilityHelper.
                     after.run()
@@ -216,11 +244,16 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                     interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
                 }
                 .setCustomInterpolator(View.ALPHA, Interpolators.FAST_OUT_SLOW_IN),
-            true /* animate */)
-        interactionJankMonitor.begin(
-            mCentralSurfaces.notificationShadeWindowView,
-            CUJ_SCREEN_OFF_SHOW_AOD
+            true /* animate */
         )
+        val builder =
+            InteractionJankMonitor.Configuration.Builder.withView(
+                    InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD,
+                    checkNotNull(notifShadeWindowControllerLazy.get().windowRootView)
+                )
+                .setTag(statusBarStateControllerImpl.getClockId())
+
+        interactionJankMonitor.begin(builder)
     }
 
     override fun onStartedWakingUp() {
@@ -249,7 +282,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             // even if we're going from SHADE to SHADE or KEYGUARD to KEYGUARD, since we might have
             // changed parts of the UI (such as showing AOD in the shade) without actually changing
             // the StatusBarState. This ensures that the UI definitely reflects the desired state.
-            mCentralSurfaces.updateIsKeyguard(true /* forceStateChange */)
+            centralSurfaces.updateIsKeyguard(true /* forceStateChange */)
         }
     }
 
@@ -258,7 +291,6 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             decidedToAnimateGoingToSleep = true
 
             shouldAnimateInKeyguard = true
-            lightRevealAnimationPlaying = true
 
             // Start the animation on the next frame. startAnimation() is called after
             // PhoneWindowManager makes a binder call to System UI on
@@ -267,20 +299,34 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             // chance of missing the first frame, so to mitigate this we should start the animation
             // on the next frame.
             DejankUtils.postAfterTraversal(startLightRevealCallback)
-            handler.postDelayed({
-                // Only run this callback if the device is sleeping (not interactive). This callback
-                // is removed in onStartedWakingUp, but since that event is asynchronously
-                // dispatched, a race condition could make it possible for this callback to be run
-                // as the device is waking up. That results in the AOD UI being shown while we wake
-                // up, with unpredictable consequences.
-                if (!powerManager.isInteractive(Display.DEFAULT_DISPLAY)) {
-                    aodUiAnimationPlaying = true
+            handler.postDelayed(
+                {
+                    // Only run this callback if the device is sleeping (not interactive). This
+                    // callback
+                    // is removed in onStartedWakingUp, but since that event is asynchronously
+                    // dispatched, a race condition could make it possible for this callback to be
+                    // run
+                    // as the device is waking up. That results in the AOD UI being shown while we
+                    // wake
+                    // up, with unpredictable consequences.
+                    if (
+                        !powerManager.isInteractive(Display.DEFAULT_DISPLAY) &&
+                            shouldAnimateInKeyguard
+                    ) {
+                        if (!MigrateClocksToBlueprint.isEnabled) {
+                            // Tracking this state should no longer be relevant, as the
+                            // isInteractive
+                            // check covers it
+                            aodUiAnimationPlaying = true
+                        }
 
-                    // Show AOD. That'll cause the KeyguardVisibilityHelper to call
-                    // #animateInKeyguard.
-                    mCentralSurfaces.shadeViewController.showAodUi()
-                }
-            }, (ANIMATE_IN_KEYGUARD_DELAY * animatorDurationScale).toLong())
+                        // Show AOD. That'll cause the KeyguardVisibilityHelper to call
+                        // #animateInKeyguard.
+                        shadeLockscreenInteractorLazy.get().showAodUi()
+                    }
+                },
+                (ANIMATE_IN_KEYGUARD_DELAY * animatorDurationScale).toLong()
+            )
 
             return true
         } else {
@@ -313,8 +359,12 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         }
 
         // If animations are disabled system-wide, don't play this one either.
-        if (Settings.Global.getString(
-                context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE) == "0") {
+        if (
+            Settings.Global.getString(
+                context.contentResolver,
+                Settings.Global.ANIMATOR_DURATION_SCALE
+            ) == "0"
+        ) {
             return false
         }
 
@@ -326,8 +376,9 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // We currently draw both the light reveal scrim, and the AOD UI, in the shade. If it's
         // already expanded and showing notifications/QS, the animation looks really messy. For now,
         // disable it if the notification panel is expanded.
-        if ((!this::mCentralSurfaces.isInitialized ||
-                mCentralSurfaces.shadeViewController.isPanelExpanded) &&
+        if (
+            (!this::centralSurfaces.isInitialized ||
+                panelExpansionInteractorLazy.get().isPanelExpanded) &&
                 // Status bar might be expanded because we have started
                 // playing the animation already
                 !isAnimationPlaying()
@@ -338,8 +389,10 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // If we're not allowed to rotate the keyguard, it can only be displayed in zero-degree
         // portrait. If we're in another orientation, disable the screen off animation so we don't
         // animate in the keyguard AOD UI sideways or upside down.
-        if (!keyguardStateController.isKeyguardScreenRotationAllowed &&
-            context.display?.rotation != Surface.ROTATION_0) {
+        if (
+            !keyguardStateController.isKeyguardScreenRotationAllowed &&
+                context.display?.rotation != Surface.ROTATION_0
+        ) {
             return false
         }
 
@@ -355,30 +408,28 @@ class UnlockedScreenOffAnimationController @Inject constructor(
      * AOD UI.
      */
     override fun isAnimationPlaying(): Boolean {
-        return lightRevealAnimationPlaying || aodUiAnimationPlaying
+        return isScreenOffLightRevealAnimationPlaying() || aodUiAnimationPlaying
     }
 
-    override fun shouldAnimateInKeyguard(): Boolean =
-        shouldAnimateInKeyguard
+    override fun shouldAnimateInKeyguard(): Boolean = shouldAnimateInKeyguard
 
-    override fun shouldHideScrimOnWakeUp(): Boolean =
-        isScreenOffLightRevealAnimationPlaying()
+    override fun shouldHideScrimOnWakeUp(): Boolean = isScreenOffLightRevealAnimationPlaying()
 
     override fun overrideNotificationsDozeAmount(): Boolean =
         shouldPlayUnlockedScreenOffAnimation() && isAnimationPlaying()
 
-    override fun shouldShowAodIconsWhenShade(): Boolean =
-        isAnimationPlaying()
+    override fun shouldShowAodIconsWhenShade(): Boolean = isAnimationPlaying()
 
-    override fun shouldAnimateAodIcons(): Boolean =
-        shouldPlayUnlockedScreenOffAnimation()
+    override fun shouldAnimateAodIcons(): Boolean = shouldPlayUnlockedScreenOffAnimation()
 
-    override fun shouldPlayAnimation(): Boolean =
-        shouldPlayUnlockedScreenOffAnimation()
+    override fun shouldPlayAnimation(): Boolean = shouldPlayUnlockedScreenOffAnimation()
 
     /**
      * Whether the light reveal animation is playing. The second part of the screen off animation,
      * where AOD animates in, might still be playing if this returns false.
+     *
+     * Note: This only refers to the specific light reveal animation that is playing during lock
+     * therefore LightRevealScrimInteractor.isAnimating is not the desired response.
      */
     fun isScreenOffLightRevealAnimationPlaying(): Boolean {
         return lightRevealAnimationPlaying

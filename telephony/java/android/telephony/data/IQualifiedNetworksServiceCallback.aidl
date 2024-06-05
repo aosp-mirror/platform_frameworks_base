@@ -16,6 +16,8 @@
 
 package android.telephony.data;
 
+import com.android.internal.telephony.IIntegerConsumer;
+
 /**
  * The qualified networks service call back interface
  * @hide
@@ -23,4 +25,6 @@ package android.telephony.data;
 oneway interface IQualifiedNetworksServiceCallback
 {
     void onQualifiedNetworkTypesChanged(int apnTypes, in int[] qualifiedNetworkTypes);
+    void onNetworkValidationRequested(int networkCapability, IIntegerConsumer callback);
+    void onReconnectQualifiedNetworkType(int apnTypes, int qualifiedNetworkType);
 }

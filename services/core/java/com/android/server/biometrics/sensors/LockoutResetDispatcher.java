@@ -27,9 +27,8 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Allows clients (such as keyguard) to register for notifications on when biometric lockout
@@ -42,7 +41,7 @@ public class LockoutResetDispatcher implements IBinder.DeathRecipient {
 
     private final Context mContext;
     @VisibleForTesting
-    final List<ClientCallback> mClientCallbacks = new ArrayList<>();
+    final ConcurrentLinkedQueue<ClientCallback> mClientCallbacks = new ConcurrentLinkedQueue<>();
 
     private static class ClientCallback {
         private static final long WAKELOCK_TIMEOUT_MS = 2000;

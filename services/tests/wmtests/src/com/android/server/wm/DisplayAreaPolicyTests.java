@@ -34,8 +34,6 @@ import static org.mockito.Mockito.mock;
 
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
-import android.view.Display;
-import android.view.DisplayInfo;
 
 import androidx.test.filters.SmallTest;
 
@@ -49,7 +47,6 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Tests for the {@link DisplayAreaPolicy}.
@@ -105,16 +102,6 @@ public class DisplayAreaPolicyTests extends WindowTestsBase {
         stack2.getParent().positionChildAt(POSITION_BOTTOM, stack2, false /* includingParents */);
 
         assertTaskDisplayAreasOrder(policy, taskDisplayArea1, taskDisplayArea2);
-    }
-
-    @Test
-    public void testEmptyFeaturesOnUntrustedDisplay() {
-        final DisplayInfo info = new DisplayInfo(mDisplayInfo);
-        info.flags &= ~Display.FLAG_TRUSTED;
-        final DisplayContent untrustedDisplay = new TestDisplayContent.Builder(mAtm, info).build();
-
-        assertTrue(untrustedDisplay.mFeatures.isEmpty());
-        assertNotNull(untrustedDisplay.getWindowingLayer());
     }
 
     @Test
@@ -190,7 +177,7 @@ public class DisplayAreaPolicyTests extends WindowTestsBase {
         final WindowManagerService wms = mWm;
         final DisplayContent displayContent = mock(DisplayContent.class);
         doReturn(true).when(displayContent).isTrusted();
-        doReturn(true).when(displayContent).supportsSystemDecorations();
+        doReturn(true).when(displayContent).isHomeSupported();
         final RootDisplayArea root = new SurfacelessDisplayAreaRoot(wms);
         final TaskDisplayArea taskDisplayAreaWithHome = new TaskDisplayArea(displayContent, wms,
                 "Tasks1", FEATURE_DEFAULT_TASK_CONTAINER);
@@ -215,11 +202,15 @@ public class DisplayAreaPolicyTests extends WindowTestsBase {
     private void assertTaskDisplayAreaPresentAndCanHaveHome(DisplayAreaPolicy policy,
                                                             int featureId,
                                                             boolean canHaveHome) {
-        Optional<DisplayArea> optionalDisplayArea = policy.mRoot.mChildren
-                .stream().filter(displayArea -> displayArea.mFeatureId == featureId)
-                .findAny();
-        assertTrue(optionalDisplayArea.isPresent());
-        assertEquals(canHaveHome, optionalDisplayArea.get().asTaskDisplayArea().canHostHomeTask());
+        final ArrayList<TaskDisplayArea> matchedAreas = new ArrayList<>();
+        policy.mRoot.forAllWindowContainers(w -> {
+            final TaskDisplayArea tda = w.asTaskDisplayArea();
+            if (tda != null && tda.mFeatureId == featureId) {
+                matchedAreas.add(tda);
+            }
+        });
+        assertTrue(matchedAreas.size() > 0);
+        assertEquals(canHaveHome, matchedAreas.get(0).canHostHomeTask());
     }
 
     private void assertTaskDisplayAreasOrder(DisplayAreaPolicy policy,

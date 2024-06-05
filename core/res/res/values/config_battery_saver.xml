@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright (C) 2023 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<!-- These resources are around just to allow their values to be customized
+     for different hardware and product builds.  Do not translate.
+
+     NOTE: The naming convention is "config_camelCaseValue". Some legacy
+     entries do not follow the convention, but all new entries should. -->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
+
+    <!-- Whether or not the device supports battery saver. If false, battery saver will be
+     disabled. -->
+    <bool name="config_batterySaverSupported">true</bool>
+
+    <!-- Whether or not battery saver should be "sticky" when manually enabled. -->
+    <bool name="config_batterySaverStickyBehaviourDisabled">false</bool>
+
+    <!-- Whether to enable "Battery Saver turned off" notification. -->
+    <bool name="config_batterySaverTurnedOffNotificationEnabled">true</bool>
+
+    <!-- Config flag to track default disable threshold for Dynamic power savings enabled battery saver. -->
+    <integer name="config_dynamicPowerSavingsDefaultDisableThreshold">80</integer>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.adjustBrightnessFactor -->
+    <item name="config_batterySaver_full_adjustBrightnessFactor" format="float" type="dimen">
+        .5
+    </item>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.deferFullBackup -->
+    <bool name="config_batterySaver_full_deferFullBackup">true</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.deferKeyValueBackup -->
+    <bool name="config_batterySaver_full_deferKeyValueBackup">true</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.disableAnimation -->
+    <bool name="config_batterySaver_full_disableAnimation">false</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.disableAod -->
+    <bool name="config_batterySaver_full_disableAod">true</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.disableLaunchBoost -->
+    <bool name="config_batterySaver_full_disableLaunchBoost">true</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.disableOptionalSensors -->
+    <bool name="config_batterySaver_full_disableOptionalSensors">true</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.disableVibration -->
+    <bool name="config_batterySaver_full_disableVibration">false</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.enableAdjustBrightness -->
+    <bool name="config_batterySaver_full_enableAdjustBrightness">false</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.enableDataSaver -->
+    <bool name="config_batterySaver_full_enableDataSaver">false</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.enableFirewall -->
+    <bool name="config_batterySaver_full_enableFirewall">true</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.enableNightMode -->
+    <bool name="config_batterySaver_full_enableNightMode">true</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.enableQuickDoze -->
+    <bool name="config_batterySaver_full_enableQuickDoze">true</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.forceAllAppsStandby -->
+    <bool name="config_batterySaver_full_forceAllAppsStandby">true</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.forceBackgroundCheck -->
+    <bool name="config_batterySaver_full_forceBackgroundCheck">true</bool>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.locationMode
+       (LOCATION_MODE_FOREGROUND_ONLY) -->
+    <integer name="config_batterySaver_full_locationMode">3</integer>
+
+    <!-- Default for BatterySaverPolicy.DEFAULT_FULL_POLICY.soundTriggerMode
+       (SOUND_TRIGGER_MODE_CRITICAL_ONLY) -->
+    <integer name="config_batterySaver_full_soundTriggerMode">1</integer>
+</resources>
+

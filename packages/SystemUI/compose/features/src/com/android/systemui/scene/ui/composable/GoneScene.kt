@@ -16,54 +16,80 @@
 
 package com.android.systemui.scene.ui.composable
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
-import com.android.systemui.scene.shared.model.UserAction
-import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.IntOffset
+import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
+import com.android.compose.animation.scene.animateSceneFloatAsState
+import com.android.internal.policy.SystemBarUtils
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.notifications.ui.composable.HeadsUpNotificationSpace
+import com.android.systemui.qs.ui.composable.QuickSettings
+import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.ui.viewmodel.GoneSceneViewModel
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
+import dagger.Lazy
+import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * "Gone" is not a real scene but rather the absence of scenes when we want to skip showing any
  * content from the scene framework.
  */
-class GoneScene : ComposableScene {
-    override val key = SceneKey.Gone
+@SysUISingleton
+class GoneScene
+@Inject
+constructor(
+    private val notificationStackScrolLView: Lazy<NotificationScrollView>,
+    private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
+    private val viewModel: GoneSceneViewModel,
+) : ComposableScene {
+    override val key = Scenes.Gone
 
-    override fun destinationScenes(
-        containerName: String,
-    ): StateFlow<Map<UserAction, SceneModel>> =
-        MutableStateFlow<Map<UserAction, SceneModel>>(
-                mapOf(
-                    UserAction.Swipe(Direction.DOWN) to SceneModel(SceneKey.Shade),
-                )
-            )
-            .asStateFlow()
+    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+        viewModel.destinationScenes
 
     @Composable
-    override fun Content(
-        containerName: String,
+    override fun SceneScope.Content(
         modifier: Modifier,
     ) {
-        /*
-         * TODO(b/279501596): once we start testing with the real Content Dynamics Framework,
-         *  replace this with an error to make sure it doesn't get rendered.
-         */
-        Box(modifier = modifier) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.align(Alignment.Center)
-            ) {
-                Text("Gone", style = MaterialTheme.typography.headlineMedium)
-            }
-        }
+        animateSceneFloatAsState(
+            value = QuickSettings.SharedValues.SquishinessValues.GoneSceneStarting,
+            key = QuickSettings.SharedValues.TilesSquishiness,
+        )
+        Spacer(modifier.fillMaxSize())
+        HeadsUpNotificationStack(
+            stackScrollView = notificationStackScrolLView.get(),
+            viewModel = notificationsPlaceholderViewModel
+        )
     }
+}
+
+@Composable
+private fun SceneScope.HeadsUpNotificationStack(
+    stackScrollView: NotificationScrollView,
+    viewModel: NotificationsPlaceholderViewModel,
+) {
+    val context = LocalContext.current
+    val density = LocalDensity.current
+    val statusBarHeight = SystemBarUtils.getStatusBarHeight(context)
+    val headsUpPadding =
+        with(density) { dimensionResource(id = R.dimen.heads_up_status_bar_padding).roundToPx() }
+
+    HeadsUpNotificationSpace(
+        stackScrollView = stackScrollView,
+        viewModel = viewModel,
+        modifier =
+            Modifier.absoluteOffset { IntOffset(x = 0, y = statusBarHeight + headsUpPadding) }
+    )
 }

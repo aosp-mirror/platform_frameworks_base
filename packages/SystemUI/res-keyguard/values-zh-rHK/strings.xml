@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在充電"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 快速充電中"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 慢速充電中"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 為保護電池，系統已優化充電"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電配件發生問題"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"按下 [選單] 即可解鎖。"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> - 為保護電池，目前暫停充電"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 檢查充電配件"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"網絡已鎖定"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"沒有 SIM 卡"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"請新增 SIM 卡。"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"找不到 SIM 卡或 SIM 卡無法讀取，請新增 SIM 卡。"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM 卡無法使用。"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM 卡已永久停用。\n請向無線服務供應商索取其他 SIM 卡。"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM 卡已鎖定。"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM 卡已使用 PUK 鎖定。"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"正在解鎖 SIM 卡…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"需要輸入 PIN 才能解除鎖定"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"需要輸入密碼解才能解除鎖定"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"需要畫出解鎖圖案才能解除鎖定"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"裝置會在閒置時安裝更新"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"系統會在裝置未使用時安裝更新"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"需要加強安全設定：已有一段時間沒有使用 PIN。"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"需要加強安全設定：已有一段時間沒有使用密碼。"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"需要加強安全設定：已有一段時間沒有使用解鎖圖案。"</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"為提升安全性，請改用圖案"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"為提升安全性，請改用 PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"為提升安全性，請改用密碼"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"請務必輸入 PIN，以進一步確保安全"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"請務必畫出上鎖圖案，以進一步確保安全"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"請務必輸入密碼，以進一步確保安全"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"裝置已由管理員鎖定"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"使用者已手動將裝置上鎖"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"未能識別"</string>

@@ -20,5 +20,6 @@
   <color name="footer_icon_disabled_color">#5F6368</color>
   <color name="colorControlNormal">#202124</color>
   <color name="snackbar_bg_color">@android:color/white</color>
+  <color name="grid_item_text_color">@android:color/white</color>
 
 </resources>

@@ -200,19 +200,43 @@ public final class DisplayPortAltModeInfo implements Parcelable {
         dest.writeInt(mLinkTrainingStatus);
     }
 
+    private String displayPortAltModeStatusToString(@DisplayPortAltModeStatus int status) {
+        switch (status) {
+            case DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE:
+                return "not capable";
+            case DISPLAYPORT_ALT_MODE_STATUS_CAPABLE_DISABLED:
+                return "capable disabled";
+            case DISPLAYPORT_ALT_MODE_STATUS_ENABLED:
+                return "enabled";
+            default:
+                return "unknown";
+        }
+    }
+
+    private String linkTrainingStatusToString(@LinkTrainingStatus int status) {
+        switch (status) {
+            case LINK_TRAINING_STATUS_SUCCESS:
+                return "success";
+            case LINK_TRAINING_STATUS_FAILURE:
+                return "failure";
+            default:
+                return "unknown";
+        }
+    }
+
     @NonNull
     @Override
     public String toString() {
         return "DisplayPortAltModeInfo{partnerSink="
-                + mPartnerSinkStatus
-                + " cable="
-                + mCableStatus
-                + " numLanes="
+                + displayPortAltModeStatusToString(mPartnerSinkStatus)
+                + ", cable="
+                + displayPortAltModeStatusToString(mCableStatus)
+                + ", numLanes="
                 + mNumLanes
-                + " hotPlugDetect="
+                + ", hotPlugDetect="
                 + mHotPlugDetect
-                + " linkTrainingStatus="
-                + mLinkTrainingStatus
+                + ", linkTrainingStatus="
+                + linkTrainingStatusToString(mLinkTrainingStatus)
                 + "}";
     }
 

@@ -18,7 +18,7 @@ package com.android.systemui.util.wrapper
 import android.content.Context
 import android.util.AttributeSet
 import com.airbnb.lottie.LottieAnimationView
-import com.android.systemui.util.traceSection
+import com.android.app.tracing.traceSection
 
 /** LottieAnimationView that traces each call to invalidate. */
 open class LottieViewWrapper : LottieAnimationView {

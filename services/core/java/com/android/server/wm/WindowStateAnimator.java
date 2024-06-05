@@ -44,6 +44,8 @@ import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimatorProto.DRAW_STATE;
 import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
 import static com.android.server.wm.WindowStateAnimatorProto.SYSTEM_DECOR_RECT;
+import static com.android.window.flags.Flags.secureWindowState;
+import static com.android.window.flags.Flags.setScPropertiesInClient;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -59,7 +61,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import com.android.internal.protolog.ProtoLogImpl;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -286,8 +288,10 @@ class WindowStateAnimator {
         int flags = SurfaceControl.HIDDEN;
         final WindowManager.LayoutParams attrs = w.mAttrs;
 
-        if (w.isSecureLocked()) {
-            flags |= SurfaceControl.SECURE;
+        if (!secureWindowState()) {
+            if (w.isSecureLocked()) {
+                flags |= SurfaceControl.SECURE;
+            }
         }
 
         if ((mWin.mAttrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0) {
@@ -309,8 +313,10 @@ class WindowStateAnimator {
 
             mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), format,
                     flags, this, attrs.type);
-            mSurfaceController.setColorSpaceAgnostic(w.getPendingTransaction(),
-                    (attrs.privateFlags & LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
+            if (!setScPropertiesInClient()) {
+                mSurfaceController.setColorSpaceAgnostic(w.getPendingTransaction(),
+                        (attrs.privateFlags & LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
+            }
 
             w.setHasSurface(true);
             // The surface instance is changed. Make sure the input info can be applied to the
@@ -488,13 +494,6 @@ class WindowStateAnimator {
         mSurfaceController.setOpaque(isOpaque);
     }
 
-    void setSecureLocked(boolean isSecure) {
-        if (mSurfaceController == null) {
-            return;
-        }
-        mSurfaceController.setSecure(isSecure);
-    }
-
     void setColorSpaceAgnosticLocked(boolean agnostic) {
         if (mSurfaceController == null) {
             return;
@@ -513,8 +512,10 @@ class WindowStateAnimator {
 
         // We don't apply animation for application main window here since this window type
         // should be controlled by ActivityRecord in general. Wallpaper is also excluded because
-        // WallpaperController should handle it.
-        if (mAttrType != TYPE_BASE_APPLICATION && !mIsWallpaper) {
+        // WallpaperController should handle it. Also skip play enter animation for the window
+        // below starting window.
+        if (mAttrType != TYPE_BASE_APPLICATION && !mIsWallpaper
+                && !(mWin.mActivityRecord != null && mWin.mActivityRecord.hasStartingWindow())) {
             applyAnimationLocked(transit, true);
         }
 
@@ -586,7 +587,7 @@ class WindowStateAnimator {
                             mWin.mAttrs, attr, TRANSIT_OLD_NONE);
                 }
             }
-            if (ProtoLogImpl.isEnabled(WM_DEBUG_ANIM)) {
+            if (ProtoLog.isEnabled(WM_DEBUG_ANIM, LogLevel.VERBOSE)) {
                 ProtoLog.v(WM_DEBUG_ANIM, "applyAnimation: win=%s"
                         + " anim=%d attr=0x%x a=%s transit=%d type=%d isEntrance=%b Callers %s",
                         this, anim, attr, a, transit, mAttrType, isEntrance, Debug.getCallers(20));

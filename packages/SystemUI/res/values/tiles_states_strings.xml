@@ -222,6 +222,16 @@
         <item>On</item>
     </string-array>
 
+    <!-- State names for record_issue tile: unavailable, off, on.
+         This subtitle is shown when the tile is in that particular state but does not set its own
+         subtitle, so some of these may never appear on screen. They should still be translated as
+         if they could appear. [CHAR LIMIT=32] -->
+    <string-array name="tile_states_record_issue">
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
+    </string-array>
+
     <!-- State names for reverse (charging) tile: unavailable, off, on.
          This subtitle is shown when the tile is in that particular state but does not set its own
          subtitle, so some of these may never appear on screen. They should still be translated as
@@ -324,6 +334,16 @@
          subtitle, so some of these may never appear on screen. They should still be translated as
          if they could appear. [CHAR LIMIT=32] -->
     <string-array name="tile_states_font_scaling">
+        <item>Unavailable</item>
+        <item>Off</item>
+        <item>On</item>
+    </string-array>
+
+    <!-- State names for hearing devices tile: unavailable, off, on.
+         This subtitle is shown when the tile is in that particular state but does not set its own
+         subtitle, so some of these may never appear on screen. They should still be translated as
+         if they could appear. [CHAR LIMIT=32] -->
+    <string-array name="tile_states_hearing_devices">
         <item>Unavailable</item>
         <item>Off</item>
         <item>On</item>

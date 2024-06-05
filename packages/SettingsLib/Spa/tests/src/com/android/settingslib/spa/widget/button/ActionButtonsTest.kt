@@ -17,8 +17,8 @@
 package com.android.settingslib.spa.widget.button
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Launch
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -43,7 +43,10 @@ class ActionButtonsTest {
         composeTestRule.setContent {
             ActionButtons(
                 listOf(
-                    ActionButton(text = "Open", imageVector = Icons.Outlined.Launch) {},
+                    ActionButton(
+                        text = "Open",
+                        imageVector = Icons.AutoMirrored.Outlined.Launch
+                    ) {},
                 )
             )
         }
@@ -57,7 +60,7 @@ class ActionButtonsTest {
         composeTestRule.setContent {
             ActionButtons(
                 listOf(
-                    ActionButton(text = "Open", imageVector = Icons.Outlined.Launch) {
+                    ActionButton(text = "Open", imageVector = Icons.AutoMirrored.Outlined.Launch) {
                         clicked = true
                     },
                 )
@@ -74,7 +77,10 @@ class ActionButtonsTest {
         composeTestRule.setContent {
             ActionButtons(
                 listOf(
-                    ActionButton(text = "Open", imageVector = Icons.Outlined.Launch) {},
+                    ActionButton(
+                        text = "Open",
+                        imageVector = Icons.AutoMirrored.Outlined.Launch
+                    ) {},
                     ActionButton(text = "Close", imageVector = Icons.Outlined.Close) {},
                 )
             )

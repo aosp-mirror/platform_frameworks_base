@@ -44,7 +44,6 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_W
 import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.isActivityTransitOld;
 import static com.android.server.wm.AppTransition.isTaskFragmentTransitOld;
-import static com.android.server.wm.AppTransition.isTaskTransitOld;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
@@ -72,7 +71,6 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration;
@@ -81,7 +79,9 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.Trace;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Pools;
@@ -101,7 +101,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
-import android.view.TaskTransitionSpec;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
@@ -111,12 +110,13 @@ import android.window.WindowContainerToken;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
-import com.android.internal.protolog.ProtoLogImpl;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
+import com.android.server.wm.utils.AlwaysTruePredicate;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -174,6 +174,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     protected SparseArray<InsetsSourceProvider> mInsetsSourceProviders = null;
 
+    @Nullable
+    private ArrayMap<IBinder, DeathRecipient> mInsetsOwnerDeathRecipientMap;
+
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
     protected final WindowList<E> mChildren = new WindowList<E>();
@@ -181,7 +184,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     // The specified orientation for this window container.
     // Shouldn't be accessed directly since subclasses can override getOverrideOrientation.
     @ScreenOrientation
-    private int mOverrideOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+    private int mOverrideOrientation = SCREEN_ORIENTATION_UNSET;
 
     /**
      * The window container which decides its orientation since the last time
@@ -419,11 +422,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * Adds an {@link InsetsFrameProvider} which describes what insets should be provided to
      * this {@link WindowContainer} and its children.
      *
-     * @param provider describes the insets types and the frames.
+     * @param provider describes the insets type and the frame.
+     * @param owner owns the insets source which only exists when the owner is alive.
      */
-    void addLocalInsetsFrameProvider(InsetsFrameProvider provider) {
-        if (provider == null) {
-            throw new IllegalArgumentException("Insets type not specified.");
+    void addLocalInsetsFrameProvider(InsetsFrameProvider provider, IBinder owner) {
+        if (provider == null || owner == null) {
+            throw new IllegalArgumentException("Insets provider or owner not specified.");
         }
         if (mDisplayContent == null) {
             // This is possible this container is detached when WM shell is responding to a previous
@@ -432,10 +436,26 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             Slog.w(TAG, "Can't add insets frame provider when detached. " + this);
             return;
         }
+
+        if (mInsetsOwnerDeathRecipientMap == null) {
+            mInsetsOwnerDeathRecipientMap = new ArrayMap<>();
+        }
+        DeathRecipient deathRecipient = mInsetsOwnerDeathRecipientMap.get(owner);
+        if (deathRecipient == null) {
+            deathRecipient = new DeathRecipient(owner);
+            try {
+                owner.linkToDeath(deathRecipient, 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to add source for " + provider + " since the owner has died.");
+                return;
+            }
+            mInsetsOwnerDeathRecipientMap.put(owner, deathRecipient);
+        }
+        final int id = provider.getId();
+        deathRecipient.addSourceId(id);
         if (mLocalInsetsSources == null) {
             mLocalInsetsSources = new SparseArray<>();
         }
-        final int id = provider.getId();
         if (mLocalInsetsSources.get(id) != null) {
             if (DEBUG) {
                 Slog.d(TAG, "The local insets source for this " + provider
@@ -443,32 +463,84 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
         final InsetsSource source = new InsetsSource(id, provider.getType());
-        source.setFrame(provider.getArbitraryRectangle());
+        source.setFrame(provider.getArbitraryRectangle())
+                .updateSideHint(getBounds())
+                .setBoundingRects(provider.getBoundingRects());
         mLocalInsetsSources.put(id, source);
         mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
     }
 
-    void removeLocalInsetsFrameProvider(InsetsFrameProvider provider) {
-        if (provider == null) {
-            throw new IllegalArgumentException("Insets type not specified.");
-        }
-        if (mLocalInsetsSources == null) {
-            return;
+    private class DeathRecipient implements IBinder.DeathRecipient {
+
+        private final IBinder mOwner;
+        private final ArraySet<Integer> mSourceIds = new ArraySet<>();
+
+        DeathRecipient(IBinder owner) {
+            mOwner = owner;
         }
 
-        final int id = provider.getId();
-        if (mLocalInsetsSources.get(id) == null) {
-            if (DEBUG) {
-                Slog.d(TAG, "Given " + provider + " doesn't have a local insets source.");
+        void addSourceId(int id) {
+            mSourceIds.add(id);
+        }
+
+        void removeSourceId(int id) {
+            mSourceIds.remove(id);
+        }
+
+        boolean hasSource() {
+            return !mSourceIds.isEmpty();
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mWmService.mGlobalLock) {
+                boolean changed = false;
+                for (int i = mSourceIds.size() - 1; i >= 0; i--) {
+                    changed |= removeLocalInsetsSource(mSourceIds.valueAt(i));
+                }
+                mSourceIds.clear();
+                mOwner.unlinkToDeath(this, 0);
+                mInsetsOwnerDeathRecipientMap.remove(mOwner);
+                if (changed && mDisplayContent != null) {
+                    mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
+                }
             }
-            return;
         }
-        mLocalInsetsSources.remove(id);
+    }
 
-        // Update insets if this window is attached.
-        if (mDisplayContent != null) {
+    void removeLocalInsetsFrameProvider(InsetsFrameProvider provider, IBinder owner) {
+        if (provider == null || owner == null) {
+            throw new IllegalArgumentException("Insets provider or owner not specified.");
+        }
+        final int id = provider.getId();
+        if (removeLocalInsetsSource(id) && mDisplayContent != null) {
             mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
         }
+        if (mInsetsOwnerDeathRecipientMap == null) {
+            return;
+        }
+        final DeathRecipient deathRecipient = mInsetsOwnerDeathRecipientMap.get(owner);
+        if (deathRecipient == null) {
+            return;
+        }
+        deathRecipient.removeSourceId(id);
+        if (!deathRecipient.hasSource()) {
+            owner.unlinkToDeath(deathRecipient, 0);
+            mInsetsOwnerDeathRecipientMap.remove(owner);
+        }
+    }
+
+    private boolean removeLocalInsetsSource(int id) {
+        if (mLocalInsetsSources == null) {
+            return false;
+        }
+        if (mLocalInsetsSources.removeReturnOld(id) == null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Given id " + Integer.toHexString(id) + " doesn't exist.");
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -643,7 +715,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         // If parent is null, the layer should be placed offscreen so reparent to null. Otherwise,
         // set to the available parent.
-        t.reparent(mSurfaceControl, mParent == null ? null : mParent.getSurfaceControl());
+        t.reparent(mSurfaceControl, mParent == null ? null : mParent.mSurfaceControl);
 
         if (mLastRelativeToLayer != null) {
             t.setRelativeLayer(mSurfaceControl, mLastRelativeToLayer, mLastLayer);
@@ -1034,7 +1106,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mInsetsSourceProviders;
     }
 
-    public DisplayContent getDisplayContent() {
+    public final DisplayContent getDisplayContent() {
         return mDisplayContent;
     }
 
@@ -1063,14 +1135,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return parent != null && parent.isAttached();
     }
 
-    void setWaitingForDrawnIfResizingChanged() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = mChildren.get(i);
-            wc.setWaitingForDrawnIfResizingChanged();
-        }
-    }
-
     void onResize() {
+        if (mControllableInsetProvider != null) {
+            mControllableInsetProvider.onWindowContainerBoundsChanged();
+        }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.onParentResize();
@@ -1090,6 +1158,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void onMovedByResize() {
+        if (mControllableInsetProvider != null) {
+            mControllableInsetProvider.onWindowContainerBoundsChanged();
+        }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.onMovedByResize();
@@ -1518,7 +1589,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
             // NOSENSOR means the display's "natural" orientation, so return that.
             if (mDisplayContent != null) {
-                return mDisplayContent.getNaturalOrientation();
+                return mDisplayContent.getNaturalConfigurationOrientation();
             }
         } else if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
             // LOCKED means the activity's orientation remains unchanged, so return existing value.
@@ -1610,8 +1681,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
 
-            // TODO: Maybe mOverrideOrientation should default to SCREEN_ORIENTATION_UNSET vs.
-            // SCREEN_ORIENTATION_UNSPECIFIED?
             final int orientation = wc.getOrientation(candidate == SCREEN_ORIENTATION_BEHIND
                     ? SCREEN_ORIENTATION_BEHIND : SCREEN_ORIENTATION_UNSET);
             if (orientation == SCREEN_ORIENTATION_BEHIND) {
@@ -1627,7 +1696,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 continue;
             }
 
-            if (wc.providesOrientation() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+            if (orientation != SCREEN_ORIENTATION_UNSPECIFIED || wc.providesOrientation()) {
                 // Use the orientation if the container can provide or requested an explicit
                 // orientation that isn't SCREEN_ORIENTATION_UNSPECIFIED.
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "%s is requesting orientation %d (%s)",
@@ -1951,29 +2020,34 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 callback, boundary, includeBoundary, traverseTopToBottom, boundaryFound);
     }
 
+    @SuppressWarnings("unchecked")
+    static <T> Predicate<T> alwaysTruePredicate() {
+        return (Predicate<T>) AlwaysTruePredicate.INSTANCE;
+    }
+
     ActivityRecord getActivityAbove(ActivityRecord r) {
-        return getActivity((above) -> true, r,
+        return getActivity(alwaysTruePredicate(), r /* boundary */,
                 false /*includeBoundary*/, false /*traverseTopToBottom*/);
     }
 
     ActivityRecord getActivityBelow(ActivityRecord r) {
-        return getActivity((below) -> true, r,
+        return getActivity(alwaysTruePredicate(), r /* boundary */,
                 false /*includeBoundary*/, true /*traverseTopToBottom*/);
     }
 
     ActivityRecord getBottomMostActivity() {
-        return getActivity((r) -> true, false /*traverseTopToBottom*/);
+        return getActivity(alwaysTruePredicate(), false /* traverseTopToBottom */);
     }
 
     ActivityRecord getTopMostActivity() {
-        return getActivity((r) -> true, true /*traverseTopToBottom*/);
+        return getActivity(alwaysTruePredicate(), true /* traverseTopToBottom */);
     }
 
     ActivityRecord getTopActivity(boolean includeFinishing, boolean includeOverlays) {
         // Break down into 4 calls to avoid object creation due to capturing input params.
         if (includeFinishing) {
             if (includeOverlays) {
-                return getActivity((r) -> true);
+                return getActivity(alwaysTruePredicate());
             }
             return getActivity((r) -> !r.isTaskOverlay());
         } else if (includeOverlays) {
@@ -2152,21 +2226,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    Task getTaskAbove(Task t) {
-        return getTask(
-                (above) -> true, t, false /*includeBoundary*/, false /*traverseTopToBottom*/);
-    }
-
     Task getTaskBelow(Task t) {
-        return getTask((below) -> true, t, false /*includeBoundary*/, true /*traverseTopToBottom*/);
+        return getTask(alwaysTruePredicate(), t /* boundary */,
+                false /* includeBoundary */, true /* traverseTopToBottom */);
     }
 
     Task getBottomMostTask() {
-        return getTask((t) -> true, false /*traverseTopToBottom*/);
+        return getTask(alwaysTruePredicate(), false /* traverseTopToBottom */);
     }
 
     Task getTopMostTask() {
-        return getTask((t) -> true, true /*traverseTopToBottom*/);
+        return getTask(alwaysTruePredicate(), true /* traverseTopToBottom */);
     }
 
     Task getTask(Predicate<Task> callback) {
@@ -2635,6 +2705,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mLastLayer;
     }
 
+    SurfaceControl getLastRelativeLayer() {
+        return mLastRelativeToLayer;
+    }
+
     protected void setRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
         if (mSurfaceFreezer.hasLeash()) {
             // When the freezer has created animation leash parent for the window, set the layer
@@ -2913,12 +2987,23 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /** Whether we can start change transition with this window and current display status. */
     boolean canStartChangeTransition() {
-        return !mWmService.mDisableTransitionAnimation && mDisplayContent != null
-                && getSurfaceControl() != null && !mDisplayContent.inTransition()
-                && isVisible() && isVisibleRequested() && okToAnimate()
-                // Pip animation will be handled by PipTaskOrganizer.
-                && !inPinnedWindowingMode() && getParent() != null
-                && !getParent().inPinnedWindowingMode();
+        if (mWmService.mDisableTransitionAnimation || !okToAnimate()) return false;
+
+        // Change transition only make sense as we go from "visible" to "visible".
+        if (mDisplayContent == null || getSurfaceControl() == null
+                || !isVisible() || !isVisibleRequested()) {
+            return false;
+        }
+
+        // Make sure display isn't a part of the transition already - needed for legacy transitions.
+        if (mDisplayContent.inTransition()) return false;
+
+        if (!ActivityTaskManagerService.isPip2ExperimentEnabled()) {
+            // Screenshots are turned off when PiP is undergoing changes.
+            return !inPinnedWindowingMode() && getParent() != null
+                    && !getParent().inPinnedWindowingMode();
+        }
+        return true;
     }
 
     /**
@@ -3060,9 +3145,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Separate position and size for use in animators.
         final Rect screenBounds = getAnimationBounds(appRootTaskClipMode);
         mTmpRect.set(screenBounds);
-        if (this.asTask() != null && isTaskTransitOld(transit)) {
-            this.asTask().adjustAnimationBoundsForTransition(mTmpRect);
-        }
         getAnimationPosition(mTmpPoint);
         mTmpRect.offsetTo(0, 0);
 
@@ -3197,14 +3279,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
             AnimationRunnerBuilder animationRunnerBuilder = new AnimationRunnerBuilder();
 
-            if (isTaskTransitOld(transit) && getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-                animationRunnerBuilder.setTaskBackgroundColor(getTaskAnimationBackgroundColor());
-                // TODO: Remove when we migrate to shell (b/202383002)
-                if (mWmService.mTaskTransitionSpec != null) {
-                    animationRunnerBuilder.hideInsetSourceViewOverflows();
-                }
-            }
-
             // Check if the animation requests to show background color for Activity and embedded
             // TaskFragment.
             final ActivityRecord activityRecord = asActivityRecord();
@@ -3256,18 +3330,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
-    }
-
-    private @ColorInt int getTaskAnimationBackgroundColor() {
-        Context uiContext = mDisplayContent.getDisplayPolicy().getSystemUiContext();
-        TaskTransitionSpec customSpec = mWmService.mTaskTransitionSpec;
-        @ColorInt int defaultFallbackColor = uiContext.getColor(R.color.overview_background);
-
-        if (customSpec != null && customSpec.backgroundColor != 0) {
-            return customSpec.backgroundColor;
-        }
-
-        return defaultFallbackColor;
     }
 
     final SurfaceAnimationRunner getSurfaceAnimationRunner() {
@@ -3322,7 +3384,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 // ActivityOption#makeCustomAnimation or WindowManager#overridePendingTransition.
                 a.restrictDuration(MAX_APP_TRANSITION_DURATION);
             }
-            if (ProtoLogImpl.isEnabled(WM_DEBUG_ANIM)) {
+            if (ProtoLog.isEnabled(WM_DEBUG_ANIM, LogLevel.DEBUG)) {
                 ProtoLog.i(WM_DEBUG_ANIM, "Loaded animation %s for %s, duration: %d, stack=%s",
                         a, this, ((a != null) ? a.getDuration() : 0), Debug.getCallers(20));
             }
@@ -3537,6 +3599,29 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public int getSurfaceHeight() {
         return mSurfaceControl.getHeight();
+    }
+
+    static void enforceSurfaceVisible(@NonNull WindowContainer<?> wc) {
+        if (wc.mSurfaceControl == null) {
+            return;
+        }
+        wc.getSyncTransaction().show(wc.mSurfaceControl);
+        final ActivityRecord ar = wc.asActivityRecord();
+        if (ar != null) {
+            ar.mLastSurfaceShowing = true;
+        }
+        // Force showing the parents because they may be hidden by previous transition.
+        for (WindowContainer<?> p = wc.getParent(); p != null && p != wc.mDisplayContent;
+                p = p.getParent()) {
+            if (p.mSurfaceControl != null) {
+                p.getSyncTransaction().show(p.mSurfaceControl);
+                final Task task = p.asTask();
+                if (task != null) {
+                    task.mLastSurfaceShowing = true;
+                }
+            }
+        }
+        wc.scheduleAnimation();
     }
 
     @CallSuper
@@ -3782,6 +3867,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
+
+    /** @return {@code true} if this container wants to show wallpaper. */
+    boolean hasWallpaper() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer child = mChildren.get(i);
+            if (child.hasWallpaper()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Nullable
     static WindowContainer fromBinder(IBinder binder) {
         return RemoteToken.fromBinder(binder).getContainer();
@@ -3852,7 +3949,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Nullable
     BLASTSyncEngine.SyncGroup getSyncGroup() {
         if (mSyncGroup != null) return mSyncGroup;
-        if (mParent != null) return mParent.getSyncGroup();
+        WindowContainer<?> parent = mParent;
+        while (parent != null) {
+            if (parent.mSyncGroup != null) {
+                return parent.mSyncGroup;
+            }
+            parent = parent.mParent;
+        }
         return null;
     }
 
@@ -3875,7 +3978,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return true;
     }
 
-    boolean useBLASTSync() {
+    boolean syncNextBuffer() {
         return mSyncState != SYNC_STATE_NONE;
     }
 
@@ -3886,7 +3989,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param cancel If true, this is being finished because it is leaving the sync group rather
      *               than due to the sync group completing.
      */
-    void finishSync(Transaction outMergedTransaction, BLASTSyncEngine.SyncGroup group,
+    void finishSync(Transaction outMergedTransaction, @Nullable BLASTSyncEngine.SyncGroup group,
             boolean cancel) {
         if (mSyncState == SYNC_STATE_NONE) return;
         final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
@@ -3914,7 +4017,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (!isVisibleRequested()) {
             return true;
         }
-        if (mSyncState == SYNC_STATE_NONE) {
+        if (mSyncState == SYNC_STATE_NONE && getSyncGroup() != null) {
+            Slog.i(TAG, "prepareSync in isSyncFinished: " + this);
             prepareSync();
         }
         if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW) {
@@ -3973,16 +4077,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
             if (newParent == null) {
                 // This is getting removed.
+                final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
                 if (oldParent.mSyncState != SYNC_STATE_NONE) {
                     // In order to keep the transaction in sync, merge it into the parent.
-                    finishSync(oldParent.mSyncTransaction, getSyncGroup(), true /* cancel */);
-                } else if (mSyncGroup != null) {
-                    // This is watched directly by the sync-group, so merge this transaction into
-                    // into the sync-group so it isn't lost
-                    finishSync(mSyncGroup.getOrphanTransaction(), mSyncGroup, true /* cancel */);
+                    finishSync(oldParent.mSyncTransaction, syncGroup, true /* cancel */);
+                } else if (syncGroup != null) {
+                    // This is watched by the sync-group, so merge this transaction into the
+                    // sync-group for not losing the operations in the transaction.
+                    finishSync(syncGroup.getOrphanTransaction(), syncGroup, true /* cancel */);
                 } else {
-                    throw new IllegalStateException("This container is in sync mode without a sync"
-                            + " group: " + this);
+                    Slog.wtf(TAG, this + " is in sync mode without a sync group");
+                    // Make sure the removal transaction take effect.
+                    finishSync(getPendingTransaction(), null /* group */, true /* cancel */);
                 }
                 return;
             } else if (mSyncGroup == null) {
@@ -4133,27 +4239,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 // animation but and so the surface is still animating)
                 mOnAnimationFinished.add(clearBackgroundColorHandler);
                 mOnAnimationCancelled.add(clearBackgroundColorHandler);
-            }
-        }
-
-        private void hideInsetSourceViewOverflows() {
-            final SparseArray<InsetsSourceProvider> providers =
-                    getDisplayContent().getInsetsStateController().getSourceProviders();
-            for (int i = providers.size(); i >= 0; i--) {
-                final InsetsSourceProvider insetProvider = providers.valueAt(i);
-                if (!insetProvider.getSource().insetsRoundedCornerFrame()) {
-                    return;
-                }
-
-                // Will apply it immediately to current leash and to all future inset animations
-                // until we disable it.
-                insetProvider.setCropToProvidingInsetsBounds(getPendingTransaction());
-
-                // Only clear the size restriction of the inset once the surface animation is over
-                // and not if it's canceled to be replace by another animation.
-                mOnAnimationFinished.add(() -> {
-                    insetProvider.removeCropToProvidingInsetsBounds(getPendingTransaction());
-                });
             }
         }
 

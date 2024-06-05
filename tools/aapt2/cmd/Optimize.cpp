@@ -30,6 +30,7 @@
 #include "ValueVisitor.h"
 #include "android-base/file.h"
 #include "android-base/stringprintf.h"
+#include "androidfw/BigBufferStream.h"
 #include "androidfw/ConfigDescription.h"
 #include "androidfw/IDiagnostics.h"
 #include "androidfw/ResourceTypes.h"
@@ -39,7 +40,6 @@
 #include "filter/AbiFilter.h"
 #include "format/binary/TableFlattener.h"
 #include "format/binary/XmlFlattener.h"
-#include "io/BigBufferStream.h"
 #include "io/Util.h"
 #include "optimize/MultiApkGenerator.h"
 #include "optimize/Obfuscator.h"
@@ -101,6 +101,7 @@ class OptimizeContext : public IAaptContext {
 
   void SetVerbose(bool val) {
     verbose_ = val;
+    diagnostics_.SetVerbose(val);
   }
 
   void SetMinSdkVersion(int sdk_version) {
@@ -248,7 +249,7 @@ class Optimizer {
       return false;
     }
 
-    io::BigBufferInputStream manifest_buffer_in(&manifest_buffer);
+    android::BigBufferInputStream manifest_buffer_in(&manifest_buffer);
     if (!io::CopyInputStreamToArchive(context_, &manifest_buffer_in, "AndroidManifest.xml",
                                       ArchiveEntry::kCompress, writer)) {
       return false;
@@ -296,7 +297,7 @@ class Optimizer {
       return false;
     }
 
-    io::BigBufferInputStream table_buffer_in(&table_buffer);
+    android::BigBufferInputStream table_buffer_in(&table_buffer);
     return io::CopyInputStreamToArchive(context_, &table_buffer_in, "resources.arsc",
                                         ArchiveEntry::kAlign, writer);
   }

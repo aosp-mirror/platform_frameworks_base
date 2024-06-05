@@ -18,8 +18,11 @@ package com.android.settingslib;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.MotionEvent;
-import android.widget.Switch;
+import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 
 import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
@@ -35,7 +38,7 @@ import com.android.settingslib.core.instrumentation.SettingsJankMonitor;
  */
 public class PrimarySwitchPreference extends RestrictedPreference {
 
-    private Switch mSwitch;
+    private CompoundButton mSwitch;
     private boolean mChecked;
     private boolean mCheckedSet;
     private boolean mEnableSwitch = true;
@@ -59,13 +62,17 @@ public class PrimarySwitchPreference extends RestrictedPreference {
 
     @Override
     protected int getSecondTargetResId() {
-        return R.layout.preference_widget_primary_switch;
+        return androidx.preference.R.layout.preference_widget_switch_compat;
     }
 
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        mSwitch = (Switch) holder.findViewById(R.id.switchWidget);
+        final View widgetFrame = holder.findViewById(android.R.id.widget_frame);
+        if (widgetFrame instanceof LinearLayout linearLayout) {
+            linearLayout.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+        }
+        mSwitch = (CompoundButton) holder.findViewById(androidx.preference.R.id.switchWidget);
         if (mSwitch != null) {
             mSwitch.setOnClickListener(v -> {
                 if (mSwitch != null && !mSwitch.isEnabled()) {
@@ -147,7 +154,7 @@ public class PrimarySwitchPreference extends RestrictedPreference {
         setSwitchEnabled(admin == null);
     }
 
-    public Switch getSwitch() {
+    public CompoundButton getSwitch() {
         return mSwitch;
     }
 

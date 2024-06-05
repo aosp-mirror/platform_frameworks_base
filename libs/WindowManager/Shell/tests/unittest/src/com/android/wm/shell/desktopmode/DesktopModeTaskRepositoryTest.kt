@@ -16,8 +16,10 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
+import android.view.Display.INVALID_DISPLAY
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
@@ -117,6 +119,57 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    fun isOnlyActiveTask_noActiveTasks() {
+        // Not an active task
+        assertThat(repo.isOnlyActiveTask(1)).isFalse()
+    }
+
+    @Test
+    fun isOnlyActiveTask_singleActiveTask() {
+        repo.addActiveTask(DEFAULT_DISPLAY, 1)
+        // The only active task
+        assertThat(repo.isActiveTask(1)).isTrue()
+        assertThat(repo.isOnlyActiveTask(1)).isTrue()
+        // Not an active task
+        assertThat(repo.isActiveTask(99)).isFalse()
+        assertThat(repo.isOnlyActiveTask(99)).isFalse()
+    }
+
+    @Test
+    fun isOnlyActiveTask_multipleActiveTasks() {
+        repo.addActiveTask(DEFAULT_DISPLAY, 1)
+        repo.addActiveTask(DEFAULT_DISPLAY, 2)
+        // Not the only task
+        assertThat(repo.isActiveTask(1)).isTrue()
+        assertThat(repo.isOnlyActiveTask(1)).isFalse()
+        // Not the only task
+        assertThat(repo.isActiveTask(2)).isTrue()
+        assertThat(repo.isOnlyActiveTask(2)).isFalse()
+        // Not an active task
+        assertThat(repo.isActiveTask(99)).isFalse()
+        assertThat(repo.isOnlyActiveTask(99)).isFalse()
+    }
+
+    @Test
+    fun isOnlyActiveTask_multipleDisplays() {
+        repo.addActiveTask(DEFAULT_DISPLAY, 1)
+        repo.addActiveTask(DEFAULT_DISPLAY, 2)
+        repo.addActiveTask(SECOND_DISPLAY, 3)
+        // Not the only task on DEFAULT_DISPLAY
+        assertThat(repo.isActiveTask(1)).isTrue()
+        assertThat(repo.isOnlyActiveTask(1)).isFalse()
+        // Not the only task on DEFAULT_DISPLAY
+        assertThat(repo.isActiveTask(2)).isTrue()
+        assertThat(repo.isOnlyActiveTask(2)).isFalse()
+        // The only active task on SECOND_DISPLAY
+        assertThat(repo.isActiveTask(3)).isTrue()
+        assertThat(repo.isOnlyActiveTask(3)).isTrue()
+        // Not an active task
+        assertThat(repo.isActiveTask(99)).isFalse()
+        assertThat(repo.isOnlyActiveTask(99)).isFalse()
+    }
+
+    @Test
     fun addListener_notifiesVisibleFreeformTask() {
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
         val listener = TestVisibilityListener()
@@ -124,7 +177,7 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         repo.addVisibleTasksListener(listener, executor)
         executor.flushAll()
 
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isTrue()
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(1)
         assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
     }
 
@@ -136,7 +189,7 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         repo.addVisibleTasksListener(listener, executor)
         executor.flushAll()
 
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isFalse()
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(0)
         // One call as adding listener notifies it
         assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(0)
     }
@@ -150,8 +203,8 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 2, visible = true)
         executor.flushAll()
 
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isTrue()
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(2)
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(2)
     }
 
     @Test
@@ -163,16 +216,16 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
         executor.flushAll()
 
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isTrue()
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(1)
         assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
-        assertThat(listener.hasVisibleTasksOnSecondaryDisplay).isFalse()
+        assertThat(listener.visibleTasksCountOnSecondaryDisplay).isEqualTo(0)
         assertThat(listener.visibleChangesOnSecondaryDisplay).isEqualTo(0)
 
         repo.updateVisibleFreeformTasks(displayId = 1, taskId = 2, visible = true)
         executor.flushAll()
 
         // Listener for secondary display is notified
-        assertThat(listener.hasVisibleTasksOnSecondaryDisplay).isTrue()
+        assertThat(listener.visibleTasksCountOnSecondaryDisplay).isEqualTo(1)
         assertThat(listener.visibleChangesOnSecondaryDisplay).isEqualTo(1)
         // No changes to listener for default display
         assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
@@ -186,7 +239,7 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
 
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
         executor.flushAll()
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isTrue()
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(1)
 
         // Mark task 1 visible on secondary display
         repo.updateVisibleFreeformTasks(displayId = 1, taskId = 1, visible = true)
@@ -196,11 +249,11 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         // 1 - visible task added
         // 2 - visible task removed
         assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(2)
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isFalse()
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(0)
 
         // Secondary display should have 1 call for visible task added
         assertThat(listener.visibleChangesOnSecondaryDisplay).isEqualTo(1)
-        assertThat(listener.hasVisibleTasksOnSecondaryDisplay).isTrue()
+        assertThat(listener.visibleTasksCountOnSecondaryDisplay).isEqualTo(1)
     }
 
     @Test
@@ -212,17 +265,38 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 2, visible = true)
         executor.flushAll()
 
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isTrue()
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(2)
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = false)
         executor.flushAll()
 
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(1)
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(3)
 
         repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 2, visible = false)
         executor.flushAll()
 
-        assertThat(listener.hasVisibleTasksOnDefaultDisplay).isFalse()
-        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(2)
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(0)
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(4)
+    }
+
+    /**
+     * When a task vanishes, the displayId of the task is set to INVALID_DISPLAY.
+     * This tests that task is removed from the last parent display when it vanishes.
+     */
+    @Test
+    fun updateVisibleFreeformTasks_removeVisibleTasksRemovesTaskWithInvalidDisplay() {
+        val listener = TestVisibilityListener()
+        val executor = TestShellExecutor()
+        repo.addVisibleTasksListener(listener, executor)
+        repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 1, visible = true)
+        repo.updateVisibleFreeformTasks(DEFAULT_DISPLAY, taskId = 2, visible = true)
+        executor.flushAll()
+
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(2)
+        repo.updateVisibleFreeformTasks(INVALID_DISPLAY, taskId = 1, visible = false)
+        executor.flushAll()
+
+        assertThat(listener.visibleChangesOnDefaultDisplay).isEqualTo(3)
+        assertThat(listener.visibleTasksCountOnDefaultDisplay).isEqualTo(1)
     }
 
     @Test
@@ -289,11 +363,11 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
 
     @Test
     fun addOrMoveFreeformTaskToTop_didNotExist_addsToTop() {
-        repo.addOrMoveFreeformTaskToTop(5)
-        repo.addOrMoveFreeformTaskToTop(6)
-        repo.addOrMoveFreeformTaskToTop(7)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 5)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 6)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 7)
 
-        val tasks = repo.getFreeformTasksInZOrder()
+        val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
         assertThat(tasks.size).isEqualTo(3)
         assertThat(tasks[0]).isEqualTo(7)
         assertThat(tasks[1]).isEqualTo(6)
@@ -302,16 +376,137 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
 
     @Test
     fun addOrMoveFreeformTaskToTop_alreadyExists_movesToTop() {
-        repo.addOrMoveFreeformTaskToTop(5)
-        repo.addOrMoveFreeformTaskToTop(6)
-        repo.addOrMoveFreeformTaskToTop(7)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 5)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 6)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 7)
 
-        repo.addOrMoveFreeformTaskToTop(6)
+        repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 6)
 
-        val tasks = repo.getFreeformTasksInZOrder()
+        val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
         assertThat(tasks.size).isEqualTo(3)
         assertThat(tasks.first()).isEqualTo(6)
     }
+
+    @Test
+    fun removeFreeformTask_removesTaskBoundsBeforeMaximize() {
+        val taskId = 1
+        repo.saveBoundsBeforeMaximize(taskId, Rect(0, 0, 200, 200))
+        repo.removeFreeformTask(THIRD_DISPLAY, taskId)
+        assertThat(repo.removeBoundsBeforeMaximize(taskId)).isNull()
+    }
+
+    @Test
+    fun saveBoundsBeforeMaximize_boundsSavedByTaskId() {
+        val taskId = 1
+        val bounds = Rect(0, 0, 200, 200)
+        repo.saveBoundsBeforeMaximize(taskId, bounds)
+        assertThat(repo.removeBoundsBeforeMaximize(taskId)).isEqualTo(bounds)
+    }
+
+    @Test
+    fun removeBoundsBeforeMaximize_returnsNullAfterBoundsRemoved() {
+        val taskId = 1
+        val bounds = Rect(0, 0, 200, 200)
+        repo.saveBoundsBeforeMaximize(taskId, bounds)
+        repo.removeBoundsBeforeMaximize(taskId)
+        assertThat(repo.removeBoundsBeforeMaximize(taskId)).isNull()
+    }
+
+    @Test
+    fun minimizeTaskNotCalled_noTasksMinimized() {
+        assertThat(repo.isMinimizedTask(taskId = 0)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 1)).isFalse()
+    }
+
+    @Test
+    fun minimizeTask_onlyThatTaskIsMinimized() {
+        repo.minimizeTask(displayId = 0, taskId = 0)
+
+        assertThat(repo.isMinimizedTask(taskId = 0)).isTrue()
+        assertThat(repo.isMinimizedTask(taskId = 1)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 2)).isFalse()
+    }
+
+    @Test
+    fun unminimizeTask_taskNoLongerMinimized() {
+        repo.minimizeTask(displayId = 0, taskId = 0)
+        repo.unminimizeTask(displayId = 0, taskId = 0)
+
+        assertThat(repo.isMinimizedTask(taskId = 0)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 1)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 2)).isFalse()
+    }
+
+    @Test
+    fun unminimizeTask_nonExistentTask_doesntCrash() {
+        repo.unminimizeTask(displayId = 0, taskId = 0)
+
+        assertThat(repo.isMinimizedTask(taskId = 0)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 1)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 2)).isFalse()
+    }
+
+
+    @Test
+    fun updateVisibleFreeformTasks_toVisible_taskIsUnminimized() {
+        repo.minimizeTask(displayId = 10, taskId = 2)
+
+        repo.updateVisibleFreeformTasks(displayId = 10, taskId = 2, visible = true)
+
+        assertThat(repo.isMinimizedTask(taskId = 2)).isFalse()
+    }
+
+    @Test
+    fun isDesktopModeShowing_noActiveTasks_returnsFalse() {
+        assertThat(repo.isDesktopModeShowing(displayId = 0)).isFalse()
+    }
+
+    @Test
+    fun isDesktopModeShowing_noTasksVisible_returnsFalse() {
+        repo.addActiveTask(displayId = 0, taskId = 1)
+        repo.addActiveTask(displayId = 0, taskId = 2)
+
+        assertThat(repo.isDesktopModeShowing(displayId = 0)).isFalse()
+    }
+
+    @Test
+    fun isDesktopModeShowing_tasksActiveAndVisible_returnsTrue() {
+        repo.addActiveTask(displayId = 0, taskId = 1)
+        repo.addActiveTask(displayId = 0, taskId = 2)
+        repo.updateVisibleFreeformTasks(displayId = 0, taskId = 1, visible = true)
+
+        assertThat(repo.isDesktopModeShowing(displayId = 0)).isTrue()
+    }
+
+    @Test
+    fun getActiveNonMinimizedTasksOrderedFrontToBack_returnsFreeformTasksInCorrectOrder() {
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 1)
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 3)
+        // The front-most task will be the one added last through addOrMoveFreeformTaskToTop
+        repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 3)
+        repo.addOrMoveFreeformTaskToTop(displayId = 0, taskId = 2)
+        repo.addOrMoveFreeformTaskToTop(displayId = 0, taskId = 1)
+
+        assertThat(repo.getActiveNonMinimizedTasksOrderedFrontToBack(displayId = 0))
+            .containsExactly(1, 2, 3).inOrder()
+    }
+
+    @Test
+    fun getActiveNonMinimizedTasksOrderedFrontToBack_minimizedTaskNotIncluded() {
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 1)
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 3)
+        // The front-most task will be the one added last through addOrMoveFreeformTaskToTop
+        repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 3)
+        repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 2)
+        repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 1)
+        repo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+
+        assertThat(repo.getActiveNonMinimizedTasksOrderedFrontToBack(
+            displayId = DEFAULT_DISPLAY)).containsExactly(1, 3).inOrder()
+    }
+
 
     class TestListener : DesktopModeTaskRepository.ActiveTasksListener {
         var activeChangesOnDefaultDisplay = 0
@@ -326,20 +521,20 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     class TestVisibilityListener : DesktopModeTaskRepository.VisibleTasksListener {
-        var hasVisibleTasksOnDefaultDisplay = false
-        var hasVisibleTasksOnSecondaryDisplay = false
+        var visibleTasksCountOnDefaultDisplay = 0
+        var visibleTasksCountOnSecondaryDisplay = 0
 
         var visibleChangesOnDefaultDisplay = 0
         var visibleChangesOnSecondaryDisplay = 0
 
-        override fun onVisibilityChanged(displayId: Int, hasVisibleFreeformTasks: Boolean) {
+        override fun onTasksVisibilityChanged(displayId: Int, visibleTasksCount: Int) {
             when (displayId) {
                 DEFAULT_DISPLAY -> {
-                    hasVisibleTasksOnDefaultDisplay = hasVisibleFreeformTasks
+                    visibleTasksCountOnDefaultDisplay = visibleTasksCount
                     visibleChangesOnDefaultDisplay++
                 }
                 SECOND_DISPLAY -> {
-                    hasVisibleTasksOnSecondaryDisplay = hasVisibleFreeformTasks
+                    visibleTasksCountOnSecondaryDisplay = visibleTasksCount
                     visibleChangesOnSecondaryDisplay++
                 }
                 else -> fail("Visible task listener received unexpected display id: $displayId")
@@ -349,5 +544,6 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
 
     companion object {
         const val SECOND_DISPLAY = 1
+        const val THIRD_DISPLAY = 345
     }
 }

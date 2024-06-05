@@ -509,8 +509,6 @@ public final class StreamConfigurationMap {
      * Recommended for recording video (simple to use)
      * <li>{@link android.media.MediaCodec} -
      * Recommended for recording video (more complicated to use, with more flexibility)
-     * <li>{@link android.renderscript.Allocation} -
-     * Recommended for image processing with {@link android.renderscript RenderScript}
      * <li>{@link android.view.SurfaceHolder} -
      * Recommended for low-power camera preview with {@link android.view.SurfaceView}
      * <li>{@link android.graphics.SurfaceTexture} -
@@ -1475,6 +1473,11 @@ public final class StreamConfigurationMap {
      * <li>ImageFormat.DEPTH_JPEG => HAL_DATASPACE_DYNAMIC_DEPTH
      * <li>ImageFormat.HEIC => HAL_DATASPACE_HEIF
      * <li>ImageFormat.JPEG_R => HAL_DATASPACE_JPEG_R
+     * <li>ImageFormat.YUV_420_888 => HAL_DATASPACE_JFIF
+     * <li>ImageFormat.RAW_SENSOR => HAL_DATASPACE_ARBITRARY
+     * <li>ImageFormat.RAW_OPAQUE => HAL_DATASPACE_ARBITRARY
+     * <li>ImageFormat.RAW10 => HAL_DATASPACE_ARBITRARY
+     * <li>ImageFormat.RAW12 => HAL_DATASPACE_ARBITRARY
      * <li>others => HAL_DATASPACE_UNKNOWN
      * </ul>
      * </p>
@@ -1511,6 +1514,13 @@ public final class StreamConfigurationMap {
                 return HAL_DATASPACE_HEIF;
             case ImageFormat.JPEG_R:
                 return HAL_DATASPACE_JPEG_R;
+            case ImageFormat.YUV_420_888:
+                return HAL_DATASPACE_JFIF;
+            case ImageFormat.RAW_SENSOR:
+            case ImageFormat.RAW_PRIVATE:
+            case ImageFormat.RAW10:
+            case ImageFormat.RAW12:
+                return HAL_DATASPACE_ARBITRARY;
             default:
                 return HAL_DATASPACE_UNKNOWN;
         }
@@ -2005,6 +2015,12 @@ public final class StreamConfigurationMap {
     private static final int HAL_DATASPACE_RANGE_SHIFT = 27;
 
     private static final int HAL_DATASPACE_UNKNOWN = 0x0;
+
+    /**
+     * @hide
+     */
+    public static final int HAL_DATASPACE_ARBITRARY = 0x1;
+
     /** @hide */
     public static final int HAL_DATASPACE_V0_JFIF =
             (2 << HAL_DATASPACE_STANDARD_SHIFT) |
@@ -2027,6 +2043,10 @@ public final class StreamConfigurationMap {
      * @hide
      */
     public static final int HAL_DATASPACE_JPEG_R = 0x1005;
+    /**
+     * @hide
+     */
+    public static final int HAL_DATASPACE_JFIF = 0x8C20000;
     private static final long DURATION_20FPS_NS = 50000000L;
     /**
      * @see #getDurations(int, int)

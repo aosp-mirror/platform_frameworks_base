@@ -89,7 +89,7 @@ constructor(
         var futureTime = Long.MAX_VALUE
         groupEntry.children
             .asSequence()
-            .mapNotNull { child -> child.sbn.notification.`when`.takeIf { it > 0 } }
+            .mapNotNull { child -> child.sbn.notification.getWhen().takeIf { it > 0 } }
             .forEach { time ->
                 val isInThePast = currentTimeMillis - time > 0
                 if (isInThePast) {

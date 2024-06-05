@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -25,6 +26,8 @@ import android.app.ILocalWallpaperColorConsumer;
 import android.app.WallpaperInfo;
 import android.content.ComponentName;
 import android.app.WallpaperColors;
+
+import java.util.List;
 
 /** @hide */
 interface IWallpaperManager {
@@ -39,15 +42,21 @@ interface IWallpaperManager {
      *   FLAG_SET_SYSTEM
      *   FLAG_SET_LOCK
      *
-     * A 'null' cropHint rectangle is explicitly permitted as a sentinel for "whatever
-     * the source image's bounding rect is."
+     * 'screenOrientations' and 'crops' define how the wallpaper will be positioned for
+     * different screen orientations. If some screen orientations are missing, crops for these
+     * orientations will be added by the system.
+     *
+     * If 'screenOrientations' is null, 'crops' can be null or a singleton list. The system will
+     * fit the provided crop (or the whole image, if 'crops' is 'null') for the current device
+     * orientation, and add crops for the missing orientations.
      *
      * The completion callback's "onWallpaperChanged()" method is invoked when the
      * new wallpaper content is ready to display.
      */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_WALLPAPER)")
     ParcelFileDescriptor setWallpaper(String name, in String callingPackage,
-            in Rect cropHint, boolean allowBackup, out Bundle extras, int which,
-            IWallpaperManagerCallback completion, int userId);
+            in int[] screenOrientations, in List<Rect> crops, boolean allowBackup,
+            out Bundle extras, int which, IWallpaperManagerCallback completion, int userId);
 
     /**
      * Set the live wallpaper.
@@ -76,6 +85,30 @@ interface IWallpaperManager {
     ParcelFileDescriptor getWallpaperWithFeature(String callingPkg, String callingFeatureId,
             IWallpaperManagerCallback cb, int which, out Bundle outParams, int userId,
             boolean getCropped);
+
+    /**
+     * For a given user and a list of display sizes, get a list of Rect representing the
+     * area of the current wallpaper that is displayed for each display size.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.READ_WALLPAPER_INTERNAL)")
+    @SuppressWarnings(value={"untyped-collection"})
+    List getBitmapCrops(in List<Point> displaySizes, int which, boolean originalBitmap, int userId);
+
+    /**
+     * Return how a bitmap of a given size would be cropped for a given list of display sizes when
+     * set with the given suggested crops.
+     * @hide
+     */
+    @SuppressWarnings(value={"untyped-collection"})
+    List getFutureBitmapCrops(in Point bitmapSize, in List<Point> displaySizes,
+            in int[] screenOrientations, in List<Rect> crops);
+
+    /**
+     * Return how a bitmap of a given size would be cropped when set with the given suggested crops.
+     * @hide
+     */
+    @SuppressWarnings(value={"untyped-collection"})
+    Rect getBitmapCrop(in Point bitmapSize, in int[] screenOrientations, in List<Rect> crops);
 
     /**
      * Retrieve the given user's current wallpaper ID of the given kind.
@@ -161,12 +194,6 @@ interface IWallpaperManager {
      */
     boolean isWallpaperBackupEligible(int which, int userId);
 
-    /*
-     * Keyguard: register a callback for being notified that lock-state relevant
-     * wallpaper content has changed.
-     */
-    boolean setLockWallpaperCallback(IWallpaperManagerCallback cb);
-
     /**
      * Returns the colors used by the lock screen or system wallpaper.
      *
@@ -251,18 +278,4 @@ interface IWallpaperManager {
      * @hide
      */
     boolean isStaticWallpaper(int which);
-
-    /**
-     * Temporary method for project b/197814683.
-     * Return true if the lockscreen wallpaper always uses a WallpaperService, not a static image.
-     * @hide
-     */
-     boolean isLockscreenLiveWallpaperEnabled();
-
-    /**
-     * Temporary method for project b/270726737.
-     * Return true if the wallpaper supports different crops for different display dimensions.
-     * @hide
-     */
-     boolean isMultiCropEnabled();
 }

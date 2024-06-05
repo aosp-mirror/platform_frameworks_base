@@ -110,6 +110,14 @@ public final class VirtualMouseButtonEvent implements Parcelable {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "VirtualMouseButtonEvent("
+                + " action=" + MotionEvent.actionToString(mAction)
+                + " button=" + MotionEvent.buttonStateToString(mButtonCode)
+                + " eventTime(ns)=" + mEventTimeNanos;
+    }
+
     /**
      * Returns the button code associated with this event.
      */

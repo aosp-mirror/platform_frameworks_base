@@ -16,6 +16,7 @@
 
 package android.service.dreams;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -79,11 +80,31 @@ public abstract class DreamOverlayService extends Service {
             mService.endDream(this);
         }
 
-        private void onExitRequested() {
+        @Override
+        public void comeToFront() {
+            mService.comeToFront(this);
+        }
+
+        @Override
+        public void onWakeRequested() {
+            if (Flags.dreamWakeRedirect()) {
+                mService.onWakeRequested();
+            }
+        }
+
+        private void requestExit() {
             try {
                 mDreamOverlayCallback.onExitRequested();
             } catch (RemoteException e) {
                 Log.e(TAG, "Could not request exit:" + e);
+            }
+        }
+
+        private void redirectWake(boolean redirect) {
+            try {
+                mDreamOverlayCallback.onRedirectWake(redirect);
+            } catch (RemoteException e) {
+                Log.e(TAG, "could not request redirect wake", e);
             }
         }
 
@@ -127,6 +148,16 @@ public abstract class DreamOverlayService extends Service {
             }
 
             onWakeUp();
+        });
+    }
+
+    private void comeToFront(OverlayClient client) {
+        mExecutor.execute(() -> {
+            if (mCurrentClient != client) {
+                return;
+            }
+
+            onComeToFront();
         });
     }
 
@@ -190,6 +221,13 @@ public abstract class DreamOverlayService extends Service {
     public void onWakeUp() {}
 
     /**
+     * This method is overridden by implementations to handle when the dream is coming to the front
+     * (after having lost focus to something on top of it).
+     * @hide
+     */
+    public void onComeToFront() {}
+
+    /**
      * This method is overridden by implementations to handle when the dream has ended. There may
      * be earlier signals leading up to this step, such as @{@link #onWakeUp(Runnable)}.
      *
@@ -207,7 +245,35 @@ public abstract class DreamOverlayService extends Service {
             throw new IllegalStateException("requested exit with no dream present");
         }
 
-        mCurrentClient.onExitRequested();
+        mCurrentClient.requestExit();
+    }
+
+    /**
+     * Called to inform the dream to redirect waking to this overlay rather than exiting.
+     * @param redirect {@code true} if waking up should be redirected. {@code false} otherwise.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    public final void redirectWake(boolean redirect) {
+        if (!Flags.dreamWakeRedirect()) {
+            return;
+        }
+
+        if (mCurrentClient == null) {
+            throw new IllegalStateException("redirected wake with no dream present");
+        }
+
+        mCurrentClient.redirectWake(redirect);
+    }
+
+    /**
+     * Invoked when the dream has requested to exit. This is only called if the dream overlay
+     * has explicitly requested exits to be redirected via {@link #redirectWake(boolean)}.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    public void onWakeRequested() {
     }
 
     /**

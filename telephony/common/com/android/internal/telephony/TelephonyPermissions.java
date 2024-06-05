@@ -193,7 +193,7 @@ public final class TelephonyPermissions {
         // We have READ_PHONE_STATE permission, so return true as long as the AppOps bit hasn't been
         // revoked.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        return appOps.noteOp(AppOpsManager.OPSTR_READ_PHONE_STATE, uid, callingPackage,
+        return appOps.noteOpNoThrow(AppOpsManager.OPSTR_READ_PHONE_STATE, uid, callingPackage,
                 callingFeatureId, null) == AppOpsManager.MODE_ALLOWED;
     }
 
@@ -246,7 +246,7 @@ public final class TelephonyPermissions {
         // We have READ_PHONE_STATE permission, so return true as long as the AppOps bit hasn't been
         // revoked.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        return appOps.noteOp(AppOpsManager.OPSTR_READ_PHONE_STATE, uid, callingPackage,
+        return appOps.noteOpNoThrow(AppOpsManager.OPSTR_READ_PHONE_STATE, uid, callingPackage,
                 callingFeatureId, null) == AppOpsManager.MODE_ALLOWED;
     }
 
@@ -518,7 +518,7 @@ public final class TelephonyPermissions {
         // We have READ_CALL_LOG permission, so return true as long as the AppOps bit hasn't been
         // revoked.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        return appOps.noteOp(AppOpsManager.OPSTR_READ_CALL_LOG, uid, callingPackage,
+        return appOps.noteOpNoThrow(AppOpsManager.OPSTR_READ_CALL_LOG, uid, callingPackage,
                 callingPackageName, null) == AppOpsManager.MODE_ALLOWED;
     }
 
@@ -598,8 +598,9 @@ public final class TelephonyPermissions {
      *
      * @return true if caller has ACCESS_LAST_KNOWN_CELL_ID permission else false.
      */
+    @RequiresPermission(Manifest.permission.ACCESS_LAST_KNOWN_CELL_ID)
     public static boolean checkLastKnownCellIdAccessPermission(Context context) {
-        return context.checkCallingOrSelfPermission("android.permission.ACCESS_LAST_KNOWN_CELL_ID")
+        return context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_LAST_KNOWN_CELL_ID)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
@@ -789,7 +790,7 @@ public final class TelephonyPermissions {
         if (isGranted) return;
 
         if (allowCarrierPrivilegeOnAnySub) {
-            if (checkCarrierPrivilegeForAnySubId(context, Binder.getCallingUid())) return;
+            if (checkCarrierPrivilegeForAnySubId(context, uid)) return;
         } else {
             if (checkCarrierPrivilegeForSubId(context, subId)) return;
         }
@@ -854,7 +855,8 @@ public final class TelephonyPermissions {
     public static boolean checkSubscriptionAssociatedWithUser(@NonNull Context context, int subId,
             @NonNull UserHandle callerUserHandle, @NonNull String destAddr) {
         // Skip subscription-user association check for emergency numbers
-        TelephonyManager tm = context.getSystemService(TelephonyManager.class);
+        TelephonyManager tm = (TelephonyManager) context.getSystemService(
+                Context.TELEPHONY_SERVICE);
         final long token = Binder.clearCallingIdentity();
         try {
             if (tm != null && tm.isEmergencyNumber(destAddr)) {
@@ -876,16 +878,13 @@ public final class TelephonyPermissions {
      * @param context Context
      * @param subId subscription ID
      * @param callerUserHandle caller user handle
-     * @return  false if user is not associated with the subscription.
+     * @return  false if user is not associated with the subscription, or no record found of this
+     * subscription.
      */
     public static boolean checkSubscriptionAssociatedWithUser(@NonNull Context context, int subId,
             @NonNull UserHandle callerUserHandle) {
-        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-            // No subscription on device, return true.
-            return true;
-        }
-
-        SubscriptionManager subManager = context.getSystemService(SubscriptionManager.class);
+        SubscriptionManager subManager = (SubscriptionManager) context.getSystemService(
+                Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         final long token = Binder.clearCallingIdentity();
         try {
             if ((subManager != null) &&
@@ -894,8 +893,11 @@ public final class TelephonyPermissions {
                 Log.e(LOG_TAG, "User[User ID:" + callerUserHandle.getIdentifier()
                         + "] is not associated with Subscription ID:" + subId);
                 return false;
-
             }
+        } catch (IllegalArgumentException e) {
+            // Found no record of this sub Id.
+            Log.e(LOG_TAG, "Subscription[Subscription ID:" + subId + "] has no records on device");
+            return false;
         } finally {
             Binder.restoreCallingIdentity(token);
         }

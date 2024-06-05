@@ -21,6 +21,8 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,7 @@ public final class SearchResponse implements Parcelable {
                     SEARCH_STATUS_OK,
                     SEARCH_STATUS_TIME_OUT,
                     SEARCH_STATUS_NO_INTERNET})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface SearchStatusCode {
     }
 

@@ -31,12 +31,10 @@ bootstrap_go_package {
         "blueprint",
         "soong",
         "soong-android",
-        "soong-bp2build",
         "soong-genrule",
         "soong-java",
     ],
     srcs: ["api.go"],
-    testSrcs: ["api_test.go"],
     pluginFor: ["soong_build"],
 }
 
@@ -62,17 +60,40 @@ metalava_cmd = "$(location metalava)"
 metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
 metalava_cmd += " --quiet "
 
-genrule {
-    name: "current-api-xml",
-    tools: ["metalava"],
-    srcs: [":frameworks-base-api-current.txt"],
-    out: ["current.api"],
-    cmd: metalava_cmd + "signature-to-jdiff $(in) $(out)",
-    visibility: ["//visibility:public"],
+soong_config_module_type {
+    name: "enable_crashrecovery_module",
+    module_type: "combined_apis_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: ["release_crashrecovery_module"],
+    properties: [
+        "bootclasspath",
+        "system_server_classpath",
+    ],
+}
+
+soong_config_bool_variable {
+    name: "release_crashrecovery_module",
+}
+
+enable_crashrecovery_module {
+    name: "crashrecovery_module_defaults",
+    soong_config_variables: {
+        release_crashrecovery_module: {
+            bootclasspath: [
+                "framework-crashrecovery",
+            ],
+            system_server_classpath: [
+                "service-crashrecovery",
+            ],
+        },
+    },
 }
 
 combined_apis {
     name: "frameworks-base-api",
+    defaults: [
+        "crashrecovery_module_defaults",
+    ],
     bootclasspath: [
         "android.net.ipsec.ike",
         "art.module.public.api",
@@ -86,11 +107,16 @@ combined_apis {
         "framework-devicelock",
         "framework-graphics",
         "framework-healthfitness",
+        "framework-location",
         "framework-media",
         "framework-mediaprovider",
+        "framework-nfc",
         "framework-ondevicepersonalization",
+        "framework-pdf",
+        "framework-pdf-v",
         "framework-permission",
         "framework-permission-s",
+        "framework-profiling",
         "framework-scheduling",
         "framework-sdkextensions",
         "framework-statsd",
@@ -175,7 +201,7 @@ genrule {
     out: ["current.srcjar"],
     cmd: "$(location merge_zips) $(out) $(in)",
     srcs: [
-        ":api-stubs-docs-non-updatable",
+        ":api-stubs-docs-non-updatable{.exportable}",
         ":all-modules-public-stubs-source",
     ],
     visibility: ["//visibility:private"], // Used by make module in //development, mind
@@ -198,7 +224,7 @@ genrule {
     name: "sdk-annotations.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
-        ":android-non-updatable-doc-stubs{.annotations.zip}",
+        ":android-non-updatable-doc-stubs{.exportable.annotations.zip}",
         ":all-modules-public-annotations",
     ],
 }
@@ -207,7 +233,7 @@ genrule {
     name: "sdk-annotations-system.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
-        ":android-non-updatable-doc-stubs-system{.annotations.zip}",
+        ":android-non-updatable-doc-stubs-system{.exportable.annotations.zip}",
         ":all-modules-system-annotations",
     ],
 }
@@ -216,7 +242,7 @@ genrule {
     name: "sdk-annotations-module-lib.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
-        ":android-non-updatable-doc-stubs-module-lib{.annotations.zip}",
+        ":android-non-updatable-doc-stubs-module-lib{.exportable.annotations.zip}",
         ":all-modules-module-lib-annotations",
     ],
 }
@@ -225,7 +251,7 @@ genrule {
     name: "sdk-annotations-system-server.zip",
     defaults: ["sdk-annotations-defaults"],
     srcs: [
-        ":android-non-updatable-doc-stubs-system-server{.annotations.zip}",
+        ":android-non-updatable-doc-stubs-system-server{.exportable.annotations.zip}",
         ":all-modules-system-server-annotations",
     ],
 }
@@ -259,7 +285,235 @@ java_genrule {
     cmd: "cat $(in) | md5sum | cut -d' ' -f1 > $(out)",
 }
 
+packages_to_document = [
+    "android",
+    "dalvik",
+    "java",
+    "javax",
+    "junit",
+    "org.apache.http",
+    "org.json",
+    "org.w3c.dom",
+    "org.xml.sax",
+    "org.xmlpull",
+]
+
+// These are libs from framework-internal-utils that are required (i.e. being referenced)
+// from framework-non-updatable-sources. Add more here when there's a need.
+// DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
+// dependencies gets bigger.
+android_non_updatable_stubs_libs = [
+    "android.hardware.cas-V1.2-java",
+    "android.hardware.health-V1.0-java-constants",
+    "android.hardware.thermal-V1.0-java-constants",
+    "android.hardware.thermal-V2.0-java",
+    "android.hardware.tv.input-V1.0-java-constants",
+    "android.hardware.usb-V1.0-java-constants",
+    "android.hardware.usb-V1.1-java-constants",
+    "android.hardware.usb.gadget-V1.0-java",
+    "android.hardware.vibrator-V1.3-java",
+    "framework-protos",
+]
+
+java_defaults {
+    name: "android-non-updatable-stubs-libs-defaults",
+    libs: android_non_updatable_stubs_libs,
+}
+
+// Defaults for all stubs that include the non-updatable framework. These defaults do not include
+// module symbols, so will not compile correctly on their own. Users must add module APIs to the
+// classpath (or sources) somehow.
+stubs_defaults {
+    name: "android-non-updatable-stubs-defaults",
+    aconfig_declarations: ["framework-minus-apex-aconfig-declarations"],
+    srcs: [":android-non-updatable-stub-sources"],
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
+    arg_files: [":frameworks-base-core-AndroidManifest.xml"],
+    aidl: {
+        include_dirs: [
+            "frameworks/av/aidl",
+            "frameworks/base/media/aidl",
+            "frameworks/base/telephony/java",
+            "frameworks/native/libs/permission/aidl",
+            "packages/modules/Bluetooth/framework/aidl-export",
+            "packages/modules/Connectivity/framework/aidl-export",
+            "packages/modules/Media/apex/aidl/stable",
+            "hardware/interfaces/biometrics/common/aidl",
+            "hardware/interfaces/biometrics/fingerprint/aidl",
+            "hardware/interfaces/common/aidl",
+            "hardware/interfaces/common/fmq/aidl",
+            "hardware/interfaces/graphics/common/aidl",
+            "hardware/interfaces/keymaster/aidl",
+            "hardware/interfaces/power/aidl",
+            "system/hardware/interfaces/media/aidl",
+        ],
+    },
+    // These are libs from framework-internal-utils that are required (i.e. being referenced)
+    // from framework-non-updatable-sources. Add more here when there's a need.
+    // DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
+    // dependencies gets bigger.
+    libs: android_non_updatable_stubs_libs,
+    flags: [
+        "--error NoSettingsProvider",
+        "--error UnhiddenSystemApi",
+        "--error UnflaggedApi",
+        "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*",
+        // Disable CallbackInterface, as Java 8 default interface methods avoid the extensibility
+        // issue interfaces had previously.
+        "--hide CallbackInterface",
+        // Disable HiddenSuperclass, as Metalava handles this fine (it should be hidden by default)
+        "--hide HiddenSuperclass",
+        "--hide-package android.audio.policy.configuration.V7_0",
+        "--hide-package com.android.server",
+        "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",
+    ],
+    filter_packages: packages_to_document,
+    high_mem: true, // Lots of sources => high memory use, see b/170701554
+    installable: false,
+    annotations_enabled: true,
+    previous_api: ":android.api.public.latest",
+    merge_annotations_dirs: ["metalava-manual"],
+    defaults_visibility: ["//frameworks/base/api"],
+    visibility: [
+        "//frameworks/base/api",
+        "//frameworks/base/core/api",
+    ],
+}
+
+soong_config_module_type {
+    name: "non_updatable_exportable_droidstubs",
+    module_type: "droidstubs",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "release_hidden_api_exportable_stubs",
+    ],
+    properties: [
+        "dists",
+    ],
+}
+
+// We resolve dependencies on APIs in modules by depending on a prebuilt of the whole
+// platform (sdk_system_current_android). That prebuilt does not include module-lib APIs,
+// so use the prebuilt module-lib stubs for modules that export module-lib stubs that the
+// non-updatable part depends on.
+non_updatable_api_deps_on_modules = [
+    "sdk_module-lib_current_framework-tethering",
+    "sdk_module-lib_current_framework-connectivity-t",
+    "sdk_system_current_android",
+]
+
+// Defaults with module APIs in the classpath (mostly from prebuilts).
+// Suitable for compiling android-non-updatable.
+stubs_defaults {
+    name: "module-classpath-stubs-defaults",
+    aidl: {
+        include_dirs: [
+            "packages/modules/Bluetooth/framework/aidl-export",
+            "packages/modules/Connectivity/framework/aidl-export",
+            "packages/modules/Media/apex/aidl/stable",
+        ],
+    },
+    libs: non_updatable_api_deps_on_modules,
+}
+
+// Defaults for the java_sdk_libraries of unbundled jars from framework.
+// java_sdk_libraries using these defaults should also add themselves to the
+// non_updatable_modules list in frameworks/base/api/api.go
+java_defaults {
+    name: "framework-non-updatable-unbundled-defaults",
+    defaults: [
+        "framework-non-updatable-lint-defaults",
+        "non-updatable-framework-module-defaults",
+    ],
+    public: {
+        libs: ["android_module_lib_stubs_current"],
+    },
+    system: {
+        libs: ["android_module_lib_stubs_current"],
+    },
+    module_lib: {
+        libs: ["android_module_lib_stubs_current"],
+    },
+    test: {
+        libs: ["android_test_frameworks_core_stubs_current"],
+    },
+    sdk_version: "core_platform",
+    stub_only_libs: ["framework-protos"],
+    impl_only_libs: ["framework-minus-apex-headers"], // the framework, including hidden API
+    impl_library_visibility: ["//frameworks/base"],
+    defaults_visibility: [
+        "//frameworks/base/location",
+        "//frameworks/base/nfc",
+    ],
+    plugins: ["error_prone_android_framework"],
+    errorprone: {
+        javacflags: [
+            "-Xep:AndroidFrameworkCompatChange:ERROR",
+            "-Xep:AndroidFrameworkUid:ERROR",
+        ],
+    },
+    // Include manual annotations in API txt files
+    merge_annotations_dirs: ["metalava-manual"],
+}
+
 build = [
     "ApiDocs.bp",
     "StubLibraries.bp",
 ]
+
+genrule_defaults {
+    name: "flag-api-mapping-generation-defaults",
+    cmd: "$(location extract-flagged-apis) $(in) $(out)",
+    tools: ["extract-flagged-apis"],
+}
+
+genrule {
+    name: "flag-api-mapping-PublicApi",
+    defaults: ["flag-api-mapping-generation-defaults"],
+    srcs: [":frameworks-base-api-current.txt"],
+    out: ["flag_api_map.textproto"],
+    dist: {
+        targets: ["droid"],
+    },
+}
+
+genrule {
+    name: "flag-api-mapping-SystemApi",
+    defaults: ["flag-api-mapping-generation-defaults"],
+    srcs: [":frameworks-base-api-system-current.txt"],
+    out: ["system_flag_api_map.textproto"],
+    dist: {
+        targets: ["droid"],
+    },
+}
+
+genrule {
+    name: "flag-api-mapping-ModuleLibApi",
+    defaults: ["flag-api-mapping-generation-defaults"],
+    srcs: [":frameworks-base-api-module-lib-current.txt"],
+    out: ["module_lib_flag_api_map.textproto"],
+    dist: {
+        targets: ["droid"],
+    },
+}
+
+genrule {
+    name: "flag-api-mapping-SystemServerApi",
+    defaults: ["flag-api-mapping-generation-defaults"],
+    srcs: [":frameworks-base-api-system-server-current.txt"],
+    out: ["system_server_flag_api_map.textproto"],
+    dist: {
+        targets: ["droid"],
+    },
+}
+
+phony_rule {
+    name: "checkapi",
+    phony_deps: [
+        "frameworks-base-api-current-compat",
+        "frameworks-base-api-system-current-compat",
+        "frameworks-base-api-module-lib-current-compat",
+    ],
+}

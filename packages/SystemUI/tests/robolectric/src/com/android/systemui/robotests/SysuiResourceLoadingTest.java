@@ -16,9 +16,11 @@
 
 package com.android.systemui.robotests;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
-import static com.google.common.truth.Truth.assertThat;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -27,7 +29,7 @@ import org.junit.runner.RunWith;
 public class SysuiResourceLoadingTest extends SysuiRoboBase {
     @Test
     public void testResources() {
-        assertThat(getContext().getString(com.android.systemui.R.string.app_label))
+        assertThat(getContext().getString(com.android.systemui.res.R.string.app_label))
                 .isEqualTo("System UI");
         assertThat(getContext().getString(com.android.systemui.tests.R.string.test_content))
                 .isNotEmpty();

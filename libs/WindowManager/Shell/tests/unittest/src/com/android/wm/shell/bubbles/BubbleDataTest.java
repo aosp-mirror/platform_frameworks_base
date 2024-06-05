@@ -49,6 +49,8 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.bubbles.BubbleData.TimeSource;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.bubbles.BubbleBarLocation;
+import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
 
 import com.google.common.collect.ImmutableList;
 
@@ -110,6 +112,8 @@ public class BubbleDataTest extends ShellTestCase {
     private PendingIntent mDeleteIntent;
     @Mock
     private BubbleLogger mBubbleLogger;
+    @Mock
+    private BubbleEducationController mEducationController;
     @Mock
     private ShellExecutor mMainExecutor;
 
@@ -190,8 +194,8 @@ public class BubbleDataTest extends ShellTestCase {
                 mMainExecutor);
 
         mPositioner = new TestableBubblePositioner(mContext,
-                mock(WindowManager.class));
-        mBubbleData = new BubbleData(getContext(), mBubbleLogger, mPositioner,
+                mContext.getSystemService(WindowManager.class));
+        mBubbleData = new BubbleData(getContext(), mBubbleLogger, mPositioner, mEducationController,
                 mMainExecutor);
 
         // Used by BubbleData to set lastAccessedTime
@@ -216,6 +220,22 @@ public class BubbleDataTest extends ShellTestCase {
         verifyUpdateReceived();
         assertBubbleAdded(mBubbleA1);
         assertSelectionChangedTo(mBubbleA1);
+    }
+
+    @Test
+    public void testAddAppBubble_setsTime() {
+        // Setup
+        mBubbleData.setListener(mListener);
+
+        // Test
+        assertThat(mAppBubble.getLastActivity()).isEqualTo(0);
+        setCurrentTime(1000);
+        mBubbleData.notificationEntryUpdated(mAppBubble, true /* suppressFlyout*/,
+                false /* showInShade */);
+
+        // Verify
+        assertThat(mBubbleData.getBubbleInStackWithKey(mAppBubble.getKey())).isEqualTo(mAppBubble);
+        assertThat(mAppBubble.getLastActivity()).isEqualTo(1000);
     }
 
     @Test
@@ -383,6 +403,65 @@ public class BubbleDataTest extends ShellTestCase {
         mBubbleData.dismissBubbleWithKey(mEntryA2.getKey(), Bubbles.DISMISS_GROUP_CANCELLED);
         verifyUpdateReceived();
         assertOverflowChangedTo(ImmutableList.of());
+    }
+
+    /**
+     * Verifies that the update shouldn't show the user education, if the education is not required
+     */
+    @Test
+    public void test_shouldNotShowEducation() {
+        // Setup
+        when(mEducationController.shouldShowStackEducation(any())).thenReturn(false);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryUpdated(mBubbleA1, /* suppressFlyout */ true, /* showInShade */
+                true);
+
+        // Verify
+        verifyUpdateReceived();
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.shouldShowEducation).isFalse();
+    }
+
+    /**
+     * Verifies that the update should show the user education, if the education is required
+     */
+    @Test
+    public void test_shouldShowEducation() {
+        // Setup
+        when(mEducationController.shouldShowStackEducation(any())).thenReturn(true);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryUpdated(mBubbleA1, /* suppressFlyout */ true, /* showInShade */
+                true);
+
+        // Verify
+        verifyUpdateReceived();
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.shouldShowEducation).isTrue();
+    }
+
+    /**
+     * Verifies that the update shouldn't show the user education, if the education is required but
+     * the bubble should auto-expand
+     */
+    @Test
+    public void test_shouldShowEducation_shouldAutoExpand() {
+        // Setup
+        when(mEducationController.shouldShowStackEducation(any())).thenReturn(true);
+        mBubbleData.setListener(mListener);
+        mBubbleA1.setShouldAutoExpand(true);
+
+        // Test
+        mBubbleData.notificationEntryUpdated(mBubbleA1, /* suppressFlyout */ true, /* showInShade */
+                true);
+
+        // Verify
+        verifyUpdateReceived();
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.shouldShowEducation).isFalse();
     }
 
     // COLLAPSED / ADD
@@ -1101,7 +1180,7 @@ public class BubbleDataTest extends ShellTestCase {
     }
 
     @Test
-    public void test_removeAppBubble_skipsOverflow() {
+    public void test_removeAppBubble_overflows() {
         String appBubbleKey = mAppBubble.getKey();
         mBubbleData.notificationEntryUpdated(mAppBubble, true /* suppressFlyout*/,
                 false /* showInShade */);
@@ -1109,8 +1188,79 @@ public class BubbleDataTest extends ShellTestCase {
 
         mBubbleData.dismissBubbleWithKey(appBubbleKey, Bubbles.DISMISS_USER_GESTURE);
 
-        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNull();
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isEqualTo(mAppBubble);
         assertThat(mBubbleData.getBubbleInStackWithKey(appBubbleKey)).isNull();
+    }
+
+    @Test
+    public void test_getInitialStateForBubbleBar_includesInitialBubblesAndPosition() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        mPositioner.setBubbleBarLocation(BubbleBarLocation.LEFT);
+
+        BubbleBarUpdate update = mBubbleData.getInitialStateForBubbleBar();
+        assertThat(update.currentBubbleList).hasSize(2);
+        assertThat(update.currentBubbleList.get(0).getKey()).isEqualTo(mEntryA2.getKey());
+        assertThat(update.currentBubbleList.get(1).getKey()).isEqualTo(mEntryA1.getKey());
+        assertThat(update.bubbleBarLocation).isEqualTo(BubbleBarLocation.LEFT);
+    }
+
+    @Test
+    public void setSelectedBubbleAndExpandStack() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.setSelectedBubbleAndExpandStack(mBubbleA1);
+
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleA1);
+        assertExpandedChangedTo(true);
+    }
+
+    @Test
+    public void testShowOverflowChanged_hasOverflowBubbles() {
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertThat(mUpdateCaptor.getValue().showOverflowChanged).isTrue();
+        assertThat(mBubbleData.getOverflowBubbles()).isNotEmpty();
+    }
+
+    @Test
+    public void testShowOverflowChanged_false_hasOverflowBubbles() {
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 1000);
+        mBubbleData.setListener(mListener);
+
+        // First overflowed causes change event
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertThat(mUpdateCaptor.getValue().showOverflowChanged).isTrue();
+        assertThat(mBubbleData.getOverflowBubbles()).isNotEmpty();
+
+        // Second overflow does not
+        mBubbleData.dismissBubbleWithKey(mEntryA2.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertThat(mUpdateCaptor.getValue().showOverflowChanged).isFalse();
+    }
+
+    @Test
+    public void testShowOverflowChanged_noOverflowBubbles() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbles()).isNotEmpty();
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_NOTIF_CANCEL);
+
+        verifyUpdateReceived();
+        assertThat(mUpdateCaptor.getValue().showOverflowChanged).isTrue();
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
     }
 
     private void verifyUpdateReceived() {

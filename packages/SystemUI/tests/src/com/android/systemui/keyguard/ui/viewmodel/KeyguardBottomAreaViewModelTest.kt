@@ -19,11 +19,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.os.UserHandle
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.shared.model.Icon
@@ -32,6 +33,7 @@ import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceProviderClientFactory
@@ -40,26 +42,26 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardLongPressInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
-import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -68,7 +70,6 @@ import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.max
 import kotlin.math.min
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -76,18 +77,18 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
-class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Mock private lateinit var expandable: Expandable
     @Mock private lateinit var burnInHelperWrapper: BurnInHelperWrapper
@@ -95,8 +96,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var activityStarter: ActivityStarter
-    @Mock private lateinit var launchAnimator: DialogLaunchAnimator
-    @Mock private lateinit var commandQueue: CommandQueue
+    @Mock private lateinit var launchAnimator: DialogTransitionAnimator
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
@@ -106,16 +106,35 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
 
     private lateinit var testScope: TestScope
     private lateinit var repository: FakeKeyguardRepository
-    private lateinit var registry: FakeKeyguardQuickAffordanceRegistry
     private lateinit var homeControlsQuickAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var quickAccessWalletAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var qrCodeScannerAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var dockManager: DockManagerFake
     private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
 
+    private val kosmos = testKosmos()
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, true)
+        overrideResource(
+            R.array.config_keyguardQuickAffordanceDefaults,
+            arrayOf(
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START +
+                    ":" +
+                    BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END +
+                    ":" +
+                    BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
+            )
+        )
+
         whenever(burnInHelperWrapper.burnInOffset(anyInt(), any()))
             .thenReturn(RETURNED_BURN_IN_OFFSET)
 
@@ -129,38 +148,17 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER)
         dockManager = DockManagerFake()
         biometricSettingsRepository = FakeBiometricSettingsRepository()
-        registry =
-            FakeKeyguardQuickAffordanceRegistry(
-                mapOf(
-                    KeyguardQuickAffordancePosition.BOTTOM_START to
-                        listOf(
-                            homeControlsQuickAffordanceConfig,
-                        ),
-                    KeyguardQuickAffordancePosition.BOTTOM_END to
-                        listOf(
-                            quickAccessWalletAffordanceConfig,
-                            qrCodeScannerAffordanceConfig,
-                        ),
-                ),
-            )
-        repository = FakeKeyguardRepository()
         val featureFlags =
             FakeFeatureFlags().apply {
-                set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, false)
-                set(Flags.FACE_AUTH_REFACTOR, true)
                 set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
                 set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, false)
             }
 
-        val keyguardInteractor =
-            KeyguardInteractor(
-                repository = repository,
-                commandQueue = commandQueue,
-                featureFlags = featureFlags,
-                bouncerRepository = FakeKeyguardBouncerRepository(),
-            )
+        val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
+        val keyguardInteractor = withDeps.keyguardInteractor
+        repository = withDeps.repository
+
         whenever(userTracker.userHandle).thenReturn(mock())
-        whenever(userTracker.userId).thenReturn(10)
         whenever(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)
         val testDispatcher = StandardTestDispatcher()
@@ -180,6 +178,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
+                systemSettings = FakeSettings(),
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -216,11 +215,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             KeyguardLongPressInteractor(
                 appContext = mContext,
                 scope = testScope.backgroundScope,
-                transitionInteractor =
-                    KeyguardTransitionInteractor(
-                        repository = FakeKeyguardTransitionRepository(),
-                        scope = testScope.backgroundScope
-                    ),
+                transitionInteractor = kosmos.keyguardTransitionInteractor,
                 repository = repository,
                 logger = UiEventLoggerFake(),
                 featureFlags = featureFlags,
@@ -233,7 +228,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 quickAffordanceInteractor =
                     KeyguardQuickAffordanceInteractor(
                         keyguardInteractor = keyguardInteractor,
-                        registry = registry,
+                        shadeInteractor = kosmos.shadeInteractor,
                         lockPatternUtils = lockPatternUtils,
                         keyguardStateController = keyguardStateController,
                         userTracker = userTracker,
@@ -247,6 +242,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                         biometricSettingsRepository = biometricSettingsRepository,
                         backgroundDispatcher = testDispatcher,
                         appContext = mContext,
+                        sceneInteractor = { kosmos.sceneInteractor },
                     ),
                 bottomAreaInteractor = KeyguardBottomAreaInteractor(repository = repository),
                 burnInHelperWrapper = burnInHelperWrapper,
@@ -555,91 +551,6 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun isIndicationAreaPadded() =
-        testScope.runTest {
-            repository.setKeyguardShowing(true)
-            val value = collectLastValue(underTest.isIndicationAreaPadded)
-
-            assertThat(value()).isFalse()
-            setUpQuickAffordanceModel(
-                position = KeyguardQuickAffordancePosition.BOTTOM_START,
-                testConfig =
-                    TestConfig(
-                        isVisible = true,
-                        isClickable = true,
-                        icon = mock(),
-                        canShowWhileLocked = true,
-                        slotId = KeyguardQuickAffordancePosition.BOTTOM_START.toSlotId(),
-                    )
-            )
-            assertThat(value()).isTrue()
-            setUpQuickAffordanceModel(
-                position = KeyguardQuickAffordancePosition.BOTTOM_END,
-                testConfig =
-                    TestConfig(
-                        isVisible = true,
-                        isClickable = true,
-                        icon = mock(),
-                        canShowWhileLocked = false,
-                        slotId = KeyguardQuickAffordancePosition.BOTTOM_END.toSlotId(),
-                    )
-            )
-            assertThat(value()).isTrue()
-            setUpQuickAffordanceModel(
-                position = KeyguardQuickAffordancePosition.BOTTOM_START,
-                testConfig =
-                    TestConfig(
-                        isVisible = false,
-                        slotId = KeyguardQuickAffordancePosition.BOTTOM_START.toSlotId(),
-                    )
-            )
-            assertThat(value()).isTrue()
-            setUpQuickAffordanceModel(
-                position = KeyguardQuickAffordancePosition.BOTTOM_END,
-                testConfig =
-                    TestConfig(
-                        isVisible = false,
-                        slotId = KeyguardQuickAffordancePosition.BOTTOM_END.toSlotId(),
-                    )
-            )
-            assertThat(value()).isFalse()
-        }
-
-    @Test
-    fun indicationAreaTranslationX() =
-        testScope.runTest {
-            val value = collectLastValue(underTest.indicationAreaTranslationX)
-
-            assertThat(value()).isEqualTo(0f)
-            repository.setClockPosition(100, 100)
-            assertThat(value()).isEqualTo(100f)
-            repository.setClockPosition(200, 100)
-            assertThat(value()).isEqualTo(200f)
-            repository.setClockPosition(200, 200)
-            assertThat(value()).isEqualTo(200f)
-            repository.setClockPosition(300, 100)
-            assertThat(value()).isEqualTo(300f)
-        }
-
-    @Test
-    fun indicationAreaTranslationY() =
-        testScope.runTest {
-            val value =
-                collectLastValue(underTest.indicationAreaTranslationY(DEFAULT_BURN_IN_OFFSET))
-
-            // Negative 0 - apparently there's a difference in floating point arithmetic - FML
-            assertThat(value()).isEqualTo(-0f)
-            val expected1 = setDozeAmountAndCalculateExpectedTranslationY(0.1f)
-            assertThat(value()).isEqualTo(expected1)
-            val expected2 = setDozeAmountAndCalculateExpectedTranslationY(0.2f)
-            assertThat(value()).isEqualTo(expected2)
-            val expected3 = setDozeAmountAndCalculateExpectedTranslationY(0.5f)
-            assertThat(value()).isEqualTo(expected3)
-            val expected4 = setDozeAmountAndCalculateExpectedTranslationY(1f)
-            assertThat(value()).isEqualTo(expected4)
-        }
-
-    @Test
     fun isClickable_trueWhenAlphaAtThreshold() =
         testScope.runTest {
             repository.setKeyguardShowing(true)
@@ -762,11 +673,6 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             )
         }
 
-    private fun setDozeAmountAndCalculateExpectedTranslationY(dozeAmount: Float): Float {
-        repository.setDozeAmount(dozeAmount)
-        return dozeAmount * (RETURNED_BURN_IN_OFFSET - DEFAULT_BURN_IN_OFFSET)
-    }
-
     private suspend fun setUpQuickAffordanceModel(
         position: KeyguardQuickAffordancePosition,
         testConfig: TestConfig,
@@ -798,7 +704,8 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 KeyguardQuickAffordanceConfig.LockScreenState.Hidden
             }
         config.setState(lockScreenState)
-        return config.key
+
+        return "${position.toSlotId()}::${config.key}"
     }
 
     private fun assertQuickAffordanceViewModel(
@@ -851,5 +758,11 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     companion object {
         private const val DEFAULT_BURN_IN_OFFSET = 5
         private const val RETURNED_BURN_IN_OFFSET = 3
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
     }
 }

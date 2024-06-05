@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="4539824758261855508">"CredentialManager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"বাতিল কৰক"</string>
     <string name="string_continue" msgid="1346732695941131882">"অব্যাহত ৰাখক"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"অধিক বিকল্প"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"অন্য ধৰণে ছেভ কৰক"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"অধিক জানক"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"পাছৱৰ্ড দেখুৱাওক"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"পাছৱৰ্ড লুকুৱাওক"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"পাছকীৰ জৰিয়তে অধিক সুৰক্ষিত"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"পাছকী ব্যৱহাৰ কৰিলে আপুনি জটিল পাছৱৰ্ড সৃষ্টি কৰিব অথবা মনত ৰাখিব নালাগে"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"পাছকীসমূহ হৈছে আপুনি আপোনাৰ ফিংগাৰপ্ৰিণ্ট, মুখাৱয়ব অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰি সৃষ্টি কৰা এনক্ৰিপ্ট কৰা ডিজিটেল চাবি"</string>
@@ -18,16 +32,16 @@
     <string name="passwordless_technology_title" msgid="2497513482056606668">"পাছৱৰ্ডবিহীন প্ৰযুক্তি"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"পাছকীসমূহে আপোনাক পাছৱৰ্ডৰ ওপৰত নিৰ্ভৰ নকৰাকৈ ছাইন ইন কৰাৰ অনুমতি দিয়ে। আপুনি আপোনাৰ পৰিচয় সত্যাপন কৰিবলৈ আৰু এটা পাছকী সৃষ্টি কৰিবলৈ কেৱল আপোনাৰ ফিংগাৰপ্ৰিণ্ট, মুখাৱয়ব চিনাক্তকৰণ, পিন অথবা ছোৱাইপ কৰাৰ আৰ্হি ব্যৱহাৰ কৰিলেই হ’ল।"</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"ৰাজহুৱা চাবি ক্ৰিপ্ট’গ্ৰাফী"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO জোঁট (য’ত Google, Apple, Microsoft আৰু অধিক অন্তৰ্ভুক্ত) আৰু W3C মানকসমূহৰ ওপৰত ভিত্তি কৰি, পাছকীসমূহে ক্ৰিপ্ট’গ্ৰাফিক চাবিৰ যোৰা ব্যৱহাৰ কৰে। আমি পাছৱৰ্ডৰ বাবে ব্যৱহাৰ কৰা ব্যৱহাৰকাৰীৰ নাম আৰু বৰ্ণৰ ষ্ট্ৰিঙৰ বিপৰীতে, এটা এপ্‌ অথবা ৱেবছাইটৰ বাবে এটা ব্যক্তিগত-ৰাজহুৱা কীৰ যোৰা সৃষ্টি কৰা হয়। ব্যক্তিগত চাবিটো আপোনাৰ ডিভাইচ অথবা পাছৱৰ্ড পৰিচালকত সুৰক্ষিতভাৱে ষ্ট’ৰ কৰা হয় আৰু ই আপোনাৰ পৰিচয় নিশ্চিত কৰে। ৰাজহুৱা চাবিটো এপ্‌ অথবা ৱেবছাইটৰ ছাৰ্ভাৰৰ সৈতে শ্বেয়াৰ কৰা হয়। সংশ্লিষ্ট চাবিসমূহৰ জৰিয়তে আপুনি তাৎক্ষণিকভাৱে পঞ্জীয়ন আৰু ছাইন ইন কৰিব পাৰিব।"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO জোঁট (য’ত Google, Apple, Microsoft আৰু অধিক অন্তৰ্ভুক্ত) আৰু W3C মানকসমূহৰ ওপৰত ভিত্তি কৰি, পাছকীসমূহে ক্ৰিপ্ট’গ্ৰাফিক চাবিৰ যোৰা ব্যৱহাৰ কৰে। আমি পাছৱৰ্ডৰ বাবে ব্যৱহাৰ কৰা ব্যৱহাৰকাৰীৰ নাম আৰু বৰ্ণৰ ষ্ট্ৰিঙৰ বিপৰীতে, এটা এপ্‌ অথবা ৱেবছাইটৰ বাবে এটা ব্যক্তিগত-ৰাজহুৱা চাবিৰ যোৰা সৃষ্টি কৰা হয়। ব্যক্তিগত চাবিটো আপোনাৰ ডিভাইচ অথবা পাছৱৰ্ড পৰিচালকত সুৰক্ষিতভাৱে ষ্ট’ৰ কৰা হয় আৰু ই আপোনাৰ পৰিচয় নিশ্চিত কৰে। ৰাজহুৱা চাবিটো এপ্‌ অথবা ৱেবছাইটৰ ছাৰ্ভাৰৰ সৈতে শ্বেয়াৰ কৰা হয়। সংশ্লিষ্ট চাবিসমূহৰ জৰিয়তে আপুনি তাৎক্ষণিকভাৱে পঞ্জীয়ন আৰু ছাইন ইন কৰিব পাৰিব।"</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"একাউণ্টৰ উন্নত সুৰক্ষা"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"প্ৰতিটো চাবি বিশেষভাৱে সেই এপ্‌ অথবা ৱেবছাইটৰ সৈতে লিংক কৰা হয় যাৰ বাবে সেইটো সৃষ্টি কৰা হৈছে, সেয়ে আপুনি কেতিয়াও ভুলতে কোনো প্ৰৱঞ্চনামূলক এপ্‌ অথবা ৱেবছাইটত ছাইন ইন কৰিব নোৱাৰে। ইয়াৰ উপৰিও, কেৱল ৰাজহুৱা চাবিসমূহ ৰখা ছাৰ্ভাৰৰ ক্ষেত্ৰত হেক কৰাটো বহুত কঠিন হৈ পৰে।"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"বাধাহীন স্থানান্তৰণ"</string>
     <string name="seamless_transition_detail" msgid="4475509237171739843">"আমি পাছৱৰ্ডবিহীন ভৱিষ্যতৰ দিশে আগবঢ়াৰ লগে লগে পাছকীৰ লগতে পাছৱৰ্ডসমূহো উপলব্ধ হ’ব।"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"আপোনাৰ <xliff:g id="CREATETYPES">%1$s</xliff:g> ক’ত ছেভ কৰিব লাগে সেয়া বাছনি কৰক"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"আপোনাৰ তথ্য ছেভ কৰি পৰৱৰ্তী সময়ত দ্ৰুতভাৱে ছাইন ইন কৰিবলৈ এটা পাছৱৰ্ড পৰিচালক বাছনি কৰক"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g>ৰ বাবে পাছকী সৃষ্টি কৰিবনে?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g>ৰ বাবে পাছৱৰ্ড ছেভ কৰিবনে?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g>ৰ বাবে ছাইন ইনৰ তথ্য ছেভ কৰিবনে?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"<xliff:g id="APP_NAME">%1$s</xliff:g>ত ছাইন ইন কৰিবলৈ পাছকী সৃষ্টি কৰিবনে?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"<xliff:g id="APP_NAME">%1$s</xliff:g>ত ছাইন ইন কৰিবলৈ পাছৱৰ্ড ছেভ কৰিবনে?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছাইন ইনৰ তথ্য ছেভ কৰিবনে?"</string>
     <string name="passkey" msgid="632353688396759522">"পাছকী"</string>
     <string name="password" msgid="6738570945182936667">"পাছৱৰ্ড"</string>
     <string name="passkeys" msgid="5733880786866559847">"পাছকী"</string>
@@ -35,10 +49,13 @@
     <string name="sign_ins" msgid="4710739369149469208">"ছাইন-ইন"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"ছাইন ইনৰ তথ্য"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ইয়াত ছেভ কৰক"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"অন্য এটা ডিভাইচত পাছকী সৃষ্টি কৰিবনে?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"অন্য কোনো ডিভাইচত পাছকী সৃষ্টি কৰিব নেকি?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"অন্য কোনো ডিভাইচত পাছৱৰ্ড ছেভ কৰিব নেকি?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"অন্য কোনো ডিভাইচত ছাইন-ইন ছেভ কৰিব নেকি?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"আপোনাৰ আটাইবোৰ ছাইন ইনৰ বাবে <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ব্যৱহাৰ কৰিবনে?"</string>
-    <string name="use_provider_for_all_description" msgid="8466427781848268490">"আপোনাক সহজে ছাইন ইন কৰাত সহায় কৰিবলৈ এই পাছৱৰ্ড পৰিচালকটোৱে আপোনাৰ পাছৱৰ্ড আৰু পাছকী ষ্ট’ৰ কৰিব"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"আপোনাক সহজে ছাইন ইন কৰাত সহায় কৰিবলৈ <xliff:g id="USERNAME">%1$s</xliff:g>ৰ বাবে থকা এই পাছৱৰ্ড পৰিচালকে আপোনাৰ পাছৱৰ্ড আৰু পাছকী ষ্ট’ৰ কৰিব"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ডিফ’ল্ট হিচাপে ছেট কৰক"</string>
+    <string name="settings" msgid="6536394145760913145">"ছেটিং"</string>
     <string name="use_once" msgid="9027366575315399714">"এবাৰ ব্যৱহাৰ কৰক"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> টা পাছৱৰ্ড • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> টা পাছকী"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> টা পাছৱৰ্ড"</string>
@@ -49,21 +66,33 @@
     <string name="other_password_manager" msgid="565790221427004141">"অন্য পাছৱৰ্ড পৰিচালক"</string>
     <string name="close_sheet" msgid="1393792015338908262">"শ্বীট বন্ধ কৰক"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"পূৰ্বৱৰ্তী পৃষ্ঠালৈ ঘূৰি যাওক"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"স্ক্ৰীনখনৰ একেবাৰে তলত প্ৰদৰ্শিত ক্ৰিডেনশ্বিয়েল পৰিচালকৰ কাৰ্য সম্পৰ্কীয় পৰামৰ্শ বন্ধ কৰক"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে আপোনাৰ ছেভ হৈ থকা পাছকী ব্যৱহাৰ কৰিবনে?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে আপোনাৰ ছেভ হৈ থকা ছাইন ইন তথ্য ব্যৱহাৰ কৰিবনে?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ হৈ থকা এটা ছাইন ইন বাছনি কৰক"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"বন্ধ কৰক"</string>
+    <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"অগ্ৰাহ্য কৰক"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"আপুনি <xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ কৰি থোৱা পাছকী ব্যৱহাৰ কৰক"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"আপুনি <xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ কৰি থোৱা পাছৱৰ্ড ব্যৱহাৰ কৰক"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে থকা আপোনাৰ একাউণ্ট ব্যৱহাৰ কৰক"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"<xliff:g id="USERNAME">%2$s</xliff:g> ব্যৱহাৰ কৰি <xliff:g id="APP_NAME">%1$s</xliff:g>ত ছাইন ইন কৰিবলৈ আপোনাৰ স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছাইন ইনৰ বিকল্পসমূহ আনলক কৰক"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ হৈ থকা এটা পাছকী বাছনি কৰক"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ হৈ থকা এটা পাছৱৰ্ড বাছনি কৰক"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ হৈ থকা এটা ছাইন ইন বাছনি কৰক"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে এটা একাউণ্ট বাছনি কৰক"</string>
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে এটা বিকল্প বাছনি কৰিবনে?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g>ত এই তথ্য ব্যৱহাৰ কৰিবনে?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"অন্য উপায়েৰে ছাইন ইন কৰক"</string>
     <string name="snackbar_action" msgid="37373514216505085">"বিকল্পসমূহ চাওক"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"অব্যাহত ৰাখক"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ছাইন ইনৰ বিকল্প"</string>
+    <string name="button_label_view_more" msgid="3429098227286495651">"অধিক চাওক"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g>ৰ বাবে"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"লক হৈ থকা পাছৱৰ্ড পৰিচালক"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
-    <skip />
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"আনলক কৰিবলৈ টিপক"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"ছাইন ইনৰ তথ্য নাই"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"<xliff:g id="SOURCE">%1$s</xliff:g>ত কোনো ছাইন ইনৰ তথ্য নাই"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"ছাইন ইন পৰিচালনা কৰক"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"অন্য এটা ডিভাইচৰ পৰা"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"অন্য এটা ডিভাইচ ব্যৱহাৰ কৰক"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ অনুৰোধটো বাতিল কৰিছে"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"ছাইন ইনৰ বিকল্প"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"অধিক"</string>
 </resources>

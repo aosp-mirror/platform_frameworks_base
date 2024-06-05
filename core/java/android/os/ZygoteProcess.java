@@ -71,7 +71,7 @@ import java.util.UUID;
  */
 public class ZygoteProcess {
 
-    private static final int ZYGOTE_CONNECT_TIMEOUT_MS = 20000;
+    private static final int ZYGOTE_CONNECT_TIMEOUT_MS = 60000;
 
     /**
      * Use a relatively short delay, because for app zygote, this is in the critical path of
@@ -355,6 +355,7 @@ public class ZygoteProcess {
                                                           allowlistedDataInfoList,
                                                   boolean bindMountAppsData,
                                                   boolean bindMountAppStorageDirs,
+                                                  boolean bindOverrideSysprops,
                                                   @Nullable String[] zygoteArgs) {
         // TODO (chriswailes): Is there a better place to check this value?
         if (fetchUsapPoolEnabledPropWithMinInterval()) {
@@ -367,7 +368,7 @@ public class ZygoteProcess {
                     abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/ false,
                     packageName, zygotePolicyFlags, isTopApp, disabledCompatChanges,
                     pkgDataInfoMap, allowlistedDataInfoList, bindMountAppsData,
-                    bindMountAppStorageDirs, zygoteArgs);
+                    bindMountAppStorageDirs, bindOverrideSysprops, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -424,6 +425,8 @@ public class ZygoteProcess {
                 throw new ZygoteStartFailedEx("Embedded newlines not allowed");
             } else if (arg.indexOf('\r') >= 0) {
                 throw new ZygoteStartFailedEx("Embedded carriage returns not allowed");
+            } else if (arg.indexOf('\u0000') >= 0) {
+                throw new ZygoteStartFailedEx("Embedded nulls not allowed");
             }
         }
 
@@ -638,6 +641,7 @@ public class ZygoteProcess {
                                                               allowlistedDataInfoList,
                                                       boolean bindMountAppsData,
                                                       boolean bindMountAppStorageDirs,
+                                                      boolean bindMountOverrideSysprops,
                                                       @Nullable String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
         ArrayList<String> argsForZygote = new ArrayList<>();
@@ -751,6 +755,10 @@ public class ZygoteProcess {
 
         if (bindMountAppsData) {
             argsForZygote.add(Zygote.BIND_MOUNT_APP_DATA_DIRS);
+        }
+
+        if (bindMountOverrideSysprops) {
+            argsForZygote.add(Zygote.BIND_MOUNT_SYSPROP_OVERRIDES);
         }
 
         if (disabledCompatChanges != null && disabledCompatChanges.length > 0) {
@@ -959,6 +967,14 @@ public class ZygoteProcess {
             return true;
         }
 
+        for (/* NonNull */ String s : mApiDenylistExemptions) {
+            // indexOf() is intrinsified and faster than contains().
+            if (s.indexOf('\n') >= 0 || s.indexOf('\r') >= 0 || s.indexOf('\u0000') >= 0) {
+                Slog.e(LOG_TAG, "Failed to set API denylist exemptions: Bad character");
+                mApiDenylistExemptions = Collections.emptyList();
+                return false;
+            }
+        }
         try {
             state.mZygoteOutputWriter.write(Integer.toString(mApiDenylistExemptions.size() + 1));
             state.mZygoteOutputWriter.newLine();
@@ -1306,7 +1322,8 @@ public class ZygoteProcess {
                     ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS /* zygotePolicyFlags */, false /* isTopApp */,
                     null /* disabledCompatChanges */, null /* pkgDataInfoMap */,
                     null /* allowlistedDataInfoList */, true /* bindMountAppsData*/,
-                    /* bindMountAppStorageDirs */ false, extraArgs);
+                    /* bindMountAppStorageDirs */ false, /*bindMountOverrideSysprops */ false,
+                    extraArgs);
 
         } catch (ZygoteStartFailedEx ex) {
             throw new RuntimeException("Starting child-zygote through Zygote failed", ex);

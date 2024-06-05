@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"యాప్ ఇన్‌స్టాల్ చేయబడింది."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"మీరు ఈ యాప్‌ను అప్‌డేట్ చేయాలనుకుంటున్నారా?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> ద్వారా ఈ యాప్‌ను అప్‌డేట్ చేయాలా?\n\nఈ యాప్ సాధారణంగా <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> నుండి అప్‌డేట్‌లను అందుకుంటుంది. వేరే సోర్స్ ద్వారా అప్‌డేట్ చేయడం వల్ల, భవిష్యత్తులో మీ ఫోన్‌లోని ఏ సోర్స్ ద్వారా అయినా అప్‌డేట్‌లను పొందవచ్చు. యాప్ ఫంక్షనాలిటీ మారవచ్చు."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;ఈ యాప్‌ను &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; నుండి అప్‌డేట్ చేయాలా?&lt;/p&gt;&lt;p&gt;ఈ యాప్ సాధారణంగా &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; నుండి అప్‌డేట్‌లను స్వీకరిస్తుంది. విభిన్నమైన సోర్స్ నుండి అప్‌డేట్ చేయడం ద్వారా, మీరు టాబ్లెట్‌లోని ఏదైనా సోర్స్ నుండి భవిష్యత్తు అప్‌డేట్‌లను పొందవచ్చు. యాప్ ఫంక్షనాలిటీ మారవచ్చు.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;ఈ యాప్‌ను &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; నుండి అప్‌డేట్ చేయాలా?&lt;/p&gt;&lt;p&gt;ఈ యాప్ సాధారణంగా &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; నుండి అప్‌డేట్‌లను స్వీకరిస్తుంది. విభిన్నమైన సోర్స్ నుండి అప్‌డేట్ చేయడం ద్వారా, మీరు TVలోని ఏదైనా సోర్స్ నుండి భవిష్యత్తు అప్‌డేట్‌లను పొందవచ్చు. యాప్ ఫంక్షనాలిటీ మారవచ్చు.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;ఈ యాప్‌ను &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; నుండి అప్‌డేట్ చేయాలా?&lt;/p&gt;&lt;p&gt;ఈ యాప్ సాధారణంగా &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; నుండి అప్‌డేట్‌లను స్వీకరిస్తుంది. విభిన్న సోర్స్ నుండి అప్‌డేట్ చేయడం ద్వారా, మీరు ఫోన్‌లోని ఏదైనా సోర్స్ నుండి భవిష్యత్తు అప్‌డేట్‌లను పొందవచ్చు. యాప్ ఫంక్షనాలిటీ మారవచ్చు.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"యాప్ ఇన్‌స్టాల్ చేయబడలేదు."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ప్యాకేజీ ఇన్‌స్టాల్ కాకుండా బ్లాక్ చేయబడింది."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ప్యాకేజీ, అలాగే ఇప్పటికే ఉన్న ప్యాకేజీ మధ్య వైరుధ్యం ఉన్నందున యాప్ ఇన్‌స్టాల్ చేయబడలేదు."</string>
@@ -42,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ఈ వినియోగదారు తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయలేరు"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"యాప్‌లను ఇన్‌స్టాల్ చేయడానికి ఈ వినియోగదారుకు అనుమతి లేదు"</string>
     <string name="ok" msgid="7871959885003339302">"సరే"</string>
+    <string name="archive" msgid="4447791830199354721">"ఆర్కైవ్ చేయండి"</string>
     <string name="update_anyway" msgid="8792432341346261969">"ఏదేమైనా అప్‌డేట్ చేయండి"</string>
     <string name="manage_applications" msgid="5400164782453975580">"యాప్‌లను నిర్వహించండి"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ఖాళీ లేదు"</string>
@@ -56,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"అప్‌డేట్ అన్‌ఇన్‌స్టాల్ చేయి"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> అనేది కింది యాప్‌లో ఒక భాగం:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"మీరు ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"మీ వ్యక్తిగత డేటా సేవ్ చేయబడుతుంది"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"యూజర్‌లందరికీ ఈ యాప్‌ను ఆర్కైవ్ చేయాలా? మీ వ్యక్తిగత డేటా సేవ్ చేయబడుతుంది"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"మీ వర్క్ ప్రొఫైల్‌లో ఈ యాప్‌ను ఆర్కైవ్ చేయాలా? మీ వ్యక్తిగత డేటా సేవ్ చేయబడుతుంది"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"<xliff:g id="USERNAME">%1$s</xliff:g>‌కు ఈ యాప్‌ను ఆర్కైవ్ చేయాలా? మీ వ్యక్తిగత డేటా సేవ్ చేయబడుతుంది"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"మీరు మీ ప్రైవేట్ స్పేస్ నుండి ఈ యాప్‌ను ఆర్కైవ్ చేయాలనుకుంటున్నారా? మీ వ్యక్తిగత డేటా సేవ్ చేయబడుతుంది"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"మీరు ఈ యాప్‌ను "<b>"అందరు"</b>" వినియోగదారులకు అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? అప్లికేషన్, దాని డేటా పరికరంలోని "<b>"అందరు"</b>" వినియోగదారుల నుండి తీసివేయబడుతుంది."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"మీరు వినియోగదారు <xliff:g id="USERNAME">%1$s</xliff:g> కోసం ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"మీ వర్క్ ప్రొఫైల్ నుండి ఈ యాప్‌ను మీరు అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
@@ -64,6 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> యాప్ డేటాను ఉంచండి."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"మీరు ఈ యాప్‌ను తొలగించాలనుకుంటున్నారా?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"మీరు ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> క్లోన్ కూడా తొలగించబడుతుంది."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"మీరు మీ ప్రైవేట్ స్పేస్ నుండి ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"అన్ఇన్‌స్టాల్ చేయబడుతున్నవి"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"విఫలమైన అన్‌ఇన్‌స్టాల్‌లు"</string>
     <string name="uninstalling" msgid="8709566347688966845">"అన్ఇన్‌స్టాల్ చేస్తోంది…"</string>
@@ -83,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"వినియోగదారులను మేనేజ్ చేయండి"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని అన్‌ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"ప్యాకేజీని అన్వయించడంలో సమస్య ఏర్పడింది."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wearలో ఇన్‌స్టాల్/అన్ఇన్‌స్టాల్ చర్యలకు మద్దతు లేదు."</string>
     <string name="message_staging" msgid="8032722385658438567">"యాప్‌ను సిద్ధం చేస్తుంది…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"తెలియదు"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"మీ సెక్యూరిటీ దృష్ట్యా, ఈ సోర్సు నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ టాబ్లెట్ ప్రస్తుతం అనుమతించబడదు. మీరు దీన్ని సెట్టింగ్‌లలో మార్చవచ్చు."</string>
@@ -95,10 +102,30 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"మీ టాబ్లెట్ మరియు వ్యక్తిగత డేటాపై తెలియని యాప్‌లు దాడి చేయడానికి ఎక్కువ అవకాశం ఉంది. మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయడం ద్వారా, దీనిని ఉపయోగించడం వలన మీ టాబ్లెట్‌కు ఏదైనా హాని జరిగినా లేదా డేటా కోల్పోయినా బాధ్యత మీదేనని అంగీకరిస్తున్నారు."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"మీ టీవీ మరియు వ్యక్తిగత డేటాపై తెలియని యాప్‌లు దాడి చేయడానికి ఎక్కువ అవకాశం ఉంది. మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయడం ద్వారా, దీనిని ఉపయోగించడం వలన మీ టీవీకి ఏదైనా హాని జరిగినా లేదా డేటా కోల్పోయినా బాధ్యత మీదేనని అంగీకరిస్తున్నారు."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> క్లోన్"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>‌ను ఆర్కైవ్ చేయాలా?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"కొనసాగండి"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"సెట్టింగ్‌లు"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear యాప్‌లను ఇన్‌స్టాల్/అన్‌ఇన్‌స్టాల్ చేస్తోంది"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"యాప్ ఇన్‌స్టాల్ చేయబడిందనే నోటిఫికేషన్"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"విజయవంతంగా ఇన్‌స్టాల్ చేయబడింది"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"“<xliff:g id="APPNAME">%1$s</xliff:g>” విజయవంతంగా ఇన్‌స్టాల్ చేయబడింది"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%2$s</xliff:g> నుండి <xliff:g id="APPNAME">%1$s</xliff:g>‌ను రీస్టోర్ చేయాలా?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"ఈ యాప్ బ్యాక్‌గ్రౌండ్‌లో డౌన్‌లోడ్ అవ్వడం ప్రారంభమవుతుంది"</string>
+    <string name="restore" msgid="8460854736328970444">"రీస్టోర్ చేయండి"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"మీరు ఆఫ్‌లైన్‌లో ఉన్నారు"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"ఈ యాప్‌ను రీస్టోర్ చేయడానికి, మీ ఇంటర్నెట్ కనెక్షన్‌ను చెక్ చేసి, మళ్లీ ట్రై చేయండి"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"ఏదో పొరపాటు జరిగింది"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"ఈ యాప్‌ను రీస్టోర్ చేయడానికి ట్రై చేస్తున్నపుడు సమస్య ఏర్పడింది"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"తగినంత స్టోరేజ్ స్పేస్ లేదు"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"ఈ యాప్‌ను రీస్టోర్ చేయడానికి, మీరు ఈ పరికరంలో స్పేస్‌ను ఖాళీ చేయవచ్చు. స్టోరేజ్ అవసరం: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"మీరు పూర్తి చేయాల్సిన చర్య"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"ఈ యాప్‌ను రీస్టోర్ చేయడానికి తదుపరి దశలను ఫాలో అవ్వండి"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> డిజేబుల్ చేయబడింది"</string>
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"ఈ యాప్‌ను రీస్టోర్ చేయడానికి, సెట్టింగ్‌లలో <xliff:g id="INSTALLERNAME">%1$s</xliff:g>‌ను ఎనేబుల్ చేయండి"</string>
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> అన్‌ఇన్‌స్టాల్ చేయబడింది"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"ఈ యాప్‌ను రీస్టోర్ చేయడానికి, మీరు <xliff:g id="INSTALLERNAME">%1$s</xliff:g>‌ను ఇన్‌స్టాల్ చేయాలి"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"కొనసాగించండి"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"స్టోరేజ్‌ను క్లియర్ చేయండి"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"సెట్టింగ్‌లు"</string>
+    <string name="close" msgid="5214897374055647996">"మూసివేయండి"</string>
 </resources>

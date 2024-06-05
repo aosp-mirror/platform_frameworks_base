@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • იტენება"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • სწრაფად იტენება"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ნელა იტენება"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • დატენვა ოპტიმიზირებულია ბატარეის დასაცავად"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • დამტენი დამხმარე მოწყობილობის პრობლემა"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"განსაბლოკად დააჭირეთ მენიუს."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • დატენვა შეჩერებულია ბატარეის დასაცავად"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • შეამოწმეთ დამტენი აქსესუარი"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ქსელი ჩაკეტილია"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM არ არის"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"SIM-ის დამატება."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM აკლია ან არ იკითხება. SIM-ის დამატება."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"გამოუყენებელი SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"თქვენი SIM სამუდამოდ გამორთულია.\n დაუკავშირდით თქვენს უკაბელო სერვისის პროვაიდერს სხვა SIM ბარათისთვის."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-ბარათი ჩაკეტილია."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM დაბლოკილია PUK-ით."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM-ის განბლოკვა…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"დაბლოკვის შემდეგ საჭიროა PIN-კოდი"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"დაბლოკვის შემდეგ საჭიროა პაროლი"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"დაბლოკვის შემდეგ საჭიროა ნიმუში"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"განახლება დაყენდება არასამუშაო საათებში"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"განახლება დაინსტალირდება, როცა მოწყობილობა არ გამოიყენება"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"საჭიროა დამ. უსაფრთ. PIN-კოდი ერთხანს არ გამოიყენ."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"საჭ. დამ. უსაფრთ. პაროლი ერთხანს არ გამოიყენება."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"საჭიროა დამ. უსაფრთ. ნიმუში ერთხანს არ გამოიყენება."</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"დამატებითი უსაფრთხოებისთვის გამოიყენეთ ნიმუში"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"დამატებითი უსაფრთხოებისთვის გამოიყენეთ PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"დამატებითი უსაფრთხოებისთვის გამოიყენეთ პაროლი"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"დამატებითი უსაფრთხოებისთვის საჭიროა PIN-კოდის შეყვანა"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"დამატებითი უსაფრთხოებისთვის საჭიროა ნიმუშის შეყვანა"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"დამატებითი უსაფრთხოებისთვის საჭიროა პაროლის შეყვანა"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"მოწყობილობა ჩაკეტილია ადმინისტრატორის მიერ"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"მოწყობილობა ხელით ჩაიკეტა"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"არ არის ამოცნობილი"</string>

@@ -61,6 +61,7 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.testing.PollingCheck;
 import android.view.WindowManagerGlobal;
+import android.window.ActivityWindowInfo;
 import android.window.SizeConfigurationBuckets;
 
 import androidx.test.annotation.UiThreadTest;
@@ -181,7 +182,7 @@ public class ActivityThreadClientTest {
 
             // Verify for ON_START state. Activity should be relaunched.
             getInstrumentation().runOnMainSync(() -> clientSession.startActivity(r));
-            recreateAndVerifyRelaunched(activityThread, activity[0], r, ON_START);
+            recreateAndVerifyRelaunched(activityThread, activity[0], r, ON_PAUSE);
 
             // Verify for ON_RESUME state. Activity should be relaunched.
             getInstrumentation().runOnMainSync(() -> clientSession.resumeActivity(r));
@@ -308,17 +309,17 @@ public class ActivityThreadClientTest {
 
         private void pauseActivity(ActivityClientRecord r) {
             mThread.handlePauseActivity(r, false /* finished */,
-                    false /* userLeaving */, 0 /* configChanges */, false /* autoEnteringPip */,
+                    false /* userLeaving */, false /* autoEnteringPip */,
                     null /* pendingActions */, "test");
         }
 
         private void stopActivity(ActivityClientRecord r) {
-            mThread.handleStopActivity(r, 0 /* configChanges */,
+            mThread.handleStopActivity(r,
                     new PendingTransactionActions(), false /* finalStateRequest */, "test");
         }
 
         private void destroyActivity(ActivityClientRecord r) {
-            mThread.handleDestroyActivity(r, true /* finishing */, 0 /* configChanges */,
+            mThread.handleDestroyActivity(r, true /* finishing */,
                     false /* getNonConfigInstance */, "test");
         }
 
@@ -353,7 +354,8 @@ public class ActivityThreadClientTest {
                     null /* pendingResults */, null /* pendingNewIntents */,
                     null /* activityOptions */, true /* isForward */, null /* profilerInfo */,
                     mThread /* client */, null /* asssitToken */, null /* shareableActivityToken */,
-                    false /* launchedFromBubble */, null /* taskfragmentToken */);
+                    false /* launchedFromBubble */, null /* taskfragmentToken */,
+                    null /* initialCallerInfoAccessToken */, new ActivityWindowInfo());
         }
 
         @Override

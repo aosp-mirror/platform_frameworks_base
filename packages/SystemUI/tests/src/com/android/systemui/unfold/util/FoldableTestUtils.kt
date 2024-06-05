@@ -17,21 +17,35 @@
 package com.android.systemui.unfold.util
 
 import android.content.Context
+import android.hardware.devicestate.DeviceState
 import org.junit.Assume.assumeTrue
 
 object FoldableTestUtils {
 
     /** Finds device state for folded and unfolded. */
     fun findDeviceStates(context: Context): FoldableDeviceStates {
+        // TODO(b/325474477): Migrate clients to updated DeviceStateManager API's
         val foldedDeviceStates: IntArray = context.resources.getIntArray(
             com.android.internal.R.array.config_foldedDeviceStates)
         assumeTrue("Test should be launched on a foldable device",
             foldedDeviceStates.isNotEmpty())
 
-        val folded = foldedDeviceStates.maxOrNull()!!
-        val unfolded = folded + 1
+        val folded = getDeviceState(
+            identifier = foldedDeviceStates.maxOrNull()!!
+        )
+        val unfolded = getDeviceState(
+            identifier = folded.identifier + 1
+        )
         return FoldableDeviceStates(folded = folded, unfolded = unfolded)
+    }
+
+    private fun getDeviceState(identifier: Int): DeviceState {
+        return DeviceState(
+            DeviceState.Configuration.Builder(
+                identifier, "" /* name */
+            ).build()
+        )
     }
 }
 
-data class FoldableDeviceStates(val folded: Int, val unfolded: Int)
+data class FoldableDeviceStates(val folded: DeviceState, val unfolded: DeviceState)

@@ -57,6 +57,7 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.permission.PermissionManager;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -67,6 +68,7 @@ import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -105,9 +107,6 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Nullable
     private final ComponentName mInstantAppResolverSettingsComponent;
 
-    @NonNull
-    private final String mRequiredSupplementalProcessPackage;
-
     @Nullable
     private final String mServicesExtensionPackageName;
 
@@ -123,7 +122,6 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             @NonNull PackageInstallerService installerService,
             @NonNull PackageProperty packageProperty, @NonNull ComponentName resolveComponentName,
             @Nullable ComponentName instantAppResolverSettingsComponent,
-            @NonNull String requiredSupplementalProcessPackage,
             @Nullable String servicesExtensionPackageName,
             @Nullable String sharedSystemSharedLibraryPackageName) {
         mService = service;
@@ -138,7 +136,6 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
         mPackageProperty = packageProperty;
         mResolveComponentName = resolveComponentName;
         mInstantAppResolverSettingsComponent = instantAppResolverSettingsComponent;
-        mRequiredSupplementalProcessPackage = requiredSupplementalProcessPackage;
         mServicesExtensionPackageName = servicesExtensionPackageName;
         mSharedSystemSharedLibraryPackageName = sharedSystemSharedLibraryPackageName;
     }
@@ -474,7 +471,8 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             @PackageManager.ApplicationInfoFlagsBits long flags, int userId) {
         final int callingUid = Binder.getCallingUid();
         return new ParceledListSlice<>(
-                snapshot().getInstalledApplications(flags, userId, callingUid));
+                snapshot().getInstalledApplications(flags, userId, callingUid,
+                        /* forceAllowCrossUser= */ false));
     }
 
     @Override
@@ -810,7 +808,22 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Override
     @Deprecated
     public final String[] getSystemSharedLibraryNames() {
-        return snapshot().getSystemSharedLibraryNames();
+        ArrayMap<String, String> namesAndPaths = snapshot().getSystemSharedLibraryNamesAndPaths();
+        if (namesAndPaths.isEmpty()) {
+            return null;
+        }
+        final int size = namesAndPaths.size();
+        final String[] libs = new String[size];
+        for (int i = 0; i < size; i++) {
+            libs[i] = namesAndPaths.keyAt(i);
+        }
+        return libs;
+    }
+
+    @Override
+    @Deprecated
+    public final Map<String, String> getSystemSharedLibraryNamesAndPaths() {
+        return snapshot().getSystemSharedLibraryNamesAndPaths();
     }
 
     @Override
@@ -933,7 +946,32 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Deprecated
     public final boolean isPackageSuspendedForUser(@NonNull String packageName,
             @UserIdInt int userId) {
-        return snapshot().isPackageSuspendedForUser(packageName, userId);
+        try {
+            return snapshot().isPackageSuspendedForUser(packageName, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalArgumentException("Unknown target package: " + packageName);
+        }
+    }
+
+    @Override
+    @Deprecated
+    public final boolean isPackageQuarantinedForUser(@NonNull String packageName,
+            @UserIdInt int userId) {
+        try {
+            return snapshot().isPackageQuarantinedForUser(packageName, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalArgumentException("Unknown target package: " + packageName);
+        }
+    }
+
+    @Override
+    public final boolean isPackageStoppedForUser(@NonNull String packageName,
+            @UserIdInt int userId) {
+        try {
+            return snapshot().isPackageStoppedForUser(packageName, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalArgumentException("Unknown target package: " + packageName);
+        }
     }
 
     @Override
@@ -1057,7 +1095,8 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         final int callingUid = Binder.getCallingUid();
         return new ParceledListSlice<>(snapshot().queryIntentServicesInternal(
-                intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/));
+                intent, resolvedType, flags, userId, callingUid, Process.INVALID_PID,
+                /*includeInstantApps*/ false, /*resolveForStart*/ false));
     }
 
     @Override
@@ -1101,7 +1140,7 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         return mResolveIntentHelper.resolveIntentInternal(snapshot(), intent,
                 resolvedType, flags, 0 /*privateResolveFlags*/, userId, false,
-                Binder.getCallingUid());
+                Binder.getCallingUid(), Binder.getCallingPid());
     }
 
     @Override
@@ -1110,7 +1149,8 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         final int callingUid = Binder.getCallingUid();
         return mResolveIntentHelper.resolveServiceInternal(snapshot(), intent,
-                resolvedType, flags, userId, callingUid);
+                resolvedType, flags, userId, callingUid, Process.INVALID_PID,
+                /*resolveForStart*/ false);
     }
 
     @Override

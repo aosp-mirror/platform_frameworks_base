@@ -50,6 +50,7 @@ public final class VibratorHelper {
     private final long[] mFallbackPattern;
     @Nullable private final float[] mDefaultPwlePattern;
     @Nullable private final float[] mFallbackPwlePattern;
+    private final int mDefaultVibrationAmplitude;
 
     public VibratorHelper(Context context) {
         mVibrator = context.getSystemService(Vibrator.class);
@@ -65,6 +66,8 @@ public final class VibratorHelper {
                 com.android.internal.R.array.config_defaultNotificationVibeWaveform);
         mFallbackPwlePattern = getFloatArray(context.getResources(),
                 com.android.internal.R.array.config_notificationFallbackVibeWaveform);
+        mDefaultVibrationAmplitude = context.getResources().getInteger(
+            com.android.internal.R.integer.config_defaultVibrationAmplitude);
     }
 
     /**
@@ -136,6 +139,14 @@ public final class VibratorHelper {
     }
 
     /**
+     *  Scale vibration effect, valid range is [0.0f, 1.0f]
+     *  Resolves default amplitude value if not already set.
+     */
+    public VibrationEffect scale(VibrationEffect effect, float scale) {
+        return effect.resolve(mDefaultVibrationAmplitude).scale(scale);
+    }
+
+    /**
      * Vibrate the device with given {@code effect}.
      *
      * <p>We need to vibrate as "android" so we can breakthrough DND.
@@ -180,6 +191,11 @@ public final class VibratorHelper {
             }
         }
         return createWaveformVibration(mDefaultPattern, insistent);
+    }
+
+    /** Returns if a given vibration can be played by the vibrator that does notification buzz. */
+    public boolean areEffectComponentsSupported(VibrationEffect effect) {
+        return mVibrator.areVibrationFeaturesSupported(effect);
     }
 
     @Nullable

@@ -21,55 +21,53 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
-import android.hardware.biometrics.fingerprint.Error;
+import android.hardware.biometrics.SensorLocationInternal;
+import android.hardware.biometrics.common.ComponentInfo;
+import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.ISession;
-import android.hardware.biometrics.fingerprint.ISessionCallback;
-import android.hardware.fingerprint.Fingerprint;
+import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.hardware.keymaster.HardwareAuthToken;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
 import com.android.server.biometrics.UserStateProto;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
-import com.android.server.biometrics.sensors.AcquisitionClient;
-import com.android.server.biometrics.sensors.AuthSessionCoordinator;
-import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
-import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.LockoutCache;
-import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
-import com.android.server.biometrics.sensors.RemovalConsumer;
+import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.StartUserClient;
 import com.android.server.biometrics.sensors.StopUserClient;
-import com.android.server.biometrics.sensors.UserAwareBiometricScheduler;
+import com.android.server.biometrics.sensors.UserSwitchProvider;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Maintains the state of a single sensor within an instance of the
@@ -78,450 +76,173 @@ import java.util.function.Supplier;
 @SuppressWarnings("deprecation")
 public class Sensor {
 
+    private static final String TAG = "Sensor";
+
     private boolean mTestHalEnabled;
 
-    @NonNull private final String mTag;
     @NonNull private final FingerprintProvider mProvider;
     @NonNull private final Context mContext;
     @NonNull private final IBinder mToken;
     @NonNull private final Handler mHandler;
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProperties;
-    @NonNull private final UserAwareBiometricScheduler mScheduler;
-    @NonNull private final LockoutCache mLockoutCache;
+    @NonNull private BiometricScheduler<IFingerprint, ISession> mScheduler;
+    @NonNull private LockoutTracker mLockoutTracker;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
+    @NonNull private final BiometricContext mBiometricContext;
 
     @Nullable AidlSession mCurrentSession;
-    @NonNull private final Supplier<AidlSession> mLazySession;
+    @NonNull private Supplier<AidlSession> mLazySession;
 
-    @VisibleForTesting
-    public static class HalSessionCallback extends ISessionCallback.Stub {
-
-        /**
-         * Interface to sends results to the HalSessionCallback's owner.
-         */
-        public interface Callback {
-            /**
-             * Invoked when the HAL sends ERROR_HW_UNAVAILABLE.
-             */
-            void onHardwareUnavailable();
-        }
-
-        @NonNull
-        private final Context mContext;
-        @NonNull
-        private final Handler mHandler;
-        @NonNull
-        private final String mTag;
-        @NonNull
-        private final UserAwareBiometricScheduler mScheduler;
-        private final int mSensorId;
-        private final int mUserId;
-        @NonNull
-        private final LockoutCache mLockoutCache;
-        @NonNull
-        private final LockoutResetDispatcher mLockoutResetDispatcher;
-        @NonNull
-        private AuthSessionCoordinator mAuthSessionCoordinator;
-        @NonNull
-        private final Callback mCallback;
-
-        HalSessionCallback(@NonNull Context context, @NonNull Handler handler, @NonNull String tag,
-                @NonNull UserAwareBiometricScheduler scheduler, int sensorId, int userId,
-                @NonNull LockoutCache lockoutTracker,
-                @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-                @NonNull AuthSessionCoordinator authSessionCoordinator,
-                @NonNull Callback callback) {
-            mContext = context;
-            mHandler = handler;
-            mTag = tag;
-            mScheduler = scheduler;
-            mSensorId = sensorId;
-            mUserId = userId;
-            mLockoutCache = lockoutTracker;
-            mLockoutResetDispatcher = lockoutResetDispatcher;
-            mAuthSessionCoordinator = authSessionCoordinator;
-            mCallback = callback;
-        }
-
-        @Override
-        public int getInterfaceVersion() {
-            return this.VERSION;
-        }
-
-        @Override
-        public String getInterfaceHash() {
-            return this.HASH;
-        }
-
-        @Override
-        public void onChallengeGenerated(long challenge) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintGenerateChallengeClient)) {
-                    Slog.e(mTag, "onChallengeGenerated for wrong client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FingerprintGenerateChallengeClient generateChallengeClient =
-                        (FingerprintGenerateChallengeClient) client;
-                generateChallengeClient.onChallengeGenerated(mSensorId, mUserId, challenge);
-            });
-        }
-
-        @Override
-        public void onChallengeRevoked(long challenge) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintRevokeChallengeClient)) {
-                    Slog.e(mTag, "onChallengeRevoked for wrong client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FingerprintRevokeChallengeClient revokeChallengeClient =
-                        (FingerprintRevokeChallengeClient) client;
-                revokeChallengeClient.onChallengeRevoked(mSensorId, mUserId, challenge);
-            });
-        }
-
-        @Override
-        public void onAcquired(byte info, int vendorCode) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof AcquisitionClient)) {
-                    Slog.e(mTag, "onAcquired for non-acquisition client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final AcquisitionClient<?> acquisitionClient = (AcquisitionClient<?>) client;
-                acquisitionClient.onAcquired(AidlConversionUtils.toFrameworkAcquiredInfo(info),
-                        vendorCode);
-            });
-        }
-
-        @Override
-        public void onError(byte error, int vendorCode) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                Slog.d(mTag, "onError"
-                        + ", client: " + Utils.getClientName(client)
-                        + ", error: " + error
-                        + ", vendorCode: " + vendorCode);
-                if (!(client instanceof ErrorConsumer)) {
-                    Slog.e(mTag, "onError for non-error consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final ErrorConsumer errorConsumer = (ErrorConsumer) client;
-                errorConsumer.onError(AidlConversionUtils.toFrameworkError(error), vendorCode);
-
-                if (error == Error.HW_UNAVAILABLE) {
-                    mCallback.onHardwareUnavailable();
-                }
-            });
-        }
-
-        @Override
-        public void onEnrollmentProgress(int enrollmentId, int remaining) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintEnrollClient)) {
-                    Slog.e(mTag, "onEnrollmentProgress for non-enroll client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final int currentUserId = client.getTargetUserId();
-                final CharSequence name = FingerprintUtils.getInstance(mSensorId)
-                        .getUniqueName(mContext, currentUserId);
-                final Fingerprint fingerprint = new Fingerprint(name, enrollmentId, mSensorId);
-
-                final FingerprintEnrollClient enrollClient = (FingerprintEnrollClient) client;
-                enrollClient.onEnrollResult(fingerprint, remaining);
-            });
-        }
-
-        @Override
-        public void onAuthenticationSucceeded(int enrollmentId, HardwareAuthToken hat) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof AuthenticationConsumer)) {
-                    Slog.e(mTag, "onAuthenticationSucceeded for non-authentication consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final AuthenticationConsumer authenticationConsumer =
-                        (AuthenticationConsumer) client;
-                final Fingerprint fp = new Fingerprint("", enrollmentId, mSensorId);
-                final byte[] byteArray = HardwareAuthTokenUtils.toByteArray(hat);
-                final ArrayList<Byte> byteList = new ArrayList<>();
-                for (byte b : byteArray) {
-                    byteList.add(b);
-                }
-
-                authenticationConsumer.onAuthenticated(fp, true /* authenticated */, byteList);
-            });
-        }
-
-        @Override
-        public void onAuthenticationFailed() {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof AuthenticationConsumer)) {
-                    Slog.e(mTag, "onAuthenticationFailed for non-authentication consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final AuthenticationConsumer authenticationConsumer =
-                        (AuthenticationConsumer) client;
-                final Fingerprint fp = new Fingerprint("", 0 /* enrollmentId */, mSensorId);
-                authenticationConsumer
-                        .onAuthenticated(fp, false /* authenticated */, null /* hat */);
-            });
-        }
-
-        @Override
-        public void onLockoutTimed(long durationMillis) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof LockoutConsumer)) {
-                    Slog.e(mTag, "onLockoutTimed for non-lockout consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final LockoutConsumer lockoutConsumer = (LockoutConsumer) client;
-                lockoutConsumer.onLockoutTimed(durationMillis);
-            });
-        }
-
-        @Override
-        public void onLockoutPermanent() {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof LockoutConsumer)) {
-                    Slog.e(mTag, "onLockoutPermanent for non-lockout consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final LockoutConsumer lockoutConsumer = (LockoutConsumer) client;
-                lockoutConsumer.onLockoutPermanent();
-            });
-        }
-
-        @Override
-        public void onLockoutCleared() {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintResetLockoutClient)) {
-                    Slog.d(mTag, "onLockoutCleared outside of resetLockout by HAL");
-                    // Given that onLockoutCleared() can happen at any time, and is not necessarily
-                    // coming from a specific client, set this to -1 to indicate it wasn't for a
-                    // specific request.
-                    FingerprintResetLockoutClient.resetLocalLockoutStateToNone(mSensorId, mUserId,
-                            mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
-                            Utils.getCurrentStrength(mSensorId), -1 /* requestId */);
-                } else {
-                    Slog.d(mTag, "onLockoutCleared after resetLockout");
-                    final FingerprintResetLockoutClient resetLockoutClient =
-                            (FingerprintResetLockoutClient) client;
-                    resetLockoutClient.onLockoutCleared();
-                }
-            });
-        }
-
-        @Override
-        public void onInteractionDetected() {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintDetectClient)) {
-                    Slog.e(mTag, "onInteractionDetected for non-detect client: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FingerprintDetectClient fingerprintDetectClient =
-                        (FingerprintDetectClient) client;
-                fingerprintDetectClient.onInteractionDetected();
-            });
-        }
-
-        @Override
-        public void onEnrollmentsEnumerated(int[] enrollmentIds) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof EnumerateConsumer)) {
-                    Slog.e(mTag, "onEnrollmentsEnumerated for non-enumerate consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final EnumerateConsumer enumerateConsumer =
-                        (EnumerateConsumer) client;
-                if (enrollmentIds.length > 0) {
-                    for (int i = 0; i < enrollmentIds.length; i++) {
-                        final Fingerprint fp = new Fingerprint("", enrollmentIds[i], mSensorId);
-                        enumerateConsumer.onEnumerationResult(fp, enrollmentIds.length - i - 1);
-                    }
-                } else {
-                    enumerateConsumer.onEnumerationResult(null /* identifier */, 0);
-                }
-            });
-        }
-
-        @Override
-        public void onEnrollmentsRemoved(int[] enrollmentIds) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof RemovalConsumer)) {
-                    Slog.e(mTag, "onRemoved for non-removal consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final RemovalConsumer removalConsumer = (RemovalConsumer) client;
-                if (enrollmentIds.length > 0) {
-                    for (int i  = 0; i < enrollmentIds.length; i++) {
-                        final Fingerprint fp = new Fingerprint("", enrollmentIds[i], mSensorId);
-                        removalConsumer.onRemoved(fp, enrollmentIds.length - i - 1);
-                    }
-                } else {
-                    removalConsumer.onRemoved(null, 0);
-                }
-            });
-        }
-
-        @Override
-        public void onAuthenticatorIdRetrieved(long authenticatorId) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintGetAuthenticatorIdClient)) {
-                    Slog.e(mTag, "onAuthenticatorIdRetrieved for wrong consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FingerprintGetAuthenticatorIdClient getAuthenticatorIdClient =
-                        (FingerprintGetAuthenticatorIdClient) client;
-                getAuthenticatorIdClient.onAuthenticatorIdRetrieved(authenticatorId);
-            });
-        }
-
-        @Override
-        public void onAuthenticatorIdInvalidated(long newAuthenticatorId) {
-            mHandler.post(() -> {
-                final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof FingerprintInvalidationClient)) {
-                    Slog.e(mTag, "onAuthenticatorIdInvalidated for wrong consumer: "
-                            + Utils.getClientName(client));
-                    return;
-                }
-
-                final FingerprintInvalidationClient invalidationClient =
-                        (FingerprintInvalidationClient) client;
-                invalidationClient.onAuthenticatorIdInvalidated(newAuthenticatorId);
-            });
-        }
-
-        @Override
-        public void onSessionClosed() {
-            mHandler.post(mScheduler::onUserStopped);
-        }
-    }
-
-    Sensor(@NonNull String tag, @NonNull FingerprintProvider provider, @NonNull Context context,
-            @NonNull Handler handler, @NonNull FingerprintSensorPropertiesInternal sensorProperties,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+    public Sensor(@NonNull FingerprintProvider provider,
+            @NonNull Context context, @NonNull Handler handler,
+            @NonNull FingerprintSensorPropertiesInternal sensorProperties,
             @NonNull BiometricContext biometricContext, AidlSession session) {
-        mTag = tag;
         mProvider = provider;
         mContext = context;
         mToken = new Binder();
         mHandler = handler;
         mSensorProperties = sensorProperties;
-        mLockoutCache = new LockoutCache();
-        mScheduler = new UserAwareBiometricScheduler(tag,
+        mBiometricContext = biometricContext;
+        mAuthenticatorIds = new HashMap<>();
+        mCurrentSession = session;
+    }
+
+    Sensor(@NonNull FingerprintProvider provider, @NonNull Context context,
+            @NonNull Handler handler, @NonNull SensorProps sensorProp,
+            @NonNull BiometricContext biometricContext,
+            @NonNull List<SensorLocationInternal> workaroundLocation,
+            boolean resetLockoutRequiresHardwareAuthToken) {
+        this(provider, context, handler, getFingerprintSensorPropertiesInternal(sensorProp,
+                        workaroundLocation, resetLockoutRequiresHardwareAuthToken),
+                biometricContext, null);
+    }
+
+    /**
+     * Initialize biometric scheduler, lockout tracker and session for the sensor.
+     */
+    public void init(@NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+        setScheduler(getBiometricSchedulerForInit(gestureAvailabilityDispatcher,
+                lockoutResetDispatcher));
+        mLockoutTracker = new LockoutCache();
+        mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
+    }
+
+    private BiometricScheduler<IFingerprint, ISession> getBiometricSchedulerForInit(
+            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+        return new BiometricScheduler<>(mHandler,
                 BiometricScheduler.sensorTypeFromFingerprintProperties(mSensorProperties),
                 gestureAvailabilityDispatcher,
                 () -> mCurrentSession != null ? mCurrentSession.getUserId() : UserHandle.USER_NULL,
-                new UserAwareBiometricScheduler.UserSwitchCallback() {
+                new UserSwitchProvider<IFingerprint, ISession>() {
                     @NonNull
                     @Override
-                    public StopUserClient<?> getStopUserClient(int userId) {
-                        return new FingerprintStopUserClient(mContext, mLazySession, mToken,
+                    public StopUserClient<ISession> getStopUserClient(int userId) {
+                        return new FingerprintStopUserClient(mContext,
+                                () -> mLazySession.get().getSession(), mToken,
                                 userId, mSensorProperties.sensorId,
-                                BiometricLogger.ofUnknown(mContext), biometricContext,
+                                BiometricLogger.ofUnknown(mContext), mBiometricContext,
                                 () -> mCurrentSession = null);
                     }
 
                     @NonNull
                     @Override
-                    public StartUserClient<?, ?> getStartUserClient(int newUserId) {
+                    public StartUserClient<IFingerprint, ISession> getStartUserClient(
+                            int newUserId) {
                         final int sensorId = mSensorProperties.sensorId;
-
-                        final HalSessionCallback resultController = new HalSessionCallback(mContext,
-                                mHandler, mTag, mScheduler, sensorId, newUserId, mLockoutCache,
-                                lockoutResetDispatcher,
-                                biometricContext.getAuthSessionCoordinator(), () -> {
-                            Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
-                            mCurrentSession = null;
-                        });
-
-                        final StartUserClient.UserStartedCallback<ISession> userStartedCallback =
-                                (userIdStarted, newSession, halInterfaceVersion) -> {
-                                    Slog.d(mTag, "New session created for user: "
-                                            + userIdStarted + " with hal version: "
-                                            + halInterfaceVersion);
-                                    mCurrentSession = new AidlSession(halInterfaceVersion,
-                                            newSession, userIdStarted, resultController);
-                                    if (FingerprintUtils.getInstance(sensorId)
-                                            .isInvalidationInProgress(mContext, userIdStarted)) {
-                                        Slog.w(mTag,
-                                                "Scheduling unfinished invalidation request for "
-                                                        + "sensor: "
-                                                        + sensorId
-                                                        + ", user: " + userIdStarted);
-                                        provider.scheduleInvalidationRequest(sensorId,
-                                                userIdStarted);
+                        final AidlResponseHandler resultController = new AidlResponseHandler(
+                                mContext, mScheduler, sensorId, newUserId,
+                                mLockoutTracker, lockoutResetDispatcher,
+                                mBiometricContext.getAuthSessionCoordinator(),
+                                new AidlResponseHandler.AidlResponseHandlerCallback() {
+                                    @Override
+                                    public void onEnrollSuccess() {
+                                        mProvider.scheduleLoadAuthenticatorIdsForUser(sensorId,
+                                                newUserId);
+                                        mProvider.scheduleInvalidationRequest(sensorId,
+                                                newUserId);
                                     }
-                                };
 
-                        return new FingerprintStartUserClient(mContext, provider::getHalInstance,
-                                mToken, newUserId, mSensorProperties.sensorId,
-                                BiometricLogger.ofUnknown(mContext), biometricContext,
-                                resultController, userStartedCallback);
+                                    @Override
+                                    public void onHardwareUnavailable() {
+                                        Slog.e(TAG,
+                                                "Fingerprint sensor hardware unavailable.");
+                                        mCurrentSession = null;
+                                    }
+                                });
+
+                        return Sensor.this.getStartUserClient(resultController, sensorId,
+                                newUserId);
                     }
                 });
-        mAuthenticatorIds = new HashMap<>();
-        mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
-        mCurrentSession = session;
     }
 
-    Sensor(@NonNull String tag, @NonNull FingerprintProvider provider, @NonNull Context context,
-            @NonNull Handler handler, @NonNull FingerprintSensorPropertiesInternal sensorProperties,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
-            @NonNull BiometricContext biometricContext) {
-        this(tag, provider, context, handler, sensorProperties, lockoutResetDispatcher,
-                gestureAvailabilityDispatcher, biometricContext, null);
+    private FingerprintStartUserClient getStartUserClient(AidlResponseHandler resultController,
+            int sensorId, int newUserId) {
+        final StartUserClient.UserStartedCallback<ISession> userStartedCallback =
+                (userIdStarted, newSession, halInterfaceVersion) -> {
+                    Slog.d(TAG, "New fingerprint session created for user: "
+                            + userIdStarted + " with hal version: "
+                            + halInterfaceVersion);
+                    mCurrentSession = new AidlSession(halInterfaceVersion,
+                            newSession, userIdStarted, resultController);
+                    if (FingerprintUtils.getInstance(sensorId)
+                            .isInvalidationInProgress(mContext, userIdStarted)) {
+                        Slog.w(TAG,
+                                "Scheduling unfinished invalidation request for "
+                                        + "fingerprint sensor: "
+                                        + sensorId
+                                        + ", user: " + userIdStarted);
+                        mProvider.scheduleInvalidationRequest(sensorId,
+                                userIdStarted);
+                    }
+                };
+
+        return new FingerprintStartUserClient(mContext, mProvider::getHalInstance,
+                mToken, newUserId, mSensorProperties.sensorId,
+                BiometricLogger.ofUnknown(mContext), mBiometricContext,
+                resultController, userStartedCallback);
     }
 
-    @NonNull Supplier<AidlSession> getLazySession() {
+    protected static FingerprintSensorPropertiesInternal getFingerprintSensorPropertiesInternal(
+            SensorProps prop, List<SensorLocationInternal> workaroundLocations,
+            boolean resetLockoutRequiresHardwareAuthToken) {
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        if (prop.commonProps.componentInfo != null) {
+            for (ComponentInfo info : prop.commonProps.componentInfo) {
+                componentInfo.add(new ComponentInfoInternal(info.componentId,
+                        info.hardwareVersion, info.firmwareVersion, info.serialNumber,
+                        info.softwareVersion));
+            }
+        }
+        return new FingerprintSensorPropertiesInternal(prop.commonProps.sensorId,
+                prop.commonProps.sensorStrength,
+                prop.commonProps.maxEnrollmentsPerUser,
+                componentInfo,
+                prop.sensorType,
+                prop.halControlsIllumination,
+                resetLockoutRequiresHardwareAuthToken,
+                !workaroundLocations.isEmpty() ? workaroundLocations :
+                        Arrays.stream(prop.sensorLocations).map(location ->
+                                        new SensorLocationInternal(
+                                                location.display,
+                                                location.sensorLocationX,
+                                                location.sensorLocationY,
+                                                location.sensorRadius))
+                                .collect(Collectors.toList()));
+    }
+
+    @NonNull public Supplier<AidlSession> getLazySession() {
         return mLazySession;
     }
 
-    @NonNull FingerprintSensorPropertiesInternal getSensorProperties() {
+    @NonNull public FingerprintSensorPropertiesInternal getSensorProperties() {
         return mSensorProperties;
     }
 
-    @Nullable AidlSession getSessionForUser(int userId) {
+    @Nullable protected AidlSession getSessionForUser(int userId) {
+        Slog.d(TAG, "getSessionForUser: mCurrentSession: " + mCurrentSession);
         if (mCurrentSession != null && mCurrentSession.getUserId() == userId) {
             return mCurrentSession;
         } else {
@@ -535,30 +256,33 @@ public class Sensor {
                 biometricStateCallback, mProvider, this);
     }
 
-    @NonNull BiometricScheduler getScheduler() {
+    @NonNull public BiometricScheduler<IFingerprint, ISession> getScheduler() {
         return mScheduler;
     }
 
-    @NonNull LockoutCache getLockoutCache() {
-        return mLockoutCache;
+    @NonNull protected LockoutTracker getLockoutTracker(boolean forAuth) {
+        if (forAuth) {
+            return null;
+        }
+        return mLockoutTracker;
     }
 
-    @NonNull Map<Integer, Long> getAuthenticatorIds() {
+    @NonNull public Map<Integer, Long> getAuthenticatorIds() {
         return mAuthenticatorIds;
     }
 
     void setTestHalEnabled(boolean enabled) {
-        Slog.w(mTag, "setTestHalEnabled: " + enabled);
+        Slog.w(TAG, "Fingerprint setTestHalEnabled: " + enabled);
         if (enabled != mTestHalEnabled) {
             // The framework should retrieve a new session from the HAL.
             try {
                 if (mCurrentSession != null) {
                     // TODO(181984005): This should be scheduled instead of directly invoked
-                    Slog.d(mTag, "Closing old session");
+                    Slog.d(TAG, "Closing old fingerprint session");
                     mCurrentSession.getSession().close();
                 }
             } catch (RemoteException e) {
-                Slog.e(mTag, "RemoteException", e);
+                Slog.e(TAG, "RemoteException", e);
             }
             mCurrentSession = null;
         }
@@ -600,7 +324,7 @@ public class Sensor {
     public void onBinderDied() {
         final BaseClientMonitor client = mScheduler.getCurrentClient();
         if (client instanceof ErrorConsumer) {
-            Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
+            Slog.e(TAG, "Sending fingerprint hardware unavailable error for client: " + client);
             final ErrorConsumer errorConsumer = (ErrorConsumer) client;
             errorConsumer.onError(FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
@@ -616,5 +340,50 @@ public class Sensor {
         mScheduler.recordCrashState();
         mScheduler.reset();
         mCurrentSession = null;
+    }
+
+    @NonNull protected Handler getHandler() {
+        return mHandler;
+    }
+
+    @NonNull protected Context getContext() {
+        return mContext;
+    }
+
+    /**
+     * Returns true if the sensor hardware is detected.
+     */
+    protected boolean isHardwareDetected(String halInstance) {
+        if (mTestHalEnabled) {
+            return true;
+        }
+        return (ServiceManager.checkService(IFingerprint.DESCRIPTOR + "/" + halInstance)
+                != null);
+    }
+
+    @NonNull protected BiometricContext getBiometricContext() {
+        return mBiometricContext;
+    }
+
+    /**
+     * Returns lockout mode of this sensor.
+     */
+    @LockoutTracker.LockoutMode
+    public int getLockoutModeForUser(int userId) {
+        return mBiometricContext.getAuthSessionCoordinator().getLockoutStateFor(userId,
+                Utils.getCurrentStrength(mSensorProperties.sensorId));
+    }
+
+    public void setScheduler(BiometricScheduler scheduler) {
+        mScheduler = scheduler;
+    }
+
+    public void setLazySession(
+            Supplier<AidlSession> lazySession) {
+        mLazySession = lazySession;
+    }
+
+    public FingerprintProvider getProvider() {
+        return mProvider;
     }
 }

@@ -1,0 +1,15 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksTimeCoreTests",
+      "options": [
+        {
+          "include-filter": "android.service."
+        }
+      ]
+    },
+    {
+      "name": "CtsLocationTimeZoneManagerHostTest"
+    }
+  ]
+}

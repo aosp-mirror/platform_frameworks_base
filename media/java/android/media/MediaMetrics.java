@@ -148,6 +148,7 @@ public class MediaMetrics {
                 createKey("headTrackerEnabled", String.class); // spatializer
 
         public static final Key<Integer> INDEX = createKey("index", Integer.class); // volume
+        public static final Key<Integer> OLD_INDEX = createKey("oldIndex", Integer.class); // volume
         public static final Key<Integer> INPUT_PORT_COUNT =
                 createKey("inputPortCount", Integer.class); // MIDI
         // Either "true" or "false"

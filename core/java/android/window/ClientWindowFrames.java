@@ -22,6 +22,8 @@ import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * The window frame container class used by client side for layout.
  * @hide
@@ -54,7 +56,16 @@ public class ClientWindowFrames implements Parcelable {
     public ClientWindowFrames() {
     }
 
-    public ClientWindowFrames(ClientWindowFrames other) {
+    public ClientWindowFrames(@NonNull ClientWindowFrames other) {
+        setTo(other);
+    }
+
+    private ClientWindowFrames(@NonNull Parcel in) {
+        readFromParcel(in);
+    }
+
+    /** Updates the current frames to the given frames. */
+    public void setTo(@NonNull ClientWindowFrames other) {
         frame.set(other.frame);
         displayFrame.set(other.displayFrame);
         parentFrame.set(other.parentFrame);
@@ -63,10 +74,6 @@ public class ClientWindowFrames implements Parcelable {
         }
         isParentFrameClippedByDisplayCutout = other.isParentFrameClippedByDisplayCutout;
         compatScale = other.compatScale;
-    }
-
-    private ClientWindowFrames(Parcel in) {
-        readFromParcel(in);
     }
 
     /** Needed for AIDL out parameters. */
@@ -98,6 +105,29 @@ public class ClientWindowFrames implements Parcelable {
                 + (attachedFrame != null ? " attachedFrame=" + attachedFrame.toShortString() : "")
                 + (isParentFrameClippedByDisplayCutout ? " parentClippedByDisplayCutout" : "")
                 + (compatScale != 1f ? " sizeCompatScale=" + compatScale : "") +  "}";
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final ClientWindowFrames other = (ClientWindowFrames) o;
+        return frame.equals(other.frame)
+                && displayFrame.equals(other.displayFrame)
+                && parentFrame.equals(other.parentFrame)
+                && Objects.equals(attachedFrame, other.attachedFrame)
+                && isParentFrameClippedByDisplayCutout == other.isParentFrameClippedByDisplayCutout
+                && compatScale == other.compatScale;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(frame, displayFrame, parentFrame, attachedFrame,
+                isParentFrameClippedByDisplayCutout, compatScale);
     }
 
     @Override

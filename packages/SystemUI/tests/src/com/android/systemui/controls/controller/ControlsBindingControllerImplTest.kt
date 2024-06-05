@@ -116,11 +116,7 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testBindAndLoad_cancel() {
-        val callback = object : ControlsBindingController.LoadCallback {
-            override fun error(message: String) {}
-
-            override fun accept(t: List<Control>) {}
-        }
+        val callback = mock(ControlsBindingController.LoadCallback::class.java)
         val subscription = mock(IControlsSubscription::class.java)
 
         val canceller = controller.bindAndLoad(TEST_COMPONENT_NAME_1, callback)
@@ -130,6 +126,7 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 
         canceller.run()
         verify(providers[0]).cancelSubscription(subscription)
+        verify(callback).error(any())
     }
 
     @Test

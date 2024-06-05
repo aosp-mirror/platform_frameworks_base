@@ -16,8 +16,15 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.graphics.Rect;
+
 import com.android.systemui.Dumpable;
 import com.android.systemui.plugins.DarkIconDispatcher;
+
+import kotlinx.coroutines.flow.StateFlow;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Dispatches events to {@link DarkReceiver}s about changes in darkness, tint area
@@ -29,4 +36,27 @@ public interface SysuiDarkIconDispatcher extends DarkIconDispatcher, Dumpable {
      * @return LightBarTransitionsController
      */
     LightBarTransitionsController getTransitionsController();
+
+    /**
+     * Flow equivalent of registering {@link DarkReceiver} using
+     * {@link DarkIconDispatcher#addDarkReceiver(DarkReceiver)}
+     */
+    StateFlow<DarkChange> darkChangeFlow();
+
+    /** Model for {@link #darkChangeFlow()} */
+    class DarkChange {
+
+        public static final DarkChange EMPTY =
+                new DarkChange(new ArrayList<>(), /* darkIntensity= */ 0f, DEFAULT_ICON_TINT);
+
+        public DarkChange(Collection<Rect> areas, float darkIntensity, int tint) {
+            this.areas = areas;
+            this.darkIntensity = darkIntensity;
+            this.tint = tint;
+        }
+
+        public final Collection<Rect> areas;
+        public final float darkIntensity;
+        public final int tint;
+    }
 }

@@ -32,7 +32,13 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
+import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipKeepClearAlgorithmInterface;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +66,8 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
 
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
     private DisplayInfo mDefaultDisplayInfo;
-    private PipBoundsState mPipBoundsState; private PipSizeSpecHandler mPipSizeSpecHandler;
+    private PipBoundsState mPipBoundsState;
+    private SizeSpecSource mSizeSpecSource;
     private PipDisplayLayoutState mPipDisplayLayoutState;
 
 
@@ -68,11 +75,12 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     public void setUp() throws Exception {
         initializeMockResources();
         mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
-        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
-        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler, mPipDisplayLayoutState);
+
+        mSizeSpecSource = new PhoneSizeSpecSource(mContext, mPipDisplayLayoutState);
+        mPipBoundsState = new PipBoundsState(mContext, mSizeSpecSource, mPipDisplayLayoutState);
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState,
                 new PipSnapAlgorithm(), new PipKeepClearAlgorithmInterface() {},
-                mPipSizeSpecHandler);
+                mPipDisplayLayoutState, mSizeSpecSource);
 
         DisplayLayout layout =
                 new DisplayLayout(mDefaultDisplayInfo, mContext.getResources(), true, true);
@@ -132,7 +140,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
 
     @Test
     public void getDefaultBounds_noOverrideMinSize_matchesDefaultSizeAndAspectRatio() {
-        final Size defaultSize = mPipSizeSpecHandler.getDefaultSize(DEFAULT_ASPECT_RATIO);
+        final Size defaultSize = mSizeSpecSource.getDefaultSize(DEFAULT_ASPECT_RATIO);
 
         mPipBoundsState.setOverrideMinSize(null);
         final Rect defaultBounds = mPipBoundsAlgorithm.getDefaultBounds();
@@ -346,14 +354,17 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     }
 
     @Test
-    public void getEntryDestinationBounds_reentryStateExists_restoreLastSize() {
+    public void getEntryDestinationBounds_reentryStateExists_restoreProportionalSize() {
         mPipBoundsState.setAspectRatio(DEFAULT_ASPECT_RATIO);
+        final Size maxSize = mSizeSpecSource.getMaxSize(DEFAULT_ASPECT_RATIO);
+        mPipBoundsState.setMaxSize(maxSize.getWidth(), maxSize.getHeight());
         final Rect reentryBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         reentryBounds.scale(1.25f);
+        mPipBoundsState.setBounds(reentryBounds); // this updates the bounds scale used in reentry
+
         final float reentrySnapFraction = mPipBoundsAlgorithm.getSnapFraction(reentryBounds);
 
-        mPipBoundsState.saveReentryState(
-                new Size(reentryBounds.width(), reentryBounds.height()), reentrySnapFraction);
+        mPipBoundsState.saveReentryState(reentrySnapFraction);
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
 
         assertEquals(reentryBounds.width(), destinationBounds.width());
@@ -367,8 +378,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
         reentryBounds.offset(0, -100);
         final float reentrySnapFraction = mPipBoundsAlgorithm.getSnapFraction(reentryBounds);
 
-        mPipBoundsState.saveReentryState(
-                new Size(reentryBounds.width(), reentryBounds.height()), reentrySnapFraction);
+        mPipBoundsState.saveReentryState(reentrySnapFraction);
 
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
 

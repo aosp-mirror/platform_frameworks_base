@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -68,26 +72,21 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
     ) {
         val contentPadding = PaddingValues(horizontal = SettingsDimension.itemPaddingEnd)
         Button(
+            modifier = Modifier.semantics { role = Role.DropdownList },
             onClick = { expanded = true },
             colors = ButtonDefaults.buttonColors(
-                containerColor = SettingsTheme.colorScheme.spinnerHeaderContainer,
-                contentColor = SettingsTheme.colorScheme.onSpinnerHeaderContainer,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ),
             contentPadding = contentPadding,
         ) {
             SpinnerText(options.find { it.id == selectedId })
-            Icon(
-                imageVector = when {
-                    expanded -> Icons.Outlined.ExpandLess
-                    else -> Icons.Outlined.ExpandMore
-                },
-                contentDescription = null,
-            )
+            ExpandIcon(expanded)
         }
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(SettingsTheme.colorScheme.spinnerItemContainer),
+            modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer),
         ) {
             for (option in options) {
                 DropdownMenuItem(
@@ -95,7 +94,7 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
                         SpinnerText(
                             option = option,
                             modifier = Modifier.padding(end = 24.dp),
-                            color = SettingsTheme.colorScheme.onSpinnerItemContainer,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
                     },
                     onClick = {
@@ -107,6 +106,17 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
             }
         }
     }
+}
+
+@Composable
+internal fun ExpandIcon(expanded: Boolean) {
+    Icon(
+        imageVector = when {
+            expanded -> Icons.Outlined.ExpandLess
+            else -> Icons.Outlined.ExpandMore
+        },
+        contentDescription = null,
+    )
 }
 
 @Composable
@@ -129,7 +139,7 @@ private fun SpinnerText(
 @Composable
 private fun SpinnerPreview() {
     SettingsTheme {
-        var selectedId by rememberSaveable { mutableStateOf(1) }
+        var selectedId by rememberSaveable { mutableIntStateOf(1) }
         Spinner(
             options = (1..3).map { SpinnerOption(id = it, text = "Option $it") },
             selectedId = selectedId,

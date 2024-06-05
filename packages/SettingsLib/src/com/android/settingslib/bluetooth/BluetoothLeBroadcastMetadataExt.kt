@@ -31,37 +31,33 @@ import com.android.settingslib.bluetooth.BluetoothBroadcastUtils.SCHEME_BT_BROAD
 object BluetoothLeBroadcastMetadataExt {
     private const val TAG = "BtLeBroadcastMetadataExt"
 
-    // BluetoothLeBroadcastMetadata
-    private const val KEY_BT_QR_VER = "R"
-    private const val KEY_BT_ADDRESS_TYPE = "T"
-    private const val KEY_BT_DEVICE = "D"
-    private const val KEY_BT_ADVERTISING_SID = "AS"
-    private const val KEY_BT_BROADCAST_ID = "B"
+    // Data Elements for directing Broadcast Assistants
     private const val KEY_BT_BROADCAST_NAME = "BN"
-    private const val KEY_BT_PUBLIC_BROADCAST_DATA = "PM"
-    private const val KEY_BT_SYNC_INTERVAL = "SI"
-    private const val KEY_BT_BROADCAST_CODE = "C"
-    private const val KEY_BT_SUBGROUPS = "SG"
-    private const val KEY_BT_VENDOR_SPECIFIC = "V"
-    private const val KEY_BT_ANDROID_VERSION = "VN"
+    private const val KEY_BT_ADVERTISER_ADDRESS_TYPE = "AT"
+    private const val KEY_BT_ADVERTISER_ADDRESS = "AD"
+    private const val KEY_BT_BROADCAST_ID = "BI"
+    private const val KEY_BT_BROADCAST_CODE = "BC"
+    private const val KEY_BT_STREAM_METADATA = "MD"
+    private const val KEY_BT_STANDARD_QUALITY = "SQ"
+    private const val KEY_BT_HIGH_QUALITY = "HQ"
 
-    // Subgroup data
+    // Extended Bluetooth URI Data Elements
+    private const val KEY_BT_ADVERTISING_SID = "AS"
+    private const val KEY_BT_PA_INTERVAL = "PI"
+    private const val KEY_BT_NUM_SUBGROUPS = "NS"
+
+    // Subgroup data elements
     private const val KEY_BTSG_BIS_SYNC = "BS"
-    private const val KEY_BTSG_BIS_MASK = "BM"
-    private const val KEY_BTSG_AUDIO_CONTENT = "AC"
+    private const val KEY_BTSG_NUM_BISES = "NB"
+    private const val KEY_BTSG_METADATA = "SM"
 
-    // Vendor specific data
-    private const val KEY_BTVSD_COMPANY_ID = "VI"
-    private const val KEY_BTVSD_VENDOR_DATA = "VD"
+    // Vendor specific data, not being used
+    private const val KEY_BTVSD_VENDOR_DATA = "VS"
 
     private const val DELIMITER_KEY_VALUE = ":"
-    private const val DELIMITER_BT_LEVEL_1 = ";"
-    private const val DELIMITER_BT_LEVEL_2 = ","
+    private const val DELIMITER_ELEMENT = ";"
 
     private const val SUFFIX_QR_CODE = ";;"
-
-    private const val ANDROID_VER = "U"
-    private const val QR_CODE_VER = 0x010000
 
     // BT constants
     private const val BIS_SYNC_MAX_CHANNEL = 32
@@ -71,33 +67,55 @@ object BluetoothLeBroadcastMetadataExt {
     /**
      * Converts [BluetoothLeBroadcastMetadata] to QR code string.
      *
-     * QR code string will prefix with "BT:".
+     * QR code string will prefix with "BLUETOOTH:UUID:184F".
      */
     fun BluetoothLeBroadcastMetadata.toQrCodeString(): String {
         val entries = mutableListOf<Pair<String, String>>()
-        entries.add(Pair(KEY_BT_QR_VER, QR_CODE_VER.toString()))
-        entries.add(Pair(KEY_BT_ADDRESS_TYPE, this.sourceAddressType.toString()))
-        entries.add(Pair(KEY_BT_DEVICE, this.sourceDevice.address.replace(":", "-")))
-        entries.add(Pair(KEY_BT_ADVERTISING_SID, this.sourceAdvertisingSid.toString()))
-        entries.add(Pair(KEY_BT_BROADCAST_ID, this.broadcastId.toString()))
-        if (this.broadcastName != null) {
-            entries.add(Pair(KEY_BT_BROADCAST_NAME, Base64.encodeToString(
-                this.broadcastName?.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)))
-        }
-        if (this.publicBroadcastMetadata != null) {
-            entries.add(Pair(KEY_BT_PUBLIC_BROADCAST_DATA, Base64.encodeToString(
-                this.publicBroadcastMetadata?.rawMetadata, Base64.NO_WRAP)))
-        }
-        entries.add(Pair(KEY_BT_SYNC_INTERVAL, this.paSyncInterval.toString()))
+        // Generate data elements for directing Broadcast Assistants
+        require(this.broadcastName != null) { "Broadcast name is mandatory for QR code" }
+        entries.add(Pair(KEY_BT_BROADCAST_NAME, Base64.encodeToString(
+            this.broadcastName?.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)))
+        entries.add(Pair(KEY_BT_ADVERTISER_ADDRESS_TYPE, this.sourceAddressType.toString()))
+        entries.add(Pair(KEY_BT_ADVERTISER_ADDRESS, this.sourceDevice.address.replace(":", "")))
+        entries.add(Pair(KEY_BT_BROADCAST_ID, String.format("%X", this.broadcastId.toLong())))
         if (this.broadcastCode != null) {
             entries.add(Pair(KEY_BT_BROADCAST_CODE,
                 Base64.encodeToString(this.broadcastCode, Base64.NO_WRAP)))
         }
+        if (this.publicBroadcastMetadata != null &&
+                this.publicBroadcastMetadata?.rawMetadata?.size != 0) {
+            entries.add(Pair(KEY_BT_STREAM_METADATA, Base64.encodeToString(
+                this.publicBroadcastMetadata?.rawMetadata, Base64.NO_WRAP)))
+        }
+        if ((this.audioConfigQuality and
+                BluetoothLeBroadcastMetadata.AUDIO_CONFIG_QUALITY_STANDARD) != 0) {
+            entries.add(Pair(KEY_BT_STANDARD_QUALITY, "1"))
+        }
+        if ((this.audioConfigQuality and
+                BluetoothLeBroadcastMetadata.AUDIO_CONFIG_QUALITY_HIGH) != 0) {
+            entries.add(Pair(KEY_BT_HIGH_QUALITY, "1"))
+        }
+
+        // Generate extended Bluetooth URI data elements
+        entries.add(Pair(KEY_BT_ADVERTISING_SID,
+                String.format("%X", this.sourceAdvertisingSid.toLong())))
+        entries.add(Pair(KEY_BT_PA_INTERVAL, String.format("%X", this.paSyncInterval.toLong())))
+        entries.add(Pair(KEY_BT_NUM_SUBGROUPS, String.format("%X", this.subgroups.size.toLong())))
+
         this.subgroups.forEach {
-                subgroup -> entries.add(Pair(KEY_BT_SUBGROUPS, subgroup.toQrCodeString())) }
-        entries.add(Pair(KEY_BT_ANDROID_VERSION, ANDROID_VER))
+            val (bisSync, bisCount) = getBisSyncFromChannels(it.channels)
+            entries.add(Pair(KEY_BTSG_BIS_SYNC, String.format("%X", bisSync.toLong())))
+            if (bisCount > 0u) {
+                entries.add(Pair(KEY_BTSG_NUM_BISES, String.format("%X", bisCount.toLong())))
+            }
+            if (it.contentMetadata.rawMetadata.size != 0) {
+                entries.add(Pair(KEY_BTSG_METADATA,
+                    Base64.encodeToString(it.contentMetadata.rawMetadata, Base64.NO_WRAP)))
+            }
+        }
+
         val qrCodeString = SCHEME_BT_BROADCAST_METADATA +
-                entries.toQrCodeString(DELIMITER_BT_LEVEL_1) + SUFFIX_QR_CODE
+                entries.toQrCodeString(DELIMITER_ELEMENT) + SUFFIX_QR_CODE
         Log.d(TAG, "Generated QR string : $qrCodeString")
         return qrCodeString
     }
@@ -105,7 +123,7 @@ object BluetoothLeBroadcastMetadataExt {
     /**
      * Converts QR code string to [BluetoothLeBroadcastMetadata].
      *
-     * QR code string should prefix with "BT:BluetoothLeBroadcastMetadata:".
+     * QR code string should prefix with "BLUETOOTH:UUID:184F".
      */
     fun convertToBroadcastMetadata(qrCodeString: String): BluetoothLeBroadcastMetadata? {
         if (!qrCodeString.startsWith(SCHEME_BT_BROADCAST_METADATA)) {
@@ -126,15 +144,6 @@ object BluetoothLeBroadcastMetadataExt {
         }
     }
 
-    private fun BluetoothLeBroadcastSubgroup.toQrCodeString(): String {
-        val entries = mutableListOf<Pair<String, String>>()
-        entries.add(Pair(KEY_BTSG_BIS_SYNC, getBisSyncFromChannels(this.channels).toString()))
-        entries.add(Pair(KEY_BTSG_BIS_MASK, getBisMaskFromChannels(this.channels).toString()))
-        entries.add(Pair(KEY_BTSG_AUDIO_CONTENT,
-            Base64.encodeToString(this.contentMetadata.rawMetadata, Base64.NO_WRAP)))
-        return entries.toQrCodeString(DELIMITER_BT_LEVEL_2)
-    }
-
     private fun List<Pair<String, String>>.toQrCodeString(delimiter: String): String {
         val entryStrings = this.map{ it.first + DELIMITER_KEY_VALUE + it.second }
         return entryStrings.joinToString(separator = delimiter)
@@ -143,23 +152,29 @@ object BluetoothLeBroadcastMetadataExt {
     @TargetApi(Build.VERSION_CODES.TIRAMISU)
     private fun parseQrCodeToMetadata(input: String): BluetoothLeBroadcastMetadata {
         // Split into a list of list
-        val level1Fields = input.split(DELIMITER_BT_LEVEL_1)
+        val elementFields = input.split(DELIMITER_ELEMENT)
             .map{it.split(DELIMITER_KEY_VALUE, limit = 2)}
-        var qrCodeVersion = -1
+
         var sourceAddrType = BluetoothDevice.ADDRESS_TYPE_UNKNOWN
         var sourceAddrString: String? = null
         var sourceAdvertiserSid = -1
         var broadcastId = -1
         var broadcastName: String? = null
-        var publicBroadcastMetadata: BluetoothLeAudioContentMetadata? = null
+        var streamMetadata: BluetoothLeAudioContentMetadata? = null
         var paSyncInterval = -1
         var broadcastCode: ByteArray? = null
-        // List of VendorID -> Data Pairs
-        var vendorDataList = mutableListOf<Pair<Int, ByteArray?>>()
-        var androidVersion: String? = null
+        var audioConfigQualityStandard = -1
+        var audioConfigQualityHigh = -1
+        var numSubgroups = -1
+
+        // List of subgroup data
+        var subgroupBisSyncList = mutableListOf<UInt>()
+        var subgroupNumOfBisesList = mutableListOf<UInt>()
+        var subgroupMetadataList = mutableListOf<ByteArray?>()
+
         val builder = BluetoothLeBroadcastMetadata.Builder()
 
-        for (field: List<String> in level1Fields) {
+        for (field: List<String> in elementFields) {
             if (field.isEmpty()) {
                 continue
             }
@@ -167,190 +182,200 @@ object BluetoothLeBroadcastMetadataExt {
             // Ignore 3rd value and after
             val value = if (field.size > 1) field[1] else ""
             when (key) {
-                KEY_BT_QR_VER -> {
-                    require(qrCodeVersion == -1) { "Duplicate qrCodeVersion: $input" }
-                    qrCodeVersion = value.toInt()
+                // Parse data elements for directing Broadcast Assistants
+                KEY_BT_BROADCAST_NAME -> {
+                    require(broadcastName == null) { "Duplicate broadcastName: $input" }
+                    broadcastName = String(Base64.decode(value, Base64.NO_WRAP))
                 }
-                KEY_BT_ADDRESS_TYPE -> {
+                KEY_BT_ADVERTISER_ADDRESS_TYPE -> {
                     require(sourceAddrType == BluetoothDevice.ADDRESS_TYPE_UNKNOWN) {
                         "Duplicate sourceAddrType: $input"
                     }
                     sourceAddrType = value.toInt()
                 }
-                KEY_BT_DEVICE -> {
+                KEY_BT_ADVERTISER_ADDRESS -> {
                     require(sourceAddrString == null) { "Duplicate sourceAddr: $input" }
-                    sourceAddrString = value.replace("-", ":")
-                }
-                KEY_BT_ADVERTISING_SID -> {
-                    require(sourceAdvertiserSid == -1) { "Duplicate sourceAdvertiserSid: $input" }
-                    sourceAdvertiserSid = value.toInt()
+                    sourceAddrString = value.chunked(2).joinToString(":")
                 }
                 KEY_BT_BROADCAST_ID -> {
                     require(broadcastId == -1) { "Duplicate broadcastId: $input" }
-                    broadcastId = value.toInt()
-                }
-                KEY_BT_BROADCAST_NAME -> {
-                    require(broadcastName == null) { "Duplicate broadcastName: $input" }
-                    broadcastName = String(Base64.decode(value, Base64.NO_WRAP))
-                }
-                KEY_BT_PUBLIC_BROADCAST_DATA -> {
-                    require(publicBroadcastMetadata == null) {
-                        "Duplicate publicBroadcastMetadata $input"
-                    }
-                    publicBroadcastMetadata = BluetoothLeAudioContentMetadata
-                        .fromRawBytes(Base64.decode(value, Base64.NO_WRAP))
-                }
-                KEY_BT_SYNC_INTERVAL -> {
-                    require(paSyncInterval == -1) { "Duplicate paSyncInterval: $input" }
-                    paSyncInterval = value.toInt()
+                    broadcastId = value.toInt(16)
                 }
                 KEY_BT_BROADCAST_CODE -> {
                     require(broadcastCode == null) { "Duplicate broadcastCode: $input" }
-                    broadcastCode = Base64.decode(value, Base64.NO_WRAP)
+
+                    broadcastCode = Base64.decode(value.dropLastWhile { it.equals(0.toByte()) }
+                            .toByteArray(), Base64.NO_WRAP)
                 }
-                KEY_BT_ANDROID_VERSION -> {
-                    require(androidVersion == null) { "Duplicate androidVersion: $input" }
-                    androidVersion = value
-                    Log.i(TAG, "QR code Android version: $androidVersion")
+                KEY_BT_STREAM_METADATA -> {
+                    require(streamMetadata == null) {
+                        "Duplicate streamMetadata $input"
+                    }
+                    streamMetadata = BluetoothLeAudioContentMetadata
+                        .fromRawBytes(Base64.decode(value, Base64.NO_WRAP))
                 }
-                // Repeatable
-                KEY_BT_SUBGROUPS -> {
-                    builder.addSubgroup(parseSubgroupData(value))
+                KEY_BT_STANDARD_QUALITY -> {
+                    require(audioConfigQualityStandard == -1) {
+                        "Duplicate audioConfigQualityStandard: $input"
+                    }
+                    audioConfigQualityStandard = value.toInt()
                 }
-                // Repeatable
-                KEY_BT_VENDOR_SPECIFIC -> {
-                    vendorDataList.add(parseVendorData(value))
+                KEY_BT_HIGH_QUALITY -> {
+                    require(audioConfigQualityHigh == -1) {
+                        "Duplicate audioConfigQualityHigh: $input"
+                    }
+                    audioConfigQualityHigh = value.toInt()
+                }
+
+                // Parse extended Bluetooth URI data elements
+                KEY_BT_ADVERTISING_SID -> {
+                    require(sourceAdvertiserSid == -1) { "Duplicate sourceAdvertiserSid: $input" }
+                    sourceAdvertiserSid = value.toInt(16)
+                }
+                KEY_BT_PA_INTERVAL -> {
+                    require(paSyncInterval == -1) { "Duplicate paSyncInterval: $input" }
+                    paSyncInterval = value.toInt(16)
+                }
+                KEY_BT_NUM_SUBGROUPS -> {
+                    require(numSubgroups == -1) { "Duplicate numSubgroups: $input" }
+                    numSubgroups = value.toInt(16)
+                }
+
+                // Repeatable subgroup elements
+                KEY_BTSG_BIS_SYNC -> {
+                    subgroupBisSyncList.add(value.toUInt(16))
+                }
+                KEY_BTSG_NUM_BISES -> {
+                    subgroupNumOfBisesList.add(value.toUInt(16))
+                }
+                KEY_BTSG_METADATA -> {
+                    subgroupMetadataList.add(Base64.decode(value, Base64.NO_WRAP))
                 }
             }
         }
-        Log.d(TAG, "parseQrCodeToMetadata: sourceAddrType=$sourceAddrType, " +
+        Log.d(TAG, "parseQrCodeToMetadata: main data elements sourceAddrType=$sourceAddrType, " +
                 "sourceAddr=$sourceAddrString, sourceAdvertiserSid=$sourceAdvertiserSid, " +
                 "broadcastId=$broadcastId, broadcastName=$broadcastName, " +
-                "publicBroadcastMetadata=${publicBroadcastMetadata != null}, " +
+                "streamMetadata=${streamMetadata != null}, " +
                 "paSyncInterval=$paSyncInterval, " +
-                "broadcastCode=${broadcastCode?.toString(Charsets.UTF_8)}")
-        Log.d(TAG, "Not used in current code, but part of the specification: " +
-                "qrCodeVersion=$qrCodeVersion, androidVersion=$androidVersion, " +
-                "vendorDataListSize=${vendorDataList.size}")
+                "broadcastCode=${broadcastCode?.toString(Charsets.UTF_8)}, " +
+                "audioConfigQualityStandard=$audioConfigQualityStandard, " +
+                "audioConfigQualityHigh=$audioConfigQualityHigh")
+
         val adapter = BluetoothAdapter.getDefaultAdapter()
+        // Check parsed elements data
+        require(broadcastName != null) {
+            "broadcastName($broadcastName) must present in QR code string"
+        }
+        var addr = sourceAddrString
+        var addrType = sourceAddrType
+        if (sourceAddrString != null) {
+            require(sourceAddrType != BluetoothDevice.ADDRESS_TYPE_UNKNOWN) {
+                "sourceAddrType($sourceAddrType) must present if address present"
+            }
+        } else {
+            // Use placeholder device if not present
+            addr = "FF:FF:FF:FF:FF:FF"
+            addrType = BluetoothDevice.ADDRESS_TYPE_RANDOM
+        }
+        val device = adapter.getRemoteLeDevice(requireNotNull(addr), addrType)
+
         // add source device and set broadcast code
-        val device = adapter.getRemoteLeDevice(requireNotNull(sourceAddrString), sourceAddrType)
+        var audioConfigQuality = BluetoothLeBroadcastMetadata.AUDIO_CONFIG_QUALITY_NONE or
+                (if (audioConfigQualityStandard != -1) audioConfigQualityStandard else 0) or
+                (if (audioConfigQualityHigh != -1) audioConfigQualityHigh else 0)
+
+        // process subgroup data
+        // metadata should include at least 1 subgroup for metadata, add a placeholder group if not present
+        numSubgroups = if (numSubgroups > 0) numSubgroups else 1
+        for (i in 0 until numSubgroups) {
+            val bisSync = subgroupBisSyncList.getOrNull(i)
+            val bisNum = subgroupNumOfBisesList.getOrNull(i)
+            val metadata = subgroupMetadataList.getOrNull(i)
+
+            val channels = convertToChannels(bisSync, bisNum)
+            val audioCodecConfigMetadata = BluetoothLeAudioCodecConfigMetadata.Builder()
+                    .setAudioLocation(0).build()
+            val subgroup = BluetoothLeBroadcastSubgroup.Builder().apply {
+                setCodecId(SUBGROUP_LC3_CODEC_ID)
+                setCodecSpecificConfig(audioCodecConfigMetadata)
+                setContentMetadata(
+                        BluetoothLeAudioContentMetadata.fromRawBytes(metadata ?: ByteArray(0)))
+                channels.forEach(::addChannel)
+            }.build()
+
+            Log.d(TAG, "parseQrCodeToMetadata: subgroup $i elements bisSync=$bisSync, " +
+                    "bisNum=$bisNum, metadata=${metadata != null}")
+
+            builder.addSubgroup(subgroup)
+        }
+
         builder.apply {
-            setSourceDevice(device, sourceAddrType)
+            setSourceDevice(device, addrType)
             setSourceAdvertisingSid(sourceAdvertiserSid)
             setBroadcastId(broadcastId)
             setBroadcastName(broadcastName)
-            setPublicBroadcast(publicBroadcastMetadata != null)
-            setPublicBroadcastMetadata(publicBroadcastMetadata)
+            // QR code should set PBP(public broadcast profile) for auracast
+            setPublicBroadcast(true)
+            setPublicBroadcastMetadata(streamMetadata)
             setPaSyncInterval(paSyncInterval)
             setEncrypted(broadcastCode != null)
             setBroadcastCode(broadcastCode)
             // Presentation delay is unknown and not useful when adding source
             // Broadcast sink needs to sync to the Broadcast source to get presentation delay
             setPresentationDelayMicros(0)
+            setAudioConfigQuality(audioConfigQuality)
         }
         return builder.build()
     }
 
-    private fun parseSubgroupData(input: String): BluetoothLeBroadcastSubgroup {
-        Log.d(TAG, "parseSubgroupData: $input")
-        val fields = input.split(DELIMITER_BT_LEVEL_2)
-        var bisSync: UInt? = null
-        var bisMask: UInt? = null
-        var metadata: ByteArray? = null
-
-        fields.forEach { field ->
-            val(key, value) = field.split(DELIMITER_KEY_VALUE)
-            when (key) {
-                KEY_BTSG_BIS_SYNC -> {
-                    require(bisSync == null) { "Duplicate bisSync: $input" }
-                    bisSync = value.toUInt()
-                }
-                KEY_BTSG_BIS_MASK -> {
-                    require(bisMask == null) { "Duplicate bisMask: $input" }
-                    bisMask = value.toUInt()
-                }
-                KEY_BTSG_AUDIO_CONTENT -> {
-                    require(metadata == null) { "Duplicate metadata: $input" }
-                    metadata = Base64.decode(value, Base64.NO_WRAP)
-                }
-            }
-        }
-        val channels = convertToChannels(requireNotNull(bisSync), requireNotNull(bisMask))
-        val audioCodecConfigMetadata = BluetoothLeAudioCodecConfigMetadata.Builder()
-                .setAudioLocation(0).build()
-        return BluetoothLeBroadcastSubgroup.Builder().apply {
-            setCodecId(SUBGROUP_LC3_CODEC_ID)
-            setCodecSpecificConfig(audioCodecConfigMetadata)
-            setContentMetadata(
-                    BluetoothLeAudioContentMetadata.fromRawBytes(metadata ?: ByteArray(0)))
-            channels.forEach(::addChannel)
-        }.build()
-    }
-
-    private fun parseVendorData(input: String): Pair<Int, ByteArray?> {
-        var companyId = -1
-        var data: ByteArray? = null
-        val fields = input.split(DELIMITER_BT_LEVEL_2)
-        fields.forEach { field ->
-            val(key, value) = field.split(DELIMITER_KEY_VALUE)
-            when (key) {
-                KEY_BTVSD_COMPANY_ID -> {
-                    require(companyId == -1) { "Duplicate companyId: $input" }
-                    companyId = value.toInt()
-                }
-                KEY_BTVSD_VENDOR_DATA -> {
-                    require(data == null) { "Duplicate data: $input" }
-                    data = Base64.decode(value, Base64.NO_WRAP)
-                }
-            }
-        }
-        return Pair(companyId, data)
-    }
-
-    private fun getBisSyncFromChannels(channels: List<BluetoothLeBroadcastChannel>): UInt {
+    private fun getBisSyncFromChannels(
+        channels: List<BluetoothLeBroadcastChannel>
+    ): Pair<UInt, UInt> {
         var bisSync = 0u
-        // channel index starts from 1
-        channels.forEach { channel ->
-            if (channel.isSelected && channel.channelIndex > 0) {
-                bisSync = bisSync or (1u shl (channel.channelIndex - 1))
-            }
-        }
-        // No channel is selected means no preference on Android platform
-        return if (bisSync == 0u) BIS_SYNC_NO_PREFERENCE else bisSync
-    }
-
-    private fun getBisMaskFromChannels(channels: List<BluetoothLeBroadcastChannel>): UInt {
-        var bisMask = 0u
+        var bisCount = 0u
         // channel index starts from 1
         channels.forEach { channel ->
             if (channel.channelIndex > 0) {
-                bisMask = bisMask or (1u shl (channel.channelIndex - 1))
+                bisCount++
+                if (channel.isSelected) {
+                    bisSync = bisSync or (1u shl (channel.channelIndex - 1))
+                }
             }
         }
-        return bisMask
+        // No channel is selected means no preference on Android platform
+        return if (bisSync == 0u) Pair(BIS_SYNC_NO_PREFERENCE, bisCount)
+                else Pair(bisSync, bisCount)
     }
 
-    private fun convertToChannels(bisSync: UInt, bisMask: UInt):
-            List<BluetoothLeBroadcastChannel> {
-        Log.d(TAG, "convertToChannels: bisSync=$bisSync, bisMask=$bisMask")
-        var selectionMask = bisSync
-        if (bisSync != BIS_SYNC_NO_PREFERENCE) {
-            require(bisMask == (bisMask or bisSync)) {
-                "bisSync($bisSync) must select a subset of bisMask($bisMask) if it has preferences"
-            }
-        } else {
-            // No channel preference means no channel is selected
-            selectionMask = 0u
-        }
+    private fun convertToChannels(
+        bisSync: UInt?,
+        bisNum: UInt?
+    ): List<BluetoothLeBroadcastChannel> {
+        Log.d(TAG, "convertToChannels: bisSync=$bisSync, bisNum=$bisNum")
+        // if no BIS_SYNC or BIS_NUM available or BIS_SYNC is no preference
+        // return empty channel map with one placeholder channel
+        var selectedChannels = if (bisSync != null && bisNum != null) bisSync else 0u
         val channels = mutableListOf<BluetoothLeBroadcastChannel>()
         val audioCodecConfigMetadata = BluetoothLeAudioCodecConfigMetadata.Builder()
                 .setAudioLocation(0).build()
+
+        if (bisSync == BIS_SYNC_NO_PREFERENCE || selectedChannels == 0u) {
+            // No channel preference means no channel is selected
+            // Generate one placeholder channel for metadata
+            val channel = BluetoothLeBroadcastChannel.Builder().apply {
+                setSelected(false)
+                setChannelIndex(1)
+                setCodecMetadata(audioCodecConfigMetadata)
+            }
+            return listOf(channel.build())
+        }
+
         for (i in 0 until BIS_SYNC_MAX_CHANNEL) {
             val channelMask = 1u shl i
-            if ((bisMask and channelMask) != 0u) {
+            if ((selectedChannels and channelMask) != 0u) {
                 val channel = BluetoothLeBroadcastChannel.Builder().apply {
-                    setSelected((selectionMask and channelMask) != 0u)
+                    setSelected(true)
                     setChannelIndex(i + 1)
                     setCodecMetadata(audioCodecConfigMetadata)
                 }

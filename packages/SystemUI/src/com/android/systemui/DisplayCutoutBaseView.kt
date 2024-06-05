@@ -209,11 +209,11 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
         return result
     }
 
-    open fun enableShowProtection(show: Boolean) {
-        if (showProtection == show) {
+    open fun enableShowProtection(isCameraActive: Boolean) {
+        if (showProtection == isCameraActive) {
             return
         }
-        showProtection = show
+        showProtection = isCameraActive
         updateProtectionBoundingPath()
         // Delay the relayout until the end of the animation when hiding the cutout,
         // otherwise we'd clip it.

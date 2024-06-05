@@ -9,6 +9,7 @@ package {
 
 android_test {
     name: "mediaroutertest",
+    team: "trendy_team_android_media_solutions",
 
     srcs: ["**/*.java"],
 
@@ -24,7 +25,7 @@ android_test {
         "compatibility-device-util-axt",
         "mockito-target-minus-junit4",
         "testng",
-        "truth-prebuilt",
+        "truth",
     ],
     test_suites: ["general-tests"],
     platform_apis: true,

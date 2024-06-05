@@ -19,8 +19,8 @@ package com.android.systemui.mediaprojection.appselector.view
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Rect
-import android.view.WindowInsets.Type
-import android.view.WindowManager
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorScope
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider.TaskPreviewSizeListener
 import com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen
@@ -34,17 +34,21 @@ class TaskPreviewSizeProvider
 @Inject
 constructor(
     private val context: Context,
-    private val windowManager: WindowManager,
-    configurationController: ConfigurationController
-) : CallbackController<TaskPreviewSizeListener>, ConfigurationListener {
+    private val windowMetricsProvider: WindowMetricsProvider,
+    private val configurationController: ConfigurationController,
+) : CallbackController<TaskPreviewSizeListener>, ConfigurationListener, DefaultLifecycleObserver {
 
     /** Returns the size of the task preview on the screen in pixels */
     val size: Rect = calculateSize()
 
     private val listeners = arrayListOf<TaskPreviewSizeListener>()
 
-    init {
+    override fun onCreate(owner: LifecycleOwner) {
         configurationController.addCallback(this)
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        configurationController.removeCallback(this)
     }
 
     override fun onConfigChanged(newConfig: Configuration) {
@@ -56,17 +60,14 @@ constructor(
     }
 
     private fun calculateSize(): Rect {
-        val windowMetrics = windowManager.maximumWindowMetrics
-        val maximumWindowHeight = windowMetrics.bounds.height()
-        val width = windowMetrics.bounds.width()
+        val maxWindowBounds = windowMetricsProvider.maximumWindowBounds
+        val maximumWindowHeight = maxWindowBounds.height()
+        val width = maxWindowBounds.width()
         var height = maximumWindowHeight
 
         val isLargeScreen = isLargeScreen(context)
         if (isLargeScreen) {
-            val taskbarSize =
-                windowManager.currentWindowMetrics.windowInsets
-                    .getInsets(Type.tappableElement())
-                    .bottom
+            val taskbarSize = windowMetricsProvider.currentWindowInsets.bottom
             height -= taskbarSize
         }
 

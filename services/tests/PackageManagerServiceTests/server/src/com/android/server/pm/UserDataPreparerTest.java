@@ -21,6 +21,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,7 +50,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 
-// atest PackageManagerServiceTest:com.android.server.pm.UserDataPreparerTest
+// atest PackageManagerServiceServerTests:com.android.server.pm.UserDataPreparerTest
 @RunWith(AndroidJUnit4.class)
 @Presubmit
 @SmallTest
@@ -56,6 +58,7 @@ public class UserDataPreparerTest {
 
     private static final int TEST_USER_SERIAL = 1000;
     private static final int TEST_USER_ID = 10;
+    private static final UserInfo TEST_USER = new UserInfo();
 
     private TestUserDataPreparer mUserDataPreparer;
 
@@ -68,13 +71,15 @@ public class UserDataPreparerTest {
     @Mock
     private Installer mInstaller;
 
-    private Object mInstallLock;
+    private PackageManagerTracedLock mInstallLock;
 
     @Before
     public void setup() {
+        TEST_USER.id = TEST_USER_ID;
+        TEST_USER.serialNumber = TEST_USER_SERIAL;
         Context ctx = InstrumentationRegistry.getContext();
         FileUtils.deleteContents(ctx.getCacheDir());
-        mInstallLock = new Object();
+        mInstallLock = new PackageManagerTracedLock();
         MockitoAnnotations.initMocks(this);
         mUserDataPreparer = new TestUserDataPreparer(mInstaller, mInstallLock, mContextMock,
                 ctx.getCacheDir());
@@ -92,10 +97,9 @@ public class UserDataPreparerTest {
         userDeDir.mkdirs();
         File systemDeDir = mUserDataPreparer.getDataSystemDeDirectory(TEST_USER_ID);
         systemDeDir.mkdirs();
-        mUserDataPreparer
-                .prepareUserData(TEST_USER_ID, TEST_USER_SERIAL, StorageManager.FLAG_STORAGE_DE);
+        mUserDataPreparer.prepareUserData(TEST_USER, StorageManager.FLAG_STORAGE_DE);
         verify(mStorageManagerMock).prepareUserStorage(isNull(String.class), eq(TEST_USER_ID),
-                eq(TEST_USER_SERIAL), eq(StorageManager.FLAG_STORAGE_DE));
+                eq(StorageManager.FLAG_STORAGE_DE));
         verify(mInstaller).createUserData(isNull(String.class), eq(TEST_USER_ID),
                 eq(TEST_USER_SERIAL), eq(StorageManager.FLAG_STORAGE_DE));
         int serialNumber = UserDataPreparer.getSerialNumber(userDeDir);
@@ -110,16 +114,37 @@ public class UserDataPreparerTest {
         userCeDir.mkdirs();
         File systemCeDir = mUserDataPreparer.getDataSystemCeDirectory(TEST_USER_ID);
         systemCeDir.mkdirs();
-        mUserDataPreparer
-                .prepareUserData(TEST_USER_ID, TEST_USER_SERIAL, StorageManager.FLAG_STORAGE_CE);
+        mUserDataPreparer.prepareUserData(TEST_USER, StorageManager.FLAG_STORAGE_CE);
         verify(mStorageManagerMock).prepareUserStorage(isNull(String.class), eq(TEST_USER_ID),
-                eq(TEST_USER_SERIAL), eq(StorageManager.FLAG_STORAGE_CE));
+                eq(StorageManager.FLAG_STORAGE_CE));
         verify(mInstaller).createUserData(isNull(String.class), eq(TEST_USER_ID),
                 eq(TEST_USER_SERIAL), eq(StorageManager.FLAG_STORAGE_CE));
         int serialNumber = UserDataPreparer.getSerialNumber(userCeDir);
         assertEquals(TEST_USER_SERIAL, serialNumber);
         serialNumber = UserDataPreparer.getSerialNumber(systemCeDir);
         assertEquals(TEST_USER_SERIAL, serialNumber);
+    }
+
+    @Test
+    public void testPrepareUserData_forNewUser_destroysOnFailure() throws Exception {
+        TEST_USER.lastLoggedInTime = 0;
+        doThrow(new IllegalStateException("expected exception for test")).when(mStorageManagerMock)
+                .prepareUserStorage(isNull(String.class), eq(TEST_USER_ID),
+                        eq(StorageManager.FLAG_STORAGE_CE));
+        mUserDataPreparer.prepareUserData(TEST_USER, StorageManager.FLAG_STORAGE_CE);
+        verify(mStorageManagerMock).destroyUserStorage(isNull(String.class), eq(TEST_USER_ID),
+                eq(StorageManager.FLAG_STORAGE_CE));
+    }
+
+    @Test
+    public void testPrepareUserData_forExistingUser_doesNotDestroyOnFailure() throws Exception {
+        TEST_USER.lastLoggedInTime = System.currentTimeMillis();
+        doThrow(new IllegalStateException("expected exception for test")).when(mStorageManagerMock)
+                .prepareUserStorage(isNull(String.class), eq(TEST_USER_ID),
+                        eq(StorageManager.FLAG_STORAGE_CE));
+        mUserDataPreparer.prepareUserData(TEST_USER, StorageManager.FLAG_STORAGE_CE);
+        verify(mStorageManagerMock, never()).destroyUserStorage(isNull(String.class),
+                eq(TEST_USER_ID), eq(StorageManager.FLAG_STORAGE_CE));
     }
 
     @Test
@@ -213,8 +238,8 @@ public class UserDataPreparerTest {
     private static class TestUserDataPreparer extends UserDataPreparer {
         File testDir;
 
-        TestUserDataPreparer(Installer installer, Object installLock, Context context,
-                File testDir) {
+        TestUserDataPreparer(Installer installer, PackageManagerTracedLock installLock,
+                Context context, File testDir) {
             super(installer, installLock, context);
             this.testDir = testDir;
         }

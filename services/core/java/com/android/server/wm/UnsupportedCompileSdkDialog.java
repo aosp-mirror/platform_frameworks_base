@@ -32,8 +32,8 @@ import com.android.server.utils.AppInstallerUtil;
 class UnsupportedCompileSdkDialog extends AppWarnings.BaseDialog {
 
     UnsupportedCompileSdkDialog(final AppWarnings manager, Context context,
-            ApplicationInfo appInfo) {
-        super(manager, appInfo.packageName);
+            ApplicationInfo appInfo, int userId) {
+        super(manager, context, appInfo.packageName, userId);
 
         final PackageManager pm = context.getPackageManager();
         final CharSequence label = appInfo.loadSafeLabel(pm,
@@ -68,6 +68,6 @@ class UnsupportedCompileSdkDialog extends AppWarnings.BaseDialog {
         final CheckBox alwaysShow = mDialog.findViewById(R.id.ask_checkbox);
         alwaysShow.setChecked(true);
         alwaysShow.setOnCheckedChangeListener((buttonView, isChecked) -> manager.setPackageFlag(
-                mPackageName, AppWarnings.FLAG_HIDE_COMPILE_SDK, !isChecked));
+                mUserId, mPackageName, AppWarnings.FLAG_HIDE_COMPILE_SDK, !isChecked));
     }
 }

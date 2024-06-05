@@ -45,10 +45,12 @@ public class BubbleInfo implements Parcelable {
     private Icon mIcon;
     @Nullable
     private String mTitle;
+    @Nullable
+    private String mAppName;
     private boolean mIsImportantConversation;
 
     public BubbleInfo(String key, int flags, @Nullable String shortcutId, @Nullable Icon icon,
-            int userId, String packageName, @Nullable String title,
+            int userId, String packageName, @Nullable String title, @Nullable String appName,
             boolean isImportantConversation) {
         mKey = key;
         mFlags = flags;
@@ -57,6 +59,7 @@ public class BubbleInfo implements Parcelable {
         mUserId = userId;
         mPackageName = packageName;
         mTitle = title;
+        mAppName = appName;
         mIsImportantConversation = isImportantConversation;
     }
 
@@ -68,6 +71,7 @@ public class BubbleInfo implements Parcelable {
         mUserId = source.readInt();
         mPackageName = source.readString();
         mTitle = source.readString();
+        mAppName = source.readString();
         mIsImportantConversation = source.readBoolean();
     }
 
@@ -102,6 +106,11 @@ public class BubbleInfo implements Parcelable {
         return mTitle;
     }
 
+    @Nullable
+    public String getAppName() {
+        return mAppName;
+    }
+
     public boolean isImportantConversation() {
         return mIsImportantConversation;
     }
@@ -127,6 +136,11 @@ public class BubbleInfo implements Parcelable {
      */
     public boolean isNotificationSuppressed() {
         return (mFlags & Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION) != 0;
+    }
+
+    /** Sets the flags for this bubble. */
+    public void setFlags(int flags) {
+        mFlags = flags;
     }
 
     @Override
@@ -156,6 +170,7 @@ public class BubbleInfo implements Parcelable {
         parcel.writeInt(mUserId);
         parcel.writeString(mPackageName);
         parcel.writeString(mTitle);
+        parcel.writeString(mAppName);
         parcel.writeBoolean(mIsImportantConversation);
     }
 

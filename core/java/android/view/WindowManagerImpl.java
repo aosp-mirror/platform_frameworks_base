@@ -20,6 +20,8 @@ import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.window.WindowProviderService.isWindowProviderService;
 
+import static com.android.window.flags.Flags.screenRecordingCallbacks;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -32,10 +34,14 @@ import android.graphics.Bitmap;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.util.Log;
 import android.window.ITaskFpsCallback;
+import android.window.InputTransferToken;
 import android.window.TaskFpsCallback;
+import android.window.TrustedPresentationThresholds;
 import android.window.WindowContext;
 import android.window.WindowMetricsController;
 import android.window.WindowProvider;
@@ -80,6 +86,8 @@ import java.util.function.IntConsumer;
  * @hide
  */
 public final class WindowManagerImpl implements WindowManager {
+    private static final String TAG = "WindowManager";
+
     @UnsupportedAppUsage
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
     @UiContext
@@ -215,14 +223,36 @@ public final class WindowManagerImpl implements WindowManager {
             @Override
             public void send(int resultCode, Bundle resultData) throws RemoteException {
                 List<KeyboardShortcutGroup> result =
-                        resultData.getParcelableArrayList(PARCEL_KEY_SHORTCUTS_ARRAY, android.view.KeyboardShortcutGroup.class);
+                        resultData.getParcelableArrayList(PARCEL_KEY_SHORTCUTS_ARRAY,
+                                android.view.KeyboardShortcutGroup.class);
                 receiver.onKeyboardShortcutsReceived(result);
             }
         };
         try {
             WindowManagerGlobal.getWindowManagerService()
-                .requestAppKeyboardShortcuts(resultReceiver, deviceId);
+                    .requestAppKeyboardShortcuts(resultReceiver, deviceId);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public void requestImeKeyboardShortcuts(
+            final KeyboardShortcutsReceiver receiver, int deviceId) {
+        IResultReceiver resultReceiver = new IResultReceiver.Stub() {
+            @Override
+            public void send(int resultCode, Bundle resultData) throws RemoteException {
+                List<KeyboardShortcutGroup> result =
+                        resultData.getParcelableArrayList(PARCEL_KEY_SHORTCUTS_ARRAY,
+                                android.view.KeyboardShortcutGroup.class);
+                receiver.onKeyboardShortcutsReceived(result);
+            }
+        };
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                    .requestImeKeyboardShortcuts(resultReceiver, deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -431,7 +461,9 @@ public final class WindowManagerImpl implements WindowManager {
         return null;
     }
 
-    IBinder getDefaultToken() {
+    @Override
+    @NonNull
+    public IBinder getDefaultToken() {
         return mDefaultToken;
     }
 
@@ -443,6 +475,131 @@ public final class WindowManagerImpl implements WindowManager {
                     .notifyScreenshotListeners(displayId));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public boolean replaceContentOnDisplayWithMirror(int displayId, @NonNull Window window) {
+        View decorView = window.peekDecorView();
+        if (decorView == null) {
+            Log.e(TAG, "replaceContentOnDisplayWithMirror: Window's decorView was null.");
+            return false;
+        }
+
+        ViewRootImpl viewRoot = decorView.getViewRootImpl();
+        if (viewRoot == null) {
+            Log.e(TAG, "replaceContentOnDisplayWithMirror: Window's viewRootImpl was null.");
+            return false;
+        }
+
+        SurfaceControl sc = viewRoot.getSurfaceControl();
+        if (!sc.isValid()) {
+            Log.e(TAG, "replaceContentOnDisplayWithMirror: Window's SC is invalid.");
+            return false;
+        }
+        return replaceContentOnDisplayWithSc(displayId, SurfaceControl.mirrorSurface(sc));
+    }
+
+    @Override
+    public boolean replaceContentOnDisplayWithSc(int displayId, @NonNull SurfaceControl sc) {
+        if (!sc.isValid()) {
+            Log.e(TAG, "replaceContentOnDisplayWithSc: Invalid SC.");
+            return false;
+        }
+
+        try {
+            return WindowManagerGlobal.getWindowManagerService()
+                    .replaceContentOnDisplay(displayId, sc);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        return false;
+    }
+
+    @Override
+    public void registerTrustedPresentationListener(@NonNull IBinder window,
+            @NonNull TrustedPresentationThresholds thresholds, @NonNull Executor executor,
+            @NonNull Consumer<Boolean> listener) {
+        Objects.requireNonNull(window, "window must not be null");
+        Objects.requireNonNull(thresholds, "thresholds must not be null");
+        Objects.requireNonNull(executor, "executor must not be null");
+        Objects.requireNonNull(listener, "listener must not be null");
+        mGlobal.registerTrustedPresentationListener(window, thresholds, executor, listener);
+    }
+
+    @Override
+    public void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
+        mGlobal.unregisterTrustedPresentationListener(listener);
+    }
+
+    @NonNull
+    @Override
+    public InputTransferToken registerBatchedSurfaceControlInputReceiver(
+            @NonNull InputTransferToken hostInputTransferToken,
+            @NonNull SurfaceControl surfaceControl, @NonNull Choreographer choreographer,
+            @NonNull SurfaceControlInputReceiver receiver) {
+        Objects.requireNonNull(hostInputTransferToken);
+        Objects.requireNonNull(surfaceControl);
+        Objects.requireNonNull(choreographer);
+        Objects.requireNonNull(receiver);
+        return mGlobal.registerBatchedSurfaceControlInputReceiver(hostInputTransferToken,
+                surfaceControl, choreographer, receiver);
+    }
+
+    @NonNull
+    @Override
+    public InputTransferToken registerUnbatchedSurfaceControlInputReceiver(
+            @NonNull InputTransferToken hostInputTransferToken,
+            @NonNull SurfaceControl surfaceControl, @NonNull Looper looper,
+            @NonNull SurfaceControlInputReceiver receiver) {
+        Objects.requireNonNull(hostInputTransferToken);
+        Objects.requireNonNull(surfaceControl);
+        Objects.requireNonNull(looper);
+        Objects.requireNonNull(receiver);
+        return mGlobal.registerUnbatchedSurfaceControlInputReceiver(
+                hostInputTransferToken, surfaceControl, looper, receiver);
+    }
+
+    @Override
+    public void unregisterSurfaceControlInputReceiver(@NonNull SurfaceControl surfaceControl) {
+        Objects.requireNonNull(surfaceControl);
+        mGlobal.unregisterSurfaceControlInputReceiver(surfaceControl);
+    }
+
+    @Override
+    @Nullable
+    public IBinder getSurfaceControlInputClientToken(@NonNull SurfaceControl surfaceControl) {
+        Objects.requireNonNull(surfaceControl);
+        return mGlobal.getSurfaceControlInputClientToken(surfaceControl);
+    }
+
+    @Override
+    public boolean transferTouchGesture(@NonNull InputTransferToken transferFromToken,
+            @NonNull InputTransferToken transferToToken) {
+        Objects.requireNonNull(transferFromToken);
+        Objects.requireNonNull(transferToToken);
+        return mGlobal.transferTouchGesture(transferFromToken, transferToToken);
+    }
+
+    @Override
+    public @ScreenRecordingState int addScreenRecordingCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<@ScreenRecordingState Integer> callback) {
+        if (screenRecordingCallbacks()) {
+            Objects.requireNonNull(executor, "executor must not be null");
+            Objects.requireNonNull(callback, "callback must not be null");
+            return ScreenRecordingCallbacks.getInstance().addCallback(executor, callback);
+        }
+        return SCREEN_RECORDING_STATE_NOT_VISIBLE;
+    }
+
+    @Override
+    public void removeScreenRecordingCallback(
+            @NonNull Consumer<@ScreenRecordingState Integer> callback) {
+        if (screenRecordingCallbacks()) {
+            Objects.requireNonNull(callback, "callback must not be null");
+            ScreenRecordingCallbacks.getInstance().removeCallback(callback);
         }
     }
 }

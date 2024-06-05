@@ -24,6 +24,7 @@ import android.widget.ImageView
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.statusbar.BatteryStatusChip
+import com.android.systemui.statusbar.ConnectedDisplayChip
 
 typealias ViewCreator = (context: Context) -> BackgroundAnimatableView
 
@@ -35,6 +36,11 @@ interface StatusEvent {
     val showAnimation: Boolean
     val viewCreator: ViewCreator
     var contentDescription: String?
+    /**
+     * When true, an accessibility event with [contentDescription] is announced when the view
+     * becomes visible.
+     */
+    val shouldAnnounceAccessibilityEvent: Boolean
 
     // Update this event with values from another event.
     fun updateFromEvent(other: StatusEvent?) {
@@ -75,6 +81,7 @@ class BatteryEvent(@IntRange(from = 0, to = 100) val batteryLevel: Int) : Status
     override var forceVisible = false
     override val showAnimation = true
     override var contentDescription: String? = ""
+    override val shouldAnnounceAccessibilityEvent: Boolean = false
 
     override val viewCreator: ViewCreator = { context ->
         BatteryStatusChip(context).apply {
@@ -87,11 +94,30 @@ class BatteryEvent(@IntRange(from = 0, to = 100) val batteryLevel: Int) : Status
     }
 }
 
+/** Event that triggers a connected display chip in the status bar. */
+class ConnectedDisplayEvent : StatusEvent {
+    /** Priority is set higher than [BatteryEvent]. */
+    override val priority = 60
+    override var forceVisible = false
+    override val showAnimation = true
+    override var contentDescription: String? = ""
+    override val shouldAnnounceAccessibilityEvent: Boolean = true
+
+    override val viewCreator: ViewCreator = { context ->
+        ConnectedDisplayChip(context)
+    }
+
+    override fun toString(): String {
+        return javaClass.simpleName
+    }
+}
+
 /** open only for testing purposes. (See [FakeStatusEvent.kt]) */
 open class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEvent {
     override var contentDescription: String? = null
     override val priority = 100
     override var forceVisible = true
+    override val shouldAnnounceAccessibilityEvent: Boolean = false
     var privacyItems: List<PrivacyItem> = listOf()
     private var privacyChip: OngoingPrivacyChip? = null
 

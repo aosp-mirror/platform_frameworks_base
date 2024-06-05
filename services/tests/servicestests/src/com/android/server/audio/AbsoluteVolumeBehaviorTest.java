@@ -28,6 +28,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.media.AudioDeviceAttributes;
@@ -37,6 +38,7 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.VolumeInfo;
+import android.os.PermissionEnforcer;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -69,6 +71,7 @@ public class AbsoluteVolumeBehaviorTest {
     private AudioSystemAdapter mSpyAudioSystem;
     private SystemServerAdapter mSystemServer;
     private SettingsAdapter mSettingsAdapter;
+    private AudioVolumeGroupHelperBase mAudioVolumeGroupHelper;
     private TestLooper mTestLooper;
 
     private AudioService mAudioService;
@@ -93,9 +96,12 @@ public class AbsoluteVolumeBehaviorTest {
         mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
         mSystemServer = new NoOpSystemServerAdapter();
         mSettingsAdapter = new NoOpSettingsAdapter();
+        mAudioVolumeGroupHelper = new AudioVolumeGroupHelperBase();
 
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSystemServer,
-                mSettingsAdapter, mMockAudioPolicy, mTestLooper.getLooper()) {
+                mSettingsAdapter, mAudioVolumeGroupHelper, mMockAudioPolicy,
+                mTestLooper.getLooper(), mock(AppOpsManager.class), mock(PermissionEnforcer.class),
+                mock(AudioServerPermissionProvider.class)) {
             @Override
             public int getDeviceForStream(int stream) {
                 return AudioSystem.DEVICE_OUT_SPEAKER;

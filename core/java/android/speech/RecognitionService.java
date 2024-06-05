@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.app.AppOpsManager;
 import android.app.Service;
 import android.content.AttributionSource;
@@ -38,6 +39,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.ref.WeakReference;
@@ -232,39 +234,68 @@ public abstract class RecognitionService extends Service {
                     intent,
                     attributionSource,
                     new ModelDownloadListener() {
+
+                        private final Object mLock = new Object();
+
+                        @GuardedBy("mLock")
+                        private boolean mIsTerminated = false;
+
                         @Override
                         public void onProgress(int completedPercent) {
-                            try {
-                                listener.onProgress(completedPercent);
-                            } catch (RemoteException e) {
-                                throw e.rethrowFromSystemServer();
+                            synchronized (mLock) {
+                                if (mIsTerminated) {
+                                    return;
+                                }
+                                try {
+                                    listener.onProgress(completedPercent);
+                                } catch (RemoteException e) {
+                                    throw e.rethrowFromSystemServer();
+                                }
                             }
                         }
 
                         @Override
                         public void onSuccess() {
-                            try {
-                                listener.onSuccess();
-                            } catch (RemoteException e) {
-                                throw e.rethrowFromSystemServer();
+                            synchronized (mLock) {
+                                if (mIsTerminated) {
+                                    return;
+                                }
+                                mIsTerminated = true;
+                                try {
+                                    listener.onSuccess();
+                                } catch (RemoteException e) {
+                                    throw e.rethrowFromSystemServer();
+                                }
                             }
                         }
 
                         @Override
                         public void onScheduled() {
-                            try {
-                                listener.onScheduled();
-                            } catch (RemoteException e) {
-                                throw e.rethrowFromSystemServer();
+                            synchronized (mLock) {
+                                if (mIsTerminated) {
+                                    return;
+                                }
+                                mIsTerminated = true;
+                                try {
+                                    listener.onScheduled();
+                                } catch (RemoteException e) {
+                                    throw e.rethrowFromSystemServer();
+                                }
                             }
                         }
 
                         @Override
                         public void onError(int error) {
-                            try {
-                                listener.onError(error);
-                            } catch (RemoteException e) {
-                                throw e.rethrowFromSystemServer();
+                            synchronized (mLock) {
+                                if (mIsTerminated) {
+                                    return;
+                                }
+                                mIsTerminated = true;
+                                try {
+                                    listener.onError(error);
+                                } catch (RemoteException e) {
+                                    throw e.rethrowFromSystemServer();
+                                }
                             }
                         }
                     });
@@ -484,8 +515,14 @@ public abstract class RecognitionService extends Service {
     @Override
     public final IBinder onBind(final Intent intent) {
         if (DBG) Log.d(TAG, "#onBind, intent=" + intent);
+        onBindInternal();
         return mBinder;
     }
+
+    /** @hide */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
+    public void onBindInternal() { }
 
     @Override
     public void onDestroy() {

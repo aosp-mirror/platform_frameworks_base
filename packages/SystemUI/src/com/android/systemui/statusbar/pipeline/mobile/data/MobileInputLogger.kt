@@ -16,14 +16,16 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data
 
+import android.content.Intent
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
 import android.telephony.TelephonyDisplayInfo
+import android.telephony.TelephonyManager
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.pipeline.dagger.MobileInputLog
 import javax.inject.Inject
 
@@ -48,6 +50,27 @@ constructor(
                 "onServiceStateChanged: subId=$int1 emergencyOnly=$bool1 roaming=$bool2" +
                     " operator=$str1"
             }
+        )
+    }
+
+    fun logTopLevelServiceStateBroadcastEmergencyOnly(subId: Int, serviceState: ServiceState) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            {
+                int1 = subId
+                bool1 = serviceState.isEmergencyOnly
+            },
+            { "ACTION_SERVICE_STATE for subId=$int1. ServiceState.isEmergencyOnly=$bool1" }
+        )
+    }
+
+    fun logTopLevelServiceStateBroadcastMissingExtras(subId: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { int1 = subId },
+            { "ACTION_SERVICE_STATE for subId=$int1. Intent is missing extras. Ignoring" }
         )
     }
 
@@ -100,6 +123,15 @@ constructor(
         )
     }
 
+    fun logOnCarrierRoamingNtnModeChanged(active: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { bool1 = active },
+            { "onCarrierRoamingNtnModeChanged: $bool1" }
+        )
+    }
+
     fun logOnDisplayInfoChanged(displayInfo: TelephonyDisplayInfo, subId: Int) {
         buffer.log(
             TAG,
@@ -107,8 +139,9 @@ constructor(
             {
                 int1 = subId
                 str1 = displayInfo.toString()
+                bool1 = displayInfo.isRoaming
             },
-            { "onDisplayInfoChanged: subId=$int1 displayInfo=$str1" },
+            { "onDisplayInfoChanged: subId=$int1 displayInfo=$str1 isRoaming=$bool1" },
         )
     }
 
@@ -161,6 +194,50 @@ constructor(
 
     fun logOnSubscriptionsChanged() {
         buffer.log(TAG, LogLevel.INFO, {}, { "onSubscriptionsChanged" })
+    }
+
+    fun logServiceProvidersUpdatedBroadcast(intent: Intent) {
+        val showSpn = intent.getBooleanExtra(TelephonyManager.EXTRA_SHOW_SPN, false)
+        val spn = intent.getStringExtra(TelephonyManager.EXTRA_DATA_SPN)
+        val showPlmn = intent.getBooleanExtra(TelephonyManager.EXTRA_SHOW_PLMN, false)
+        val plmn = intent.getStringExtra(TelephonyManager.EXTRA_PLMN)
+
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            {
+                bool1 = showSpn
+                str1 = spn
+                bool2 = showPlmn
+                str2 = plmn
+            },
+            {
+                "Intent: ACTION_SERVICE_PROVIDERS_UPDATED." +
+                    " showSpn=$bool1 spn=$str1 showPlmn=$bool2 plmn=$str2"
+            }
+        )
+    }
+
+    fun logOnSimStateChanged() {
+        buffer.log(TAG, LogLevel.INFO, "onSimStateChanged")
+    }
+
+    fun logPrioritizedNetworkAvailable(netId: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { int1 = netId },
+            { "Found prioritized network (nedId=$int1)" },
+        )
+    }
+
+    fun logPrioritizedNetworkLost(netId: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { int1 = netId },
+            { "Lost prioritized network (nedId=$int1)" },
+        )
     }
 }
 

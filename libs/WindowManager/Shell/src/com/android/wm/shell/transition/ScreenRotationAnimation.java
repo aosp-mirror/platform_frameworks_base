@@ -167,7 +167,7 @@ class ScreenRotationAnimation {
                 t.show(mScreenshotLayer);
                 if (!isCustomRotate()) {
                     mStartLuma = TransitionAnimation.getBorderLuma(hardwareBuffer,
-                            screenshotBuffer.getColorSpace());
+                            screenshotBuffer.getColorSpace(), mSurfaceControl);
                 }
                 hardwareBuffer.close();
             }

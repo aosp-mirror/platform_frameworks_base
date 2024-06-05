@@ -21,13 +21,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.time.UnixEpochTime;
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -73,10 +69,6 @@ public class NetworkTimeUpdateService extends Binder {
     private static final String TAG = "NetworkTimeUpdateService";
     private static final boolean DBG = false;
 
-    private static final String ACTION_POLL =
-            "com.android.server.timedetector.NetworkTimeUpdateService.action.POLL";
-    private static final int POLL_REQUEST = 0;
-
     private final Object mLock = new Object();
     private final Context mContext;
     private final ConnectivityManager mCM;
@@ -113,16 +105,19 @@ public class NetworkTimeUpdateService extends Binder {
         AlarmManager alarmManager = mContext.getSystemService(AlarmManager.class);
         TimeDetectorInternal timeDetectorInternal =
                 LocalServices.getService(TimeDetectorInternal.class);
-        // Broadcast alarms sent by system are immutable
-        Intent pollIntent = new Intent(ACTION_POLL, null).setPackage("android");
-        PendingIntent pendingPollIntent = PendingIntent.getBroadcast(mContext, POLL_REQUEST,
-                pollIntent, PendingIntent.FLAG_IMMUTABLE);
         mRefreshCallbacks = new Engine.RefreshCallbacks() {
+            private final AlarmManager.OnAlarmListener mOnAlarmListener =
+                    new ScheduledRefreshAlarmListener();
+
             @Override
             public void scheduleNextRefresh(@ElapsedRealtimeLong long elapsedRealtimeMillis) {
-                alarmManager.cancel(pendingPollIntent);
+                alarmManager.cancel(mOnAlarmListener);
+
+                String alarmTag = "NetworkTimeUpdateService.POLL";
+                Handler handler = null; // Use the main thread
                 alarmManager.set(
-                        AlarmManager.ELAPSED_REALTIME, elapsedRealtimeMillis, pendingPollIntent);
+                        AlarmManager.ELAPSED_REALTIME, elapsedRealtimeMillis, alarmTag,
+                        mOnAlarmListener, handler);
             }
 
             @Override
@@ -138,10 +133,6 @@ public class NetworkTimeUpdateService extends Binder {
 
     /** Initialize the receivers and initiate the first NTP request */
     public void systemRunning() {
-        // Listen for scheduled refreshes.
-        ScheduledRefreshBroadcastReceiver receiver = new ScheduledRefreshBroadcastReceiver();
-        mContext.registerReceiver(receiver, new IntentFilter(ACTION_POLL));
-
         // Listen for network connectivity changes.
         NetworkConnectivityCallback networkConnectivityCallback = new NetworkConnectivityCallback();
         mCM.registerDefaultNetworkCallback(networkConnectivityCallback, mHandler);
@@ -214,13 +205,13 @@ public class NetworkTimeUpdateService extends Binder {
         }
     }
 
-    private class ScheduledRefreshBroadcastReceiver extends BroadcastReceiver implements Runnable {
+    private class ScheduledRefreshAlarmListener implements AlarmManager.OnAlarmListener, Runnable {
 
         @Override
-        public void onReceive(Context context, Intent intent) {
-            // The BroadcastReceiver has to complete quickly or an ANR will be triggered by the
+        public void onAlarm() {
+            // The OnAlarmListener has to complete quickly or an ANR will be triggered by the
             // platform regardless of the receiver thread used. Instead of blocking the receiver
-            // thread, the long-running / blocking work is posted to mHandler to allow onReceive()
+            // thread, the long-running / blocking work is posted to mHandler to allow onAlarm()
             // to return immediately.
             mHandler.post(this);
         }
@@ -424,8 +415,14 @@ public class NetworkTimeUpdateService extends Binder {
             logToDebugAndDumpsys("forceRefreshForTests: refreshSuccessful=" + refreshSuccessful);
 
             if (refreshSuccessful) {
-                makeNetworkTimeSuggestion(mNtpTrustedTime.getCachedTimeResult(),
-                        "EngineImpl.forceRefreshForTests()", refreshCallbacks);
+                TimeResult cachedTimeResult = mNtpTrustedTime.getCachedTimeResult();
+                if (cachedTimeResult == null) {
+                    logToDebugAndDumpsys(
+                            "forceRefreshForTests: cachedTimeResult unexpectedly null");
+                } else {
+                    makeNetworkTimeSuggestion(cachedTimeResult,
+                            "EngineImpl.forceRefreshForTests()", refreshCallbacks);
+                }
             }
             return refreshSuccessful;
         }

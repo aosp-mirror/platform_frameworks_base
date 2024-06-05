@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,61 +16,30 @@
 
 package com.android.systemui.accessibility
 
-import com.android.systemui.qs.tileimpl.QSTileImpl
-import com.android.systemui.qs.tiles.ColorCorrectionTile
-import com.android.systemui.qs.tiles.ColorInversionTile
-import com.android.systemui.qs.tiles.DreamTile
-import com.android.systemui.qs.tiles.FontScalingTile
-import com.android.systemui.qs.tiles.NightDisplayTile
-import com.android.systemui.qs.tiles.OneHandedModeTile
-import com.android.systemui.qs.tiles.ReduceBrightColorsTile
+import com.android.systemui.accessibility.data.repository.AccessibilityQsShortcutsRepository
+import com.android.systemui.accessibility.data.repository.AccessibilityQsShortcutsRepositoryImpl
+import com.android.systemui.accessibility.data.repository.ColorCorrectionRepository
+import com.android.systemui.accessibility.data.repository.ColorCorrectionRepositoryImpl
+import com.android.systemui.accessibility.data.repository.ColorInversionRepository
+import com.android.systemui.accessibility.data.repository.ColorInversionRepositoryImpl
+import com.android.systemui.accessibility.data.repository.OneHandedModeRepository
+import com.android.systemui.accessibility.data.repository.OneHandedModeRepositoryImpl
+import com.android.systemui.accessibility.qs.QSAccessibilityModule
 import dagger.Binds
 import dagger.Module
-import dagger.multibindings.IntoMap
-import dagger.multibindings.StringKey
 
-@Module
+@Module(includes = [QSAccessibilityModule::class])
 interface AccessibilityModule {
-
-    /** Inject ColorInversionTile into tileMap in QSModule */
     @Binds
-    @IntoMap
-    @StringKey(ColorInversionTile.TILE_SPEC)
-    fun bindColorInversionTile(colorInversionTile: ColorInversionTile): QSTileImpl<*>
+    fun colorCorrectionRepository(impl: ColorCorrectionRepositoryImpl): ColorCorrectionRepository
 
-    /** Inject NightDisplayTile into tileMap in QSModule */
     @Binds
-    @IntoMap
-    @StringKey(NightDisplayTile.TILE_SPEC)
-    fun bindNightDisplayTile(nightDisplayTile: NightDisplayTile): QSTileImpl<*>
+    fun colorInversionRepository(impl: ColorInversionRepositoryImpl): ColorInversionRepository
 
-    /** Inject ReduceBrightColorsTile into tileMap in QSModule */
-    @Binds
-    @IntoMap
-    @StringKey(ReduceBrightColorsTile.TILE_SPEC)
-    fun bindReduceBrightColorsTile(reduceBrightColorsTile: ReduceBrightColorsTile): QSTileImpl<*>
+    @Binds fun oneHandedModeRepository(impl: OneHandedModeRepositoryImpl): OneHandedModeRepository
 
-    /** Inject OneHandedModeTile into tileMap in QSModule */
     @Binds
-    @IntoMap
-    @StringKey(OneHandedModeTile.TILE_SPEC)
-    fun bindOneHandedModeTile(oneHandedModeTile: OneHandedModeTile): QSTileImpl<*>
-
-    /** Inject ColorCorrectionTile into tileMap in QSModule */
-    @Binds
-    @IntoMap
-    @StringKey(ColorCorrectionTile.TILE_SPEC)
-    fun bindColorCorrectionTile(colorCorrectionTile: ColorCorrectionTile): QSTileImpl<*>
-
-    /** Inject DreamTile into tileMap in QSModule */
-    @Binds
-    @IntoMap
-    @StringKey(DreamTile.TILE_SPEC)
-    fun bindDreamTile(dreamTile: DreamTile): QSTileImpl<*>
-
-    /** Inject FontScalingTile into tileMap in QSModule */
-    @Binds
-    @IntoMap
-    @StringKey(FontScalingTile.TILE_SPEC)
-    fun bindFontScalingTile(fontScalingTile: FontScalingTile): QSTileImpl<*>
+    fun accessibilityQsShortcutsRepository(
+        impl: AccessibilityQsShortcutsRepositoryImpl
+    ): AccessibilityQsShortcutsRepository
 }

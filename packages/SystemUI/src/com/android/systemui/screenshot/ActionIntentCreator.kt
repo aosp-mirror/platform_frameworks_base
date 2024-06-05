@@ -19,28 +19,29 @@ package com.android.systemui.screenshot
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ComponentName
+import android.content.ContentProvider
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import com.android.systemui.R
+import android.os.UserHandle
+import com.android.systemui.res.R
+import com.android.systemui.screenshot.scroll.LongScreenshotActivity
 
 object ActionIntentCreator {
     /** @return a chooser intent to share the given URI. */
-    fun createShareIntent(uri: Uri) = createShareIntent(uri, null, null)
+    fun createShare(uri: Uri): Intent = createShare(uri, subject = null, text = null)
 
     /** @return a chooser intent to share the given URI with the optional provided subject. */
-    fun createShareIntentWithSubject(uri: Uri, subject: String?) =
-        createShareIntent(uri, subject = subject)
+    fun createShareWithSubject(uri: Uri, subject: String): Intent =
+        createShare(uri, subject = subject)
 
     /** @return a chooser intent to share the given URI with the optional provided extra text. */
-    fun createShareIntentWithExtraText(uri: Uri, extraText: String?) =
-        createShareIntent(uri, extraText = extraText)
+    fun createShareWithText(uri: Uri, extraText: String): Intent =
+        createShare(uri, text = extraText)
 
-    private fun createShareIntent(
-        uri: Uri,
-        subject: String? = null,
-        extraText: String? = null
-    ): Intent {
+    private fun createShare(rawUri: Uri, subject: String? = null, text: String? = null): Intent {
+        val uri = uriWithoutUserId(rawUri)
+
         // Create a share intent, this will always go through the chooser activity first
         // which should not trigger auto-enter PiP
         val sharingIntent =
@@ -56,8 +57,8 @@ object ActionIntentCreator {
                         ClipData.Item(uri)
                     )
 
-                putExtra(Intent.EXTRA_SUBJECT, subject)
-                putExtra(Intent.EXTRA_TEXT, extraText)
+                subject?.let { putExtra(Intent.EXTRA_SUBJECT, subject) }
+                text?.let { putExtra(Intent.EXTRA_TEXT, text) }
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             }
@@ -72,20 +73,42 @@ object ActionIntentCreator {
      * @return an ACTION_EDIT intent for the given URI, directed to config_screenshotEditor if
      *   available.
      */
-    fun createEditIntent(uri: Uri, context: Context): Intent {
+    fun createEdit(rawUri: Uri, context: Context): Intent {
+        val uri = uriWithoutUserId(rawUri)
         val editIntent = Intent(Intent.ACTION_EDIT)
 
-        context.getString(R.string.config_screenshotEditor)?.let {
-            if (it.isNotEmpty()) {
-                editIntent.component = ComponentName.unflattenFromString(it)
-            }
+        val editor = context.getString(R.string.config_screenshotEditor)
+        if (editor.isNotEmpty()) {
+            editIntent.component = ComponentName.unflattenFromString(editor)
         }
 
         return editIntent
             .setDataAndType(uri, "image/png")
+            .putExtra(EXTRA_EDIT_SOURCE, EDIT_SOURCE_SCREENSHOT)
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
     }
+
+    /** @return an Intent to start the LongScreenshotActivity */
+    fun createLongScreenshotIntent(owner: UserHandle, context: Context): Intent {
+        return Intent(context, LongScreenshotActivity::class.java)
+            .putExtra(LongScreenshotActivity.EXTRA_SCREENSHOT_USER_HANDLE, owner)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+    }
+
+    private const val EXTRA_EDIT_SOURCE = "edit_source"
+    private const val EDIT_SOURCE_SCREENSHOT = "screenshot"
+}
+
+/**
+ * URIs here are passed only via Intent which are sent to the target user via Intent. Because of
+ * this, the userId component can be removed to prevent compatibility issues when an app attempts
+ * valid a URI containing a userId within the authority.
+ */
+private fun uriWithoutUserId(uri: Uri): Uri {
+    return ContentProvider.getUriWithoutUserId(uri)
 }

@@ -16,12 +16,19 @@
 
 package com.android.server.am;
 
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
+import static com.android.server.am.BroadcastConstants.getDeviceConfigBoolean;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread;
@@ -44,7 +51,9 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -71,6 +80,9 @@ final class ActivityManagerConstants extends ContentObserver {
             = "fgservice_screen_on_before_time";
     private static final String KEY_FGSERVICE_SCREEN_ON_AFTER_TIME
             = "fgservice_screen_on_after_time";
+
+    private static final String KEY_FGS_BOOT_COMPLETED_ALLOWLIST = "fgs_boot_completed_allowlist";
+
     private static final String KEY_CONTENT_PROVIDER_RETAIN_TIME = "content_provider_retain_time";
     private static final String KEY_GC_TIMEOUT = "gc_timeout";
     private static final String KEY_GC_MIN_INTERVAL = "gc_min_interval";
@@ -151,7 +163,11 @@ final class ActivityManagerConstants extends ContentObserver {
 
     static final String KEY_USE_TIERED_CACHED_ADJ = "use_tiered_cached_adj";
     static final String KEY_TIERED_CACHED_ADJ_DECAY_TIME = "tiered_cached_adj_decay_time";
-    static final String KEY_USE_MODERN_TRIM = "use_modern_trim";
+
+    /**
+     * Whether or not to enable the new oom adjuster implementation.
+     */
+    static final String KEY_ENABLE_NEW_OOMADJ = "enable_new_oom_adj";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 1024;
     private static final boolean DEFAULT_PRIORITIZE_ALARM_BROADCASTS = true;
@@ -159,6 +175,15 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME = 1*1000;
     private static final long DEFAULT_FGSERVICE_SCREEN_ON_AFTER_TIME = 5*1000;
+
+    private static final int DEFAULT_FGS_BOOT_COMPLETED_ALLOWLIST =
+            FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                | FOREGROUND_SERVICE_TYPE_HEALTH
+                | FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING
+                | FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED
+                | FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+                | FOREGROUND_SERVICE_TYPE_LOCATION;
+
     private static final long DEFAULT_CONTENT_PROVIDER_RETAIN_TIME = 20*1000;
     private static final long DEFAULT_GC_TIMEOUT = 5*1000;
     private static final long DEFAULT_GC_MIN_INTERVAL = 60*1000;
@@ -213,7 +238,10 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final boolean DEFAULT_USE_TIERED_CACHED_ADJ = false;
     private static final long DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME = 60 * 1000;
 
-    private static final boolean DEFAULT_USE_MODERN_TRIM = true;
+    /**
+     * The default value to {@link #KEY_ENABLE_NEW_OOMADJ}.
+     */
+    private static final boolean DEFAULT_ENABLE_NEW_OOM_ADJ = Flags.oomadjusterCorrectnessRewrite();
 
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
@@ -286,10 +314,6 @@ final class ActivityManagerConstants extends ContentObserver {
       * Depends on KEY_PROACTIVE_KILLS_ENABLED
       */
     private static final String KEY_LOW_SWAP_THRESHOLD_PERCENT = "low_swap_threshold_percent";
-
-    /** Default value for mFlagApplicationStartInfoEnabled. Defaults to false. */
-    private static final String KEY_DEFAULT_APPLICATION_START_INFO_ENABLED =
-            "enable_app_start_info";
 
     /**
      * Default value for mFlagBackgroundActivityStartsEnabled if not explicitly set in
@@ -410,6 +434,18 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_MAX_SERVICE_CONNECTIONS_PER_PROCESS =
             "max_service_connections_per_process";
 
+    private static final String KEY_PROC_STATE_DEBUG_UIDS = "proc_state_debug_uids";
+
+    /**
+     * UIDs we want to print detailed info in OomAdjuster.
+     * It's only used for debugging, and it's almost never updated, so we just create a new
+     * array when it's changed to avoid synchronization.
+     */
+    volatile SparseBooleanArray mProcStateDebugUids = new SparseBooleanArray(0);
+    volatile boolean mEnableProcStateStacktrace = false;
+    volatile int mProcStateDebugSetProcStateDelay = 0;
+    volatile int mProcStateDebugSetUidStateDelay = 0;
+
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
 
@@ -437,6 +473,9 @@ final class ActivityManagerConstants extends ContentObserver {
     // it is stopped when the screen turns on.  This is the time from when the screen turns
     // on until we will stop reporting it.
     public long FGSERVICE_SCREEN_ON_AFTER_TIME = DEFAULT_FGSERVICE_SCREEN_ON_AFTER_TIME;
+
+    // Allow-list for FGS types that are allowed to start from BOOT_COMPLETED.
+    public int FGS_BOOT_COMPLETED_ALLOWLIST = DEFAULT_FGS_BOOT_COMPLETED_ALLOWLIST;
 
     // How long we will retain processes hosting content providers in the "last activity"
     // state before allowing them to drop down to the regular cached LRU list.  This is
@@ -596,9 +635,6 @@ final class ActivityManagerConstants extends ContentObserver {
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
     volatile boolean mFlagActivityStartsLoggingEnabled;
 
-    // Indicates whether ApplicationStartInfo is enabled.
-    volatile boolean mFlagApplicationStartInfoEnabled;
-
     // Indicates whether the background activity starts is enabled.
     // Controlled by Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED.
     // If not set explicitly the default is controlled by DeviceConfig.
@@ -623,6 +659,10 @@ final class ActivityManagerConstants extends ContentObserver {
     // Whether to display a notification when a service is restricted from startForeground due to
     // foreground service background start restriction.
     volatile boolean mFgsStartRestrictionNotificationEnabled = false;
+
+    // Indicates whether PSS profiling in AppProfiler is force-enabled, even if RSS is used by
+    // default. Controlled by Settings.Global.FORCE_ENABLE_PSS_PROFILING
+    volatile boolean mForceEnablePssProfiling = false;
 
     /**
      * Indicates whether the foreground service background start restriction is enabled for
@@ -953,6 +993,9 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final Uri ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI =
             Settings.Global.getUriFor(Settings.Global.ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS);
 
+    private static final Uri FORCE_ENABLE_PSS_PROFILING_URI =
+            Settings.Global.getUriFor(Settings.Global.FORCE_ENABLE_PSS_PROFILING);
+
     /**
      * The threshold to decide if a given association should be dumped into metrics.
      */
@@ -1019,6 +1062,27 @@ final class ActivityManagerConstants extends ContentObserver {
     public volatile long mShortFgsProcStateExtraWaitDuration =
             DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION;
 
+    /** Timeout for a mediaProcessing FGS, in milliseconds. */
+    private static final String KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION =
+            "media_processing_fgs_timeout_duration";
+
+    /** @see #KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION */
+    static final long DEFAULT_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION = 6 * 60 * 60_000; // 6 hours
+
+    /** @see #KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION */
+    public volatile long mMediaProcessingFgsTimeoutDuration =
+            DEFAULT_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION;
+
+    /** Timeout for a dataSync FGS, in milliseconds. */
+    private static final String KEY_DATA_SYNC_FGS_TIMEOUT_DURATION =
+            "data_sync_fgs_timeout_duration";
+
+    /** @see #KEY_DATA_SYNC_FGS_TIMEOUT_DURATION */
+    static final long DEFAULT_DATA_SYNC_FGS_TIMEOUT_DURATION = 6 * 60 * 60_000; // 6 hours
+
+    /** @see #KEY_DATA_SYNC_FGS_TIMEOUT_DURATION */
+    public volatile long mDataSyncFgsTimeoutDuration = DEFAULT_DATA_SYNC_FGS_TIMEOUT_DURATION;
+
     /**
      * If enabled, when starting an application, the system will wait for a
      * {@link ActivityManagerService#finishAttachApplication} from the app before scheduling
@@ -1027,7 +1091,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION =
             "enable_wait_for_finish_attach_application";
 
-    private static final boolean DEFAULT_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION = false;
+    private static final boolean DEFAULT_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION = true;
 
     /** @see #KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION */
     public volatile boolean mEnableWaitForFinishAttachApplication =
@@ -1049,14 +1113,48 @@ final class ActivityManagerConstants extends ContentObserver {
     public volatile long mShortFgsAnrExtraWaitDuration =
             DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION;
 
+    /**
+     * If a service of a timeout-enforced type doesn't finish within this duration after its
+     * timeout, then we'll crash the app.
+     * i.e. if the time limit for a type is 1 hour, and this extra duration is 10 seconds, then
+     * the app will crash 1 hour and 10 seconds after it started.
+     */
+    private static final String KEY_FGS_CRASH_EXTRA_WAIT_DURATION = "fgs_crash_extra_wait_duration";
+
+    /** @see #KEY_FGS_CRASH_EXTRA_WAIT_DURATION */
+    static final long DEFAULT_FGS_CRASH_EXTRA_WAIT_DURATION = 10_000;
+
+    /** @see #KEY_FGS_CRASH_EXTRA_WAIT_DURATION */
+    public volatile long mFgsCrashExtraWaitDuration = DEFAULT_FGS_CRASH_EXTRA_WAIT_DURATION;
+
     /** @see #KEY_USE_TIERED_CACHED_ADJ */
     public boolean USE_TIERED_CACHED_ADJ = DEFAULT_USE_TIERED_CACHED_ADJ;
 
     /** @see #KEY_TIERED_CACHED_ADJ_DECAY_TIME */
     public long TIERED_CACHED_ADJ_DECAY_TIME = DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME;
 
-    /** @see #KEY_USE_MODERN_TRIM */
-    public boolean USE_MODERN_TRIM = DEFAULT_USE_MODERN_TRIM;
+    /** @see #KEY_ENABLE_NEW_OOMADJ */
+    public boolean ENABLE_NEW_OOMADJ = DEFAULT_ENABLE_NEW_OOM_ADJ;
+
+    /**
+     * Indicates whether PSS profiling in AppProfiler is disabled or not.
+     */
+    static final String KEY_DISABLE_APP_PROFILER_PSS_PROFILING =
+            "disable_app_profiler_pss_profiling";
+
+    private final boolean mDefaultDisableAppProfilerPssProfiling;
+
+    public boolean APP_PROFILER_PSS_PROFILING_DISABLED;
+
+    /**
+     * The modifier used to adjust PSS thresholds in OomAdjuster when RSS is collected instead.
+     */
+    static final String KEY_PSS_TO_RSS_THRESHOLD_MODIFIER =
+            "pss_to_rss_threshold_modifier";
+
+    private final float mDefaultPssToRssThresholdModifier;
+
+    public float PSS_TO_RSS_THRESHOLD_MODIFIER;
 
     private final OnPropertiesChangedListener mOnDeviceConfigChangedListener =
             new OnPropertiesChangedListener() {
@@ -1069,9 +1167,6 @@ final class ActivityManagerConstants extends ContentObserver {
                         switch (name) {
                             case KEY_MAX_CACHED_PROCESSES:
                                 updateMaxCachedProcesses();
-                                break;
-                            case KEY_DEFAULT_APPLICATION_START_INFO_ENABLED:
-                                updateApplicationStartInfoEnabled();
                                 break;
                             case KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED:
                                 updateBackgroundActivityStarts();
@@ -1211,8 +1306,17 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION:
                                 updateShortFgsProcStateExtraWaitDuration();
                                 break;
+                            case KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION:
+                                updateMediaProcessingFgsTimeoutDuration();
+                                break;
+                            case KEY_DATA_SYNC_FGS_TIMEOUT_DURATION:
+                                updateDataSyncFgsTimeoutDuration();
+                                break;
                             case KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION:
                                 updateShortFgsAnrExtraWaitDuration();
+                                break;
+                            case KEY_FGS_CRASH_EXTRA_WAIT_DURATION:
+                                updateFgsCrashExtraWaitDuration();
                                 break;
                             case KEY_PROACTIVE_KILLS_ENABLED:
                                 updateProactiveKillsEnabled();
@@ -1233,8 +1337,14 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_TIERED_CACHED_ADJ_DECAY_TIME:
                                 updateUseTieredCachedAdj();
                                 break;
-                            case KEY_USE_MODERN_TRIM:
-                                updateUseModernTrim();
+                            case KEY_DISABLE_APP_PROFILER_PSS_PROFILING:
+                                updateDisableAppProfilerPssProfiling();
+                                break;
+                            case KEY_PSS_TO_RSS_THRESHOLD_MODIFIER:
+                                updatePssToRssThresholdModifier();
+                                break;
+                            case KEY_PROC_STATE_DEBUG_UIDS:
+                                updateProcStateDebugUids();
                                 break;
                             default:
                                 updateFGSPermissionEnforcementFlagsIfNecessary(name);
@@ -1317,7 +1427,14 @@ final class ActivityManagerConstants extends ContentObserver {
         CUR_TRIM_EMPTY_PROCESSES = rawMaxEmptyProcesses / 2;
         CUR_TRIM_CACHED_PROCESSES = (Integer.min(CUR_MAX_CACHED_PROCESSES, MAX_CACHED_PROCESSES)
                     - rawMaxEmptyProcesses) / 3;
+        loadNativeBootDeviceConfigConstants();
+        mDefaultDisableAppProfilerPssProfiling = context.getResources().getBoolean(
+                R.bool.config_am_disablePssProfiling);
+        APP_PROFILER_PSS_PROFILING_DISABLED = mDefaultDisableAppProfilerPssProfiling;
 
+        mDefaultPssToRssThresholdModifier = context.getResources().getFloat(
+                com.android.internal.R.dimen.config_am_pssToRssThresholdModifier);
+        PSS_TO_RSS_THRESHOLD_MODIFIER = mDefaultPssToRssThresholdModifier;
     }
 
     public void start(ContentResolver resolver) {
@@ -1330,6 +1447,7 @@ final class ActivityManagerConstants extends ContentObserver {
             mResolver.registerContentObserver(ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI,
                     false, this);
         }
+        mResolver.registerContentObserver(FORCE_ENABLE_PSS_PROFILING_URI, false, this);
         updateConstants();
         if (mSystemServerAutomaticHeapDumpEnabled) {
             updateEnableAutomaticSystemServerHeapDumps();
@@ -1345,14 +1463,22 @@ final class ActivityManagerConstants extends ContentObserver {
         // The following read from Settings.
         updateActivityStartsLoggingEnabled();
         updateForegroundServiceStartsLoggingEnabled();
+        updateForceEnablePssProfiling();
+        // Read DropboxRateLimiter params from flags.
+        mService.initDropboxRateLimiter();
     }
 
-    private void loadDeviceConfigConstants() {
+    void loadDeviceConfigConstants() {
         mOnDeviceConfigChangedListener.onPropertiesChanged(
                 DeviceConfig.getProperties(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER));
         mOnDeviceConfigChangedForComponentAliasListener.onPropertiesChanged(
                 DeviceConfig.getProperties(
                         DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS));
+    }
+
+    private void loadNativeBootDeviceConfigConstants() {
+        ENABLE_NEW_OOMADJ = getDeviceConfigBoolean(KEY_ENABLE_NEW_OOMADJ,
+                DEFAULT_ENABLE_NEW_OOM_ADJ);
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
@@ -1379,6 +1505,8 @@ final class ActivityManagerConstants extends ContentObserver {
             updateForegroundServiceStartsLoggingEnabled();
         } else if (ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI.equals(uri)) {
             updateEnableAutomaticSystemServerHeapDumps();
+        } else if (FORCE_ENABLE_PSS_PROFILING_URI.equals(uri)) {
+            updateForceEnablePssProfiling();
         }
     }
 
@@ -1405,6 +1533,8 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_FGSERVICE_SCREEN_ON_BEFORE_TIME);
             FGSERVICE_SCREEN_ON_AFTER_TIME = mParser.getLong(KEY_FGSERVICE_SCREEN_ON_AFTER_TIME,
                     DEFAULT_FGSERVICE_SCREEN_ON_AFTER_TIME);
+            FGS_BOOT_COMPLETED_ALLOWLIST = mParser.getInt(KEY_FGS_BOOT_COMPLETED_ALLOWLIST,
+                    DEFAULT_FGS_BOOT_COMPLETED_ALLOWLIST);
             CONTENT_PROVIDER_RETAIN_TIME = mParser.getLong(KEY_CONTENT_PROVIDER_RETAIN_TIME,
                     DEFAULT_CONTENT_PROVIDER_RETAIN_TIME);
             GC_TIMEOUT = mParser.getLong(KEY_GC_TIMEOUT,
@@ -1491,12 +1621,9 @@ final class ActivityManagerConstants extends ContentObserver {
                 Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED, 1) == 1;
     }
 
-    private void updateApplicationStartInfoEnabled() {
-        mFlagApplicationStartInfoEnabled =
-                DeviceConfig.getBoolean(
-                        DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                        KEY_DEFAULT_APPLICATION_START_INFO_ENABLED,
-                        /*defaultValue*/ false);
+    private void updateForceEnablePssProfiling() {
+        mForceEnablePssProfiling = Settings.Global.getInt(mResolver,
+                Settings.Global.FORCE_ENABLE_PSS_PROFILING, 0) == 1;
     }
 
     private void updateBackgroundActivityStarts() {
@@ -1919,6 +2046,76 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_MAX_PREVIOUS_TIME);
     }
 
+    private void updateProcStateDebugUids() {
+        final String val = DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_PROC_STATE_DEBUG_UIDS,
+                "").trim();
+
+        // Parse KEY_PROC_STATE_DEBUG_UIDS as comma-separated values. Each values can be:
+        // Number:  Enable debugging on the given UID.
+        // "stack": Enable stack trace when updating proc/uid-states.s
+        // "u" + delay-ms: Enable sleep when updating uid-state
+        // "p" + delay-ms: Enable sleep when updating procstate
+        //
+        // Example:
+        //   device_config put activity_manager proc_state_debug_uids '10177,10202,stack,p500,u100'
+        // means:
+        // - Monitor UID 10177 and 10202
+        // - Also enable stack trace
+        // - Sleep 500 ms when updating the procstate.
+        // - Sleep 100 ms when updating the UID state.
+
+        mEnableProcStateStacktrace = false;
+        mProcStateDebugSetProcStateDelay = 0;
+        mProcStateDebugSetUidStateDelay = 0;
+        if (val.length() == 0) {
+            mProcStateDebugUids = new SparseBooleanArray(0);
+            return;
+        }
+        final String[] uids = val.split(",");
+
+        final SparseBooleanArray newArray = new SparseBooleanArray(0);
+
+        for (String token : uids) {
+            if (token.length() == 0) {
+                continue;
+            }
+            // "stack" -> enable stacktrace.
+            if ("stack".equals(token)) {
+                mEnableProcStateStacktrace = true;
+                continue;
+            }
+            boolean isUid = true;
+            char prefix = token.charAt(0);
+            if ('a' <= prefix && prefix <= 'z') {
+                // If the token starts with an alphabet, it's not a UID.
+                isUid = false;
+                token = token.substring(1);
+            }
+
+            int value = -1;
+            try {
+                value = Integer.parseInt(token.trim());
+            } catch (NumberFormatException e) {
+                Slog.w(TAG, "Invalid number " + token + " in " + val);
+                continue;
+            }
+            if (isUid) {
+                newArray.put(value, true);
+            } else if (prefix == 'p') {
+                // Enable delay in set-proc-state
+                mProcStateDebugSetProcStateDelay = value;
+            } else if (prefix == 'u') {
+                // Enable delay in set-uid-state
+                mProcStateDebugSetUidStateDelay = value;
+            } else {
+                Slog.w(TAG, "Invalid prefix " + prefix + " in " + val);
+            }
+        }
+        mProcStateDebugUids = newArray;
+    }
+
     private void updateMinAssocLogDuration() {
         MIN_ASSOC_LOG_DURATION = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_MIN_ASSOC_LOG_DURATION,
@@ -1988,6 +2185,27 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION);
     }
 
+    private void updateMediaProcessingFgsTimeoutDuration() {
+        mMediaProcessingFgsTimeoutDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION,
+                DEFAULT_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION);
+    }
+
+    private void updateDataSyncFgsTimeoutDuration() {
+        mDataSyncFgsTimeoutDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DATA_SYNC_FGS_TIMEOUT_DURATION,
+                DEFAULT_DATA_SYNC_FGS_TIMEOUT_DURATION);
+    }
+
+    private void updateFgsCrashExtraWaitDuration() {
+        mFgsCrashExtraWaitDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FGS_CRASH_EXTRA_WAIT_DURATION,
+                DEFAULT_FGS_CRASH_EXTRA_WAIT_DURATION);
+    }
+
     private void updateEnableWaitForFinishAttachApplication() {
         mEnableWaitForFinishAttachApplication = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -2006,16 +2224,50 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME);
     }
 
-    private void updateUseModernTrim() {
-        USE_MODERN_TRIM = DeviceConfig.getBoolean(
-            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-            KEY_USE_MODERN_TRIM,
-            DEFAULT_USE_MODERN_TRIM);
+    private void updateEnableNewOomAdj() {
+        ENABLE_NEW_OOMADJ = DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+            KEY_ENABLE_NEW_OOMADJ,
+            DEFAULT_ENABLE_NEW_OOM_ADJ);
     }
 
     private void updateFGSPermissionEnforcementFlagsIfNecessary(@NonNull String name) {
         ForegroundServiceTypePolicy.getDefaultPolicy()
-                .updatePermissionEnforcementFlagIfNecessary(name);
+            .updatePermissionEnforcementFlagIfNecessary(name);
+    }
+
+    private void updateDisableAppProfilerPssProfiling() {
+        APP_PROFILER_PSS_PROFILING_DISABLED = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_DISABLE_APP_PROFILER_PSS_PROFILING,
+                mDefaultDisableAppProfilerPssProfiling);
+    }
+
+    private void updatePssToRssThresholdModifier() {
+        PSS_TO_RSS_THRESHOLD_MODIFIER = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_PSS_TO_RSS_THRESHOLD_MODIFIER,
+                mDefaultPssToRssThresholdModifier);
+    }
+
+    boolean shouldDebugUidForProcState(int uid) {
+        SparseBooleanArray ar = mProcStateDebugUids;
+        final var size = ar.size();
+        if (size == 0) { // Most common case.
+            return false;
+        }
+        // If the array is small (also common), avoid the binary search.
+        if (size <= 8) {
+            for (int i = 0; i < size; i++) {
+                if (ar.keyAt(i) == uid) {
+                    return ar.valueAt(i);
+                }
+            }
+            return false;
+        }
+        return ar.get(uid, false);
+    }
+
+    boolean shouldEnableProcStateDebug() {
+        return mProcStateDebugUids.size() > 0;
     }
 
     @NeverCompile // Avoid size overhead of debugging code.
@@ -2035,6 +2287,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(FGSERVICE_SCREEN_ON_BEFORE_TIME);
         pw.print("  "); pw.print(KEY_FGSERVICE_SCREEN_ON_AFTER_TIME); pw.print("=");
         pw.println(FGSERVICE_SCREEN_ON_AFTER_TIME);
+        pw.print("  "); pw.print(KEY_FGS_BOOT_COMPLETED_ALLOWLIST); pw.print("=");
+        pw.println(FGS_BOOT_COMPLETED_ALLOWLIST);
         pw.print("  "); pw.print(KEY_CONTENT_PROVIDER_RETAIN_TIME); pw.print("=");
         pw.println(CONTENT_PROVIDER_RETAIN_TIME);
         pw.print("  "); pw.print(KEY_GC_TIMEOUT); pw.print("=");
@@ -2123,10 +2377,6 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(mFgToBgFgsGraceDuration);
         pw.print("  "); pw.print(KEY_FGS_START_FOREGROUND_TIMEOUT); pw.print("=");
         pw.println(mFgsStartForegroundTimeoutMs);
-        pw.print("  ");
-        pw.print(KEY_DEFAULT_APPLICATION_START_INFO_ENABLED);
-        pw.print("=");
-        pw.println(mFlagApplicationStartInfoEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED); pw.print("=");
         pw.println(mFlagBackgroundActivityStartsEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_BACKGROUND_FGS_STARTS_RESTRICTION_ENABLED);
@@ -2202,10 +2452,29 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  "); pw.print(KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION);
         pw.print("="); pw.println(mShortFgsAnrExtraWaitDuration);
 
+        pw.print("  "); pw.print(KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION);
+        pw.print("="); pw.println(mMediaProcessingFgsTimeoutDuration);
+        pw.print("  "); pw.print(KEY_DATA_SYNC_FGS_TIMEOUT_DURATION);
+        pw.print("="); pw.println(mDataSyncFgsTimeoutDuration);
+        pw.print("  "); pw.print(KEY_FGS_CRASH_EXTRA_WAIT_DURATION);
+        pw.print("="); pw.println(mFgsCrashExtraWaitDuration);
+
         pw.print("  "); pw.print(KEY_USE_TIERED_CACHED_ADJ);
         pw.print("="); pw.println(USE_TIERED_CACHED_ADJ);
         pw.print("  "); pw.print(KEY_TIERED_CACHED_ADJ_DECAY_TIME);
         pw.print("="); pw.println(TIERED_CACHED_ADJ_DECAY_TIME);
+
+        pw.print("  "); pw.print(KEY_ENABLE_NEW_OOMADJ);
+        pw.print("="); pw.println(ENABLE_NEW_OOMADJ);
+
+        pw.print("  "); pw.print(KEY_DISABLE_APP_PROFILER_PSS_PROFILING);
+        pw.print("="); pw.println(APP_PROFILER_PSS_PROFILING_DISABLED);
+
+        pw.print("  "); pw.print(KEY_PSS_TO_RSS_THRESHOLD_MODIFIER);
+        pw.print("="); pw.println(PSS_TO_RSS_THRESHOLD_MODIFIER);
+
+        pw.print("  "); pw.print(KEY_MAX_PREVIOUS_TIME);
+        pw.print("="); pw.println(MAX_PREVIOUS_TIME);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
@@ -2219,5 +2488,12 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  OOMADJ_UPDATE_QUICK="); pw.println(OOMADJ_UPDATE_QUICK);
         pw.print("  ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION=");
         pw.println(mEnableWaitForFinishAttachApplication);
+
+        synchronized (mProcStateDebugUids) {
+            pw.print("  "); pw.print(KEY_PROC_STATE_DEBUG_UIDS);
+            pw.print("="); pw.println(mProcStateDebugUids);
+            pw.print("    uid-state-delay="); pw.println(mProcStateDebugSetUidStateDelay);
+            pw.print("    proc-state-delay="); pw.println(mProcStateDebugSetProcStateDelay);
+        }
     }
 }

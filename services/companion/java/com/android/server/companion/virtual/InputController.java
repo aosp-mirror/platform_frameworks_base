@@ -16,9 +16,12 @@
 
 package com.android.server.companion.virtual;
 
+import static android.text.TextUtils.formatSimple;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.StringDef;
+import android.content.AttributionSource;
 import android.graphics.PointF;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputDeviceIdentifier;
@@ -28,26 +31,28 @@ import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
+import android.hardware.input.VirtualStylusButtonEvent;
+import android.hardware.input.VirtualStylusMotionEvent;
 import android.hardware.input.VirtualTouchEvent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInputConstants;
 import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Slog;
-import android.view.Display;
 import android.view.InputDevice;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.expresslog.Counter;
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -70,24 +75,18 @@ class InputController {
     static final String PHYS_TYPE_MOUSE = "Mouse";
     static final String PHYS_TYPE_TOUCHSCREEN = "Touchscreen";
     static final String PHYS_TYPE_NAVIGATION_TOUCHPAD = "NavigationTouchpad";
+    static final String PHYS_TYPE_STYLUS = "Stylus";
     @StringDef(prefix = { "PHYS_TYPE_" }, value = {
             PHYS_TYPE_DPAD,
             PHYS_TYPE_KEYBOARD,
             PHYS_TYPE_MOUSE,
             PHYS_TYPE_TOUCHSCREEN,
             PHYS_TYPE_NAVIGATION_TOUCHPAD,
+            PHYS_TYPE_STYLUS,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface PhysType {
     }
-
-    /**
-     * The maximum length of a device name (in bytes in UTF-8 encoding).
-     *
-     * This limitation comes directly from uinput.
-     * See also UINPUT_MAX_NAME_SIZE in linux/uinput.h
-     */
-    private static final int DEVICE_NAME_MAX_LENGTH = 80;
 
     final Object mLock = new Object();
 
@@ -101,11 +100,12 @@ class InputController {
     private final DisplayManagerInternal mDisplayManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
     private final WindowManager mWindowManager;
+    private final AttributionSource mAttributionSource;
     private final DeviceCreationThreadVerifier mThreadVerifier;
 
     InputController(@NonNull Handler handler,
-            @NonNull WindowManager windowManager) {
-        this(new NativeWrapper(), handler, windowManager,
+            @NonNull WindowManager windowManager, AttributionSource attributionSource) {
+        this(new NativeWrapper(), handler, windowManager, attributionSource,
                 // Verify that virtual devices are not created on the handler thread.
                 () -> !handler.getLooper().isCurrentThread());
     }
@@ -113,12 +113,14 @@ class InputController {
     @VisibleForTesting
     InputController(@NonNull NativeWrapper nativeWrapper,
             @NonNull Handler handler, @NonNull WindowManager windowManager,
+            AttributionSource attributionSource,
             @NonNull DeviceCreationThreadVerifier threadVerifier) {
         mHandler = handler;
         mNativeWrapper = nativeWrapper;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mWindowManager = windowManager;
+        mAttributionSource = attributionSource;
         mThreadVerifier = threadVerifier;
     }
 
@@ -136,25 +138,17 @@ class InputController {
         }
     }
 
-    void createDpad(@NonNull String deviceName,
-                        int vendorId,
-                        int productId,
-                        @NonNull IBinder deviceToken,
-                        int displayId) {
+    void createDpad(@NonNull String deviceName, int vendorId, int productId,
+            @NonNull IBinder deviceToken, int displayId) throws DeviceCreationException {
         final String phys = createPhys(PHYS_TYPE_DPAD);
-        try {
-            createDeviceInternal(InputDeviceDescriptor.TYPE_DPAD, deviceName, vendorId,
+        createDeviceInternal(InputDeviceDescriptor.TYPE_DPAD, deviceName, vendorId,
                     productId, deviceToken, displayId, phys,
                     () -> mNativeWrapper.openUinputDpad(deviceName, vendorId, productId, phys));
-        } catch (DeviceCreationException e) {
-            throw new RuntimeException(
-                    "Failed to create virtual dpad device '" + deviceName + "'.", e);
-        }
     }
 
     void createKeyboard(@NonNull String deviceName, int vendorId, int productId,
             @NonNull IBinder deviceToken, int displayId, @NonNull String languageTag,
-            @NonNull String layoutType) {
+            @NonNull String layoutType) throws DeviceCreationException {
         final String phys = createPhys(PHYS_TYPE_KEYBOARD);
         mInputManagerInternal.addKeyboardLayoutAssociation(phys, languageTag,
                 layoutType);
@@ -164,67 +158,52 @@ class InputController {
                     () -> mNativeWrapper.openUinputKeyboard(deviceName, vendorId, productId, phys));
         } catch (DeviceCreationException e) {
             mInputManagerInternal.removeKeyboardLayoutAssociation(phys);
-            throw new RuntimeException(
-                    "Failed to create virtual keyboard device '" + deviceName + "'.", e);
+            throw e;
         }
     }
 
-    void createMouse(@NonNull String deviceName,
-            int vendorId,
-            int productId,
-            @NonNull IBinder deviceToken,
-            int displayId) {
+    void createMouse(@NonNull String deviceName, int vendorId, int productId,
+            @NonNull IBinder deviceToken, int displayId) throws DeviceCreationException {
         final String phys = createPhys(PHYS_TYPE_MOUSE);
-        try {
-            createDeviceInternal(InputDeviceDescriptor.TYPE_MOUSE, deviceName, vendorId, productId,
-                    deviceToken, displayId, phys,
-                    () -> mNativeWrapper.openUinputMouse(deviceName, vendorId, productId, phys));
-        } catch (DeviceCreationException e) {
-            throw new RuntimeException(
-                    "Failed to create virtual mouse device: '" + deviceName + "'.", e);
-        }
-        mInputManagerInternal.setVirtualMousePointerDisplayId(displayId);
+        createDeviceInternal(InputDeviceDescriptor.TYPE_MOUSE, deviceName, vendorId, productId,
+                deviceToken, displayId, phys,
+                () -> mNativeWrapper.openUinputMouse(deviceName, vendorId, productId, phys));
     }
 
-    void createTouchscreen(@NonNull String deviceName,
-            int vendorId,
-            int productId,
-            @NonNull IBinder deviceToken,
-            int displayId,
-            int height,
-            int width) {
+    void createTouchscreen(@NonNull String deviceName, int vendorId, int productId,
+            @NonNull IBinder deviceToken, int displayId, int height, int width)
+            throws DeviceCreationException {
         final String phys = createPhys(PHYS_TYPE_TOUCHSCREEN);
-        try {
-            createDeviceInternal(InputDeviceDescriptor.TYPE_TOUCHSCREEN, deviceName, vendorId,
-                    productId, deviceToken, displayId, phys,
-                    () -> mNativeWrapper.openUinputTouchscreen(deviceName, vendorId, productId,
-                            phys, height, width));
-        } catch (DeviceCreationException e) {
-            throw new RuntimeException(
-                    "Failed to create virtual touchscreen device '" + deviceName + "'.", e);
-        }
+        createDeviceInternal(InputDeviceDescriptor.TYPE_TOUCHSCREEN, deviceName, vendorId,
+                productId, deviceToken, displayId, phys,
+                () -> mNativeWrapper.openUinputTouchscreen(deviceName, vendorId, productId, phys,
+                        height, width));
     }
 
-    void createNavigationTouchpad(
-            @NonNull String deviceName,
-            int vendorId,
-            int productId,
-            @NonNull IBinder deviceToken,
-            int displayId,
-            int touchpadHeight,
-            int touchpadWidth) {
+    void createNavigationTouchpad(@NonNull String deviceName, int vendorId, int productId,
+            @NonNull IBinder deviceToken, int displayId, int height, int width)
+            throws DeviceCreationException {
         final String phys = createPhys(PHYS_TYPE_NAVIGATION_TOUCHPAD);
         mInputManagerInternal.setTypeAssociation(phys, NAVIGATION_TOUCHPAD_DEVICE_TYPE);
         try {
             createDeviceInternal(InputDeviceDescriptor.TYPE_NAVIGATION_TOUCHPAD, deviceName,
                     vendorId, productId, deviceToken, displayId, phys,
                     () -> mNativeWrapper.openUinputTouchscreen(deviceName, vendorId, productId,
-                            phys, touchpadHeight, touchpadWidth));
+                            phys, height, width));
         } catch (DeviceCreationException e) {
             mInputManagerInternal.unsetTypeAssociation(phys);
-            throw new RuntimeException(
-                    "Failed to create virtual navigation touchpad device '" + deviceName + "'.", e);
+            throw e;
         }
+    }
+
+    void createStylus(@NonNull String deviceName, int vendorId, int productId,
+            @NonNull IBinder deviceToken, int displayId, int height, int width)
+            throws DeviceCreationException {
+        final String phys = createPhys(PHYS_TYPE_STYLUS);
+        createDeviceInternal(InputDeviceDescriptor.TYPE_STYLUS, deviceName, vendorId,
+                productId, deviceToken, displayId, phys,
+                () -> mNativeWrapper.openUinputStylus(deviceName, vendorId, productId, phys,
+                        height, width));
     }
 
     void unregisterInputDevice(@NonNull IBinder token) {
@@ -232,10 +211,10 @@ class InputController {
             final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.remove(
                     token);
             if (inputDeviceDescriptor == null) {
-                throw new IllegalArgumentException(
-                        "Could not unregister input device for given token");
+                Slog.w(TAG, "Could not unregister input device for given token.");
+            } else {
+                closeInputDeviceDescriptorLocked(token, inputDeviceDescriptor);
             }
-            closeInputDeviceDescriptorLocked(token, inputDeviceDescriptor);
         }
     }
 
@@ -245,7 +224,7 @@ class InputController {
         token.unlinkToDeath(inputDeviceDescriptor.getDeathRecipient(), /* flags= */ 0);
         mNativeWrapper.closeUinput(inputDeviceDescriptor.getNativePointer());
         String phys = inputDeviceDescriptor.getPhys();
-        InputManagerGlobal.getInstance().removeUniqueIdAssociation(phys);
+        InputManagerGlobal.getInstance().removeUniqueIdAssociationByPort(phys);
         // Type associations are added in the case of navigation touchpads. Those should be removed
         // once the input device gets closed.
         if (inputDeviceDescriptor.getType() == InputDeviceDescriptor.TYPE_NAVIGATION_TOUCHPAD) {
@@ -254,16 +233,6 @@ class InputController {
 
         if (inputDeviceDescriptor.getType() == InputDeviceDescriptor.TYPE_KEYBOARD) {
             mInputManagerInternal.removeKeyboardLayoutAssociation(phys);
-        }
-
-        // Reset values to the default if all virtual mice are unregistered, or set display
-        // id if there's another mouse (choose the most recent). The inputDeviceDescriptor must be
-        // removed from the mInputDeviceDescriptors instance variable prior to this point.
-        if (inputDeviceDescriptor.isMouse()) {
-            if (mInputManagerInternal.getVirtualMousePointerDisplayId()
-                    == inputDeviceDescriptor.getDisplayId()) {
-                updateActivePointerDisplayIdLocked();
-            }
         }
     }
 
@@ -284,61 +253,24 @@ class InputController {
         mInputManagerInternal.setPointerIconVisible(visible, displayId);
     }
 
-    void setPointerAcceleration(float pointerAcceleration, int displayId) {
-        mInputManagerInternal.setPointerAcceleration(pointerAcceleration, displayId);
+    void setMousePointerAccelerationEnabled(boolean enabled, int displayId) {
+        mInputManagerInternal.setMousePointerAccelerationEnabled(enabled, displayId);
     }
 
     void setDisplayEligibilityForPointerCapture(boolean isEligible, int displayId) {
         mInputManagerInternal.setDisplayEligibilityForPointerCapture(displayId, isEligible);
     }
 
-    void setLocalIme(int displayId) {
-        // WM throws a SecurityException if the display is untrusted.
-        if ((mDisplayManagerInternal.getDisplayInfo(displayId).flags & Display.FLAG_TRUSTED)
-                == Display.FLAG_TRUSTED) {
-            mWindowManager.setDisplayImePolicy(displayId,
-                    WindowManager.DISPLAY_IME_POLICY_LOCAL);
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void updateActivePointerDisplayIdLocked() {
-        InputDeviceDescriptor mostRecentlyCreatedMouse = null;
-        for (int i = 0; i < mInputDeviceDescriptors.size(); ++i) {
-            InputDeviceDescriptor otherInputDeviceDescriptor = mInputDeviceDescriptors.valueAt(i);
-            if (otherInputDeviceDescriptor.isMouse()) {
-                if (mostRecentlyCreatedMouse == null
-                        || (otherInputDeviceDescriptor.getCreationOrderNumber()
-                        > mostRecentlyCreatedMouse.getCreationOrderNumber())) {
-                    mostRecentlyCreatedMouse = otherInputDeviceDescriptor;
-                }
-            }
-        }
-        if (mostRecentlyCreatedMouse != null) {
-            mInputManagerInternal.setVirtualMousePointerDisplayId(
-                    mostRecentlyCreatedMouse.getDisplayId());
-        } else {
-            // All mice have been unregistered
-            mInputManagerInternal.setVirtualMousePointerDisplayId(Display.INVALID_DISPLAY);
-        }
+    void setDisplayImePolicy(int displayId, @WindowManager.DisplayImePolicy int policy) {
+        mWindowManager.setDisplayImePolicy(displayId, policy);
     }
 
     /**
-     * Validates a device name by checking length and whether a device with the same name
-     * already exists. Throws exceptions if the validation fails.
+     * Validates a device name by checking whether a device with the same name already exists.
      * @param deviceName The name of the device to be validated
      * @throws DeviceCreationException if {@code deviceName} is not valid.
      */
     private void validateDeviceName(String deviceName) throws DeviceCreationException {
-        // Comparison is greater or equal because the device name must fit into a const char*
-        // including the \0-terminator. Therefore the actual number of bytes that can be used
-        // for device name is DEVICE_NAME_MAX_LENGTH - 1
-        if (deviceName.getBytes(StandardCharsets.UTF_8).length >= DEVICE_NAME_MAX_LENGTH) {
-            throw new DeviceCreationException(
-                    "Input device name exceeds maximum length of " + DEVICE_NAME_MAX_LENGTH
-                            + "bytes: " + deviceName);
-        }
-
         synchronized (mLock) {
             for (int i = 0; i < mInputDeviceDescriptors.size(); ++i) {
                 if (mInputDeviceDescriptors.valueAt(i).mName.equals(deviceName)) {
@@ -350,12 +282,12 @@ class InputController {
     }
 
     private static String createPhys(@PhysType String type) {
-        return String.format("virtual%s:%d", type, sNextPhysId.getAndIncrement());
+        return formatSimple("virtual%s:%d", type, sNextPhysId.getAndIncrement());
     }
 
     private void setUniqueIdAssociation(int displayId, String phys) {
         final String displayUniqueId = mDisplayManagerInternal.getDisplayInfo(displayId).uniqueId;
-        InputManagerGlobal.getInstance().addUniqueIdAssociation(phys, displayUniqueId);
+        InputManagerGlobal.getInstance().addUniqueIdAssociationByPort(phys, displayUniqueId);
     }
 
     boolean sendDpadKeyEvent(@NonNull IBinder token, @NonNull VirtualKeyEvent event) {
@@ -363,8 +295,7 @@ class InputController {
             final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
                     token);
             if (inputDeviceDescriptor == null) {
-                throw new IllegalArgumentException(
-                        "Could not send key event to input device for given token");
+                return false;
             }
             return mNativeWrapper.writeDpadKeyEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getKeyCode(), event.getAction(), event.getEventTimeNanos());
@@ -376,8 +307,7 @@ class InputController {
             final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
                     token);
             if (inputDeviceDescriptor == null) {
-                throw new IllegalArgumentException(
-                        "Could not send key event to input device for given token");
+                return false;
             }
             return mNativeWrapper.writeKeyEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getKeyCode(), event.getAction(), event.getEventTimeNanos());
@@ -389,13 +319,7 @@ class InputController {
             final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
                     token);
             if (inputDeviceDescriptor == null) {
-                throw new IllegalArgumentException(
-                        "Could not send button event to input device for given token");
-            }
-            if (inputDeviceDescriptor.getDisplayId()
-                    != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
-                throw new IllegalStateException(
-                        "Display id associated with this mouse is not currently targetable");
+                return false;
             }
             return mNativeWrapper.writeButtonEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getButtonCode(), event.getAction(), event.getEventTimeNanos());
@@ -407,8 +331,7 @@ class InputController {
             final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
                     token);
             if (inputDeviceDescriptor == null) {
-                throw new IllegalArgumentException(
-                        "Could not send touch event to input device for given token");
+                return false;
             }
             return mNativeWrapper.writeTouchEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getPointerId(), event.getToolType(), event.getAction(), event.getX(),
@@ -422,13 +345,7 @@ class InputController {
             final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
                     token);
             if (inputDeviceDescriptor == null) {
-                throw new IllegalArgumentException(
-                        "Could not send relative event to input device for given token");
-            }
-            if (inputDeviceDescriptor.getDisplayId()
-                    != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
-                throw new IllegalStateException(
-                        "Display id associated with this mouse is not currently targetable");
+                return false;
             }
             return mNativeWrapper.writeRelativeEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getRelativeX(), event.getRelativeY(), event.getEventTimeNanos());
@@ -440,13 +357,7 @@ class InputController {
             final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
                     token);
             if (inputDeviceDescriptor == null) {
-                throw new IllegalArgumentException(
-                        "Could not send scroll event to input device for given token");
-            }
-            if (inputDeviceDescriptor.getDisplayId()
-                    != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
-                throw new IllegalStateException(
-                        "Display id associated with this mouse is not currently targetable");
+                return false;
             }
             return mNativeWrapper.writeScrollEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getXAxisMovement(), event.getYAxisMovement(), event.getEventTimeNanos());
@@ -461,12 +372,34 @@ class InputController {
                 throw new IllegalArgumentException(
                         "Could not get cursor position for input device for given token");
             }
-            if (inputDeviceDescriptor.getDisplayId()
-                    != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
-                throw new IllegalStateException(
-                        "Display id associated with this mouse is not currently targetable");
+            return LocalServices.getService(InputManagerInternal.class).getCursorPosition(
+                    inputDeviceDescriptor.getDisplayId());
+        }
+    }
+
+    boolean sendStylusMotionEvent(@NonNull IBinder token, @NonNull VirtualStylusMotionEvent event) {
+        synchronized (mLock) {
+            final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
+                    token);
+            if (inputDeviceDescriptor == null) {
+                return false;
             }
-            return LocalServices.getService(InputManagerInternal.class).getCursorPosition();
+            return mNativeWrapper.writeStylusMotionEvent(inputDeviceDescriptor.getNativePointer(),
+                    event.getToolType(), event.getAction(), event.getX(), event.getY(),
+                    event.getPressure(), event.getTiltX(), event.getTiltY(),
+                    event.getEventTimeNanos());
+        }
+    }
+
+    boolean sendStylusButtonEvent(@NonNull IBinder token, @NonNull VirtualStylusButtonEvent event) {
+        synchronized (mLock) {
+            final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
+                    token);
+            if (inputDeviceDescriptor == null) {
+                return false;
+            }
+            return mNativeWrapper.writeStylusButtonEvent(inputDeviceDescriptor.getNativePointer(),
+                    event.getButtonCode(), event.getAction(), event.getEventTimeNanos());
         }
     }
 
@@ -497,7 +430,7 @@ class InputController {
         }
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     Map<IBinder, InputDeviceDescriptor> getInputDeviceDescriptors() {
         final Map<IBinder, InputDeviceDescriptor> inputDeviceDescriptors = new ArrayMap<>();
         synchronized (mLock) {
@@ -514,6 +447,8 @@ class InputController {
             String phys);
     private static native long nativeOpenUinputTouchscreen(String deviceName, int vendorId,
             int productId, String phys, int height, int width);
+    private static native long nativeOpenUinputStylus(String deviceName, int vendorId,
+            int productId, String phys, int height, int width);
     private static native void nativeCloseUinput(long ptr);
     private static native boolean nativeWriteDpadKeyEvent(long ptr, int androidKeyCode, int action,
             long eventTimeNanos);
@@ -528,6 +463,10 @@ class InputController {
             float relativeY, long eventTimeNanos);
     private static native boolean nativeWriteScrollEvent(long ptr, float xAxisMovement,
             float yAxisMovement, long eventTimeNanos);
+    private static native boolean nativeWriteStylusMotionEvent(long ptr, int toolType, int action,
+            int locationX, int locationY, int pressure, int tiltX, int tiltY, long eventTimeNanos);
+    private static native boolean nativeWriteStylusButtonEvent(long ptr, int buttonCode, int action,
+            long eventTimeNanos);
 
     /** Wrapper around the static native methods for tests. */
     @VisibleForTesting
@@ -549,6 +488,11 @@ class InputController {
                 int productId, String phys, int height, int width) {
             return nativeOpenUinputTouchscreen(deviceName, vendorId, productId, phys, height,
                     width);
+        }
+
+        public long openUinputStylus(String deviceName, int vendorId, int productId, String phys,
+                int height, int width) {
+            return nativeOpenUinputStylus(deviceName, vendorId, productId, phys, height, width);
         }
 
         public void closeUinput(long ptr) {
@@ -587,21 +531,35 @@ class InputController {
                 long eventTimeNanos) {
             return nativeWriteScrollEvent(ptr, xAxisMovement, yAxisMovement, eventTimeNanos);
         }
+
+        public boolean writeStylusMotionEvent(long ptr, int toolType, int action, int locationX,
+                int locationY, int pressure, int tiltX, int tiltY, long eventTimeNanos) {
+            return nativeWriteStylusMotionEvent(ptr, toolType, action, locationX, locationY,
+                    pressure, tiltX, tiltY, eventTimeNanos);
+        }
+
+        public boolean writeStylusButtonEvent(long ptr, int buttonCode, int action,
+                long eventTimeNanos) {
+            return nativeWriteStylusButtonEvent(ptr, buttonCode, action, eventTimeNanos);
+        }
     }
 
-    @VisibleForTesting static final class InputDeviceDescriptor {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    static final class InputDeviceDescriptor {
 
         static final int TYPE_KEYBOARD = 1;
         static final int TYPE_MOUSE = 2;
         static final int TYPE_TOUCHSCREEN = 3;
         static final int TYPE_DPAD = 4;
         static final int TYPE_NAVIGATION_TOUCHPAD = 5;
+        static final int TYPE_STYLUS = 6;
         @IntDef(prefix = { "TYPE_" }, value = {
                 TYPE_KEYBOARD,
                 TYPE_MOUSE,
                 TYPE_TOUCHSCREEN,
                 TYPE_DPAD,
                 TYPE_NAVIGATION_TOUCHPAD,
+                TYPE_STYLUS,
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface Type {
@@ -694,32 +652,37 @@ class InputController {
 
         private int mInputDeviceId = IInputConstants.INVALID_INPUT_DEVICE_ID;
 
-        WaitForDevice(String deviceName, int vendorId, int productId) {
+        WaitForDevice(String deviceName, int vendorId, int productId, int associatedDisplayId) {
             mListener = new InputManager.InputDeviceListener() {
                 @Override
                 public void onInputDeviceAdded(int deviceId) {
-                    final InputDevice device = InputManagerGlobal.getInstance().getInputDevice(
-                            deviceId);
-                    Objects.requireNonNull(device, "Newly added input device was null.");
-                    if (!device.getName().equals(deviceName)) {
-                        return;
-                    }
-                    final InputDeviceIdentifier id = device.getIdentifier();
-                    if (id.getVendorId() != vendorId || id.getProductId() != productId) {
-                        return;
-                    }
-                    mInputDeviceId = deviceId;
-                    mDeviceAddedLatch.countDown();
+                    onInputDeviceChanged(deviceId);
                 }
 
                 @Override
                 public void onInputDeviceRemoved(int deviceId) {
-
                 }
 
                 @Override
                 public void onInputDeviceChanged(int deviceId) {
+                    if (isMatchingDevice(deviceId)) {
+                        mInputDeviceId = deviceId;
+                        mDeviceAddedLatch.countDown();
+                    }
+                }
 
+                private boolean isMatchingDevice(int deviceId) {
+                    final InputDevice device = InputManagerGlobal.getInstance().getInputDevice(
+                            deviceId);
+                    Objects.requireNonNull(device, "Newly added input device was null.");
+                    if (!device.getName().equals(deviceName)) {
+                        return false;
+                    }
+                    final InputDeviceIdentifier id = device.getIdentifier();
+                    if (id.getVendorId() != vendorId || id.getProductId() != productId) {
+                        return false;
+                    }
+                    return device.getAssociatedDisplayId() == associatedDisplayId;
                 }
             };
             InputManagerGlobal.getInstance().registerInputDeviceListener(mListener, mHandler);
@@ -756,12 +719,18 @@ class InputController {
     }
 
     /** An internal exception that is thrown to indicate an error when opening a virtual device. */
-    private static class DeviceCreationException extends Exception {
+    static class DeviceCreationException extends Exception {
+        DeviceCreationException() {
+            super();
+        }
         DeviceCreationException(String message) {
             super(message);
         }
-        DeviceCreationException(String message, Exception cause) {
+        DeviceCreationException(String message, Throwable cause) {
             super(message, cause);
+        }
+        DeviceCreationException(Throwable cause) {
+            super(cause);
         }
     }
 
@@ -795,7 +764,7 @@ class InputController {
         final int inputDeviceId;
 
         setUniqueIdAssociation(displayId, phys);
-        try (WaitForDevice waiter = new WaitForDevice(deviceName, vendorId, productId)) {
+        try (WaitForDevice waiter = new WaitForDevice(deviceName, vendorId, productId, displayId)) {
             ptr = deviceOpener.get();
             // See INVALID_PTR in libs/input/VirtualInputDevice.cpp.
             if (ptr == 0) {
@@ -820,7 +789,7 @@ class InputController {
                 throw e;
             }
         } catch (DeviceCreationException e) {
-            InputManagerGlobal.getInstance().removeUniqueIdAssociation(phys);
+            InputManagerGlobal.getInstance().removeUniqueIdAssociationByPort(phys);
             throw e;
         }
 
@@ -828,6 +797,33 @@ class InputController {
             mInputDeviceDescriptors.put(deviceToken,
                     new InputDeviceDescriptor(ptr, binderDeathRecipient, type, displayId, phys,
                             deviceName, inputDeviceId));
+        }
+
+        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
+            String metricId = getMetricIdForInputType(type);
+            if (metricId != null) {
+                Counter.logIncrementWithUid(metricId, mAttributionSource.getUid());
+            }
+        }
+    }
+
+    private static String getMetricIdForInputType(@InputDeviceDescriptor.Type int type) {
+        switch (type) {
+            case InputDeviceDescriptor.TYPE_KEYBOARD:
+                return "virtual_devices.value_virtual_keyboard_created_count";
+            case InputDeviceDescriptor.TYPE_MOUSE:
+                return "virtual_devices.value_virtual_mouse_created_count";
+            case InputDeviceDescriptor.TYPE_TOUCHSCREEN:
+                return "virtual_devices.value_virtual_touchscreen_created_count";
+            case InputDeviceDescriptor.TYPE_DPAD:
+                return "virtual_devices.value_virtual_dpad_created_count";
+            case InputDeviceDescriptor.TYPE_NAVIGATION_TOUCHPAD:
+                return "virtual_devices.value_virtual_navigationtouchpad_created_count";
+            case InputDeviceDescriptor.TYPE_STYLUS:
+                return "virtual_devices.value_virtual_stylus_created_count";
+            default:
+                Log.e(TAG, "No metric known for input type: " + type);
+                return null;
         }
     }
 

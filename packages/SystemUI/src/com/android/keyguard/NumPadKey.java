@@ -15,7 +15,7 @@
  */
 package com.android.keyguard;
 
-import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
+import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -30,13 +30,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Viewgroup for the bouncer numpad button, specifically for digits.
@@ -105,8 +105,6 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         }
 
         setOnClickListener(mListener);
-        setOnHoverListener(new LiftToActivateListener(
-                (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE)));
 
         mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
@@ -211,7 +209,9 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         left = centerX - mKlondikeText.getMeasuredWidth() / 2;
         mKlondikeText.layout(left, top, left + mKlondikeText.getMeasuredWidth(), bottom);
 
-        if (mAnimator != null) mAnimator.onLayout(b - t);
+        int width = r - l;
+        int height = b - t;
+        if (mAnimator != null) mAnimator.onLayout(width, height);
     }
 
     @Override
@@ -237,5 +237,11 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
      */
     public void setAnimationEnabled(boolean enabled) {
         mAnimationsEnabled = enabled;
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setTextEntryKey(true);
     }
 }

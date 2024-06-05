@@ -18,7 +18,6 @@ package com.android.server.notification;
 
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
-
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
@@ -27,6 +26,9 @@ import static android.service.notification.NotificationStats.DISMISSAL_OTHER;
 import static com.android.server.notification.NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_CLICK;
 import static com.android.server.notification.NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_GROUP_SUMMARY_CANCELED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_USER_OTHER;
+import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED;
+import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_UPDATED;
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -42,9 +44,12 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;
+import com.android.internal.util.FrameworkStatsLog;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.time.Duration;
 
 
 @SmallTest
@@ -166,6 +171,42 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testGetFsiState_isUpdate_zero() {
+        final int fsiState = NotificationRecordLogger.getFsiState(
+                /* hasFullScreenIntent= */ true,
+                /* hasFsiRequestedButDeniedFlag= */ true,
+                /* eventType= */ NOTIFICATION_UPDATED);
+        assertEquals(0, fsiState);
+    }
+
+    @Test
+    public void testGetFsiState_hasFsi_allowedEnum() {
+        final int fsiState = NotificationRecordLogger.getFsiState(
+                /* hasFullScreenIntent= */ true,
+                /* hasFsiRequestedButDeniedFlag= */ false,
+                /* eventType= */ NOTIFICATION_POSTED);
+        assertEquals(FrameworkStatsLog.NOTIFICATION_REPORTED__FSI_STATE__FSI_ALLOWED, fsiState);
+    }
+
+    @Test
+    public void testGetFsiState_fsiPermissionDenied_deniedEnum() {
+        final int fsiState = NotificationRecordLogger.getFsiState(
+                /* hasFullScreenIntent= */ false,
+                /* hasFsiRequestedButDeniedFlag= */ true,
+                /* eventType= */ NOTIFICATION_POSTED);
+        assertEquals(FrameworkStatsLog.NOTIFICATION_REPORTED__FSI_STATE__FSI_DENIED, fsiState);
+    }
+
+    @Test
+    public void testGetFsiState_noFsi_noFsiEnum() {
+        final int fsiState = NotificationRecordLogger.getFsiState(
+                /* hasFullScreenIntent= */ false,
+                /* hasFsiRequestedButDeniedFlag= */ false,
+                /* eventType= */ NOTIFICATION_POSTED);
+        assertEquals(FrameworkStatsLog.NOTIFICATION_REPORTED__FSI_STATE__NO_FSI, fsiState);
+    }
+
+    @Test
     public void testBubbleGroupSummaryDismissal() {
         assertEquals(NOTIFICATION_CANCEL_GROUP_SUMMARY_CANCELED,
                 NotificationRecordLogger.NotificationCancelledEvent.fromCancelReason(
@@ -177,5 +218,13 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
         assertEquals(NOTIFICATION_CANCEL_USER_OTHER,
                 NotificationRecordLogger.NotificationCancelledEvent.fromCancelReason(
                         REASON_CANCEL, DISMISSAL_OTHER));
+    }
+
+    @Test
+    public void testGetAgeInMinutes() {
+        long postTimeMs = Duration.ofMinutes(5).toMillis();
+        long whenMs = Duration.ofMinutes(2).toMillis();
+        int age = NotificationRecordLogger.getAgeInMinutes(postTimeMs, whenMs);
+        assertThat(age).isEqualTo(3);
     }
 }

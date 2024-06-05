@@ -19,19 +19,18 @@
 #include <cinttypes>
 #include <vector>
 
-#include "android-base/stringprintf.h"
-#include "androidfw/ConfigDescription.h"
-#include "androidfw/StringPiece.h"
-
 #include "Debug.h"
 #include "Diagnostics.h"
 #include "LoadedApk.h"
 #include "Util.h"
+#include "android-base/stringprintf.h"
+#include "androidfw/ConfigDescription.h"
+#include "androidfw/FileStream.h"
+#include "androidfw/StringPiece.h"
 #include "format/Container.h"
 #include "format/binary/BinaryResourceParser.h"
 #include "format/binary/XmlFlattener.h"
 #include "format/proto/ProtoDeserialize.h"
-#include "io/FileStream.h"
 #include "io/ZipArchive.h"
 #include "process/IResourceTableConsumer.h"
 #include "text/Printer.h"
@@ -112,6 +111,7 @@ class DumpContext : public IAaptContext {
 
   void SetVerbose(bool val) {
     verbose_ = val;
+    diagnostics_.SetVerbose(val);
   }
 
   int GetMinSdkVersion() override {
@@ -144,7 +144,7 @@ int DumpAPCCommand::Action(const std::vector<std::string>& args) {
 
   bool error = false;
   for (auto container : args) {
-    io::FileInputStream input(container);
+    android::FileInputStream input(container);
     if (input.HadError()) {
       context.GetDiagnostics()->Error(android::DiagMessage(container)
                                       << "failed to open file: " << input.GetError());

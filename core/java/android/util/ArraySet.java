@@ -20,8 +20,6 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 
-import libcore.util.EmptyArray;
-
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
@@ -53,6 +51,7 @@ import java.util.function.Predicate;
  *
  * <p>This structure is <b>NOT</b> thread-safe.</p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ArraySet<E> implements Collection<E>, Set<E> {
     private static final boolean DEBUG = false;
     private static final String TAG = "ArraySet";

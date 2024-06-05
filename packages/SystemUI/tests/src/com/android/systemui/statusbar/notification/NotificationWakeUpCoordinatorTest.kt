@@ -16,26 +16,39 @@
 
 package com.android.systemui.statusbar.notification
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import androidx.core.animation.AnimatorTestRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.AnimatorTestRule
+import com.android.systemui.communal.data.repository.communalSceneRepository
+import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeViewController.Companion.WAKEUP_ANIMATION_DELAY_MS
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_WAKEUP
+import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.HeadsUpManager
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,12 +59,16 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 
-@RunWith(AndroidTestingRunner::class)
+@OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
 
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
+
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     private val dumpManager: DumpManager = mock()
     private val headsUpManager: HeadsUpManager = mock()
@@ -59,7 +76,7 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
     private val bypassController: KeyguardBypassController = mock()
     private val dozeParameters: DozeParameters = mock()
     private val screenOffAnimationController: ScreenOffAnimationController = mock()
-    private val logger: NotificationWakeUpCoordinatorLogger = mock()
+    private val logger = NotificationWakeUpCoordinatorLogger(logcatLogBuffer())
     private val stackScrollerController: NotificationStackScrollLayoutController = mock()
     private val wakeUpListener: NotificationWakeUpCoordinator.WakeUpListener = mock()
 
@@ -92,6 +109,7 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
         whenever(statusBarStateController.state).then { statusBarState }
         notificationWakeUpCoordinator =
             NotificationWakeUpCoordinator(
+                kosmos.applicationCoroutineScope,
                 dumpManager,
                 headsUpManager,
                 statusBarStateController,
@@ -99,6 +117,8 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
                 dozeParameters,
                 screenOffAnimationController,
                 logger,
+                kosmos.notificationsKeyguardInteractor,
+                kosmos.communalInteractor,
             )
         statusBarStateCallback = withArgCaptor {
             verify(statusBarStateController).addCallback(capture())
@@ -153,6 +173,39 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
         verifyStackScrollerDozeAndHideAmount(dozeAmount = 0f, hideAmount = 0f)
         assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isFalse()
     }
+
+    @Test
+    fun setDozeToZeroWhenCommunalShowingWillFullyHideNotifications() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(CommunalScenes.Communal)
+                )
+            kosmos.communalSceneRepository.setTransitionState(transitionState)
+            runCurrent()
+            setDozeAmount(0f)
+            verifyStackScrollerDozeAndHideAmount(dozeAmount = 1f, hideAmount = 1f)
+            assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isTrue()
+        }
+
+    @Test
+    fun closingCommunalWillShowNotifications() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(CommunalScenes.Communal)
+                )
+            kosmos.communalSceneRepository.setTransitionState(transitionState)
+            runCurrent()
+            setDozeAmount(0f)
+            verifyStackScrollerDozeAndHideAmount(dozeAmount = 1f, hideAmount = 1f)
+            assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isTrue()
+
+            transitionState.value = ObservableTransitionState.Idle(CommunalScenes.Blank)
+            runCurrent()
+            verifyStackScrollerDozeAndHideAmount(dozeAmount = 0f, hideAmount = 0f)
+            assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isFalse()
+        }
 
     @Test
     fun switchingToShadeWithBypassEnabledWillShowNotifications() {

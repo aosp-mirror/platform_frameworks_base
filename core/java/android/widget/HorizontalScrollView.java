@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static android.view.flags.Flags.viewVelocityApi;
+
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -1488,6 +1490,11 @@ public class HorizontalScrollView extends FrameLayout {
             if (!awakenScrollBars()) {
                 postInvalidateOnAnimation();
             }
+
+            // For variable refresh rate project to track the current velocity of this View
+            if (viewVelocityApi()) {
+                setFrameContentVelocity(Math.abs(mScroller.getCurrVelocity()));
+            }
         }
     }
 
@@ -1498,6 +1505,11 @@ public class HorizontalScrollView extends FrameLayout {
      * @return The unconsumed delta after the EdgeEffects have had an opportunity to consume.
      */
     private int consumeFlingInStretch(int unconsumed) {
+        int scrollX = getScrollX();
+        if (scrollX < 0 || scrollX > getScrollRange()) {
+            // We've overscrolled, so don't stretch
+            return unconsumed;
+        }
         if (unconsumed > 0 && mEdgeGlowLeft != null && mEdgeGlowLeft.getDistance() != 0f) {
             int size = getWidth();
             float deltaDistance = -unconsumed * FLING_DESTRETCH_FACTOR / size;
@@ -1804,6 +1816,11 @@ public class HorizontalScrollView extends FrameLayout {
             if (shouldFling) {
                 mScroller.fling(mScrollX, mScrollY, velocityX, 0, 0,
                         maxScroll, 0, 0, width / 2, 0);
+
+                // For variable refresh rate project to track the current velocity of this View
+                if (viewVelocityApi()) {
+                    setFrameContentVelocity(Math.abs(mScroller.getCurrVelocity()));
+                }
 
                 final boolean movingRight = velocityX > 0;
 

@@ -1,0 +1,286 @@
+package: "android.content.pm"
+container: "system"
+
+flag {
+    name: "quarantined_enabled"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag for Quarantined state"
+    bug: "269127435"
+}
+
+flag {
+    name: "archiving"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the archiving feature."
+    bug: "278553670"
+}
+
+flag {
+    name: "disallow_sdk_libs_to_be_apps"
+    namespace: "package_manager_service"
+    description: "Feature flag to disallow a <sdk-library> to be an <application>."
+    bug: "295843617"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "stay_stopped"
+    is_exported: true
+    namespace: "backstage_power"
+    description: "Feature flag to improve stopped state enforcement"
+    bug: "296644915"
+}
+
+flag {
+    name: "nullable_data_dir"
+    namespace: "package_manager_service"
+    description: "Feature flag to allow ApplicationInfo.dataDir to be null."
+    bug: "302587814"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "get_package_info"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the feature to retrieve package info without installation."
+    bug: "269149275"
+}
+
+flag {
+    name: "use_art_service_v2"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the features that rely on new ART Service APIs that are in the VIC version of the ART module."
+    bug: "304741685"
+}
+
+flag {
+    name: "sdk_lib_independence"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to keep app working even if its declared sdk-library dependency is unavailable."
+    bug: "295827951"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "rollback_lifetime"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to enable custom rollback lifetime during install."
+    bug: "299670324"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "improve_install_freeze"
+    namespace: "package_manager_service"
+    description: "Feature flag to improve install freeze time."
+    bug: "307561242"
+}
+
+flag {
+    name: "get_resolved_apk_path"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to retrieve resolved path of the base APK during an app install."
+    bug: "269728874"
+}
+
+flag {
+    name: "lightweight_invisible_label_detection"
+    namespace: "package_manager_service"
+    description: "Feature flag to detect the invisible labels in Launcher Apps"
+    bug: "299586370"
+}
+
+flag {
+    name: "read_install_info"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to read install related information from an APK."
+    bug: "275658500"
+}
+
+flag {
+    name: "use_pia_v2"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the refactored Package Installer app with updated UI."
+    bug: "182205982"
+}
+
+flag {
+    name: "improve_install_dont_kill"
+    namespace: "package_manager_service"
+    description: "Feature flag to reduce app crashes caused by split installs with INSTALL_DONT_KILL"
+    bug: "291212866"
+}
+
+flag {
+    name: "relative_reference_intent_filters"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to enable relative reference intent filters"
+    bug: "307556883"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "fix_duplicated_flags"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to fix duplicated PackageManager flag values"
+    bug: "314815969"
+}
+
+flag {
+    name: "get_package_storage_stats"
+    namespace: "system_performance"
+    is_exported: true
+    description: "Add dumpsys entry point for package StorageStats"
+    bug: "332905331"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "provide_info_of_apk_in_apex"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to provide the information of APK-in-APEX"
+    bug: "306329516"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "improve_home_app_behavior"
+    namespace: "package_manager_service"
+    description: "Feature flag to improve the uninstallation and preferred activity of home app."
+    bug: "310801107"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "introduce_media_processing_type"
+    is_exported: true
+    namespace: "backstage_power"
+    description: "Add a new FGS type for media processing use cases."
+    bug: "317788011"
+}
+
+flag {
+    name: "encode_app_intent"
+    namespace: "package_manager_service"
+    description: "Feature flag to encode app intent."
+    bug: "281848623"
+}
+
+flag {
+    name: "recoverability_detection"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to enable recoverability detection feature. It includes GMS core rollback and improvements to rescue party."
+    bug: "291135724"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "fix_system_apps_first_install_time"
+    namespace: "package_manager_service"
+    description: "Feature flag to fix the first-install timestamps for system apps."
+    bug: "321258605"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "allow_sdk_sandbox_query_intent_activities"
+    namespace: "package_manager_service"
+    description: "Feature flag to allow the sandbox SDK to query intent activities of the client app."
+    bug: "295842134"
+}
+
+flag {
+    name: "emergency_install_permission"
+    is_exported: true
+    namespace: "permissions"
+    description: "Feature flag to enable permission EMERGENCY_INSTALL_PACKAGES"
+    bug: "321080601"
+}
+
+flag {
+    name: "asl_in_apk_app_metadata_source"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to allow to know if the Android Safety Label (ASL) of an app is provided by the app's APK itself, or provided by an installer."
+    bug: "287487923"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "force_multi_arch_native_libs_match"
+    namespace: "package_manager_service"
+    description: "Feature flag to force an multiArch app's native libraries to match with the natively supported ABIs of the device"
+    bug: "282783453"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "set_pre_verified_domains"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to enable pre-verified domains"
+    bug: "307327678"
+}
+
+flag {
+    name: "restrict_nonpreloads_system_shareduids"
+    namespace: "package_manager_service"
+    description: "Feature flag to restrict apps from joining system shared uids"
+    bug: "308573169"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "min_target_sdk_24"
+    namespace: "responsible_apis"
+    description: "Feature flag to bump min target sdk to 24"
+    bug: "297603927"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "wait_application_killed"
+    namespace: "package_manager_service"
+    description: "Feature flag to control whether to wait until the application is killed when clear application data"
+    bug: "31009094"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "component_state_changed_metrics"
+    namespace: "package_manager_service"
+    description: "Feature flag to log the metrics when the component state is changed."
+    bug: "316916801"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "package_restart_query_disabled_by_default"
+    namespace: "package_manager_service"
+    description: "Feature flag to register broadcast receiver only support package restart query."
+    bug: "300309050"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "get_package_info_with_fd"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the feature to retrieve package info without installation with a file descriptor."
+    bug: "340879905"
+}

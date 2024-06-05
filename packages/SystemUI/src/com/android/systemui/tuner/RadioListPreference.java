@@ -29,8 +29,8 @@ import androidx.preference.PreferenceScreen;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.res.R;
 
 import java.util.Objects;
 

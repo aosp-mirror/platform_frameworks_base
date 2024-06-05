@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddas"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddas snabbt"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddas långsamt"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddningen har optimerats för att skydda batteriet"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ett problem uppstod med att ladda tillbehöret"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Lås upp genom att trycka på Meny."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddningen har pausats för att skydda batteriet"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kontrollera laddningstillbehöret"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Nätverk låst"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Inget SIM-kort"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Lägg till ett SIM-kort."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM-kort saknas eller går inte att läsa. Lägg till ett SIM-kort."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM-kortet går inte att använda."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Ditt SIM-kort har inaktiverats permanent.\n Kontakta din operatör och be om ett nytt SIM-kort."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-kortet är låst."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM-kortet har låsts med PUK-kod."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM-kortet låses upp …"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Pinkod krävs efter låsning"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Lösenord krävs efter låsning"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Mönster krävs efter låsning"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Uppdateringen installeras under inaktiva timmar"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Uppdateringen installeras när enheten inte används"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Ökad säkerhet krävs. Pinkoden har inte använts på länge."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Ökad säkerhet krävs. Lösenordet har inte använts på länge."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Ökad säkerhet krävs. Mönstret har inte använts på länge."</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"För ytterligare säkerhet använder du mönstret i stället"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"För ytterligare säkerhet använder du pinkoden i stället"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"För ytterligare säkerhet använder du lösenordet i stället"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Du måste ange en pinkod för ytterligare säkerhet"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Du måste ange ett mönster för ytterligare säkerhet"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Du måste ange ett lösenord för ytterligare säkerhet"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administratören har låst enheten"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Enheten har låsts manuellt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Identifierades inte"</string>

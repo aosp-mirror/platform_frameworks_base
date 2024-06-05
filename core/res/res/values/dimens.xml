@@ -65,13 +65,16 @@
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
     <dimen name="navigation_bar_width">48dp</dimen>
     <!-- Height of the bottom taskbar not including decorations like rounded corners. -->
-    <dimen name="taskbar_frame_height">60dp</dimen>
+    <dimen name="taskbar_frame_height">56dp</dimen>
     <!-- How much we expand the touchable region of the status bar below the notch to catch touches
          that just start below the notch. -->
     <dimen name="display_cutout_touchable_region_size">12dp</dimen>
     <!-- The default margin used in immersive mode to capture the start of a swipe gesture from the
          edge of the screen to show the system bars. -->
     <dimen name="system_gestures_start_threshold">24dp</dimen>
+    <!-- The minimum swipe gesture distance for showing the system bars when in immersive mode. This
+         swipe must be within the specified system_gestures_start_threshold area. -->
+    <dimen name="system_gestures_distance_threshold">24dp</dimen>
 
     <!-- Height of the bottom navigation bar frame; this is different than navigation_bar_height
          where that is the height reported to all the other windows to resize themselves around the
@@ -95,8 +98,10 @@
     <dimen name="navigation_bar_height_landscape_car_mode">96dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen in car mode -->
     <dimen name="navigation_bar_width_car_mode">96dp</dimen>
-    <!-- Height of notification icons in the status bar -->
+    <!-- Original dp height of notification icons in the status bar  -->
     <dimen name="status_bar_icon_size">22dip</dimen>
+    <!-- New sp height of notification icons in the status bar  -->
+    <dimen name="status_bar_icon_size_sp">22sp</dimen>
     <!-- Desired size of system icons in status bar. -->
     <dimen name="status_bar_system_icon_size">15dp</dimen>
     <!-- Intrinsic size of most system icons in status bar. This is the default value that
@@ -346,6 +351,9 @@
 
     <!-- the height of the expand button pill -->
     <dimen name="notification_expand_button_pill_height">24dp</dimen>
+
+    <!-- the padding of the expand icon in the notification header -->
+    <dimen name="notification_expand_button_icon_padding">2dp</dimen>
 
     <!-- Vertical margin for the headerless notification content, when content has 1 line -->
     <!-- 16 * 2 (margins) + 24 (1 line) = 56 (notification) -->
@@ -685,6 +693,9 @@
     <!-- Parameters applied to line disappearing animation in LockPatternView in milliseconds. -->
     <integer name="lock_pattern_line_fade_out_duration">500</integer>
     <integer name="lock_pattern_line_fade_out_delay">150</integer>
+    <!-- Parameters applied to fade pattern animation in LockPatternView in milliseconds. -->
+    <integer name="lock_pattern_fade_pattern_duration">200</integer>
+    <integer name="lock_pattern_fade_pattern_delay">2300</integer>
 
     <dimen name="text_handle_min_size">40dp</dimen>
 
@@ -838,6 +849,12 @@
     <dimen name="conversation_face_pile_protection_width">2dp</dimen>
     <!-- The width of the protection of the face pile layout when expanded-->
     <dimen name="conversation_face_pile_protection_width_expanded">@dimen/conversation_face_pile_protection_width</dimen>
+    <!-- size of the compact face pile -->
+    <dimen name="conversation_compact_face_pile_size">24dp</dimen>
+    <!-- size of the face pile avatar -->
+    <dimen name="conversation_compact_face_pile_avatar_size">17dp</dimen>
+    <!-- size of the face pile protection -->
+    <dimen name="conversation_compact_face_pile_protection_width">1dp</dimen>
     <!-- The padding of the expanded message container-->
     <dimen name="expanded_group_conversation_message_padding">32dp</dimen>
     <!-- The stroke width of the ring used to visually mark a conversation as important -->
@@ -869,7 +886,7 @@
     <dimen name="autofill_dataset_picker_max_height">90%</dimen>
 
     <!-- Autofill save dialog padding -->
-    <dimen name="autofill_save_outer_top_margin">24dp</dimen>
+    <dimen name="autofill_save_outer_margin">24dp</dimen>
     <dimen name="autofill_save_outer_top_padding">16dp</dimen>
     <dimen name="autofill_elevation">32dp</dimen>
     <dimen name="autofill_save_inner_padding">16dp</dimen>
@@ -879,6 +896,11 @@
     <dimen name="autofill_save_scroll_view_top_margin">16dp</dimen>
     <dimen name="autofill_save_button_bar_padding">16dp</dimen>
     <dimen name="autofill_dialog_corner_radius">24dp</dimen>
+    <dimen name="autofill_button_bar_spacer_width">12dp</dimen>
+    <dimen name="autofill_button_bar_spacer_height">4dp</dimen>
+
+    <!-- How much extra space should be left around the autofill dialog -->
+    <dimen name="autofill_dialog_offset">72dp</dimen>
 
     <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
     <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>
@@ -1015,9 +1037,25 @@
     <dimen name="popup_enter_animation_from_y_delta">20dp</dimen>
     <dimen name="popup_exit_animation_to_y_delta">-10dp</dimen>
 
+    <!-- Dimensions for the activity embedding divider. -->
+    <dimen name="activity_embedding_divider_handle_width">4dp</dimen>
+    <dimen name="activity_embedding_divider_handle_height">48dp</dimen>
+    <dimen name="activity_embedding_divider_handle_radius">2dp</dimen>
+    <dimen name="activity_embedding_divider_handle_width_pressed">12dp</dimen>
+    <dimen name="activity_embedding_divider_handle_height_pressed">53dp</dimen>
+    <dimen name="activity_embedding_divider_handle_radius_pressed">6dp</dimen>
+    <dimen name="activity_embedding_divider_touch_target_width">24dp</dimen>
+    <dimen name="activity_embedding_divider_touch_target_height">64dp</dimen>
+
     <!-- Default handwriting bounds offsets for editors. -->
     <dimen name="handwriting_bounds_offset_left">10dp</dimen>
     <dimen name="handwriting_bounds_offset_top">40dp</dimen>
     <dimen name="handwriting_bounds_offset_right">10dp</dimen>
     <dimen name="handwriting_bounds_offset_bottom">40dp</dimen>
+
+    <!-- The threshold for full back swipe progress. -->
+    <dimen name="navigation_edge_action_progress_threshold">412dp</dimen>
+    <!-- The non-linear progress interval when the screen is wider than the
+        navigation_edge_action_progress_threshold. -->
+    <item name="back_progress_non_linear_factor" format="float" type="dimen">0.2</item>
 </resources>

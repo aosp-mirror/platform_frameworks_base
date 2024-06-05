@@ -95,21 +95,29 @@ public class WallpaperEffectsGenerationPerUserService extends
         String newTaskId = cinematicEffectRequest.getTaskId();
         // Previous request is still being processed.
         if (mCinematicEffectListenerWrapper != null) {
+            CinematicEffectResponse cinematicEffectResponse;
             if (mCinematicEffectListenerWrapper.mTaskId.equals(newTaskId)) {
-                invokeCinematicListenerAndCleanup(
-                        new CinematicEffectResponse.Builder(
-                                CinematicEffectResponse.CINEMATIC_EFFECT_STATUS_PENDING, newTaskId)
-                                .build()
-                );
+                cinematicEffectResponse =  new CinematicEffectResponse.Builder(
+                        CinematicEffectResponse.CINEMATIC_EFFECT_STATUS_PENDING, newTaskId)
+                        .build();
             } else {
-                invokeCinematicListenerAndCleanup(
-                        new CinematicEffectResponse.Builder(
-                                CinematicEffectResponse.CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS,
-                                newTaskId).build()
-                );
+                cinematicEffectResponse =  new CinematicEffectResponse.Builder(
+                        CinematicEffectResponse.CINEMATIC_EFFECT_STATUS_TOO_MANY_REQUESTS,
+                        newTaskId)
+                        .build();
             }
-            return;
+            try {
+                cinematicEffectListener.onCinematicEffectGenerated(cinematicEffectResponse);
+                return;
+            } catch (RemoteException e) {
+                if (isDebug()) {
+                    Slog.w(TAG, "RemoteException invoking cinematic effect listener for task["
+                            + mCinematicEffectListenerWrapper.mTaskId + "]");
+                }
+                return;
+            }
         }
+
         RemoteWallpaperEffectsGenerationService remoteService = ensureRemoteServiceLocked();
         if (remoteService != null) {
             remoteService.executeOnResolvedService(

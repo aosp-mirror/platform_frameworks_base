@@ -59,7 +59,12 @@ import java.util.Set;
  * Class to handle interactions with {@link Slice}s.
  * <p>
  * The SliceManager manages permissions and pinned state for slices.
+ * @deprecated Slice framework has been deprecated, it will not receive any updates from
+ *          {@link android.os.Build.VANILLA_ICE_CREAM} and forward. If you are looking for a
+ *          framework that sends displayable data from one app to another, consider using
+ *          {@link android.app.appsearch.AppSearchManager}.
  */
+@Deprecated
 @SystemService(Context.SLICE_SERVICE)
 public class SliceManager {
 
@@ -138,15 +143,6 @@ public class SliceManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * @deprecated TO BE REMOVED
-     * @removed
-     */
-    @Deprecated
-    public void pinSlice(@NonNull Uri uri, @NonNull List<SliceSpec> specs) {
-        pinSlice(uri, new ArraySet<>(specs));
     }
 
     /**
@@ -270,15 +266,6 @@ public class SliceManager {
             // Manager will kill this process shortly anyway.
             return null;
         }
-    }
-
-    /**
-     * @deprecated TO BE REMOVED
-     * @removed
-     */
-    @Deprecated
-    public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull List<SliceSpec> supportedSpecs) {
-        return bindSlice(uri, new ArraySet<>(supportedSpecs));
     }
 
     /**
@@ -409,17 +396,6 @@ public class SliceManager {
             // Manager will kill this process shortly anyway.
             return null;
         }
-    }
-
-    /**
-     * @deprecated TO BE REMOVED.
-     * @removed
-     */
-    @Deprecated
-    @Nullable
-    public Slice bindSlice(@NonNull Intent intent,
-            @NonNull List<SliceSpec> supportedSpecs) {
-        return bindSlice(intent, new ArraySet<>(supportedSpecs));
     }
 
     /**

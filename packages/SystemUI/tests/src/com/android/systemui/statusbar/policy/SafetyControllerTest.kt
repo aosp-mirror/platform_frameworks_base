@@ -23,10 +23,11 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Handler
 import android.safetycenter.SafetyCenterManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
+import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -43,7 +44,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class SafetyControllerTest : SysuiTestCase() {
 
     private val TEST_PC_PKG = "testPermissionControllerPackageName"
@@ -129,5 +130,62 @@ class SafetyControllerTest : SysuiTestCase() {
         testIntent.data = Uri.parse("package:$TEST_PC_PKG")
         controller.mPermControllerChangeReceiver.onReceive(context, testIntent)
         verify(listener, never()).onSafetyCenterEnableChanged(true)
+    }
+
+    @Test
+    fun listenerRemovedWhileDispatching_doesNotCrash() {
+        var remove = false
+        val callback = object : SafetyController.Listener {
+            override fun onSafetyCenterEnableChanged(isSafetyCenterEnabled: Boolean) {
+                if (remove) {
+                    controller.removeCallback(this)
+                }
+            }
+        }
+
+        controller.addCallback(callback)
+        controller.addCallback {}
+
+        remove = true
+
+        `when`(scm.isSafetyCenterEnabled).thenReturn(true)
+        val testIntent = Intent(Intent.ACTION_PACKAGE_CHANGED)
+        testIntent.data = Uri.parse("package:$TEST_PC_PKG")
+        controller.mPermControllerChangeReceiver.onReceive(context, testIntent)
+    }
+
+    @Test
+    fun listenerRemovedWhileDispatching_otherCallbacksCalled() {
+        var remove = false
+        var called = false
+
+        val callback1 = object : SafetyController.Listener {
+            override fun onSafetyCenterEnableChanged(isSafetyCenterEnabled: Boolean) {
+                if (remove) {
+                    controller.removeCallback(this)
+                }
+            }
+        }
+
+        val callback2 = object : SafetyController.Listener {
+            override fun onSafetyCenterEnableChanged(isSafetyCenterEnabled: Boolean) {
+                // When the first callback is removed, we track if this is called
+                if (remove) {
+                    called = true
+                }
+            }
+        }
+
+        controller.addCallback(callback1)
+        controller.addCallback(callback2)
+
+        remove = true
+
+        `when`(scm.isSafetyCenterEnabled).thenReturn(true)
+        val testIntent = Intent(Intent.ACTION_PACKAGE_CHANGED)
+        testIntent.data = Uri.parse("package:$TEST_PC_PKG")
+        controller.mPermControllerChangeReceiver.onReceive(context, testIntent)
+
+        assertThat(called).isTrue()
     }
 }

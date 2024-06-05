@@ -19,7 +19,6 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.ComponentNamePolicyValue;
-import android.app.admin.PolicyKey;
 import android.content.ComponentName;
 import android.util.Log;
 
@@ -37,8 +36,7 @@ final class ComponentNamePolicySerializer extends PolicySerializer<ComponentName
     private static final String ATTR_CLASS_NAME = "class-name";
 
     @Override
-    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer,
-            @NonNull ComponentName value) throws IOException {
+    void saveToXml(TypedXmlSerializer serializer, @NonNull ComponentName value) throws IOException {
         Objects.requireNonNull(value);
         serializer.attribute(
                 /* namespace= */ null, ATTR_PACKAGE_NAME, value.getPackageName());

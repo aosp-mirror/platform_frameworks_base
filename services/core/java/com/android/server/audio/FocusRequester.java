@@ -18,17 +18,22 @@ package com.android.server.audio;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.UserProperties;
 import android.media.AudioAttributes;
 import android.media.AudioFocusInfo;
 import android.media.AudioManager;
 import android.media.IAudioFocusDispatcher;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.LocalServices;
 import com.android.server.audio.MediaFocusControl.AudioFocusDeathHandler;
+import com.android.server.pm.UserManagerInternal;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * @hide
@@ -39,7 +44,7 @@ import java.io.PrintWriter;
 public class FocusRequester {
 
     // on purpose not using this classe's name, as it will only be used from MediaFocusControl
-    private static final String TAG = "MediaFocusControl";
+    private static final String TAG = "FocusRequester";
     private static final boolean DEBUG = false;
 
     private AudioFocusDeathHandler mDeathHandler; // may be null
@@ -164,6 +169,12 @@ public class FocusRequester {
 
     boolean hasSameUid(int uid) {
         return mCallingUid == uid;
+    }
+
+    boolean isAlwaysVisibleUser() {
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        final UserProperties properties = umi.getUserProperties(UserHandle.getUserId(mCallingUid));
+        return properties != null && properties.getAlwaysVisible();
     }
 
     int getClientUid() {
@@ -330,6 +341,9 @@ public class FocusRequester {
     @GuardedBy("MediaFocusControl.mAudioFocusLock")
     boolean handleFocusLossFromGain(int focusGain, final FocusRequester frWinner, boolean forceDuck)
     {
+        if (DEBUG) {
+            Log.i(TAG, "handleFocusLossFromGain for " + mClientId + " gain:" + focusGain);
+        }
         final int focusLoss = focusLossForGainRequest(focusGain);
         handleFocusLoss(focusLoss, frWinner, forceDuck);
         return (focusLoss == AudioManager.AUDIOFOCUS_LOSS);
@@ -368,6 +382,9 @@ public class FocusRequester {
     @GuardedBy("MediaFocusControl.mAudioFocusLock")
     void handleFocusLoss(int focusLoss, @Nullable final FocusRequester frWinner, boolean forceDuck)
     {
+        if (DEBUG) {
+            Log.i(TAG, "handleFocusLoss for " + mClientId + " loss:" + focusLoss);
+        }
         try {
             if (focusLoss != mFocusLossReceived) {
                 mFocusLossReceived = focusLoss;
@@ -417,6 +434,9 @@ public class FocusRequester {
                             toAudioFocusInfo(), true /* wasDispatched */);
                     mFocusLossWasNotified = true;
                     fd.dispatchAudioFocusChange(mFocusLossReceived, mClientId);
+                } else if (DEBUG) {
+                    Log.i(TAG, "NOT dispatching " + focusChangeToString(mFocusLossReceived)
+                            + " to " + mClientId + " no IAudioFocusDispatcher");
                 }
             }
         } catch (android.os.RemoteException e) {
@@ -476,7 +496,8 @@ public class FocusRequester {
                 // will be dispatched later, it is now in limbo mode
                 mFocusLossFadeLimbo = true;
                 mFocusController.postDelayedLossAfterFade(this,
-                        FadeOutManager.FADE_OUT_DURATION_MS);
+                        mFocusController.getFadeOutDurationOnFocusLossMillis(
+                                this.getAudioAttributes()));
                 return true;
             }
         }
@@ -512,6 +533,33 @@ public class FocusRequester {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
+    @GuardedBy("MediaFocusControl.mAudioFocusLock")
+    int dispatchFocusChangeWithFadeLocked(int focusChange, List<FocusRequester> otherActiveFrs) {
+        if (focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+                || focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE
+                || focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
+                || focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+            mFocusLossFadeLimbo = false;
+            mFocusController.restoreVShapedPlayers(this);
+        } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS
+                && mFocusController.shouldEnforceFade()) {
+            for (int index = 0; index < otherActiveFrs.size(); index++) {
+                // candidate for fade-out before a receiving a loss
+                if (mFocusController.fadeOutPlayers(otherActiveFrs.get(index), /* loser= */ this)) {
+                    // active players are being faded out, delay the dispatch of focus loss
+                    // mark this instance as being faded so it's not released yet as the focus loss
+                    // will be dispatched later, it is now in limbo mode
+                    mFocusLossFadeLimbo = true;
+                    mFocusController.postDelayedLossAfterFade(this,
+                            mFocusController.getFadeOutDurationOnFocusLossMillis(
+                                    this.getAudioAttributes()));
+                    return AudioManager.AUDIOFOCUS_REQUEST_DELAYED;
+                }
+            }
+        }
+        return dispatchFocusChange(focusChange);
     }
 
     void dispatchFocusResultFromExtPolicy(int requestResult) {

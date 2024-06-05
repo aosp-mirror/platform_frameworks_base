@@ -36,6 +36,7 @@ android_app {
         "services.backup",
         "services.core",
         "services.net",
+        "service-permission.stubs.system_server",
     ],
 
     libs: ["android.net.ipsec.ike.stubs.system"],
@@ -56,11 +57,17 @@ android_robolectric_test {
     // Include the testing libraries
     libs: [
         "mockito-robolectric-prebuilt",
+        "Settings-robo-testutils",
+        "SettingsLib-robo-testutils",
         "platform-test-annotations",
         "testng",
-        "truth-prebuilt",
+        "truth",
     ],
 
     instrumentation_for: "BackupFrameworksServicesLib",
+
+    upstream: true,
+
+    strict_mode: false,
 
 }

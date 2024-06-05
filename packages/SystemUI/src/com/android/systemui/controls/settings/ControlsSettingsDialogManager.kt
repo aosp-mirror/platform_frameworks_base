@@ -24,7 +24,7 @@ import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.controls.settings.ControlsSettingsDialogManager.Companion.MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG
 import com.android.systemui.controls.settings.ControlsSettingsDialogManager.Companion.PREFS_SETTINGS_DIALOG_ATTEMPTS
 import com.android.systemui.dagger.SysUISingleton
@@ -135,7 +135,7 @@ internal constructor(
         val listener = DialogListener(prefs, attempts, onAttemptCompleted)
         val d =
             dialogProvider(activityContext, R.style.Theme_SystemUI_Dialog).apply {
-                setIcon(R.drawable.ic_warning)
+                setIcon(R.drawable.ic_lock_locked)
                 setOnCancelListener(listener)
                 setNeutralButton(R.string.controls_settings_dialog_neutral_button, listener)
                 setPositiveButton(R.string.controls_settings_dialog_positive_button, listener)

@@ -1079,7 +1079,7 @@ public final class AudioFormat implements Parcelable {
      * @return one of the values that can be set in {@link Builder#setEncoding(int)} or
      * {@link AudioFormat#ENCODING_INVALID} if not set.
      */
-    public int getEncoding() {
+    public @EncodingCanBeInvalid int getEncoding() {
         return mEncoding;
     }
 
@@ -1282,10 +1282,8 @@ public final class AudioFormat implements Parcelable {
          *    {@link AudioFormat#CHANNEL_OUT_BACK_CENTER},
          *    {@link AudioFormat#CHANNEL_OUT_SIDE_LEFT},
          *    {@link AudioFormat#CHANNEL_OUT_SIDE_RIGHT}.
-         *    <p> For a valid {@link AudioTrack} channel position mask,
-         *    the following conditions apply:
-         *    <br> (1) at most eight channel positions may be used;
-         *    <br> (2) right/left pairs should be matched.
+         *    <p> For output or {@link AudioTrack}, channel position masks which do not contain
+         *    matched left/right pairs are invalid.
          *    <p> For input or {@link AudioRecord}, the mask should be
          *    {@link AudioFormat#CHANNEL_IN_MONO} or
          *    {@link AudioFormat#CHANNEL_IN_STEREO}.  {@link AudioFormat#CHANNEL_IN_MONO} is
@@ -1487,6 +1485,44 @@ public final class AudioFormat implements Parcelable {
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}
+
+    /** @hide same as @Encoding, but adding ENCODING_INVALID */
+    @IntDef(flag = false, prefix = "ENCODING", value = {
+            ENCODING_INVALID,
+            ENCODING_DEFAULT,
+            ENCODING_PCM_16BIT,
+            ENCODING_PCM_8BIT,
+            ENCODING_PCM_FLOAT,
+            ENCODING_AC3,
+            ENCODING_E_AC3,
+            ENCODING_DTS,
+            ENCODING_DTS_HD,
+            ENCODING_MP3,
+            ENCODING_AAC_LC,
+            ENCODING_AAC_HE_V1,
+            ENCODING_AAC_HE_V2,
+            ENCODING_IEC61937,
+            ENCODING_DOLBY_TRUEHD,
+            ENCODING_AAC_ELD,
+            ENCODING_AAC_XHE,
+            ENCODING_AC4,
+            ENCODING_E_AC3_JOC,
+            ENCODING_DOLBY_MAT,
+            ENCODING_OPUS,
+            ENCODING_PCM_24BIT_PACKED,
+            ENCODING_PCM_32BIT,
+            ENCODING_MPEGH_BL_L3,
+            ENCODING_MPEGH_BL_L4,
+            ENCODING_MPEGH_LC_L3,
+            ENCODING_MPEGH_LC_L4,
+            ENCODING_DTS_UHD_P1,
+            ENCODING_DRA,
+            ENCODING_DTS_HD_MA,
+            ENCODING_DTS_UHD_P2,
+            ENCODING_DSD }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EncodingCanBeInvalid {}
 
     /** @hide */
     public static final int[] SURROUND_SOUND_ENCODING = {

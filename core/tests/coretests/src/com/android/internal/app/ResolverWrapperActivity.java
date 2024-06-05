@@ -88,6 +88,10 @@ public class ResolverWrapperActivity extends ResolverActivity {
         return ((ResolverListAdapter) mMultiProfilePagerAdapter.getAdapterForIndex(1));
     }
 
+    int getMultiProfilePagerAdapterCount(){
+        return mMultiProfilePagerAdapter.getCount();
+    }
+
     @Override
     public boolean isVoiceInteraction() {
         if (sOverrides.isVoiceInteraction != null) {
@@ -110,6 +114,10 @@ public class ResolverWrapperActivity extends ResolverActivity {
     protected ResolverListController createListController(UserHandle userHandle) {
         if (userHandle == UserHandle.SYSTEM) {
             when(sOverrides.resolverListController.getUserHandle()).thenReturn(UserHandle.SYSTEM);
+            return sOverrides.resolverListController;
+        }
+        if (isLaunchedInSingleUserMode()) {
+            when(sOverrides.resolverListController.getUserHandle()).thenReturn(userHandle);
             return sOverrides.resolverListController;
         }
         when(sOverrides.workResolverListController.getUserHandle()).thenReturn(userHandle);
@@ -141,6 +149,11 @@ public class ResolverWrapperActivity extends ResolverActivity {
     @Override
     protected UserHandle getCloneProfileUserHandle() {
         return sOverrides.cloneProfileUserHandle;
+    }
+
+    @Override
+    protected UserHandle getPrivateProfileUserHandle() {
+        return sOverrides.privateProfileUserHandle;
     }
 
     @Override
@@ -176,6 +189,7 @@ public class ResolverWrapperActivity extends ResolverActivity {
         public Boolean isVoiceInteraction;
         public UserHandle workProfileUserHandle;
         public UserHandle cloneProfileUserHandle;
+        public UserHandle privateProfileUserHandle;
         public UserHandle tabOwnerUserHandleForLaunch;
         public Integer myUserId;
         public boolean hasCrossProfileIntents;
@@ -191,6 +205,7 @@ public class ResolverWrapperActivity extends ResolverActivity {
             workResolverListController = mock(ResolverListController.class);
             workProfileUserHandle = null;
             cloneProfileUserHandle = null;
+            privateProfileUserHandle = null;
             tabOwnerUserHandleForLaunch = null;
             myUserId = null;
             hasCrossProfileIntents = true;

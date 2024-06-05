@@ -17,8 +17,12 @@
 package com.android.server.net;
 
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_BACKGROUND;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_ALLOW;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_DENY_ADMIN;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_DENY_USER;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
@@ -27,14 +31,16 @@ import static android.net.INetd.FIREWALL_CHAIN_NONE;
 import static android.net.INetd.FIREWALL_DENYLIST;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_BACKGROUND;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_METERED_ALLOW;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_METERED_DENY_ADMIN;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_METERED_DENY_USER;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_RESTRICTED;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
-
-import static com.android.net.module.util.NetworkStatsUtils.LIMIT_GLOBAL_ALERT;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -43,15 +49,12 @@ import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.INetdUnsolicitedEventListener;
 import android.net.INetworkManagementEventObserver;
-import android.net.ITetheringStatsProvider;
 import android.net.InetAddresses;
 import android.net.InterfaceConfiguration;
 import android.net.InterfaceConfigurationParcel;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.NetworkPolicyManager;
-import android.net.NetworkStack;
-import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.util.NetdService;
 import android.os.BatteryStats;
@@ -78,28 +81,20 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
-import com.android.internal.util.Preconditions;
+import com.android.modules.utils.build.SdkLevel;
 import com.android.net.module.util.NetdUtils;
-import com.android.net.module.util.NetdUtils.ModifyOperation;
+import com.android.net.module.util.PermissionUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 
 import com.google.android.collect.Maps;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @hide
@@ -129,13 +124,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     private static final String TAG = "NetworkManagement";
     private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final int MAX_UID_RANGES_PER_COMMAND = 10;
-
-    static final int DAEMON_MSG_MOBILE_CONN_REAL_TIME_INFO = 1;
-
-    static final boolean MODIFY_OPERATION_ADD = true;
-    static final boolean MODIFY_OPERATION_REMOVE = false;
-
     /**
      * Binder context for this service
      */
@@ -154,16 +142,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     private final RemoteCallbackList<INetworkManagementEventObserver> mObservers =
             new RemoteCallbackList<>();
 
-    @GuardedBy("mTetheringStatsProviders")
-    private final HashMap<ITetheringStatsProvider, String>
-            mTetheringStatsProviders = Maps.newHashMap();
-
     /**
      * If both locks need to be held, then they should be obtained in the order:
      * first {@link #mQuotaLock} and then {@link #mRulesLock}.
      */
     private final Object mQuotaLock = new Object();
     private final Object mRulesLock = new Object();
+
+    private final boolean mUseMeteredFirewallChains;
 
     /** Set of interfaces with active quotas. */
     @GuardedBy("mQuotaLock")
@@ -172,9 +158,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @GuardedBy("mQuotaLock")
     private HashMap<String, Long> mActiveAlerts = Maps.newHashMap();
     /** Set of UIDs denied on metered networks. */
+    // TODO: b/336693007 - Remove once NPMS has completely migrated to metered firewall chains.
     @GuardedBy("mRulesLock")
     private SparseBooleanArray mUidRejectOnMetered = new SparseBooleanArray();
     /** Set of UIDs allowed on metered networks. */
+    // TODO: b/336693007 - Remove once NPMS has completely migrated to metered firewall chains.
     @GuardedBy("mRulesLock")
     private SparseBooleanArray mUidAllowOnMetered = new SparseBooleanArray();
     /** Set of UIDs with cleartext penalties. */
@@ -182,39 +170,68 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     private SparseIntArray mUidCleartextPolicy = new SparseIntArray();
     /** Set of UIDs that are to be blocked/allowed by firewall controller. */
     @GuardedBy("mRulesLock")
-    private SparseIntArray mUidFirewallRules = new SparseIntArray();
+    private final SparseIntArray mUidFirewallRules = new SparseIntArray();
     /**
      * Set of UIDs that are to be blocked/allowed by firewall controller.  This set of Ids matches
      * to application idles.
      */
     @GuardedBy("mRulesLock")
-    private SparseIntArray mUidFirewallStandbyRules = new SparseIntArray();
+    private final SparseIntArray mUidFirewallStandbyRules = new SparseIntArray();
     /**
      * Set of UIDs that are to be blocked/allowed by firewall controller.  This set of Ids matches
      * to device idles.
      */
     @GuardedBy("mRulesLock")
-    private SparseIntArray mUidFirewallDozableRules = new SparseIntArray();
+    private final SparseIntArray mUidFirewallDozableRules = new SparseIntArray();
     /**
      * Set of UIDs that are to be blocked/allowed by firewall controller.  This set of Ids matches
      * to device on power-save mode.
      */
     @GuardedBy("mRulesLock")
-    private SparseIntArray mUidFirewallPowerSaveRules = new SparseIntArray();
+    private final SparseIntArray mUidFirewallPowerSaveRules = new SparseIntArray();
     /**
      * Contains the per-UID firewall rules that are used when Restricted Networking Mode is enabled.
      */
     @GuardedBy("mRulesLock")
-    private SparseIntArray mUidFirewallRestrictedRules = new SparseIntArray();
+    private final SparseIntArray mUidFirewallRestrictedRules = new SparseIntArray();
     /**
      * Contains the per-UID firewall rules that are used when Low Power Standby is enabled.
      */
     @GuardedBy("mRulesLock")
-    private SparseIntArray mUidFirewallLowPowerStandbyRules = new SparseIntArray();
+    private final SparseIntArray mUidFirewallLowPowerStandbyRules = new SparseIntArray();
+
+    /**
+     * Contains the per-UID firewall rules that are used when Background chain is enabled.
+     */
+    @GuardedBy("mRulesLock")
+    private final SparseIntArray mUidFirewallBackgroundRules = new SparseIntArray();
+
+    /**
+     * Contains the per-UID firewall rules that are used to allowlist the app from metered-network
+     * restrictions when data saver is enabled.
+     */
+    @GuardedBy("mRulesLock")
+    private final SparseIntArray mUidMeteredFirewallAllowRules = new SparseIntArray();
+
+    /**
+     * Contains the per-UID firewall rules that are used to deny app access to metered networks
+     * due to user action.
+     */
+    @GuardedBy("mRulesLock")
+    private final SparseIntArray mUidMeteredFirewallDenyUserRules = new SparseIntArray();
+
+    /**
+     * Contains the per-UID firewall rules that are used to deny app access to metered networks
+     * due to admin action.
+     */
+    @GuardedBy("mRulesLock")
+    private final SparseIntArray mUidMeteredFirewallDenyAdminRules = new SparseIntArray();
+
     /** Set of states for the child firewall chains. True if the chain is active. */
     @GuardedBy("mRulesLock")
     final SparseBooleanArray mFirewallChainStates = new SparseBooleanArray();
 
+    // TODO: b/336693007 - Remove once NPMS has completely migrated to metered firewall chains.
     @GuardedBy("mQuotaLock")
     private volatile boolean mDataSaverMode;
 
@@ -232,22 +249,20 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         mContext = context;
         mDeps = deps;
 
+        mUseMeteredFirewallChains = Flags.useMeteredFirewallChains();
+
+        if (mUseMeteredFirewallChains) {
+            // These firewalls are always on and currently ConnectivityService does not allow
+            // changing their enabled state.
+            mFirewallChainStates.put(FIREWALL_CHAIN_METERED_DENY_USER, true);
+            mFirewallChainStates.put(FIREWALL_CHAIN_METERED_DENY_ADMIN, true);
+        }
+
         mDaemonHandler = new Handler(FgThread.get().getLooper());
 
         mNetdUnsolicitedEventListener = new NetdUnsolicitedEventListener();
 
         mDeps.registerLocalService(new LocalService());
-
-        synchronized (mTetheringStatsProviders) {
-            mTetheringStatsProviders.put(new NetdTetheringStatsProvider(), "netd");
-        }
-    }
-
-    private NetworkManagementService() {
-        mContext = null;
-        mDaemonHandler = null;
-        mDeps = null;
-        mNetdUnsolicitedEventListener = null;
     }
 
     static NetworkManagementService create(Context context, Dependencies deps)
@@ -290,19 +305,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void registerObserver(INetworkManagementEventObserver observer) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         mObservers.register(observer);
     }
 
     @Override
     public void unregisterObserver(INetworkManagementEventObserver observer) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         mObservers.unregister(observer);
     }
 
     @FunctionalInterface
     private interface NetworkManagementEventCallback {
-        public void sendCallback(INetworkManagementEventObserver o) throws RemoteException;
+        void sendCallback(INetworkManagementEventObserver o) throws RemoteException;
     }
 
     private void invokeForAllObservers(NetworkManagementEventCallback eventCallback) {
@@ -362,39 +377,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     /**
      * Notify our observers of a change in the data activity state of the interface
      */
-    private void notifyInterfaceClassActivity(int type, boolean isActive, long tsNanos,
+    private void notifyInterfaceClassActivity(int label, boolean isActive, long tsNanos,
             int uid) {
         invokeForAllObservers(o -> o.interfaceClassDataActivityChanged(
-                type, isActive, tsNanos, uid));
-    }
-
-    @Override
-    public void registerTetheringStatsProvider(ITetheringStatsProvider provider, String name) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        Objects.requireNonNull(provider);
-        synchronized(mTetheringStatsProviders) {
-            mTetheringStatsProviders.put(provider, name);
-        }
-    }
-
-    @Override
-    public void unregisterTetheringStatsProvider(ITetheringStatsProvider provider) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        synchronized(mTetheringStatsProviders) {
-            mTetheringStatsProviders.remove(provider);
-        }
-    }
-
-    @Override
-    public void tetherLimitReached(ITetheringStatsProvider provider) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        synchronized(mTetheringStatsProviders) {
-            if (!mTetheringStatsProviders.containsKey(provider)) {
-                return;
-            }
-            // No current code examines the interface parameter in a global alert. Just pass null.
-            mDaemonHandler.post(() -> notifyLimitReached(LIMIT_GLOBAL_ALERT, null));
-        }
+                label, isActive, tsNanos, uid));
     }
 
     // Sync the state of the given chain with the native daemon.
@@ -465,33 +451,39 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 }
             }
 
-            SparseBooleanArray uidRejectOnQuota = null;
-            SparseBooleanArray uidAcceptOnQuota = null;
-            synchronized (mRulesLock) {
-                size = mUidRejectOnMetered.size();
-                if (size > 0) {
-                    if (DBG) Slog.d(TAG, "Pushing " + size + " UIDs to metered denylist rules");
-                    uidRejectOnQuota = mUidRejectOnMetered;
-                    mUidRejectOnMetered = new SparseBooleanArray();
-                }
+            if (!mUseMeteredFirewallChains) {
+                SparseBooleanArray uidRejectOnQuota = null;
+                SparseBooleanArray uidAcceptOnQuota = null;
+                synchronized (mRulesLock) {
+                    size = mUidRejectOnMetered.size();
+                    if (size > 0) {
+                        if (DBG) {
+                            Slog.d(TAG, "Pushing " + size + " UIDs to metered denylist rules");
+                        }
+                        uidRejectOnQuota = mUidRejectOnMetered;
+                        mUidRejectOnMetered = new SparseBooleanArray();
+                    }
 
-                size = mUidAllowOnMetered.size();
-                if (size > 0) {
-                    if (DBG) Slog.d(TAG, "Pushing " + size + " UIDs to metered allowlist rules");
-                    uidAcceptOnQuota = mUidAllowOnMetered;
-                    mUidAllowOnMetered = new SparseBooleanArray();
+                    size = mUidAllowOnMetered.size();
+                    if (size > 0) {
+                        if (DBG) {
+                            Slog.d(TAG, "Pushing " + size + " UIDs to metered allowlist rules");
+                        }
+                        uidAcceptOnQuota = mUidAllowOnMetered;
+                        mUidAllowOnMetered = new SparseBooleanArray();
+                    }
                 }
-            }
-            if (uidRejectOnQuota != null) {
-                for (int i = 0; i < uidRejectOnQuota.size(); i++) {
-                    setUidOnMeteredNetworkDenylist(uidRejectOnQuota.keyAt(i),
-                            uidRejectOnQuota.valueAt(i));
+                if (uidRejectOnQuota != null) {
+                    for (int i = 0; i < uidRejectOnQuota.size(); i++) {
+                        setUidOnMeteredNetworkDenylist(uidRejectOnQuota.keyAt(i),
+                                uidRejectOnQuota.valueAt(i));
+                    }
                 }
-            }
-            if (uidAcceptOnQuota != null) {
-                for (int i = 0; i < uidAcceptOnQuota.size(); i++) {
-                    setUidOnMeteredNetworkAllowlist(uidAcceptOnQuota.keyAt(i),
-                            uidAcceptOnQuota.valueAt(i));
+                if (uidAcceptOnQuota != null) {
+                    for (int i = 0; i < uidAcceptOnQuota.size(); i++) {
+                        setUidOnMeteredNetworkAllowlist(uidAcceptOnQuota.keyAt(i),
+                                uidAcceptOnQuota.valueAt(i));
+                    }
                 }
             }
 
@@ -513,22 +505,31 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             syncFirewallChainLocked(FIREWALL_CHAIN_POWERSAVE, "powersave ");
             syncFirewallChainLocked(FIREWALL_CHAIN_RESTRICTED, "restricted ");
             syncFirewallChainLocked(FIREWALL_CHAIN_LOW_POWER_STANDBY, "low power standby ");
+            syncFirewallChainLocked(FIREWALL_CHAIN_BACKGROUND, FIREWALL_CHAIN_NAME_BACKGROUND);
+            if (mUseMeteredFirewallChains) {
+                syncFirewallChainLocked(FIREWALL_CHAIN_METERED_ALLOW,
+                        FIREWALL_CHAIN_NAME_METERED_ALLOW);
+                syncFirewallChainLocked(FIREWALL_CHAIN_METERED_DENY_USER,
+                        FIREWALL_CHAIN_NAME_METERED_DENY_USER);
+                syncFirewallChainLocked(FIREWALL_CHAIN_METERED_DENY_ADMIN,
+                        FIREWALL_CHAIN_NAME_METERED_DENY_ADMIN);
+            }
 
-            final int[] chains = {
+            final int[] chainsToEnable = {
                     FIREWALL_CHAIN_STANDBY,
                     FIREWALL_CHAIN_DOZABLE,
                     FIREWALL_CHAIN_POWERSAVE,
                     FIREWALL_CHAIN_RESTRICTED,
-                    FIREWALL_CHAIN_LOW_POWER_STANDBY
+                    FIREWALL_CHAIN_LOW_POWER_STANDBY,
+                    FIREWALL_CHAIN_BACKGROUND,
             };
 
-            for (int chain : chains) {
+            for (int chain : chainsToEnable) {
                 if (getFirewallChainState(chain)) {
                     setFirewallChainEnabled(chain, true);
                 }
             }
         }
-
 
         try {
             getBatteryStats().noteNetworkStatsEnabled();
@@ -666,7 +667,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     public String[] listInterfaces() {
         // TODO: Remove CONNECTIVITY_INTERNAL after bluetooth tethering has no longer called these
         //  APIs.
-        NetworkStack.checkNetworkStackPermissionOr(mContext, CONNECTIVITY_INTERNAL);
+        PermissionUtils.enforceNetworkStackPermissionOr(mContext, CONNECTIVITY_INTERNAL);
         try {
             return mNetdService.interfaceGetList();
         } catch (RemoteException | ServiceSpecificException e) {
@@ -718,7 +719,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     public InterfaceConfiguration getInterfaceConfig(String iface) {
         // TODO: Remove CONNECTIVITY_INTERNAL after bluetooth tethering has no longer called these
         //  APIs.
-        NetworkStack.checkNetworkStackPermissionOr(mContext, CONNECTIVITY_INTERNAL);
+        PermissionUtils.enforceNetworkStackPermissionOr(mContext, CONNECTIVITY_INTERNAL);
         final InterfaceConfigurationParcel result;
         try {
             result = mNetdService.interfaceGetCfg(iface);
@@ -738,7 +739,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     public void setInterfaceConfig(String iface, InterfaceConfiguration cfg) {
         // TODO: Remove CONNECTIVITY_INTERNAL after bluetooth tethering has no longer called these
         //  APIs.
-        NetworkStack.checkNetworkStackPermissionOr(mContext, CONNECTIVITY_INTERNAL);
+        PermissionUtils.enforceNetworkStackPermissionOr(mContext, CONNECTIVITY_INTERNAL);
         LinkAddress linkAddr = cfg.getLinkAddress();
         if (linkAddr == null || linkAddr.getAddress() == null) {
             throw new IllegalStateException("Null LinkAddress given");
@@ -755,7 +756,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void setInterfaceDown(String iface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         final InterfaceConfiguration ifcg = getInterfaceConfig(iface);
         ifcg.setInterfaceDown();
         setInterfaceConfig(iface, ifcg);
@@ -763,7 +764,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void setInterfaceUp(String iface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         final InterfaceConfiguration ifcg = getInterfaceConfig(iface);
         ifcg.setInterfaceUp();
         setInterfaceConfig(iface, ifcg);
@@ -771,7 +772,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void setInterfaceIpv6PrivacyExtensions(String iface, boolean enable) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         try {
             mNetdService.interfaceSetIPv6PrivacyExtensions(iface, enable);
         } catch (RemoteException | ServiceSpecificException e) {
@@ -783,7 +784,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
        IPv6 addresses on interface down, but we need to do full clean up here */
     @Override
     public void clearInterfaceAddresses(String iface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         try {
             mNetdService.interfaceClearAddrs(iface);
         } catch (RemoteException | ServiceSpecificException e) {
@@ -793,7 +794,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void enableIpv6(String iface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         try {
             mNetdService.interfaceSetEnableIPv6(iface, true);
         } catch (RemoteException | ServiceSpecificException e) {
@@ -803,7 +804,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void setIPv6AddrGenMode(String iface, int mode) throws ServiceSpecificException {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         try {
             mNetdService.setIPv6AddrGenMode(iface, mode);
         } catch (RemoteException e) {
@@ -813,52 +814,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void disableIpv6(String iface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         try {
             mNetdService.interfaceSetEnableIPv6(iface, false);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public void addRoute(int netId, RouteInfo route) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        NetdUtils.modifyRoute(mNetdService, ModifyOperation.ADD, netId, route);
-    }
-
-    @Override
-    public void removeRoute(int netId, RouteInfo route) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        NetdUtils.modifyRoute(mNetdService, ModifyOperation.REMOVE, netId, route);
-    }
-
-    private ArrayList<String> readRouteList(String filename) {
-        FileInputStream fstream = null;
-        ArrayList<String> list = new ArrayList<>();
-
-        try {
-            fstream = new FileInputStream(filename);
-            DataInputStream in = new DataInputStream(fstream);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String s;
-
-            // throw away the title line
-
-            while (((s = br.readLine()) != null) && (s.length() != 0)) {
-                list.add(s);
-            }
-        } catch (IOException ex) {
-            // return current list, possibly empty
-        } finally {
-            if (fstream != null) {
-                try {
-                    fstream.close();
-                } catch (IOException ex) {}
-            }
-        }
-
-        return list;
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.SHUTDOWN)
@@ -873,11 +834,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public boolean getIpForwardingEnabled() throws IllegalStateException{
-        NetworkStack.checkNetworkStackPermission(mContext);
-
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException(
+                    "NMS#getIpForwardingEnabled not supported in V+");
+        }
         try {
-            final boolean isEnabled = mNetdService.ipfwdEnabled();
-            return isEnabled;
+            return mNetdService.ipfwdEnabled();
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
@@ -885,8 +848,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void setIpForwardingEnabled(boolean enable) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        try {
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException(
+                    "NMS#setIpForwardingEnabled not supported in V+");
+        }        try {
             if (enable) {
                 mNetdService.ipfwdEnableForwarding("tethering");
             } else {
@@ -899,14 +865,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void startTethering(String[] dhcpRange) {
-        startTetheringWithConfiguration(true, dhcpRange);
-    }
-
-    @Override
-    public void startTetheringWithConfiguration(boolean usingLegacyDnsProxy, String[] dhcpRange) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#startTethering not supported in V+");
+        }
         try {
-            NetdUtils.tetherStart(mNetdService, usingLegacyDnsProxy, dhcpRange);
+            NetdUtils.tetherStart(mNetdService, true /* usingLegacyDnsProxy */, dhcpRange);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
@@ -914,7 +878,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void stopTethering() {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#stopTethering not supported in V+");
+        }
         try {
             mNetdService.tetherStop();
         } catch (RemoteException | ServiceSpecificException e) {
@@ -924,11 +891,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public boolean isTetheringStarted() {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#isTetheringStarted not supported in V+");
+        }
         try {
-            final boolean isEnabled = mNetdService.tetherIsEnabled();
-            return isEnabled;
+            return mNetdService.tetherIsEnabled();
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
@@ -936,7 +904,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void tetherInterface(String iface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#tetherInterface not supported in V+");
+        }
         try {
             final LinkAddress addr = getInterfaceConfig(iface).getLinkAddress();
             final IpPrefix dest = new IpPrefix(addr.getAddress(), addr.getPrefixLength());
@@ -948,7 +919,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void untetherInterface(String iface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#untetherInterface not supported in V+");
+        }
         try {
             NetdUtils.untetherInterface(mNetdService, iface);
         } catch (RemoteException | ServiceSpecificException e) {
@@ -958,7 +932,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public String[] listTetheredInterfaces() {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException(
+                    "NMS#listTetheredInterfaces not supported in V+");
+        }
         try {
             return mNetdService.tetherInterfaceList();
         } catch (RemoteException | ServiceSpecificException e) {
@@ -967,51 +945,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public String[] getDnsForwarders() {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        try {
-            return mNetdService.tetherDnsList();
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private List<InterfaceAddress> excludeLinkLocal(List<InterfaceAddress> addresses) {
-        ArrayList<InterfaceAddress> filtered = new ArrayList<>(addresses.size());
-        for (InterfaceAddress ia : addresses) {
-            if (!ia.getAddress().isLinkLocalAddress())
-                filtered.add(ia);
-        }
-        return filtered;
-    }
-
-    private void modifyInterfaceForward(boolean add, String fromIface, String toIface) {
-        try {
-            if (add) {
-                mNetdService.ipfwdAddInterfaceForward(fromIface, toIface);
-            } else {
-                mNetdService.ipfwdRemoveInterfaceForward(fromIface, toIface);
-            }
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void startInterfaceForwarding(String fromIface, String toIface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        modifyInterfaceForward(true, fromIface, toIface);
-    }
-
-    @Override
-    public void stopInterfaceForwarding(String fromIface, String toIface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        modifyInterfaceForward(false, fromIface, toIface);
-    }
-
-    @Override
     public void enableNat(String internalInterface, String externalInterface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#enableNat not supported in V+");
+        }
         try {
             mNetdService.tetherAddForward(internalInterface, externalInterface);
         } catch (RemoteException | ServiceSpecificException e) {
@@ -1021,7 +959,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void disableNat(String internalInterface, String externalInterface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#disableNat not supported in V+");
+        }
         try {
             mNetdService.tetherRemoveForward(internalInterface, externalInterface);
         } catch (RemoteException | ServiceSpecificException e) {
@@ -1031,7 +972,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void setInterfaceQuota(String iface, long quotaBytes) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
 
         synchronized (mQuotaLock) {
             if (mActiveQuotas.containsKey(iface)) {
@@ -1046,23 +987,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             } catch (RemoteException | ServiceSpecificException e) {
                 throw new IllegalStateException(e);
             }
-
-            synchronized (mTetheringStatsProviders) {
-                for (ITetheringStatsProvider provider : mTetheringStatsProviders.keySet()) {
-                    try {
-                        provider.setInterfaceQuota(iface, quotaBytes);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Problem setting tethering data limit on provider " +
-                                mTetheringStatsProviders.get(provider) + ": " + e);
-                    }
-                }
-            }
         }
     }
 
     @Override
     public void removeInterfaceQuota(String iface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
 
         synchronized (mQuotaLock) {
             if (!mActiveQuotas.containsKey(iface)) {
@@ -1079,23 +1009,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             } catch (RemoteException | ServiceSpecificException e) {
                 throw new IllegalStateException(e);
             }
-
-            synchronized (mTetheringStatsProviders) {
-                for (ITetheringStatsProvider provider : mTetheringStatsProviders.keySet()) {
-                    try {
-                        provider.setInterfaceQuota(iface, ITetheringStatsProvider.QUOTA_UNLIMITED);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Problem removing tethering data limit on provider " +
-                                mTetheringStatsProviders.get(provider) + ": " + e);
-                    }
-                }
-            }
         }
     }
 
     @Override
     public void setInterfaceAlert(String iface, long alertBytes) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
 
         // quick validity check
         if (!mActiveQuotas.containsKey(iface)) {
@@ -1119,7 +1038,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void removeInterfaceAlert(String iface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
 
         synchronized (mQuotaLock) {
             if (!mActiveAlerts.containsKey(iface)) {
@@ -1137,19 +1056,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
-    @Override
-    public void setGlobalAlert(long alertBytes) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        try {
-            mNetdService.bandwidthSetGlobalAlert(alertBytes);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     private void setUidOnMeteredNetworkList(int uid, boolean allowlist, boolean enable) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
 
         synchronized (mQuotaLock) {
             boolean oldEnable;
@@ -1216,17 +1124,33 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 Log.w(TAG, "setDataSaverMode(): already " + mDataSaverMode);
                 return true;
             }
-            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "bandwidthEnableDataSaver");
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setDataSaverModeEnabled");
             try {
-                final boolean changed = mNetdService.bandwidthEnableDataSaver(enable);
-                if (changed) {
+                if (SdkLevel.isAtLeastV()) {
+                    // setDataSaverEnabled throws if it fails to set data saver.
+                    mContext.getSystemService(ConnectivityManager.class)
+                            .setDataSaverEnabled(enable);
                     mDataSaverMode = enable;
+                    if (mUseMeteredFirewallChains) {
+                        // Copy mDataSaverMode state to FIREWALL_CHAIN_METERED_ALLOW
+                        // until ConnectivityService allows manipulation of the data saver mode via
+                        // FIREWALL_CHAIN_METERED_ALLOW.
+                        synchronized (mRulesLock) {
+                            mFirewallChainStates.put(FIREWALL_CHAIN_METERED_ALLOW, enable);
+                        }
+                    }
+                    return true;
                 } else {
-                    Log.w(TAG, "setDataSaverMode(" + enable + "): netd command silently failed");
+                    final boolean changed = mNetdService.bandwidthEnableDataSaver(enable);
+                    if (changed) {
+                        mDataSaverMode = enable;
+                    } else {
+                        Log.e(TAG, "setDataSaverMode(" + enable + "): failed to set iptables");
+                    }
+                    return changed;
                 }
-                return changed;
-            } catch (RemoteException e) {
-                Log.w(TAG, "setDataSaverMode(" + enable + "): netd command failed", e);
+            } catch (RemoteException | IllegalStateException e) {
+                Log.e(TAG, "setDataSaverMode(" + enable + "): failed with exception", e);
                 return false;
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
@@ -1261,7 +1185,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void setUidCleartextNetworkPolicy(int uid, int policy) {
         if (mDeps.getCallingUid() != uid) {
-            NetworkStack.checkNetworkStackPermission(mContext);
+            PermissionUtils.enforceNetworkStackPermission(mContext);
         }
 
         synchronized (mQuotaLock) {
@@ -1298,27 +1222,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         return true;
     }
 
-    private class NetdTetheringStatsProvider extends ITetheringStatsProvider.Stub {
-        @Override
-        public NetworkStats getTetherStats(int how) {
-            // Remove the implementation of NetdTetheringStatsProvider#getTetherStats
-            // since all callers are migrated to use INetd#tetherGetStats directly.
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setInterfaceQuota(String iface, long quotaBytes) {
-            // Do nothing. netd is already informed of quota changes in setInterfaceQuota.
-        }
-    }
-
-    @Override
-    public NetworkStats getNetworkStatsTethering(int how) {
-        // Remove the implementation of getNetworkStatsTethering since all callers are migrated
-        // to use INetd#tetherGetStats directly.
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public void setFirewallEnabled(boolean enabled) {
         enforceSystemUid();
@@ -1338,18 +1241,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public void setFirewallInterfaceRule(String iface, boolean allow) {
-        enforceSystemUid();
-        Preconditions.checkState(mFirewallEnabled);
-        try {
-            mNetdService.firewallSetInterfaceRule(iface,
-                    allow ? INetd.FIREWALL_RULE_ALLOW : INetd.FIREWALL_RULE_DENY);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public void setFirewallChainEnabled(int chain, boolean enable) {
         enforceSystemUid();
         synchronized (mQuotaLock) {
@@ -1362,9 +1253,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 setFirewallChainState(chain, enable);
             }
 
-            final String chainName = getFirewallChainName(chain);
-            if (chain == FIREWALL_CHAIN_NONE) {
-                throw new IllegalArgumentException("Bad child chain: " + chainName);
+            if (!isValidFirewallChainForSetEnabled(chain)) {
+                throw new IllegalArgumentException("Invalid chain for setFirewallChainEnabled: "
+                        + NetworkPolicyLogger.getFirewallChainName(chain));
             }
 
             final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
@@ -1376,34 +1267,29 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
-    private String getFirewallChainName(int chain) {
-        switch (chain) {
-            case FIREWALL_CHAIN_STANDBY:
-                return FIREWALL_CHAIN_NAME_STANDBY;
-            case FIREWALL_CHAIN_DOZABLE:
-                return FIREWALL_CHAIN_NAME_DOZABLE;
-            case FIREWALL_CHAIN_POWERSAVE:
-                return FIREWALL_CHAIN_NAME_POWERSAVE;
-            case FIREWALL_CHAIN_RESTRICTED:
-                return FIREWALL_CHAIN_NAME_RESTRICTED;
-            case FIREWALL_CHAIN_LOW_POWER_STANDBY:
-                return FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
-            default:
-                throw new IllegalArgumentException("Bad child chain: " + chain);
-        }
+    private boolean isValidFirewallChainForSetEnabled(int chain) {
+        return switch (chain) {
+            case FIREWALL_CHAIN_STANDBY, FIREWALL_CHAIN_DOZABLE, FIREWALL_CHAIN_POWERSAVE,
+                    FIREWALL_CHAIN_RESTRICTED, FIREWALL_CHAIN_LOW_POWER_STANDBY,
+                    FIREWALL_CHAIN_BACKGROUND -> true;
+            // METERED_* firewall chains are not yet supported by
+            // ConnectivityService#setFirewallChainEnabled.
+            default -> false;
+        };
     }
 
     private int getFirewallType(int chain) {
         switch (chain) {
             case FIREWALL_CHAIN_STANDBY:
+            case FIREWALL_CHAIN_METERED_DENY_ADMIN:
+            case FIREWALL_CHAIN_METERED_DENY_USER:
                 return FIREWALL_DENYLIST;
             case FIREWALL_CHAIN_DOZABLE:
-                return FIREWALL_ALLOWLIST;
             case FIREWALL_CHAIN_POWERSAVE:
-                return FIREWALL_ALLOWLIST;
             case FIREWALL_CHAIN_RESTRICTED:
-                return FIREWALL_ALLOWLIST;
             case FIREWALL_CHAIN_LOW_POWER_STANDBY:
+            case FIREWALL_CHAIN_BACKGROUND:
+            case FIREWALL_CHAIN_METERED_ALLOW:
                 return FIREWALL_ALLOWLIST;
             default:
                 return isFirewallEnabled() ? FIREWALL_ALLOWLIST : FIREWALL_DENYLIST;
@@ -1525,6 +1411,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 return mUidFirewallRestrictedRules;
             case FIREWALL_CHAIN_LOW_POWER_STANDBY:
                 return mUidFirewallLowPowerStandbyRules;
+            case FIREWALL_CHAIN_BACKGROUND:
+                return mUidFirewallBackgroundRules;
+            case FIREWALL_CHAIN_METERED_ALLOW:
+                return mUidMeteredFirewallAllowRules;
+            case FIREWALL_CHAIN_METERED_DENY_USER:
+                return mUidMeteredFirewallDenyUserRules;
+            case FIREWALL_CHAIN_METERED_DENY_ADMIN:
+                return mUidMeteredFirewallDenyAdminRules;
             case FIREWALL_CHAIN_NONE:
                 return mUidFirewallRules;
             default:
@@ -1542,6 +1436,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+
+        pw.println("Flags:");
+        pw.println(Flags.FLAG_USE_METERED_FIREWALL_CHAINS + ": " + mUseMeteredFirewallChains);
+        pw.println();
 
         synchronized (mQuotaLock) {
             pw.print("Active quota ifaces: "); pw.println(mActiveQuotas.toString());
@@ -1577,6 +1475,31 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             pw.println(getFirewallChainState(FIREWALL_CHAIN_LOW_POWER_STANDBY));
             dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY,
                     mUidFirewallLowPowerStandbyRules);
+
+            pw.print("UID firewall background chain enabled: ");
+            pw.println(getFirewallChainState(FIREWALL_CHAIN_BACKGROUND));
+            dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_BACKGROUND, mUidFirewallBackgroundRules);
+
+            pw.print("UID firewall metered allow chain enabled (Data saver mode): ");
+            // getFirewallChainState should maintain a duplicated state from mDataSaverMode when
+            // mUseMeteredFirewallChains is enabled.
+            pw.println(getFirewallChainState(FIREWALL_CHAIN_METERED_ALLOW));
+            dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_METERED_ALLOW,
+                    mUidMeteredFirewallAllowRules);
+
+            pw.print("UID firewall metered deny_user chain enabled (always-on): ");
+            // This always-on state should be reflected by getFirewallChainState when
+            // mUseMeteredFirewallChains is enabled.
+            pw.println(getFirewallChainState(FIREWALL_CHAIN_METERED_DENY_USER));
+            dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_METERED_DENY_USER,
+                    mUidMeteredFirewallDenyUserRules);
+
+            pw.print("UID firewall metered deny_admin chain enabled (always-on): ");
+            // This always-on state should be reflected by getFirewallChainState when
+            // mUseMeteredFirewallChains is enabled.
+            pw.println(getFirewallChainState(FIREWALL_CHAIN_METERED_DENY_ADMIN));
+            dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_METERED_DENY_ADMIN,
+                    mUidMeteredFirewallDenyAdminRules);
         }
 
         pw.print("Firewall enabled: "); pw.println(mFirewallEnabled);
@@ -1619,22 +1542,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         pw.println("]");
     }
 
-    private void modifyInterfaceInNetwork(boolean add, int netId, String iface) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        try {
-            if (add) {
-                mNetdService.networkAddInterface(netId, iface);
-            } else {
-                mNetdService.networkRemoveInterface(netId, iface);
-            }
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     @Override
     public void allowProtect(int uid) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
 
         try {
             mNetdService.networkSetProtectAllow(uid);
@@ -1645,31 +1555,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void denyProtect(int uid) {
-        NetworkStack.checkNetworkStackPermission(mContext);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
 
         try {
             mNetdService.networkSetProtectDeny(uid);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public void addInterfaceToLocalNetwork(String iface, List<RouteInfo> routes) {
-        modifyInterfaceInNetwork(MODIFY_OPERATION_ADD, INetd.LOCAL_NET_ID, iface);
-        // modifyInterfaceInNetwork already check calling permission.
-        NetdUtils.addRoutesToLocalNetwork(mNetdService, iface, routes);
-    }
-
-    @Override
-    public void removeInterfaceFromLocalNetwork(String iface) {
-        modifyInterfaceInNetwork(MODIFY_OPERATION_REMOVE, INetd.LOCAL_NET_ID, iface);
-    }
-
-    @Override
-    public int removeRoutesFromLocalNetwork(List<RouteInfo> routes) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        return NetdUtils.removeRoutesFromLocalNetwork(mNetdService, routes);
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
@@ -1707,14 +1599,45 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of low power standby");
                 return true;
             }
-            if (mUidRejectOnMetered.get(uid)) {
-                if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of no metered data"
-                        + " in the background");
+            if (getFirewallChainState(FIREWALL_CHAIN_BACKGROUND)
+                    && mUidFirewallBackgroundRules.get(uid) != FIREWALL_RULE_ALLOW) {
+                if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because it is in background");
                 return true;
             }
-            if (mDataSaverMode && !mUidAllowOnMetered.get(uid)) {
-                if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of data saver mode");
-                return true;
+            if (mUseMeteredFirewallChains) {
+                if (getFirewallChainState(FIREWALL_CHAIN_METERED_DENY_USER)
+                        && mUidMeteredFirewallDenyUserRules.get(uid) == FIREWALL_RULE_DENY) {
+                    if (DBG) {
+                        Slog.d(TAG, "Uid " + uid + " restricted because of user-restricted metered"
+                                + " data in the background");
+                    }
+                    return true;
+                }
+                if (getFirewallChainState(FIREWALL_CHAIN_METERED_DENY_ADMIN)
+                        && mUidMeteredFirewallDenyAdminRules.get(uid) == FIREWALL_RULE_DENY) {
+                    if (DBG) {
+                        Slog.d(TAG, "Uid " + uid + " restricted because of admin-restricted metered"
+                                + " data in the background");
+                    }
+                    return true;
+                }
+                if (getFirewallChainState(FIREWALL_CHAIN_METERED_ALLOW)
+                        && mUidMeteredFirewallAllowRules.get(uid) != FIREWALL_RULE_ALLOW) {
+                    if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of data saver mode");
+                    return true;
+                }
+            } else {
+                if (mUidRejectOnMetered.get(uid)) {
+                    if (DBG) {
+                        Slog.d(TAG, "Uid " + uid
+                                + " restricted because of no metered data in the background");
+                    }
+                    return true;
+                }
+                if (mDataSaverMode && !mUidAllowOnMetered.get(uid)) {
+                    if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of data saver mode");
+                    return true;
+                }
             }
             return false;
         }

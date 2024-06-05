@@ -24,16 +24,18 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import android.app.usage.Flags;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.os.PersistableBundle;
 import android.util.AtomicFile;
-import android.util.TimeSparseArray;
+import android.util.LongSparseArray;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -183,6 +185,17 @@ public class UsageStatsDatabaseTest {
                 case Event.LOCUS_ID_SET:
                     event.mLocusId = "locus" + (i % 7); //"random" locus
                     break;
+                case Event.USER_INTERACTION:
+                    if (Flags.userInteractionTypeApi()) {
+                        // "random" user interaction extras.
+                        PersistableBundle extras = new PersistableBundle();
+                        extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY,
+                                "fake.namespace.category" + (i % 13));
+                        extras.putString(UsageStatsManager.EXTRA_EVENT_ACTION,
+                                "fakeaction" + (i % 13));
+                        event.mExtras = extras;
+                    }
+                    break;
             }
 
             mIntervalStats.addEvent(event);
@@ -295,6 +308,18 @@ public class UsageStatsDatabaseTest {
                         assertEquals(e1.mLocusIdToken, e2.mLocusIdToken,
                                 "Usage event " + debugId);
                         break;
+                    case Event.USER_INTERACTION:
+                        if (Flags.userInteractionTypeApi()) {
+                            PersistableBundle extras1 = e1.getExtras();
+                            PersistableBundle extras2 = e2.getExtras();
+                            assertEquals(extras1.getString(UsageStatsManager.EXTRA_EVENT_CATEGORY),
+                                    extras2.getString(UsageStatsManager.EXTRA_EVENT_CATEGORY),
+                                    "Usage event " + debugId);
+                            assertEquals(extras1.getString(UsageStatsManager.EXTRA_EVENT_ACTION),
+                                    extras2.getString(UsageStatsManager.EXTRA_EVENT_ACTION),
+                                    "Usage event " + debugId);
+                        }
+                        break;
                 }
                 // fallthrough
             case 4: // test fields added in version 4
@@ -382,7 +407,7 @@ public class UsageStatsDatabaseTest {
     void runWriteReadTest(int interval) throws IOException {
         mUsageStatsDatabase.putUsageStats(interval, mIntervalStats);
         List<IntervalStats> stats = mUsageStatsDatabase.queryUsageStats(interval, 0, mEndTime,
-                mIntervalStatsVerifier);
+                mIntervalStatsVerifier, false);
 
         assertEquals(1, stats.size());
         compareIntervalStats(mIntervalStats, stats.get(0), MAX_TESTED_VERSION);
@@ -421,7 +446,7 @@ public class UsageStatsDatabaseTest {
         newDB.readMappingsLocked();
         newDB.init(mEndTime);
         List<IntervalStats> stats = newDB.queryUsageStats(interval, 0, mEndTime,
-                mIntervalStatsVerifier);
+                mIntervalStatsVerifier, false);
 
         assertEquals(1, stats.size());
 
@@ -465,7 +490,7 @@ public class UsageStatsDatabaseTest {
         assertTrue(restoredApps.containsAll(prevDBApps),
                 "List of restored apps does not match list backed-up apps list.");
         List<IntervalStats> stats = newDB.queryUsageStats(
-                UsageStatsManager.INTERVAL_DAILY, 0, mEndTime, mIntervalStatsVerifier);
+                UsageStatsManager.INTERVAL_DAILY, 0, mEndTime, mIntervalStatsVerifier, false);
 
         if (version > UsageStatsDatabase.BACKUP_VERSION || version < 1) {
             assertFalse(stats != null && !stats.isEmpty(),
@@ -568,7 +593,7 @@ public class UsageStatsDatabaseTest {
         mUsageStatsDatabase.forceIndexFiles();
         final int len = mUsageStatsDatabase.mSortedStatFiles.length;
         for (int i = 0; i < len; i++) {
-            final TimeSparseArray<AtomicFile> files =  mUsageStatsDatabase.mSortedStatFiles[i];
+            final LongSparseArray<AtomicFile> files =  mUsageStatsDatabase.mSortedStatFiles[i];
             // The stats file for each interval type equals to max allowed.
             assertEquals(UsageStatsDatabase.MAX_FILES_PER_INTERVAL_TYPE[i],
                     files.size());
@@ -593,7 +618,7 @@ public class UsageStatsDatabaseTest {
         newDB.readMappingsLocked();
         newDB.init(mEndTime);
         List<IntervalStats> stats = newDB.queryUsageStats(interval, 0, mEndTime,
-                mIntervalStatsVerifier);
+                mIntervalStatsVerifier, false);
 
         assertEquals(1, stats.size());
         // The written and read IntervalStats should match
@@ -620,7 +645,7 @@ public class UsageStatsDatabaseTest {
         db.onPackageRemoved(removedPackage, System.currentTimeMillis());
 
         List<IntervalStats> stats = db.queryUsageStats(interval, 0, mEndTime,
-                mIntervalStatsVerifier);
+                mIntervalStatsVerifier, false);
         assertEquals(1, stats.size(),
                 "Only one interval stats object should exist for the given time range.");
         final IntervalStats stat = stats.get(0);
@@ -648,7 +673,7 @@ public class UsageStatsDatabaseTest {
     private void verifyPackageDataIsRemoved(UsageStatsDatabase db, int interval,
             String removedPackage) {
         List<IntervalStats> stats = db.queryUsageStats(interval, 0, mEndTime,
-                mIntervalStatsVerifier);
+                mIntervalStatsVerifier, false);
         assertEquals(1, stats.size(),
                 "Only one interval stats object should exist for the given time range.");
         final IntervalStats stat = stats.get(0);
@@ -668,7 +693,7 @@ public class UsageStatsDatabaseTest {
     private void verifyPackageDataIsNotRemoved(UsageStatsDatabase db, int interval,
             Set<String> installedPackages) {
         List<IntervalStats> stats = db.queryUsageStats(interval, 0, mEndTime,
-                mIntervalStatsVerifier);
+                mIntervalStatsVerifier, false);
         assertEquals(1, stats.size(),
                 "Only one interval stats object should exist for the given time range.");
         final IntervalStats stat = stats.get(0);

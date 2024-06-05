@@ -36,7 +36,7 @@ using namespace android;
 using namespace android::uirenderer;
 
 TEST(SkiaCanvas, drawShadowLayer) {
-    auto surface = SkSurface::MakeRasterN32Premul(10, 10);
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(10, 10));
     SkiaCanvas canvas(surface->getCanvas());
 
     // clear to white

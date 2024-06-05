@@ -19,6 +19,7 @@ package com.android.systemui.navigationbar;
 import static android.inputmethodservice.InputMethodService.canImeRenderGesturalNavButtons;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
+import static com.android.systemui.Flags.enableViewCaptureTracing;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SEARCH_DISABLED;
@@ -37,6 +38,7 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.media.permission.SafeCloseable;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.AttributeSet;
@@ -59,10 +61,10 @@ import android.widget.FrameLayout;
 import androidx.annotation.Nullable;
 
 import com.android.app.animation.Interpolators;
+import com.android.app.viewcapture.ViewCaptureFactory;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.Utils;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.ContextualButton;
@@ -70,11 +72,12 @@ import com.android.systemui.navigationbar.buttons.ContextualButtonGroup;
 import com.android.systemui.navigationbar.buttons.DeadZone;
 import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
 import com.android.systemui.navigationbar.buttons.NearestTouchFrame;
-import com.android.systemui.navigationbar.buttons.RotationContextButton;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shared.rotation.FloatingRotationButton;
 import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.shared.rotation.RotationButtonController;
@@ -149,8 +152,9 @@ public class NavigationBarView extends FrameLayout {
     private NavigationBarInflaterView mNavigationInflaterView;
     private Optional<Recents> mRecentsOptional = Optional.empty();
     @Nullable
-    private ShadeViewController mPanelView;
-    private RotationContextButton mRotationContextButton;
+    private ShadeViewController mShadeViewController;
+    @Nullable
+    private PanelExpansionInteractor mPanelExpansionInteractor;
     private FloatingRotationButton mFloatingRotationButton;
     private RotationButtonController mRotationButtonController;
 
@@ -176,6 +180,7 @@ public class NavigationBarView extends FrameLayout {
     private boolean mOverviewProxyEnabled;
     private boolean mShowSwipeUpUi;
     private UpdateActiveTouchRegionsCallback mUpdateActiveTouchRegionsCallback;
+    private SafeCloseable mViewCaptureCloseable;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -290,8 +295,6 @@ public class NavigationBarView extends FrameLayout {
                         R.drawable.ic_sysbar_accessibility_button);
         mContextualButtonGroup.addButton(imeSwitcherButton);
         mContextualButtonGroup.addButton(accessibilityButton);
-        mRotationContextButton = new RotationContextButton(R.id.rotate_suggestion,
-                mLightContext, R.drawable.ic_sysbar_rotate_button_ccw_start_0);
         mFloatingRotationButton = new FloatingRotationButton(mContext,
                 R.string.accessibility_rotate_button,
                 R.layout.rotate_suggestion,
@@ -347,8 +350,9 @@ public class NavigationBarView extends FrameLayout {
     }
 
     /** */
-    public void setComponents(ShadeViewController panel) {
-        mPanelView = panel;
+    public void setComponents(ShadeViewController svc, PanelExpansionInteractor pei) {
+        mShadeViewController = svc;
+        mPanelExpansionInteractor = pei;
         updatePanelSystemUiStateFlags();
     }
 
@@ -359,6 +363,7 @@ public class NavigationBarView extends FrameLayout {
 
     public void setBackgroundExecutor(Executor bgExecutor) {
         mBgExecutor = bgExecutor;
+        mRotationButtonController.setBgExecutor(bgExecutor);
     }
 
     public void setDisplayTracker(DisplayTracker displayTracker) {
@@ -428,10 +433,6 @@ public class NavigationBarView extends FrameLayout {
         return mButtonDispatchers.get(R.id.accessibility_button);
     }
 
-    public RotationContextButton getRotateSuggestionButton() {
-        return (RotationContextButton) mButtonDispatchers.get(R.id.rotate_suggestion);
-    }
-
     public ButtonDispatcher getHomeHandle() {
         return mButtonDispatchers.get(R.id.home_handle);
     }
@@ -478,29 +479,14 @@ public class NavigationBarView extends FrameLayout {
      * Updates the rotation button based on the current navigation mode.
      */
     void updateRotationButton() {
-        if (isGesturalMode(mNavBarMode)) {
-            mContextualButtonGroup.removeButton(R.id.rotate_suggestion);
-            mButtonDispatchers.remove(R.id.rotate_suggestion);
-            mRotationButtonController.setRotationButton(mFloatingRotationButton,
-                    mRotationButtonListener);
-        } else if (mContextualButtonGroup.getContextButton(R.id.rotate_suggestion) == null) {
-            mContextualButtonGroup.addButton(mRotationContextButton);
-            mButtonDispatchers.put(R.id.rotate_suggestion, mRotationContextButton);
-            mRotationButtonController.setRotationButton(mRotationContextButton,
-                    mRotationButtonListener);
-        }
-        mNavigationInflaterView.setButtonDispatchers(mButtonDispatchers);
+        mRotationButtonController.setRotationButton(mFloatingRotationButton,
+                mRotationButtonListener);
     }
 
     public KeyButtonDrawable getBackDrawable() {
-        KeyButtonDrawable drawable = getDrawable(getBackDrawableRes());
+        KeyButtonDrawable drawable = getDrawable(R.drawable.ic_sysbar_back);
         orientBackButton(drawable);
         return drawable;
-    }
-
-    public @DrawableRes int getBackDrawableRes() {
-        return chooseNavigationIconDrawableRes(R.drawable.ic_sysbar_back,
-                R.drawable.ic_sysbar_back_quick_step);
     }
 
     public KeyButtonDrawable getHomeDrawable() {
@@ -542,11 +528,6 @@ public class NavigationBarView extends FrameLayout {
         drawable.setRotation(mIsVertical ? 90 : 0);
     }
 
-    private @DrawableRes int chooseNavigationIconDrawableRes(@DrawableRes int icon,
-            @DrawableRes int quickStepIcon) {
-        return mShowSwipeUpUi ? quickStepIcon : icon;
-    }
-
     private KeyButtonDrawable getDrawable(@DrawableRes int icon) {
         return KeyButtonDrawable.create(mLightContext, mLightIconColor, mDarkIconColor, icon,
                 true /* hasShadow */, null /* ovalBackgroundColor */);
@@ -583,7 +564,6 @@ public class NavigationBarView extends FrameLayout {
         if (!visible) {
             mTransitionListener.onBackAltCleared();
         }
-        mRotationButtonController.getRotationButton().setCanShowRotationButton(!visible);
     }
 
     void setDisabledFlags(int disabledFlags, SysUiState sysUiState) {
@@ -760,10 +740,10 @@ public class NavigationBarView extends FrameLayout {
 
     private void updatePanelSystemUiStateFlags() {
         if (SysUiState.DEBUG) {
-            Log.d(TAG, "Updating panel sysui state flags: panelView=" + mPanelView);
+            Log.d(TAG, "Updating panel sysui state flags: panelView=" + mShadeViewController);
         }
-        if (mPanelView != null) {
-            mPanelView.updateSystemUiStateFlags();
+        if (mShadeViewController != null) {
+            mShadeViewController.updateSystemUiStateFlags();
         }
     }
 
@@ -811,7 +791,8 @@ public class NavigationBarView extends FrameLayout {
      */
     void updateSlippery() {
         setSlippery(!isQuickStepSwipeUpEnabled() ||
-                (mPanelView != null && mPanelView.isFullyExpanded() && !mPanelView.isCollapsing()));
+                (mPanelExpansionInteractor != null && mPanelExpansionInteractor.isFullyExpanded()
+                        && !mPanelExpansionInteractor.isCollapsing()));
     }
 
     void setSlippery(boolean slippery) {
@@ -1036,7 +1017,6 @@ public class NavigationBarView extends FrameLayout {
         updateIcons(mTmpLastConfiguration);
         updateRecentsIcon();
         updateCurrentRotation();
-        mEdgeBackGestureHandler.onConfigurationChanged(mConfiguration);
         if (uiCarModeChanged || mTmpLastConfiguration.densityDpi != mConfiguration.densityDpi
                 || mTmpLastConfiguration.getLayoutDirection() != mConfiguration.getLayoutDirection()) {
             // If car mode or density changes, we need to reset the icons.
@@ -1101,6 +1081,10 @@ public class NavigationBarView extends FrameLayout {
         }
 
         updateNavButtonIcons();
+        if (enableViewCaptureTracing()) {
+            mViewCaptureCloseable = ViewCaptureFactory.getInstance(getContext())
+                    .startCapture(getRootView(), ".NavigationBarView");
+        }
     }
 
     @Override
@@ -1112,6 +1096,9 @@ public class NavigationBarView extends FrameLayout {
         if (mRotationButtonController != null) {
             mFloatingRotationButton.hide();
             mRotationButtonController.unregisterListeners();
+        }
+        if (mViewCaptureCloseable != null) {
+            mViewCaptureCloseable.close();
         }
     }
 
@@ -1149,7 +1136,6 @@ public class NavigationBarView extends FrameLayout {
         dumpButton(pw, "home", getHomeButton());
         dumpButton(pw, "handle", getHomeHandle());
         dumpButton(pw, "rcnt", getRecentsButton());
-        dumpButton(pw, "rota", getRotateSuggestionButton());
         dumpButton(pw, "a11y", getAccessibilityButton());
         dumpButton(pw, "ime", getImeSwitchButton());
 

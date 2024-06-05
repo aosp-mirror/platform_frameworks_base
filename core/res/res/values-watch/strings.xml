@@ -26,5 +26,9 @@
     <string name="global_action_emergency">Emergency SOS</string>
 
    <!-- Reboot to Recovery Progress Dialog. This is shown before it reboots to recovery. -->
+    <string name="reboot_to_update_prepare">Preparing to update</string>
     <string name="reboot_to_update_title">Wear OS system update</string>
+
+   <!-- Title of the pop-up dialog in which the user switches keyboard, also known as input method. -->
+    <string name="select_input_method">Choose input</string>
 </resources>

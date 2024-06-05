@@ -618,4 +618,14 @@ public final class VpnProfile implements Cloneable, Parcelable {
     public int describeContents() {
         return 0;
     }
+
+    @Override
+    public VpnProfile clone() {
+        try {
+            return (VpnProfile) super.clone();
+        } catch (CloneNotSupportedException e) {
+            Log.wtf(TAG, e);
+            return null;
+        }
+    }
 }

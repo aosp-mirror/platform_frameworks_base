@@ -67,10 +67,15 @@ import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
+import android.telephony.satellite.INtnSignalStrengthCallback;
+import android.telephony.satellite.ISatelliteCapabilitiesCallback;
+import android.telephony.satellite.ISatelliteCommunicationAllowedStateCallback;
 import android.telephony.satellite.ISatelliteDatagramCallback;
 import android.telephony.satellite.ISatelliteTransmissionUpdateCallback;
 import android.telephony.satellite.ISatelliteProvisionStateCallback;
-import android.telephony.satellite.ISatelliteStateCallback;
+import android.telephony.satellite.ISatelliteSupportedStateCallback;
+import android.telephony.satellite.ISatelliteModemStateCallback;
+import android.telephony.satellite.NtnSignalStrength;
 import android.telephony.satellite.SatelliteCapabilities;
 import android.telephony.satellite.SatelliteDatagram;
 import com.android.ims.internal.IImsServiceFeatureCallback;
@@ -1192,17 +1197,6 @@ interface ITelephony {
             in List<String> cdmaNonRoamingList);
 
     /**
-     * Returns the result and response from RIL for oem request
-     *
-     * @param oemReq the data is sent to ril.
-     * @param oemResp the respose data from RIL.
-     * @return negative value request was not handled or get error
-     *         0 request was handled succesfully, but no response data
-     *         positive value success, data length of response
-     */
-    int invokeOemRilRequestRaw(in byte[] oemReq, out byte[] oemResp);
-
-    /**
      * Check if any mobile Radios need to be shutdown.
      *
      * @return true is any mobile radio needs to be shutdown
@@ -1405,19 +1399,18 @@ interface ITelephony {
     oneway void requestModemActivityInfo(in ResultReceiver result);
 
     /**
-     * Get the service state on specified subscription
-     * @param subId Subscription id
+     * Get the service state on specified SIM slot.
+     * @param slotIndex of phone whose service state is returned
      * @param renounceFineLocationAccess Set this to true if the caller would not like to
      * receive fine location related information
      * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
      * receive coarse location related information
      * @param callingPackage The package making the call
      * @param callingFeatureId The feature in the package
-     * @return Service state on specified subscription.
+     * @return Service state on specified SIM slot.
      */
-    ServiceState getServiceStateForSubscriber(int subId, boolean renounceFineLocationAccess,
-            boolean renounceCoarseLocationAccess,
-            String callingPackage, String callingFeatureId);
+    ServiceState getServiceStateForSlot(int slotIndex, boolean renounceFineLocationAccess,
+            boolean renounceCoarseLocationAccess, String callingPackage, String callingFeatureId);
 
     /**
      * Returns the URI for the per-account voicemail ringtone set in Phone settings.
@@ -1907,6 +1900,16 @@ interface ITelephony {
       * Removes an existing IMS registration status callback for the subscription specified.
       */
     void unregisterImsRegistrationCallback(int subId, IImsRegistrationCallback c);
+
+    /**
+     * Adds an IMS emergency registration status callback for the subscription id specified.
+     */
+    void registerImsEmergencyRegistrationCallback(int subId, IImsRegistrationCallback c);
+    /**
+     * Removes an existing IMS emergency registration status callback for the subscription
+     * id specified.
+     */
+    void unregisterImsEmergencyRegistrationCallback(int subId, IImsRegistrationCallback c);
 
     /**
      * Get the IMS service registration state for the MmTelFeature associated with this sub id.
@@ -2740,14 +2743,19 @@ interface ITelephony {
      * Request to enable or disable the satellite modem.
      *
      * @param subId The subId of the subscription to enable or disable the satellite modem for.
-     * @param enable True to enable the satellite modem and false to disable.
-     * @param isDemoModeEnabled True if demo mode is enabled and false otherwise.
+     * @param enableSatellite True to enable the satellite modem and false to disable.
+     * @param enableDemoMode True if demo mode is enabled and false otherwise. When
+     *                       disabling satellite, {@code enableDemoMode} is always considered as
+     *                       {@code false} by Telephony.
+     * @param isEmergency {@code true} means satellite is enabled for emergency mode, {@code false}
+     *                    otherwise. When disabling satellite, {@code isEmergency} is always
+     *                    considered as {@code false} by Telephony.
      * @param callback The callback to get the result of the request.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void requestSatelliteEnabled(int subId, boolean enable, boolean isDemoModeEnabled,
-            in IIntegerConsumer callback);
+    void requestSatelliteEnabled(int subId, boolean enableSatellite, boolean enableDemoMode,
+            boolean isEmergency, in IIntegerConsumer callback);
 
     /**
      * Request to get whether the satellite modem is enabled.
@@ -2771,6 +2779,18 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void requestIsDemoModeEnabled(int subId, in ResultReceiver receiver);
+
+    /**
+     * Request to get whether the satellite service is enabled with emergency mode.
+     *
+     * @param subId The subId of the subscription to request whether the satellite demo mode is
+     *              enabled for.
+     * @param receiver Result receiver to get the error code of the request and whether the
+     *                 satellite is enabled with emergency mode.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestIsEmergencyModeEnabled(int subId, in ResultReceiver receiver);
 
     /**
      * Request to get whether the satellite service is supported on the device.
@@ -2848,7 +2868,6 @@ interface ITelephony {
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void deprovisionSatelliteService(int subId, in String token, in IIntegerConsumer callback);
 
-
     /**
      * Registers for provision state changed from satellite modem.
      *
@@ -2895,7 +2914,7 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int registerForSatelliteModemStateChanged(int subId, ISatelliteStateCallback callback);
+    int registerForSatelliteModemStateChanged(int subId, ISatelliteModemStateCallback callback);
 
     /**
      * Unregisters for modem state changed from satellite modem.
@@ -2906,7 +2925,7 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void unregisterForSatelliteModemStateChanged(int subId, ISatelliteStateCallback callback);
+    void unregisterForModemStateChanged(int subId, ISatelliteModemStateCallback callback);
 
    /**
      * Register to receive incoming datagrams over satellite.
@@ -2918,18 +2937,18 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int registerForSatelliteDatagram(int subId, ISatelliteDatagramCallback callback);
+    int registerForIncomingDatagram(int subId, ISatelliteDatagramCallback callback);
 
    /**
      * Unregister to stop receiving incoming datagrams over satellite.
      * If callback was not registered before, the request will be ignored.
      *
      * @param subId The subId of the subscription to unregister for incoming satellite datagrams.
-     * @param callback The callback that was passed to registerForSatelliteDatagram.
+     * @param callback The callback that was passed to registerForIncomingDatagram.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void unregisterForSatelliteDatagram(int subId, ISatelliteDatagramCallback callback);
+    void unregisterForIncomingDatagram(int subId, ISatelliteDatagramCallback callback);
 
    /**
     * Poll pending satellite datagrams over satellite.
@@ -2939,7 +2958,7 @@ interface ITelephony {
     */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
                 + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void pollPendingSatelliteDatagrams(int subId, IIntegerConsumer callback);
+    void pollPendingDatagrams(int subId, IIntegerConsumer callback);
 
    /**
     * Send datagram over satellite.
@@ -2953,9 +2972,8 @@ interface ITelephony {
     */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void sendSatelliteDatagram(int subId, int datagramType,
-             in SatelliteDatagram datagram, in boolean needFullScreenPointingUI,
-             IIntegerConsumer callback);
+    void sendDatagram(int subId, int datagramType, in SatelliteDatagram datagram,
+            in boolean needFullScreenPointingUI, IIntegerConsumer callback);
 
     /**
      * Request to get whether satellite communication is allowed for the current location.
@@ -2967,8 +2985,7 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void requestIsSatelliteCommunicationAllowedForCurrentLocation(int subId,
-            in ResultReceiver receiver);
+    void requestIsCommunicationAllowedForCurrentLocation(int subId, in ResultReceiver receiver);
 
     /**
      * Request to get the time after which the satellite will be visible.
@@ -2989,7 +3006,7 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void onDeviceAlignedWithSatellite(int subId, in boolean isAligned);
+    void setDeviceAlignedWithSatellite(int subId, in boolean isAligned);
 
     /**
      * This API can be used by only CTS to update satellite vendor service package name.
@@ -3030,13 +3047,72 @@ interface ITelephony {
     boolean setSatellitePointingUiClassName(in String packageName, in String className);
 
     /**
-     * This API can be used by only CTS to update the timeout duration in milliseconds whether
-     * the device is aligned with the satellite for demo mode
+     * This API can be used by only CTS to override the timeout durations used by the
+     * DatagramController module.
      *
      * @param timeoutMillis The timeout duration in millisecond.
      * @return {@code true} if the timeout duration is set successfully, {@code false} otherwise.
      */
-    boolean setSatelliteDeviceAlignedTimeoutDuration(long timeoutMillis);
+    boolean setDatagramControllerTimeoutDuration(
+            boolean reset, int timeoutType, long timeoutMillis);
+
+    /**
+     * This API can be used by only CTS to override the timeout durations used by the
+     * SatelliteController module.
+     *
+     * @param timeoutMillis The timeout duration in millisecond.
+     * @return {@code true} if the timeout duration is set successfully, {@code false} otherwise.
+     */
+    boolean setSatelliteControllerTimeoutDuration(
+            boolean reset, int timeoutType, long timeoutMillis);
+
+    /**
+     * This API can be used in only testing to override connectivity status in monitoring emergency
+     * calls and sending EVENT_DISPLAY_EMERGENCY_MESSAGE to Dialer.
+     *
+     * @param handoverType The type of handover from emergency call to satellite messaging. Use one
+     *                     of the following values to enable the override:
+     *                     1 - EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_SOS
+     *                     2 - EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911
+     *                     To disable the override, use -1 for handoverType.
+     * @param delaySeconds The event EVENT_DISPLAY_EMERGENCY_MESSAGE will be sent to Dialer
+     *                     delaySeconds after the emergency call starts.
+     * @return {@code true} if the handover type is set successfully, {@code false} otherwise.
+     */
+    boolean setEmergencyCallToSatelliteHandoverType(int handoverType, int delaySeconds);
+
+    /**
+     * This API should be used by only CTS tests to forcefully set the country codes.
+     *
+     * @param reset {@code true} mean the overridden country codes should not be used, {@code false}
+     *              otherwise.
+     * @return {@code true} if the country code is set successfully, {@code false} otherwise.
+     */
+    boolean setCountryCodes(in boolean reset, in List<String> currentNetworkCountryCodes,
+            in Map cachedNetworkCountryCodes, in String locationCountryCode,
+            in long locationCountryCodeTimestampNanos);
+
+    /**
+     * This API should be used by only CTS tests to override the overlay configs of satellite
+     * access controller.
+     *
+     * @param reset {@code true} mean the overridden configs should not be used, {@code false}
+     *              otherwise.
+     * @return {@code true} if the overlay configs are set successfully, {@code false} otherwise.
+     */
+    boolean setSatelliteAccessControlOverlayConfigs(in boolean reset, in boolean isAllowed,
+            in String s2CellFile, in long locationFreshDurationNanos,
+            in List<String> satelliteCountryCodes);
+
+    /**
+     * This API can be used in only testing to override oem-enabled satellite provision status.
+     *
+     * @param reset {@code true} mean the overriding status should not be used, {@code false}
+     *              otherwise.
+     * @param isProvisioned The overriding provision status.
+     * @return {@code true} if the provision status is set successfully, {@code false} otherwise.
+     */
+    boolean setOemEnabledSatelliteProvisionStatus(in boolean reset, in boolean isProvisioned);
 
     /**
      * Test method to confirm the file contents are not altered.
@@ -3044,4 +3120,274 @@ interface ITelephony {
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
                  + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
      List<String> getShaIdFromAllowList(String pkgName, int carrierId);
+
+    /**
+     * Add a restriction reason for disallowing satellite communication.
+     *
+     * @param subId The subId of the subscription to request for.
+     * @param reason Reason for disallowing satellite communication for carrier.
+     * @param callback Listener for the {@link SatelliteManager.SatelliteError} result of the
+     * operation.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void addAttachRestrictionForCarrier(int subId, int reason, in IIntegerConsumer callback);
+
+    /**
+     * Remove a restriction reason for disallowing satellite communication.
+     *
+     * @param subId The subId of the subscription to request for.
+     * @param reason Reason for disallowing satellite communication.
+     * @param callback Listener for the {@link SatelliteManager.SatelliteError} result of the
+     * operation.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void removeAttachRestrictionForCarrier(int subId, int reason, in IIntegerConsumer callback);
+
+    /**
+     * Get reasons for disallowing satellite communication, as requested by
+     * {@link #addAttachRestrictionForCarrier(int, int)}.
+     *
+     * @param subId The subId of the subscription to request for.
+     *
+     * @return Set of reasons for disallowing satellite communication.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int[] getAttachRestrictionReasonsForCarrier(int subId);
+
+    /**
+     * Request to get the signal strength of the satellite connection.
+     *
+     * @param subId The subId of the subscription to request for.
+     * @param receiver Result receiver to get the error code of the request and the current signal
+     * strength of the satellite connection.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestNtnSignalStrength(int subId, in ResultReceiver receiver);
+
+    /**
+     * Registers for NTN signal strength changed from satellite modem. If the registration operation
+     * is not successful, a {@link SatelliteException} that contains {@link SatelliteResult} will be
+     * thrown.
+     *
+     * @param subId The subId of the subscription to request for.
+     * @param callback The callback to handle the NTN signal strength changed event. If the
+     * operation is successful, {@link NtnSignalStrengthCallback#onNtnSignalStrengthChanged(
+     * NtnSignalStrength)} will return an instance of {@link NtnSignalStrength} with a value of
+     * {@link NtnSignalStrength.NtnSignalStrengthLevel} when the signal strength of non-terrestrial
+     * network has changed.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void registerForNtnSignalStrengthChanged(int subId,
+            in INtnSignalStrengthCallback callback);
+
+    /**
+     * Unregisters for NTN signal strength changed from satellite modem.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param subId The subId of the subscription to unregister for provision state changed.
+     * @param callback The callback that was passed to
+     * {@link #registerForNtnSignalStrengthChanged(Executor, NtnSignalStrengthCallback)}.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void unregisterForNtnSignalStrengthChanged(int subId, in INtnSignalStrengthCallback callback);
+
+    /**
+     * Registers for satellite capabilities change event from the satellite service.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback to handle the satellite capabilities changed event.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int registerForCapabilitiesChanged(int subId, in ISatelliteCapabilitiesCallback callback);
+
+    /**
+     * Unregisters for satellite capabilities change event from the satellite service.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param callback The callback that was passed to.
+     * {@link #registerForCapabilitiesChanged(Executor, SatelliteCapabilitiesCallback)}.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void unregisterForCapabilitiesChanged(int subId,
+            in ISatelliteCapabilitiesCallback callback);
+
+    /**
+     * This API can be used by only CTS to override the cached value for the device overlay config
+     * value : config_send_satellite_datagram_to_modem_in_demo_mode, which determines whether
+     * outgoing satellite datagrams should be sent to modem in demo mode.
+     *
+     * @param shouldSendToDemoMode Whether send datagram in demo mode should be sent to satellite
+     * modem or not.
+     *
+     * @return {@code true} if the operation is successful, {@code false} otherwise.
+     */
+    boolean setShouldSendDatagramToModemInDemoMode(boolean shouldSendToModemInDemoMode);
+
+    /**
+     *  @return {@code true} if the DomainSelectionService is set,
+     *          {@code false} otherwise.
+     */
+    boolean setDomainSelectionServiceOverride(in ComponentName componentName);
+
+    /**
+     *  @return {@code true} if the DomainSelectionService override is cleared,
+     *          {@code false} otherwise.
+     */
+    boolean clearDomainSelectionServiceOverride();
+
+    /**
+     * @return {@code true} if the AOSP domain selection service is supported,
+     *         {@code false} otherwise.
+     */
+    boolean isAospDomainSelectionService();
+
+    /**
+     * Enable or disable notifications sent for cellular identifier disclosure events.
+     *
+     * Disclosure events are defined as instances where a device has sent a cellular identifier
+     * on the Non-access stratum (NAS) before a security context is established. As a result the
+     * identifier is sent in the clear, which has privacy implications for the user.
+     *
+     * <p>Requires permission: android.Manifest.MODIFY_PHONE_STATE</p>
+     *
+     * @param enabled if notifications about disclosure events should be enabled
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support this feature.
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+        + "android.Manifest.permission.MODIFY_PHONE_STATE)")
+    void setEnableCellularIdentifierDisclosureNotifications(boolean enable);
+
+    /**
+     * Get whether or not cellular identifier disclosure notifications are enabled.
+     *
+     * <p>Requires permission: android.Manifest.READ_PRIVILEGED_PHONE_STATE</p>
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support this feature.
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+        + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
+    boolean isCellularIdentifierDisclosureNotificationsEnabled();
+
+    /**
+     * Enables or disables notifications sent when cellular null cipher or integrity algorithms
+     * are in use by the cellular modem.
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support reporting on ciphering
+     * and integrity algorithms in use
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+        + "android.Manifest.permission.MODIFY_PHONE_STATE)")
+    void setNullCipherNotificationsEnabled(boolean enable);
+
+    /**
+     * Get whether notifications are enabled for null cipher or integrity algorithms in use by the
+     * cellular modem.
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support reporting on ciphering
+     * and integrity algorithms in use
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+        + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
+    boolean isNullCipherNotificationsEnabled();
+
+    /**
+     * Get the aggregated satellite plmn list. This API collects plmn data from multiple sources,
+     * including carrier config, entitlement server, and config update.
+     *
+     * @param subId subId The subscription ID of the carrier.
+     *
+     * @return List of plmns for carrier satellite service. If no plmn is available, empty list will
+     * be returned.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    List<String> getSatellitePlmnsForCarrier(int subId);
+
+    /**
+     * Registers for supported state changed from satellite modem.
+     *
+     * @param subId The subId of the subscription to register for supported state changed.
+     * @param callback The callback to handle the satellite supported state changed event.
+     *
+     * @return The {@link SatelliteError} result of the operation.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int registerForSatelliteSupportedStateChanged(int subId,
+            in ISatelliteSupportedStateCallback callback);
+
+    /**
+     * Unregisters for supported state changed from satellite modem.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param subId The subId of the subscription to unregister for supported state changed.
+     * @param callback The callback that was passed to registerForSatelliteSupportedStateChanged.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void unregisterForSatelliteSupportedStateChanged(int subId,
+            in ISatelliteSupportedStateCallback callback);
+
+    /**
+     * Registers for satellite communication allowed state changed.
+     *
+     * @param subId The subId of the subscription to register for communication allowed state.
+     * @param callback The callback to handle the communication allowed state changed event.
+     *
+     * @return The {@link SatelliteError} result of the operation.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int registerForCommunicationAllowedStateChanged(int subId,
+            in ISatelliteCommunicationAllowedStateCallback callback);
+
+    /**
+     * Unregisters for satellite communication allowed state.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param subId The subId of the subscription to unregister for supported state changed.
+     * @param callback The callback that was passed to registerForCommunicationAllowedStateChanged.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void unregisterForCommunicationAllowedStateChanged(int subId,
+            in ISatelliteCommunicationAllowedStateCallback callback);
+
+    /**
+     * This API can be used by only CTS to override the boolean configs used by the
+     * DatagramController module.
+     *
+     * @param enable Whether to enable boolean config.
+     * @return {@code true} if the boolean config is set successfully, {@code false} otherwise.
+     */
+    boolean setDatagramControllerBooleanConfig(boolean reset, int booleanType, boolean enable);
+
+    /**
+     * This API can be used by only CTS to set the cache whether satellite communication is allowed.
+     *
+     * @param state a state indicates whether satellite access allowed state should be cached and
+     * the allowed state.
+     * @return {@code true} if the setting is successful, {@code false} otherwise.
+     */
+    boolean setIsSatelliteCommunicationAllowedForCurrentLocationCache(in String state);
 }

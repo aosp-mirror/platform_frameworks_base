@@ -19,15 +19,15 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:forceHasOverlappingRendering="false"
     android:theme="@style/MediaPlayer">
-    <com.android.systemui.media.controls.ui.MediaScrollView
+    <com.android.systemui.media.controls.ui.view.MediaScrollView
         android:id="@+id/media_carousel_scroller"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:scrollbars="none"
         android:clipChildren="false"
         android:clipToPadding="false"
@@ -42,7 +42,7 @@
             >
             <!-- QSMediaPlayers will be added here dynamically -->
         </LinearLayout>
-    </com.android.systemui.media.controls.ui.MediaScrollView>
+    </com.android.systemui.media.controls.ui.view.MediaScrollView>
     <com.android.systemui.qs.PageIndicator
         android:id="@+id/media_page_indicator"
         android:layout_width="wrap_content"

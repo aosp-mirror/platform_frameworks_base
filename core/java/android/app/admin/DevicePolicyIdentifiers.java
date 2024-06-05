@@ -16,7 +16,12 @@
 
 package android.app.admin;
 
+import static android.app.admin.flags.Flags.FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED;
+import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.UserManager;
 
@@ -41,6 +46,21 @@ public final class DevicePolicyIdentifiers {
      * String identifier for {@link DevicePolicyManager#setPermissionGrantState}.
      */
     public static final String PERMISSION_GRANT_POLICY = "permissionGrant";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setSecurityLoggingEnabled}.
+     */
+    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
+    public static final String SECURITY_LOGGING_POLICY = "securityLogging";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setAuditLogEnabled}.
+     *
+     * @hide
+     */
+    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
+    @SystemApi
+    public static final String AUDIT_LOGGING_POLICY = "auditLogging";
 
     /**
      * String identifier for {@link DevicePolicyManager#setLockTaskPackages}.
@@ -158,6 +178,24 @@ public final class DevicePolicyIdentifiers {
      * @hide
      */
     public static final String CROSS_PROFILE_WIDGET_PROVIDER_POLICY = "crossProfileWidgetProvider";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setContentProtectionPolicy}.
+     */
+    @FlaggedApi(android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    public static final String CONTENT_PROTECTION_POLICY = "contentProtection";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setUsbDataSignalingEnabled}.
+     */
+    @FlaggedApi(FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED)
+    public static final String USB_DATA_SIGNALING_POLICY = "usbDataSignaling";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setRequiredPasswordComplexity}.
+     */
+    @FlaggedApi(FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED)
+    public static final String PASSWORD_COMPLEXITY_POLICY = "passwordComplexity";
 
     /**
      * @hide

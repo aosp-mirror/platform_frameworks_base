@@ -17,11 +17,13 @@
 package com.android.server.pm.parsing
 
 import android.content.pm.ApplicationInfo
+import android.util.ArraySet
+import com.android.internal.pm.parsing.PackageParser2
 import java.io.File
 
 class TestPackageParser2(var cacheDir: File? = null) : PackageParser2(
         null /* separateProcesses */, null /* displayMetrics */,
-        cacheDir /* cacheDir */, object : PackageParser2.Callback() {
+    cacheDir?.let { PackageCacher(cacheDir) }, object : PackageParser2.Callback() {
     override fun isChangeEnabled(changeId: Long, appInfo: ApplicationInfo): Boolean {
         return true
     }
@@ -33,4 +35,7 @@ class TestPackageParser2(var cacheDir: File? = null) : PackageParser2(
         // behavior.
         return false
     }
+
+    override fun getHiddenApiWhitelistedApps() = ArraySet<String>()
+    override fun getInstallConstraintsAllowlist() = ArraySet<String>()
 })

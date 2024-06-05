@@ -21,8 +21,8 @@
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true" />
         <option name="install-arg" value="-t" />
-        <option name="test-file-name" value="FrameworksImeTests.apk" />
         <option name="test-file-name" value="SimpleTestIme.apk" />
+        <option name="test-file-name" value="FrameworksImeTests.apk" />
     </target_preparer>
 
     <option name="test-tag" value="FrameworksImeTests" />

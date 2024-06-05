@@ -19,11 +19,15 @@ package {
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
+    default_team: "trendy_team_multitasking_windowing",
 }
 
 android_test {
     name: "WMShellUnitTests",
-
+    defaults: [
+        // For ExtendedMockito dependencies.
+        "modules-utils-testable-device-config-defaults",
+    ],
     srcs: [
         "**/*.java",
         "**/*.kt",
@@ -35,6 +39,7 @@ android_test {
     static_libs: [
         "WindowManager-Shell",
         "junit",
+        "flag-junit",
         "androidx.test.runner",
         "androidx.test.rules",
         "androidx.test.ext.junit",
@@ -43,11 +48,16 @@ android_test {
         "frameworks-base-testutils",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
+        "mockito-kotlin2",
         "mockito-target-extended-minus-junit4",
-        "truth-prebuilt",
+        "truth",
         "testables",
         "platform-test-annotations",
         "servicestests-utils",
+        "com_android_wm_shell_flags_lib",
+        "guava-android-testlib",
+        "com.android.window.flags.window-aconfig-java",
+        "platform-test-annotations",
     ],
 
     libs: [

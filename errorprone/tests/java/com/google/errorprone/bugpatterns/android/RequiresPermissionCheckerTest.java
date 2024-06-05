@@ -438,4 +438,43 @@ public class RequiresPermissionCheckerTest {
                         "}")
                 .doTest();
     }
+
+    @Test
+    public void testEnforce() {
+        compilationHelper
+                .addSourceFile("/android/annotation/EnforcePermission.java")
+                .addSourceFile("/android/content/Context.java")
+                .addSourceFile("/android/foo/IBarService.java")
+                .addSourceFile("/android/os/IInterface.java")
+                .addSourceLines("BarService.java",
+                        "import android.annotation.EnforcePermission;",
+                        "import android.foo.IBarService;",
+                        "class BarService extends IBarService.Stub {",
+                        "  @Override",
+                        "  @EnforcePermission(\"INTERNET\")",
+                        "  public void bar() {",
+                        "    bar_enforcePermission();",
+                        "  }",
+                        "}")
+                .addSourceLines("BarManager.java",
+                        "import android.annotation.RequiresPermission;",
+                        "class BarManager {",
+                        "  BarService mService;",
+                        "  @RequiresPermission(\"INTERNET\")",
+                        "  public void callBar() {",
+                        "    mService.bar();",
+                        "  }",
+                        "  @RequiresPermission(\"NONE\")",
+                        "  public void callBarDifferent() {",
+                        "    // BUG: Diagnostic contains:",
+                        "    mService.bar();",
+                        "  }",
+                        "  public void callBarMissing() {",
+                        "    // BUG: Diagnostic contains:",
+                        "    mService.bar();",
+                        "  }",
+                        "}")
+                .doTest();
+    }
+
 }

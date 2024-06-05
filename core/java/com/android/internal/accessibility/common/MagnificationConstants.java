@@ -16,8 +16,10 @@
 
 package com.android.internal.accessibility.common;
 
+import android.os.SystemProperties;
+
 /**
- * Collection of common constants for accessibility shortcut.
+ * Collection of common constants for accessibility magnification.
  */
 public final class MagnificationConstants {
     private MagnificationConstants() {}
@@ -27,4 +29,11 @@ public final class MagnificationConstants {
      * the min value, there will be no obvious magnification effect.
      */
     public static final float PERSISTED_SCALE_MIN_VALUE = 1.3f;
+
+    /** Minimum supported value for magnification scale. */
+    public static final float SCALE_MIN_VALUE = 1.0f;
+
+    /** Maximum supported value for magnification scale. Default of 8.0. */
+    public static final float SCALE_MAX_VALUE =
+            Float.parseFloat(SystemProperties.get("ro.config.max_magnification_scale", "8.0"));
 }

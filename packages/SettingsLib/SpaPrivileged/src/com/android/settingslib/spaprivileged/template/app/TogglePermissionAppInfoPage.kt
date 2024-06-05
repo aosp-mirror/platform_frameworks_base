@@ -16,18 +16,16 @@
 
 package com.android.settingslib.spaprivileged.template.app
 
-import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.os.bundleOf
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.android.settingslib.spa.framework.common.SettingsEntry
@@ -38,15 +36,19 @@ import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
+import com.android.settingslib.spa.widget.ui.AnnotatedText
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.IPackageManagers
 import com.android.settingslib.spaprivileged.model.app.PackageManagers
 import com.android.settingslib.spaprivileged.model.app.toRoute
+import com.android.settingslib.spaprivileged.model.enterprise.EnhancedConfirmation
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
 import com.android.settingslib.spaprivileged.template.preference.RestrictedSwitchPreference
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 internal class TogglePermissionAppInfoPageProvider(
     private val appListTemplate: TogglePermissionAppListTemplate,
@@ -108,7 +110,7 @@ internal fun <T : AppRecord> TogglePermissionAppListModel<T>.TogglePermissionApp
     app: ApplicationInfo,
 ) {
     val record = remember { transformItem(app) }
-    if (!remember { isChangeable(record) }) return
+    if (!remember { isChangeableWithSystemUidCheck(record) }) return
     val context = LocalContext.current
     val internalListModel = remember {
         TogglePermissionInternalAppListModel(
@@ -130,7 +132,7 @@ internal fun <T : AppRecord> TogglePermissionAppListModel<T>.TogglePermissionApp
 
 @VisibleForTesting
 @Composable
-internal fun TogglePermissionAppListModel<out AppRecord>.TogglePermissionAppInfoPage(
+internal fun <T : AppRecord> TogglePermissionAppListModel<T>.TogglePermissionAppInfoPage(
     packageName: String,
     userId: Int,
     packageManagers: IPackageManagers = PackageManagers,
@@ -140,42 +142,42 @@ internal fun TogglePermissionAppListModel<out AppRecord>.TogglePermissionAppInfo
         title = stringResource(pageTitleResId),
         packageName = packageName,
         userId = userId,
-        footerText = stringResource(footerResId),
-        footerContent = footerContent(),
+        footerContent = { AnnotatedText(footerResId) },
         packageManagers = packageManagers,
     ) {
-        val model = createSwitchModel(checkNotNull(applicationInfo))
-        val restrictions = Restrictions(userId, switchRestrictionKeys)
-        RestrictedSwitchPreference(model, restrictions, restrictionsProviderFactory)
+        val app = applicationInfo ?: return@AppInfoPage
+        val record = rememberRecord(app).value ?: return@AppInfoPage
+        val isAllowed = isAllowed(record)
+        val isChangeable by rememberIsChangeable(record)
+        val switchModel = object : SwitchPreferenceModel {
+            override val title = stringResource(switchTitleResId)
+            override val checked = isAllowed
+            override val changeable = { isChangeable }
+            override val onCheckedChange: (Boolean) -> Unit = { setAllowed(record, it) }
+        }
+        val restrictions = Restrictions(userId = userId,
+            keys = switchRestrictionKeys,
+            enhancedConfirmation = enhancedConfirmationKey?.let { EnhancedConfirmation(
+                key = it,
+                packageName = packageName) })
+        RestrictedSwitchPreference(switchModel, restrictions, restrictionsProviderFactory)
+        InfoPageAdditionalContent(record, isAllowed)
     }
 }
 
 @Composable
-private fun <T : AppRecord> TogglePermissionAppListModel<T>.createSwitchModel(
-    app: ApplicationInfo,
-): TogglePermissionSwitchModel<T> {
-    val context = LocalContext.current
-    val record = remember(app) { transformItem(app) }
-    val isAllowed = isAllowed(record)
-    return remember(record) { TogglePermissionSwitchModel(context, this, record, isAllowed) }
-        .also { model -> LaunchedEffect(model, Dispatchers.IO) { model.initState() } }
-}
+private fun <T : AppRecord> TogglePermissionAppListModel<T>.rememberRecord(app: ApplicationInfo) =
+    remember(app) {
+        flow {
+            emit(transformItem(app))
+        }.flowOn(Dispatchers.Default)
+    }.collectAsStateWithLifecycle(initialValue = null)
 
-private class TogglePermissionSwitchModel<T : AppRecord>(
-    context: Context,
-    private val listModel: TogglePermissionAppListModel<T>,
-    private val record: T,
-    isAllowed: State<Boolean?>,
-) : SwitchPreferenceModel {
-    override val title: String = context.getString(listModel.switchTitleResId)
-    override val checked = isAllowed
-    override val changeable = mutableStateOf(true)
 
-    fun initState() {
-        changeable.value = listModel.isChangeable(record)
-    }
-
-    override val onCheckedChange: (Boolean) -> Unit = { newChecked ->
-        listModel.setAllowed(record, newChecked)
-    }
-}
+@Composable
+private fun <T : AppRecord> TogglePermissionAppListModel<T>.rememberIsChangeable(record: T) =
+    remember(record) {
+        flow {
+            emit(isChangeableWithSystemUidCheck(record))
+        }.flowOn(Dispatchers.Default)
+    }.collectAsStateWithLifecycle(initialValue = false)

@@ -19,6 +19,7 @@ package android.transition;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -464,14 +465,17 @@ public abstract class Transition implements Cloneable {
      *
      *
      * @param sceneRoot The root of the transition hierarchy.
-     * @param startValues The values for a specific target in the start scene.
-     * @param endValues The values for the target in the end scene.
-     * @return A Animator to be started at the appropriate time in the
-     * overall transition for this scene change. A null value means no animation
-     * should be run.
+     * @param startValues The values for a specific target in the start scene, or {@code null} if
+     *                   the target doesn't exist in the start scene.
+     * @param endValues The values for the target in the end scene, or {@code null} if the target
+     *                 doesn't exist in the end scene.
+     * @return an {@link Animator} to be started at the appropriate time in the overall transition
+     * for this scene change. A {@code null} value means no animation should be run.
      */
-    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
+    @Nullable
+    public Animator createAnimator(@NonNull ViewGroup sceneRoot,
+            @Nullable TransitionValues startValues,
+            @Nullable TransitionValues endValues) {
         return null;
     }
 

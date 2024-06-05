@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"ஆப்ஸ் நிறுவப்பட்டது."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"இந்த ஆப்ஸை நிறுவ வேண்டுமா?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"இந்த ஆப்ஸைப் புதுப்பிக்க வேண்டுமா?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> இலிருந்து இந்த ஆப்ஸைப் புதுப்பிக்க வேண்டுமா?\n\nபொதுவாக இந்த ஆப்ஸ்<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> இலிருந்து புதுப்பிப்புகளைப் பெறும். வேறொன்றின் மூலம் புதுப்பித்தால் எதிர்காலத்தில் மொபைலில் வேறு இடத்திலிருந்து புதுப்பிப்புகளை நீங்கள் பெறக்கூடும். ஆப்ஸ் செயல்பாடுகள் மாறுபடக்கூடும்."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; இல் இருந்து இந்த ஆப்ஸைப் புதுப்பிக்க வேண்டுமா?&lt;/p&gt;&lt;p&gt;பொதுவாக இந்த ஆப்ஸ் &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; இல் இருந்து புதுப்பிப்புகளைப் பெறும். வேறு உரிமையாளர் மூலம் புதுப்பித்தால் எதிர்காலத்தில் டேப்லெட்டில் இடம்பெற்றுள்ள எந்த உரிமையாளரிடம் இருந்தும் புதுப்பிப்புகளைப் பெறக்கூடும். ஆப்ஸ் செயல்பாடுகள் மாறுபடக்கூடும்.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; இல் இருந்து இந்த ஆப்ஸைப் புதுப்பிக்க வேண்டுமா?&lt;/p&gt;&lt;p&gt;பொதுவாக இந்த ஆப்ஸ் &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; இல் இருந்து புதுப்பிப்புகளைப் பெறும். வேறு உரிமையாளர் மூலம் புதுப்பித்தால் எதிர்காலத்தில் டிவியில் இடம்பெற்றுள்ள எந்த உரிமையாளரிடம் இருந்தும் புதுப்பிப்புகளைப் பெறக்கூடும். ஆப்ஸ் செயல்பாடுகள் மாறுபடக்கூடும்.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;&lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; இல் இருந்து இந்த ஆப்ஸைப் புதுப்பிக்க வேண்டுமா?&lt;/p&gt;&lt;p&gt;பொதுவாக இந்த ஆப்ஸ் &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; இல் இருந்து புதுப்பிப்புகளைப் பெறும். வேறு உரிமையாளர் மூலம் புதுப்பித்தால் எதிர்காலத்தில் மொபைலில் இடம்பெற்றுள்ள எந்த உரிமையாளரிடம் இருந்தும் புதுப்பிப்புகளைப் பெறக்கூடும். ஆப்ஸ் செயல்பாடுகள் மாறுபடக்கூடும்.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"ஆப்ஸ் நிறுவப்படவில்லை."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"இந்தத் தொகுப்பு நிறுவப்படுவதிலிருந்து தடுக்கப்பட்டது."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"இந்தத் தொகுப்பு ஏற்கனவே உள்ள தொகுப்புடன் முரண்படுவதால் ஆப்ஸ் நிறுவப்படவில்லை."</string>
@@ -42,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"அறியப்படாத ஆப்ஸை இந்தப் பயனரால் நிறுவ இயலாது"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ஆப்ஸை நிறுவ இந்தப் பயனருக்கு அனுமதியில்லை"</string>
     <string name="ok" msgid="7871959885003339302">"சரி"</string>
+    <string name="archive" msgid="4447791830199354721">"காப்பிடு"</string>
     <string name="update_anyway" msgid="8792432341346261969">"பரவாயில்லை, புதுப்பிக்கவும்"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ஆப்ஸை நிர்வகி"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"போதுமான சேமிப்பிடம் இல்லை"</string>
@@ -56,6 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"புதுப்பிப்பை நிறுவல் நீக்குதல்"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> என்பது பின்வரும் ஆப்ஸின் பகுதியாகும்:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"இந்த ஆப்ஸை நிறுவல் நீக்க விரும்புகிறீர்களா?"</string>
+    <string name="archive_application_text" msgid="8482325710714386348">"உங்கள் தனிப்பட்ட தரவு சேமிக்கப்படும்"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"அனைத்துப் பயனர்களுக்கும் இந்த ஆப்ஸைக் காப்பிடவா? உங்கள் தனிப்பட்ட தரவு சேமிக்கப்படும்"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"உங்கள் பணிக் கணக்கில் இந்த ஆப்ஸைக் காப்பிடவா? உங்கள் தனிப்பட்ட தரவு சேமிக்கப்படும்"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"<xliff:g id="USERNAME">%1$s</xliff:g>க்கு இந்த ஆப்ஸைக் காப்பிடவா? உங்கள் தனிப்பட்ட தரவு சேமிக்கப்படும்"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"உங்கள் தனிப்பட்ட சேமிப்பிடத்திலிருந்து இந்த ஆப்ஸைக் காப்பிட வேண்டுமா? உங்கள் தனிப்பட்ட தரவு சேமிக்கப்படும்"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"இந்த ஆப்ஸை "<b>"அனைத்துப்"</b>" பயனர்களுக்கும் நிறுவல் நீக்க விரும்புகிறீர்களா? ஆப்ஸும் அதன் தரவும் சாதனத்திலுள்ள "<b>"அனைத்துப்"</b>" பயனர்களிடமிருந்தும் அகற்றப்படும்."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> என்ற பயனருக்கு இந்த ஆப்ஸை நிறுவல் நீக்க விரும்புகிறீர்களா?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"உங்கள் பணிக் கணக்கிலிருந்து இந்த ஆப்ஸை நிறுவல் நீக்க விரும்புகிறீர்களா?"</string>
@@ -64,6 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ஆப்ஸ் தரவை வைத்திரு."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"இந்த ஆப்ஸை நீக்க வேண்டுமா?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"இந்த ஆப்ஸை நிறுவல் நீக்க வேண்டுமா? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> குளோனும் நீக்கப்படும்."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"உங்கள் தனிப்பட்ட சேமிப்பிடத்திலிருந்து இந்த ஆப்ஸை நிறுவல் நீக்க வேண்டுமா?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"இயக்கத்திலுள்ள நிறுவல் நீக்கங்கள்"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"தோல்வியுற்ற நிறுவல் நீக்கங்கள்"</string>
     <string name="uninstalling" msgid="8709566347688966845">"நிறுவல் நீக்குகிறது…"</string>
@@ -83,8 +92,6 @@
     <string name="manage_users" msgid="1243995386982560813">"\'பயனர்களை\' நிர்வகி"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸை நிறுவல் நீக்க இயலவில்லை."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"தொகுப்பைப் பாகுபடுத்திப் பார்ப்பதில் சிக்கல் ஏற்பட்டது."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wearரில் நிறுவல்கள்/நிறுவல் நீக்கங்கள் செய்ய இயலாது"</string>
     <string name="message_staging" msgid="8032722385658438567">"ஆப்ஸ் தயாராகிறது…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"அறியப்படாதது"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"உங்கள் பாதுகாப்புக்காக, இந்த மூலத்திலிருந்து அறியப்படாத ஆப்ஸை டேப்லெட்டில் நிறுவ தற்போது அனுமதியில்லை. இதை அமைப்புகளில் மாற்றலாம்."</string>
@@ -95,10 +102,30 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"அறியப்படாத ஆப்ஸால் உங்கள் டேப்லெட்டும் தனிப்பட்ட தரவும் மிக எளிதாகப் பாதிப்புக்குள்ளாகலாம். இந்த ஆப்ஸை நிறுவுவதன் மூலம், இதைப் பயன்படுத்தும்போது டேப்லெட்டில் ஏதேனும் சிக்கல் ஏற்பட்டாலோ உங்களது தரவை இழந்தாலோ அதற்கு நீங்களே பொறுப்பாவீர்கள் என்பதை ஏற்கிறீர்கள்."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"அறியப்படாத ஆப்ஸால் உங்கள் டிவியும் தனிப்பட்ட தரவும் மிக எளிதாகப் பாதிப்புக்குள்ளாகலாம். இந்த ஆப்ஸை நிறுவுவதன் மூலம், இதைப் பயன்படுத்தும்போது டிவியில் ஏதேனும் சிக்கல் ஏற்பட்டாலோ உங்களது தரவை இழந்தாலோ அதற்கு நீங்களே பொறுப்பாவீர்கள் என்பதை ஏற்கிறீர்கள்."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> குளோன்"</string>
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ஐக் காப்பிடவா?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"தொடர்க"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"அமைப்புகள்"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear ஆப்ஸை நிறுவுதல்/நிறுவல் நீக்குதல்"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ஆப்ஸ் நிறுவப்பட்டது குறித்த அறிவிப்பு"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"வெற்றிகரமாக நிறுவப்பட்டது"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" வெற்றிகரமாக நிறுவப்பட்டது"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%2$s</xliff:g>ல் இருந்து <xliff:g id="APPNAME">%1$s</xliff:g> ஐ மீட்டெடுக்கவா?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"இந்த ஆப்ஸ் பின்னணியில் பதிவிறக்கத் தொடங்கும்"</string>
+    <string name="restore" msgid="8460854736328970444">"மீட்டெடு"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"ஆஃப்லைனில் உள்ளீர்கள்"</string>
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"இந்த ஆப்ஸை மீட்டெடுக்க, உங்கள் இணைய இணைப்பைச் சரிபார்த்துவிட்டு மீண்டும் முயலவும்"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"ஏதோ தவறாகிவிட்டது"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"இந்த ஆப்ஸை மீட்டெடுக்க முயலும்போது சிக்கல் ஏற்பட்டது"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"போதுமான சேமிப்பகம் இல்லை"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"இந்த ஆப்ஸை மீட்டெடுக்க, இந்தச் சாதனத்தில் உள்ள சேமிப்பகத்தை காலியாக்கலாம். தேவைப்படும் சேமிப்பகம்: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"நடவடிக்கை தேவை"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"இந்த ஆப்ஸை மீட்டெடுக்க அடுத்த வழிமுறைகளைப் பின்பற்றுங்கள்"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> முடக்கப்பட்டுள்ளது"</string>
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"இந்த ஆப்ஸை மீட்டெடுக்க அமைப்புகளில் <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ஐ இயக்குங்கள்"</string>
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> நிறுவல் நீக்கப்பட்டது"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"இந்த ஆப்ஸை மீட்டெடுக்க <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ஐ நிறுவ வேண்டும்"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"தொடர்க"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"சேமிப்பகத்தைக் காலியாக்கு"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"அமைப்புகள்"</string>
+    <string name="close" msgid="5214897374055647996">"மூடுக"</string>
 </resources>

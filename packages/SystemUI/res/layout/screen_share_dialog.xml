@@ -36,14 +36,13 @@
             android:layout_width="@dimen/screenrecord_logo_size"
             android:layout_height="@dimen/screenrecord_logo_size"
             android:src="@drawable/ic_media_projection_permission"
-            android:tint="?androidprv:attr/colorAccentPrimaryVariant"
+            android:tint="?androidprv:attr/materialColorPrimary"
             android:importantForAccessibility="no"/>
         <TextView
             android:id="@+id/screen_share_dialog_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:fontFamily="@*android:string/config_headlineFontFamily"
+            android:textAppearance="@style/TextAppearance.Dialog.Title"
             android:layout_marginTop="@dimen/screenrecord_title_margin_top"
             android:gravity="center"/>
         <Spinner
@@ -64,18 +63,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/screenrecord_permission_dialog_warning_entire_screen"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?android:textColorSecondary"
-            android:gravity="start"
-            android:lineHeight="@dimen/screenrecord_warning_line_height"/>
+            style="@style/TextAppearance.Dialog.Body.Message"
+            android:gravity="start"/>
 
         <!-- Buttons -->
-        <LinearLayout
+        <com.android.internal.widget.ButtonBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="@dimen/screenrecord_buttons_margin_top">
-            <TextView
+            <Button
                 android:id="@android:id/button2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -86,13 +83,13 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"/>
-            <TextView
+            <Button
                 android:id="@android:id/button1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
                 android:text="@string/screenrecord_continue"
                 style="@style/Widget.Dialog.Button" />
-        </LinearLayout>
+        </com.android.internal.widget.ButtonBarLayout>
     </LinearLayout>
 </ScrollView>

@@ -26,42 +26,35 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.text.font.FontFamily
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.anyInt
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.stub
 
 @RunWith(AndroidJUnit4::class)
 class SettingsThemeTest {
-    @get:Rule
-    val mockito: MockitoRule = MockitoJUnit.rule()
 
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @Mock
-    private lateinit var context: Context
+    private val resources = mock<Resources> {
+        on { getString(any()) } doReturn ""
+    }
 
-    @Mock
-    private lateinit var resources: Resources
+    private val context = mock<Context> {
+        on { resources } doReturn resources
+    }
 
     private var nextMockResId = 1
 
-    @Before
-    fun setUp() {
-        whenever(context.resources).thenReturn(resources)
-        whenever(resources.getString(anyInt())).thenReturn("")
-    }
-
     private fun mockAndroidConfig(configName: String, configValue: String) {
-        whenever(resources.getIdentifier(configName, "string", "android"))
-            .thenReturn(nextMockResId)
-        whenever(resources.getString(nextMockResId)).thenReturn(configValue)
+        resources.stub {
+            on { getIdentifier(configName, "string", "android") } doReturn nextMockResId
+            on { getString(nextMockResId) } doReturn configValue
+        }
         nextMockResId++
     }
 

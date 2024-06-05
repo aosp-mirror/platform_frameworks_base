@@ -18,8 +18,6 @@ package com.android.systemui.qs.footer.dagger
 
 import com.android.systemui.qs.footer.data.repository.ForegroundServicesRepository
 import com.android.systemui.qs.footer.data.repository.ForegroundServicesRepositoryImpl
-import com.android.systemui.qs.footer.data.repository.UserSwitcherRepository
-import com.android.systemui.qs.footer.data.repository.UserSwitcherRepositoryImpl
 import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractor
 import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractorImpl
 import dagger.Binds
@@ -28,7 +26,6 @@ import dagger.Module
 /** Dagger module to provide/bind footer actions singletons. */
 @Module
 interface FooterActionsModule {
-    @Binds fun userSwitcherRepository(impl: UserSwitcherRepositoryImpl): UserSwitcherRepository
 
     @Binds
     fun foregroundServicesRepository(

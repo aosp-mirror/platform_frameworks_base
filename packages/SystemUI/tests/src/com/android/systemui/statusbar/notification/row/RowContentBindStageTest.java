@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
@@ -33,10 +34,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Log;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -51,7 +52,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class RowContentBindStageTest extends SysuiTestCase {
 
@@ -68,7 +69,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
         mRowContentBindStage = new RowContentBindStage(
                 mBinder,
                 mock(NotifInflationErrorManager.class),
-                mock(RowContentBindStageLogger.class));
+                new RowContentBindStageLogger(logcatLogBuffer()));
         mRowContentBindStage.createStageParams(mEntry);
     }
 
@@ -196,7 +197,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
         params.clearDirtyContentViews();
 
         // WHEN low priority is set and stage executed.
-        params.setUseLowPriority(true);
+        params.setUseMinimized(true);
         mRowContentBindStage.executeStage(mEntry, mRow, (en) -> { });
 
         // THEN binder is called with use low priority and contracted/expanded are called to bind.
@@ -209,7 +210,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
                 anyBoolean(),
                 any());
         BindParams usedParams = bindParamsCaptor.getValue();
-        assertTrue(usedParams.isLowPriority);
+        assertTrue(usedParams.isMinimized);
     }
 
     @Test

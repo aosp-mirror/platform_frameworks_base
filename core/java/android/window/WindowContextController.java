@@ -86,6 +86,7 @@ public class WindowContextController {
      * @param token The token used to attach to a window manager node. It is usually from
      *              {@link Context#getWindowContextToken()}.
      */
+    @VisibleForTesting
     public WindowContextController(@NonNull WindowTokenClient token) {
         mToken = token;
     }
@@ -104,7 +105,8 @@ public class WindowContextController {
             throw new IllegalStateException("A Window Context can be only attached to "
                     + "a DisplayArea once.");
         }
-        mAttachedToDisplayArea = mToken.attachToDisplayArea(type, displayId, options)
+        mAttachedToDisplayArea = getWindowTokenClientController().attachToDisplayArea(
+                mToken, type, displayId, options)
                 ? AttachStatus.STATUS_ATTACHED : AttachStatus.STATUS_FAILED;
         if (mAttachedToDisplayArea == AttachStatus.STATUS_FAILED) {
             Log.w(TAG, "attachToDisplayArea fail, type:" + type + ", displayId:"
@@ -133,24 +135,33 @@ public class WindowContextController {
      * {@link #attachToDisplayArea(int, int, Bundle)}.
      *
      * @see WindowProviderService#attachToWindowToken(IBinder))
-     * @see IWindowManager#attachWindowContextToWindowToken(IBinder, IBinder)
+     * @see IWindowManager#attachWindowContextToWindowToken
      */
-    public void attachToWindowToken(IBinder windowToken) {
+    public void attachToWindowToken(@NonNull IBinder windowToken) {
         if (mAttachedToDisplayArea != AttachStatus.STATUS_ATTACHED) {
             throw new IllegalStateException("The Window Context should have been attached"
                     + " to a DisplayArea. AttachToDisplayArea:" + mAttachedToDisplayArea);
         }
-        mToken.attachToWindowToken(windowToken);
+        if (!getWindowTokenClientController().attachToWindowToken(mToken, windowToken)) {
+            Log.e(TAG, "attachToWindowToken fail");
+        }
     }
 
     /** Detaches the window context from the node it's currently associated with. */
     public void detachIfNeeded() {
         if (mAttachedToDisplayArea == AttachStatus.STATUS_ATTACHED) {
-            mToken.detachFromWindowContainerIfNeeded();
+            getWindowTokenClientController().detachIfNeeded(mToken);
             mAttachedToDisplayArea = AttachStatus.STATUS_DETACHED;
             if (DEBUG_ATTACH) {
                 Log.d(TAG, "Detach Window Context.");
             }
         }
+    }
+
+    /** Gets the {@link WindowTokenClientController}. */
+    @VisibleForTesting
+    @NonNull
+    public WindowTokenClientController getWindowTokenClientController() {
+        return WindowTokenClientController.getInstance();
     }
 }

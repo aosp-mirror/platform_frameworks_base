@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"HDCP परीक्षण कहिल्यै प्रयोग नगर्नुहोस्"</item>
-    <item msgid="8254225038262324761">"DRM सामग्रीको लागि मात्र HDCP जाँचको प्रयोग गरियोस्"</item>
+    <item msgid="8254225038262324761">"DRM सामग्रीको लागि मात्र HDCP जाँचको प्रयोग गर्नुहोस्"</item>
     <item msgid="6421717003037072581">"सधैँ HDCP जाँच प्रयोग गर्नुहोस्"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
@@ -97,7 +97,7 @@
     <item msgid="8147982633566548515">"map14"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="2494959071796102843">"सिस्टमको छनौट प्रयोग गरियोस् (डिफल्ट)"</item>
+    <item msgid="2494959071796102843">"सिस्टमको छनौट प्रयोग गर्नुहोस् (डिफल्ट)"</item>
     <item msgid="4055460186095649420">"SBC"</item>
     <item msgid="720249083677397051">"AAC"</item>
     <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> अडियो"</item>
@@ -107,7 +107,7 @@
     <item msgid="506175145534048710">"Opus"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="8868109554557331312">"सिस्टमको छनौट प्रयोग गरियोस् (डिफल्ट)"</item>
+    <item msgid="8868109554557331312">"सिस्टमको छनौट प्रयोग गर्नुहोस् (डिफल्ट)"</item>
     <item msgid="9024885861221697796">"SBC"</item>
     <item msgid="4688890470703790013">"AAC"</item>
     <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> अडियो"</item>
@@ -117,38 +117,38 @@
     <item msgid="7940970833006181407">"Opus"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="926809261293414607">"सिस्टमको छनौट प्रयोग गरियोस् (डिफल्ट)"</item>
+    <item msgid="926809261293414607">"सिस्टमको छनौट प्रयोग गर्नुहोस् (डिफल्ट)"</item>
     <item msgid="8003118270854840095">"४४.१ kHz"</item>
     <item msgid="3208896645474529394">"४८.० kHz"</item>
     <item msgid="8420261949134022577">"८८.२ kHz"</item>
     <item msgid="8887519571067543785">"९६.० kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="2284090879080331090">"सिस्टमको छनौट प्रयोग गरियोस् (डिफल्ट)"</item>
+    <item msgid="2284090879080331090">"सिस्टमको छनौट प्रयोग गर्नुहोस् (डिफल्ट)"</item>
     <item msgid="1872276250541651186">"४४.१ kHz"</item>
     <item msgid="8736780630001704004">"४८.० kHz"</item>
     <item msgid="7698585706868856888">"८८.२ kHz"</item>
     <item msgid="8946330945963372966">"९६.० kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2574107108483219051">"सिस्टमको छनौट प्रयोग गरियोस् (डिफल्ट)"</item>
+    <item msgid="2574107108483219051">"सिस्टमको छनौट प्रयोग गर्नुहोस् (डिफल्ट)"</item>
     <item msgid="4671992321419011165">"१६ बिट/नमूना"</item>
     <item msgid="1933898806184763940">"२४ बिट/नमूना"</item>
     <item msgid="1212577207279552119">"३२ बिट/नमूना"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="9196208128729063711">"सिस्टमको छनौट प्रयोग गरियोस् (डिफल्ट)"</item>
+    <item msgid="9196208128729063711">"सिस्टमको छनौट प्रयोग गर्नुहोस् (डिफल्ट)"</item>
     <item msgid="1084497364516370912">"१६ बिट/नमूना"</item>
     <item msgid="2077889391457961734">"२४ बिट/नमूना"</item>
     <item msgid="3836844909491316925">"३२ बिट/नमूना"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="3014194562841654656">"सिस्टमको छनौट प्रयोग गरियोस् (डिफल्ट)"</item>
+    <item msgid="3014194562841654656">"सिस्टमको छनौट प्रयोग गर्नुहोस् (डिफल्ट)"</item>
     <item msgid="5982952342181788248">"मोनो"</item>
     <item msgid="927546067692441494">"स्टेरियो"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="1997302811102880485">"सिस्टमको छनौट प्रयोग गरियोस् (डिफल्ट)"</item>
+    <item msgid="1997302811102880485">"सिस्टमको छनौट प्रयोग गर्नुहोस् (डिफल्ट)"</item>
     <item msgid="8005696114958453588">"मोनो"</item>
     <item msgid="1333279807604675720">"स्टेरियो"</item>
   </string-array>
@@ -281,5 +281,11 @@
     <item msgid="3825132913289380004">"RNDIS (USB इथरनेट)"</item>
     <item msgid="8828567335701536560">"अडियो स्रोत"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
+  </string-array>
+  <string-array name="grammatical_gender_values">
+    <item msgid="4976102487934077239">"०"</item>
+    <item msgid="2646486108212979598">"१"</item>
+    <item msgid="3753634915787796632">"२"</item>
+    <item msgid="4779928470672877922">"३"</item>
   </string-array>
 </resources>

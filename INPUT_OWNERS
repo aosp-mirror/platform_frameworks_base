@@ -1,7 +1,11 @@
 # Bug component: 136048
+arpitks@google.com
+asmitapoddar@google.com
 hcutts@google.com
 joseprio@google.com
 michaelwr@google.com
 prabirmsp@google.com
 svv@google.com
 vdevmurari@google.com
+
+per-file Virtual*=file:/services/companion/java/com/android/server/companion/virtual/OWNERS

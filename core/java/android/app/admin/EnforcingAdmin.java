@@ -16,9 +16,14 @@
 
 package android.app.admin;
 
+import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -38,6 +43,11 @@ public final class EnforcingAdmin implements Parcelable {
     private final UserHandle mUserHandle;
 
     /**
+     * @hide
+     */
+    private final ComponentName mComponentName;
+
+    /**
      * Creates an enforcing admin with the given params.
      */
     public EnforcingAdmin(
@@ -46,6 +56,23 @@ public final class EnforcingAdmin implements Parcelable {
         mPackageName = Objects.requireNonNull(packageName);
         mAuthority = Objects.requireNonNull(authority);
         mUserHandle = Objects.requireNonNull(userHandle);
+        mComponentName = null;
+    }
+
+    /**
+     * Creates an enforcing admin with the given params.
+     *
+     * @hide
+     */
+    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
+    @TestApi
+    public EnforcingAdmin(
+            @NonNull String packageName, @NonNull Authority authority,
+            @NonNull UserHandle userHandle, @Nullable ComponentName componentName) {
+        mPackageName = Objects.requireNonNull(packageName);
+        mAuthority = Objects.requireNonNull(authority);
+        mUserHandle = Objects.requireNonNull(userHandle);
+        mComponentName = componentName;
     }
 
     private EnforcingAdmin(Parcel source) {
@@ -53,6 +80,7 @@ public final class EnforcingAdmin implements Parcelable {
         mUserHandle = new UserHandle(source.readInt());
         mAuthority = Objects.requireNonNull(
                 source.readParcelable(Authority.class.getClassLoader()));
+        mComponentName = source.readParcelable(ComponentName.class.getClassLoader());
     }
 
     /**
@@ -79,6 +107,16 @@ public final class EnforcingAdmin implements Parcelable {
         return mUserHandle;
     }
 
+    /**
+     * Returns the {@link ComponentName} of the admin if applicable.
+     *
+     * @hide
+     */
+    @Nullable
+    public ComponentName getComponentName() {
+        return mComponentName;
+    }
+
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
@@ -86,7 +124,8 @@ public final class EnforcingAdmin implements Parcelable {
         EnforcingAdmin other = (EnforcingAdmin) o;
         return Objects.equals(mPackageName, other.mPackageName)
                 && Objects.equals(mAuthority, other.mAuthority)
-                && Objects.equals(mUserHandle, other.mUserHandle);
+                && Objects.equals(mUserHandle, other.mUserHandle)
+                && Objects.equals(mComponentName, other.mComponentName);
     }
 
     @Override
@@ -97,7 +136,7 @@ public final class EnforcingAdmin implements Parcelable {
     @Override
     public String toString() {
         return "EnforcingAdmin { mPackageName= " + mPackageName + ", mAuthority= " + mAuthority
-                + ", mUserHandle= " + mUserHandle + " }";
+                + ", mUserHandle= " + mUserHandle + ", mComponentName= " + mComponentName + " }";
     }
 
     @Override
@@ -110,6 +149,7 @@ public final class EnforcingAdmin implements Parcelable {
         dest.writeString(mPackageName);
         dest.writeInt(mUserHandle.getIdentifier());
         dest.writeParcelable(mAuthority, flags);
+        dest.writeParcelable(mComponentName, flags);
     }
 
     @NonNull

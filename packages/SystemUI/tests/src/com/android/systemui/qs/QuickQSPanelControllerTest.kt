@@ -17,36 +17,40 @@
 package com.android.systemui.qs
 
 import android.content.res.Configuration
-import android.testing.AndroidTestingRunner
+import android.view.ContextThemeWrapper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.controls.ui.MediaHost
-import com.android.systemui.media.controls.ui.MediaHostState
+import com.android.systemui.haptics.qs.QSLongPressEffect
+import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
+import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.plugins.qs.QSTile
-import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.leak.RotationUtils
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import javax.inject.Provider
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class QuickQSPanelControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var quickQSPanel: QuickQSPanel
@@ -57,8 +61,12 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var qsLogger: QSLogger
     @Mock private lateinit var tile: QSTile
     @Mock private lateinit var tileLayout: TileLayout
-    @Mock private lateinit var tileView: QSTileView
     @Captor private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
+    @Mock private lateinit var longPressEffectProvider: Provider<QSLongPressEffect>
+    @Mock private lateinit var mediaCarouselInteractor: MediaCarouselInteractor
+
+    private val usingMediaPlayer: Boolean
+        get() = false
 
     private val uiEventLogger = UiEventLoggerFake()
     private val dumpManager = DumpManager()
@@ -75,20 +83,24 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         whenever(quickQSPanel.isAttachedToWindow).thenReturn(true)
         whenever(quickQSPanel.dumpableTag).thenReturn("")
         whenever(quickQSPanel.resources).thenReturn(mContext.resources)
-        whenever(qsHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
+        whenever(quickQSPanel.context)
+            .thenReturn(ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings))
 
         controller =
             TestQuickQSPanelController(
                 quickQSPanel,
                 qsHost,
                 qsCustomizerController,
-                /* usingMediaPlayer = */ false,
+                usingMediaPlayer,
                 mediaHost,
                 { usingCollapsedLandscapeMedia },
                 metricsLogger,
                 uiEventLogger,
                 qsLogger,
-                dumpManager)
+                dumpManager,
+                longPressEffectProvider,
+                mediaCarouselInteractor,
+            )
 
         controller.init()
     }
@@ -155,7 +167,9 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         metricsLogger: MetricsLogger,
         uiEventLogger: UiEventLoggerFake,
         qsLogger: QSLogger,
-        dumpManager: DumpManager
+        dumpManager: DumpManager,
+        longPressEffectProvider: Provider<QSLongPressEffect>,
+        mediaCarouselInteractor: MediaCarouselInteractor,
     ) :
         QuickQSPanelController(
             view,
@@ -167,7 +181,11 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
             metricsLogger,
             uiEventLogger,
             qsLogger,
-            dumpManager) {
+            dumpManager,
+            ResourcesSplitShadeStateController(),
+            longPressEffectProvider,
+            mediaCarouselInteractor
+        ) {
 
         private var rotation = RotationUtils.ROTATION_NONE
 

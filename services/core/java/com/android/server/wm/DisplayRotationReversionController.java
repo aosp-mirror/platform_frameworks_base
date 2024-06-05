@@ -16,17 +16,17 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_LOCKED;
 
 import android.annotation.Nullable;
-import android.app.WindowConfiguration;
 import android.content.ActivityInfoProto;
 import android.view.Surface;
 
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.server.policy.WindowManagerPolicy;
 
 /**
  * Defines the behavior of reversion from device rotation overrides.
@@ -51,9 +51,7 @@ final class DisplayRotationReversionController {
     private static final int NUM_SLOTS = 3;
 
     @Surface.Rotation
-    private int mUserRotationOverridden = WindowConfiguration.ROTATION_UNDEFINED;
-    @WindowManagerPolicy.UserRotationMode
-    private int mUserRotationModeOverridden;
+    private int mUserRotationOverridden = ROTATION_UNDEFINED;
 
     private final boolean[] mSlots = new boolean[NUM_SLOTS];
     private final DisplayContent mDisplayContent;
@@ -115,10 +113,12 @@ final class DisplayRotationReversionController {
             return false;
         }
         // Only override if the rotation is frozen and there are no other active slots.
-        if (mDisplayContent.getDisplayRotation().isRotationFrozen()) {
-            mDisplayContent.getDisplayRotation().setUserRotation(
-                    mUserRotationModeOverridden,
-                    mUserRotationOverridden);
+        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        if (mUserRotationOverridden != ROTATION_UNDEFINED
+                && displayRotation.getUserRotationMode() == USER_ROTATION_LOCKED) {
+            displayRotation.setUserRotation(USER_ROTATION_LOCKED, mUserRotationOverridden,
+                /* caller= */ "DisplayRotationReversionController#revertOverride");
+            mUserRotationOverridden = ROTATION_UNDEFINED;
             return true;
         } else {
             return false;
@@ -126,10 +126,10 @@ final class DisplayRotationReversionController {
     }
 
     private void maybeSaveUserRotation() {
-        if (!isAnyOverrideActive()) {
-            mUserRotationModeOverridden =
-                    mDisplayContent.getDisplayRotation().getUserRotationMode();
-            mUserRotationOverridden = mDisplayContent.getDisplayRotation().getUserRotation();
+        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        if (!isAnyOverrideActive()
+                && displayRotation.getUserRotationMode() == USER_ROTATION_LOCKED) {
+            mUserRotationOverridden = displayRotation.getUserRotation();
         }
     }
 

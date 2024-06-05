@@ -16,22 +16,19 @@
 
 #include "GraphicsJNI.h"
 
-#ifdef __ANDROID__ // Layoutlib does not support Looper and device properties
+#ifdef __ANDROID__  // Layoutlib does not support Looper
 #include <utils/Looper.h>
 #endif
 
-#include <SkRegion.h>
-#include <SkRuntimeEffect.h>
-
+#include <CanvasProperty.h>
 #include <Rect.h>
 #include <RenderNode.h>
-#include <CanvasProperty.h>
+#include <SkRegion.h>
+#include <SkRuntimeEffect.h>
 #include <hwui/Canvas.h>
 #include <hwui/Paint.h>
 #include <minikin/Layout.h>
-#ifdef __ANDROID__ // Layoutlib does not support RenderThread
 #include <renderthread/RenderProxy.h>
-#endif
 
 namespace android {
 
@@ -84,12 +81,8 @@ static void android_view_DisplayListCanvas_resetDisplayListCanvas(CRITICAL_JNI_P
     canvas->resetRecording(width, height, renderNode);
 }
 
-static jint android_view_DisplayListCanvas_getMaxTextureSize(CRITICAL_JNI_PARAMS) {
-#ifdef __ANDROID__ // Layoutlib does not support RenderProxy (RenderThread)
+static jint android_view_DisplayListCanvas_getMaxTextureSize(JNIEnv*, jobject) {
     return android::uirenderer::renderthread::RenderProxy::maxTextureSize();
-#else
-    return 4096;
-#endif
 }
 
 static void android_view_DisplayListCanvas_enableZ(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr,
@@ -175,14 +168,14 @@ static void android_view_DisplayListCanvas_drawWebViewFunctor(CRITICAL_JNI_PARAM
 const char* const kClassPathName = "android/graphics/RecordingCanvas";
 
 static JNINativeMethod gMethods[] = {
+        {"nGetMaximumTextureWidth", "()I", (void*)android_view_DisplayListCanvas_getMaxTextureSize},
+        {"nGetMaximumTextureHeight", "()I",
+         (void*)android_view_DisplayListCanvas_getMaxTextureSize},
         // ------------ @CriticalNative --------------
         {"nCreateDisplayListCanvas", "(JII)J",
          (void*)android_view_DisplayListCanvas_createDisplayListCanvas},
         {"nResetDisplayListCanvas", "(JJII)V",
          (void*)android_view_DisplayListCanvas_resetDisplayListCanvas},
-        {"nGetMaximumTextureWidth", "()I", (void*)android_view_DisplayListCanvas_getMaxTextureSize},
-        {"nGetMaximumTextureHeight", "()I",
-         (void*)android_view_DisplayListCanvas_getMaxTextureSize},
         {"nEnableZ", "(JZ)V", (void*)android_view_DisplayListCanvas_enableZ},
         {"nFinishRecording", "(JJ)V", (void*)android_view_DisplayListCanvas_finishRecording},
         {"nDrawRenderNode", "(JJ)V", (void*)android_view_DisplayListCanvas_drawRenderNode},

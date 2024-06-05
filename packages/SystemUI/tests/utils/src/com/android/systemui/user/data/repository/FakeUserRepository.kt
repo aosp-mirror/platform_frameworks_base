@@ -19,18 +19,39 @@ package com.android.systemui.user.data.repository
 
 import android.content.pm.UserInfo
 import android.os.UserHandle
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.user.data.model.SelectedUserModel
+import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
+import dagger.Binds
+import dagger.Module
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.yield
 
-class FakeUserRepository : UserRepository {
+@SysUISingleton
+class FakeUserRepository @Inject constructor() : UserRepository {
     companion object {
         // User id to represent a non system (human) user id. We presume this is the main user.
-        private const val MAIN_USER_ID = 10
+        const val MAIN_USER_ID = 10
+
+        private const val DEFAULT_SELECTED_USER = 0
+        private val DEFAULT_SELECTED_USER_INFO =
+            UserInfo(
+                /* id= */ DEFAULT_SELECTED_USER,
+                /* name= */ "default selected user",
+                /* flags= */ 0,
+            )
+        private val MAIN_USER =
+            UserInfo(
+                /* id= */ MAIN_USER_ID,
+                /* name= */ "main user",
+                /* flags= */ UserInfo.FLAG_MAIN,
+            )
     }
 
     private val _userSwitcherSettings = MutableStateFlow(UserSwitcherSettingsModel())
@@ -40,12 +61,11 @@ class FakeUserRepository : UserRepository {
     private val _userInfos = MutableStateFlow<List<UserInfo>>(emptyList())
     override val userInfos: Flow<List<UserInfo>> = _userInfos.asStateFlow()
 
-    private val _selectedUserInfo = MutableStateFlow<UserInfo?>(null)
-    override val selectedUserInfo: Flow<UserInfo> = _selectedUserInfo.filterNotNull()
-
-    private val _userSwitchingInProgress = MutableStateFlow(false)
-    override val userSwitchingInProgress: Flow<Boolean>
-        get() = _userSwitchingInProgress
+    override val selectedUser =
+        MutableStateFlow(
+            SelectedUserModel(DEFAULT_SELECTED_USER_INFO, SelectionStatus.SELECTION_COMPLETE)
+        )
+    override val selectedUserInfo: Flow<UserInfo> = selectedUser.map { it.userInfo }
 
     override var mainUserId: Int = MAIN_USER_ID
     override var lastSelectedNonGuestUserId: Int = mainUserId
@@ -64,6 +84,10 @@ class FakeUserRepository : UserRepository {
 
     override var isRefreshUsersPaused: Boolean = false
 
+    override suspend fun getMainUserId(): Int? {
+        return MAIN_USER_ID
+    }
+
     var refreshUsersCallCount: Int = 0
         private set
 
@@ -72,7 +96,7 @@ class FakeUserRepository : UserRepository {
     }
 
     override fun getSelectedUserInfo(): UserInfo {
-        return checkNotNull(_selectedUserInfo.value)
+        return selectedUser.value.userInfo
     }
 
     override fun isSimpleUserSwitcher(): Boolean {
@@ -87,13 +111,30 @@ class FakeUserRepository : UserRepository {
         _userInfos.value = infos
     }
 
-    suspend fun setSelectedUserInfo(userInfo: UserInfo) {
+    suspend fun setSelectedUserInfo(
+        userInfo: UserInfo,
+        selectionStatus: SelectionStatus = SelectionStatus.SELECTION_COMPLETE,
+    ) {
         check(_userInfos.value.contains(userInfo)) {
             "Cannot select the following user, it is not in the list of user infos: $userInfo!"
         }
 
-        _selectedUserInfo.value = userInfo
+        selectedUser.value = SelectedUserModel(userInfo, selectionStatus)
         yield()
+    }
+
+    /** Resets the current user to the default of [DEFAULT_SELECTED_USER_INFO]. */
+    suspend fun asDefaultUser(): UserInfo {
+        setUserInfos(listOf(DEFAULT_SELECTED_USER_INFO))
+        setSelectedUserInfo(DEFAULT_SELECTED_USER_INFO)
+        return DEFAULT_SELECTED_USER_INFO
+    }
+
+    /** Makes the current user [MAIN_USER]. */
+    suspend fun asMainUser(): UserInfo {
+        setUserInfos(listOf(MAIN_USER))
+        setSelectedUserInfo(MAIN_USER)
+        return MAIN_USER
     }
 
     suspend fun setSettings(settings: UserSwitcherSettingsModel) {
@@ -104,8 +145,9 @@ class FakeUserRepository : UserRepository {
     fun setGuestUserAutoCreated(value: Boolean) {
         _isGuestUserAutoCreated = value
     }
+}
 
-    fun setUserSwitching(value: Boolean) {
-        _userSwitchingInProgress.value = value
-    }
+@Module
+interface FakeUserRepositoryModule {
+    @Binds fun bindFake(fake: FakeUserRepository): UserRepository
 }

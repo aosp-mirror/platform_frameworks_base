@@ -26,7 +26,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,8 +34,14 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
+import static java.util.Objects.requireNonNull;
+
 import android.app.ActivityThread;
+import android.app.IApplicationThread;
+import android.app.WindowConfiguration;
+import android.content.ComponentCallbacks;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
@@ -46,7 +51,10 @@ import android.view.Display;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.window.WindowContextInfo;
 import android.window.WindowTokenClient;
+
+import androidx.annotation.NonNull;
 
 import com.android.server.inputmethod.InputMethodDialogWindowContext;
 
@@ -55,6 +63,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 // TODO(b/157888351): Move the test to inputmethod package once we find the way to test the
 //  scenario there.
@@ -91,14 +102,15 @@ public class InputMethodDialogWindowContextTest extends WindowTestsBase {
         spyOn(mIWindowManager);
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
-            IBinder clientToken = (IBinder) args[0];
-            int displayId = (int) args[2];
+            IApplicationThread appThread = (IApplicationThread) args[0];
+            IBinder clientToken = (IBinder) args[1];
+            int displayId = (int) args[3];
             DisplayContent dc = mWm.mRoot.getDisplayContent(displayId);
-            mWm.mWindowContextListenerController.registerWindowContainerListener(clientToken,
-                    dc.getImeContainer(), 1000 /* ownerUid */, TYPE_INPUT_METHOD_DIALOG,
-                    null /* options */);
-            return dc.getImeContainer().getConfiguration();
-        }).when(mIWindowManager).attachWindowContextToDisplayArea(any(),
+            final WindowProcessController wpc = mAtm.getProcessController(appThread);
+            mWm.mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
+                    dc.getImeContainer(), TYPE_INPUT_METHOD_DIALOG, null /* options */);
+            return new WindowContextInfo(dc.getImeContainer().getConfiguration(), displayId);
+        }).when(mIWindowManager).attachWindowContextToDisplayArea(any(), any(),
                 eq(TYPE_INPUT_METHOD_DIALOG), anyInt(), any());
         mDisplayManagerGlobal = DisplayManagerGlobal.getInstance();
         spyOn(mDisplayManagerGlobal);
@@ -135,44 +147,99 @@ public class InputMethodDialogWindowContextTest extends WindowTestsBase {
     @Test
     public void testGetSettingsContextOnDualDisplayContent() {
         final Context context = mWindowContext.get(mSecondaryDisplay.getDisplayId());
+        final MaxBoundsVerifier maxBoundsVerifier = new MaxBoundsVerifier();
+        context.registerComponentCallbacks(maxBoundsVerifier);
+
         final WindowTokenClient tokenClient = (WindowTokenClient) context.getWindowContextToken();
-        assertNotNull(tokenClient);
-        spyOn(tokenClient);
+        spyOn(requireNonNull(tokenClient));
 
         final DisplayArea.Tokens imeContainer = mSecondaryDisplay.getImeContainer();
         spyOn(imeContainer);
         assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondaryDisplay);
 
-        mSecondaryDisplay.mFirstRoot.placeImeContainer(imeContainer);
+        final DisplayAreaGroup firstDaGroup = mSecondaryDisplay.mFirstRoot;
+        maxBoundsVerifier.setMaxBounds(firstDaGroup.getMaxBounds());
+
+        // Clear the previous invocation histories in case we may count the previous
+        // onConfigurationChanged invocation into the next verification.
+        clearInvocations(tokenClient, imeContainer);
+        firstDaGroup.placeImeContainer(imeContainer);
 
         verify(imeContainer, timeout(WAIT_TIMEOUT_MS)).onConfigurationChanged(
-                eq(mSecondaryDisplay.mFirstRoot.getConfiguration()));
+                eq(firstDaGroup.getConfiguration()));
         verify(tokenClient, timeout(WAIT_TIMEOUT_MS)).onConfigurationChanged(
-                eq(mSecondaryDisplay.mFirstRoot.getConfiguration()),
+                eq(firstDaGroup.getConfiguration()),
                 eq(mSecondaryDisplay.mDisplayId));
-        assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondaryDisplay.mFirstRoot);
+        assertThat(imeContainer.getRootDisplayArea()).isEqualTo(firstDaGroup);
+        maxBoundsVerifier.waitAndAssertMaxMetricsMatches();
         assertImeSwitchContextMetricsValidity(context, mSecondaryDisplay);
 
         // Clear the previous invocation histories in case we may count the previous
         // onConfigurationChanged invocation into the next verification.
         clearInvocations(tokenClient, imeContainer);
-        mSecondaryDisplay.mSecondRoot.placeImeContainer(imeContainer);
+        final DisplayAreaGroup secondDaGroup = mSecondaryDisplay.mSecondRoot;
+        maxBoundsVerifier.setMaxBounds(secondDaGroup.getMaxBounds());
+
+        secondDaGroup.placeImeContainer(imeContainer);
 
         verify(imeContainer, timeout(WAIT_TIMEOUT_MS)).onConfigurationChanged(
-                eq(mSecondaryDisplay.mSecondRoot.getConfiguration()));
+                eq(secondDaGroup.getConfiguration()));
         verify(tokenClient, timeout(WAIT_TIMEOUT_MS)).onConfigurationChanged(
-                eq(mSecondaryDisplay.mSecondRoot.getConfiguration()),
+                eq(secondDaGroup.getConfiguration()),
                 eq(mSecondaryDisplay.mDisplayId));
-        assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondaryDisplay.mSecondRoot);
+        assertThat(imeContainer.getRootDisplayArea()).isEqualTo(secondDaGroup);
+        maxBoundsVerifier.waitAndAssertMaxMetricsMatches();
         assertImeSwitchContextMetricsValidity(context, mSecondaryDisplay);
     }
 
     private void assertImeSwitchContextMetricsValidity(Context context, DisplayContent dc) {
         assertThat(context.getDisplayId()).isEqualTo(dc.getDisplayId());
 
+        final Rect imeContainerBounds = dc.getImeContainer().getBounds();
         final Rect contextBounds = context.getSystemService(WindowManager.class)
                 .getMaximumWindowMetrics().getBounds();
-        final Rect imeContainerBounds = dc.getImeContainer().getBounds();
         assertThat(contextBounds).isEqualTo(imeContainerBounds);
+    }
+
+    private static final class MaxBoundsVerifier implements ComponentCallbacks {
+
+        private CountDownLatch mLatch;
+
+        private Rect mMaxBounds;
+
+        /**
+         * Sets max bounds to verify whether it matches the
+         * {@link WindowConfiguration#getMaxBounds()} reported from
+         * {@link #onConfigurationChanged(Configuration)} callback, and also resets the count down
+         * latch.
+         *
+         * @param maxBounds max bounds to verify
+         */
+        private void setMaxBounds(@NonNull Rect maxBounds) {
+            mMaxBounds = maxBounds;
+            mLatch = new CountDownLatch(1);
+        }
+
+        /**
+         * Waits for the {@link #onConfigurationChanged(Configuration)} callback whose the reported
+         * {@link WindowConfiguration#getMaxBounds()} matches {@link #mMaxBounds}.
+         */
+        private void waitAndAssertMaxMetricsMatches() {
+            try {
+                assertThat(mLatch.await(WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Test failed because of " + e);
+            }
+        }
+
+        @Override
+        public void onConfigurationChanged(@NonNull Configuration newConfig) {
+            if (newConfig.windowConfiguration.getMaxBounds().equals(mMaxBounds)) {
+                mLatch.countDown();
+            }
+        }
+
+        @Override
+        public void onLowMemory() {}
     }
 }

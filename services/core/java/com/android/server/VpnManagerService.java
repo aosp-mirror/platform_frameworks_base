@@ -30,10 +30,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
-import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.IVpnManager;
-import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkStack;
 import android.net.UnderlyingNetworkInfo;
@@ -90,8 +88,6 @@ public class VpnManagerService extends IVpnManager.Stub {
     private final Context mUserAllContext;
 
     private final Dependencies mDeps;
-
-    private final ConnectivityManager mCm;
     private final VpnProfileStore mVpnProfileStore;
     private final INetworkManagementService mNMS;
     private final INetd mNetd;
@@ -165,7 +161,6 @@ public class VpnManagerService extends IVpnManager.Stub {
         mHandler = mHandlerThread.getThreadHandler();
         mVpnProfileStore = mDeps.getVpnProfileStore();
         mUserAllContext = mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */);
-        mCm = mContext.getSystemService(ConnectivityManager.class);
         mNMS = mDeps.getINetworkManagementService();
         mNetd = mDeps.getNetd();
         mUserManager = mContext.getSystemService(UserManager.class);
@@ -437,16 +432,9 @@ public class VpnManagerService extends IVpnManager.Stub {
             throw new UnsupportedOperationException("Legacy VPN is deprecated");
         }
         int user = UserHandle.getUserId(mDeps.getCallingUid());
-        // Note that if the caller is not system (uid >= Process.FIRST_APPLICATION_UID),
-        // the code might not work well since getActiveNetwork might return null if the uid is
-        // blocked by NetworkPolicyManagerService.
-        final LinkProperties egress = mCm.getLinkProperties(mCm.getActiveNetwork());
-        if (egress == null) {
-            throw new IllegalStateException("Missing active network connection");
-        }
         synchronized (mVpns) {
             throwIfLockdownEnabled();
-            mVpns.get(user).startLegacyVpn(profile, null /* underlying */, egress);
+            mVpns.get(user).startLegacyVpn(profile);
         }
     }
 
@@ -1017,6 +1005,71 @@ public class VpnManagerService extends IVpnManager.Stub {
                 }
             }
         }
+    }
+
+    /**
+     * Get the vpn profile owned by the calling uid with the given name from the vpn database.
+     *
+     * <p>Note this method should not be used for platform VPN profiles. </p>
+     *
+     * @param name The name of the profile to retrieve.
+     * @return the unstructured blob for the matching vpn profile.
+     * Returns null if no profile with a matching name was found.
+     * @hide
+     */
+    @Override
+    @Nullable
+    public byte[] getFromVpnProfileStore(@NonNull String name) {
+        return mVpnProfileStore.get(name);
+    }
+
+    /**
+     * Put the given vpn profile owned by the calling uid with the given name into the vpn database.
+     * Existing profiles with the same name will be replaced.
+     *
+     * <p>Note this method should not be used for platform VPN profiles.
+     * To update a platform VPN, use provisionVpnProfile() instead. </p>
+     *
+     * @param name The name of the profile to put.
+     * @param blob The profile.
+     * @return true if the profile was successfully added. False otherwise.
+     * @hide
+     */
+    @Override
+    public boolean putIntoVpnProfileStore(@NonNull String name, @NonNull byte[] blob) {
+        return mVpnProfileStore.put(name, blob);
+    }
+
+    /**
+     * Removes the vpn profile owned by the calling uid with the given name from the vpn database.
+     *
+     * <p>Note this method should not be used for platform VPN profiles.
+     * To remove a platform VPN, use deleteVpnProfile() instead.</p>
+     *
+     * @param name The name of the profile to be removed.
+     * @return true if a profile was removed. False if no profile with a matching name was found.
+     * @hide
+     */
+    @Override
+    public boolean removeFromVpnProfileStore(@NonNull String name) {
+        return mVpnProfileStore.remove(name);
+    }
+
+    /**
+     * Returns a list of the name suffixes of the vpn profiles owned by the calling uid in the vpn
+     * database matching the given prefix, sorted in ascending order.
+     *
+     * <p>Note this method should not be used for platform VPN profiles. </p>
+     *
+     * @param prefix The prefix to match.
+     * @return an array of strings representing the name suffixes stored in the profile database
+     * matching the given prefix. The return value may be empty but never null.
+     * @hide
+     */
+    @Override
+    @NonNull
+    public String[] listFromVpnProfileStore(@NonNull String prefix) {
+        return mVpnProfileStore.list(prefix);
     }
 
     private void ensureRunningOnHandlerThread() {

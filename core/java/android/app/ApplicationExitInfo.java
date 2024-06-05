@@ -460,6 +460,42 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     public static final int SUBREASON_SDK_SANDBOX_NOT_NEEDED = 28;
 
+    /**
+     * The process was killed because the binder proxy limit for system server was exceeded.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_EXCESSIVE_BINDER_OBJECTS = 29;
+
+    /**
+     * The process was killed by the [kernel] Out-of-memory (OOM) killer; this
+     * would be set only when the reason is {@link #REASON_LOW_MEMORY}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_OOM_KILL = 30;
+
+    /**
+     * The process was killed because its async kernel binder buffer is running out
+     * while being frozen.
+     * this would be set only when the reason is {@link #REASON_FREEZER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_FREEZER_BINDER_ASYNC_FULL = 31;
+
+    /**
+     * The process was killed because it was sending too many broadcasts while it is in the
+     * Cached state. This would be set only when the reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_EXCESSIVE_OUTGOING_BROADCASTS_WHILE_CACHED = 32;
+
     // If there is any OEM code which involves additional app kill reasons, it should
     // be categorized in {@link #REASON_OTHER}, with subreason code starting from 1000.
 
@@ -635,6 +671,10 @@ public final class ApplicationExitInfo implements Parcelable {
         SUBREASON_KILL_BACKGROUND,
         SUBREASON_PACKAGE_UPDATE,
         SUBREASON_UNDELIVERED_BROADCAST,
+        SUBREASON_EXCESSIVE_BINDER_OBJECTS,
+        SUBREASON_OOM_KILL,
+        SUBREASON_FREEZER_BINDER_ASYNC_FULL,
+        SUBREASON_EXCESSIVE_OUTGOING_BROADCASTS_WHILE_CACHED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SubReason {}
@@ -1360,6 +1400,14 @@ public final class ApplicationExitInfo implements Parcelable {
                 return "PACKAGE UPDATE";
             case SUBREASON_UNDELIVERED_BROADCAST:
                 return "UNDELIVERED BROADCAST";
+            case SUBREASON_EXCESSIVE_BINDER_OBJECTS:
+                return "EXCESSIVE BINDER OBJECTS";
+            case SUBREASON_OOM_KILL:
+                return "OOM KILL";
+            case SUBREASON_FREEZER_BINDER_ASYNC_FULL:
+                return "FREEZER BINDER ASYNC FULL";
+            case SUBREASON_EXCESSIVE_OUTGOING_BROADCASTS_WHILE_CACHED:
+                return "EXCESSIVE_OUTGOING_BROADCASTS_WHILE_CACHED";
             default:
                 return "UNKNOWN";
         }

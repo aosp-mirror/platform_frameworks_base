@@ -16,10 +16,13 @@
 
 package com.android.server.pm;
 
+import static android.app.admin.flags.Flags.crossUserSuspensionEnabledRo;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -30,10 +33,12 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserPackage;
 import android.content.pm.overlay.OverlayPaths;
 import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
 import android.service.pm.PackageProto;
+import android.service.pm.PackageProto.UserInfoProto.ArchiveState.ArchiveActivityInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -41,13 +46,14 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
-import com.android.server.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUnserialized;
@@ -67,6 +73,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -79,8 +86,39 @@ import java.util.UUID;
  * @hide
  */
 @DataClass(genGetters = true, genConstructor = false, genSetters = false, genBuilder = false)
-@DataClass.Suppress({"getSnapshot", })
+@DataClass.Suppress({"getSnapshot", "getBooleans"})
 public class PackageSetting extends SettingBase implements PackageStateInternal {
+
+    // Use a bitset to store boolean data to save memory
+    private static class Booleans {
+        @IntDef({
+                INSTALL_PERMISSION_FIXED,
+                UPDATE_AVAILABLE,
+                FORCE_QUERYABLE_OVERRIDE,
+                SCANNED_AS_STOPPED_SYSTEM_APP,
+                PENDING_RESTORE,
+        })
+        public @interface Flags {
+        }
+        private static final int INSTALL_PERMISSION_FIXED = 1;
+        private static final int UPDATE_AVAILABLE = 1 << 1;
+        private static final int FORCE_QUERYABLE_OVERRIDE = 1 << 2;
+        private static final int SCANNED_AS_STOPPED_SYSTEM_APP = 1 << 3;
+        private static final int PENDING_RESTORE = 1 << 4;
+    }
+    private int mBooleans;
+
+    private void setBoolean(@Booleans.Flags int flag, boolean value) {
+        if (value) {
+            mBooleans |= flag;
+        } else {
+            mBooleans &= ~flag;
+        }
+    }
+
+    private boolean getBoolean(@Booleans.Flags int flag) {
+        return (mBooleans & flag) != 0;
+    }
 
     /**
      * The shared user ID lets us link this object to {@link SharedUserSetting}.
@@ -90,15 +128,15 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     @Nullable
     private Map<String, Set<String>> mimeGroups;
 
-    @Deprecated
-    @Nullable
-    private Set<String> mOldCodePaths;
-
+    // TODO(b/314036181): encapsulate all these fields for usesSdk, instead of having three
+    //  separate arrays.
     @Nullable
     private String[] usesSdkLibraries;
 
     @Nullable
     private long[] usesSdkLibrariesVersionsMajor;
+    @Nullable
+    private boolean[] usesSdkLibrariesOptional;
 
     @Nullable
     private String[] usesStaticLibraries;
@@ -139,6 +177,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     private File mPath;
     @NonNull
     private String mPathString;
+    @Nullable
+    private LinkedHashSet<File> mOldPaths;
 
     private float mLoadingProgress;
     private long mLoadingCompletedTime;
@@ -159,8 +199,6 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     @NonNull
     private PackageSignatures signatures;
 
-    private boolean installPermissionsFixed;
-
     @NonNull
     private PackageKeySetData keySetData = new PackageKeySetData();
 
@@ -171,17 +209,12 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     @NonNull
     private InstallSource installSource;
 
-    /** @see PackageState#getVolumeUuid()  */
+    /** @see PackageState#getVolumeUuid() */
     @Nullable
     private String volumeUuid;
 
     /** @see PackageState#getCategoryOverride() */
     private int categoryOverride = ApplicationInfo.CATEGORY_UNDEFINED;
-
-    /** @see PackageState#isUpdateAvailable() */
-    private boolean updateAvailable;
-
-    private boolean forceQueryableOverride;
 
     @NonNull
     private final PackageStateUnserialized pkgState = new PackageStateUnserialized(this);
@@ -191,6 +224,13 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     @Nullable
     private String mAppMetadataFilePath;
+
+    private int mAppMetadataSource = PackageManager.APP_METADATA_SOURCE_UNKNOWN;
+
+    private int mTargetSdkVersion;
+
+    @Nullable
+    private byte[] mRestrictUpdateHash;
 
     /**
      * Snapshot support.
@@ -207,34 +247,16 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public PackageSetting(String name, String realName, @NonNull File path,
-            String legacyNativeLibraryPath, String primaryCpuAbi,
-            String secondaryCpuAbi, String cpuAbiOverride,
-            long longVersionCode, int pkgFlags, int pkgPrivateFlags,
-            int sharedUserAppId,
-            String[] usesSdkLibraries, long[] usesSdkLibrariesVersionsMajor,
-            String[] usesStaticLibraries, long[] usesStaticLibrariesVersions,
-            Map<String, Set<String>> mimeGroups,
-            @NonNull UUID domainSetId) {
+    public PackageSetting(@NonNull String name, @Nullable String realName, @NonNull File path,
+                          int pkgFlags, int pkgPrivateFlags, @NonNull UUID domainSetId) {
         super(pkgFlags, pkgPrivateFlags);
         this.mName = name;
         this.mRealName = realName;
-        this.usesSdkLibraries = usesSdkLibraries;
-        this.usesSdkLibrariesVersionsMajor = usesSdkLibrariesVersionsMajor;
-        this.usesStaticLibraries = usesStaticLibraries;
-        this.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
         this.mPath = path;
         this.mPathString = path.toString();
-        this.legacyNativeLibraryPath = legacyNativeLibraryPath;
-        this.mPrimaryCpuAbi = primaryCpuAbi;
-        this.mSecondaryCpuAbi = secondaryCpuAbi;
-        this.mCpuAbiOverride = cpuAbiOverride;
-        this.versionCode = longVersionCode;
         this.signatures = new PackageSignatures();
         this.installSource = InstallSource.EMPTY;
-        this.mSharedUserAppId = sharedUserAppId;
-        mDomainSetId = domainSetId;
-        copyMimeGroups(mimeGroups);
+        this.mDomainSetId = domainSetId;
         mSnapshot = makeCache();
     }
 
@@ -258,7 +280,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         this.mRealName = realPkgName;
     }
 
-    PackageSetting(@NonNull PackageSetting original, boolean sealedSnapshot)  {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public PackageSetting(@NonNull PackageSetting original, boolean sealedSnapshot)  {
         super(original);
         copyPackageSetting(original, sealedSnapshot);
         if (sealedSnapshot) {
@@ -337,7 +360,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
             final long previousFirstInstallTime =
                     replacedPkgSetting.getUserStateOrDefault(userId).getFirstInstallTimeMillis();
             if (previousFirstInstallTime != 0) {
-                modifyUserState(userId).setFirstInstallTime(previousFirstInstallTime);
+                modifyUserState(userId).setFirstInstallTimeMillis(previousFirstInstallTime);
             }
         }
         onChanged();
@@ -352,17 +375,17 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         if (userId == UserHandle.USER_ALL) {
             int userStateCount = mUserStates.size();
             for (int i = 0; i < userStateCount; i++) {
-                mUserStates.valueAt(i).setFirstInstallTime(firstInstallTime);
+                mUserStates.valueAt(i).setFirstInstallTimeMillis(firstInstallTime);
             }
         } else {
-            modifyUserState(userId).setFirstInstallTime(firstInstallTime);
+            modifyUserState(userId).setFirstInstallTimeMillis(firstInstallTime);
         }
         onChanged();
         return this;
     }
 
     public PackageSetting setForceQueryableOverride(boolean forceQueryableOverride) {
-        this.forceQueryableOverride = forceQueryableOverride;
+        setBoolean(Booleans.FORCE_QUERYABLE_OVERRIDE, forceQueryableOverride);
         onChanged();
         return this;
     }
@@ -448,6 +471,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     /**
      * Notify {@link #onChanged()}  if the parameter {@code usesLibraryFiles} is different from
      * {@link #getUsesLibraryFiles()}.
+     *
      * @param usesLibraryFiles the new uses library files
      * @return {@code this}
      */
@@ -491,14 +515,27 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     public PackageSetting setUpdateAvailable(boolean updateAvailable) {
-        this.updateAvailable = updateAvailable;
+        setBoolean(Booleans.UPDATE_AVAILABLE, updateAvailable);
         onChanged();
         return this;
     }
 
-    public void setSharedUserAppId(int sharedUserAppId) {
+    public PackageSetting setSharedUserAppId(int sharedUserAppId) {
         mSharedUserAppId = sharedUserAppId;
         onChanged();
+        return this;
+    }
+
+    public PackageSetting setTargetSdkVersion(int targetSdkVersion) {
+        mTargetSdkVersion = targetSdkVersion;
+        onChanged();
+        return this;
+    }
+
+    public PackageSetting setRestrictUpdateHash(byte[] restrictUpdateHash) {
+        mRestrictUpdateHash = restrictUpdateHash;
+        onChanged();
+        return this;
     }
 
     @Override
@@ -511,6 +548,20 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return mSharedUserAppId > 0;
     }
 
+    /**
+     * @see PackageState#isPendingRestore()
+     */
+    public PackageSetting setPendingRestore(boolean value) {
+        setBoolean(Booleans.PENDING_RESTORE, value);
+        onChanged();
+        return this;
+    }
+
+    @Override
+    public boolean isPendingRestore() {
+        return getBoolean(Booleans.PENDING_RESTORE);
+    }
+
     @Override
     public String toString() {
         return "PackageSetting{"
@@ -518,7 +569,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 + " " + mName + "/" + mAppId + "}";
     }
 
-    protected void copyMimeGroups(@Nullable Map<String, Set<String>> newMimeGroups) {
+    private void copyMimeGroups(@Nullable Map<String, Set<String>> newMimeGroups) {
         if (newMimeGroups == null) {
             mimeGroups = null;
             return;
@@ -583,7 +634,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     public PackageSetting setInstallPermissionsFixed(boolean installPermissionsFixed) {
-        this.installPermissionsFixed = installPermissionsFixed;
+        setBoolean(Booleans.INSTALL_PERMISSION_FIXED, installPermissionsFixed);
         return this;
     }
 
@@ -620,6 +671,16 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return (getFlags() & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
+    public boolean isRequestLegacyExternalStorage() {
+        return (getPrivateFlags() & ApplicationInfo.PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE)
+                != 0;
+    }
+
+    public boolean isUserDataFragile() {
+        return (getPrivateFlags() & ApplicationInfo.PRIVATE_FLAG_HAS_FRAGILE_USER_DATA)
+                != 0;
+    }
+
     public SigningDetails getSigningDetails() {
         return signatures.mSigningDetails;
     }
@@ -633,6 +694,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     public void copyPackageSetting(PackageSetting other, boolean sealedSnapshot) {
         super.copySettingBase(other);
+        mBooleans = other.mBooleans;
         mSharedUserAppId = other.mSharedUserAppId;
         mLoadingProgress = other.mLoadingProgress;
         mLoadingCompletedTime = other.mLoadingCompletedTime;
@@ -643,6 +705,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         pkg = other.pkg;
         mPath = other.mPath;
         mPathString = other.mPathString;
+        mOldPaths = other.mOldPaths == null ? null : new LinkedHashSet<>(other.mOldPaths);
         mPrimaryCpuAbi = other.mPrimaryCpuAbi;
         mSecondaryCpuAbi = other.mSecondaryCpuAbi;
         mCpuAbiOverride = other.mCpuAbiOverride;
@@ -650,15 +713,16 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         lastUpdateTime = other.lastUpdateTime;
         versionCode = other.versionCode;
         signatures = other.signatures;
-        installPermissionsFixed = other.installPermissionsFixed;
         keySetData = new PackageKeySetData(other.keySetData);
         installSource = other.installSource;
         volumeUuid = other.volumeUuid;
         categoryOverride = other.categoryOverride;
-        updateAvailable = other.updateAvailable;
-        forceQueryableOverride = other.forceQueryableOverride;
         mDomainSetId = other.mDomainSetId;
         mAppMetadataFilePath = other.mAppMetadataFilePath;
+        mAppMetadataSource = other.mAppMetadataSource;
+        mTargetSdkVersion = other.mTargetSdkVersion;
+        mRestrictUpdateHash = other.mRestrictUpdateHash == null
+                ? null : other.mRestrictUpdateHash.clone();
 
         usesSdkLibraries = other.usesSdkLibraries != null
                 ? Arrays.copyOf(other.usesSdkLibraries,
@@ -666,6 +730,9 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         usesSdkLibrariesVersionsMajor = other.usesSdkLibrariesVersionsMajor != null
                 ? Arrays.copyOf(other.usesSdkLibrariesVersionsMajor,
                 other.usesSdkLibrariesVersionsMajor.length) : null;
+        usesSdkLibrariesOptional = other.usesSdkLibrariesOptional != null
+                ? Arrays.copyOf(other.usesSdkLibrariesOptional,
+                other.usesSdkLibrariesOptional.length) : null;
 
         usesStaticLibraries = other.usesStaticLibraries != null
                 ? Arrays.copyOf(other.usesStaticLibraries,
@@ -682,15 +749,6 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 var userState = other.mUserStates.valueAt(i);
                 userState.setWatchable(this);
                 mUserStates.put(other.mUserStates.keyAt(i), userState);
-            }
-        }
-
-        if (mOldCodePaths != null) {
-            if (other.mOldCodePaths != null) {
-                mOldCodePaths.clear();
-                mOldCodePaths.addAll(other.mOldCodePaths);
-            } else {
-                mOldCodePaths = null;
             }
         }
 
@@ -744,8 +802,17 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         onChanged();
     }
 
+    void setArchiveState(ArchiveState archiveState, int userId) {
+        modifyUserState(userId).setArchiveState(archiveState);
+        onChanged();
+    }
+
     boolean getInstalled(int userId) {
         return readUserState(userId).isInstalled();
+    }
+
+    boolean isArchived(int userId) {
+        return PackageArchiver.isArchived(readUserState(userId));
     }
 
     int getInstallReason(int userId) {
@@ -778,9 +845,26 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return changed;
     }
 
-    boolean isAnyInstalled(int[] users) {
-        for (int user: users) {
-            if (readUserState(user).isInstalled()) {
+    boolean isInstalledOnAnyOtherUser(int[] allUsers, int currentUser) {
+        for (int user: allUsers) {
+            if (user == currentUser) {
+                continue;
+            }
+            final PackageUserStateInternal userState = readUserState(user);
+            if (userState.isInstalled()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean hasDataOnAnyOtherUser(int[] allUsers, int currentUser) {
+        for (int user: allUsers) {
+            if (user == currentUser) {
+                continue;
+            }
+            final PackageUserStateInternal userState = readUserState(user);
+            if (userState.dataExists()) {
                 return true;
             }
         }
@@ -805,12 +889,39 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return res;
     }
 
+    int[] queryUsersInstalledOrHasData(int[] users) {
+        int num = 0;
+        for (int user : users) {
+            if (getInstalled(user) || readUserState(user).dataExists()) {
+                num++;
+            }
+        }
+        int[] res = new int[num];
+        num = 0;
+        for (int user : users) {
+            if (getInstalled(user) || readUserState(user).dataExists()) {
+                res[num] = user;
+                num++;
+            }
+        }
+        return res;
+    }
+
     long getCeDataInode(int userId) {
         return readUserState(userId).getCeDataInode();
     }
 
+    long getDeDataInode(int userId) {
+        return readUserState(userId).getDeDataInode();
+    }
+
     void setCeDataInode(long ceDataInode, int userId) {
         modifyUserState(userId).setCeDataInode(ceDataInode);
+        onChanged();
+    }
+
+    void setDeDataInode(long deDataInode, int userId) {
+        modifyUserState(userId).setDeDataInode(deDataInode);
         onChanged();
     }
 
@@ -821,6 +932,12 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     void setStopped(boolean stop, int userId) {
         modifyUserState(userId).setStopped(stop);
         onChanged();
+    }
+
+    public PackageSetting setScannedAsStoppedSystemApp(boolean stop) {
+        setBoolean(Booleans.SCANNED_AS_STOPPED_SYSTEM_APP, stop);
+        onChanged();
+        return this;
     }
 
     boolean getNotLaunched(int userId) {
@@ -868,17 +985,18 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         onChanged();
     }
 
-    void setUserState(int userId, long ceDataInode, int enabled, boolean installed, boolean stopped,
-            boolean notLaunched, boolean hidden, int distractionFlags,
-            ArrayMap<String, SuspendParams> suspendParams, boolean instantApp,
-            boolean virtualPreload, String lastDisableAppCaller,
-            ArraySet<String> enabledComponents, ArraySet<String> disabledComponents,
-            int installReason, int uninstallReason,
-            String harmfulAppWarning, String splashScreenTheme,
-            long firstInstallTime) {
+    void setUserState(int userId, long ceDataInode, long deDataInode, int enabled,
+                      boolean installed, boolean stopped, boolean notLaunched, boolean hidden,
+                      int distractionFlags, ArrayMap<UserPackage, SuspendParams> suspendParams,
+                      boolean instantApp, boolean virtualPreload, String lastDisableAppCaller,
+                      ArraySet<String> enabledComponents, ArraySet<String> disabledComponents,
+                      int installReason, int uninstallReason,
+                      String harmfulAppWarning, String splashScreenTheme,
+                      long firstInstallTime, int aspectRatio, ArchiveState archiveState) {
         modifyUserState(userId)
                 .setSuspendParams(suspendParams)
                 .setCeDataInode(ceDataInode)
+                .setDeDataInode(deDataInode)
                 .setEnabledState(enabled)
                 .setInstalled(installed)
                 .setStopped(stopped)
@@ -894,25 +1012,28 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 .setVirtualPreload(virtualPreload)
                 .setHarmfulAppWarning(harmfulAppWarning)
                 .setSplashScreenTheme(splashScreenTheme)
-                .setFirstInstallTime(firstInstallTime);
+                .setFirstInstallTimeMillis(firstInstallTime)
+                .setMinAspectRatio(aspectRatio)
+                .setArchiveState(archiveState);
         onChanged();
     }
 
     void setUserState(int userId, PackageUserStateInternal otherState) {
-        setUserState(userId, otherState.getCeDataInode(), otherState.getEnabledState(),
-                otherState.isInstalled(), otherState.isStopped(), otherState.isNotLaunched(),
-                otherState.isHidden(), otherState.getDistractionFlags(),
+        setUserState(userId, otherState.getCeDataInode(), otherState.getDeDataInode(),
+                otherState.getEnabledState(), otherState.isInstalled(), otherState.isStopped(),
+                otherState.isNotLaunched(), otherState.isHidden(), otherState.getDistractionFlags(),
                 otherState.getSuspendParams() == null
                         ? null : otherState.getSuspendParams().untrackedStorage(),
-                otherState.isInstantApp(),
-                otherState.isVirtualPreload(), otherState.getLastDisableAppCaller(),
+                otherState.isInstantApp(), otherState.isVirtualPreload(),
+                otherState.getLastDisableAppCaller(),
                 otherState.getEnabledComponentsNoCopy() == null
                         ? null : otherState.getEnabledComponentsNoCopy().untrackedStorage(),
                 otherState.getDisabledComponentsNoCopy() == null
                         ? null : otherState.getDisabledComponentsNoCopy().untrackedStorage(),
                 otherState.getInstallReason(), otherState.getUninstallReason(),
                 otherState.getHarmfulAppWarning(), otherState.getSplashScreenTheme(),
-                otherState.getFirstInstallTimeMillis());
+                otherState.getFirstInstallTimeMillis(), otherState.getMinAspectRatio(),
+                otherState.getArchiveState());
     }
 
     WatchedArraySet<String> getEnabledComponents(int userId) {
@@ -1011,6 +1132,29 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return changed;
     }
 
+    void restoreComponentSettings(int userId) {
+        PackageUserStateImpl state = modifyUserStateComponents(userId, true, true);
+        WatchedArraySet<String> enabledComponents = state.getEnabledComponentsNoCopy();
+        WatchedArraySet<String> disabledComponents = state.getDisabledComponentsNoCopy();
+
+        boolean changed = false;
+        for (int i = enabledComponents.size() - 1; i >= 0; i--) {
+            if (!AndroidPackageUtils.hasComponentClassName(pkg, enabledComponents.valueAt(i))) {
+                enabledComponents.removeAt(i);
+                changed = true;
+            }
+        }
+        for (int i = disabledComponents.size() - 1; i >= 0; i--) {
+            if (!AndroidPackageUtils.hasComponentClassName(pkg, disabledComponents.valueAt(i))) {
+                disabledComponents.removeAt(i);
+                changed = true;
+            }
+        }
+        if (changed) {
+            onChanged();
+        }
+    }
+
     int getCurrentEnabledStateLPr(String componentName, int userId) {
         PackageUserStateInternal state = readUserState(userId);
         if (state.getEnabledComponentsNoCopy() != null
@@ -1096,7 +1240,11 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
             if (state.isSuspended()) {
                 for (int j = 0; j < state.getSuspendParams().size(); j++) {
                     proto.write(PackageProto.UserInfoProto.SUSPENDING_PACKAGE,
-                            state.getSuspendParams().keyAt(j));
+                            state.getSuspendParams().keyAt(j).packageName);
+                    if (crossUserSuspensionEnabledRo()) {
+                        proto.write(PackageProto.UserInfoProto.SUSPENDING_USER,
+                                state.getSuspendParams().keyAt(j).userId);
+                    }
                 }
             }
             proto.write(PackageProto.UserInfoProto.IS_STOPPED, state.isStopped());
@@ -1107,17 +1255,68 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                     state.getLastDisableAppCaller());
             proto.write(PackageProto.UserInfoProto.FIRST_INSTALL_TIME_MS,
                     state.getFirstInstallTimeMillis());
+            writeArchiveState(proto, state.getArchiveState());
             proto.end(userToken);
         }
+    }
+
+    private static void writeArchiveState(ProtoOutputStream proto, ArchiveState archiveState) {
+        if (archiveState == null) {
+            return;
+        }
+        long archiveStateToken = proto.start(PackageProto.UserInfoProto.ARCHIVE_STATE);
+        for (ArchiveState.ArchiveActivityInfo activityInfo : archiveState.getActivityInfos()) {
+            long activityInfoToken = proto.start(
+                    PackageProto.UserInfoProto.ArchiveState.ACTIVITY_INFOS);
+            proto.write(ArchiveActivityInfo.TITLE, activityInfo.getTitle());
+            proto.write(
+                    ArchiveActivityInfo.ORIGINAL_COMPONENT_NAME,
+                    activityInfo.getOriginalComponentName().flattenToString());
+            if (activityInfo.getIconBitmap() != null) {
+                proto.write(ArchiveActivityInfo.ICON_BITMAP_PATH,
+                        activityInfo.getIconBitmap().toAbsolutePath().toString());
+            }
+            if (activityInfo.getMonochromeIconBitmap() != null) {
+                proto.write(ArchiveActivityInfo.MONOCHROME_ICON_BITMAP_PATH,
+                        activityInfo.getMonochromeIconBitmap().toAbsolutePath().toString());
+            }
+            proto.end(activityInfoToken);
+        }
+
+        proto.write(PackageProto.UserInfoProto.ArchiveState.INSTALLER_TITLE,
+                archiveState.getInstallerTitle());
+        proto.end(archiveStateToken);
     }
 
     /**
      * @see #mPath
      */
-    PackageSetting setPath(@NonNull File path) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public PackageSetting setPath(@NonNull File path) {
         this.mPath = path;
         this.mPathString = path.toString();
         onChanged();
+        return this;
+    }
+
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public PackageSetting addOldPath(@NonNull File path) {
+        if (mOldPaths == null) {
+            mOldPaths = new LinkedHashSet<>();
+        }
+        mOldPaths.add(path);
+        onChanged();
+        return this;
+    }
+
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public PackageSetting removeOldPath(@Nullable File path) {
+        if (path == null || mOldPaths == null) {
+            return this;
+        }
+        if (mOldPaths.remove(path)) {
+            onChanged();
+        }
         return this;
     }
 
@@ -1164,8 +1363,11 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     public PackageSetting setLoadingProgress(float progress) {
-        mLoadingProgress = progress;
-        onChanged();
+        // To prevent race conditions, we don't allow progress to ever go down
+        if (mLoadingProgress < progress) {
+            mLoadingProgress = progress;
+            onChanged();
+        }
         return this;
     }
 
@@ -1180,6 +1382,15 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
      */
     public PackageSetting setAppMetadataFilePath(String path) {
         mAppMetadataFilePath = path;
+        onChanged();
+        return this;
+    }
+
+    /**
+     * @param source the source of the app metadata that is currently associated with
+     */
+    public PackageSetting setAppMetadataSource(int source) {
+        mAppMetadataSource = source;
         onChanged();
         return this;
     }
@@ -1232,6 +1443,12 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     @NonNull
     @Override
+    public boolean[] getUsesSdkLibrariesOptional() {
+        return usesSdkLibrariesOptional == null ? EmptyArray.BOOLEAN : usesSdkLibrariesOptional;
+    }
+
+    @NonNull
+    @Override
     public String[] getUsesStaticLibraries() {
         return usesStaticLibraries == null ? EmptyArray.STRING : usesStaticLibraries;
     }
@@ -1245,7 +1462,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     @NonNull
     @Override
     public List<SharedLibrary> getSharedLibraryDependencies() {
-        return (List<SharedLibrary>) (List<?>) pkgState.getUsesLibraryInfos();
+        return Collections.unmodifiableList(pkgState.getUsesLibraryInfos());
     }
 
     @NonNull
@@ -1257,7 +1474,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     @NonNull
     @Override
     public List<String> getUsesLibraryFiles() {
-        return pkgState.getUsesLibraryFiles();
+        return Collections.unmodifiableList(pkgState.getUsesLibraryFiles());
     }
 
     @NonNull
@@ -1312,15 +1529,11 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return this;
     }
 
-    public PackageSetting setMimeGroups(@NonNull Map<String, Set<String>> mimeGroups) {
-        this.mimeGroups = mimeGroups;
-        onChanged();
-        return this;
-    }
-
-    public PackageSetting setOldCodePaths(Set<String> oldCodePaths) {
-        mOldCodePaths = oldCodePaths;
-        onChanged();
+    public PackageSetting setMimeGroups(@Nullable Map<String, Set<String>> mimeGroups) {
+        if (mimeGroups != null) {
+            copyMimeGroups(mimeGroups);
+            onChanged();
+        }
         return this;
     }
 
@@ -1332,6 +1545,12 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     public PackageSetting setUsesSdkLibrariesVersionsMajor(long[] usesSdkLibrariesVersions) {
         this.usesSdkLibrariesVersionsMajor = usesSdkLibrariesVersions;
+        onChanged();
+        return this;
+    }
+
+    public PackageSetting setUsesSdkLibrariesOptional(boolean[] usesSdkLibrariesOptional) {
+        this.usesSdkLibrariesOptional = usesSdkLibrariesOptional;
         onChanged();
         return this;
     }
@@ -1437,6 +1656,42 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return getAndroidPackage() != null && getAndroidPackage().isApex();
     }
 
+    @Override
+    public boolean isForceQueryableOverride() {
+        return getBoolean(Booleans.FORCE_QUERYABLE_OVERRIDE);
+    }
+
+    /**
+     * @see PackageState#isUpdateAvailable()
+     */
+    @Override
+    public boolean isUpdateAvailable() {
+        return getBoolean(Booleans.UPDATE_AVAILABLE);
+    }
+
+    @Override
+    public boolean isInstallPermissionsFixed() {
+        return getBoolean(Booleans.INSTALL_PERMISSION_FIXED);
+    }
+
+    /**
+     * @see PackageState#isDefaultToDeviceProtectedStorage()
+     */
+    @Override
+    public boolean isDefaultToDeviceProtectedStorage() {
+        return (getPrivateFlags() & PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) != 0;
+    }
+
+    @Override
+    public boolean isPersistent() {
+        return (getFlags() & ApplicationInfo.FLAG_PERSISTENT) != 0;
+    }
+
+    @Override
+    public boolean isScannedAsStoppedSystemApp() {
+        return getBoolean(Booleans.SCANNED_AS_STOPPED_SYSTEM_APP);
+    }
+
 
 
     // Code below generated by codegen v1.0.23.
@@ -1451,11 +1706,6 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     //   Settings > Editor > Code Style > Formatter Control
     //@formatter:off
 
-
-    @DataClass.Generated.Member
-    public @Deprecated @Nullable Set<String> getOldCodePaths() {
-        return mOldCodePaths;
-    }
 
     /**
      * The path under which native libraries have been unpacked. This path is
@@ -1509,6 +1759,11 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     @DataClass.Generated.Member
+    public @Nullable LinkedHashSet<File> getOldPaths() {
+        return mOldPaths;
+    }
+
+    @DataClass.Generated.Member
     public float getLoadingProgress() {
         return mLoadingProgress;
     }
@@ -1539,11 +1794,6 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     @DataClass.Generated.Member
-    public boolean isInstallPermissionsFixed() {
-        return installPermissionsFixed;
-    }
-
-    @DataClass.Generated.Member
     public @NonNull PackageKeySetData getKeySetData() {
         return keySetData;
     }
@@ -1569,19 +1819,6 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return categoryOverride;
     }
 
-    /**
-     * @see PackageState#isUpdateAvailable()
-     */
-    @DataClass.Generated.Member
-    public boolean isUpdateAvailable() {
-        return updateAvailable;
-    }
-
-    @DataClass.Generated.Member
-    public boolean isForceQueryableOverride() {
-        return forceQueryableOverride;
-    }
-
     @DataClass.Generated.Member
     public @NonNull PackageStateUnserialized getPkgState() {
         return pkgState;
@@ -1597,11 +1834,26 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return mAppMetadataFilePath;
     }
 
+    @DataClass.Generated.Member
+    public int getAppMetadataSource() {
+        return mAppMetadataSource;
+    }
+
+    @DataClass.Generated.Member
+    public int getTargetSdkVersion() {
+        return mTargetSdkVersion;
+    }
+
+    @DataClass.Generated.Member
+    public @Nullable byte[] getRestrictUpdateHash() {
+        return mRestrictUpdateHash;
+    }
+
     @DataClass.Generated(
-            time = 1680917079522L,
+            time = 1706698406378L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/services/core/java/com/android/server/pm/PackageSetting.java",
-            inputSignatures = "private  int mSharedUserAppId\nprivate @android.annotation.Nullable java.util.Map<java.lang.String,java.util.Set<java.lang.String>> mimeGroups\nprivate @java.lang.Deprecated @android.annotation.Nullable java.util.Set<java.lang.String> mOldCodePaths\nprivate @android.annotation.Nullable java.lang.String[] usesSdkLibraries\nprivate @android.annotation.Nullable long[] usesSdkLibrariesVersionsMajor\nprivate @android.annotation.Nullable java.lang.String[] usesStaticLibraries\nprivate @android.annotation.Nullable long[] usesStaticLibrariesVersions\nprivate @android.annotation.Nullable @java.lang.Deprecated java.lang.String legacyNativeLibraryPath\nprivate @android.annotation.NonNull java.lang.String mName\nprivate @android.annotation.Nullable java.lang.String mRealName\nprivate  int mAppId\nprivate @android.annotation.Nullable com.android.server.pm.parsing.pkg.AndroidPackageInternal pkg\nprivate @android.annotation.NonNull java.io.File mPath\nprivate @android.annotation.NonNull java.lang.String mPathString\nprivate  float mLoadingProgress\nprivate  long mLoadingCompletedTime\nprivate @android.annotation.Nullable java.lang.String mPrimaryCpuAbi\nprivate @android.annotation.Nullable java.lang.String mSecondaryCpuAbi\nprivate @android.annotation.Nullable java.lang.String mCpuAbiOverride\nprivate  long mLastModifiedTime\nprivate  long lastUpdateTime\nprivate  long versionCode\nprivate @android.annotation.NonNull com.android.server.pm.PackageSignatures signatures\nprivate  boolean installPermissionsFixed\nprivate @android.annotation.NonNull com.android.server.pm.PackageKeySetData keySetData\nprivate final @android.annotation.NonNull android.util.SparseArray<com.android.server.pm.pkg.PackageUserStateImpl> mUserStates\nprivate @android.annotation.NonNull com.android.server.pm.InstallSource installSource\nprivate @android.annotation.Nullable java.lang.String volumeUuid\nprivate  int categoryOverride\nprivate  boolean updateAvailable\nprivate  boolean forceQueryableOverride\nprivate final @android.annotation.NonNull com.android.server.pm.pkg.PackageStateUnserialized pkgState\nprivate @android.annotation.NonNull java.util.UUID mDomainSetId\nprivate @android.annotation.Nullable java.lang.String mAppMetadataFilePath\nprivate final @android.annotation.NonNull com.android.server.utils.SnapshotCache<com.android.server.pm.PackageSetting> mSnapshot\nprivate  com.android.server.utils.SnapshotCache<com.android.server.pm.PackageSetting> makeCache()\npublic  com.android.server.pm.PackageSetting snapshot()\npublic  void dumpDebug(android.util.proto.ProtoOutputStream,long,java.util.List<android.content.pm.UserInfo>,com.android.server.pm.permission.LegacyPermissionDataProvider)\npublic  com.android.server.pm.PackageSetting setAppId(int)\npublic  com.android.server.pm.PackageSetting setCpuAbiOverride(java.lang.String)\npublic  com.android.server.pm.PackageSetting setFirstInstallTimeFromReplaced(com.android.server.pm.pkg.PackageStateInternal,int[])\npublic  com.android.server.pm.PackageSetting setFirstInstallTime(long,int)\npublic  com.android.server.pm.PackageSetting setForceQueryableOverride(boolean)\npublic  com.android.server.pm.PackageSetting setInstallerPackage(java.lang.String,int)\npublic  com.android.server.pm.PackageSetting setUpdateOwnerPackage(java.lang.String)\npublic  com.android.server.pm.PackageSetting setInstallSource(com.android.server.pm.InstallSource)\n  com.android.server.pm.PackageSetting removeInstallerPackage(java.lang.String)\npublic  com.android.server.pm.PackageSetting setIsOrphaned(boolean)\npublic  com.android.server.pm.PackageSetting setKeySetData(com.android.server.pm.PackageKeySetData)\npublic  com.android.server.pm.PackageSetting setLastModifiedTime(long)\npublic  com.android.server.pm.PackageSetting setLastUpdateTime(long)\npublic  com.android.server.pm.PackageSetting setLongVersionCode(long)\npublic  boolean setMimeGroup(java.lang.String,android.util.ArraySet<java.lang.String>)\npublic  com.android.server.pm.PackageSetting setPkg(com.android.server.pm.pkg.AndroidPackage)\npublic  com.android.server.pm.PackageSetting setPkgStateLibraryFiles(java.util.Collection<java.lang.String>)\npublic  com.android.server.pm.PackageSetting setPrimaryCpuAbi(java.lang.String)\npublic  com.android.server.pm.PackageSetting setSecondaryCpuAbi(java.lang.String)\npublic  com.android.server.pm.PackageSetting setSignatures(com.android.server.pm.PackageSignatures)\npublic  com.android.server.pm.PackageSetting setVolumeUuid(java.lang.String)\npublic @java.lang.Override boolean isExternalStorage()\npublic  com.android.server.pm.PackageSetting setUpdateAvailable(boolean)\npublic  void setSharedUserAppId(int)\npublic @java.lang.Override int getSharedUserAppId()\npublic @java.lang.Override boolean hasSharedUser()\npublic @java.lang.Override java.lang.String toString()\nprotected  void copyMimeGroups(java.util.Map<java.lang.String,java.util.Set<java.lang.String>>)\npublic  void updateFrom(com.android.server.pm.PackageSetting)\n  com.android.server.pm.PackageSetting updateMimeGroups(java.util.Set<java.lang.String>)\npublic @java.lang.Deprecated @java.lang.Override com.android.server.pm.permission.LegacyPermissionState getLegacyPermissionState()\npublic  com.android.server.pm.PackageSetting setInstallPermissionsFixed(boolean)\npublic  boolean isPrivileged()\npublic  boolean isOem()\npublic  boolean isVendor()\npublic  boolean isProduct()\npublic @java.lang.Override boolean isRequiredForSystemUser()\npublic  boolean isSystemExt()\npublic  boolean isOdm()\npublic  boolean isSystem()\npublic  android.content.pm.SigningDetails getSigningDetails()\npublic  com.android.server.pm.PackageSetting setSigningDetails(android.content.pm.SigningDetails)\npublic  void copyPackageSetting(com.android.server.pm.PackageSetting,boolean)\n @com.android.internal.annotations.VisibleForTesting com.android.server.pm.pkg.PackageUserStateImpl modifyUserState(int)\npublic  com.android.server.pm.pkg.PackageUserStateImpl getOrCreateUserState(int)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateInternal readUserState(int)\n  void setEnabled(int,int,java.lang.String)\n  int getEnabled(int)\n  void setInstalled(boolean,int)\n  boolean getInstalled(int)\n  int getInstallReason(int)\n  void setInstallReason(int,int)\n  int getUninstallReason(int)\n  void setUninstallReason(int,int)\n @android.annotation.NonNull android.content.pm.overlay.OverlayPaths getOverlayPaths(int)\n  boolean setOverlayPathsForLibrary(java.lang.String,android.content.pm.overlay.OverlayPaths,int)\n  boolean isAnyInstalled(int[])\n  int[] queryInstalledUsers(int[],boolean)\n  long getCeDataInode(int)\n  void setCeDataInode(long,int)\n  boolean getStopped(int)\n  void setStopped(boolean,int)\n  boolean getNotLaunched(int)\n  void setNotLaunched(boolean,int)\n  boolean getHidden(int)\n  void setHidden(boolean,int)\n  int getDistractionFlags(int)\n  void setDistractionFlags(int,int)\npublic  boolean getInstantApp(int)\n  void setInstantApp(boolean,int)\n  boolean getVirtualPreload(int)\n  void setVirtualPreload(boolean,int)\n  void setUserState(int,long,int,boolean,boolean,boolean,boolean,int,android.util.ArrayMap<java.lang.String,com.android.server.pm.pkg.SuspendParams>,boolean,boolean,java.lang.String,android.util.ArraySet<java.lang.String>,android.util.ArraySet<java.lang.String>,int,int,java.lang.String,java.lang.String,long)\n  void setUserState(int,com.android.server.pm.pkg.PackageUserStateInternal)\n  com.android.server.utils.WatchedArraySet<java.lang.String> getEnabledComponents(int)\n  com.android.server.utils.WatchedArraySet<java.lang.String> getDisabledComponents(int)\n  void setEnabledComponents(com.android.server.utils.WatchedArraySet<java.lang.String>,int)\n  void setDisabledComponents(com.android.server.utils.WatchedArraySet<java.lang.String>,int)\n  void setEnabledComponentsCopy(com.android.server.utils.WatchedArraySet<java.lang.String>,int)\n  void setDisabledComponentsCopy(com.android.server.utils.WatchedArraySet<java.lang.String>,int)\n  com.android.server.pm.pkg.PackageUserStateImpl modifyUserStateComponents(int,boolean,boolean)\n  void addDisabledComponent(java.lang.String,int)\n  void addEnabledComponent(java.lang.String,int)\n  boolean enableComponentLPw(java.lang.String,int)\n  boolean disableComponentLPw(java.lang.String,int)\n  boolean restoreComponentLPw(java.lang.String,int)\n  int getCurrentEnabledStateLPr(java.lang.String,int)\n  void removeUser(int)\npublic  int[] getNotInstalledUserIds()\n  void writePackageUserPermissionsProto(android.util.proto.ProtoOutputStream,long,java.util.List<android.content.pm.UserInfo>,com.android.server.pm.permission.LegacyPermissionDataProvider)\nprotected  void writeUsersInfoToProto(android.util.proto.ProtoOutputStream,long)\n  com.android.server.pm.PackageSetting setPath(java.io.File)\npublic @com.android.internal.annotations.VisibleForTesting boolean overrideNonLocalizedLabelAndIcon(android.content.ComponentName,java.lang.String,java.lang.Integer,int)\npublic  void resetOverrideComponentLabelIcon(int)\npublic @android.annotation.Nullable java.lang.String getSplashScreenTheme(int)\npublic  boolean isIncremental()\npublic  boolean isLoading()\npublic  com.android.server.pm.PackageSetting setLoadingProgress(float)\npublic  com.android.server.pm.PackageSetting setLoadingCompletedTime(long)\npublic  com.android.server.pm.PackageSetting setAppMetadataFilePath(java.lang.String)\npublic @android.annotation.NonNull @java.lang.Override long getVersionCode()\npublic @android.annotation.Nullable @java.lang.Override java.util.Map<java.lang.String,java.util.Set<java.lang.String>> getMimeGroups()\npublic @android.annotation.NonNull @java.lang.Override java.lang.String getPackageName()\npublic @android.annotation.Nullable @java.lang.Override com.android.server.pm.pkg.AndroidPackage getAndroidPackage()\npublic @android.annotation.NonNull android.content.pm.SigningInfo getSigningInfo()\npublic @android.annotation.NonNull @java.lang.Override java.lang.String[] getUsesSdkLibraries()\npublic @android.annotation.NonNull @java.lang.Override long[] getUsesSdkLibrariesVersionsMajor()\npublic @android.annotation.NonNull @java.lang.Override java.lang.String[] getUsesStaticLibraries()\npublic @android.annotation.NonNull @java.lang.Override long[] getUsesStaticLibrariesVersions()\npublic @android.annotation.NonNull @java.lang.Override java.util.List<com.android.server.pm.pkg.SharedLibrary> getSharedLibraryDependencies()\npublic @android.annotation.NonNull com.android.server.pm.PackageSetting addUsesLibraryInfo(android.content.pm.SharedLibraryInfo)\npublic @android.annotation.NonNull @java.lang.Override java.util.List<java.lang.String> getUsesLibraryFiles()\npublic @android.annotation.NonNull com.android.server.pm.PackageSetting addUsesLibraryFile(java.lang.String)\npublic @java.lang.Override boolean isHiddenUntilInstalled()\npublic @android.annotation.NonNull @java.lang.Override long[] getLastPackageUsageTime()\npublic @java.lang.Override boolean isUpdatedSystemApp()\npublic @java.lang.Override boolean isApkInUpdatedApex()\npublic @android.annotation.Nullable @java.lang.Override java.lang.String getApexModuleName()\npublic  com.android.server.pm.PackageSetting setDomainSetId(java.util.UUID)\npublic  com.android.server.pm.PackageSetting setCategoryOverride(int)\npublic  com.android.server.pm.PackageSetting setLegacyNativeLibraryPath(java.lang.String)\npublic  com.android.server.pm.PackageSetting setMimeGroups(java.util.Map<java.lang.String,java.util.Set<java.lang.String>>)\npublic  com.android.server.pm.PackageSetting setOldCodePaths(java.util.Set<java.lang.String>)\npublic  com.android.server.pm.PackageSetting setUsesSdkLibraries(java.lang.String[])\npublic  com.android.server.pm.PackageSetting setUsesSdkLibrariesVersionsMajor(long[])\npublic  com.android.server.pm.PackageSetting setUsesStaticLibraries(java.lang.String[])\npublic  com.android.server.pm.PackageSetting setUsesStaticLibrariesVersions(long[])\npublic  com.android.server.pm.PackageSetting setApexModuleName(java.lang.String)\npublic @android.annotation.NonNull @java.lang.Override com.android.server.pm.pkg.PackageStateUnserialized getTransientState()\npublic @android.annotation.NonNull android.util.SparseArray<? extends PackageUserStateInternal> getUserStates()\npublic  com.android.server.pm.PackageSetting addMimeTypes(java.lang.String,java.util.Set<java.lang.String>)\npublic @android.annotation.NonNull @java.lang.Override com.android.server.pm.pkg.PackageUserState getStateForUser(android.os.UserHandle)\npublic @android.annotation.Nullable java.lang.String getPrimaryCpuAbi()\npublic @android.annotation.Nullable java.lang.String getSecondaryCpuAbi()\npublic @android.annotation.Nullable @java.lang.Override java.lang.String getSeInfo()\npublic @android.annotation.Nullable java.lang.String getPrimaryCpuAbiLegacy()\npublic @android.annotation.Nullable java.lang.String getSecondaryCpuAbiLegacy()\npublic @android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy @java.lang.Override int getHiddenApiEnforcementPolicy()\npublic @java.lang.Override boolean isApex()\nclass PackageSetting extends com.android.server.pm.SettingBase implements [com.android.server.pm.pkg.PackageStateInternal]\n@com.android.internal.util.DataClass(genGetters=true, genConstructor=false, genSetters=false, genBuilder=false)")
+            inputSignatures = "private  int mBooleans\nprivate  int mSharedUserAppId\nprivate @android.annotation.Nullable java.util.Map<java.lang.String,java.util.Set<java.lang.String>> mimeGroups\nprivate @android.annotation.Nullable java.lang.String[] usesSdkLibraries\nprivate @android.annotation.Nullable long[] usesSdkLibrariesVersionsMajor\nprivate @android.annotation.Nullable boolean[] usesSdkLibrariesOptional\nprivate @android.annotation.Nullable java.lang.String[] usesStaticLibraries\nprivate @android.annotation.Nullable long[] usesStaticLibrariesVersions\nprivate @android.annotation.Nullable @java.lang.Deprecated java.lang.String legacyNativeLibraryPath\nprivate @android.annotation.NonNull java.lang.String mName\nprivate @android.annotation.Nullable java.lang.String mRealName\nprivate  int mAppId\nprivate @android.annotation.Nullable com.android.internal.pm.parsing.pkg.AndroidPackageInternal pkg\nprivate @android.annotation.NonNull java.io.File mPath\nprivate @android.annotation.NonNull java.lang.String mPathString\nprivate @android.annotation.Nullable java.util.LinkedHashSet<java.io.File> mOldPaths\nprivate  float mLoadingProgress\nprivate  long mLoadingCompletedTime\nprivate @android.annotation.Nullable java.lang.String mPrimaryCpuAbi\nprivate @android.annotation.Nullable java.lang.String mSecondaryCpuAbi\nprivate @android.annotation.Nullable java.lang.String mCpuAbiOverride\nprivate  long mLastModifiedTime\nprivate  long lastUpdateTime\nprivate  long versionCode\nprivate @android.annotation.NonNull com.android.server.pm.PackageSignatures signatures\nprivate @android.annotation.NonNull com.android.server.pm.PackageKeySetData keySetData\nprivate final @android.annotation.NonNull android.util.SparseArray<com.android.server.pm.pkg.PackageUserStateImpl> mUserStates\nprivate @android.annotation.NonNull com.android.server.pm.InstallSource installSource\nprivate @android.annotation.Nullable java.lang.String volumeUuid\nprivate  int categoryOverride\nprivate final @android.annotation.NonNull com.android.server.pm.pkg.PackageStateUnserialized pkgState\nprivate @android.annotation.NonNull java.util.UUID mDomainSetId\nprivate @android.annotation.Nullable java.lang.String mAppMetadataFilePath\nprivate  int mAppMetadataSource\nprivate  int mTargetSdkVersion\nprivate @android.annotation.Nullable byte[] mRestrictUpdateHash\nprivate final @android.annotation.NonNull com.android.server.utils.SnapshotCache<com.android.server.pm.PackageSetting> mSnapshot\nprivate  void setBoolean(int,boolean)\nprivate  boolean getBoolean(int)\nprivate  com.android.server.utils.SnapshotCache<com.android.server.pm.PackageSetting> makeCache()\npublic  com.android.server.pm.PackageSetting snapshot()\npublic  void dumpDebug(android.util.proto.ProtoOutputStream,long,java.util.List<android.content.pm.UserInfo>,com.android.server.pm.permission.LegacyPermissionDataProvider)\npublic  com.android.server.pm.PackageSetting setAppId(int)\npublic  com.android.server.pm.PackageSetting setCpuAbiOverride(java.lang.String)\npublic  com.android.server.pm.PackageSetting setFirstInstallTimeFromReplaced(com.android.server.pm.pkg.PackageStateInternal,int[])\npublic  com.android.server.pm.PackageSetting setFirstInstallTime(long,int)\npublic  com.android.server.pm.PackageSetting setForceQueryableOverride(boolean)\npublic  com.android.server.pm.PackageSetting setInstallerPackage(java.lang.String,int)\npublic  com.android.server.pm.PackageSetting setUpdateOwnerPackage(java.lang.String)\npublic  com.android.server.pm.PackageSetting setInstallSource(com.android.server.pm.InstallSource)\n  com.android.server.pm.PackageSetting removeInstallerPackage(java.lang.String)\npublic  com.android.server.pm.PackageSetting setIsOrphaned(boolean)\npublic  com.android.server.pm.PackageSetting setKeySetData(com.android.server.pm.PackageKeySetData)\npublic  com.android.server.pm.PackageSetting setLastModifiedTime(long)\npublic  com.android.server.pm.PackageSetting setLastUpdateTime(long)\npublic  com.android.server.pm.PackageSetting setLongVersionCode(long)\npublic  boolean setMimeGroup(java.lang.String,android.util.ArraySet<java.lang.String>)\npublic  com.android.server.pm.PackageSetting setPkg(com.android.server.pm.pkg.AndroidPackage)\npublic  com.android.server.pm.PackageSetting setPkgStateLibraryFiles(java.util.Collection<java.lang.String>)\npublic  com.android.server.pm.PackageSetting setPrimaryCpuAbi(java.lang.String)\npublic  com.android.server.pm.PackageSetting setSecondaryCpuAbi(java.lang.String)\npublic  com.android.server.pm.PackageSetting setSignatures(com.android.server.pm.PackageSignatures)\npublic  com.android.server.pm.PackageSetting setVolumeUuid(java.lang.String)\npublic @java.lang.Override boolean isExternalStorage()\npublic  com.android.server.pm.PackageSetting setUpdateAvailable(boolean)\npublic  com.android.server.pm.PackageSetting setSharedUserAppId(int)\npublic  com.android.server.pm.PackageSetting setTargetSdkVersion(int)\npublic  com.android.server.pm.PackageSetting setRestrictUpdateHash(byte[])\npublic @java.lang.Override int getSharedUserAppId()\npublic @java.lang.Override boolean hasSharedUser()\npublic @java.lang.Override java.lang.String toString()\nprivate  void copyMimeGroups(java.util.Map<java.lang.String,java.util.Set<java.lang.String>>)\npublic  void updateFrom(com.android.server.pm.PackageSetting)\n  com.android.server.pm.PackageSetting updateMimeGroups(java.util.Set<java.lang.String>)\npublic @java.lang.Deprecated @java.lang.Override com.android.server.pm.permission.LegacyPermissionState getLegacyPermissionState()\npublic  com.android.server.pm.PackageSetting setInstallPermissionsFixed(boolean)\npublic  boolean isPrivileged()\npublic  boolean isOem()\npublic  boolean isVendor()\npublic  boolean isProduct()\npublic @java.lang.Override boolean isRequiredForSystemUser()\npublic  boolean isSystemExt()\npublic  boolean isOdm()\npublic  boolean isSystem()\npublic  boolean isRequestLegacyExternalStorage()\npublic  boolean isUserDataFragile()\npublic  android.content.pm.SigningDetails getSigningDetails()\npublic  com.android.server.pm.PackageSetting setSigningDetails(android.content.pm.SigningDetails)\npublic  void copyPackageSetting(com.android.server.pm.PackageSetting,boolean)\n @com.android.internal.annotations.VisibleForTesting com.android.server.pm.pkg.PackageUserStateImpl modifyUserState(int)\npublic  com.android.server.pm.pkg.PackageUserStateImpl getOrCreateUserState(int)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateInternal readUserState(int)\n  void setEnabled(int,int,java.lang.String)\n  int getEnabled(int)\n  void setInstalled(boolean,int)\n  void setArchiveState(com.android.server.pm.pkg.ArchiveState,int)\n  boolean getInstalled(int)\n  boolean isArchived(int)\n  int getInstallReason(int)\n  void setInstallReason(int,int)\n  int getUninstallReason(int)\n  void setUninstallReason(int,int)\n @android.annotation.NonNull android.content.pm.overlay.OverlayPaths getOverlayPaths(int)\n  boolean setOverlayPathsForLibrary(java.lang.String,android.content.pm.overlay.OverlayPaths,int)\n  boolean isInstalledOnAnyOtherUser(int[],int)\n  boolean hasDataOnAnyOtherUser(int[],int)\n  int[] queryInstalledUsers(int[],boolean)\n  int[] queryUsersInstalledOrHasData(int[])\n  long getCeDataInode(int)\n  long getDeDataInode(int)\n  void setCeDataInode(long,int)\n  void setDeDataInode(long,int)\n  boolean getStopped(int)\n  void setStopped(boolean,int)\npublic  com.android.server.pm.PackageSetting setScannedAsStoppedSystemApp(boolean)\n  boolean getNotLaunched(int)\n  void setNotLaunched(boolean,int)\n  boolean getHidden(int)\n  void setHidden(boolean,int)\n  int getDistractionFlags(int)\n  void setDistractionFlags(int,int)\npublic  boolean getInstantApp(int)\n  void setInstantApp(boolean,int)\n  boolean getVirtualPreload(int)\n  void setVirtualPreload(boolean,int)\n  void setUserState(int,long,long,int,boolean,boolean,boolean,boolean,int,android.util.ArrayMap<android.content.pm.UserPackage,com.android.server.pm.pkg.SuspendParams>,boolean,boolean,java.lang.String,android.util.ArraySet<java.lang.String>,android.util.ArraySet<java.lang.String>,int,int,java.lang.String,java.lang.String,long,int,com.android.server.pm.pkg.ArchiveState)\n  void setUserState(int,com.android.server.pm.pkg.PackageUserStateInternal)\n  com.android.server.utils.WatchedArraySet<java.lang.String> getEnabledComponents(int)\n  com.android.server.utils.WatchedArraySet<java.lang.String> getDisabledComponents(int)\n  void setEnabledComponents(com.android.server.utils.WatchedArraySet<java.lang.String>,int)\n  void setDisabledComponents(com.android.server.utils.WatchedArraySet<java.lang.String>,int)\n  void setEnabledComponentsCopy(com.android.server.utils.WatchedArraySet<java.lang.String>,int)\n  void setDisabledComponentsCopy(com.android.server.utils.WatchedArraySet<java.lang.String>,int)\n  com.android.server.pm.pkg.PackageUserStateImpl modifyUserStateComponents(int,boolean,boolean)\n  void addDisabledComponent(java.lang.String,int)\n  void addEnabledComponent(java.lang.String,int)\n  boolean enableComponentLPw(java.lang.String,int)\n  boolean disableComponentLPw(java.lang.String,int)\n  boolean restoreComponentLPw(java.lang.String,int)\n  void restoreComponentSettings(int)\n  int getCurrentEnabledStateLPr(java.lang.String,int)\n  void removeUser(int)\npublic  int[] getNotInstalledUserIds()\n  void writePackageUserPermissionsProto(android.util.proto.ProtoOutputStream,long,java.util.List<android.content.pm.UserInfo>,com.android.server.pm.permission.LegacyPermissionDataProvider)\nprotected  void writeUsersInfoToProto(android.util.proto.ProtoOutputStream,long)\nprivate static  void writeArchiveState(android.util.proto.ProtoOutputStream,com.android.server.pm.pkg.ArchiveState)\npublic @com.android.internal.annotations.VisibleForTesting com.android.server.pm.PackageSetting setPath(java.io.File)\npublic @com.android.internal.annotations.VisibleForTesting com.android.server.pm.PackageSetting addOldPath(java.io.File)\npublic @com.android.internal.annotations.VisibleForTesting com.android.server.pm.PackageSetting removeOldPath(java.io.File)\npublic @com.android.internal.annotations.VisibleForTesting boolean overrideNonLocalizedLabelAndIcon(android.content.ComponentName,java.lang.String,java.lang.Integer,int)\npublic  void resetOverrideComponentLabelIcon(int)\npublic @android.annotation.Nullable java.lang.String getSplashScreenTheme(int)\npublic  boolean isIncremental()\npublic  boolean isLoading()\npublic  com.android.server.pm.PackageSetting setLoadingProgress(float)\npublic  com.android.server.pm.PackageSetting setLoadingCompletedTime(long)\npublic  com.android.server.pm.PackageSetting setAppMetadataFilePath(java.lang.String)\npublic  com.android.server.pm.PackageSetting setAppMetadataSource(int)\npublic @android.annotation.NonNull @java.lang.Override long getVersionCode()\npublic @android.annotation.Nullable @java.lang.Override java.util.Map<java.lang.String,java.util.Set<java.lang.String>> getMimeGroups()\npublic @android.annotation.NonNull @java.lang.Override java.lang.String getPackageName()\npublic @android.annotation.Nullable @java.lang.Override com.android.server.pm.pkg.AndroidPackage getAndroidPackage()\npublic @android.annotation.NonNull android.content.pm.SigningInfo getSigningInfo()\npublic @android.annotation.NonNull @java.lang.Override java.lang.String[] getUsesSdkLibraries()\npublic @android.annotation.NonNull @java.lang.Override long[] getUsesSdkLibrariesVersionsMajor()\npublic @android.annotation.NonNull @java.lang.Override boolean[] getUsesSdkLibrariesOptional()\npublic @android.annotation.NonNull @java.lang.Override java.lang.String[] getUsesStaticLibraries()\npublic @android.annotation.NonNull @java.lang.Override long[] getUsesStaticLibrariesVersions()\npublic @android.annotation.NonNull @java.lang.Override java.util.List<com.android.server.pm.pkg.SharedLibrary> getSharedLibraryDependencies()\npublic @android.annotation.NonNull com.android.server.pm.PackageSetting addUsesLibraryInfo(android.content.pm.SharedLibraryInfo)\npublic @android.annotation.NonNull @java.lang.Override java.util.List<java.lang.String> getUsesLibraryFiles()\npublic @android.annotation.NonNull com.android.server.pm.PackageSetting addUsesLibraryFile(java.lang.String)\npublic @java.lang.Override boolean isHiddenUntilInstalled()\npublic @android.annotation.NonNull @java.lang.Override long[] getLastPackageUsageTime()\npublic @java.lang.Override boolean isUpdatedSystemApp()\npublic @java.lang.Override boolean isApkInUpdatedApex()\npublic @android.annotation.Nullable @java.lang.Override java.lang.String getApexModuleName()\npublic  com.android.server.pm.PackageSetting setDomainSetId(java.util.UUID)\npublic  com.android.server.pm.PackageSetting setCategoryOverride(int)\npublic  com.android.server.pm.PackageSetting setLegacyNativeLibraryPath(java.lang.String)\npublic  com.android.server.pm.PackageSetting setMimeGroups(java.util.Map<java.lang.String,java.util.Set<java.lang.String>>)\npublic  com.android.server.pm.PackageSetting setUsesSdkLibraries(java.lang.String[])\npublic  com.android.server.pm.PackageSetting setUsesSdkLibrariesVersionsMajor(long[])\npublic  com.android.server.pm.PackageSetting setUsesSdkLibrariesOptional(boolean[])\npublic  com.android.server.pm.PackageSetting setUsesStaticLibraries(java.lang.String[])\npublic  com.android.server.pm.PackageSetting setUsesStaticLibrariesVersions(long[])\npublic  com.android.server.pm.PackageSetting setApexModuleName(java.lang.String)\npublic @android.annotation.NonNull @java.lang.Override com.android.server.pm.pkg.PackageStateUnserialized getTransientState()\npublic @android.annotation.NonNull android.util.SparseArray<? extends PackageUserStateInternal> getUserStates()\npublic  com.android.server.pm.PackageSetting addMimeTypes(java.lang.String,java.util.Set<java.lang.String>)\npublic @android.annotation.NonNull @java.lang.Override com.android.server.pm.pkg.PackageUserState getStateForUser(android.os.UserHandle)\npublic @android.annotation.Nullable java.lang.String getPrimaryCpuAbi()\npublic @android.annotation.Nullable java.lang.String getSecondaryCpuAbi()\npublic @android.annotation.Nullable @java.lang.Override java.lang.String getSeInfo()\npublic @android.annotation.Nullable java.lang.String getPrimaryCpuAbiLegacy()\npublic @android.annotation.Nullable java.lang.String getSecondaryCpuAbiLegacy()\npublic @android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy @java.lang.Override int getHiddenApiEnforcementPolicy()\npublic @java.lang.Override boolean isApex()\npublic @java.lang.Override boolean isForceQueryableOverride()\npublic @java.lang.Override boolean isUpdateAvailable()\npublic @java.lang.Override boolean isInstallPermissionsFixed()\npublic @java.lang.Override boolean isDefaultToDeviceProtectedStorage()\npublic @java.lang.Override boolean isPersistent()\npublic @java.lang.Override boolean isScannedAsStoppedSystemApp()\nclass PackageSetting extends com.android.server.pm.SettingBase implements [com.android.server.pm.pkg.PackageStateInternal]\nprivate static final  int INSTALL_PERMISSION_FIXED\nprivate static final  int UPDATE_AVAILABLE\nprivate static final  int FORCE_QUERYABLE_OVERRIDE\nprivate static final  int SCANNED_AS_STOPPED_SYSTEM_APP\nclass Booleans extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genGetters=true, genConstructor=false, genSetters=false, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 

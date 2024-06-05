@@ -289,6 +289,11 @@ public abstract class InCallService extends Service {
 
             switch (msg.what) {
                 case MSG_SET_IN_CALL_ADAPTER:
+                    if (mPhone != null) {
+                        Log.i(this, "mPhone is already instantiated, ignoring "
+                                + "request to reset adapter.");
+                        break;
+                    }
                     String callingPackage = getApplicationContext().getOpPackageName();
                     mPhone = new Phone(new InCallAdapter((IInCallAdapter) msg.obj), callingPackage,
                             getApplicationContext().getApplicationInfo().targetSdkVersion);

@@ -8,5 +8,10 @@
         }
       ]
     }
+  ],
+  "postsubmit": [
+    {
+      "name": "PrintSpoolerOutOfProcessTests"
+    }
   ]
 }

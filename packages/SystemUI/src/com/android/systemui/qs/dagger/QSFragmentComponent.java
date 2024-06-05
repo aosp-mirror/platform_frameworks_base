@@ -16,53 +16,25 @@
 
 package com.android.systemui.qs.dagger;
 
-import com.android.systemui.qs.FooterActionsController;
-import com.android.systemui.qs.QSAnimator;
-import com.android.systemui.qs.QSContainerImplController;
-import com.android.systemui.qs.QSFooter;
-import com.android.systemui.qs.QSFragment;
-import com.android.systemui.qs.QSPanelController;
-import com.android.systemui.qs.QSSquishinessController;
-import com.android.systemui.qs.QuickQSPanelController;
-import com.android.systemui.qs.customize.QSCustomizerController;
+import android.view.View;
+
+import com.android.systemui.dagger.qualifiers.RootView;
+import com.android.systemui.qs.QSFragmentLegacy;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
- * Dagger Subcomponent for {@link QSFragment}.
+ * Dagger Subcomponent for {@link QSFragmentLegacy}.
  */
 @Subcomponent(modules = {QSFragmentModule.class})
 @QSScope
-public interface QSFragmentComponent {
+public interface QSFragmentComponent extends QSComponent {
 
     /** Factory for building a {@link QSFragmentComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        QSFragmentComponent create(@BindsInstance QSFragment qsFragment);
+        /** */
+        QSFragmentComponent create(@BindsInstance @RootView View view);
     }
-
-    /** Construct a {@link QSPanelController}. */
-    QSPanelController getQSPanelController();
-
-    /** Construct a {@link QuickQSPanelController}. */
-    QuickQSPanelController getQuickQSPanelController();
-
-    /** Construct a {@link QSAnimator}. */
-    QSAnimator getQSAnimator();
-
-    /** Construct a {@link QSContainerImplController}. */
-    QSContainerImplController getQSContainerImplController();
-
-    /** Construct a {@link QSFooter} */
-    QSFooter getQSFooter();
-
-    /** Construct a {@link QSCustomizerController}. */
-    QSCustomizerController getQSCustomizerController();
-
-    /** Construct a {@link QSSquishinessController}. */
-    QSSquishinessController getQSSquishinessController();
-
-    /** Construct a {@link FooterActionsController}. */
-    FooterActionsController getQSFooterActionController();
 }

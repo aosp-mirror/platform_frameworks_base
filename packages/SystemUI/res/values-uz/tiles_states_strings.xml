@@ -126,6 +126,11 @@
     <item msgid="8259411607272330225">"Oʻchiq"</item>
     <item msgid="578444932039713369">"Yoniq"</item>
   </string-array>
+  <string-array name="tile_states_record_issue">
+    <item msgid="1727196795383575383">"Mavjud emas"</item>
+    <item msgid="9061144428113385092">"Oʻchiq"</item>
+    <item msgid="2984256114867200368">"Yoniq"</item>
+  </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"Ishlamaydi"</item>
     <item msgid="8707481475312432575">"Oʻchiq"</item>
@@ -180,5 +185,10 @@
     <item msgid="3173069902082305985">"Mavjud emas"</item>
     <item msgid="2478289035899842865">"Oʻchiq"</item>
     <item msgid="5137565285664080143">"Yoniq"</item>
+  </string-array>
+  <string-array name="tile_states_hearing_devices">
+    <item msgid="1235334096484287173">"Ishlamayapti"</item>
+    <item msgid="3079622119444911877">"Oʻchiq"</item>
+    <item msgid="3028994095749238254">"Yoniq"</item>
   </string-array>
 </resources>

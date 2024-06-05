@@ -1,0 +1,49 @@
+package: "android.service.dreams"
+container: "system"
+
+flag {
+  name: "dream_overlay_host"
+  namespace: "communal"
+  description: "This flag enables using a host to handle displaying a dream's overlay rather than "
+      "relying on the dream's window"
+  bug: "291990564"
+}
+
+flag {
+  name: "dream_handles_confirm_keys"
+  namespace: "communal"
+  description: "This flag enables dreams processing confirm keys to show the bouncer or dismiss "
+       "the keyguard"
+  bug: "326975875"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "dream_wake_redirect"
+  namespace: "systemui"
+  description: "This flag enables using a host to handle displaying a dream's overlay rather than "
+      "relying on the dream's window"
+  bug: "334083490"
+}
+
+flag {
+    name: "dismiss_dream_on_keyguard_dismiss"
+    namespace: "systemui"
+    description: "Dismisses the dream in the keyguard-going-away transition, preventing it from being visible"
+    bug: "333829441"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "dream_handles_being_obscured"
+  namespace: "communal"
+  description: "This flag enables the ability for dreams to handle being obscured"
+  bug: "337302237"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

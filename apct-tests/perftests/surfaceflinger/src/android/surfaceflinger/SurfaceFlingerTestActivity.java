@@ -16,12 +16,15 @@
 
 package android.surfaceflinger;
 
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_DEFAULT;
+
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -42,6 +45,11 @@ public class SurfaceFlingerTestActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        View decorView = getWindow().getDecorView();
+        // Hide both the navigation bar and the status bar.
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         mTestSurfaceView = new TestSurfaceView(this);
         setContentView(mTestSurfaceView);
@@ -49,6 +57,10 @@ public class SurfaceFlingerTestActivity extends Activity {
 
     public SurfaceControl createChildSurfaceControl() {
         return mTestSurfaceView.getChildSurfaceControlHelper();
+    }
+
+    public int getBufferTransformHint() {
+        return mTestSurfaceView.getRootSurfaceControl().getBufferTransformHint();
     }
 
     public class TestSurfaceView extends SurfaceView {
@@ -79,6 +91,9 @@ public class SurfaceFlingerTestActivity extends Activity {
             // check to see if surface is valid
             if (holder.getSurface().isValid()) {
                 mSurfaceControl = getSurfaceControl();
+                new SurfaceControl.Transaction()
+                        .setFrameRate(mSurfaceControl, 1000, FRAME_RATE_COMPATIBILITY_DEFAULT)
+                        .apply(true);
             }
             return new SurfaceControl.Builder()
                     .setName("ChildSurfaceControl")

@@ -17,17 +17,18 @@
 package android.test;
 
 import android.test.mock.MockContext;
-import android.test.suitebuilder.annotation.SmallTest;
 
-import java.util.ArrayList;
-import junit.framework.TestCase;
+import androidx.test.filters.SmallTest;
+
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import junit.framework.TestCase;
 import junit.framework.TestListener;
+import junit.framework.TestSuite;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Unit tests for {@link AndroidTestRunner}

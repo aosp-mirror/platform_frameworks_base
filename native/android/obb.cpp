@@ -42,7 +42,7 @@ void AObbInfo_delete(AObbInfo* obbInfo) {
 }
 
 const char* AObbInfo_getPackageName(AObbInfo* obbInfo) {
-    return obbInfo->getPackageName();
+    return obbInfo->getPackageName().c_str();
 }
 
 int32_t AObbInfo_getVersion(AObbInfo* obbInfo) {

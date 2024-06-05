@@ -18,10 +18,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.settingslib">
 
+    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
+
     <application>
-        <activity
-            android:name="com.android.settingslib.users.AvatarPickerActivity"
-            android:theme="@style/SudThemeGlifV2.DayNight"/>
     </application>
 
 </manifest>

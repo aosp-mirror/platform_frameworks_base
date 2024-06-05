@@ -34,14 +34,12 @@ import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.settings.UserTracker
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -50,7 +48,6 @@ import javax.inject.Inject
  * Activity for rearranging and removing controls for a given structure
  */
 open class ControlsEditingActivity @Inject constructor(
-    featureFlags: FeatureFlags,
     @Main private val mainExecutor: Executor,
     private val controller: ControlsControllerImpl,
     private val userTracker: UserTracker,
@@ -76,8 +73,6 @@ open class ControlsEditingActivity @Inject constructor(
 
     private var isFromFavoriting: Boolean = false
 
-    private val isNewFlowEnabled: Boolean =
-        featureFlags.isEnabled(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS)
     private val userTrackerCallback: UserTracker.Callback = object : UserTracker.Callback {
         private val startingUser = controller.currentUserId
 
@@ -176,7 +171,7 @@ open class ControlsEditingActivity @Inject constructor(
     private fun bindButtons() {
         addControls = requireViewById<Button>(R.id.addControls).apply {
             isEnabled = true
-            visibility = if (isNewFlowEnabled) View.VISIBLE else View.GONE
+            visibility = View.VISIBLE
             setOnClickListener {
                 if (saveButton.isEnabled) {
                     // The user has made changes

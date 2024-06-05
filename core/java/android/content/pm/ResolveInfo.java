@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -33,6 +34,7 @@ import android.util.Slog;
 
 import java.text.Collator;
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Information that is returned from resolving an intent
@@ -40,6 +42,7 @@ import java.util.Comparator;
  * information collected from the AndroidManifest.xml's
  * &lt;intent&gt; tags.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ResolveInfo implements Parcelable {
     private static final String TAG = "ResolveInfo";
     private static final String INTENT_FORWARDER_ACTIVITY =
@@ -224,10 +227,18 @@ public class ResolveInfo implements Parcelable {
      * @return Returns a CharSequence containing the resolutions's label.  If the
      * item does not have a label, its name is returned.
      */
-    public CharSequence loadLabel(PackageManager pm) {
+    @NonNull
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
+    public CharSequence loadLabel(@NonNull PackageManager pm) {
         if (nonLocalizedLabel != null) {
             return nonLocalizedLabel;
         }
+
+        // In order to not change the original behavior. To add null check here to support backward
+        // compatible. If nonLocalizedLabel is not null, we also return nonLocalizedLabel even if pm
+        // is null.
+        Objects.requireNonNull(pm);
+
         CharSequence label;
         if (resolvePackageName != null && labelRes != 0) {
             label = pm.getText(resolvePackageName, labelRes, null);
@@ -295,6 +306,7 @@ public class ResolveInfo implements Parcelable {
      * @return Returns a Drawable containing the resolution's icon.  If the
      * item does not have an icon, the default activity icon is returned.
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public Drawable loadIcon(PackageManager pm) {
         Drawable dr = null;
         if (resolvePackageName != null && iconResourceId != 0) {
@@ -577,6 +589,6 @@ public class ResolveInfo implements Parcelable {
         }
 
         private final Collator   mCollator = Collator.getInstance();
-        private PackageManager   mPM;
+        private final PackageManager mPM;
     }
 }

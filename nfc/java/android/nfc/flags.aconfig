@@ -1,0 +1,112 @@
+package: "android.nfc"
+container: "system"
+
+flag {
+    name: "enable_nfc_mainline"
+    is_exported: true
+    namespace: "nfc"
+    description: "Flag for NFC mainline changes"
+    bug: "292140387"
+}
+
+flag {
+    name: "enable_nfc_reader_option"
+    is_exported: true
+    namespace: "nfc"
+    description: "Flag for NFC reader option API changes"
+    bug: "291187960"
+}
+
+flag {
+    name: "enable_nfc_user_restriction"
+    is_exported: true
+    namespace: "nfc"
+    description: "Flag for NFC user restriction"
+    bug: "291187960"
+}
+
+flag {
+    name: "nfc_observe_mode"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable NFC Observe Mode"
+    bug: "294217286"
+}
+
+flag {
+    name: "nfc_read_polling_loop"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable NFC Polling Loop Notifications"
+    bug: "294217286"
+}
+
+flag {
+    name: "nfc_observe_mode_st_shim"
+    namespace: "nfc"
+    description: "Enable NFC Observe Mode ST shim"
+    bug: "294217286"
+}
+
+flag {
+    name: "nfc_read_polling_loop_st_shim"
+    namespace: "nfc"
+    description: "Enable NFC Polling Loop Notifications ST shim"
+    bug: "294217286"
+}
+
+flag {
+    name: "enable_tag_detection_broadcasts"
+    namespace: "nfc"
+    description: "Enable sending broadcasts to Wallet role holder when a tag enters/leaves the field."
+    bug: "306203494"
+}
+
+flag {
+    name: "enable_nfc_charging"
+    is_exported: true
+    namespace: "nfc"
+    description: "Flag for NFC charging changes"
+    bug: "292143899"
+}
+
+flag {
+    name: "enable_nfc_set_discovery_tech"
+    is_exported: true
+    namespace: "nfc"
+    description: "Flag for NFC set discovery tech API"
+    bug: "300351519"
+}
+
+flag {
+    name: "nfc_vendor_cmd"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable NFC vendor command support"
+    bug: "289879306"
+}
+
+flag {
+    name: "nfc_oem_extension"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable NFC OEM extension support"
+    bug: "331206243"
+}
+
+flag {
+    name: "nfc_state_change"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable nfc state change API"
+    bug: "319934052"
+}
+
+flag {
+    name: "nfc_set_default_disc_tech"
+    is_exported: true
+    namespace: "nfc"
+    description: "Flag for NFC set default disc tech API"
+    bug: "321311407"
+}
+

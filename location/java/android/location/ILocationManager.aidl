@@ -19,13 +19,11 @@ package android.location;
 import android.app.PendingIntent;
 import android.location.Address;
 import android.location.Criteria;
-import android.location.GeocoderParams;
 import android.location.Geofence;
 import android.location.GnssAntennaInfo;
 import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementRequest;
-import android.location.IGeocodeListener;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
@@ -37,8 +35,11 @@ import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.location.LocationTime;
+import android.location.provider.ForwardGeocodeRequest;
+import android.location.provider.IGeocodeCallback;
 import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
+import android.location.provider.ReverseGeocodeRequest;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
 import android.os.PackageTagsList;
@@ -68,13 +69,9 @@ interface ILocationManager
     void requestGeofence(in Geofence geofence, in PendingIntent intent, String packageName, String attributionTag);
     void removeGeofence(in PendingIntent intent);
 
-    boolean geocoderIsPresent();
-    void getFromLocation(double latitude, double longitude, int maxResults,
-        in GeocoderParams params, in IGeocodeListener listener);
-    void getFromLocationName(String locationName,
-        double lowerLeftLatitude, double lowerLeftLongitude,
-        double upperRightLatitude, double upperRightLongitude, int maxResults,
-        in GeocoderParams params, in IGeocodeListener listener);
+    boolean isGeocodeAvailable();
+    void reverseGeocode(in ReverseGeocodeRequest request, in IGeocodeCallback callback);
+    void forwardGeocode(in ForwardGeocodeRequest request, in IGeocodeCallback callback);
 
     GnssCapabilities getGnssCapabilities();
     int getGnssYearOfHardware();
@@ -98,12 +95,16 @@ interface ILocationManager
     void addGnssAntennaInfoListener(in IGnssAntennaInfoListener listener, String packageName, @nullable String attributionTag, String listenerId);
     void removeGnssAntennaInfoListener(in IGnssAntennaInfoListener listener);
 
+    @EnforcePermission("INTERACT_ACROSS_USERS")
     void addProviderRequestListener(in IProviderRequestListener listener);
     void removeProviderRequestListener(in IProviderRequestListener listener);
 
     int getGnssBatchSize();
+    @EnforcePermission("LOCATION_HARDWARE")
     void startGnssBatch(long periodNanos, in ILocationListener listener, String packageName, @nullable String attributionTag, String listenerId);
+    @EnforcePermission("LOCATION_HARDWARE")
     void flushGnssBatch();
+    @EnforcePermission("LOCATION_HARDWARE")
     void stopGnssBatch();
 
     boolean hasProvider(String provider);
@@ -111,7 +112,9 @@ interface ILocationManager
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
     ProviderProperties getProviderProperties(String provider);
+    @EnforcePermission("READ_DEVICE_CONFIG")
     boolean isProviderPackage(@nullable String provider, String packageName, @nullable String attributionTag);
+    @EnforcePermission("READ_DEVICE_CONFIG")
     List<String> getProviderPackages(String provider);
 
     @EnforcePermission("LOCATION_HARDWARE")

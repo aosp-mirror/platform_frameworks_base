@@ -23,6 +23,7 @@ import android.view.Display
 import androidx.annotation.GuardedBy
 import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
+import com.android.app.tracing.traceSection
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.Assert
 import java.lang.ref.WeakReference
@@ -46,18 +47,30 @@ internal constructor(
     val displayChangedListener: DisplayManager.DisplayListener =
         object : DisplayManager.DisplayListener {
             override fun onDisplayAdded(displayId: Int) {
-                val list = synchronized(displayCallbacks) { displayCallbacks.toList() }
-                onDisplayAdded(displayId, list)
+                traceSection(
+                    "DisplayTrackerImpl.displayChangedDisplayListener#onDisplayAdded",
+                ) {
+                    val list = synchronized(displayCallbacks) { displayCallbacks.toList() }
+                    onDisplayAdded(displayId, list)
+                }
             }
 
             override fun onDisplayRemoved(displayId: Int) {
-                val list = synchronized(displayCallbacks) { displayCallbacks.toList() }
-                onDisplayRemoved(displayId, list)
+                traceSection(
+                    "DisplayTrackerImpl.displayChangedDisplayListener#onDisplayRemoved",
+                ) {
+                    val list = synchronized(displayCallbacks) { displayCallbacks.toList() }
+                    onDisplayRemoved(displayId, list)
+                }
             }
 
             override fun onDisplayChanged(displayId: Int) {
-                val list = synchronized(displayCallbacks) { displayCallbacks.toList() }
-                onDisplayChanged(displayId, list)
+                traceSection(
+                    "DisplayTrackerImpl.displayChangedDisplayListener#onDisplayChanged",
+                ) {
+                    val list = synchronized(displayCallbacks) { displayCallbacks.toList() }
+                    onDisplayChanged(displayId, list)
+                }
             }
         }
 
@@ -69,8 +82,12 @@ internal constructor(
             override fun onDisplayRemoved(displayId: Int) {}
 
             override fun onDisplayChanged(displayId: Int) {
-                val list = synchronized(brightnessCallbacks) { brightnessCallbacks.toList() }
-                onDisplayChanged(displayId, list)
+                traceSection(
+                    "DisplayTrackerImpl.displayBrightnessChangedDisplayListener#onDisplayChanged",
+                ) {
+                    val list = synchronized(brightnessCallbacks) { brightnessCallbacks.toList() }
+                    onDisplayChanged(displayId, list)
+                }
             }
         }
 
@@ -113,6 +130,10 @@ internal constructor(
                 displayManager.unregisterDisplayListener(displayBrightnessChangedListener)
             }
         }
+    }
+
+    override fun getDisplay(displayId: Int): Display {
+        return displayManager.getDisplay(displayId)
     }
 
     @WorkerThread

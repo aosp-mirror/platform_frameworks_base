@@ -30,8 +30,6 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
-import android.hardware.usb.UsbManager;
-import android.media.IAudioService;
 import android.net.IIpConnectivityMetrics;
 import android.net.Uri;
 import android.os.Bundle;
@@ -54,8 +52,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalServices;
-import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
 import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -216,11 +214,6 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
-        IAudioService getIAudioService() {
-            return services.iaudioService;
-        }
-
-        @Override
         PersistentDataBlockManagerInternal getPersistentDataBlockManagerInternal() {
             return services.persistentDataBlockManagerInternal;
         }
@@ -241,11 +234,6 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         LockPatternUtils newLockPatternUtils() {
             return services.lockPatternUtils;
-        }
-
-        @Override
-        UsbManager getUsbManager() {
-            return services.usbManager;
         }
 
         @Override
@@ -380,18 +368,8 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
-        void settingsSecurePutInt(String name, int value) {
-            services.settings.settingsSecurePutInt(name, value);
-        }
-
-        @Override
         void settingsGlobalPutInt(String name, int value) {
             services.settings.settingsGlobalPutInt(name, value);
-        }
-
-        @Override
-        void settingsSecurePutString(String name, String value) {
-            services.settings.settingsSecurePutString(name, value);
         }
 
         @Override
@@ -462,11 +440,6 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         @Override
         public void runCryptoSelfTest() {}
-
-        @Override
-        public String[] getPersonalAppsForSuspension(int userId) {
-            return new String[]{};
-        }
 
         public void setSystemCurrentTimeMillis(long value) {
             mCurrentTimeMillis = value;

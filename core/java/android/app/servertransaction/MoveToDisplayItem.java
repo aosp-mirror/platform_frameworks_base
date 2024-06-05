@@ -27,6 +27,7 @@ import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Trace;
+import android.window.ActivityWindowInfo;
 
 import java.util.Objects;
 
@@ -38,71 +39,75 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
 
     private int mTargetDisplayId;
     private Configuration mConfiguration;
+    private ActivityWindowInfo mActivityWindowInfo;
 
     @Override
-    public void preExecute(ClientTransactionHandler client, IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client) {
         CompatibilityInfo.applyOverrideScaleIfNeeded(mConfiguration);
         // Notify the client of an upcoming change in the token configuration. This ensures that
         // batches of config change items only process the newest configuration.
-        client.updatePendingActivityConfiguration(token, mConfiguration);
+        client.updatePendingActivityConfiguration(getActivityToken(), mConfiguration);
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
-            PendingTransactionActions pendingActions) {
+    public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
+            @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityMovedToDisplay");
-        client.handleActivityConfigurationChanged(r, mConfiguration, mTargetDisplayId);
+        client.handleActivityConfigurationChanged(r, mConfiguration, mTargetDisplayId,
+                mActivityWindowInfo);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
-
 
     // ObjectPoolItem implementation
 
     private MoveToDisplayItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static MoveToDisplayItem obtain(int targetDisplayId,
-            @NonNull Configuration configuration) {
-        if (configuration == null) {
-            throw new IllegalArgumentException("Configuration must not be null");
-        }
-
+    @NonNull
+    public static MoveToDisplayItem obtain(@NonNull IBinder activityToken, int targetDisplayId,
+            @NonNull Configuration configuration, @NonNull ActivityWindowInfo activityWindowInfo) {
         MoveToDisplayItem instance = ObjectPool.obtain(MoveToDisplayItem.class);
         if (instance == null) {
             instance = new MoveToDisplayItem();
         }
+        instance.setActivityToken(activityToken);
         instance.mTargetDisplayId = targetDisplayId;
-        instance.mConfiguration = configuration;
+        instance.mConfiguration = new Configuration(configuration);
+        instance.mActivityWindowInfo = new ActivityWindowInfo(activityWindowInfo);
 
         return instance;
     }
 
     @Override
     public void recycle() {
+        super.recycle();
         mTargetDisplayId = 0;
-        mConfiguration = Configuration.EMPTY;
+        mConfiguration = null;
+        mActivityWindowInfo = null;
         ObjectPool.recycle(this);
     }
-
 
     // Parcelable implementation
 
     /** Write to Parcel. */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeInt(mTargetDisplayId);
         dest.writeTypedObject(mConfiguration, flags);
+        dest.writeTypedObject(mActivityWindowInfo, flags);
     }
 
     /** Read from Parcel. */
-    private MoveToDisplayItem(Parcel in) {
+    private MoveToDisplayItem(@NonNull Parcel in) {
+        super(in);
         mTargetDisplayId = in.readInt();
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
+        mActivityWindowInfo = in.readTypedObject(ActivityWindowInfo.CREATOR);
     }
 
-    public static final @NonNull Creator<MoveToDisplayItem> CREATOR =
-            new Creator<MoveToDisplayItem>() {
-        public MoveToDisplayItem createFromParcel(Parcel in) {
+    public static final @NonNull Creator<MoveToDisplayItem> CREATOR = new Creator<>() {
+        public MoveToDisplayItem createFromParcel(@NonNull Parcel in) {
             return new MoveToDisplayItem(in);
         }
 
@@ -116,25 +121,30 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!super.equals(o)) {
             return false;
         }
         final MoveToDisplayItem other = (MoveToDisplayItem) o;
         return mTargetDisplayId == other.mTargetDisplayId
-                && Objects.equals(mConfiguration, other.mConfiguration);
+                && Objects.equals(mConfiguration, other.mConfiguration)
+                && Objects.equals(mActivityWindowInfo, other.mActivityWindowInfo);
     }
 
     @Override
     public int hashCode() {
         int result = 17;
+        result = 31 * result + super.hashCode();
         result = 31 * result + mTargetDisplayId;
         result = 31 * result + mConfiguration.hashCode();
+        result = 31 * result + Objects.hashCode(mActivityWindowInfo);
         return result;
     }
 
     @Override
     public String toString() {
-        return "MoveToDisplayItem{targetDisplayId=" + mTargetDisplayId
-                + ",configuration=" + mConfiguration + "}";
+        return "MoveToDisplayItem{" + super.toString()
+                + ",targetDisplayId=" + mTargetDisplayId
+                + ",configuration=" + mConfiguration
+                + ",activityWindowInfo=" + mActivityWindowInfo + "}";
     }
 }

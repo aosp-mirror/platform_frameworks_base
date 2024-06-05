@@ -15,6 +15,7 @@
  */
 package com.android.server.autofill.ui;
 
+import static android.service.autofill.FillResponse.FLAG_CREDENTIAL_MANAGER_RESPONSE;
 import static com.android.server.autofill.Helper.paramsToString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
@@ -31,6 +32,7 @@ import android.graphics.drawable.Drawable;
 import android.service.autofill.Dataset;
 import android.service.autofill.Dataset.DatasetFieldFilter;
 import android.service.autofill.FillResponse;
+import android.service.autofill.Flags;
 import android.text.TextUtils;
 import android.util.PluralsMessageFormatter;
 import android.util.Slog;
@@ -79,6 +81,7 @@ final class FillUi {
             com.android.internal.R.style.Theme_DeviceDefault_Light_Autofill;
     private static final int THEME_ID_DARK =
             com.android.internal.R.style.Theme_DeviceDefault_Autofill;
+    private static final int AUTOFILL_CREDMAN_MAX_VISIBLE_DATASETS = 5;
 
     private static final TypedValue sTempTypedValue = new TypedValue();
 
@@ -91,6 +94,7 @@ final class FillUi {
         void requestShowFillUi(int width, int height,
                 IAutofillWindowPresenter windowPresenter);
         void requestHideFillUi();
+        void requestHideFillUiWhenDestroyed();
         void startIntentSender(IntentSender intentSender);
         void dispatchUnhandledKey(KeyEvent keyEvent);
         void cancelSession();
@@ -126,6 +130,8 @@ final class FillUi {
 
     private final int mThemeId;
 
+    private int mMaxInputLengthForAutofill;
+
     public static boolean isFullScreen(Context context) {
         if (sFullScreenMode != null) {
             if (sVerbose) Slog.v(TAG, "forcing full-screen mode to " + sFullScreenMode);
@@ -137,7 +143,8 @@ final class FillUi {
     FillUi(@NonNull Context context, @NonNull FillResponse response,
             @NonNull AutofillId focusedViewId, @Nullable String filterText,
             @NonNull OverlayControl overlayControl, @NonNull CharSequence serviceLabel,
-            @NonNull Drawable serviceIcon, boolean nightMode, @NonNull Callback callback) {
+            @NonNull Drawable serviceIcon, boolean nightMode, int maxInputLengthForAutofill,
+            @NonNull Callback callback) {
         if (sVerbose) {
             Slogf.v(TAG, "nightMode: %b displayId: %d", nightMode, context.getDisplayId());
         }
@@ -145,6 +152,7 @@ final class FillUi {
         mCallback = callback;
         mFullScreen = isFullScreen(context);
         mContext = new ContextThemeWrapper(context, mThemeId);
+        mMaxInputLengthForAutofill = maxInputLengthForAutofill;
 
         final LayoutInflater inflater = LayoutInflater.from(mContext);
 
@@ -206,7 +214,11 @@ final class FillUi {
             if (sVerbose) {
                 Slog.v(TAG, "overriding maximum visible datasets to " + mVisibleDatasetsMaxCount);
             }
-        } else {
+        } else if (Flags.autofillCredmanIntegration() && (
+                (response.getFlags() & FLAG_CREDENTIAL_MANAGER_RESPONSE) != 0)) {
+            mVisibleDatasetsMaxCount = AUTOFILL_CREDMAN_MAX_VISIBLE_DATASETS;
+        }
+        else {
             mVisibleDatasetsMaxCount = mContext.getResources()
                     .getInteger(com.android.internal.R.integer.autofill_max_visible_datasets);
         }
@@ -425,10 +437,17 @@ final class FillUi {
             if (mDestroyed) {
                 return;
             }
+            final int size = mFilterText == null ? 0 : mFilterText.length();
             if (count <= 0) {
                 if (sDebug) {
-                    final int size = mFilterText == null ? 0 : mFilterText.length();
                     Slog.d(TAG, "No dataset matches filter with " + size + " chars");
+                }
+                mCallback.requestHideFillUi();
+            } else if (size > mMaxInputLengthForAutofill) {
+                // Do not show suggestion if user entered more than the maximum suggesiton length
+                if (sDebug) {
+                    Slog.d(TAG, "Not showing fill UI because user entered more than "
+                            + mMaxInputLengthForAutofill + " characters");
                 }
                 mCallback.requestHideFillUi();
             } else {
@@ -482,7 +501,7 @@ final class FillUi {
         }
         mCallback.onDestroy();
         if (notifyClient) {
-            mCallback.requestHideFillUi();
+            mCallback.requestHideFillUiWhenDestroyed();
         }
         mDestroyed = true;
     }

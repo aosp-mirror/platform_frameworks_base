@@ -22,14 +22,16 @@ import java.util.HashMap;
  */
 public class KernelWakelockStats extends HashMap<String, KernelWakelockStats.Entry> {
     public static class Entry {
-        public int mCount;
-        public long mTotalTime;
-        public int mVersion;
+        public int count;
+        public long totalTimeUs;
+        public long activeTimeUs;
+        public int version;
 
-        Entry(int count, long totalTime, int version) {
-            mCount = count;
-            mTotalTime = totalTime;
-            mVersion = version;
+        Entry(int count, long totalTimeUs, long activeTimeUs, int version) {
+            this.count = count;
+            this.totalTimeUs = totalTimeUs;
+            this.activeTimeUs = activeTimeUs;
+            this.version = version;
         }
     }
 

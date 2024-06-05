@@ -83,6 +83,8 @@
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"/>
     <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
+    <uses-permission android:name="android.permission.NETWORK_FACTORY" />
+    <uses-permission android:name="android.permission.SATELLITE_COMMUNICATION" />
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
@@ -176,6 +178,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"/>
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.RECORD_SENSITIVE_CONTENT"/>
 
     <!-- Assist -->
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
@@ -236,6 +240,7 @@
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS" />
 
     <!-- role holder APIs -->
     <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
@@ -253,7 +258,13 @@
     <!-- launcher apps -->
     <uses-permission android:name="android.permission.ACCESS_SHORTCUTS" />
 
+    <!-- Permission to start Launcher's widget picker activity. -->
+    <uses-permission android:name="android.permission.START_WIDGET_PICKER_ACTIVITY" />
+
     <uses-permission android:name="android.permission.MODIFY_THEME_OVERLAY" />
+
+    <!-- Activity Manager -->
+    <uses-permission android:name="android.permission.SET_THEME_OVERLAY_CONTROLLER_READY" />
 
     <!-- accessibility -->
     <uses-permission android:name="android.permission.MODIFY_ACCESSIBILITY_DATA" />
@@ -262,6 +273,12 @@
 
     <!-- to control accessibility volume -->
     <uses-permission android:name="android.permission.CHANGE_ACCESSIBILITY_VOLUME" />
+
+    <!-- to change spatial audio -->
+    <uses-permission android:name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS" />
+
+    <!-- to adjust volume in volume panel -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <!-- to access ResolverRankerServices -->
     <uses-permission android:name="android.permission.BIND_RESOLVER_RANKER_SERVICE" />
@@ -348,6 +365,14 @@
 
     <uses-permission android:name="android.permission.MONITOR_KEYBOARD_BACKLIGHT" />
 
+    <uses-permission android:name="android.permission.MONITOR_STICKY_MODIFIER_STATE" />
+
+    <!-- To follow the grammatical gender preference -->
+    <uses-permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER" />
+
+    <!-- Listen to (dis-)connection of external displays and enable / disable them. -->
+    <uses-permission android:name="android.permission.MANAGE_DISPLAYS" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
@@ -369,7 +394,7 @@
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true"
         tools:replace="android:appComponentFactory"
-        android:appComponentFactory=".SystemUIAppComponentFactory">
+        android:appComponentFactory=".PhoneSystemUIAppComponentFactory">
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
              Setting the theme on the application does not affect views inflated by services.
              The application theme is set again from onCreate to take effect for those views. -->
@@ -415,7 +440,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".screenshot.LongScreenshotActivity"
+        <activity android:name=".screenshot.scroll.LongScreenshotActivity"
                   android:theme="@style/LongScreenshotActivity"
                   android:process=":screenshot"
                   android:exported="false"
@@ -451,14 +476,19 @@
             android:noHistory="true" />
 
         <service android:name=".screenshot.appclips.AppClipsScreenshotHelperService"
-            android:permission="com.android.systemui.permission.SELF"
-            android:exported="false" />
+            android:exported="false"
+            android:singleUser="true"
+            android:permission="com.android.systemui.permission.SELF" />
 
         <service android:name=".screenshot.appclips.AppClipsService"
-            android:permission="android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE"
-            android:exported="true" />
+            android:exported="true"
+            android:singleUser="true"
+            android:permission="android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE" />
 
         <service android:name=".screenrecord.RecordingService"
+                 android:foregroundServiceType="systemExempted"/>
+
+        <service android:name=".recordissue.IssueRecordingService"
                  android:foregroundServiceType="systemExempted"/>
 
         <receiver android:name=".SysuiRestartReceiver"
@@ -505,24 +535,6 @@
             </intent-filter>
         </activity-alias>
 
-        <activity
-            android:name="com.android.wm.shell.legacysplitscreen.ForcedResizableInfoActivity"
-            android:theme="@style/ForcedResizableTheme"
-            android:excludeFromRecents="true"
-            android:stateNotNeeded="true"
-            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
-            android:exported="false">
-        </activity>
-
-        <!-- Springboard for launching the share and edit activity. This needs to be in the main
-             system ui process since we need to notify the status bar to dismiss the keyguard -->
-        <receiver android:name=".screenshot.ActionProxyReceiver"
-            android:exported="false" />
-
-        <!-- Callback for deleting screenshot notification -->
-        <receiver android:name=".screenshot.DeleteScreenshotReceiver"
-            android:exported="false" />
-
         <!-- Callback for invoking a smart action from the screenshot notification. -->
         <receiver android:name=".screenshot.SmartActionsReceiver"
                   android:exported="false"/>
@@ -546,26 +558,6 @@
         </activity>
 
         <!-- started from UsbDeviceSettingsManager -->
-        <activity android:name=".usb.tv.TvUsbConfirmActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:permission="android.permission.MANAGE_USB"
-                  android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:excludeFromRecents="true">
-        </activity>
-
-        <!-- started from UsbDeviceSettingsManager -->
-        <activity android:name=".usb.tv.TvUsbPermissionActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:permission="android.permission.MANAGE_USB"
-                  android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:excludeFromRecents="true">
-        </activity>
-
-        <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbResolverActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_USB"
@@ -574,46 +566,15 @@
             android:excludeFromRecents="true">
         </activity>
 
-        <!-- started from HdmiCecLocalDevicePlayback -->
-        <activity android:name=".hdmi.HdmiCecSetMenuLanguageActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:permission="android.permission.CHANGE_CONFIGURATION"
-                  android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:excludeFromRecents="true">
-        </activity>
-
         <!-- started from SensoryPrivacyService -->
         <activity android:name=".sensorprivacy.SensorUseStartedActivity"
                   android:exported="true"
                   android:launchMode="singleTop"
                   android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
-                  android:theme="@style/Theme.SystemUI.Dialog.Alert"
+                  android:theme="@style/Theme.SystemUI.Dialog.Alert.SensorPrivacy"
                   android:finishOnCloseSystemDialogs="true"
                   android:showForAllUsers="true">
         </activity>
-
-        <!-- started from SensoryPrivacyService -->
-        <activity android:name=".sensorprivacy.television.TvUnblockSensorActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
-                  android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:showForAllUsers="true">
-        </activity>
-
-        <!-- started from SensoryPrivacyService -->
-        <activity android:name=".sensorprivacy.television.TvSensorPrivacyChangedActivity"
-            android:exported="true"
-            android:launchMode="singleTop"
-            android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
-            android:theme="@style/BottomSheet"
-            android:finishOnCloseSystemDialogs="true"
-            android:showForAllUsers="true">
-        </activity>
-
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbAccessoryUriActivity"
@@ -679,7 +640,7 @@
 
         <!-- started from MediaProjectionManager -->
         <activity
-            android:name=".media.MediaProjectionPermissionActivity"
+            android:name=".mediaprojection.permission.MediaProjectionPermissionActivity"
             android:exported="true"
             android:theme="@style/Theme.SystemUI.MediaProjectionAlertDialog"
             android:finishOnCloseSystemDialogs="true"
@@ -688,7 +649,7 @@
             android:visibleToInstantApps="true"/>
 
         <activity
-            android:name=".media.MediaProjectionAppSelectorActivity"
+            android:name=".mediaprojection.appselector.MediaProjectionAppSelectorActivity"
             android:theme="@style/Theme.SystemUI.MediaProjectionAppSelector"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
@@ -699,14 +660,6 @@
             android:visibleToInstantApps="true"
             android:exported="false"
             android:permission="android.permission.MANAGE_MEDIA_PROJECTION"/>
-
-        <!-- started from TvNotificationPanel -->
-        <activity
-            android:name=".statusbar.tv.notifications.TvNotificationPanelActivity"
-            android:excludeFromRecents="true"
-            android:launchMode="singleTask"
-            android:noHistory="true"
-            android:theme="@style/TvSidePanelTheme" />
 
         <!-- started from SliceProvider -->
         <activity android:name=".SlicePermissionActivity"
@@ -814,7 +767,8 @@
         <service
             android:name=".dreams.DreamOverlayService"
             android:enabled="false"
-            android:exported="true" />
+            android:exported="true"
+            android:singleUser="true" />
 
         <activity android:name=".keyguard.WorkLockActivity"
                   android:label="@string/accessibility_desc_work_lock"
@@ -861,27 +815,13 @@
         <activity
             android:name=".settings.brightness.BrightnessDialog"
             android:label="@string/quick_settings_brightness_dialog_title"
-            android:theme="@style/Theme.SystemUI.QuickSettings.BrightnessDialog"
+            android:theme="@style/BrightnessDialog"
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleInstance"
             android:excludeFromRecents="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.android.intent.action.SHOW_BRIGHTNESS_DIALOG" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".contrast.ContrastDialogActivity"
-            android:label="@string/quick_settings_contrast_label"
-            android:theme="@style/Theme.SystemUI.ContrastDialog"
-            android:finishOnCloseSystemDialogs="true"
-            android:launchMode="singleInstance"
-            android:excludeFromRecents="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.android.intent.action.SHOW_CONTRAST_DIALOG" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -992,6 +932,11 @@
 
         <service android:name=".notetask.NoteTaskControllerUpdateService" />
 
+        <service android:name=".notetask.NoteTaskBubblesController$NoteTaskBubblesService"
+            android:exported="false"
+            android:singleUser="true"
+            android:permission="com.android.systemui.permission.SELF" />
+
         <activity
             android:name=".notetask.shortcut.LaunchNoteTaskActivity"
             android:exported="true"
@@ -1004,20 +949,10 @@
             </intent-filter>
         </activity>
 
-        <!-- LaunchNoteTaskManagedProfileProxyActivity MUST NOT be exported because it allows caller
-             to specify an Android user when launching the default notes app. -->
-        <activity
-            android:name=".notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity"
-            android:exported="false"
-            android:enabled="true"
-            android:excludeFromRecents="true"
-            android:theme="@android:style/Theme.NoDisplay" />
-
         <activity
             android:name=".notetask.LaunchNotesRoleSettingsTrampolineActivity"
             android:exported="true"
             android:excludeFromRecents="true"
-            android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay" >
             <intent-filter>
                 <action android:name="com.android.systemui.action.MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE" />
@@ -1037,6 +972,14 @@
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
             android:excludeFromRecents="true"
             android:visibleToInstantApps="true"/>
+
+        <activity android:name="com.android.systemui.communal.widgets.EditWidgetsActivity"
+            android:theme="@style/Theme.EditWidgetsActivity"
+            android:excludeFromRecents="true"
+            android:autoRemoveFromRecents="true"
+            android:launchMode="singleTop"
+            android:exported="false">
+        </activity>
 
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
@@ -1069,17 +1012,9 @@
                   android:exported="true">
         </provider>
 
-        <!-- Provides list and realistic previews of clock faces for the picker app. -->
-        <provider
-            android:name="com.android.keyguard.clock.ClockOptionsProvider"
-            android:authorities="com.android.keyguard.clock"
-            android:enabled="false"
-            android:exported="false"
-            android:grantUriPermissions="true">
-        </provider>
-
         <receiver
             android:name=".statusbar.KeyboardShortcutsReceiver"
+            android:visibleToInstantApps="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.android.intent.action.DISMISS_KEYBOARD_SHORTCUTS" />
@@ -1091,6 +1026,7 @@
                   android:exported="true">
             <intent-filter android:priority="1">
                 <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG" />
+                <action android:name="com.android.systemui.action.LAUNCH_SYSTEM_MEDIA_OUTPUT_DIALOG" />
                 <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG" />
                 <action android:name="com.android.systemui.action.DISMISS_MEDIA_OUTPUT_DIALOG" />
             </intent-filter>
@@ -1102,6 +1038,13 @@
                 <action android:name="android.settings.panel.action.VOLUME" />
                 <action android:name="com.android.systemui.action.LAUNCH_VOLUME_PANEL_DIALOG" />
                 <action android:name="com.android.systemui.action.DISMISS_VOLUME_PANEL_DIALOG" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".accessibility.hearingaid.HearingDevicesDialogReceiver"
+            android:exported="false">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.systemui.action.LAUNCH_HEARING_DEVICES_DIALOG" />
             </intent-filter>
         </receiver>
 
@@ -1128,5 +1071,35 @@
             <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer"
                 tools:node="remove" />
         </provider>
+
+        <!-- Allow SystemUI to listen for the capabilities defined in the linked xml -->
+        <property android:name="android.net.PROPERTY_SELF_CERTIFIED_CAPABILITIES"
+                  android:value="@xml/self_certified_network_capabilities_both" />
+
+
+        <service
+            android:name="com.android.systemui.dreams.homecontrols.HomeControlsDreamService"
+            android:exported="false"
+            android:enabled="false"
+            android:label="@string/home_controls_dream_label"
+            android:description="@string/home_controls_dream_description"
+            android:permission="android.permission.BIND_DREAM_SERVICE"
+            android:icon="@drawable/controls_icon"
+            >
+
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.dream"
+                android:resource="@xml/home_controls_dream_metadata" />
+        </service>
+
+        <activity android:name="com.android.systemui.keyboard.shortcut.ui.view.ShortcutHelperActivity"
+            android:exported="false"
+            android:theme="@style/ShortcutHelperTheme"
+            android:excludeFromRecents="true"
+            android:finishOnCloseSystemDialogs="true" />
     </application>
 </manifest>

@@ -25,9 +25,6 @@
 #include <sys/cdefs.h>
 #include <vulkan/vulkan.h>
 
-#undef LOG_TAG
-#define LOG_TAG "AndroidGraphicsJNI"
-
 extern int register_android_graphics_Bitmap(JNIEnv*);
 extern int register_android_graphics_BitmapFactory(JNIEnv*);
 extern int register_android_graphics_BitmapRegionDecoder(JNIEnv*);
@@ -52,6 +49,7 @@ namespace android {
 extern int register_android_graphics_Canvas(JNIEnv* env);
 extern int register_android_graphics_CanvasProperty(JNIEnv* env);
 extern int register_android_graphics_ColorFilter(JNIEnv* env);
+extern int register_android_graphics_Color(JNIEnv* env);
 extern int register_android_graphics_ColorSpace(JNIEnv* env);
 extern int register_android_graphics_DrawFilter(JNIEnv* env);
 extern int register_android_graphics_FontFamily(JNIEnv* env);
@@ -73,7 +71,6 @@ extern int register_android_graphics_fonts_Font(JNIEnv* env);
 extern int register_android_graphics_fonts_FontFamily(JNIEnv* env);
 extern int register_android_graphics_pdf_PdfDocument(JNIEnv* env);
 extern int register_android_graphics_pdf_PdfEditor(JNIEnv* env);
-extern int register_android_graphics_pdf_PdfRenderer(JNIEnv* env);
 extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
 extern int register_android_graphics_text_LineBreaker(JNIEnv *env);
 extern int register_android_graphics_text_TextShaper(JNIEnv *env);
@@ -102,6 +99,7 @@ extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
 
     static const RegJNIRec gRegJNI[] = {
             REG_JNI(register_android_graphics_Canvas),
+            REG_JNI(register_android_graphics_Color),
             // This needs to be before register_android_graphics_Graphics, or the latter
             // will not be able to find the jmethodID for ColorSpace.get().
             REG_JNI(register_android_graphics_ColorSpace),
@@ -145,7 +143,6 @@ extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
             REG_JNI(register_android_graphics_fonts_FontFamily),
             REG_JNI(register_android_graphics_pdf_PdfDocument),
             REG_JNI(register_android_graphics_pdf_PdfEditor),
-            REG_JNI(register_android_graphics_pdf_PdfRenderer),
             REG_JNI(register_android_graphics_text_MeasuredText),
             REG_JNI(register_android_graphics_text_LineBreaker),
             REG_JNI(register_android_graphics_text_TextShaper),

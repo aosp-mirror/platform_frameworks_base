@@ -19,12 +19,13 @@ package com.android.systemui.media.controls.util
 import android.app.StatusBarManager
 import android.os.UserHandle
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import javax.inject.Inject
 
 @SysUISingleton
-class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
+class MediaFlags @Inject constructor(private val featureFlags: FeatureFlagsClassic) {
     /**
      * Check whether media control actions should be based on PlaybackState instead of notification
      */
@@ -34,27 +35,11 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
         return enabled || featureFlags.isEnabled(Flags.MEDIA_SESSION_ACTIONS)
     }
 
-    /** Check whether we support displaying information about mute await connections. */
-    fun areMuteAwaitConnectionsEnabled() = featureFlags.isEnabled(Flags.MEDIA_MUTE_AWAIT)
-
-    /**
-     * Check whether we enable support for nearby media devices. See
-     * [android.app.StatusBarManager.registerNearbyMediaDevicesProvider] for more information.
-     */
-    fun areNearbyMediaDevicesEnabled() = featureFlags.isEnabled(Flags.MEDIA_NEARBY_DEVICES)
-
-    /** Check whether we show explicit indicator on UMO */
-    fun isExplicitIndicatorEnabled() = featureFlags.isEnabled(Flags.MEDIA_EXPLICIT_INDICATOR)
-
     /**
      * If true, keep active media controls for the lifetime of the MediaSession, regardless of
      * whether the underlying notification was dismissed
      */
     fun isRetainingPlayersEnabled() = featureFlags.isEnabled(Flags.MEDIA_RETAIN_SESSIONS)
-
-    /** Check whether we show the updated recommendation card. */
-    fun isRecommendationCardUpdateEnabled() =
-        featureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)
 
     /** Check whether to get progress information for resume players */
     fun isResumeProgressEnabled() = featureFlags.isEnabled(Flags.MEDIA_RESUME_PROGRESS)
@@ -64,4 +49,7 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
 
     /** Check whether we allow remote media to generate resume controls */
     fun isRemoteResumeAllowed() = featureFlags.isEnabled(Flags.MEDIA_REMOTE_RESUME)
+
+    /** Check whether to use scene framework */
+    fun isSceneContainerEnabled() = SceneContainerFlag.isEnabled
 }

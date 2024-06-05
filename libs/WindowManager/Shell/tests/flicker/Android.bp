@@ -23,14 +23,36 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-android_test {
-    name: "WMShellFlickerTests",
+filegroup {
+    name: "WMShellFlickerTestsUtils-src",
+    srcs: ["src/com/android/wm/shell/flicker/utils/*.kt"],
+}
+
+java_library {
+    name: "wm-shell-flicker-utils",
+    platform_apis: true,
+    optimize: {
+        enabled: false,
+    },
     srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
+        ":WMShellFlickerTestsUtils-src",
     ],
-    manifest: "AndroidManifest.xml",
-    test_config: "AndroidTest.xml",
+    static_libs: [
+        "androidx.test.ext.junit",
+        "flickertestapplib",
+        "flickerlib",
+        "flickerlib-helpers",
+        "platform-test-annotations",
+        "wm-flicker-common-app-helpers",
+        "wm-flicker-common-assertions",
+        "launcher-helper-lib",
+        "launcher-aosp-tapl",
+        "com_android_wm_shell_flags_lib",
+    ],
+}
+
+java_defaults {
+    name: "WMShellFlickerTestsDefault",
     platform_apis: true,
     certificate: "platform",
     optimize: {
@@ -39,17 +61,25 @@ android_test {
     test_suites: ["device-tests"],
     libs: ["android.test.runner"],
     static_libs: [
+        "wm-shell-flicker-utils",
         "androidx.test.ext.junit",
+        "flickertestapplib",
         "flickerlib",
-        "flickerlib-apphelpers",
         "flickerlib-helpers",
-        "truth-prebuilt",
-        "app-helpers-core",
+        "flickerlib-trace_processor_shell",
+        "platform-test-annotations",
+        "wm-flicker-common-app-helpers",
+        "wm-flicker-common-assertions",
         "launcher-helper-lib",
         "launcher-aosp-tapl",
-        "wm-flicker-common-assertions",
-        "wm-flicker-common-app-helpers",
-        "platform-test-annotations",
-        "flickertestapplib",
     ],
+    data: [
+        ":FlickerTestApp",
+    ],
+}
+
+java_library {
+    name: "WMShellFlickerTestsBase",
+    defaults: ["WMShellFlickerTestsDefault"],
+    srcs: ["src/com/android/wm/shell/flicker/*.kt"],
 }

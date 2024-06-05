@@ -32,10 +32,14 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.util.Log;
 
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.util.FrameworkStatsLog;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -492,6 +496,9 @@ interface NotificationRecordLogger {
         final boolean is_foreground_service;
         final long timeout_millis;
         final boolean is_non_dismissible;
+        final int fsi_state;
+        final boolean is_locked;
+        final int age_in_minutes;
         @DurationMillisLong long post_duration_millis; // Not final; calculated at the end.
 
         NotificationReported(NotificationRecordPair p,
@@ -522,6 +529,20 @@ interface NotificationRecordLogger {
             this.is_foreground_service = NotificationRecordLogger.isForegroundService(p.r);
             this.timeout_millis = p.r.getSbn().getNotification().getTimeoutAfter();
             this.is_non_dismissible = NotificationRecordLogger.isNonDismissible(p.r);
+
+            final boolean hasFullScreenIntent =
+                    p.r.getSbn().getNotification().fullScreenIntent != null;
+
+            final boolean hasFsiRequestedButDeniedFlag =  (p.r.getSbn().getNotification().flags
+                    & Notification.FLAG_FSI_REQUESTED_BUT_DENIED) != 0;
+
+            this.fsi_state = NotificationRecordLogger.getFsiState(
+                    hasFullScreenIntent, hasFsiRequestedButDeniedFlag, eventType);
+
+            this.is_locked = p.r.isLocked();
+
+            this.age_in_minutes = NotificationRecordLogger.getAgeInMinutes(
+                    p.r.getSbn().getPostTime(), p.r.getSbn().getNotification().getWhen());
         }
     }
 
@@ -550,7 +571,6 @@ interface NotificationRecordLogger {
     }
 
     /**
-     * @param r NotificationRecord
      * @return Whether the notification is a non-dismissible notification.
      */
     static boolean isNonDismissible(@NonNull NotificationRecord r) {
@@ -558,5 +578,35 @@ interface NotificationRecordLogger {
             return false;
         }
         return (r.getNotification().flags & Notification.FLAG_NO_DISMISS) != 0;
+    }
+
+    /**
+     * @return FrameworkStatsLog enum of the state of the full screen intent posted with this
+     * notification.
+     */
+    static int getFsiState(boolean hasFullScreenIntent,
+                           boolean hasFsiRequestedButDeniedFlag,
+                           NotificationReportedEvent eventType) {
+        if (eventType == NotificationReportedEvent.NOTIFICATION_UPDATED) {
+            // Zeroes in protos take zero bandwidth, but non-zero numbers take bandwidth,
+            // so we should log 0 when possible.
+            return 0;
+        }
+        if (hasFullScreenIntent) {
+            return FrameworkStatsLog.NOTIFICATION_REPORTED__FSI_STATE__FSI_ALLOWED;
+        }
+        if (hasFsiRequestedButDeniedFlag) {
+            return FrameworkStatsLog.NOTIFICATION_REPORTED__FSI_STATE__FSI_DENIED;
+        }
+        return FrameworkStatsLog.NOTIFICATION_REPORTED__FSI_STATE__NO_FSI;
+    }
+
+    /**
+     * @param postTimeMs time (in {@link System#currentTimeMillis} time) the notification was posted
+     * @param whenMs A timestamp related to this notification, in milliseconds since the epoch.
+     * @return difference in duration as an integer in minutes
+     */
+    static int getAgeInMinutes(long postTimeMs, long whenMs) {
+        return (int) Duration.ofMillis(postTimeMs - whenMs).toMinutes();
     }
 }

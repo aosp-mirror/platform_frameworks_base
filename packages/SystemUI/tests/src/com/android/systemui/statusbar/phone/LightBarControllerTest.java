@@ -22,34 +22,40 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 
 import static junit.framework.Assert.assertTrue;
 
-import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.annotation.ColorInt;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.view.AppearanceRegion;
+import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.FakeDisplayTracker;
+import com.android.systemui.statusbar.data.model.StatusBarAppearance;
+import com.android.systemui.statusbar.data.model.StatusBarMode;
+import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.util.kotlin.JavaAdapter;
+
+import kotlinx.coroutines.test.TestScope;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,28 +63,29 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class LightBarControllerTest extends SysuiTestCase {
 
     private static final GradientColors COLORS_LIGHT = makeColors(Color.WHITE);
     private static final GradientColors COLORS_DARK = makeColors(Color.BLACK);
-    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
+    private static final BoundsPair STATUS_BAR_BOUNDS = new BoundsPair(
+            /* start= */ new Rect(0, 0, 10, 10),
+            /* end= */ new Rect(0, 0, 20, 20));
     private LightBarTransitionsController mLightBarTransitionsController;
     private LightBarTransitionsController mNavBarController;
     private SysuiDarkIconDispatcher mStatusBarIconController;
     private LightBarController mLightBarController;
-
-    /** Allow testing with NEW_LIGHT_BAR_LOGIC flag in different states */
-    protected boolean testNewLightBarLogic() {
-        return false;
-    }
+    private final TestScope mTestScope = TestScopeProvider.getTestScope();
+    private final FakeStatusBarModeRepository mStatusBarModeRepository =
+            new FakeStatusBarModeRepository();
 
     @Before
     public void setup() {
-        mFeatureFlags.set(Flags.NEW_LIGHT_BAR_LOGIC, testNewLightBarLogic());
         mStatusBarIconController = mock(SysuiDarkIconDispatcher.class);
         mNavBarController = mock(LightBarTransitionsController.class);
         when(mNavBarController.supportsIconTintForNavMode(anyInt())).thenReturn(true);
@@ -87,12 +94,14 @@ public class LightBarControllerTest extends SysuiTestCase {
                 mLightBarTransitionsController);
         mLightBarController = new LightBarController(
                 mContext,
+                new JavaAdapter(mTestScope),
                 mStatusBarIconController,
                 mock(BatteryController.class),
                 mock(NavigationModeController.class),
-                mFeatureFlags,
+                mStatusBarModeRepository,
                 mock(DumpManager.class),
                 new FakeDisplayTracker(mContext));
+        mLightBarController.start();
     }
 
     private static GradientColors makeColors(@ColorInt int bgColor) {
@@ -107,13 +116,19 @@ public class LightBarControllerTest extends SysuiTestCase {
     public void testOnStatusBarAppearanceChanged_multipleStacks_allStacksLight() {
         final Rect firstBounds = new Rect(0, 0, 1, 1);
         final Rect secondBounds = new Rect(1, 0, 2, 1);
-        final AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{
+        final List<AppearanceRegion> appearanceRegions = Arrays.asList(
                 new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, firstBounds),
                 new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, secondBounds)
-        };
-        mLightBarController.onStatusBarAppearanceChanged(
-                appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
-                false /* navbarColorManagedByIme */);
+        );
+
+        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+                new StatusBarAppearance(
+                        StatusBarMode.TRANSPARENT,
+                        STATUS_BAR_BOUNDS,
+                        appearanceRegions,
+                        /* navbarColorManagedByIme= */ false));
+        mTestScope.getTestScheduler().advanceUntilIdle();
+
         verify(mStatusBarIconController).setIconsDarkArea(eq(null));
         verify(mLightBarTransitionsController).setIconsDark(eq(true), anyBoolean());
     }
@@ -122,13 +137,19 @@ public class LightBarControllerTest extends SysuiTestCase {
     public void testOnStatusBarAppearanceChanged_multipleStacks_oneStackLightOneStackDark() {
         final Rect firstBounds = new Rect(0, 0, 1, 1);
         final Rect secondBounds = new Rect(1, 0, 2, 1);
-        final AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{
+        final List<AppearanceRegion> appearanceRegions = Arrays.asList(
                 new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, firstBounds),
                 new AppearanceRegion(0 /* appearance */, secondBounds)
-        };
-        mLightBarController.onStatusBarAppearanceChanged(
-                appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
-                false /* navbarColorManagedByIme */);
+        );
+
+        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+                new StatusBarAppearance(
+                        StatusBarMode.TRANSPARENT,
+                        STATUS_BAR_BOUNDS,
+                        appearanceRegions,
+                        /* navbarColorManagedByIme= */ false));
+        mTestScope.getTestScheduler().advanceUntilIdle();
+
         ArgumentCaptor<ArrayList<Rect>> captor = ArgumentCaptor.forClass(ArrayList.class);
         verify(mStatusBarIconController).setIconsDarkArea(captor.capture());
         assertTrue(captor.getValue().contains(firstBounds));
@@ -139,13 +160,19 @@ public class LightBarControllerTest extends SysuiTestCase {
     public void testOnStatusBarAppearanceChanged_multipleStacks_oneStackDarkOneStackLight() {
         final Rect firstBounds = new Rect(0, 0, 1, 1);
         final Rect secondBounds = new Rect(1, 0, 2, 1);
-        final AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{
+        final List<AppearanceRegion> appearanceRegions = Arrays.asList(
                 new AppearanceRegion(0 /* appearance */, firstBounds),
                 new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, secondBounds)
-        };
-        mLightBarController.onStatusBarAppearanceChanged(
-                appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
-                false /* navbarColorManagedByIme */);
+        );
+
+        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+                new StatusBarAppearance(
+                        StatusBarMode.TRANSPARENT,
+                        STATUS_BAR_BOUNDS,
+                        appearanceRegions,
+                        /* navbarColorManagedByIme= */ false));
+        mTestScope.getTestScheduler().advanceUntilIdle();
+
         ArgumentCaptor<ArrayList<Rect>> captor = ArgumentCaptor.forClass(ArrayList.class);
         verify(mStatusBarIconController).setIconsDarkArea(captor.capture());
         assertTrue(captor.getValue().contains(secondBounds));
@@ -157,14 +184,20 @@ public class LightBarControllerTest extends SysuiTestCase {
         final Rect firstBounds = new Rect(0, 0, 1, 1);
         final Rect secondBounds = new Rect(1, 0, 2, 1);
         final Rect thirdBounds = new Rect(2, 0, 3, 1);
-        final AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{
+        final List<AppearanceRegion> appearanceRegions = Arrays.asList(
                 new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, firstBounds),
                 new AppearanceRegion(0 /* appearance */, secondBounds),
                 new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, thirdBounds)
-        };
-        mLightBarController.onStatusBarAppearanceChanged(
-                appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
-                false /* navbarColorManagedByIme */);
+        );
+
+        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+                new StatusBarAppearance(
+                        StatusBarMode.TRANSPARENT,
+                        STATUS_BAR_BOUNDS,
+                        appearanceRegions,
+                        /* navbarColorManagedByIme= */ false));
+        mTestScope.getTestScheduler().advanceUntilIdle();
+
         ArgumentCaptor<ArrayList<Rect>> captor = ArgumentCaptor.forClass(ArrayList.class);
         verify(mStatusBarIconController).setIconsDarkArea(captor.capture());
         assertTrue(captor.getValue().contains(firstBounds));
@@ -176,43 +209,122 @@ public class LightBarControllerTest extends SysuiTestCase {
     public void testOnStatusBarAppearanceChanged_multipleStacks_allStacksDark() {
         final Rect firstBounds = new Rect(0, 0, 1, 1);
         final Rect secondBounds = new Rect(1, 0, 2, 1);
-        final AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{
+        final List<AppearanceRegion> appearanceRegions = Arrays.asList(
                 new AppearanceRegion(0 /* appearance */, firstBounds),
                 new AppearanceRegion(0 /* appearance */, secondBounds)
-        };
-        mLightBarController.onStatusBarAppearanceChanged(
-                appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
-                false /* navbarColorManagedByIme */);
+        );
+
+        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+                new StatusBarAppearance(
+                        StatusBarMode.TRANSPARENT,
+                        STATUS_BAR_BOUNDS,
+                        appearanceRegions,
+                        /* navbarColorManagedByIme= */ false));
+        mTestScope.getTestScheduler().advanceUntilIdle();
+
         verify(mLightBarTransitionsController).setIconsDark(eq(false), anyBoolean());
     }
 
     @Test
     public void testOnStatusBarAppearanceChanged_singleStack_light() {
-        final AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{
+        final List<AppearanceRegion> appearanceRegions = List.of(
                 new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, new Rect(0, 0, 1, 1))
-        };
-        mLightBarController.onStatusBarAppearanceChanged(
-                appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
-                false /* navbarColorManagedByIme */);
+        );
+
+        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+                new StatusBarAppearance(
+                        StatusBarMode.TRANSPARENT,
+                        STATUS_BAR_BOUNDS,
+                        appearanceRegions,
+                        /* navbarColorManagedByIme= */ false));
+        mTestScope.getTestScheduler().advanceUntilIdle();
+
         verify(mStatusBarIconController).setIconsDarkArea(eq(null));
         verify(mLightBarTransitionsController).setIconsDark(eq(true), anyBoolean());
     }
 
     @Test
     public void testOnStatusBarAppearanceChanged_singleStack_dark() {
-        final AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{
+        final List<AppearanceRegion> appearanceRegions = List.of(
                 new AppearanceRegion(0, new Rect(0, 0, 1, 1))
-        };
-        mLightBarController.onStatusBarAppearanceChanged(
-                appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
-                false /* navbarColorManagedByIme */);
+        );
+
+        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+                new StatusBarAppearance(
+                        StatusBarMode.TRANSPARENT,
+                        STATUS_BAR_BOUNDS,
+                        appearanceRegions,
+                        /* navbarColorManagedByIme= */ false));
+        mTestScope.getTestScheduler().advanceUntilIdle();
+
         verify(mLightBarTransitionsController).setIconsDark(eq(false), anyBoolean());
     }
 
     @Test
-    public void validateNavBarChangesUpdateIcons() {
-        assumeTrue(testNewLightBarLogic());  // Only run in the new suite
+    public void testOnStatusBarAppearanceChanged_statusBarModeChanged_statusRedrawn() {
+        final List<AppearanceRegion> appearanceRegions = List.of(
+                new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, new Rect(0, 0, 1, 1))
+        );
 
+        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+                new StatusBarAppearance(
+                        StatusBarMode.TRANSPARENT,
+                        STATUS_BAR_BOUNDS,
+                        appearanceRegions,
+                        /* navbarColorManagedByIme= */ false));
+        mTestScope.getTestScheduler().advanceUntilIdle();
+        reset(mStatusBarIconController);
+
+        // WHEN the same appearance regions but different status bar mode is sent
+        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+                new StatusBarAppearance(
+                        StatusBarMode.LIGHTS_OUT_TRANSPARENT,
+                        STATUS_BAR_BOUNDS,
+                        appearanceRegions,
+                        /* navbarColorManagedByIme= */ false));
+        mTestScope.getTestScheduler().advanceUntilIdle();
+
+        // THEN the StatusBarIconController gets a redraw request
+        verify(mStatusBarIconController).setIconsDarkArea(any());
+    }
+
+    /** Regression test for b/301605450. */
+    @Test
+    public void testOnStatusBarAppearanceChanged_statusBarBoundsChanged_statusRedrawn() {
+        final List<AppearanceRegion> appearanceRegions = List.of(
+                new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, new Rect(0, 0, 1, 1))
+        );
+        BoundsPair startingBounds = new BoundsPair(
+                /* start= */ new Rect(0, 0, 10, 10),
+                /* end= */ new Rect(0, 0, 20, 20));
+
+        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+                new StatusBarAppearance(
+                        StatusBarMode.TRANSPARENT,
+                        startingBounds,
+                        appearanceRegions,
+                        /* navbarColorManagedByIme= */ false));
+        mTestScope.getTestScheduler().advanceUntilIdle();
+        reset(mStatusBarIconController);
+
+        // WHEN the same appearance regions but different status bar bounds are sent
+        BoundsPair newBounds = new BoundsPair(
+                /* start= */ new Rect(0, 0, 30, 30),
+                /* end= */ new Rect(0, 0, 40, 40));
+        mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance().setValue(
+                new StatusBarAppearance(
+                        StatusBarMode.TRANSPARENT,
+                        newBounds,
+                        appearanceRegions,
+                        /* navbarColorManagedByIme= */ false));
+        mTestScope.getTestScheduler().advanceUntilIdle();
+
+        // THEN the StatusBarIconController gets a redraw request
+        verify(mStatusBarIconController).setIconsDarkArea(any());
+    }
+
+    @Test
+    public void validateNavBarChangesUpdateIcons() {
         // On the launcher in dark mode buttons are light
         mLightBarController.setScrimState(ScrimState.UNLOCKED, 0f, COLORS_DARK);
         mLightBarController.onNavigationBarAppearanceChanged(
@@ -251,8 +363,6 @@ public class LightBarControllerTest extends SysuiTestCase {
 
     @Test
     public void navBarHasDarkIconsInLockedShade_lightMode() {
-        assumeTrue(testNewLightBarLogic());  // Only run in the new suite
-
         // On the locked shade QS in light mode buttons are light
         mLightBarController.setScrimState(ScrimState.SHADE_LOCKED, 1f, COLORS_LIGHT);
         mLightBarController.onNavigationBarAppearanceChanged(
@@ -287,8 +397,6 @@ public class LightBarControllerTest extends SysuiTestCase {
 
     @Test
     public void navBarHasLightIconsInLockedShade_darkMode() {
-        assumeTrue(testNewLightBarLogic());  // Only run in the new suite
-
         // On the locked shade QS in light mode buttons are light
         mLightBarController.setScrimState(ScrimState.SHADE_LOCKED, 1f, COLORS_DARK);
         mLightBarController.onNavigationBarAppearanceChanged(

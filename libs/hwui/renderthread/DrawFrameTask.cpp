@@ -104,7 +104,7 @@ void DrawFrameTask::run() {
         info.forceDrawFrame = mForceDrawFrame;
         mForceDrawFrame = false;
         canUnblockUiThread = syncFrameState(info);
-        canDrawThisFrame = info.out.canDrawThisFrame;
+        canDrawThisFrame = !info.out.skippedFrameReason.has_value();
         solelyTextureViewUpdates = info.out.solelyTextureViewUpdates;
 
         if (mFrameCommitCallback) {
@@ -140,12 +140,14 @@ void DrawFrameTask::run() {
     if (CC_LIKELY(canDrawThisFrame)) {
         context->draw(solelyTextureViewUpdates);
     } else {
+#ifdef __ANDROID__
         // Do a flush in case syncFrameState performed any texture uploads. Since we skipped
         // the draw() call, those uploads (or deletes) will end up sitting in the queue.
         // Do them now
         if (GrDirectContext* grContext = mRenderThread->getGrContext()) {
             grContext->flushAndSubmit();
         }
+#endif
         // wait on fences so tasks don't overlap next frame
         context->waitOnFences();
     }
@@ -176,11 +178,13 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     bool canDraw = mContext->makeCurrent();
     mContext->unpinImages();
 
+#ifdef __ANDROID__
     for (size_t i = 0; i < mLayers.size(); i++) {
         if (mLayers[i]) {
             mLayers[i]->apply();
         }
     }
+#endif
 
     mLayers.clear();
     mContext->setContentDrawBounds(mContentDrawBounds);
@@ -192,11 +196,12 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     if (CC_UNLIKELY(!hasTarget || !canDraw)) {
         if (!hasTarget) {
             mSyncResult |= SyncResult::LostSurfaceRewardIfFound;
+            info.out.skippedFrameReason = SkippedFrameReason::NoOutputTarget;
         } else {
             // If we have a surface but can't draw we must be stopped
             mSyncResult |= SyncResult::ContextIsStopped;
+            info.out.skippedFrameReason = SkippedFrameReason::ContextIsStopped;
         }
-        info.out.canDrawThisFrame = false;
     }
 
     if (info.out.hasAnimations) {
@@ -204,7 +209,7 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
             mSyncResult |= SyncResult::UIRedrawRequired;
         }
     }
-    if (!info.out.canDrawThisFrame) {
+    if (info.out.skippedFrameReason) {
         mSyncResult |= SyncResult::FrameDropped;
     }
     // If prepareTextures is false, we ran out of texture cache space

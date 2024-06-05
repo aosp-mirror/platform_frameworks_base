@@ -19,17 +19,14 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.R
-import com.android.systemui.accessibility.fontscaling.FontScalingDialog
+import com.android.systemui.accessibility.fontscaling.FontScalingDialogDelegate
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
@@ -38,12 +35,11 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
-import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.util.settings.SecureSettings
-import com.android.systemui.util.settings.SystemSettings
-import com.android.systemui.util.time.SystemClock
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
+import javax.inject.Provider
 
 class FontScalingTile
 @Inject
@@ -57,12 +53,9 @@ constructor(
     statusBarStateController: StatusBarStateController,
     activityStarter: ActivityStarter,
     qsLogger: QSLogger,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
-    private val systemSettings: SystemSettings,
-    private val secureSettings: SecureSettings,
-    private val systemClock: SystemClock,
-    private val featureFlags: FeatureFlags,
-    @Background private val backgroundDelayableExecutor: DelayableExecutor
+    private val keyguardStateController: KeyguardStateController,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
+    private val fontScalingDialogDelegateProvider: Provider<FontScalingDialogDelegate>
 ) :
     QSTileImpl<QSTile.State?>(
         host,
@@ -77,34 +70,40 @@ constructor(
     ) {
     private val icon = ResourceIcon.get(R.drawable.ic_qs_font_scaling)
 
-    override fun isAvailable(): Boolean {
-        return featureFlags.isEnabled(Flags.ENABLE_FONT_SCALING_TILE)
-    }
-
     override fun newTileState(): QSTile.State {
         return QSTile.State()
     }
 
-    override fun handleClick(view: View?) {
-        mUiHandler.post {
-            val dialog: SystemUIDialog =
-                FontScalingDialog(
-                    mContext,
-                    systemSettings,
-                    secureSettings,
-                    systemClock,
-                    mainHandler,
-                    backgroundDelayableExecutor
-                )
-            if (view != null) {
-                dialogLaunchAnimator.showFromView(
-                    dialog,
-                    view,
-                    DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG)
-                )
+    override fun handleClick(expandable: Expandable?) {
+        // We animate from the touched view only if we are not on the keyguard
+        val animateFromExpandable: Boolean =
+            expandable != null && !keyguardStateController.isShowing
+
+        val runnable = Runnable {
+            val dialog: SystemUIDialog = fontScalingDialogDelegateProvider.get().createDialog()
+            if (animateFromExpandable) {
+                val controller =
+                    expandable?.dialogTransitionController(
+                        DialogCuj(
+                            InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                            INTERACTION_JANK_TAG
+                        )
+                    )
+                controller?.let { dialogTransitionAnimator.show(dialog, controller) }
+                    ?: dialog.show()
             } else {
                 dialog.show()
             }
+        }
+
+        mainHandler.post {
+            mActivityStarter.executeRunnableDismissingKeyguard(
+                runnable,
+                /* cancelAction= */ null,
+                /* dismissShade= */ true,
+                /* afterKeyguardGone= */ true,
+                /* deferred= */ false
+            )
         }
     }
 

@@ -81,7 +81,27 @@ public class PipSurfaceTransactionHelper {
      */
     public PipSurfaceTransactionHelper scale(SurfaceControl.Transaction tx, SurfaceControl leash,
             Rect sourceBounds, Rect destinationBounds) {
+        mTmpDestinationRectF.set(destinationBounds);
+        return scale(tx, leash, sourceBounds, mTmpDestinationRectF, 0 /* degrees */);
+    }
+
+    /**
+     * Operates the scale (setMatrix) on a given transaction and leash
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
+     */
+    public PipSurfaceTransactionHelper scale(SurfaceControl.Transaction tx, SurfaceControl leash,
+            Rect sourceBounds, RectF destinationBounds) {
         return scale(tx, leash, sourceBounds, destinationBounds, 0 /* degrees */);
+    }
+
+    /**
+     * Operates the scale (setMatrix) on a given transaction and leash
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
+     */
+    public PipSurfaceTransactionHelper scale(SurfaceControl.Transaction tx, SurfaceControl leash,
+            Rect sourceBounds, Rect destinationBounds, float degrees) {
+        mTmpDestinationRectF.set(destinationBounds);
+        return scale(tx, leash, sourceBounds, mTmpDestinationRectF, degrees);
     }
 
     /**
@@ -89,7 +109,7 @@ public class PipSurfaceTransactionHelper {
      * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
      */
     public PipSurfaceTransactionHelper scale(SurfaceControl.Transaction tx, SurfaceControl leash,
-            Rect sourceBounds, Rect destinationBounds, float degrees) {
+            Rect sourceBounds, RectF destinationBounds, float degrees) {
         mTmpSourceRectF.set(sourceBounds);
         // We want the matrix to position the surface relative to the screen coordinates so offset
         // the source to 0,0

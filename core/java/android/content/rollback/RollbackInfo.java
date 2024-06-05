@@ -16,8 +16,12 @@
 
 package android.content.rollback;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import android.content.pm.Flags;
+import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -25,17 +29,14 @@ import android.os.Parcelable;
 import java.util.List;
 
 /**
- * Information about a set of packages that can be, or already have been
- * rolled back together.
+ * Information about a set of packages that can be, or already have been rolled back together.
  *
  * @hide
  */
 @SystemApi
 public final class RollbackInfo implements Parcelable {
 
-    /**
-     * A unique identifier for the rollback.
-     */
+    /** A unique identifier for the rollback. */
     private final int mRollbackId;
 
     private final List<PackageRollbackInfo> mPackages;
@@ -44,15 +45,39 @@ public final class RollbackInfo implements Parcelable {
 
     private final boolean mIsStaged;
     private int mCommittedSessionId;
+    private int mRollbackImpactLevel;
 
     /** @hide */
-    public RollbackInfo(int rollbackId, List<PackageRollbackInfo> packages, boolean isStaged,
-            List<VersionedPackage> causePackages,  int committedSessionId) {
+    public RollbackInfo(
+            int rollbackId,
+            List<PackageRollbackInfo> packages,
+            boolean isStaged,
+            List<VersionedPackage> causePackages,
+            int committedSessionId,
+            @PackageManager.RollbackImpactLevel int rollbackImpactLevel) {
         this.mRollbackId = rollbackId;
         this.mPackages = packages;
         this.mIsStaged = isStaged;
         this.mCausePackages = causePackages;
         this.mCommittedSessionId = committedSessionId;
+        this.mRollbackImpactLevel = rollbackImpactLevel;
+    }
+
+    /** @hide */
+    public RollbackInfo(
+            int rollbackId,
+            List<PackageRollbackInfo> packages,
+            boolean isStaged,
+            List<VersionedPackage> causePackages,
+            int committedSessionId) {
+        // If impact level is not set default to 0
+        this(
+                rollbackId,
+                packages,
+                isStaged,
+                causePackages,
+                committedSessionId,
+                PackageManager.ROLLBACK_USER_IMPACT_LOW);
     }
 
     private RollbackInfo(Parcel in) {
@@ -61,34 +86,28 @@ public final class RollbackInfo implements Parcelable {
         mIsStaged = in.readBoolean();
         mCausePackages = in.createTypedArrayList(VersionedPackage.CREATOR);
         mCommittedSessionId = in.readInt();
+        mRollbackImpactLevel = in.readInt();
     }
 
-    /**
-     * Returns a unique identifier for this rollback.
-     */
+    /** Returns a unique identifier for this rollback. */
     public int getRollbackId() {
         return mRollbackId;
     }
 
-    /**
-     * Returns the list of package that are rolled back.
-     */
+    /** Returns the list of package that are rolled back. */
     @NonNull
     public List<PackageRollbackInfo> getPackages() {
         return mPackages;
     }
 
-    /**
-     * Returns true if this rollback requires reboot to take effect after
-     * being committed.
-     */
+    /** Returns true if this rollback requires reboot to take effect after being committed. */
     public boolean isStaged() {
         return mIsStaged;
     }
 
     /**
-     * Returns the session ID for the committed rollback for staged rollbacks.
-     * Only applicable for rollbacks that have been committed.
+     * Returns the session ID for the committed rollback for staged rollbacks. Only applicable for
+     * rollbacks that have been committed.
      */
     public int getCommittedSessionId() {
         return mCommittedSessionId;
@@ -96,6 +115,7 @@ public final class RollbackInfo implements Parcelable {
 
     /**
      * Sets the session ID for the committed rollback for staged rollbacks.
+     *
      * @hide
      */
     public void setCommittedSessionId(int sessionId) {
@@ -103,13 +123,38 @@ public final class RollbackInfo implements Parcelable {
     }
 
     /**
-     * Gets the list of package versions that motivated this rollback.
-     * As provided to {@link #commitRollback} when the rollback was committed.
-     * This is only applicable for rollbacks that have been committed.
+     * Gets the list of package versions that motivated this rollback. As provided to {@link
+     * #commitRollback} when the rollback was committed. This is only applicable for rollbacks that
+     * have been committed.
      */
     @NonNull
     public List<VersionedPackage> getCausePackages() {
         return mCausePackages;
+    }
+
+    /**
+     * Get rollback impact level. Refer {@link
+     * android.content.pm.PackageInstaller.SessionParams#setRollbackImpactLevel(int)} for more info
+     * on impact level.
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_RECOVERABILITY_DETECTION)
+    public @PackageManager.RollbackImpactLevel int getRollbackImpactLevel() {
+        return mRollbackImpactLevel;
+    }
+
+    /**
+     * Set rollback impact level. Refer {@link
+     * android.content.pm.PackageInstaller.SessionParams#setRollbackImpactLevel(int)} for more info
+     * on impact level.
+     *
+     * @hide
+     */
+    public void setRollbackImpactLevel(
+            @PackageManager.RollbackImpactLevel int rollbackImpactLevel) {
+        mRollbackImpactLevel = rollbackImpactLevel;
     }
 
     @Override
@@ -124,16 +169,17 @@ public final class RollbackInfo implements Parcelable {
         out.writeBoolean(mIsStaged);
         out.writeTypedList(mCausePackages);
         out.writeInt(mCommittedSessionId);
+        out.writeInt(mRollbackImpactLevel);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<RollbackInfo> CREATOR =
             new Parcelable.Creator<RollbackInfo>() {
-        public RollbackInfo createFromParcel(Parcel in) {
-            return new RollbackInfo(in);
-        }
+                public RollbackInfo createFromParcel(Parcel in) {
+                    return new RollbackInfo(in);
+                }
 
-        public RollbackInfo[] newArray(int size) {
-            return new RollbackInfo[size];
-        }
-    };
+                public RollbackInfo[] newArray(int size) {
+                    return new RollbackInfo[size];
+                }
+            };
 }

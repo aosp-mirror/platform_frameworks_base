@@ -55,7 +55,7 @@ public final class UserVisibilityMediatorMUPANDTest
         AsyncUserVisibilityListener listener = addListenerForEvents(onVisible(visibleBgUserId));
 
         int result = mMediator.assignUserToDisplayOnStart(visibleBgUserId, visibleBgUserId,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+                BG_VISIBLE, DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
         expectVisibleUsers(currentUserId, visibleBgUserId);
 
@@ -76,7 +76,7 @@ public final class UserVisibilityMediatorMUPANDTest
 
         // Make sure another user cannot be started on default display
         int result2 = mMediator.assignUserToDisplayOnStart(otherUserId, otherUserId, BG_VISIBLE,
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY, false);
         assertStartUserResult(result2, USER_ASSIGNMENT_RESULT_FAILURE,
                 "when user (%d) is starting on default display after it was started by user %d",
                 otherUserId, visibleBgUserId);
@@ -99,7 +99,7 @@ public final class UserVisibilityMediatorMUPANDTest
         startForegroundUser(currentUserId);
 
         int result = mMediator.assignUserToDisplayOnStart(visibleBgUserId, visibleBgUserId,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+                BG_VISIBLE, DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
         expectVisibleUsers(currentUserId, visibleBgUserId);
 
@@ -120,7 +120,7 @@ public final class UserVisibilityMediatorMUPANDTest
 
         // Make sure another user cannot be started on default display
         int result2 = mMediator.assignUserToDisplayOnStart(otherUserId, otherUserId, BG_VISIBLE,
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY, false);
         assertStartUserResult(result2, USER_ASSIGNMENT_RESULT_FAILURE,
                 "when user (%d) is starting on default display after it was started by user %d",
                 otherUserId, visibleBgUserId);
@@ -137,7 +137,7 @@ public final class UserVisibilityMediatorMUPANDTest
         startUserInSecondaryDisplay(PARENT_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+                BG_VISIBLE, DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
@@ -159,7 +159,7 @@ public final class UserVisibilityMediatorMUPANDTest
         startUserInSecondaryDisplay(PARENT_USER_ID, DEFAULT_DISPLAY);
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+                BG_VISIBLE, DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
 
         // Assert parent user visibility
@@ -188,7 +188,7 @@ public final class UserVisibilityMediatorMUPANDTest
         startUserInSecondaryDisplay(PARENT_USER_ID, DEFAULT_DISPLAY);
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, BG,
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
 
         // Assert parent user visibility
@@ -213,7 +213,7 @@ public final class UserVisibilityMediatorMUPANDTest
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(currentUserId, currentUserId,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+                BG_VISIBLE, DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE);
 
         // Assert current user visibility

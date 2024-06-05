@@ -17,7 +17,6 @@
 package com.android.settingslib.users;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -31,7 +30,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -41,6 +39,7 @@ import com.android.settingslib.R;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.drawable.CircleFramedDrawable;
+import com.android.settingslib.utils.CustomDialogHelper;
 
 import java.io.File;
 import java.util.function.BiConsumer;
@@ -128,7 +127,7 @@ public class EditUserInfoController {
      *                        codes to take photo/choose photo/crop photo.
      */
     public Dialog createDialog(Activity activity, ActivityStarter activityStarter,
-            @Nullable Drawable oldUserIcon, String defaultUserName, String title,
+            @Nullable Drawable oldUserIcon, String defaultUserName,
             BiConsumer<String, Drawable> successCallback, Runnable cancelCallback) {
         LayoutInflater inflater = LayoutInflater.from(activity);
         View content = inflater.inflate(R.layout.edit_user_info_dialog_content, null);
@@ -160,10 +159,8 @@ public class EditUserInfoController {
                         userPhotoView);
             }
         }
-        ScrollView scrollView = content.findViewById(R.id.user_info_scroll);
-        scrollView.setClipToOutline(true);
         mEditUserInfoDialog = buildDialog(activity, content, userNameView, oldUserIcon,
-                defaultUserName, title, successCallback, cancelCallback);
+                defaultUserName, successCallback, cancelCallback);
 
         // Make sure the IME is up.
         mEditUserInfoDialog.getWindow()
@@ -181,12 +178,13 @@ public class EditUserInfoController {
     }
 
     private Dialog buildDialog(Activity activity, View content, EditText userNameView,
-            @Nullable Drawable oldUserIcon, String defaultUserName, String title,
+            @Nullable Drawable oldUserIcon, String defaultUserName,
             BiConsumer<String, Drawable> successCallback, Runnable cancelCallback) {
-        return new AlertDialog.Builder(activity)
-                .setView(content)
-                .setCancelable(true)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+        CustomDialogHelper dialogHelper = new CustomDialogHelper(activity);
+        dialogHelper
+                .setTitle(R.string.user_info_settings_title)
+                .addCustomView(content)
+                .setPositiveButton(R.string.okay, view -> {
                     Drawable newUserIcon = mEditUserPhotoController != null
                             ? mEditUserPhotoController.getNewUserPhotoDrawable()
                             : null;
@@ -201,20 +199,23 @@ public class EditUserInfoController {
                     if (successCallback != null) {
                         successCallback.accept(userName, userIcon);
                     }
+                    dialogHelper.getDialog().dismiss();
                 })
-                .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+                .setBackButton(R.string.cancel, view -> {
                     clear();
                     if (cancelCallback != null) {
                         cancelCallback.run();
                     }
-                })
-                .setOnCancelListener(dialog -> {
-                    clear();
-                    if (cancelCallback != null) {
-                        cancelCallback.run();
-                    }
-                })
-                .create();
+                    dialogHelper.getDialog().dismiss();
+                });
+        dialogHelper.getDialog().setOnCancelListener(dialog -> {
+            clear();
+            if (cancelCallback != null) {
+                cancelCallback.run();
+            }
+            dialogHelper.getDialog().dismiss();
+        });
+        return dialogHelper.getDialog();
     }
 
     @VisibleForTesting
@@ -233,6 +234,6 @@ public class EditUserInfoController {
     EditUserPhotoController createEditUserPhotoController(Activity activity,
             ActivityStarter activityStarter, ImageView userPhotoView) {
         return new EditUserPhotoController(activity, activityStarter, userPhotoView,
-                mSavedPhoto, mSavedDrawable, mFileAuthority);
+                mSavedPhoto, mSavedDrawable, mFileAuthority, false);
     }
 }

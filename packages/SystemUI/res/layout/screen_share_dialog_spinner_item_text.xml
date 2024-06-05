@@ -13,15 +13,32 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:id="@android:id/text1"
-    android:textAppearance="?android:attr/textAppearanceMedium"
-    android:textColor="?androidprv:attr/textColorOnAccent"
-    android:singleLine="true"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/screenrecord_spinner_height"
-    android:gravity="center_vertical"
-    android:ellipsize="marquee"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/screenrecord_spinner_height"
+    android:paddingEnd="@dimen/screenrecord_spinner_text_padding_end"
     android:paddingStart="@dimen/screenrecord_spinner_text_padding_start"
-    android:paddingEnd="@dimen/screenrecord_spinner_text_padding_end"/>
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@android:id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/menu_item_text" />
+
+    <TextView
+        android:id="@android:id/text2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="?androidprv:attr/materialColorError" />
+
+</LinearLayout>

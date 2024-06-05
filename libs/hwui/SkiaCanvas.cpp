@@ -47,6 +47,7 @@
 #include <utility>
 
 #include "CanvasProperty.h"
+#include "FeatureFlags.h"
 #include "Mesh.h"
 #include "NinePatchUtils.h"
 #include "VectorDrawable.h"
@@ -69,6 +70,8 @@ public:
             : mType(Type::RRect), mOp(op), mMatrix(m), mRRect(rrect) {}
     Clip(const SkPath& path, SkClipOp op, const SkMatrix& m)
             : mType(Type::Path), mOp(op), mMatrix(m), mPath(std::in_place, path) {}
+    Clip(const sk_sp<SkShader> shader, SkClipOp op, const SkMatrix& m)
+            : mType(Type::Shader), mOp(op), mMatrix(m), mShader(shader) {}
 
     void apply(SkCanvas* canvas) const {
         canvas->setMatrix(mMatrix);
@@ -85,6 +88,8 @@ public:
                 // Ensure path clips are anti-aliased
                 canvas->clipPath(mPath.value(), mOp, true);
                 break;
+            case Type::Shader:
+                canvas->clipShader(mShader, mOp);
         }
     }
 
@@ -93,6 +98,7 @@ private:
         Rect,
         RRect,
         Path,
+        Shader,
     };
 
     Type mType;
@@ -102,6 +108,7 @@ private:
     // These are logically a union (tracked separately due to non-POD path).
     std::optional<SkPath> mPath;
     SkRRect mRRect;
+    sk_sp<SkShader> mShader;
 };
 
 Canvas* Canvas::create_canvas(const SkBitmap& bitmap) {
@@ -340,6 +347,10 @@ void SkiaCanvas::concat(const SkMatrix& matrix) {
     mCanvas->concat(matrix);
 }
 
+void SkiaCanvas::concat(const SkM44& matrix) {
+    mCanvas->concat(matrix);
+}
+
 void SkiaCanvas::rotate(float degrees) {
     mCanvas->rotate(degrees);
 }
@@ -406,6 +417,11 @@ bool SkiaCanvas::clipPath(const SkPath* path, SkClipOp op) {
     this->recordClip(*path, op);
     mCanvas->clipPath(*path, op, true);
     return !mCanvas->isClipEmpty();
+}
+
+void SkiaCanvas::clipShader(sk_sp<SkShader> shader, SkClipOp op) {
+    this->recordClip(shader, op);
+    mCanvas->clipShader(shader, op);
 }
 
 bool SkiaCanvas::replaceClipRect_deprecated(float left, float top, float right, float bottom) {
@@ -580,18 +596,48 @@ void SkiaCanvas::drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const Pain
     if (recordingContext) {
         context = recordingContext->asDirectContext();
     }
-    mesh.updateSkMesh(context);
-    mCanvas->drawMesh(mesh.getSkMesh(), blender, paint);
+    mesh.refBufferData()->updateBuffers(context);
+    mCanvas->drawMesh(mesh.takeSnapshot().getSkMesh(), blender, paint);
 }
 
 // ----------------------------------------------------------------------------
 // Canvas draw operations: Bitmaps
 // ----------------------------------------------------------------------------
 
+bool SkiaCanvas::useGainmapShader(Bitmap& bitmap) {
+    // If the bitmap doesn't have a gainmap, don't use the gainmap shader
+    if (!bitmap.hasGainmap()) return false;
+
+    // If we don't have an owned canvas, then we're either hardware accelerated or drawing
+    // to a picture - use the gainmap shader out of caution. Ideally a picture canvas would
+    // use a drawable here instead to defer making that decision until the last possible
+    // moment
+    if (!mCanvasOwned) return true;
+
+    auto info = mCanvasOwned->imageInfo();
+
+    // If it's an unknown colortype then it's not a bitmap-backed canvas
+    if (info.colorType() == SkColorType::kUnknown_SkColorType) return true;
+
+    skcms_TransferFunction tfn;
+    info.colorSpace()->transferFn(&tfn);
+
+    auto transferType = skcms_TransferFunction_getType(&tfn);
+    switch (transferType) {
+        case skcms_TFType_HLGish:
+        case skcms_TFType_HLGinvish:
+        case skcms_TFType_PQish:
+            return true;
+        case skcms_TFType_Invalid:
+        case skcms_TFType_sRGBish:
+            return false;
+    }
+}
+
 void SkiaCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) {
     auto image = bitmap.makeImage();
 
-    if (bitmap.hasGainmap()) {
+    if (useGainmapShader(bitmap)) {
         Paint gainmapPaint = paint ? *paint : Paint();
         sk_sp<SkShader> gainmapShader = uirenderer::MakeGainmapShader(
                 image, bitmap.gainmap()->bitmap->makeImage(), bitmap.gainmap()->info,
@@ -618,7 +664,7 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float s
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
-    if (bitmap.hasGainmap()) {
+    if (useGainmapShader(bitmap)) {
         Paint gainmapPaint = paint ? *paint : Paint();
         sk_sp<SkShader> gainmapShader = uirenderer::MakeGainmapShader(
                 image, bitmap.gainmap()->bitmap->makeImage(), bitmap.gainmap()->info,
@@ -795,7 +841,9 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& pai
     sk_sp<SkTextBlob> textBlob(builder.make());
 
     applyLooper(&paintCopy, [&](const SkPaint& p) { mCanvas->drawTextBlob(textBlob, 0, 0, p); });
-    drawTextDecorations(x, y, totalAdvance, paintCopy);
+    if (!text_feature::fix_double_underline()) {
+        drawTextDecorations(x, y, totalAdvance, paintCopy);
+    }
 }
 
 void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,

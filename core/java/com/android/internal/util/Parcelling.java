@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
  *
  * @param <T> the type being [un]parcelled
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public interface Parcelling<T> {
 
     /**

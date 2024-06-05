@@ -22,11 +22,13 @@ import android.provider.DeviceConfig
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NOTIFICATIONS_USE_PEOPLE_FILTERING
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.BUCKET_FOREGROUND_SERVICE
 import com.android.systemui.statusbar.notification.stack.BUCKET_HEADS_UP
 import com.android.systemui.statusbar.notification.stack.BUCKET_MEDIA_CONTROLS
 import com.android.systemui.statusbar.notification.stack.BUCKET_PEOPLE
+import com.android.systemui.statusbar.notification.stack.BUCKET_PRIORITY_PEOPLE
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.Utils
@@ -53,6 +55,18 @@ class NotificationSectionsFeatureManager @Inject constructor(
     }
 
     fun getNotificationBuckets(): IntArray {
+        if (PriorityPeopleSection.isEnabled) {
+            // We don't need this list to be adaptive, it can be the superset of all features.
+            return intArrayOf(
+                    BUCKET_MEDIA_CONTROLS,
+                    BUCKET_HEADS_UP,
+                    BUCKET_FOREGROUND_SERVICE,
+                    BUCKET_PRIORITY_PEOPLE,
+                    BUCKET_PEOPLE,
+                    BUCKET_ALERTING,
+                    BUCKET_SILENT,
+                )
+        }
         return when {
             isFilteringEnabled() && isMediaControlsEnabled() ->
                 intArrayOf(BUCKET_HEADS_UP, BUCKET_FOREGROUND_SERVICE, BUCKET_MEDIA_CONTROLS,

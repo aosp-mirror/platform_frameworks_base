@@ -19,7 +19,6 @@ package android.app;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -37,8 +36,6 @@ import android.os.Parcel;
 import android.view.DisplayCutout;
 import android.window.WindowContainerToken;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -224,58 +221,6 @@ public class TaskInfo {
     public ActivityInfo topActivityInfo;
 
     /**
-     * Whether the direct top activity is in size compat mode on foreground.
-     * @hide
-     */
-    public boolean topActivityInSizeCompat;
-
-    /**
-     * Whether the direct top activity is eligible for letterbox education.
-     * @hide
-     */
-    public boolean topActivityEligibleForLetterboxEducation;
-
-    /**
-     * Whether the double tap is enabled
-     * @hide
-     */
-    public boolean isLetterboxDoubleTapEnabled;
-
-    /**
-     * Whether the update comes from a letterbox double-tap action from the user or not.
-     * @hide
-     */
-    public boolean isFromLetterboxDoubleTap;
-
-    /**
-     * If {@link isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position or
-     * {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise.
-     * @hide
-     */
-    public int topActivityLetterboxVerticalPosition;
-
-    /**
-     * If {@link isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position or
-     * {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise.
-     * @hide
-     */
-    public int topActivityLetterboxHorizontalPosition;
-
-    /**
-     * If {@link isLetterboxDoubleTapEnabled} it contains the current width of the letterboxed
-     * activity or {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise
-     * @hide
-     */
-    public int topActivityLetterboxWidth;
-
-    /**
-     * If {@link isLetterboxDoubleTapEnabled} it contains the current height of the letterboxed
-     * activity or {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise
-     * @hide
-     */
-    public int topActivityLetterboxHeight;
-
-    /**
      * Whether this task is resizable. Unlike {@link #resizeMode} (which is what the top activity
      * supports), this is what the system actually uses for resizability based on other policy and
      * developer options.
@@ -346,49 +291,16 @@ public class TaskInfo {
     public boolean isSleeping;
 
     /**
-     * Camera compat control isn't shown because it's not requested by heuristics.
+     * Whether the top activity fillsParent() is false
      * @hide
      */
-    public static final int CAMERA_COMPAT_CONTROL_HIDDEN = 0;
+    public boolean isTopActivityTransparent;
 
     /**
-     * Camera compat control is shown with the treatment suggested.
+     * Encapsulate specific App Compat information.
      * @hide
      */
-    public static final int CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED = 1;
-
-    /**
-     * Camera compat control is shown to allow reverting the applied treatment.
-     * @hide
-     */
-    public static final int CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED = 2;
-
-    /**
-     * Camera compat control is dismissed by user.
-     * @hide
-     */
-    public static final int CAMERA_COMPAT_CONTROL_DISMISSED = 3;
-
-    /**
-     * Enum for the Camera app compat control states.
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "CAMERA_COMPAT_CONTROL_" }, value = {
-            CAMERA_COMPAT_CONTROL_HIDDEN,
-            CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED,
-            CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED,
-            CAMERA_COMPAT_CONTROL_DISMISSED,
-    })
-    public @interface CameraCompatControlState {};
-
-    /**
-     * State of the Camera app compat control which is used to correct stretched viewfinder
-     * in apps that don't handle all possible configurations and changes between them correctly.
-     * @hide
-     */
-    @CameraCompatControlState
-    public int cameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
+    public AppCompatTaskInfo appCompatTaskInfo = AppCompatTaskInfo.create();
 
     TaskInfo() {
         // Do nothing
@@ -439,6 +351,12 @@ public class TaskInfo {
     }
 
     /** @hide */
+    public boolean isFreeform() {
+        return configuration.windowConfiguration.getWindowingMode()
+                == WindowConfiguration.WINDOWING_MODE_FREEFORM;
+    }
+
+    /** @hide */
     @WindowConfiguration.ActivityType
     public int getActivityType() {
         return configuration.windowConfiguration.getActivityType();
@@ -448,19 +366,6 @@ public class TaskInfo {
     public void addLaunchCookie(IBinder cookie) {
         if (cookie == null || launchCookies.contains(cookie)) return;
         launchCookies.add(cookie);
-    }
-
-    /** @hide */
-    public boolean hasCameraCompatControl() {
-        return cameraCompatControlState != CAMERA_COMPAT_CONTROL_HIDDEN
-                && cameraCompatControlState != CAMERA_COMPAT_CONTROL_DISMISSED;
-    }
-
-    /** @hide */
-    public boolean hasCompatUI() {
-        return hasCameraCompatControl() || topActivityInSizeCompat
-                || topActivityEligibleForLetterboxEducation
-                || isLetterboxDoubleTapEnabled;
     }
 
     /**
@@ -509,12 +414,6 @@ public class TaskInfo {
                 && isResizeable == that.isResizeable
                 && supportsMultiWindow == that.supportsMultiWindow
                 && displayAreaFeatureId == that.displayAreaFeatureId
-                && isFromLetterboxDoubleTap == that.isFromLetterboxDoubleTap
-                && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
-                && topActivityLetterboxWidth == that.topActivityLetterboxWidth
-                && topActivityLetterboxHeight == that.topActivityLetterboxHeight
-                && topActivityLetterboxHorizontalPosition
-                    == that.topActivityLetterboxHorizontalPosition
                 && Objects.equals(positionInParent, that.positionInParent)
                 && Objects.equals(pictureInPictureParams, that.pictureInPictureParams)
                 && Objects.equals(shouldDockBigOverlays, that.shouldDockBigOverlays)
@@ -528,7 +427,9 @@ public class TaskInfo {
                 && isSleeping == that.isSleeping
                 && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId)
                 && parentTaskId == that.parentTaskId
-                && Objects.equals(topActivity, that.topActivity);
+                && Objects.equals(topActivity, that.topActivity)
+                && isTopActivityTransparent == that.isTopActivityTransparent
+                && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo);
     }
 
     /**
@@ -539,25 +440,19 @@ public class TaskInfo {
         if (that == null) {
             return false;
         }
+        final boolean hasCompatUI = appCompatTaskInfo.hasCompatUI();
         return displayId == that.displayId
                 && taskId == that.taskId
-                && topActivityInSizeCompat == that.topActivityInSizeCompat
-                && isFromLetterboxDoubleTap == that.isFromLetterboxDoubleTap
-                && topActivityEligibleForLetterboxEducation
-                    == that.topActivityEligibleForLetterboxEducation
-                && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
-                && topActivityLetterboxHorizontalPosition
-                    == that.topActivityLetterboxHorizontalPosition
-                && topActivityLetterboxWidth == that.topActivityLetterboxWidth
-                && topActivityLetterboxHeight == that.topActivityLetterboxHeight
-                && cameraCompatControlState == that.cameraCompatControlState
+                && isFocused == that.isFocused
+                && isTopActivityTransparent == that.isTopActivityTransparent
+                && appCompatTaskInfo.equalsForCompatUi(that.appCompatTaskInfo)
                 // Bounds are important if top activity has compat controls.
-                && (!hasCompatUI() || configuration.windowConfiguration.getBounds()
+                && (!hasCompatUI || configuration.windowConfiguration.getBounds()
                     .equals(that.configuration.windowConfiguration.getBounds()))
-                && (!hasCompatUI() || configuration.getLayoutDirection()
+                && (!hasCompatUI || configuration.getLayoutDirection()
                     == that.configuration.getLayoutDirection())
-                && (!hasCompatUI() || configuration.uiMode == that.configuration.uiMode)
-                && (!hasCompatUI() || isVisible == that.isVisible);
+                && (!hasCompatUI || configuration.uiMode == that.configuration.uiMode)
+                && (!hasCompatUI || isVisible == that.isVisible);
     }
 
     /**
@@ -600,17 +495,10 @@ public class TaskInfo {
         isVisible = source.readBoolean();
         isVisibleRequested = source.readBoolean();
         isSleeping = source.readBoolean();
-        topActivityInSizeCompat = source.readBoolean();
-        topActivityEligibleForLetterboxEducation = source.readBoolean();
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
         displayAreaFeatureId = source.readInt();
-        cameraCompatControlState = source.readInt();
-        isLetterboxDoubleTapEnabled = source.readBoolean();
-        isFromLetterboxDoubleTap = source.readBoolean();
-        topActivityLetterboxVerticalPosition = source.readInt();
-        topActivityLetterboxHorizontalPosition = source.readInt();
-        topActivityLetterboxWidth = source.readInt();
-        topActivityLetterboxHeight = source.readInt();
+        isTopActivityTransparent = source.readBoolean();
+        appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
     }
 
     /**
@@ -654,17 +542,10 @@ public class TaskInfo {
         dest.writeBoolean(isVisible);
         dest.writeBoolean(isVisibleRequested);
         dest.writeBoolean(isSleeping);
-        dest.writeBoolean(topActivityInSizeCompat);
-        dest.writeBoolean(topActivityEligibleForLetterboxEducation);
         dest.writeTypedObject(mTopActivityLocusId, flags);
         dest.writeInt(displayAreaFeatureId);
-        dest.writeInt(cameraCompatControlState);
-        dest.writeBoolean(isLetterboxDoubleTapEnabled);
-        dest.writeBoolean(isFromLetterboxDoubleTap);
-        dest.writeInt(topActivityLetterboxVerticalPosition);
-        dest.writeInt(topActivityLetterboxHorizontalPosition);
-        dest.writeInt(topActivityLetterboxWidth);
-        dest.writeInt(topActivityLetterboxHeight);
+        dest.writeBoolean(isTopActivityTransparent);
+        dest.writeTypedObject(appCompatTaskInfo, flags);
     }
 
     @Override
@@ -698,34 +579,10 @@ public class TaskInfo {
                 + " isVisible=" + isVisible
                 + " isVisibleRequested=" + isVisibleRequested
                 + " isSleeping=" + isSleeping
-                + " topActivityInSizeCompat=" + topActivityInSizeCompat
-                + " topActivityEligibleForLetterboxEducation= "
-                        + topActivityEligibleForLetterboxEducation
-                + " topActivityLetterboxed= " + isLetterboxDoubleTapEnabled
-                + " isFromDoubleTap= " + isFromLetterboxDoubleTap
-                + " topActivityLetterboxVerticalPosition= " + topActivityLetterboxVerticalPosition
-                + " topActivityLetterboxHorizontalPosition= "
-                        + topActivityLetterboxHorizontalPosition
-                + " topActivityLetterboxWidth=" + topActivityLetterboxWidth
-                + " topActivityLetterboxHeight=" + topActivityLetterboxHeight
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
-                + " cameraCompatControlState="
-                        + cameraCompatControlStateToString(cameraCompatControlState)
+                + " isTopActivityTransparent=" + isTopActivityTransparent
+                + " appCompatTaskInfo=" + appCompatTaskInfo
                 + "}";
-    }
-
-    /** @hide */
-    public static String cameraCompatControlStateToString(
-            @CameraCompatControlState int cameraCompatControlState) {
-        switch (cameraCompatControlState) {
-            case CAMERA_COMPAT_CONTROL_HIDDEN: return "hidden";
-            case CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED: return "treatment-suggested";
-            case CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED: return "treatment-applied";
-            case CAMERA_COMPAT_CONTROL_DISMISSED: return "dismissed";
-            default:
-                throw new AssertionError(
-                    "Unexpected camera compat control state: " + cameraCompatControlState);
-        }
     }
 }

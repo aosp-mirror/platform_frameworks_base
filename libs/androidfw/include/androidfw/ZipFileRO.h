@@ -37,6 +37,8 @@
 #include <unistd.h>
 #include <time.h>
 
+#include <android-base/expected.h>
+
 #include <util/map_ptr.h>
 
 #include <utils/Compat.h>
@@ -102,12 +104,23 @@ public:
      */
     bool startIteration(void** cookie);
     bool startIteration(void** cookie, const char* prefix, const char* suffix);
+    /*
+     * Same as above, but returns the error code in case of failure.
+     * #see libziparchive/zip_error.h.
+     */
+    base::expected<void*, int32_t> startIterationOrError(const char* prefix, const char* suffix);
 
     /**
      * Return the next entry in iteration order, or NULL if there are no more
      * entries in this archive.
      */
     ZipEntryRO nextEntry(void* cookie);
+
+    /**
+     * Same as above, but returns the error code in case of failure.
+     * #see libziparchive/zip_error.h.
+     */
+    base::expected<ZipEntryRO, int32_t> nextEntryOrError(void* cookie);
 
     void endIteration(void* cookie);
 
@@ -134,9 +147,9 @@ public:
      * Returns "false" if "entry" is bogus or if the data in the Zip file
      * appears to be bad.
      */
-    bool getEntryInfo(ZipEntryRO entry, uint16_t* pMethod, uint32_t* pUncompLen,
-        uint32_t* pCompLen, off64_t* pOffset, uint32_t* pModWhen,
-        uint32_t* pCrc32) const;
+    bool getEntryInfo(ZipEntryRO entry, uint16_t* pMethod,
+        uint32_t* pUncompLen, uint32_t* pCompLen, off64_t* pOffset,
+        uint32_t* pModWhen, uint32_t* pCrc32, uint16_t* pExtraFieldSize) const;
 
     /*
      * Create a new FileMap object that maps a subset of the archive. For
@@ -173,6 +186,8 @@ public:
      * Uncompress the data to an open file descriptor.
      */
     bool uncompressEntry(ZipEntryRO entry, int fd) const;
+
+    const char* getZipFileName();
 
     ~ZipFileRO();
 

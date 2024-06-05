@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
@@ -159,6 +158,9 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             if (pkgSetting.getPkg().isCoreApp()) {
                 throw new IllegalStateException("Found a core app that's not important");
             }
+            // Use REASON_FIRST_BOOT to query "pm.dexopt.first-boot" for the compiler filter, but
+            // the reason itself won't make it into the actual compiler reason because it will be
+            // overridden in otapreopt.cpp.
             mDexoptCommands.addAll(generatePackageDexopts(pkgSetting.getPkg(), pkgSetting,
                     PackageManagerService.REASON_FIRST_BOOT));
         }
@@ -302,13 +304,10 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                     throws InstallerException {
                 final StringBuilder builder = new StringBuilder();
 
-                if (useArtService()) {
-                    if ((dexFlags & DEXOPT_SECONDARY_DEX) != 0) {
-                        // installd may change the reference profile in place for secondary dex
-                        // files, which isn't safe with the lock free approach in ART Service.
-                        throw new IllegalArgumentException(
-                                "Invalid OTA dexopt call for secondary dex");
-                    }
+                if ((dexFlags & DEXOPT_SECONDARY_DEX) != 0) {
+                    // installd may change the reference profile in place for secondary dex
+                    // files, which isn't safe with the lock free approach in ART Service.
+                    throw new IllegalArgumentException("Invalid OTA dexopt call for secondary dex");
                 }
 
                 // The current version. For v10, see b/115993344.
@@ -507,8 +506,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
     private static class OTADexoptPackageDexOptimizer extends
             PackageDexOptimizer.ForcedUpdatePackageDexOptimizer {
-        public OTADexoptPackageDexOptimizer(Installer installer, Object installLock,
-                Context context) {
+        OTADexoptPackageDexOptimizer(Installer installer,
+                PackageManagerTracedLock installLock, Context context) {
             super(installer, installLock, context, "*otadexopt*");
         }
     }

@@ -24,11 +24,10 @@ import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
+import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
-import android.hardware.fingerprint.ISidefpsController;
-import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 
@@ -75,7 +74,8 @@ public interface ServiceProvider extends
      */
     long scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
             int userId, @NonNull IFingerprintServiceReceiver receiver,
-            @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason);
+            @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason,
+            @NonNull FingerprintEnrollOptions options);
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId);
 
@@ -130,23 +130,11 @@ public interface ServiceProvider extends
 
     void onPointerUp(long requestId, int sensorId, PointerContext pc);
 
-    void onUiReady(long requestId, int sensorId);
+    void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event, long requestId, int sensorId);
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 
-    /**
-     * Sets udfps overlay
-     * @param controller udfps overlay
-     */
-    void setUdfpsOverlay(@NonNull IUdfpsOverlay controller);
-
     void onPowerPressed();
-
-    /**
-     * Sets side-fps controller
-     * @param controller side-fps controller
-     */
-    void setSidefpsController(@NonNull ISidefpsController controller);
 
     @NonNull
     ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
@@ -157,4 +145,11 @@ public interface ServiceProvider extends
      * @param sensorId sensor ID of the associated operation
      */
     default void scheduleWatchdog(int sensorId) {}
+
+    /**
+     * Simulate fingerprint down touch event for virtual HAL
+     * @param userId user ID
+     * @param sensorId sensor ID
+     */
+    default void simulateVhalFingerDown(int userId, int sensorId) {};
 }

@@ -104,16 +104,16 @@ public class UserLifecycleTests {
     /** Name of users/profiles in the test. Users with this name may be freely removed. */
     private static final String TEST_USER_NAME = "UserLifecycleTests_test_user";
 
-    /** Name of dummy package used when timing how long app launches take. */
+    /** Name of placeholder package used when timing how long app launches take. */
     private static final String DUMMY_PACKAGE_NAME = "perftests.multiuser.apps.dummyapp";
 
-    // Copy of UserSystemPackageInstaller whitelist mode constants.
-    private static final String PACKAGE_WHITELIST_MODE_PROP =
+    // Copy of UserSystemPackageInstaller allowlist mode constants.
+    private static final String PACKAGE_ALLOWLIST_MODE_PROP =
             "persist.debug.user.package_whitelist_mode";
-    private static final int USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE = 0;
-    private static final int USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE = 0b001;
-    private static final int USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST = 0b100;
-    private static final int USER_TYPE_PACKAGE_WHITELIST_MODE_DEVICE_DEFAULT = -1;
+    private static final int USER_TYPE_PACKAGE_ALLOWLIST_MODE_DISABLE = 0;
+    private static final int USER_TYPE_PACKAGE_ALLOWLIST_MODE_ENFORCE = 0b001;
+    private static final int USER_TYPE_PACKAGE_ALLOWLIST_MODE_IMPLICIT_ALLOWLIST = 0b100;
+    private static final int USER_TYPE_PACKAGE_ALLOWLIST_MODE_DEVICE_DEFAULT = -1;
 
     private UserManager mUm;
     private ActivityManager mAm;
@@ -366,7 +366,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
 
-            stopUser(userId, /* force */true);
+            stopUser(userId);
             mRunner.resumeTimingForNextIteration();
         }
 
@@ -429,7 +429,7 @@ public class UserLifecycleTests {
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
-            stopUser(userId, /* force */true);
+            stopUser(userId);
             mRunner.resumeTimingForNextIteration();
         }
 
@@ -545,7 +545,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.d(TAG, "Stopping timer");
             switchUserNoCheck(currentUserId);
-            stopUserAfterWaitingForBroadcastIdle(userId, /* force */true);
+            stopUserAfterWaitingForBroadcastIdle(userId);
             attestFalse("Failed to stop user " + userId, mAm.isUserRunning(userId));
             mRunner.resumeTimingForNextIteration();
         }
@@ -571,7 +571,7 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.d(TAG, "Stopping timer");
             switchUserNoCheck(startUser);
-            stopUserAfterWaitingForBroadcastIdle(testUser, true);
+            stopUserAfterWaitingForBroadcastIdle(testUser);
             attestFalse("Failed to stop user " + testUser, mAm.isUserRunning(testUser));
             mRunner.resumeTimingForNextIteration();
         }
@@ -660,7 +660,7 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
-            stopUser(userId, false);
+            stopUser(userId);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
@@ -685,7 +685,7 @@ public class UserLifecycleTests {
             Log.d(TAG, "Starting timer");
             mRunner.resumeTiming();
 
-            stopUser(userId, false);
+            stopUser(userId);
 
             mRunner.pauseTiming();
             Log.d(TAG, "Stopping timer");
@@ -883,7 +883,7 @@ public class UserLifecycleTests {
             final int userId = createManagedProfile();
             // Start the profile initially, then stop it. Similar to setQuietModeEnabled.
             startUserInBackgroundAndWaitForUnlock(userId);
-            stopUserAfterWaitingForBroadcastIdle(userId, true);
+            stopUserAfterWaitingForBroadcastIdle(userId);
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
@@ -905,7 +905,7 @@ public class UserLifecycleTests {
         startUserInBackgroundAndWaitForUnlock(userId);
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
-            stopUserAfterWaitingForBroadcastIdle(userId, true);
+            stopUserAfterWaitingForBroadcastIdle(userId);
             mRunner.resumeTiming();
             Log.d(TAG, "Starting timer");
 
@@ -987,7 +987,7 @@ public class UserLifecycleTests {
             installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
             startUserInBackgroundAndWaitForUnlock(userId);
             startApp(userId, DUMMY_PACKAGE_NAME);
-            stopUserAfterWaitingForBroadcastIdle(userId, true);
+            stopUserAfterWaitingForBroadcastIdle(userId);
             SystemClock.sleep(1_000); // 1 second cool-down before re-starting profile.
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
@@ -1019,7 +1019,7 @@ public class UserLifecycleTests {
             installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
             startUserInBackgroundAndWaitForUnlock(userId);
             startApp(userId, DUMMY_PACKAGE_NAME);
-            stopUserAfterWaitingForBroadcastIdle(userId, true);
+            stopUserAfterWaitingForBroadcastIdle(userId);
             SystemClock.sleep(1_000); // 1 second cool-down before re-starting profile.
             mRunner.resumeTiming();
             Log.d(TAG, "Starting timer");
@@ -1144,7 +1144,7 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
             Log.i(TAG, "Starting timer");
 
-            stopUser(userId, true);
+            stopUser(userId);
 
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
@@ -1168,7 +1168,7 @@ public class UserLifecycleTests {
             mRunner.resumeTiming();
             Log.d(TAG, "Starting timer");
 
-            stopUser(userId, true);
+            stopUser(userId);
 
             mRunner.pauseTiming();
             Log.d(TAG, "Stopping timer");
@@ -1178,13 +1178,13 @@ public class UserLifecycleTests {
     }
 
     // TODO: This is just a POC. Do this properly and add more.
-    /** Tests starting (unlocking) a newly-created profile using the user-type-pkg-whitelist. */
+    /** Tests starting (unlocking) a newly-created profile using the user-type-pkg-allowlist. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileUnlock_usingWhitelist() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
-        final int origMode = getUserTypePackageWhitelistMode();
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE
-                | USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST);
+        final int origMode = getUserTypePackageAllowlistMode();
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_ALLOWLIST_MODE_ENFORCE
+                | USER_TYPE_PACKAGE_ALLOWLIST_MODE_IMPLICIT_ALLOWLIST);
 
         try {
             while (mRunner.keepRunning()) {
@@ -1201,15 +1201,15 @@ public class UserLifecycleTests {
                 mRunner.resumeTimingForNextIteration();
             }
         } finally {
-            setUserTypePackageWhitelistMode(origMode);
+            setUserTypePackageAllowlistMode(origMode);
         }
     }
-    /** Tests starting (unlocking) a newly-created profile NOT using the user-type-pkg-whitelist. */
+    /** Tests starting (unlocking) a newly-created profile NOT using the user-type-pkg-allowlist. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileUnlock_notUsingWhitelist() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
-        final int origMode = getUserTypePackageWhitelistMode();
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE);
+        final int origMode = getUserTypePackageAllowlistMode();
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_ALLOWLIST_MODE_DISABLE);
 
         try {
             while (mRunner.keepRunning()) {
@@ -1226,7 +1226,7 @@ public class UserLifecycleTests {
                 mRunner.resumeTimingForNextIteration();
             }
         } finally {
-            setUserTypePackageWhitelistMode(origMode);
+            setUserTypePackageAllowlistMode(origMode);
         }
     }
 
@@ -1294,15 +1294,15 @@ public class UserLifecycleTests {
      * Do not call this method while timing is on. i.e. between mRunner.resumeTiming() and
      * mRunner.pauseTiming(). Otherwise it would cause the test results to be spiky.
      */
-    private void stopUserAfterWaitingForBroadcastIdle(int userId, boolean force)
+    private void stopUserAfterWaitingForBroadcastIdle(int userId)
             throws RemoteException {
         waitForBroadcastIdle();
-        stopUser(userId, force);
+        stopUser(userId);
     }
 
-    private void stopUser(int userId, boolean force) throws RemoteException {
+    private void stopUser(int userId) throws RemoteException {
         final CountDownLatch latch = new CountDownLatch(1);
-        mIam.stopUser(userId, force /* force */, new IStopUserCallback.Stub() {
+        mIam.stopUserWithCallback(userId, new IStopUserCallback.Stub() {
             @Override
             public void userStopped(int userId) throws RemoteException {
                 latch.countDown();
@@ -1352,7 +1352,7 @@ public class UserLifecycleTests {
         attestTrue("Didn't switch back to user, " + origUser, origUser == mAm.getCurrentUser());
 
         if (stopNewUser) {
-            stopUserAfterWaitingForBroadcastIdle(testUser, true);
+            stopUserAfterWaitingForBroadcastIdle(testUser);
             attestFalse("Failed to stop user " + testUser, mAm.isUserRunning(testUser));
         }
 
@@ -1456,22 +1456,22 @@ public class UserLifecycleTests {
         attestTrue(errMsg, success);
     }
 
-    /** Gets the PACKAGE_WHITELIST_MODE_PROP System Property. */
-    private int getUserTypePackageWhitelistMode() {
-        return SystemProperties.getInt(PACKAGE_WHITELIST_MODE_PROP,
-                USER_TYPE_PACKAGE_WHITELIST_MODE_DEVICE_DEFAULT);
+    /** Gets the PACKAGE_ALLOWLIST_MODE_PROP System Property. */
+    private int getUserTypePackageAllowlistMode() {
+        return SystemProperties.getInt(PACKAGE_ALLOWLIST_MODE_PROP,
+                USER_TYPE_PACKAGE_ALLOWLIST_MODE_DEVICE_DEFAULT);
     }
 
-    /** Sets the PACKAGE_WHITELIST_MODE_PROP System Property to the given value. */
-    private void setUserTypePackageWhitelistMode(int mode) {
+    /** Sets the PACKAGE_ALLOWLIST_MODE_PROP System Property to the given value. */
+    private void setUserTypePackageAllowlistMode(int mode) {
         String result = ShellHelper.runShellCommand(
-                String.format("setprop %s %d", PACKAGE_WHITELIST_MODE_PROP, mode));
-        attestFalse("Failed to set sysprop " + PACKAGE_WHITELIST_MODE_PROP + ": " + result,
+                String.format("setprop %s %d", PACKAGE_ALLOWLIST_MODE_PROP, mode));
+        attestFalse("Failed to set sysprop " + PACKAGE_ALLOWLIST_MODE_PROP + ": " + result,
                 result != null && result.contains("Failed"));
     }
 
     private void removeUser(int userId) throws RemoteException {
-        stopUserAfterWaitingForBroadcastIdle(userId, true);
+        stopUserAfterWaitingForBroadcastIdle(userId);
         try {
             ShellHelper.runShellCommandWithTimeout("pm remove-user -w " + userId,
                     TIMEOUT_IN_SECOND);
@@ -1512,7 +1512,7 @@ public class UserLifecycleTests {
 
             final boolean preStartComplete = mIam.startUserInBackgroundWithListener(userId,
                     preWaiter) && preWaiter.waitForFinish(TIMEOUT_IN_SECOND * 1000);
-            stopUserAfterWaitingForBroadcastIdle(userId, /* force */true);
+            stopUserAfterWaitingForBroadcastIdle(userId);
 
             assertTrue("Pre start was not performed for user" + userId, preStartComplete);
         }
@@ -1557,6 +1557,7 @@ public class UserLifecycleTests {
     }
 
     private void waitCoolDownPeriod() {
+        // Heuristic value based on local tests. Stability increased compared to no waiting.
         final int tenSeconds = 1000 * 10;
         waitForBroadcastIdle();
         sleep(tenSeconds);

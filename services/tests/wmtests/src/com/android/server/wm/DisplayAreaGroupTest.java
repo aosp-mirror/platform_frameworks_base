@@ -114,8 +114,9 @@ public class DisplayAreaGroupTest extends WindowTestsBase {
 
     @Test
     public void testResolveOverrideConfiguration_reverseOrientationWhenDifferentFromParentRoot() {
-        mDisplayContent.setBounds(0, 0, 600, 900);
-        mDisplayContent.updateOrientation();
+        // Rotate the display to portrait.
+        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        displayRotation.setRotation(displayRotation.getPortraitRotation());
         mDisplayContent.sendNewConfiguration();
 
         // DAG fills Display
@@ -128,7 +129,7 @@ public class DisplayAreaGroupTest extends WindowTestsBase {
         assertThat(mDisplayAreaGroup.getConfiguration().orientation)
                 .isEqualTo(ORIENTATION_LANDSCAPE);
 
-        // DisplayAreaGroup is portriat, same as Display
+        // DisplayAreaGroup is portrait, same as Display
         mDisplayAreaGroup.setBounds(0, 0, 300, 450);
 
         assertThat(mDisplayAreaGroup.getConfiguration().orientation)

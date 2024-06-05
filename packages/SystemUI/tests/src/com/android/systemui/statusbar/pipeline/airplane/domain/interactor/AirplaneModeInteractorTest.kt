@@ -16,84 +16,99 @@
 
 package com.android.systemui.statusbar.pipeline.airplane.domain.interactor
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
-import org.junit.Before
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
 
-@SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
-@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+@SmallTest
+@RunWith(AndroidJUnit4::class)
 class AirplaneModeInteractorTest : SysuiTestCase() {
 
-    private lateinit var underTest: AirplaneModeInteractor
+    private val mobileConnectionsRepository =
+        FakeMobileConnectionsRepository(FakeMobileMappingsProxy(), mock<TableLogBuffer> {})
+    private val airplaneModeRepository = FakeAirplaneModeRepository()
+    private val connectivityRepository = FakeConnectivityRepository()
 
-    private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
-    private lateinit var connectivityRepository: FakeConnectivityRepository
+    private val underTest =
+        AirplaneModeInteractor(
+            airplaneModeRepository,
+            connectivityRepository,
+            mobileConnectionsRepository
+        )
 
-    @Before
-    fun setUp() {
-        airplaneModeRepository = FakeAirplaneModeRepository()
-        connectivityRepository = FakeConnectivityRepository()
-        underTest = AirplaneModeInteractor(airplaneModeRepository, connectivityRepository)
+    @Test
+    fun isAirplaneMode_matchesRepo() = runTest {
+        var latest: Boolean? = null
+        underTest.isAirplaneMode.onEach { latest = it }.launchIn(backgroundScope)
+
+        airplaneModeRepository.setIsAirplaneMode(true)
+        runCurrent()
+        assertThat(latest).isTrue()
+
+        airplaneModeRepository.setIsAirplaneMode(false)
+        runCurrent()
+        assertThat(latest).isFalse()
+
+        airplaneModeRepository.setIsAirplaneMode(true)
+        runCurrent()
+        assertThat(latest).isTrue()
     }
 
     @Test
-    fun isAirplaneMode_matchesRepo() =
-        runBlocking(IMMEDIATE) {
-            var latest: Boolean? = null
-            val job = underTest.isAirplaneMode.onEach { latest = it }.launchIn(this)
+    fun isForceHidden_repoHasWifiHidden_outputsTrue() = runTest {
+        connectivityRepository.setForceHiddenIcons(setOf(ConnectivitySlot.AIRPLANE))
 
-            airplaneModeRepository.setIsAirplaneMode(true)
-            yield()
-            assertThat(latest).isTrue()
+        var latest: Boolean? = null
+        underTest.isForceHidden.onEach { latest = it }.launchIn(backgroundScope)
+        runCurrent()
 
-            airplaneModeRepository.setIsAirplaneMode(false)
-            yield()
-            assertThat(latest).isFalse()
-
-            airplaneModeRepository.setIsAirplaneMode(true)
-            yield()
-            assertThat(latest).isTrue()
-
-            job.cancel()
-        }
+        assertThat(latest).isTrue()
+    }
 
     @Test
-    fun isForceHidden_repoHasWifiHidden_outputsTrue() =
-        runBlocking(IMMEDIATE) {
-            connectivityRepository.setForceHiddenIcons(setOf(ConnectivitySlot.AIRPLANE))
+    fun isForceHidden_repoDoesNotHaveWifiHidden_outputsFalse() = runTest {
+        connectivityRepository.setForceHiddenIcons(setOf())
 
-            var latest: Boolean? = null
-            val job = underTest.isForceHidden.onEach { latest = it }.launchIn(this)
+        var latest: Boolean? = null
+        underTest.isForceHidden.onEach { latest = it }.launchIn(backgroundScope)
+        runCurrent()
 
-            assertThat(latest).isTrue()
-
-            job.cancel()
-        }
+        assertThat(latest).isFalse()
+    }
 
     @Test
-    fun isForceHidden_repoDoesNotHaveWifiHidden_outputsFalse() =
-        runBlocking(IMMEDIATE) {
-            connectivityRepository.setForceHiddenIcons(setOf())
+    fun testSetAirplaneMode_inEcmMode_Blocked() = runTest {
+        mobileConnectionsRepository.setIsInEcmState(true)
 
-            var latest: Boolean? = null
-            val job = underTest.isForceHidden.onEach { latest = it }.launchIn(this)
+        assertThat(underTest.setIsAirplaneMode(true))
+            .isEqualTo(AirplaneModeInteractor.SetResult.BLOCKED_BY_ECM)
+        assertThat(airplaneModeRepository.isAirplaneMode.value).isFalse()
+    }
 
-            assertThat(latest).isFalse()
+    @Test
+    fun testSetAirplaneMode_notInEcmMode_Success() = runTest {
+        mobileConnectionsRepository.setIsInEcmState(false)
 
-            job.cancel()
-        }
+        underTest.setIsAirplaneMode(true)
+
+        assertThat(underTest.setIsAirplaneMode(true))
+            .isEqualTo(AirplaneModeInteractor.SetResult.SUCCESS)
+        assertThat(airplaneModeRepository.isAirplaneMode.value).isTrue()
+    }
 }
-
-private val IMMEDIATE = Dispatchers.Main.immediate

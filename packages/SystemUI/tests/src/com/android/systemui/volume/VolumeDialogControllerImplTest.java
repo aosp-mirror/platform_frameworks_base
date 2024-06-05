@@ -37,11 +37,10 @@ import android.media.IAudioService;
 import android.media.session.MediaSession;
 import android.os.Handler;
 import android.os.Process;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.CaptioningManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -64,7 +63,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+import java.util.concurrent.Executor;
+
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 @TestableLooper.RunWithLooper
 public class VolumeDialogControllerImplTest extends SysuiTestCase {
@@ -96,8 +97,6 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     @Mock
     private WakefulnessLifecycle mWakefullnessLifcycle;
     @Mock
-    private CaptioningManager mCaptioningManager;
-    @Mock
     private KeyguardManager mKeyguardManager;
     @Mock
     private ActivityManager mActivityManager;
@@ -117,6 +116,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         when(mRingerModeLiveData.getValue()).thenReturn(-1);
         when(mRingerModeInternalLiveData.getValue()).thenReturn(-1);
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
+        when(mUserTracker.getUserContext()).thenReturn(mContext);
         // Enable group volume adjustments
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions,
@@ -127,7 +127,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         mVolumeController = new TestableVolumeDialogControllerImpl(mContext,
                 mBroadcastDispatcher, mRingerModeTracker, mThreadFactory, mAudioManager,
                 mNotificationManager, mVibrator, mIAudioService, mAccessibilityManager,
-                mPackageManager, mWakefullnessLifcycle, mCaptioningManager, mKeyguardManager,
+                mPackageManager, mWakefullnessLifcycle, mKeyguardManager,
                 mActivityManager, mUserTracker, mDumpManager, mCallback);
         mVolumeController.setEnableDialogs(true, true);
     }
@@ -219,6 +219,11 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         verify(mRingerModeInternalLiveData).observeForever(any());
     }
 
+    @Test
+    public void testAddCallbackWithUserTracker() {
+        verify(mUserTracker).addCallback(any(UserTracker.Callback.class), any(Executor.class));
+    }
+
     static class TestableVolumeDialogControllerImpl extends VolumeDialogControllerImpl {
         private final WakefulnessLifecycle.Observer mWakefullessLifecycleObserver;
 
@@ -234,7 +239,6 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 AccessibilityManager accessibilityManager,
                 PackageManager packageManager,
                 WakefulnessLifecycle wakefulnessLifecycle,
-                CaptioningManager captioningManager,
                 KeyguardManager keyguardManager,
                 ActivityManager activityManager,
                 UserTracker userTracker,
@@ -242,7 +246,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 C callback) {
             super(context, broadcastDispatcher, ringerModeTracker, theadFactory, audioManager,
                     notificationManager, optionalVibrator, iAudioService, accessibilityManager,
-                    packageManager, wakefulnessLifecycle, captioningManager, keyguardManager,
+                    packageManager, wakefulnessLifecycle, keyguardManager,
                     activityManager, userTracker, dumpManager);
             mCallbacks = callback;
 

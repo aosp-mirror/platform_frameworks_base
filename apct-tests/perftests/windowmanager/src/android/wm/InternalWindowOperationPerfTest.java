@@ -52,9 +52,8 @@ public class InternalWindowOperationPerfTest extends WindowManagerPerfTestBase
     private final TraceMarkParser mTraceMarkParser = new TraceMarkParser(
             "applyPostLayoutPolicy",
             "applySurfaceChanges",
-            "AppTransitionReady",
-            "closeSurfaceTransaction",
-            "openSurfaceTransaction",
+            "onTransactionReady",
+            "applyTransaction",
             "performLayout",
             "performSurfacePlacement",
             "prepareSurfaces",

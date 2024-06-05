@@ -16,10 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.view.SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN;
 import static android.view.SurfaceControl.RefreshRateRange.FLOAT_TOLERANCE;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -68,15 +70,20 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
 
     private static final FrameRateVote FRAME_RATE_VOTE_NONE = new FrameRateVote();
     private static final FrameRateVote FRAME_RATE_VOTE_DENY_LIST =
-            new FrameRateVote(LOW_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_EXACT);
+            new FrameRateVote(LOW_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_EXACT,
+                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     private static final FrameRateVote FRAME_RATE_VOTE_LOW_EXACT =
-            new FrameRateVote(LOW_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_EXACT);
+            new FrameRateVote(LOW_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_EXACT,
+                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     private static final FrameRateVote FRAME_RATE_VOTE_HI_EXACT =
-            new FrameRateVote(HI_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_EXACT);
+            new FrameRateVote(HI_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_EXACT,
+                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     private static final FrameRateVote FRAME_RATE_VOTE_LOW_PREFERRED =
-            new FrameRateVote(LOW_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
+            new FrameRateVote(LOW_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
+                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     private static final FrameRateVote FRAME_RATE_VOTE_HI_PREFERRED =
-            new FrameRateVote(HI_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
+            new FrameRateVote(HI_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
+                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
 
     // Parcel and Unparcel the LayoutParams in the window state to test the path the object
     // travels from the app's process to system server
@@ -102,6 +109,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
                         defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(),
                         LOW_REFRESH_RATE),
         };
+        mDisplayInfo.appsSupportedModes = mDisplayInfo.supportedModes;
         mDisplayInfo.defaultModeId = HI_MODE_ID;
         mPolicy = new RefreshRatePolicy(mWm, mDisplayInfo, mDenylist);
     }
@@ -282,6 +290,9 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
 
+        if (explicitRefreshRateHints()) {
+            return;
+        }
         overrideWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
                 overrideWindow.getPendingTransaction(), mock(AnimationAdapter.class),
                 false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
@@ -320,6 +331,9 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
 
+        if (explicitRefreshRateHints()) {
+            return;
+        }
         overrideWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
                 overrideWindow.getPendingTransaction(), mock(AnimationAdapter.class),
                 false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
@@ -342,6 +356,9 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         assertEquals(0, mPolicy.getPreferredMinRefreshRate(window), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(window), FLOAT_TOLERANCE);
 
+        if (explicitRefreshRateHints()) {
+            return;
+        }
         window.mActivityRecord.mSurfaceAnimator.startAnimation(
                 window.getPendingTransaction(), mock(AnimationAdapter.class),
                 false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);

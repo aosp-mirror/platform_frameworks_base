@@ -106,15 +106,14 @@ static jint backupToTar(JNIEnv* env, jobject clazz, jstring packageNameObj,
             : NULL;
 
     if (path.length() < rootpath.length()) {
-        ALOGE("file path [%s] shorter than root path [%s]",
-                path.string(), rootpath.string());
+        ALOGE("file path [%s] shorter than root path [%s]", path.c_str(), rootpath.c_str());
         return (jint) -1;
     }
 
     off64_t tarSize = 0;
     jint err = write_tarfile(packageName, domain, rootpath, path, &tarSize, writer);
     if (!err) {
-        ALOGI("measured [%s] at %lld", path.string(), (long long)tarSize);
+        ALOGI("measured [%s] at %lld", path.c_str(), (long long)tarSize);
         env->CallVoidMethod(dataOutputObj, sFullBackupDataOutput.addSize, (jlong) tarSize);
     }
 

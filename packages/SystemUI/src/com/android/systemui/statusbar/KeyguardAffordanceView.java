@@ -39,7 +39,7 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.android.app.animation.Interpolators;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 /**

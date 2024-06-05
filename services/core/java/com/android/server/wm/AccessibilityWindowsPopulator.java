@@ -22,6 +22,7 @@ import static com.android.internal.util.DumpUtils.dumpSparseArray;
 import static com.android.server.wm.utils.RegionUtils.forEachRect;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -34,7 +35,6 @@ import android.os.Message;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.IWindow;
 import android.view.InputWindowHandle;
 import android.view.MagnificationSpec;
 import android.view.WindowInfo;
@@ -150,7 +150,11 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
     @Override
     public void onWindowInfosChanged(InputWindowHandle[] windowHandles,
             DisplayInfo[] displayInfos) {
-        mHandler.post(() -> onWindowInfosChangedInternal(windowHandles, displayInfos));
+        if (com.android.server.accessibility.Flags.removeOnWindowInfosChangedHandler()) {
+            onWindowInfosChangedInternal(windowHandles, displayInfos);
+        } else {
+            mHandler.post(() -> onWindowInfosChangedInternal(windowHandles, displayInfos));
+        }
     }
 
     private void onWindowInfosChangedInternal(InputWindowHandle[] windowHandles,
@@ -161,9 +165,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             final boolean visible = (window.inputConfig & InputConfig.NOT_VISIBLE) == 0;
             final boolean isNotClone = (window.inputConfig & InputConfig.CLONE) == 0;
             final boolean hasTouchableRegion = !window.touchableRegion.isEmpty();
-            final boolean hasNonEmptyFrame =
-                    (window.frameBottom != window.frameTop) && (window.frameLeft
-                            != window.frameRight);
+            final boolean hasNonEmptyFrame = !window.frame.isEmpty();
             if (visible && isNotClone && hasTouchableRegion && hasNonEmptyFrame) {
                 tempVisibleWindows.add(window);
             }
@@ -199,14 +201,14 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             final HashMap<IBinder, Matrix> windowsTransformMatrixMap = new HashMap<>();
 
             for (InputWindowHandle inputWindowHandle : windows) {
-                final IWindow iWindow = inputWindowHandle.getWindow();
-                final WindowState windowState = iWindow != null ? mService.mWindowMap.get(
-                        iWindow.asBinder()) : null;
+                final IBinder iWindow = inputWindowHandle.getWindowToken();
+                final WindowState windowState = iWindow != null ? mService.mWindowMap.get(iWindow)
+                        : null;
 
                 if (windowState != null && windowState.shouldMagnify()) {
                     final Matrix transformMatrix = new Matrix();
                     windowState.getTransformationMatrix(sTempFloats, transformMatrix);
-                    windowsTransformMatrixMap.put(iWindow.asBinder(), transformMatrix);
+                    windowsTransformMatrixMap.put(iWindow, transformMatrix);
                 }
             }
 
@@ -332,8 +334,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         // the old and new windows at the same index should be the
         // same, otherwise something changed.
         for (int i = 0; i < windowsCount; i++) {
-            final IWindow newWindowToken = newWindows.get(i).getWindow();
-            final IWindow oldWindowToken = oldWindows.get(i).getWindow();
+            final IBinder newWindowToken = newWindows.get(i).getWindowToken();
+            final IBinder oldWindowToken = oldWindows.get(i).getWindowToken();
             final boolean hasNewWindowToken = newWindowToken != null;
             final boolean hasOldWindowToken = oldWindowToken != null;
 
@@ -344,8 +346,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
             // If both old and new windows had window tokens, but those tokens differ,
             // then the windows have changed.
-            if (hasNewWindowToken && hasOldWindowToken
-                    && !newWindowToken.asBinder().equals(oldWindowToken.asBinder())) {
+            if (hasNewWindowToken && hasOldWindowToken && !newWindowToken.equals(oldWindowToken)) {
                 return true;
             }
         }
@@ -395,9 +396,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         for (int index = inputWindowHandles.size() - 1; index >= 0; index--) {
             final Matrix windowTransformMatrix = mTempMatrix2;
             final InputWindowHandle windowHandle = inputWindowHandles.get(index);
-            final IBinder iBinder =
-                    windowHandle.getWindow() != null ? windowHandle.getWindow().asBinder() : null;
-
+            final IBinder iBinder = windowHandle.getWindowToken();
             if (getWindowTransformMatrix(iBinder, windowTransformMatrix)) {
                 generateMagnificationSpecInverseMatrix(windowHandle, currentMagnificationSpec,
                         previousMagnificationSpec, windowTransformMatrix);
@@ -567,32 +566,35 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.println("AccessibilityWindowsPopulator");
-        String prefix2 = prefix + "  ";
+        synchronized (mLock) {
+            pw.print(prefix); pw.println("AccessibilityWindowsPopulator");
+            String prefix2 = prefix + "  ";
 
-        pw.print(prefix2); pw.print("mWindowsNotificationEnabled: ");
-        pw.println(mWindowsNotificationEnabled);
+            pw.print(prefix2); pw.print("mWindowsNotificationEnabled: ");
+            pw.println(mWindowsNotificationEnabled);
 
-        if (mVisibleWindows.isEmpty()) {
-            pw.print(prefix2); pw.println("No visible windows");
-        } else {
-            pw.print(prefix2); pw.print(mVisibleWindows.size());
-            pw.print(" visible windows: "); pw.println(mVisibleWindows);
+            if (mVisibleWindows.isEmpty()) {
+                pw.print(prefix2); pw.println("No visible windows");
+            } else {
+                pw.print(prefix2); pw.print(mVisibleWindows.size());
+                pw.print(" visible windows: "); pw.println(mVisibleWindows);
+            }
+            KeyDumper noKeyDumper = (i, k) -> {}; // display id is already shown on value;
+            KeyDumper displayDumper = (i, d) -> pw.printf("%sDisplay #%d: ", prefix, d);
+            // Ideally magnificationSpecDumper should use spec.dump(pw), but there is no such method
+            ValueDumper<MagnificationSpec> magnificationSpecDumper = spec -> pw.print(spec);
+
+            dumpSparseArray(pw, prefix2, mDisplayInfos,
+                    "display info", noKeyDumper, d -> pw.print(d));
+            dumpSparseArray(pw, prefix2, mInputWindowHandlesOnDisplays,
+                    "window handles on display", displayDumper, list -> pw.print(list));
+            dumpSparseArray(pw, prefix2, mMagnificationSpecInverseMatrix,
+                    "magnification spec matrix", noKeyDumper, matrix -> matrix.dump(pw));
+            dumpSparseArray(pw, prefix2, mCurrentMagnificationSpec,
+                    "current magnification spec", noKeyDumper, magnificationSpecDumper);
+            dumpSparseArray(pw, prefix2, mPreviousMagnificationSpec,
+                    "previous magnification spec", noKeyDumper, magnificationSpecDumper);
         }
-        KeyDumper noKeyDumper = (i, k) -> {}; // display id is already shown on value;
-        KeyDumper displayDumper = (i, d) -> pw.printf("%sDisplay #%d: ", prefix, d);
-        // Ideally magnificationSpecDumper should use spec.dump(pw), but there is no such method
-        ValueDumper<MagnificationSpec> magnificationSpecDumper = spec -> pw.print(spec);
-
-        dumpSparseArray(pw, prefix2, mDisplayInfos, "display info", noKeyDumper, d -> pw.print(d));
-        dumpSparseArray(pw, prefix2, mInputWindowHandlesOnDisplays, "window handles on display",
-                displayDumper, list -> pw.print(list));
-        dumpSparseArray(pw, prefix2, mMagnificationSpecInverseMatrix, "magnification spec matrix",
-                noKeyDumper, matrix -> matrix.dump(pw));
-        dumpSparseArray(pw, prefix2, mCurrentMagnificationSpec, "current magnification spec",
-                noKeyDumper, magnificationSpecDumper);
-        dumpSparseArray(pw, prefix2, mPreviousMagnificationSpec, "previous magnification spec",
-                noKeyDumper, magnificationSpecDumper);
     }
 
     @GuardedBy("mLock")
@@ -647,7 +649,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
      */
     public static class AccessibilityWindow {
         // Data
-        private IWindow mWindow;
+        private IBinder mWindow;
         private int mDisplayId;
         @WindowManager.LayoutParams.WindowType
         private int mType;
@@ -661,6 +663,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         private final Region mTouchableRegionInScreen = new Region();
         private final Region mTouchableRegionInWindow = new Region();
         private WindowInfo mWindowInfo;
+        private Rect mSystemBarInsetFrame = null;
 
 
         /**
@@ -672,9 +675,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         public static AccessibilityWindow initializeData(WindowManagerService service,
                 InputWindowHandle inputWindowHandle, Matrix magnificationInverseMatrix,
                 IBinder pipIBinder, Matrix displayMatrix) {
-            final IWindow window = inputWindowHandle.getWindow();
-            final WindowState windowState = window != null ? service.mWindowMap.get(
-                    window.asBinder()) : null;
+            final IBinder window = inputWindowHandle.getWindowToken();
+            final WindowState windowState = window != null ? service.mWindowMap.get(window) : null;
 
             final AccessibilityWindow instance = new AccessibilityWindow();
 
@@ -682,7 +684,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             instance.mDisplayId = inputWindowHandle.displayId;
             instance.mInputConfig = inputWindowHandle.inputConfig;
             instance.mType = inputWindowHandle.layoutParamsType;
-            instance.mIsPIPMenu = window != null && window.asBinder().equals(pipIBinder);
+            instance.mIsPIPMenu = window != null && window.equals(pipIBinder);
 
             // TODO (b/199357848): gets the private flag of the window from other way.
             instance.mPrivateFlags = windowState != null ? windowState.mAttrs.privateFlags : 0;
@@ -694,9 +696,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             instance.mIgnoreDuetoRecentsAnimation = windowState != null && controller != null
                     && controller.shouldIgnoreForAccessibility(windowState);
 
-            final Rect windowFrame = new Rect(inputWindowHandle.frameLeft,
-                    inputWindowHandle.frameTop, inputWindowHandle.frameRight,
-                    inputWindowHandle.frameBottom);
+            final Rect windowFrame = new Rect(inputWindowHandle.frame);
             getTouchableRegionInWindow(instance.mShouldMagnify, inputWindowHandle.touchableRegion,
                     instance.mTouchableRegionInWindow, windowFrame, magnificationInverseMatrix,
                     displayMatrix);
@@ -725,6 +725,16 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                     spec.offsetY = sTempFloats[Matrix.MTRANS_Y];
                 } else {
                     Slog.w(TAG, "can't find spec");
+                }
+            }
+
+            // Compute system bar insets frame if needed.
+            if (com.android.server.accessibility.Flags.computeWindowChangesOnA11yV2()
+                    && windowState != null && instance.isUntouchableNavigationBar()) {
+                final InsetsSourceProvider provider =
+                        windowState.getControllableInsetProvider();
+                if (provider != null) {
+                    instance.mSystemBarInsetFrame = provider.getSource().getFrame();
                 }
             }
             return instance;
@@ -821,6 +831,15 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             return mIsPIPMenu;
         }
 
+        /**
+         * @return the system inset frame size if the window is untouchable navigation bar.
+         *  Returns null otherwise.
+         */
+        @Nullable
+        public Rect getSystemBarInsetsFrame() {
+            return mSystemBarInsetFrame;
+        }
+
         private static void getTouchableRegionInWindow(boolean shouldMagnify, Region inRegion,
                 Region outRegion, Rect frame, Matrix inverseMatrix, Matrix displayMatrix) {
             // Some modal windows, like the activity with Theme.dialog, has the full screen
@@ -871,7 +890,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             WindowInfo windowInfo = WindowInfo.obtain();
             windowInfo.displayId = window.mDisplayId;
             windowInfo.type = window.mType;
-            windowInfo.token = window.mWindow != null ? window.mWindow.asBinder() : null;
+            windowInfo.token = window.mWindow;
             windowInfo.hasFlagWatchOutsideTouch = (window.mInputConfig
                     & InputConfig.WATCH_OUTSIDE_TOUCH) != 0;
             // Set it to true to be consistent with the legacy implementation.
@@ -882,7 +901,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         @Override
         public String toString() {
             String windowToken =
-                    mWindow != null ? mWindow.asBinder().toString() : "(no window token)";
+                    mWindow != null ? mWindow.toString() : "(no window token)";
             return "A11yWindow=[" + windowToken
                     + ", displayId=" + mDisplayId
                     + ", inputConfig=0x" + Integer.toHexString(mInputConfig)

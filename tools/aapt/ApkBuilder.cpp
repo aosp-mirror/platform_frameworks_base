@@ -36,7 +36,7 @@ status_t ApkBuilder::createSplitForConfigs(const std::set<ConfigDescription>& co
             if (splitConfigs.count(*iter) > 0) {
                 // Can't have overlapping configurations.
                 fprintf(stderr, "ERROR: Split configuration '%s' is already defined "
-                        "in another split.\n", iter->toString().string());
+                        "in another split.\n", iter->toString().c_str());
                 return ALREADY_EXISTS;
             }
         }
@@ -115,10 +115,10 @@ status_t ApkSplit::addEntry(const String8& path, const sp<AaptFile>& file) {
 }
 
 void ApkSplit::print() const {
-    fprintf(stderr, "APK Split '%s'\n", mName.string());
+    fprintf(stderr, "APK Split '%s'\n", mName.c_str());
 
     std::set<OutputEntry>::const_iterator iter = mFiles.begin();
     for (; iter != mFiles.end(); iter++) {
-        fprintf(stderr, "  %s (%s)\n", iter->getPath().string(), iter->getFile()->getSourceFile().string());
+        fprintf(stderr, "  %s (%s)\n", iter->getPath().c_str(), iter->getFile()->getSourceFile().c_str());
     }
 }

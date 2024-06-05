@@ -14,41 +14,26 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalAnimationApi::class)
-
 package com.android.systemui.bouncer.ui.composable
 
 import android.view.HapticFeedbackConstants
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,168 +42,197 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Easings
 import com.android.compose.grid.VerticalGrid
-import com.android.systemui.R
+import com.android.compose.modifiers.thenIf
+import com.android.systemui.bouncer.ui.viewmodel.ActionButtonAppearance
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
-import com.android.systemui.compose.modifiers.thenIf
-import kotlin.math.max
+import com.android.systemui.res.R
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/** Renders the PIN button pad. */
 @Composable
-internal fun PinBouncer(
+fun PinPad(
     viewModel: PinBouncerViewModel,
+    verticalSpacing: Dp,
     modifier: Modifier = Modifier,
 ) {
-    // Report that the UI is shown to let the view-model run some logic.
-    LaunchedEffect(Unit) { viewModel.onShown() }
+    DisposableEffect(Unit) { onDispose { viewModel.onHidden() } }
 
-    // The length of the PIN input received so far, so we know how many dots to render.
-    val pinLength: Pair<Int, Int> by viewModel.pinLengths.collectAsState()
-    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
-    val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
+    val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsStateWithLifecycle()
+    val backspaceButtonAppearance by
+        viewModel.backspaceButtonAppearance.collectAsStateWithLifecycle()
+    val confirmButtonAppearance by viewModel.confirmButtonAppearance.collectAsStateWithLifecycle()
+    val animateFailure: Boolean by viewModel.animateFailure.collectAsStateWithLifecycle()
+    val isDigitButtonAnimationEnabled: Boolean by
+        viewModel.isDigitButtonAnimationEnabled.collectAsStateWithLifecycle()
 
-    // Show the failure animation if the user entered the wrong input.
+    val buttonScaleAnimatables = remember { List(12) { Animatable(1f) } }
     LaunchedEffect(animateFailure) {
+        // Show the failure animation if the user entered the wrong input.
         if (animateFailure) {
-            showFailureAnimation()
+            showFailureAnimation(buttonScaleAnimatables)
             viewModel.onFailureAnimationShown()
         }
     }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    VerticalGrid(
+        columns = columns,
+        verticalSpacing = verticalSpacing,
+        horizontalSpacing = calculateHorizontalSpacingBetweenColumns(gridWidth = 300.dp),
         modifier = modifier,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.heightIn(min = 16.dp).animateContentSize(),
-        ) {
-            // TODO(b/281871687): add support for dot shapes.
-            val (previousPinLength, currentPinLength) = pinLength
-            val dotCount = max(previousPinLength, currentPinLength) + 1
-            repeat(dotCount) { index ->
-                AnimatedVisibility(
-                    visible = index < currentPinLength,
-                    enter = fadeIn() + scaleIn() + slideInHorizontally(),
-                    exit = fadeOut() + scaleOut() + slideOutHorizontally(),
-                ) {
-                    Box(
-                        modifier =
-                            Modifier.size(16.dp)
-                                .background(
-                                    MaterialTheme.colorScheme.onSurfaceVariant,
-                                    CircleShape,
-                                )
-                    )
-                }
-            }
+        repeat(9) { index ->
+            DigitButton(
+                digit = index + 1,
+                isInputEnabled = isInputEnabled,
+                onClicked = viewModel::onPinButtonClicked,
+                scaling = buttonScaleAnimatables[index]::value,
+                isAnimationEnabled = isDigitButtonAnimationEnabled,
+            )
         }
 
-        Spacer(Modifier.height(100.dp))
+        ActionButton(
+            icon =
+                Icon.Resource(
+                    res = R.drawable.ic_backspace_24dp,
+                    contentDescription =
+                        ContentDescription.Resource(R.string.keyboardview_keycode_delete),
+                ),
+            isInputEnabled = isInputEnabled,
+            onClicked = viewModel::onBackspaceButtonClicked,
+            onLongPressed = viewModel::onBackspaceButtonLongPressed,
+            appearance = backspaceButtonAppearance,
+            scaling = buttonScaleAnimatables[9]::value,
+        )
 
-        VerticalGrid(
-            columns = 3,
-            verticalSpacing = 12.dp,
-            horizontalSpacing = 20.dp,
-        ) {
-            repeat(9) { index ->
-                val digit = index + 1
-                PinButton(
-                    onClicked = { viewModel.onPinButtonClicked(digit) },
-                    isEnabled = isInputEnabled,
-                ) { contentColor ->
-                    PinDigit(digit, contentColor)
-                }
-            }
+        DigitButton(
+            digit = 0,
+            isInputEnabled = isInputEnabled,
+            onClicked = viewModel::onPinButtonClicked,
+            scaling = buttonScaleAnimatables[10]::value,
+            isAnimationEnabled = isDigitButtonAnimationEnabled,
+        )
 
-            PinButton(
-                onClicked = { viewModel.onBackspaceButtonClicked() },
-                onLongPressed = { viewModel.onBackspaceButtonLongPressed() },
-                isEnabled = isInputEnabled,
-                isIconButton = true,
-            ) { contentColor ->
-                PinIcon(
-                    Icon.Resource(
-                        res = R.drawable.ic_backspace_24dp,
-                        contentDescription =
-                            ContentDescription.Resource(R.string.keyboardview_keycode_delete),
-                    ),
-                    contentColor,
-                )
-            }
-
-            PinButton(
-                onClicked = { viewModel.onPinButtonClicked(0) },
-                isEnabled = isInputEnabled,
-            ) { contentColor ->
-                PinDigit(0, contentColor)
-            }
-
-            PinButton(
-                onClicked = { viewModel.onAuthenticateButtonClicked() },
-                isEnabled = isInputEnabled,
-                isIconButton = true,
-            ) { contentColor ->
-                PinIcon(
-                    Icon.Resource(
-                        res = R.drawable.ic_keyboard_tab_36dp,
-                        contentDescription =
-                            ContentDescription.Resource(R.string.keyboardview_keycode_enter),
-                    ),
-                    contentColor,
-                )
-            }
-        }
+        ActionButton(
+            icon =
+                Icon.Resource(
+                    res = R.drawable.ic_keyboard_tab_36dp,
+                    contentDescription =
+                        ContentDescription.Resource(R.string.keyboardview_keycode_enter),
+                ),
+            isInputEnabled = isInputEnabled,
+            onClicked = viewModel::onAuthenticateButtonClicked,
+            appearance = confirmButtonAppearance,
+            scaling = buttonScaleAnimatables[11]::value,
+        )
     }
 }
 
 @Composable
-private fun PinDigit(
+private fun DigitButton(
     digit: Int,
-    contentColor: Color,
+    isInputEnabled: Boolean,
+    onClicked: (Int) -> Unit,
+    scaling: () -> Float,
+    isAnimationEnabled: Boolean,
 ) {
-    // TODO(b/281878426): once "color: () -> Color" (added to BasicText in aosp/2568972) makes it
-    //  into Text, use that here, to animate more efficiently.
-    Text(
-        text = digit.toString(),
-        style = MaterialTheme.typography.headlineLarge,
-        color = contentColor,
-    )
+    PinPadButton(
+        onClicked = { onClicked(digit) },
+        isEnabled = isInputEnabled,
+        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+        foregroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        isAnimationEnabled = isAnimationEnabled,
+        modifier =
+            Modifier.graphicsLayer {
+                val scale = if (isAnimationEnabled) scaling() else 1f
+                scaleX = scale
+                scaleY = scale
+            }
+    ) { contentColor ->
+        // TODO(b/281878426): once "color: () -> Color" (added to BasicText in aosp/2568972) makes
+        // it into Text, use that here, to animate more efficiently.
+        Text(
+            text = digit.toString(),
+            style = MaterialTheme.typography.headlineLarge,
+            color = contentColor(),
+        )
+    }
 }
 
 @Composable
-private fun PinIcon(
+private fun ActionButton(
     icon: Icon,
-    contentColor: Color,
+    isInputEnabled: Boolean,
+    onClicked: () -> Unit,
+    onLongPressed: (() -> Unit)? = null,
+    appearance: ActionButtonAppearance,
+    scaling: () -> Float,
 ) {
-    Icon(
-        icon = icon,
-        tint = contentColor,
-    )
+    val isHidden = appearance == ActionButtonAppearance.Hidden
+    val hiddenAlpha by animateFloatAsState(if (isHidden) 0f else 1f, label = "Action button alpha")
+
+    val foregroundColor =
+        when (appearance) {
+            ActionButtonAppearance.Shown -> MaterialTheme.colorScheme.onSecondaryContainer
+            else -> MaterialTheme.colorScheme.onSurface
+        }
+    val backgroundColor =
+        when (appearance) {
+            ActionButtonAppearance.Shown -> MaterialTheme.colorScheme.secondaryContainer
+            else -> MaterialTheme.colorScheme.surface
+        }
+
+    PinPadButton(
+        onClicked = onClicked,
+        onLongPressed = onLongPressed,
+        isEnabled = isInputEnabled && !isHidden,
+        backgroundColor = backgroundColor,
+        foregroundColor = foregroundColor,
+        isAnimationEnabled = true,
+        modifier =
+            Modifier.graphicsLayer {
+                alpha = hiddenAlpha
+                val scale = scaling()
+                scaleX = scale
+                scaleY = scale
+            }
+    ) { contentColor ->
+        Icon(
+            icon = icon,
+            tint = contentColor(),
+        )
+    }
 }
 
 @Composable
-private fun PinButton(
+private fun PinPadButton(
     onClicked: () -> Unit,
     isEnabled: Boolean,
+    backgroundColor: Color,
+    foregroundColor: Color,
+    isAnimationEnabled: Boolean,
     modifier: Modifier = Modifier,
     onLongPressed: (() -> Unit)? = null,
-    isIconButton: Boolean = false,
-    content: @Composable (contentColor: Color) -> Unit,
+    content: @Composable (contentColor: () -> Color) -> Unit,
 ) {
     var isPressed: Boolean by remember { mutableStateOf(false) }
 
@@ -243,7 +257,7 @@ private fun PinButton(
 
     val cornerRadius: Dp by
         animateDpAsState(
-            if (isPressed) 24.dp else pinButtonSize / 2,
+            if (isAnimationEnabled && isPressed) 24.dp else pinButtonMaxSize / 2,
             label = "PinButton round corners",
             animationSpec = tween(animDurationMillis, easing = animEasing)
         )
@@ -251,19 +265,17 @@ private fun PinButton(
     val containerColor: Color by
         animateColorAsState(
             when {
-                isPressed -> MaterialTheme.colorScheme.primary
-                isIconButton -> MaterialTheme.colorScheme.secondaryContainer
-                else -> MaterialTheme.colorScheme.surfaceVariant
+                isAnimationEnabled && isPressed -> MaterialTheme.colorScheme.primary
+                else -> backgroundColor
             },
             label = "Pin button container color",
             animationSpec = colorAnimationSpec
         )
-    val contentColor: Color by
+    val contentColor =
         animateColorAsState(
             when {
-                isPressed -> MaterialTheme.colorScheme.onPrimary
-                isIconButton -> MaterialTheme.colorScheme.onSecondaryContainer
-                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                isAnimationEnabled && isPressed -> MaterialTheme.colorScheme.onPrimary
+                else -> foregroundColor
             },
             label = "Pin button container color",
             animationSpec = colorAnimationSpec
@@ -275,7 +287,10 @@ private fun PinButton(
         contentAlignment = Alignment.Center,
         modifier =
             modifier
-                .size(pinButtonSize)
+                .focusRequester(FocusRequester.Default)
+                .focusable()
+                .sizeIn(maxWidth = pinButtonMaxSize, maxHeight = pinButtonMaxSize)
+                .aspectRatio(1f)
                 .drawBehind {
                     drawRoundRect(
                         color = containerColor,
@@ -302,19 +317,62 @@ private fun PinButton(
                     }
                 },
     ) {
-        content(contentColor)
+        content(contentColor::value)
     }
 }
 
-private fun showFailureAnimation() {
-    // TODO(b/282730134): implement.
+private suspend fun showFailureAnimation(
+    buttonScaleAnimatables: List<Animatable<Float, AnimationVector1D>>
+) {
+    coroutineScope {
+        buttonScaleAnimatables.forEachIndexed { index, animatable ->
+            launch {
+                animatable.animateTo(
+                    targetValue = pinButtonErrorShrinkFactor,
+                    animationSpec =
+                        tween(
+                            durationMillis = pinButtonErrorShrinkMs,
+                            delayMillis = index * pinButtonErrorStaggerDelayMs,
+                            easing = Easings.Linear,
+                        ),
+                )
+
+                animatable.animateTo(
+                    targetValue = 1f,
+                    animationSpec =
+                        tween(
+                            durationMillis = pinButtonErrorRevertMs,
+                            easing = Easings.Legacy,
+                        ),
+                )
+            }
+        }
+    }
 }
 
-private val pinButtonSize = 84.dp
+/** Returns the amount of horizontal spacing between columns, in dips. */
+private fun calculateHorizontalSpacingBetweenColumns(
+    gridWidth: Dp,
+): Dp {
+    return (gridWidth - (pinButtonMaxSize * columns)) / (columns - 1)
+}
+
+/** Number of columns in the PIN pad grid. */
+private const val columns = 3
+/** Maximum size (width and height) of each PIN pad button. */
+private val pinButtonMaxSize = 84.dp
+/** Scale factor to apply to buttons when animating the "error" animation on them. */
+private val pinButtonErrorShrinkFactor = 67.dp / pinButtonMaxSize
+/** Animation duration of the "shrink" phase of the error animation, on each PIN pad button. */
+private const val pinButtonErrorShrinkMs = 50
+/** Amount of time to wait between application of the "error" animation to each row of buttons. */
+private const val pinButtonErrorStaggerDelayMs = 33
+/** Animation duration of the "revert" phase of the error animation, on each PIN pad button. */
+private const val pinButtonErrorRevertMs = 617
 
 // Pin button motion spec: http://shortn/_9TTIG6SoEa
 private val pinButtonPressedDuration = 100.milliseconds
-private val pinButtonPressedEasing = LinearEasing
+private val pinButtonPressedEasing = Easings.Linear
 private val pinButtonHoldTime = 33.milliseconds
 private val pinButtonReleasedDuration = 420.milliseconds
-private val pinButtonReleasedEasing = Easings.StandardEasing
+private val pinButtonReleasedEasing = Easings.Standard

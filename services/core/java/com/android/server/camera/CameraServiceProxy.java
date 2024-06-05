@@ -37,6 +37,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
+import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.hardware.CameraExtensionSessionStats;
 import android.hardware.CameraSessionStats;
@@ -52,7 +53,8 @@ import android.hardware.display.DisplayManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
-import android.nfc.INfcAdapter;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -60,6 +62,9 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -68,6 +73,7 @@ import android.stats.camera.nano.CameraProtos.CameraStreamProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Range;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IDisplayWindowListener;
@@ -77,12 +83,15 @@ import android.view.WindowManagerGlobal;
 import com.android.framework.protobuf.nano.MessageNano;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.camera.flags.Flags;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.wm.WindowManagerInternal;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -162,10 +171,6 @@ public class CameraServiceProxy extends SystemService
      * SCALER_ROTATE_AND_CROP_NONE  -> Always return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE
      */
 
-    // Flags arguments to NFC adapter to enable/disable NFC
-    public static final int DISABLE_POLLING_FLAGS = 0x1000;
-    public static final int ENABLE_POLLING_FLAGS = 0x0000;
-
     // Handler message codes
     private static final int MSG_SWITCH_USER = 1;
     private static final int MSG_NOTIFY_DEVICE_STATE = 2;
@@ -215,7 +220,6 @@ public class CameraServiceProxy extends SystemService
     private final List<CameraUsageEvent> mCameraUsageHistory = new ArrayList<>();
 
     private static final String NFC_NOTIFICATION_PROP = "ro.camera.notify_nfc";
-    private static final String NFC_SERVICE_BINDER_NAME = "nfc";
     private static final IBinder nfcInterfaceToken = new Binder();
 
     private final boolean mNotifyNfc;
@@ -244,6 +248,9 @@ public class CameraServiceProxy extends SystemService
         public List<CameraStreamStats> mStreamStats;
         public String mUserTag;
         public int mVideoStabilizationMode;
+        public boolean mUsedUltraWide;
+        public boolean mUsedZoomOverride;
+        public Range<Integer> mMostRequestedFpsRange;
         public final long mLogId;
         public final int mSessionIndex;
 
@@ -266,12 +273,15 @@ public class CameraServiceProxy extends SystemService
             mDeviceError = deviceError;
             mLogId = logId;
             mSessionIndex = sessionIdx;
+            mMostRequestedFpsRange = new Range<Integer>(0, 0);
         }
 
         public void markCompleted(int internalReconfigure, long requestCount,
                 long resultErrorCount, boolean deviceError,
                 List<CameraStreamStats>  streamStats, String userTag,
-                int videoStabilizationMode, CameraExtensionSessionStats extStats) {
+                int videoStabilizationMode, boolean usedUltraWide,
+                boolean usedZoomOverride, Range<Integer> mostRequestedFpsRange,
+                CameraExtensionSessionStats extStats) {
             if (mCompleted) {
                 return;
             }
@@ -284,7 +294,10 @@ public class CameraServiceProxy extends SystemService
             mStreamStats = streamStats;
             mUserTag = userTag;
             mVideoStabilizationMode = videoStabilizationMode;
+            mUsedUltraWide = usedUltraWide;
+            mUsedZoomOverride = usedZoomOverride;
             mExtSessionStats = extStats;
+            mMostRequestedFpsRange = mostRequestedFpsRange;
             if (CameraServiceProxy.DEBUG) {
                 Slog.v(TAG, "A camera facing " + cameraFacingToString(mCameraFacing) +
                         " was in use by " + mClientName + " for " +
@@ -613,16 +626,80 @@ public class CameraServiceProxy extends SystemService
 
         @Override
         public boolean isCameraDisabled(int userId) {
-            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-            if (dpm == null) {
-                Slog.e(TAG, "Failed to get the device policy manager service");
+            if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
+                Slog.e(TAG, "Calling UID: " + Binder.getCallingUid()
+                        + " doesn't match expected camera service UID!");
                 return false;
             }
+            final long ident = Binder.clearCallingIdentity();
             try {
-                return dpm.getCameraDisabled(null, userId);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
+                DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+                if (dpm == null) {
+                    Slog.e(TAG, "Failed to get the device policy manager service");
+                    return false;
+                }
+                try {
+                    return dpm.getCameraDisabled(null, userId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+                String[] args, ShellCallback callback, ResultReceiver resultReceiver)
+                throws RemoteException {
+            new CSPShellCmd(CameraServiceProxy.this)
+                .exec(this, in, out, err, args, callback, resultReceiver);
+        }
+
+        private static class CSPShellCmd extends ShellCommand {
+            private static final String TAG = "CSPShellCmd";
+            private static final String USAGE = """
+                    usage: cmd media.camera.proxy SUBCMD [args]
+
+                    SUBCMDs:
+                        dump_events: Write out all collected camera usage events to statsd.
+                            Does not print to terminal.
+                        help: You're reading it.
+                    """;
+
+            private final CameraServiceProxy mCameraServiceProxy;
+
+            CSPShellCmd(CameraServiceProxy proxy) {
+                mCameraServiceProxy = proxy;
+            }
+
+            @Override
+            public int onCommand(String cmd) {
+                if (cmd == null) {
+                    return handleDefaultCommands(cmd);
+                }
+                final PrintWriter pw = getOutPrintWriter();
+                try {
+                    switch (cmd.replace('-', '_')) {
+                        case "dump_events":
+                            int eventCount = mCameraServiceProxy.getUsageEventCount();
+                            mCameraServiceProxy.dumpUsageEvents();
+                            pw.println("Camera usage events dumped: " + eventCount);
+                            break;
+                        default:
+                            return handleDefaultCommands(cmd);
+                    }
+                } catch (Exception e) {
+                    Slog.e(mCameraServiceProxy.TAG, "Error running shell command", e);
+                    return 1;
+                }
+                return 0;
+            }
+
+            @Override
+            public void onHelp() {
+                getOutPrintWriter().println(USAGE);
             }
         }
     };
@@ -830,6 +907,7 @@ public class CameraServiceProxy extends SystemService
 
             int extensionType = FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_NONE;
             boolean extensionIsAdvanced = false;
+            int extensionCaptureFormat = ImageFormat.UNKNOWN;
             if (e.mExtSessionStats != null) {
                 switch (e.mExtSessionStats.type) {
                     case CameraExtensionSessionStats.Type.EXTENSION_AUTOMATIC:
@@ -856,6 +934,9 @@ public class CameraServiceProxy extends SystemService
                         Slog.w(TAG, "Unknown extension type: " + e.mExtSessionStats.type);
                 }
                 extensionIsAdvanced = e.mExtSessionStats.isAdvanced;
+                if (Flags.analytics24q3()) {
+                    extensionCaptureFormat = e.mExtSessionStats.captureFormat;
+                }
             }
 
             int streamCount = 0;
@@ -863,6 +944,19 @@ public class CameraServiceProxy extends SystemService
                 streamCount = e.mStreamStats.size();
             }
             if (CameraServiceProxy.DEBUG) {
+                String ultrawideDebug = Flags.logUltrawideUsage()
+                        ? ", wideAngleUsage " + e.mUsedUltraWide
+                        : "";
+                String zoomOverrideDebug = Flags.logZoomOverrideUsage()
+                        ? ", zoomOverrideUsage " + e.mUsedZoomOverride
+                        : "";
+                String mostRequestedFpsRangeDebug = Flags.analytics24q3()
+                        ? ", mostRequestedFpsRange " + e.mMostRequestedFpsRange
+                        : "";
+                String extensionCaptureFormatDebug = Flags.analytics24q3()
+                        ? " extensionCaptureFormat " + e.mExtSessionStats.captureFormat
+                        : "";
+
                 Slog.v(TAG, "CAMERA_ACTION_EVENT: action " + e.mAction
                         + " clientName " + e.mClientName
                         + ", duration " + e.getDuration()
@@ -879,11 +973,16 @@ public class CameraServiceProxy extends SystemService
                         + ", streamCount is " + streamCount
                         + ", userTag is " + e.mUserTag
                         + ", videoStabilizationMode " + e.mVideoStabilizationMode
+                        + ultrawideDebug
+                        + zoomOverrideDebug
+                        + mostRequestedFpsRangeDebug
                         + ", logId " + e.mLogId
                         + ", sessionIndex " + e.mSessionIndex
                         + ", mExtSessionStats {type " + extensionType
-                        + " isAdvanced " + extensionIsAdvanced + "}");
+                        + " isAdvanced " + extensionIsAdvanced
+                        + extensionCaptureFormatDebug + "}");
             }
+
             // Convert from CameraStreamStats to CameraStreamProto
             CameraStreamProto[] streamProtos = new CameraStreamProto[MAX_STREAM_STATISTICS];
             for (int i = 0; i < MAX_STREAM_STATISTICS; i++) {
@@ -942,8 +1041,21 @@ public class CameraServiceProxy extends SystemService
                     MessageNano.toByteArray(streamProtos[2]),
                     MessageNano.toByteArray(streamProtos[3]),
                     MessageNano.toByteArray(streamProtos[4]),
-                    e.mUserTag, e.mVideoStabilizationMode, e.mLogId, e.mSessionIndex,
-                    extensionType, extensionIsAdvanced);
+                    e.mUserTag, e.mVideoStabilizationMode,
+                    e.mLogId, e.mSessionIndex,
+                    extensionType, extensionIsAdvanced, e.mUsedUltraWide,
+                    e.mUsedZoomOverride,
+                    e.mMostRequestedFpsRange.getLower(), e.mMostRequestedFpsRange.getUpper(),
+                    extensionCaptureFormat);
+        }
+    }
+
+    /**
+     * Get camera usage event count
+     */
+    int getUsageEventCount() {
+        synchronized (mLock) {
+            return mCameraUsageHistory.size();
         }
     }
 
@@ -997,12 +1109,24 @@ public class CameraServiceProxy extends SystemService
         }
     }
 
+    private boolean isAutomotive() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+    }
+
     private Set<Integer> getEnabledUserHandles(int currentUserHandle) {
         int[] userProfiles = mUserManager.getEnabledProfileIds(currentUserHandle);
         Set<Integer> handles = new ArraySet<>(userProfiles.length);
 
         for (int id : userProfiles) {
             handles.add(id);
+        }
+
+        if (Flags.cameraHsumPermission()) {
+            // If the device is running in headless system user mode then allow
+            // User 0 to access camera only for automotive form factor.
+            if (UserManager.isHeadlessSystemUserMode() && isAutomotive()) {
+                handles.add(UserHandle.USER_SYSTEM);
+            }
         }
 
         return handles;
@@ -1132,9 +1256,16 @@ public class CameraServiceProxy extends SystemService
         List<CameraStreamStats> streamStats = cameraState.getStreamStats();
         String userTag = cameraState.getUserTag();
         int videoStabilizationMode = cameraState.getVideoStabilizationMode();
+        boolean usedUltraWide = Flags.logUltrawideUsage() ? cameraState.getUsedUltraWide() : false;
+        boolean usedZoomOverride =
+                Flags.logZoomOverrideUsage() ? cameraState.getUsedZoomOverride() : false;
         long logId = cameraState.getLogId();
         int sessionIdx = cameraState.getSessionIndex();
         CameraExtensionSessionStats extSessionStats = cameraState.getExtensionSessionStats();
+        Range<Integer> mostRequestedFpsRange = Flags.analytics24q3()
+                ? cameraState.getMostRequestedFpsRange()
+                : new Range<Integer>(0, 0);
+
         synchronized(mLock) {
             // Update active camera list and notify NFC if necessary
             boolean wasEmpty = mActiveCameraUsage.isEmpty();
@@ -1189,7 +1320,8 @@ public class CameraServiceProxy extends SystemService
                         Slog.w(TAG, "Camera " + cameraId + " was already marked as active");
                         oldEvent.markCompleted(/*internalReconfigure*/0, /*requestCount*/0,
                                 /*resultErrorCount*/0, /*deviceError*/false, streamStats,
-                                /*userTag*/"", /*videoStabilizationMode*/-1,
+                                /*userTag*/"", /*videoStabilizationMode*/-1, /*usedUltraWide*/false,
+                                /*usedZoomOverride*/false, new Range<Integer>(0, 0),
                                 new CameraExtensionSessionStats());
                         mCameraUsageHistory.add(oldEvent);
                     }
@@ -1201,7 +1333,8 @@ public class CameraServiceProxy extends SystemService
 
                         doneEvent.markCompleted(internalReconfigureCount, requestCount,
                                 resultErrorCount, deviceError, streamStats, userTag,
-                                videoStabilizationMode, extSessionStats);
+                                videoStabilizationMode, usedUltraWide, usedZoomOverride,
+                                mostRequestedFpsRange, extSessionStats);
                         mCameraUsageHistory.add(doneEvent);
                         // Do not double count device error
                         deviceError = false;
@@ -1246,20 +1379,18 @@ public class CameraServiceProxy extends SystemService
     }
 
     private void notifyNfcService(boolean enablePolling) {
-
-        IBinder nfcServiceBinder = getBinderService(NFC_SERVICE_BINDER_NAME);
-        if (nfcServiceBinder == null) {
+        NfcManager nfcManager = mContext.getSystemService(NfcManager.class);
+        if (nfcManager == null) {
             Slog.w(TAG, "Could not connect to NFC service to notify it of camera state");
             return;
         }
-        INfcAdapter nfcAdapterRaw = INfcAdapter.Stub.asInterface(nfcServiceBinder);
-        int flags = enablePolling ? ENABLE_POLLING_FLAGS : DISABLE_POLLING_FLAGS;
-        if (DEBUG) Slog.v(TAG, "Setting NFC reader mode to flags " + flags);
-        try {
-            nfcAdapterRaw.setReaderMode(nfcInterfaceToken, null, flags, null);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Could not notify NFC service, remote exception: " + e);
+        NfcAdapter nfcAdapter = nfcManager.getDefaultAdapter();
+        if (nfcAdapter == null) {
+            Slog.w(TAG, "Could not connect to NFC service to notify it of camera state");
+            return;
         }
+        if (DEBUG) Slog.v(TAG, "Setting NFC reader mode. enablePolling: " + enablePolling);
+        nfcAdapter.setReaderModePollingEnabled(enablePolling);
     }
 
     private static int[] toArray(Collection<Integer> c) {

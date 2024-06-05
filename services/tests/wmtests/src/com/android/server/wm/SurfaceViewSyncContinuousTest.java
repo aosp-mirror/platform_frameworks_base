@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.server.wm.UiDeviceUtils.pressUnlockButton;
 import static android.server.wm.UiDeviceUtils.pressWakeupButton;
-import static android.server.wm.WindowManagerState.getLogicalDisplaySize;
 
 import android.app.KeyguardManager;
 import android.os.PowerManager;
@@ -26,6 +25,9 @@ import android.view.cts.surfacevalidator.CapturedActivity;
 
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.server.wm.utils.CommonUtils;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,7 +48,6 @@ public class SurfaceViewSyncContinuousTest {
     @Before
     public void setup() {
         mCapturedActivity = mActivityRule.getActivity();
-        mCapturedActivity.setLogicalDisplaySize(getLogicalDisplaySize());
 
         final KeyguardManager km = mCapturedActivity.getSystemService(KeyguardManager.class);
         if (km != null && km.isKeyguardLocked() || !Objects.requireNonNull(
@@ -54,6 +55,11 @@ public class SurfaceViewSyncContinuousTest {
             pressWakeupButton();
             pressUnlockButton();
         }
+    }
+
+    @After
+    public void tearDown() {
+        CommonUtils.waitUntilActivityRemoved(mCapturedActivity);
     }
 
     @Test

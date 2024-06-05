@@ -1,8 +1,4 @@
 # Bug component: 554432
-include /services/core/java/com/android/server/pm/OWNERS
+include /PACKAGE_MANAGER_OWNERS
 
-alexbuy@google.com
-schfan@google.com
-toddke@google.com
 zyy@google.com
-patb@google.com

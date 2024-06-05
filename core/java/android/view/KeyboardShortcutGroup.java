@@ -35,6 +35,8 @@ public final class KeyboardShortcutGroup implements Parcelable {
     private final List<KeyboardShortcutInfo> mItems;
     // The system group looks different UI wise.
     private boolean mSystemGroup;
+    // The package name for the shortcut
+    private CharSequence mPackageName;
 
     /**
      * @param label The title to be used for this group, or null if there is none.
@@ -82,6 +84,7 @@ public final class KeyboardShortcutGroup implements Parcelable {
         mLabel = source.readCharSequence();
         source.readTypedList(mItems, KeyboardShortcutInfo.CREATOR);
         mSystemGroup = source.readInt() == 1;
+        mPackageName = source.readCharSequence();
     }
 
     /**
@@ -105,6 +108,22 @@ public final class KeyboardShortcutGroup implements Parcelable {
     }
 
     /**
+     * @param packageName the name of the package associated with this shortcut.
+     * @hide
+     */
+    public void setPackageName(CharSequence packageName) {
+        mPackageName = packageName;
+    }
+
+    /**
+     * Return the package name of the app associated with this shortcut.
+     * @hide
+     */
+    public CharSequence getPackageName() {
+        return mPackageName;
+    }
+
+    /**
      * Adds an item to the existing list.
      *
      * @param item The item to be added.
@@ -123,6 +142,7 @@ public final class KeyboardShortcutGroup implements Parcelable {
         dest.writeCharSequence(mLabel);
         dest.writeTypedList(mItems);
         dest.writeInt(mSystemGroup ? 1 : 0);
+        dest.writeCharSequence(mPackageName);
     }
 
     public static final @android.annotation.NonNull Creator<KeyboardShortcutGroup> CREATOR =

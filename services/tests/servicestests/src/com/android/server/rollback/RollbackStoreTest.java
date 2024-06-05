@@ -18,6 +18,7 @@ package com.android.server.rollback;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.util.SparseIntArray;
@@ -81,7 +82,8 @@ public class RollbackStoreTest {
             + "'installedUsers':[55,79],"
             + "'ceSnapshotInodes':[]}],'isStaged':false,'causePackages':[{'packageName':'hello',"
             + "'longVersionCode':23},{'packageName':'something','longVersionCode':999}],"
-            + "'committedSessionId':45654465},'timestamp':'2019-10-01T12:29:08.855Z',"
+            + "'committedSessionId':45654465, 'rollbackImpactLevel':1},"
+            + "'timestamp':'2019-10-01T12:29:08.855Z',"
             + "'originalSessionId':567,'state':'enabling','apkSessionId':-1,"
             + "'restoreUserDataInProgress':true, 'userId':0,"
             + "'installerPackageName':'some.installer'}";
@@ -138,6 +140,8 @@ public class RollbackStoreTest {
         assertThat(rollback.getOriginalSessionId()).isEqualTo(567);
         assertThat(rollback.info.getRollbackId()).isEqualTo(ID);
         assertThat(rollback.info.getPackages()).isEmpty();
+        assertThat(rollback.info.getRollbackImpactLevel()).isEqualTo(
+                PackageManager.ROLLBACK_USER_IMPACT_LOW);
         assertThat(rollback.isEnabling()).isTrue();
         assertThat(rollback.getExtensionVersions().toString())
                 .isEqualTo(extensionVersions.toString());
@@ -158,6 +162,8 @@ public class RollbackStoreTest {
 
         assertThat(rollback.info.getRollbackId()).isEqualTo(ID);
         assertThat(rollback.info.getPackages()).isEmpty();
+        assertThat(rollback.info.getRollbackImpactLevel()).isEqualTo(
+                PackageManager.ROLLBACK_USER_IMPACT_LOW);
         assertThat(rollback.isEnabling()).isTrue();
         assertThat(rollback.getExtensionVersions().toString())
                 .isEqualTo(extensionVersions.toString());
@@ -175,6 +181,7 @@ public class RollbackStoreTest {
         origRb.info.getCausePackages().add(new VersionedPackage("com.made.up", 2));
         origRb.info.getCausePackages().add(new VersionedPackage("com.pack.age", 99));
         origRb.info.setCommittedSessionId(123456);
+        origRb.info.setRollbackImpactLevel(PackageManager.ROLLBACK_USER_IMPACT_HIGH);
 
         PackageRollbackInfo pkgInfo1 =
                 new PackageRollbackInfo(new VersionedPackage("com.made.up", 18),
@@ -226,6 +233,7 @@ public class RollbackStoreTest {
         expectedRb.info.getCausePackages().add(new VersionedPackage("hello", 23));
         expectedRb.info.getCausePackages().add(new VersionedPackage("something", 999));
         expectedRb.info.setCommittedSessionId(45654465);
+        expectedRb.info.setRollbackImpactLevel(PackageManager.ROLLBACK_USER_IMPACT_HIGH);
 
         PackageRollbackInfo pkgInfo1 = new PackageRollbackInfo(new VersionedPackage("blah", 55),
                 new VersionedPackage("blah1", 50), new ArrayList<>(), new ArrayList<>(),

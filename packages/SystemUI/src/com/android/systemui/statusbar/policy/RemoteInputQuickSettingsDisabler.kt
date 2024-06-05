@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.res.Configuration
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.util.LargeScreenUtils
 import javax.inject.Inject
 
 /**
@@ -30,9 +29,10 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class RemoteInputQuickSettingsDisabler @Inject constructor(
-    private val context: Context,
-    private val commandQueue: CommandQueue,
-    configController: ConfigurationController
+        private val context: Context,
+        private val commandQueue: CommandQueue,
+        private val splitShadeStateController: SplitShadeStateController,
+        configController: ConfigurationController
 ) : ConfigurationController.ConfigurationListener {
 
     private var remoteInputActive = false
@@ -43,7 +43,7 @@ class RemoteInputQuickSettingsDisabler @Inject constructor(
         isLandscape =
             context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         shouldUseSplitNotificationShade =
-                LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
+                splitShadeStateController.shouldUseSplitNotificationShade(context.resources)
         configController.addCallback(this)
     }
 
@@ -74,7 +74,8 @@ class RemoteInputQuickSettingsDisabler @Inject constructor(
             needToRecompute = true
         }
 
-        val newSplitShadeFlag = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
+        val newSplitShadeFlag = splitShadeStateController
+                .shouldUseSplitNotificationShade(context.resources)
         if (newSplitShadeFlag != shouldUseSplitNotificationShade) {
             shouldUseSplitNotificationShade = newSplitShadeFlag
             needToRecompute = true

@@ -22,6 +22,7 @@ import static android.text.FontConfig.NamedFamilyList;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.FontListParser;
+import android.text.FontConfig;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -52,14 +54,19 @@ public class FontCustomizationParser {
 
         private final List<Alias> mAdditionalAliases;
 
+        private final List<FontConfig.Customization.LocaleFallback> mLocaleFamilyCustomizations;
+
         public Result() {
             mAdditionalNamedFamilies = Collections.emptyMap();
+            mLocaleFamilyCustomizations = Collections.emptyList();
             mAdditionalAliases = Collections.emptyList();
         }
 
         public Result(Map<String, NamedFamilyList> additionalNamedFamilies,
+                List<FontConfig.Customization.LocaleFallback> localeFamilyCustomizations,
                 List<Alias> additionalAliases) {
             mAdditionalNamedFamilies = additionalNamedFamilies;
+            mLocaleFamilyCustomizations = localeFamilyCustomizations;
             mAdditionalAliases = additionalAliases;
         }
 
@@ -69,6 +76,10 @@ public class FontCustomizationParser {
 
         public List<Alias> getAdditionalAliases() {
             return mAdditionalAliases;
+        }
+
+        public List<FontConfig.Customization.LocaleFallback> getLocaleFamilyCustomizations() {
+            return mLocaleFamilyCustomizations;
         }
     }
 
@@ -89,7 +100,9 @@ public class FontCustomizationParser {
     }
 
     private static Result validateAndTransformToResult(
-            List<NamedFamilyList> families, List<Alias> aliases) {
+            List<NamedFamilyList> families,
+            List<FontConfig.Customization.LocaleFallback> outLocaleFamilies,
+            List<Alias> aliases) {
         HashMap<String, NamedFamilyList> namedFamily = new HashMap<>();
         for (int i = 0; i < families.size(); ++i) {
             final NamedFamilyList family = families.get(i);
@@ -105,7 +118,7 @@ public class FontCustomizationParser {
                                 + "requires fallackTarget attribute");
             }
         }
-        return new Result(namedFamily, aliases);
+        return new Result(namedFamily, outLocaleFamilies, aliases);
     }
 
     private static Result readFamilies(
@@ -115,12 +128,13 @@ public class FontCustomizationParser {
     ) throws XmlPullParserException, IOException {
         List<NamedFamilyList> families = new ArrayList<>();
         List<Alias> aliases = new ArrayList<>();
+        List<FontConfig.Customization.LocaleFallback> outLocaleFamilies = new ArrayList<>();
         parser.require(XmlPullParser.START_TAG, null, "fonts-modification");
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
             if (tag.equals("family")) {
-                readFamily(parser, fontDir, families, updatableFontMap);
+                readFamily(parser, fontDir, families, outLocaleFamilies, updatableFontMap);
             } else if (tag.equals("family-list")) {
                 readFamilyList(parser, fontDir, families, updatableFontMap);
             } else if (tag.equals("alias")) {
@@ -129,13 +143,14 @@ public class FontCustomizationParser {
                 FontListParser.skip(parser);
             }
         }
-        return validateAndTransformToResult(families, aliases);
+        return validateAndTransformToResult(families, outLocaleFamilies, aliases);
     }
 
     private static void readFamily(
             @NonNull XmlPullParser parser,
             @NonNull String fontDir,
             @NonNull List<NamedFamilyList> out,
+            @NonNull List<FontConfig.Customization.LocaleFallback> outCustomization,
             @Nullable Map<String, File> updatableFontMap)
             throws XmlPullParserException, IOException {
         final String customizationType = parser.getAttributeValue(null, "customizationType");
@@ -147,6 +162,29 @@ public class FontCustomizationParser {
                     parser, fontDir, updatableFontMap, false);
             if (fontFamily != null) {
                 out.add(fontFamily);
+            }
+        } else if (customizationType.equals("new-locale-family")) {
+            final String lang = parser.getAttributeValue(null, "lang");
+            final String op = parser.getAttributeValue(null, "operation");
+            final int intOp;
+            if (op.equals("append")) {
+                intOp = FontConfig.Customization.LocaleFallback.OPERATION_APPEND;
+            } else if (op.equals("prepend")) {
+                intOp = FontConfig.Customization.LocaleFallback.OPERATION_PREPEND;
+            } else if (op.equals("replace")) {
+                intOp = FontConfig.Customization.LocaleFallback.OPERATION_REPLACE;
+            } else {
+                throw new IllegalArgumentException("Unknown operation=" + op);
+            }
+
+            final FontConfig.FontFamily family = FontListParser.readFamily(
+                    parser, fontDir, updatableFontMap, false);
+
+            // For ignoring the customization, consume the new-locale-family element but don't
+            // register any customizations.
+            if (com.android.text.flags.Flags.vendorCustomLocaleFallback()) {
+                outCustomization.add(new FontConfig.Customization.LocaleFallback(
+                        Locale.forLanguageTag(lang), intOp, family));
             }
         } else {
             throw new IllegalArgumentException("Unknown customizationType=" + customizationType);

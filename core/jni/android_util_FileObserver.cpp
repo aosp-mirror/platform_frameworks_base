@@ -114,7 +114,7 @@ static void android_os_fileobserver_startWatching(JNIEnv* env, jobject object, j
     if (fd >= 0)
     {
         size_t count = wfds.size();
-        for (jsize i = 0; i < count; ++i) {
+        for (size_t i = 0; i < count; ++i) {
             jstring pathString = (jstring) env->GetObjectArrayElement(pathStrings, i);
 
             ScopedUtfChars path(env, pathString);

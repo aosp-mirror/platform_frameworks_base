@@ -19,12 +19,17 @@ package com.android.systemui.statusbar.notification;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
+import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
 import android.util.FloatProperty;
@@ -32,9 +37,11 @@ import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
 
+import androidx.test.filters.SmallTest;
+
 import com.android.app.animation.Interpolators;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.stack.AnimationFilter;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ViewState;
@@ -85,7 +92,7 @@ public class PropertyAnimatorTest extends SysuiTestCase {
             return mEffectiveProperty;
         }
     };
-    private AnimatorListenerAdapter mFinishListener = mock(AnimatorListenerAdapter.class);
+    private AnimatorListenerAdapter mFinishListener;
     private AnimationProperties mAnimationProperties = new AnimationProperties() {
         @Override
         public AnimationFilter getAnimationFilter() {
@@ -104,6 +111,7 @@ public class PropertyAnimatorTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mView = new View(getContext());
+        mFinishListener = mock(AnimatorListenerAdapter.class);
     }
 
     @Test
@@ -226,6 +234,32 @@ public class PropertyAnimatorTest extends SysuiTestCase {
         ValueAnimator animator = ViewState.getChildTag(mView, mProperty.getAnimatorTag());
         assertNotNull(animator);
         assertTrue(animator.getListeners().contains(mFinishListener));
+    }
+
+    @Test
+    public void testListenerCallbackOrderAndTagState() {
+        mAnimationFilter.reset();
+        mAnimationFilter.animate(mProperty.getProperty());
+        mAnimationProperties.setCustomInterpolator(mEffectiveProperty, mTestInterpolator);
+        mAnimationProperties.setDuration(500);
+
+        // Validates that the onAnimationEnd function set by PropertyAnimator was run first.
+        doAnswer(invocation -> {
+            assertNull(mView.getTag(mProperty.getAnimatorTag()));
+            return null;
+        })
+                .when(mFinishListener)
+                .onAnimationEnd(any(Animator.class), anyBoolean());
+
+        // Begin the animation and verify it set state correctly
+        PropertyAnimator.startAnimation(mView, mProperty, 200f, mAnimationProperties);
+        ValueAnimator animator = ViewState.getChildTag(mView, mProperty.getAnimatorTag());
+        assertNotNull(animator);
+        assertNotNull(mView.getTag(mProperty.getAnimatorTag()));
+
+        // Terminate the animation to run end runners, and validate they executed.
+        animator.end();
+        verify(mFinishListener).onAnimationEnd(animator, false);
     }
 
     @Test

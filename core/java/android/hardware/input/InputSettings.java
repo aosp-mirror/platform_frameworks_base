@@ -16,12 +16,23 @@
 
 package android.hardware.input;
 
+import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG;
+import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG;
+import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG;
+import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
+import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
+import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
+import static com.android.hardware.input.Flags.touchpadTapDragging;
+import static com.android.input.flags.Flags.enableInputFilterRustImpl;
+
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
+import android.app.AppGlobals;
 import android.content.Context;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -58,6 +69,23 @@ public class InputSettings {
      */
     public static final float DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH = .8f;
 
+    /**
+     * The maximum allowed Accessibility bounce keys threshold.
+     * @hide
+     */
+    public static final int MAX_ACCESSIBILITY_BOUNCE_KEYS_THRESHOLD_MILLIS = 5000;
+
+    /**
+     * The maximum allowed Accessibility slow keys threshold.
+     * @hide
+     */
+    public static final int MAX_ACCESSIBILITY_SLOW_KEYS_THRESHOLD_MILLIS = 5000;
+
+    /**
+     * Default value for {@link Settings.Secure#STYLUS_POINTER_ICON_ENABLED}.
+     * @hide
+     */
+    public static final int DEFAULT_STYLUS_POINTER_ICON_ENABLED = 1;
 
     private InputSettings() {
     }
@@ -266,7 +294,7 @@ public class InputSettings {
      */
     public static boolean useTouchpadTapToClick(@NonNull Context context) {
         return Settings.System.getIntForUser(context.getContentResolver(),
-                Settings.System.TOUCHPAD_TAP_TO_CLICK, 0, UserHandle.USER_CURRENT) == 1;
+                Settings.System.TOUCHPAD_TAP_TO_CLICK, 1, UserHandle.USER_CURRENT) == 1;
     }
 
     /**
@@ -283,6 +311,53 @@ public class InputSettings {
     public static void setTouchpadTapToClick(@NonNull Context context, boolean enabled) {
         Settings.System.putIntForUser(context.getContentResolver(),
                 Settings.System.TOUCHPAD_TAP_TO_CLICK, enabled ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Returns true if the feature flag for touchpad tap dragging is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTouchpadTapDraggingFeatureFlagEnabled() {
+        return touchpadTapDragging();
+    }
+
+    /**
+     * Returns true if the touchpad should allow tap dragging.
+     *
+     * The returned value only applies to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @return Whether the touchpad should allow tap dragging.
+     *
+     * @hide
+     */
+    public static boolean useTouchpadTapDragging(@NonNull Context context) {
+        if (!isTouchpadTapDraggingFeatureFlagEnabled()) {
+            return false;
+        }
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_TAP_DRAGGING, 0, UserHandle.USER_CURRENT) == 1;
+    }
+
+    /**
+     * Sets the tap dragging behavior for the touchpad.
+     *
+     * The new behavior is only applied to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @param enabled Will enable tap dragging if true, disable it if false
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setTouchpadTapDragging(@NonNull Context context, boolean enabled) {
+        if (!isTouchpadTapDraggingFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_TAP_DRAGGING, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
     }
 
@@ -319,13 +394,272 @@ public class InputSettings {
     }
 
     /**
-     * Whether a pointer icon will be shown over the location of a
-     * stylus pointer.
+     * Whether a pointer icon will be shown over the location of a stylus pointer.
+     *
      * @hide
      */
-    public static boolean isStylusPointerIconEnabled(@NonNull Context context) {
-        return context.getResources()
-                       .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon)
-               || InputProperties.force_enable_stylus_pointer_icon().orElse(false);
+    public static boolean isStylusPointerIconEnabled(@NonNull Context context,
+            boolean forceReloadSetting) {
+        if (InputProperties.force_enable_stylus_pointer_icon().orElse(false)) {
+            // Sysprop override is set
+            return true;
+        }
+        if (!context.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableStylusPointerIcon)) {
+            // Stylus pointer icons are disabled for the build
+            return false;
+        }
+        if (forceReloadSetting) {
+            return Settings.Secure.getIntForUser(context.getContentResolver(),
+                    Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
+                    DEFAULT_STYLUS_POINTER_ICON_ENABLED, UserHandle.USER_CURRENT_OR_SELF) != 0;
+        }
+        return AppGlobals.getIntCoreSetting(Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
+                DEFAULT_STYLUS_POINTER_ICON_ENABLED) != 0;
     }
+
+    /**
+     * Whether a pointer icon will be shown over the location of a stylus pointer.
+     *
+     * @hide
+     * @see #isStylusPointerIconEnabled(Context, boolean)
+     */
+    public static boolean isStylusPointerIconEnabled(@NonNull Context context) {
+        return isStylusPointerIconEnabled(context, false /* forceReloadSetting */);
+    }
+
+    /**
+     * Whether Accessibility bounce keys feature is enabled.
+     *
+     * <p>
+     * Bounce keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to configure the device to ignore rapid, repeated keypresses of the
+     * same key.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilityBounceKeysFeatureEnabled() {
+        return keyboardA11yBounceKeysFlag() && enableInputFilterRustImpl();
+    }
+
+    /**
+     * Whether Accessibility bounce keys is enabled.
+     *
+     * <p>
+     * ‘Bounce keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to configure the device to ignore rapid, repeated keypresses of the
+     * same key.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilityBounceKeysEnabled(@NonNull Context context) {
+        return getAccessibilityBounceKeysThreshold(context) != 0;
+    }
+
+    /**
+     * Get Accessibility bounce keys threshold duration in milliseconds.
+     *
+     * <p>
+     * ‘Bounce keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to configure the device to ignore rapid, repeated keypresses of the
+     * same key.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG)
+    public static int getAccessibilityBounceKeysThreshold(@NonNull Context context) {
+        if (!isAccessibilityBounceKeysFeatureEnabled()) {
+            return 0;
+        }
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS, 0, UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Set Accessibility bounce keys threshold duration in milliseconds.
+     * @param thresholdTimeMillis time duration for which a key down will be ignored after a
+     *                            previous key up for the same key on the same device between 0 and
+     *                            {@link MAX_ACCESSIBILITY_BOUNCE_KEYS_THRESHOLD_MILLIS}
+     *
+     * <p>
+     * ‘Bounce keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to configure the device to ignore rapid, repeated keypresses of the
+     * same key.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG)
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setAccessibilityBounceKeysThreshold(@NonNull Context context,
+            int thresholdTimeMillis) {
+        if (!isAccessibilityBounceKeysFeatureEnabled()) {
+            return;
+        }
+        if (thresholdTimeMillis < 0
+                || thresholdTimeMillis > MAX_ACCESSIBILITY_BOUNCE_KEYS_THRESHOLD_MILLIS) {
+            throw new IllegalArgumentException(
+                    "Provided Bounce keys threshold should be in range [0, "
+                            + MAX_ACCESSIBILITY_BOUNCE_KEYS_THRESHOLD_MILLIS + "]");
+        }
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS, thresholdTimeMillis,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether Accessibility slow keys feature flags is enabled.
+     *
+     * <p>
+     * 'Slow keys' is an accessibility feature to aid users who have physical disabilities, that
+     * allows the user to specify the duration for which one must press-and-hold a key before the
+     * system accepts the keypress.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilitySlowKeysFeatureFlagEnabled() {
+        return keyboardA11ySlowKeysFlag() && enableInputFilterRustImpl();
+    }
+
+    /**
+     * Whether Accessibility slow keys is enabled.
+     *
+     * <p>
+     * 'Slow keys' is an accessibility feature to aid users who have physical disabilities, that
+     * allows the user to specify the duration for which one must press-and-hold a key before the
+     * system accepts the keypress.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilitySlowKeysEnabled(@NonNull Context context) {
+        return getAccessibilitySlowKeysThreshold(context) != 0;
+    }
+
+    /**
+     * Get Accessibility slow keys threshold duration in milliseconds.
+     *
+     * <p>
+     * 'Slow keys' is an accessibility feature to aid users who have physical disabilities, that
+     * allows the user to specify the duration for which one must press-and-hold a key before the
+     * system accepts the keypress.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG)
+    public static int getAccessibilitySlowKeysThreshold(@NonNull Context context) {
+        if (!isAccessibilitySlowKeysFeatureFlagEnabled()) {
+            return 0;
+        }
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SLOW_KEYS, 0, UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Set Accessibility slow keys threshold duration in milliseconds.
+     * @param thresholdTimeMillis time duration for which a key should be pressed to be registered
+     *                            in the system. The threshold must be between 0 and
+     *                            {@link MAX_ACCESSIBILITY_SLOW_KEYS_THRESHOLD_MILLIS}
+     *
+     * <p>
+     * 'Slow keys' is an accessibility feature to aid users who have physical disabilities, that
+     * allows the user to specify the duration for which one must press-and-hold a key before the
+     * system accepts the keypress.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG)
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setAccessibilitySlowKeysThreshold(@NonNull Context context,
+            int thresholdTimeMillis) {
+        if (!isAccessibilitySlowKeysFeatureFlagEnabled()) {
+            return;
+        }
+        if (thresholdTimeMillis < 0
+                || thresholdTimeMillis > MAX_ACCESSIBILITY_SLOW_KEYS_THRESHOLD_MILLIS) {
+            throw new IllegalArgumentException(
+                    "Provided Slow keys threshold should be in range [0, "
+                            + MAX_ACCESSIBILITY_SLOW_KEYS_THRESHOLD_MILLIS + "]");
+        }
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SLOW_KEYS, thresholdTimeMillis,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether Accessibility sticky keys feature is enabled.
+     *
+     * <p>
+     * 'Sticky keys' is an accessibility feature that assists users who have physical
+     * disabilities or help users reduce repetitive strain injury. It serializes keystrokes
+     * instead of pressing multiple keys at a time, allowing the user to press and release a
+     * modifier key, such as Shift, Ctrl, Alt, or any other modifier key, and have it remain
+     * active until any other key is pressed.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilityStickyKeysFeatureEnabled() {
+        return keyboardA11yStickyKeysFlag() && enableInputFilterRustImpl();
+    }
+
+    /**
+     * Whether Accessibility sticky keys is enabled.
+     *
+     * <p>
+     * 'Sticky keys' is an accessibility feature that assists users who have physical
+     * disabilities or help users reduce repetitive strain injury. It serializes keystrokes
+     * instead of pressing multiple keys at a time, allowing the user to press and release a
+     * modifier key, such as Shift, Ctrl, Alt, or any other modifier key, and have it remain
+     * active until any other key is pressed.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG)
+    public static boolean isAccessibilityStickyKeysEnabled(@NonNull Context context) {
+        if (!isAccessibilityStickyKeysFeatureEnabled()) {
+            return false;
+        }
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_STICKY_KEYS, 0, UserHandle.USER_CURRENT) != 0;
+    }
+
+    /**
+     * Set Accessibility sticky keys feature enabled/disabled.
+     *
+     *  <p>
+     * 'Sticky keys' is an accessibility feature that assists users who have physical
+     * disabilities or help users reduce repetitive strain injury. It serializes keystrokes
+     * instead of pressing multiple keys at a time, allowing the user to press and release a
+     * modifier key, such as Shift, Ctrl, Alt, or any other modifier key, and have it remain
+     * active until any other key is pressed.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG)
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setAccessibilityStickyKeysEnabled(@NonNull Context context,
+            boolean enabled) {
+        if (!isAccessibilityStickyKeysFeatureEnabled()) {
+            return;
+        }
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_STICKY_KEYS, enabled ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
 }

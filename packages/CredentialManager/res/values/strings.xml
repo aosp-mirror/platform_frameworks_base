@@ -24,7 +24,7 @@
   <string name="string_cancel">Cancel</string>
   <!-- This is a label for a button that takes user to the next screen. [CHAR LIMIT=20] -->
   <string name="string_continue">Continue</string>
-  <!-- This is a label for a button that leads to a holistic view of all different options where the user can save their new app credential. [CHAR LIMIT=20] -->
+  <!-- This is a label for a button that leads to a holistic view of all different options where the user can save their new app credential. [CHAR LIMIT=30] -->
   <string name="string_more_options">Save another way</string>
   <!-- This is a label for a button that links to additional information about passkeys. [CHAR LIMIT=20] -->
   <string name="string_learn_more">Learn more</string>
@@ -63,12 +63,11 @@
   <!-- This appears as the description body of the modal bottom sheet which provides all available providers for users to choose. [CHAR LIMIT=200] -->
   <string name="choose_provider_body">Select a password manager to save your info and sign in faster next time</string>
   <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is passkey. [CHAR LIMIT=200] -->
-  <string name="choose_create_option_passkey_title">Create passkey for <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
+  <string name="choose_create_option_passkey_title">Create passkey to sign in to <xliff:g id="app_name" example="Tribank">%1$s</xliff:g>?</string>
   <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is password. [CHAR LIMIT=200] -->
-  <string name="choose_create_option_password_title">Save password for <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
+  <string name="choose_create_option_password_title">Save password to sign in to <xliff:g id="app_name" example="Tribank">%1$s</xliff:g>?</string>
   <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is others. [CHAR LIMIT=200] -->
-  <string name="choose_create_option_sign_in_title">Save sign-in info for <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
-  <!-- Types which are inserted as a placeholder as credentialTypes for other strings. [CHAR LIMIT=200] -->
+  <string name="choose_create_option_sign_in_title">Save sign-in info for <xliff:g id="app_name" example="Tribank">%1$s</xliff:g>?</string>
   <string name="passkey">passkey</string>
   <string name="password">password</string>
   <string name="passkeys">passkeys</string>
@@ -119,13 +118,15 @@
 
   <!-- Strings for the get flow. -->
   <!-- This appears as the title of the modal bottom sheet asking for user confirmation to use the single previously saved passkey to sign in to the app. [CHAR LIMIT=200] -->
-  <string name="get_dialog_title_use_passkey_for">Use your saved passkey for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <string name="get_dialog_title_use_passkey_for">Use your saved passkey for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
   <!-- This appears as the title of the modal bottom sheet asking for user confirmation to use the single previously saved password to sign in to the app. [CHAR LIMIT=200] -->
-  <string name="get_dialog_title_use_password_for">Use your saved password for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <string name="get_dialog_title_use_password_for">Use your saved password for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
   <!-- This appears as the title of the dialog asking for user confirmation to use the single user credential (previously saved or to be created) to sign in to the app. [CHAR LIMIT=200] -->
-  <string name="get_dialog_title_use_sign_in_for">Use your sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <string name="get_dialog_title_use_sign_in_for">Use your account for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+  <!-- This appears as the description of the modal bottom sheet asking for user confirmation to use the biometric screen embedded within credential manager for passkey authentication. [CHAR LIMIT=200] -->
+  <string name="get_dialog_description_single_tap">Use your screen lock to sign in to <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> with <xliff:g id="username" example="beckett@gmail.com">%2$s</xliff:g></string>
   <!-- This appears as the title of the dialog asking for user confirmation to unlock / authenticate (e.g. via fingerprint, faceId, passcode etc.) so that we can retrieve their sign-in options. [CHAR LIMIT=200] -->
-  <string name="get_dialog_title_unlock_options_for">Unlock sign-in options for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <string name="get_dialog_title_unlock_options_for">Unlock sign-in options for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
   <!-- This appears as the title of the dialog asking for user to make a choice from multiple previously saved passkey to sign in to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_choose_passkey_for">Choose a saved passkey for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
   <!-- This appears as the title of the dialog asking for user to make a choice from multiple previously saved passwords to sign in to the app. [CHAR LIMIT=200] -->
@@ -133,7 +134,7 @@
   <!-- This appears as the title of the dialog asking for user to make a choice from multiple previously saved credentials to sign in to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_choose_saved_sign_in_for">Choose a saved sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
   <!-- This appears as the title of the dialog asking for user to make a choice from various available user credentials (previously saved or to be created) to sign in to the app. [CHAR LIMIT=200] -->
-  <string name="get_dialog_title_choose_sign_in_for">Choose a sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+  <string name="get_dialog_title_choose_sign_in_for">Choose an account for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
   <!-- This appears as the title of the dialog asking for user to make a choice from options of available user information (e.g. driver's license, vaccination status) to pass to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_choose_option_for">Choose an option for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
   <!-- This appears as the title of the dialog asking user to send a piece of user information (e.g. driver's license, vaccination status) to the app. [CHAR LIMIT=200] -->
@@ -168,4 +169,9 @@
   <string name="get_dialog_option_headline_use_a_different_device">Use a different device</string>
   <!-- Text shown on a snackbar when the app cancelled the UI. [CHAR LIMIT=120] -->
   <string name="request_cancelled_by">Request cancelled by <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+
+  <!-- Strings for dropdown presentation. -->
+  <!-- Text shown in the dropdown presentation to select more sign in options. [CHAR LIMIT=120] -->
+  <string name="dropdown_presentation_more_sign_in_options_text">Sign-in options</string>
+  <string name="more_options_content_description">More</string>
 </resources>

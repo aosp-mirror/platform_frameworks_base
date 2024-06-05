@@ -26,7 +26,7 @@ import com.android.systemui.statusbar.notification.collection.ShadeListBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderEntryListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderGroupListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderListListener
-import com.android.systemui.util.traceSection
+import com.android.app.tracing.traceSection
 import javax.inject.Inject
 
 /**

@@ -295,7 +295,7 @@ static jobject NativeGetAssetAllocations(JNIEnv* env, jobject /*clazz*/) {
   if (alloc.length() <= 0) {
     return nullptr;
   }
-  return env->NewStringUTF(alloc.string());
+  return env->NewStringUTF(alloc.c_str());
 }
 
 static jint NativeGetGlobalAssetManagerCount(JNIEnv* /*env*/, jobject /*clazz*/) {
@@ -314,7 +314,8 @@ static void NativeDestroy(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
 }
 
 static void NativeSetApkAssets(JNIEnv* env, jclass /*clazz*/, jlong ptr,
-                               jobjectArray apk_assets_array, jboolean invalidate_caches) {
+                               jobjectArray apk_assets_array, jboolean invalidate_caches,
+                               jboolean preset) {
   ATRACE_NAME("AssetManager::SetApkAssets");
 
   const jsize apk_assets_len = env->GetArrayLength(apk_assets_array);
@@ -343,17 +344,30 @@ static void NativeSetApkAssets(JNIEnv* env, jclass /*clazz*/, jlong ptr,
   }
 
   auto assetmanager = LockAndStartAssetManager(ptr);
-  assetmanager->SetApkAssets(apk_assets, invalidate_caches);
+  if (preset) {
+    assetmanager->PresetApkAssets(apk_assets);
+  } else {
+    assetmanager->SetApkAssets(apk_assets, invalidate_caches);
+  }
 }
 
 static void NativeSetConfiguration(JNIEnv* env, jclass /*clazz*/, jlong ptr, jint mcc, jint mnc,
-                                   jstring locale, jint orientation, jint touchscreen, jint density,
-                                   jint keyboard, jint keyboard_hidden, jint navigation,
-                                   jint screen_width, jint screen_height,
-                                   jint smallest_screen_width_dp, jint screen_width_dp,
-                                   jint screen_height_dp, jint screen_layout, jint ui_mode,
-                                   jint color_mode, jint grammatical_gender, jint major_version) {
+                                   jstring default_locale, jobjectArray locales, jint orientation,
+                                   jint touchscreen, jint density, jint keyboard,
+                                   jint keyboard_hidden, jint navigation, jint screen_width,
+                                   jint screen_height, jint smallest_screen_width_dp,
+                                   jint screen_width_dp, jint screen_height_dp, jint screen_layout,
+                                   jint ui_mode, jint color_mode, jint grammatical_gender,
+                                   jint major_version, jboolean force_refresh) {
   ATRACE_NAME("AssetManager::SetConfiguration");
+
+  const jsize locale_count = (locales == NULL) ? 0 : env->GetArrayLength(locales);
+
+  // Constants duplicated from Java class android.content.res.Configuration.
+  static const jint kScreenLayoutRoundMask = 0x300;
+  static const jint kScreenLayoutRoundShift = 8;
+
+  std::vector<ResTable_config> configs;
 
   ResTable_config configuration;
   memset(&configuration, 0, sizeof(configuration));
@@ -375,25 +389,37 @@ static void NativeSetConfiguration(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
   configuration.colorMode = static_cast<uint8_t>(color_mode);
   configuration.grammaticalInflection = static_cast<uint8_t>(grammatical_gender);
   configuration.sdkVersion = static_cast<uint16_t>(major_version);
-
-  if (locale != nullptr) {
-    ScopedUtfChars locale_utf8(env, locale);
-    CHECK(locale_utf8.c_str() != nullptr);
-    configuration.setBcp47Locale(locale_utf8.c_str());
-  }
-
-  // Constants duplicated from Java class android.content.res.Configuration.
-  static const jint kScreenLayoutRoundMask = 0x300;
-  static const jint kScreenLayoutRoundShift = 8;
-
   // In Java, we use a 32bit integer for screenLayout, while we only use an 8bit integer
   // in C++. We must extract the round qualifier out of the Java screenLayout and put it
   // into screenLayout2.
   configuration.screenLayout2 =
-      static_cast<uint8_t>((screen_layout & kScreenLayoutRoundMask) >> kScreenLayoutRoundShift);
+          static_cast<uint8_t>((screen_layout & kScreenLayoutRoundMask) >> kScreenLayoutRoundShift);
+
+  if (locale_count > 0) {
+    configs.resize(locale_count, configuration);
+    for (int i = 0; i < locale_count; i++) {
+      jstring locale = (jstring)(env->GetObjectArrayElement(locales, i));
+      ScopedUtfChars locale_utf8(env, locale);
+      CHECK(locale_utf8.c_str() != nullptr);
+      configs[i].setBcp47Locale(locale_utf8.c_str());
+    }
+  } else {
+    configs.push_back(configuration);
+  }
+
+  uint32_t default_locale_int = 0;
+  if (default_locale != nullptr) {
+    ResTable_config config;
+    static_assert(std::is_same_v<decltype(config.locale), decltype(default_locale_int)>);
+    ScopedUtfChars locale_utf8(env, default_locale);
+    CHECK(locale_utf8.c_str() != nullptr);
+    config.setBcp47Locale(locale_utf8.c_str());
+    default_locale_int = config.locale;
+  }
 
   auto assetmanager = LockAndStartAssetManager(ptr);
-  assetmanager->SetConfiguration(configuration);
+  assetmanager->SetConfigurations(std::move(configs), force_refresh != JNI_FALSE);
+  assetmanager->SetDefaultLocale(default_locale_int);
 }
 
 static jobject NativeGetAssignedPackageIdentifiers(JNIEnv* env, jclass /*clazz*/, jlong ptr,
@@ -456,7 +482,7 @@ static jobjectArray NativeList(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring
   }
 
   for (size_t i = 0; i < file_count; i++) {
-    jstring java_string = env->NewStringUTF(asset_dir->getFileName(i).string());
+    jstring java_string = env->NewStringUTF(asset_dir->getFileName(i).c_str());
 
     // Check for errors creating the strings (if malformed or no memory).
     if (env->ExceptionCheck()) {
@@ -1126,22 +1152,29 @@ static jintArray NativeAttributeResolutionStack(JNIEnv* env, jclass /*clazz*/, j
     }
   }
 
-  auto style_stack = assetmanager->GetBagResIdStack(xml_style_res);
-  auto def_style_stack = assetmanager->GetBagResIdStack(def_style_resid);
+  const auto maybe_style_stack = assetmanager->GetBagResIdStack(xml_style_res);
+  if (!maybe_style_stack.ok()) {
+    jniThrowIOException(env, EBADMSG);
+    return nullptr;
+  }
+  const auto& style_stack = *maybe_style_stack.value();
+  const auto maybe_def_style_stack = assetmanager->GetBagResIdStack(def_style_resid);
+  if (!maybe_def_style_stack.ok()) {
+    jniThrowIOException(env, EBADMSG);
+    return nullptr;
+  }
+  const auto& def_style_stack = *maybe_def_style_stack.value();
 
   jintArray array = env->NewIntArray(style_stack.size() + def_style_stack.size());
   if (env->ExceptionCheck()) {
     return nullptr;
   }
 
-  for (uint32_t i = 0; i < style_stack.size(); i++) {
-    jint attr_resid = style_stack[i];
-    env->SetIntArrayRegion(array, i, 1, &attr_resid);
-  }
-  for (uint32_t i = 0; i < def_style_stack.size(); i++) {
-    jint attr_resid = def_style_stack[i];
-    env->SetIntArrayRegion(array, style_stack.size() + i, 1, &attr_resid);
-  }
+  static_assert(sizeof(jint) == sizeof(decltype(style_stack.front())));
+  env->SetIntArrayRegion(array, 0, style_stack.size(),
+                         reinterpret_cast<const jint*>(style_stack.data()));
+  env->SetIntArrayRegion(array, style_stack.size(), def_style_stack.size(),
+                         reinterpret_cast<const jint*>(def_style_stack.data()));
   return array;
 }
 
@@ -1491,94 +1524,97 @@ static jlong NativeAssetGetRemainingLength(JNIEnv* /*env*/, jclass /*clazz*/, jl
 
 // JNI registration.
 static const JNINativeMethod gAssetManagerMethods[] = {
-    // AssetManager setup methods.
-    {"nativeCreate", "()J", (void*)NativeCreate},
-    {"nativeDestroy", "(J)V", (void*)NativeDestroy},
-    {"nativeSetApkAssets", "(J[Landroid/content/res/ApkAssets;Z)V", (void*)NativeSetApkAssets},
-    {"nativeSetConfiguration", "(JIILjava/lang/String;IIIIIIIIIIIIIIII)V",
-     (void*)NativeSetConfiguration},
-    {"nativeGetAssignedPackageIdentifiers", "(JZZ)Landroid/util/SparseArray;",
-     (void*)NativeGetAssignedPackageIdentifiers},
+        // AssetManager setup methods.
+        {"nativeCreate", "()J", (void*)NativeCreate},
+        {"nativeDestroy", "(J)V", (void*)NativeDestroy},
+        {"nativeSetApkAssets", "(J[Landroid/content/res/ApkAssets;ZZ)V", (void*)NativeSetApkAssets},
+        {"nativeSetConfiguration", "(JIILjava/lang/String;[Ljava/lang/String;IIIIIIIIIIIIIIIIZ)V",
+         (void*)NativeSetConfiguration},
+        {"nativeGetAssignedPackageIdentifiers", "(JZZ)Landroid/util/SparseArray;",
+         (void*)NativeGetAssignedPackageIdentifiers},
 
-    // AssetManager file methods.
-    {"nativeContainsAllocatedTable", "(J)Z", (void*)ContainsAllocatedTable},
-    {"nativeList", "(JLjava/lang/String;)[Ljava/lang/String;", (void*)NativeList},
-    {"nativeOpenAsset", "(JLjava/lang/String;I)J", (void*)NativeOpenAsset},
-    {"nativeOpenAssetFd", "(JLjava/lang/String;[J)Landroid/os/ParcelFileDescriptor;",
-     (void*)NativeOpenAssetFd},
-    {"nativeOpenNonAsset", "(JILjava/lang/String;I)J", (void*)NativeOpenNonAsset},
-    {"nativeOpenNonAssetFd", "(JILjava/lang/String;[J)Landroid/os/ParcelFileDescriptor;",
-     (void*)NativeOpenNonAssetFd},
-    {"nativeOpenXmlAsset", "(JILjava/lang/String;)J", (void*)NativeOpenXmlAsset},
-    {"nativeOpenXmlAssetFd", "(JILjava/io/FileDescriptor;)J", (void*)NativeOpenXmlAssetFd},
+        // AssetManager file methods.
+        {"nativeContainsAllocatedTable", "(J)Z", (void*)ContainsAllocatedTable},
+        {"nativeList", "(JLjava/lang/String;)[Ljava/lang/String;", (void*)NativeList},
+        {"nativeOpenAsset", "(JLjava/lang/String;I)J", (void*)NativeOpenAsset},
+        {"nativeOpenAssetFd", "(JLjava/lang/String;[J)Landroid/os/ParcelFileDescriptor;",
+         (void*)NativeOpenAssetFd},
+        {"nativeOpenNonAsset", "(JILjava/lang/String;I)J", (void*)NativeOpenNonAsset},
+        {"nativeOpenNonAssetFd", "(JILjava/lang/String;[J)Landroid/os/ParcelFileDescriptor;",
+         (void*)NativeOpenNonAssetFd},
+        {"nativeOpenXmlAsset", "(JILjava/lang/String;)J", (void*)NativeOpenXmlAsset},
+        {"nativeOpenXmlAssetFd", "(JILjava/io/FileDescriptor;)J", (void*)NativeOpenXmlAssetFd},
 
-    // AssetManager resource methods.
-    {"nativeGetResourceValue", "(JISLandroid/util/TypedValue;Z)I", (void*)NativeGetResourceValue},
-    {"nativeGetResourceBagValue", "(JIILandroid/util/TypedValue;)I",
-     (void*)NativeGetResourceBagValue},
-    {"nativeGetStyleAttributes", "(JI)[I", (void*)NativeGetStyleAttributes},
-    {"nativeGetResourceStringArray", "(JI)[Ljava/lang/String;",
-     (void*)NativeGetResourceStringArray},
-    {"nativeGetResourceStringArrayInfo", "(JI)[I", (void*)NativeGetResourceStringArrayInfo},
-    {"nativeGetResourceIntArray", "(JI)[I", (void*)NativeGetResourceIntArray},
-    {"nativeGetResourceArraySize", "(JI)I", (void*)NativeGetResourceArraySize},
-    {"nativeGetResourceArray", "(JI[I)I", (void*)NativeGetResourceArray},
-    {"nativeGetParentThemeIdentifier", "(JI)I",
-     (void*)NativeGetParentThemeIdentifier},
+        // AssetManager resource methods.
+        {"nativeGetResourceValue", "(JISLandroid/util/TypedValue;Z)I",
+         (void*)NativeGetResourceValue},
+        {"nativeGetResourceBagValue", "(JIILandroid/util/TypedValue;)I",
+         (void*)NativeGetResourceBagValue},
+        {"nativeGetStyleAttributes", "(JI)[I", (void*)NativeGetStyleAttributes},
+        {"nativeGetResourceStringArray", "(JI)[Ljava/lang/String;",
+         (void*)NativeGetResourceStringArray},
+        {"nativeGetResourceStringArrayInfo", "(JI)[I", (void*)NativeGetResourceStringArrayInfo},
+        {"nativeGetResourceIntArray", "(JI)[I", (void*)NativeGetResourceIntArray},
+        {"nativeGetResourceArraySize", "(JI)I", (void*)NativeGetResourceArraySize},
+        {"nativeGetResourceArray", "(JI[I)I", (void*)NativeGetResourceArray},
+        {"nativeGetParentThemeIdentifier", "(JI)I", (void*)NativeGetParentThemeIdentifier},
 
-    // AssetManager resource name/ID methods.
-    {"nativeGetResourceIdentifier", "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
-     (void*)NativeGetResourceIdentifier},
-    {"nativeGetResourceName", "(JI)Ljava/lang/String;", (void*)NativeGetResourceName},
-    {"nativeGetResourcePackageName", "(JI)Ljava/lang/String;", (void*)NativeGetResourcePackageName},
-    {"nativeGetResourceTypeName", "(JI)Ljava/lang/String;", (void*)NativeGetResourceTypeName},
-    {"nativeGetResourceEntryName", "(JI)Ljava/lang/String;", (void*)NativeGetResourceEntryName},
-    {"nativeSetResourceResolutionLoggingEnabled", "(JZ)V",
-     (void*) NativeSetResourceResolutionLoggingEnabled},
-    {"nativeGetLastResourceResolution", "(J)Ljava/lang/String;",
-     (void*) NativeGetLastResourceResolution},
-    {"nativeGetLocales", "(JZ)[Ljava/lang/String;", (void*)NativeGetLocales},
-    {"nativeGetSizeConfigurations", "(J)[Landroid/content/res/Configuration;",
-     (void*)NativeGetSizeConfigurations},
-    {"nativeGetSizeAndUiModeConfigurations", "(J)[Landroid/content/res/Configuration;",
-     (void*)NativeGetSizeAndUiModeConfigurations},
+        // AssetManager resource name/ID methods.
+        {"nativeGetResourceIdentifier",
+         "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
+         (void*)NativeGetResourceIdentifier},
+        {"nativeGetResourceName", "(JI)Ljava/lang/String;", (void*)NativeGetResourceName},
+        {"nativeGetResourcePackageName", "(JI)Ljava/lang/String;",
+         (void*)NativeGetResourcePackageName},
+        {"nativeGetResourceTypeName", "(JI)Ljava/lang/String;", (void*)NativeGetResourceTypeName},
+        {"nativeGetResourceEntryName", "(JI)Ljava/lang/String;", (void*)NativeGetResourceEntryName},
+        {"nativeSetResourceResolutionLoggingEnabled", "(JZ)V",
+         (void*)NativeSetResourceResolutionLoggingEnabled},
+        {"nativeGetLastResourceResolution", "(J)Ljava/lang/String;",
+         (void*)NativeGetLastResourceResolution},
+        {"nativeGetLocales", "(JZ)[Ljava/lang/String;", (void*)NativeGetLocales},
+        {"nativeGetSizeConfigurations", "(J)[Landroid/content/res/Configuration;",
+         (void*)NativeGetSizeConfigurations},
+        {"nativeGetSizeAndUiModeConfigurations", "(J)[Landroid/content/res/Configuration;",
+         (void*)NativeGetSizeAndUiModeConfigurations},
 
-    // Style attribute related methods.
-    {"nativeAttributeResolutionStack", "(JJIII)[I", (void*)NativeAttributeResolutionStack},
-    {"nativeApplyStyle", "(JJIIJ[IJJ)V", (void*)NativeApplyStyle},
-    {"nativeResolveAttrs", "(JJII[I[I[I[I)Z", (void*)NativeResolveAttrs},
-    {"nativeRetrieveAttributes", "(JJ[I[I[I)Z", (void*)NativeRetrieveAttributes},
+        // Style attribute related methods.
+        {"nativeAttributeResolutionStack", "(JJIII)[I", (void*)NativeAttributeResolutionStack},
+        {"nativeApplyStyle", "(JJIIJ[IJJ)V", (void*)NativeApplyStyle},
+        {"nativeResolveAttrs", "(JJII[I[I[I[I)Z", (void*)NativeResolveAttrs},
+        {"nativeRetrieveAttributes", "(JJ[I[I[I)Z", (void*)NativeRetrieveAttributes},
 
-    // Theme related methods.
-    {"nativeThemeCreate", "(J)J", (void*)NativeThemeCreate},
-    {"nativeGetThemeFreeFunction", "()J", (void*)NativeGetThemeFreeFunction},
-    {"nativeThemeApplyStyle", "(JJIZ)V", (void*)NativeThemeApplyStyle},
-    {"nativeThemeRebase", "(JJ[I[ZI)V", (void*)NativeThemeRebase},
+        // Theme related methods.
+        {"nativeThemeCreate", "(J)J", (void*)NativeThemeCreate},
+        {"nativeGetThemeFreeFunction", "()J", (void*)NativeGetThemeFreeFunction},
+        {"nativeThemeApplyStyle", "(JJIZ)V", (void*)NativeThemeApplyStyle},
+        {"nativeThemeRebase", "(JJ[I[ZI)V", (void*)NativeThemeRebase},
 
-    {"nativeThemeCopy", "(JJJJ)V", (void*)NativeThemeCopy},
-    {"nativeThemeGetAttributeValue", "(JJILandroid/util/TypedValue;Z)I",
-     (void*)NativeThemeGetAttributeValue},
-    {"nativeThemeDump", "(JJILjava/lang/String;Ljava/lang/String;)V", (void*)NativeThemeDump},
-    {"nativeThemeGetChangingConfigurations", "(J)I", (void*)NativeThemeGetChangingConfigurations},
+        {"nativeThemeCopy", "(JJJJ)V", (void*)NativeThemeCopy},
+        {"nativeThemeGetAttributeValue", "(JJILandroid/util/TypedValue;Z)I",
+         (void*)NativeThemeGetAttributeValue},
+        {"nativeThemeDump", "(JJILjava/lang/String;Ljava/lang/String;)V", (void*)NativeThemeDump},
+        {"nativeThemeGetChangingConfigurations", "(J)I",
+         (void*)NativeThemeGetChangingConfigurations},
 
-    // AssetInputStream methods.
-    {"nativeAssetDestroy", "(J)V", (void*)NativeAssetDestroy},
-    {"nativeAssetReadChar", "(J)I", (void*)NativeAssetReadChar},
-    {"nativeAssetRead", "(J[BII)I", (void*)NativeAssetRead},
-    {"nativeAssetSeek", "(JJI)J", (void*)NativeAssetSeek},
-    {"nativeAssetGetLength", "(J)J", (void*)NativeAssetGetLength},
-    {"nativeAssetGetRemainingLength", "(J)J", (void*)NativeAssetGetRemainingLength},
+        // AssetInputStream methods.
+        {"nativeAssetDestroy", "(J)V", (void*)NativeAssetDestroy},
+        {"nativeAssetReadChar", "(J)I", (void*)NativeAssetReadChar},
+        {"nativeAssetRead", "(J[BII)I", (void*)NativeAssetRead},
+        {"nativeAssetSeek", "(JJI)J", (void*)NativeAssetSeek},
+        {"nativeAssetGetLength", "(J)J", (void*)NativeAssetGetLength},
+        {"nativeAssetGetRemainingLength", "(J)J", (void*)NativeAssetGetRemainingLength},
 
-    // System/idmap related methods.
-    {"nativeGetOverlayableMap", "(JLjava/lang/String;)Ljava/util/Map;",
-     (void*)NativeGetOverlayableMap},
-    {"nativeGetOverlayablesToString", "(JLjava/lang/String;)Ljava/lang/String;",
-     (void*)NativeGetOverlayablesToString},
+        // System/idmap related methods.
+        {"nativeGetOverlayableMap", "(JLjava/lang/String;)Ljava/util/Map;",
+         (void*)NativeGetOverlayableMap},
+        {"nativeGetOverlayablesToString", "(JLjava/lang/String;)Ljava/lang/String;",
+         (void*)NativeGetOverlayablesToString},
 
-    // Global management/debug methods.
-    {"getGlobalAssetCount", "()I", (void*)NativeGetGlobalAssetCount},
-    {"getAssetAllocations", "()Ljava/lang/String;", (void*)NativeGetAssetAllocations},
-    {"getGlobalAssetManagerCount", "()I", (void*)NativeGetGlobalAssetManagerCount},
+        // Global management/debug methods.
+        {"getGlobalAssetCount", "()I", (void*)NativeGetGlobalAssetCount},
+        {"getAssetAllocations", "()Ljava/lang/String;", (void*)NativeGetAssetAllocations},
+        {"getGlobalAssetManagerCount", "()I", (void*)NativeGetGlobalAssetManagerCount},
 };
 
 int register_android_content_AssetManager(JNIEnv* env) {

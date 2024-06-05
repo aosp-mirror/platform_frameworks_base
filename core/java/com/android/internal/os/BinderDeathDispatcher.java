@@ -36,6 +36,7 @@ import com.android.internal.annotations.VisibleForTesting;
  *
  * test with: atest FrameworksCoreTests:BinderDeathDispatcherTest
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BinderDeathDispatcher<T extends IInterface> {
     private static final String TAG = "BinderDeathDispatcher";
 

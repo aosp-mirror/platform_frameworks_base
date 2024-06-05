@@ -16,17 +16,22 @@
 
 package android.app.servertransaction;
 
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
+
+import static com.android.window.flags.Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG;
+
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ClientTransactionHandler;
-import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -44,24 +49,40 @@ import org.junit.runner.RunWith;
 @Presubmit
 public class ClientTransactionTests {
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+
     @Test
     public void testPreExecute() {
-        ClientTransactionItem callback1 = mock(ClientTransactionItem.class);
-        ClientTransactionItem callback2 = mock(ClientTransactionItem.class);
-        ActivityLifecycleItem stateRequest = mock(ActivityLifecycleItem.class);
-        ClientTransactionHandler clientTransactionHandler = mock(ClientTransactionHandler.class);
-        IBinder token = mock(IBinder.class);
+        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
 
-        ClientTransaction transaction = ClientTransaction.obtain(null /* client */,
-                token /* activityToken */);
-        transaction.addCallback(callback1);
-        transaction.addCallback(callback2);
-        transaction.setLifecycleStateRequest(stateRequest);
+        testPreExecuteInner();
+    }
+
+    @Test
+    public void testPreExecute_bundleClientTransaction() {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+
+        testPreExecuteInner();
+    }
+
+    private void testPreExecuteInner() {
+        final ClientTransactionItem callback1 = mock(ClientTransactionItem.class);
+        final ClientTransactionItem callback2 = mock(ClientTransactionItem.class);
+        final ActivityLifecycleItem stateRequest = mock(ActivityLifecycleItem.class);
+        doReturn(true).when(stateRequest).isActivityLifecycleItem();
+        final ClientTransactionHandler clientTransactionHandler =
+                mock(ClientTransactionHandler.class);
+
+        final ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
+        transaction.addTransactionItem(callback1);
+        transaction.addTransactionItem(callback2);
+        transaction.addTransactionItem(stateRequest);
 
         transaction.preExecute(clientTransactionHandler);
 
-        verify(callback1, times(1)).preExecute(clientTransactionHandler, token);
-        verify(callback2, times(1)).preExecute(clientTransactionHandler, token);
-        verify(stateRequest, times(1)).preExecute(clientTransactionHandler, token);
+        verify(callback1).preExecute(clientTransactionHandler);
+        verify(callback2).preExecute(clientTransactionHandler);
+        verify(stateRequest).preExecute(clientTransactionHandler);
     }
 }

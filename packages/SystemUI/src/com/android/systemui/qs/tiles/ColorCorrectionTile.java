@@ -22,14 +22,12 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
-import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
-import com.android.systemui.R.drawable;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -38,9 +36,10 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -51,8 +50,8 @@ public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
 
     public static final String TILE_SPEC = "color_correction";
 
-    private final Icon mIcon = ResourceIcon.get(drawable.ic_qs_color_correction);
-    private final SettingObserver mSetting;
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_color_correction);
+    private final UserSettingObserver mSetting;
 
     @Inject
     public ColorCorrectionTile(
@@ -71,7 +70,7 @@ public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
 
-        mSetting = new SettingObserver(secureSettings, mHandler,
+        mSetting = new UserSettingObserver(secureSettings, mHandler,
                 Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
@@ -110,7 +109,7 @@ public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         mSetting.setValue(mState.value ? 0 : 1);
     }
 

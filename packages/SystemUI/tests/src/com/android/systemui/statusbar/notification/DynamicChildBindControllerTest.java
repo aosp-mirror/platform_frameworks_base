@@ -25,21 +25,25 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.test.suitebuilder.annotation.SmallTest;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.android.systemui.R;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.media.dialog.MediaOutputDialogManager;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
+import com.android.systemui.statusbar.notification.row.RowInflaterTask;
+import com.android.systemui.statusbar.notification.row.RowInflaterTaskLogger;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +56,7 @@ import java.util.List;
 import java.util.Map;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class DynamicChildBindControllerTest extends SysuiTestCase {
 
@@ -65,7 +69,7 @@ public class DynamicChildBindControllerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectMockDependency(MediaOutputDialogFactory.class);
+        mDependency.injectMockDependency(MediaOutputDialogManager.class);
         allowTestableLooperAsMainThread();
         when(mBindStage.getStageParams(any())).thenReturn(new RowContentBindParams());
         mDynamicChildBindController =
@@ -113,20 +117,25 @@ public class DynamicChildBindControllerTest extends SysuiTestCase {
 
     private NotificationEntry addGroup(int size) {
         NotificationEntry summary = new NotificationEntryBuilder().build();
-        summary.setRow(createRow());
+        summary.setRow(createRow(summary));
         ArrayList<NotificationEntry> children = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             NotificationEntry child = new NotificationEntryBuilder().build();
-            child.setRow(createRow());
+            child.setRow(createRow(child));
             children.add(child);
         }
         mGroupNotifs.put(summary, children);
         return summary;
     }
 
-    private ExpandableNotificationRow createRow() {
+    private ExpandableNotificationRow createRow(NotificationEntry entry) {
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        inflater.setFactory2(
+                new RowInflaterTask.RowAsyncLayoutInflater(entry, new FakeSystemClock(), mock(
+                        RowInflaterTaskLogger.class)));
+
         ExpandableNotificationRow row = (ExpandableNotificationRow)
-                LayoutInflater.from(mContext).inflate(R.layout.status_bar_notification_row, null);
+                inflater.inflate(R.layout.status_bar_notification_row, null);
         row.getPrivateLayout().setContractedChild(new View(mContext));
         row.getPrivateLayout().setExpandedChild(new View(mContext));
         return row;

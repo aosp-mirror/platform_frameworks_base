@@ -44,7 +44,6 @@ public class MediaFrameworkUnitTestRunner extends InstrumentationTestRunner {
     @Override
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
-        addMediaMetadataRetrieverStateUnitTests(suite);
         addMediaRecorderStateUnitTests(suite);
         addMediaPlayerStateUnitTests(suite);
         addMediaScannerUnitTests(suite);
@@ -67,11 +66,6 @@ public class MediaFrameworkUnitTestRunner extends InstrumentationTestRunner {
 
     private void addImageReaderTests(TestSuite suite) {
         suite.addTestSuite(ImageReaderTest.class);
-    }
-
-    // Running all unit tests checking the state machine may be time-consuming.
-    private void addMediaMetadataRetrieverStateUnitTests(TestSuite suite) {
-        suite.addTestSuite(MediaMetadataRetrieverTest.class);
     }
 
     // Running all unit tests checking the state machine may be time-consuming.

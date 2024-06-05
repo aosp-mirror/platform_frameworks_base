@@ -20,6 +20,7 @@ import android.annotation.RequiresPermission;
 import android.companion.virtual.IVirtualDevice;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.io.Closeable;
 
@@ -32,6 +33,8 @@ import java.io.Closeable;
  */
 abstract class VirtualInputDevice implements Closeable {
 
+    protected static final String TAG = "VirtualInputDevice";
+
     /**
      * The virtual device to which this VirtualInputDevice belongs to.
      */
@@ -42,9 +45,12 @@ abstract class VirtualInputDevice implements Closeable {
      */
     protected final IBinder mToken;
 
+    protected final VirtualInputDeviceConfig mConfig;
+
     /** @hide */
-    VirtualInputDevice(
+    VirtualInputDevice(VirtualInputDeviceConfig config,
             IVirtualDevice virtualDevice, IBinder token) {
+        mConfig = config;
         mVirtualDevice = virtualDevice;
         mToken = token;
     }
@@ -64,10 +70,16 @@ abstract class VirtualInputDevice implements Closeable {
     @Override
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void close() {
+        Log.d(TAG, "Closing virtual input device " + mConfig.getInputDeviceName());
         try {
             mVirtualDevice.unregisterInputDevice(mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @Override
+    public String toString() {
+        return mConfig.toString();
     }
 }

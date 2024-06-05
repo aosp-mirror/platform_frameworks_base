@@ -31,7 +31,7 @@ import java.util.Objects;
  *
  * @hide
  */
-public abstract class Qos {
+public abstract class Qos implements Parcelable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -136,8 +136,10 @@ public abstract class Qos {
 
     protected Qos(@NonNull Parcel source) {
         type = source.readInt();
-        downlink = source.readParcelable(QosBandwidth.class.getClassLoader(), android.telephony.data.Qos.QosBandwidth.class);
-        uplink = source.readParcelable(QosBandwidth.class.getClassLoader(), android.telephony.data.Qos.QosBandwidth.class);
+        downlink = source.readParcelable(
+                QosBandwidth.class.getClassLoader(), android.telephony.data.Qos.QosBandwidth.class);
+        uplink = source.readParcelable(
+                QosBandwidth.class.getClassLoader(), android.telephony.data.Qos.QosBandwidth.class);
     }
 
     /**

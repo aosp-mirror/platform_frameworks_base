@@ -16,7 +16,7 @@
 
 package com.android.server.inputmethod;
 
-import static android.view.InputDevice.SOURCE_STYLUS;
+import static com.android.text.flags.Flags.handwritingEndOfLineTap;
 
 import android.Manifest;
 import android.annotation.AnyThread;
@@ -24,10 +24,15 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UiThread;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.pm.PackageManagerInternal;
+import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerGlobal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.BatchedInputEventReceiver;
@@ -63,44 +68,46 @@ final class HandwritingModeController {
     // Use getHandwritingBufferSize() and not this value directly.
     private static final int LONG_EVENT_BUFFER_SIZE = EVENT_BUFFER_SIZE * 20;
     private static final long HANDWRITING_DELEGATION_IDLE_TIMEOUT_MS = 3000;
+    private static final long AFTER_STYLUS_UP_ALLOW_PERIOD_MS = 200L;
 
+    private final Context mContext;
     // This must be the looper for the UiThread.
     private final Looper mLooper;
     private final InputManagerInternal mInputManagerInternal;
     private final WindowManagerInternal mWindowManagerInternal;
+    private final PackageManagerInternal mPackageManagerInternal;
 
     private ArrayList<MotionEvent> mHandwritingBuffer;
     private InputEventReceiver mHandwritingEventReceiver;
     private Runnable mInkWindowInitRunnable;
     private boolean mRecordingGesture;
+    private boolean mRecordingGestureAfterStylusUp;
     private int mCurrentDisplayId;
     // when set, package names are used for handwriting delegation.
     private @Nullable String mDelegatePackageName;
     private @Nullable String mDelegatorPackageName;
+    private boolean mDelegatorFromDefaultHomePackage;
+    private boolean mDelegationConnectionlessFlow;
     private Runnable mDelegationIdleTimeoutRunnable;
     private Handler mDelegationIdleTimeoutHandler;
-
+    private final Runnable mDiscardDelegationTextRunnable;
     private HandwritingEventReceiverSurface mHandwritingSurface;
 
     private int mCurrentRequestId;
 
     @AnyThread
-    HandwritingModeController(Looper uiThreadLooper, Runnable inkWindowInitRunnable) {
+    HandwritingModeController(Context context, Looper uiThreadLooper,
+            Runnable inkWindowInitRunnable,
+            Runnable discardDelegationTextRunnable) {
+        mContext = context;
         mLooper = uiThreadLooper;
         mCurrentDisplayId = Display.INVALID_DISPLAY;
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mCurrentRequestId = 0;
         mInkWindowInitRunnable = inkWindowInitRunnable;
-    }
-
-    // TODO(b/210039666): Consider moving this to MotionEvent
-    private static boolean isStylusEvent(MotionEvent event) {
-        if (!event.isFromSource(SOURCE_STYLUS)) {
-            return false;
-        }
-        final int tool = event.getToolType(0);
-        return tool == MotionEvent.TOOL_TYPE_STYLUS || tool == MotionEvent.TOOL_TYPE_ERASER;
+        mDiscardDelegationTextRunnable = discardDelegationTextRunnable;
     }
 
     /**
@@ -149,7 +156,23 @@ final class HandwritingModeController {
         return OptionalInt.of(mCurrentRequestId);
     }
 
+    void setNotTouchable(boolean notTouchable) {
+        if (!getCurrentRequestId().isPresent()) {
+            return;
+        }
+        mHandwritingSurface.setNotTouchable(notTouchable);
+    }
+
     boolean isStylusGestureOngoing() {
+        if (mRecordingGestureAfterStylusUp && !mHandwritingBuffer.isEmpty()) {
+            // If it is less than AFTER_STYLUS_UP_ALLOW_PERIOD_MS after the stylus up event, return
+            // true so that handwriting can start.
+            MotionEvent lastEvent = mHandwritingBuffer.get(mHandwritingBuffer.size() - 1);
+            if (lastEvent.getActionMasked() == MotionEvent.ACTION_UP) {
+                return SystemClock.uptimeMillis() - lastEvent.getEventTime()
+                        < AFTER_STYLUS_UP_ALLOW_PERIOD_MS;
+            }
+        }
         return mRecordingGesture;
     }
 
@@ -162,13 +185,28 @@ final class HandwritingModeController {
      * @see InputMethodManager#prepareStylusHandwritingDelegation(View, String)
      */
     void prepareStylusHandwritingDelegation(
-            @NonNull String delegatePackageName, @NonNull String delegatorPackageName) {
+            int userId, @NonNull String delegatePackageName, @NonNull String delegatorPackageName,
+            boolean connectionless) {
         mDelegatePackageName = delegatePackageName;
         mDelegatorPackageName = delegatorPackageName;
-        if (mHandwritingBuffer == null) {
-            mHandwritingBuffer = new ArrayList<>(getHandwritingBufferSize());
-        } else {
-            mHandwritingBuffer.ensureCapacity(getHandwritingBufferSize());
+        mDelegatorFromDefaultHomePackage = false;
+        // mDelegatorFromDefaultHomeActivity is only used in the cross-package delegation case.
+        // For same-package delegation, it doesn't need to be checked.
+        if (!delegatorPackageName.equals(delegatePackageName)) {
+            ComponentName defaultHomeActivity =
+                    mPackageManagerInternal.getDefaultHomeActivity(userId);
+            if (defaultHomeActivity != null) {
+                mDelegatorFromDefaultHomePackage =
+                        delegatorPackageName.equals(defaultHomeActivity.getPackageName());
+            }
+        }
+        mDelegationConnectionlessFlow = connectionless;
+        if (!connectionless) {
+            if (mHandwritingBuffer == null) {
+                mHandwritingBuffer = new ArrayList<>(getHandwritingBufferSize());
+            } else {
+                mHandwritingBuffer.ensureCapacity(getHandwritingBufferSize());
+            }
         }
         scheduleHandwritingDelegationTimeout();
     }
@@ -179,6 +217,14 @@ final class HandwritingModeController {
 
     @Nullable String getDelegatorPackageName() {
         return mDelegatorPackageName;
+    }
+
+    boolean isDelegatorFromDefaultHomePackage() {
+        return mDelegatorFromDefaultHomePackage;
+    }
+
+    boolean isDelegationUsingConnectionlessFlow() {
+        return mDelegationConnectionlessFlow;
     }
 
     private void scheduleHandwritingDelegationTimeout() {
@@ -221,6 +267,11 @@ final class HandwritingModeController {
         mDelegationIdleTimeoutRunnable = null;
         mDelegatorPackageName = null;
         mDelegatePackageName = null;
+        mDelegatorFromDefaultHomePackage = false;
+        if (mDelegationConnectionlessFlow) {
+            mDelegationConnectionlessFlow = false;
+            mDiscardDelegationTextRunnable.run();
+        }
     }
 
     /**
@@ -235,6 +286,7 @@ final class HandwritingModeController {
     @Nullable
     HandwritingSession startHandwritingSession(
             int requestId, int imePid, int imeUid, IBinder focusedWindowToken) {
+        clearPendingHandwritingDelegation();
         if (mHandwritingSurface == null) {
             Slog.e(TAG, "Cannot start handwriting session: Handwriting was not initialized.");
             return null;
@@ -243,7 +295,7 @@ final class HandwritingModeController {
             Slog.e(TAG, "Cannot start handwriting session: Invalid request id: " + requestId);
             return null;
         }
-        if (!mRecordingGesture || mHandwritingBuffer.isEmpty()) {
+        if (!isStylusGestureOngoing()) {
             Slog.e(TAG, "Cannot start handwriting session: No stylus gesture is being recorded.");
             return null;
         }
@@ -266,6 +318,7 @@ final class HandwritingModeController {
         mHandwritingEventReceiver.dispose();
         mHandwritingEventReceiver = null;
         mRecordingGesture = false;
+        mRecordingGestureAfterStylusUp = false;
 
         if (mHandwritingSurface.isIntercepting()) {
             throw new IllegalStateException(
@@ -274,7 +327,10 @@ final class HandwritingModeController {
         mHandwritingSurface.startIntercepting(imePid, imeUid);
 
         // Unset the pointer icon for the stylus in case the app had set it.
-        InputManagerGlobal.getInstance().setPointerIconType(PointerIcon.TYPE_NOT_SPECIFIED);
+        Objects.requireNonNull(mContext.getSystemService(InputManager.class)).setPointerIcon(
+                PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_NOT_SPECIFIED),
+                downEvent.getDisplayId(), downEvent.getDeviceId(), downEvent.getPointerId(0),
+                mHandwritingSurface.getInputChannel().getToken());
 
         return new HandwritingSession(mCurrentRequestId, mHandwritingSurface.getInputChannel(),
                 mHandwritingBuffer);
@@ -289,6 +345,10 @@ final class HandwritingModeController {
     @UiThread
     void reset() {
         reset(false /* reinitializing */);
+    }
+
+    void setInkWindowInitializer(Runnable inkWindowInitializer) {
+        mInkWindowInitRunnable = inkWindowInitializer;
     }
 
     private void reset(boolean reinitializing) {
@@ -313,8 +373,11 @@ final class HandwritingModeController {
             }
         }
 
-        clearPendingHandwritingDelegation();
+        if (!mDelegationConnectionlessFlow) {
+            clearPendingHandwritingDelegation();
+        }
         mRecordingGesture = false;
+        mRecordingGestureAfterStylusUp = false;
     }
 
     private boolean onInputEvent(InputEvent ev) {
@@ -323,12 +386,11 @@ final class HandwritingModeController {
                     "Input Event should not be processed when IME has the spy channel.");
         }
 
-        if (!(ev instanceof MotionEvent)) {
+        if (!(ev instanceof MotionEvent event)) {
             Slog.wtf(TAG, "Received non-motion event in stylus monitor.");
             return false;
         }
-        final MotionEvent event = (MotionEvent) ev;
-        if (!isStylusEvent(event)) {
+        if (!event.isStylusPointer()) {
             return false;
         }
         if (event.getDisplayId() != mCurrentDisplayId) {
@@ -348,22 +410,32 @@ final class HandwritingModeController {
             // Ask IMMS to make ink window ready.
             mInkWindowInitRunnable.run();
             mInkWindowInitRunnable = null;
+            return;
+        } else if (event.isHoverEvent()) {
+            // Hover events need not be recorded to buffer.
+            return;
         }
 
         // If handwriting delegation is ongoing, don't clear the buffer so that multiple strokes
         // can be buffered across windows.
-        if (TextUtils.isEmpty(mDelegatePackageName)
+        // (This isn't needed for the connectionless delegation flow.)
+        if ((TextUtils.isEmpty(mDelegatePackageName) || mDelegationConnectionlessFlow)
                 && (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL)) {
             mRecordingGesture = false;
-            mHandwritingBuffer.clear();
-            return;
+            if (handwritingEndOfLineTap() && action == MotionEvent.ACTION_UP) {
+                mRecordingGestureAfterStylusUp = true;
+            } else {
+                mHandwritingBuffer.clear();
+                return;
+            }
         }
 
         if (action == MotionEvent.ACTION_DOWN) {
+            clearBufferIfRecordingAfterStylusUp();
             mRecordingGesture = true;
         }
 
-        if (!mRecordingGesture) {
+        if (!mRecordingGesture && !mRecordingGestureAfterStylusUp) {
             return;
         }
 
@@ -373,10 +445,18 @@ final class HandwritingModeController {
                         + " The rest of the gesture will not be recorded.");
             }
             mRecordingGesture = false;
+            clearBufferIfRecordingAfterStylusUp();
             return;
         }
 
         mHandwritingBuffer.add(MotionEvent.obtain(event));
+    }
+
+    private void clearBufferIfRecordingAfterStylusUp() {
+        if (mRecordingGestureAfterStylusUp) {
+            mHandwritingBuffer.clear();
+            mRecordingGestureAfterStylusUp = false;
+        }
     }
 
     static final class HandwritingSession {

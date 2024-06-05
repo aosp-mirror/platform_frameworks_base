@@ -24,7 +24,6 @@ import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeTrue;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -36,7 +35,6 @@ import android.graphics.fonts.FontManager;
 import android.graphics.fonts.FontStyle;
 import android.os.ParcelFileDescriptor;
 import android.platform.test.annotations.RootPermissionTest;
-import android.security.FileIntegrityManager;
 import android.text.FontConfig;
 import android.util.Log;
 import android.util.Pair;
@@ -132,18 +130,13 @@ public class UpdatableSystemFontTest {
     private static final Pattern PATTERN_SYSTEM_FONT_FILES =
             Pattern.compile("^/(system|product)/fonts/");
 
-    private String mKeyId;
     private FontManager mFontManager;
     private UiDevice mUiDevice;
 
     @Before
     public void setUp() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        // Run tests only if updatable system font is enabled.
-        FileIntegrityManager fim = context.getSystemService(FileIntegrityManager.class);
-        assumeTrue(fim != null);
-        assumeTrue(fim.isApkVeritySupported());
-        mKeyId = insertCert(CERT_PATH);
+        insertCert(CERT_PATH);
         mFontManager = context.getSystemService(FontManager.class);
         expectCommandToSucceed("cmd font clear");
         mUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
@@ -153,9 +146,6 @@ public class UpdatableSystemFontTest {
     public void tearDown() throws Exception {
         // Ignore errors because this may fail if updatable system font is not enabled.
         runShellCommand("cmd font clear", null);
-        if (mKeyId != null) {
-            expectCommandToSucceed("mini-keyctl unlink " + mKeyId + " .fs-verity");
-        }
     }
 
     @Test
@@ -375,20 +365,11 @@ public class UpdatableSystemFontTest {
         assertThat(isFileOpenedBy(fontPath, EMOJI_RENDERING_TEST_APP_ID)).isFalse();
     }
 
-    private static String insertCert(String certPath) throws Exception {
-        Pair<String, String> result;
-        try (InputStream is = new FileInputStream(certPath)) {
-            result = runShellCommand("mini-keyctl padd asymmetric fsv_test .fs-verity", is);
-        }
+    private static void insertCert(String certPath) throws Exception {
         // /data/local/tmp is not readable by system server. Copy a cert file to /data/fonts
         final String copiedCert = "/data/fonts/debug_cert.der";
         runShellCommand("cp " + certPath + " " + copiedCert, null);
         runShellCommand("cmd font install-debug-cert " + copiedCert, null);
-        // Assert that there are no errors.
-        assertThat(result.second).isEmpty();
-        String keyId = result.first.trim();
-        assertThat(keyId).matches("^\\d+$");
-        return keyId;
     }
 
     private int updateFontFile(String fontPath, String signaturePath) throws IOException {

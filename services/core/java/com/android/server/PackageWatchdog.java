@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
+import android.crashrecovery.flags.Flags;
 import android.net.ConnectivityModuleConnector;
 import android.os.Environment;
 import android.os.Handler;
@@ -33,12 +34,12 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig;
+import android.sysprop.CrashRecoveryProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.LongArrayQueue;
-import android.util.MathUtils;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -57,16 +58,20 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -100,13 +105,15 @@ public class PackageWatchdog {
     public static final int FAILURE_REASON_EXPLICIT_HEALTH_CHECK = 2;
     public static final int FAILURE_REASON_APP_CRASH = 3;
     public static final int FAILURE_REASON_APP_NOT_RESPONDING = 4;
+    public static final int FAILURE_REASON_BOOT_LOOP = 5;
 
     @IntDef(prefix = { "FAILURE_REASON_" }, value = {
             FAILURE_REASON_UNKNOWN,
             FAILURE_REASON_NATIVE_CRASH,
             FAILURE_REASON_EXPLICIT_HEALTH_CHECK,
             FAILURE_REASON_APP_CRASH,
-            FAILURE_REASON_APP_NOT_RESPONDING
+            FAILURE_REASON_APP_NOT_RESPONDING,
+            FAILURE_REASON_BOOT_LOOP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FailureReasons {}
@@ -128,17 +135,20 @@ public class PackageWatchdog {
 
     @VisibleForTesting
     static final int DEFAULT_BOOT_LOOP_TRIGGER_COUNT = 5;
+
     static final long DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS = TimeUnit.MINUTES.toMillis(10);
 
-    // These properties track individual system server boot events, and are reset once the boot
-    // threshold is met, or the boot loop trigger window is exceeded between boot events.
-    private static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
-    private static final String PROP_RESCUE_BOOT_START = "sys.rescue_boot_start";
+    // Time needed to apply mitigation
+    private static final String MITIGATION_WINDOW_MS =
+            "persist.device_config.configuration.mitigation_window_ms";
+    @VisibleForTesting
+    static final long DEFAULT_MITIGATION_WINDOW_MS = TimeUnit.SECONDS.toMillis(5);
 
-    // These properties track multiple calls made to observers tracking boot loops. They are reset
-    // when the de-escalation window is exceeded between boot events.
-    private static final String PROP_BOOT_MITIGATION_WINDOW_START = "sys.boot_mitigation_start";
-    private static final String PROP_BOOT_MITIGATION_COUNT = "sys.boot_mitigation_count";
+    // Threshold level at which or above user might experience significant disruption.
+    private static final String MAJOR_USER_IMPACT_LEVEL_THRESHOLD =
+            "persist.device_config.configuration.major_user_impact_level_threshold";
+    private static final int DEFAULT_MAJOR_USER_IMPACT_LEVEL_THRESHOLD =
+            PackageHealthObserverImpact.USER_IMPACT_LEVEL_71;
 
     private long mNumberOfNativeCrashPollsRemaining;
 
@@ -152,6 +162,7 @@ public class PackageWatchdog {
     private static final String ATTR_EXPLICIT_HEALTH_CHECK_DURATION = "health-check-duration";
     private static final String ATTR_PASSED_HEALTH_CHECK = "passed-health-check";
     private static final String ATTR_MITIGATION_CALLS = "mitigation-calls";
+    private static final String ATTR_MITIGATION_COUNT = "mitigation-count";
 
     // A file containing information about the current mitigation count in the case of a boot loop.
     // This allows boot loop information to persist in the case of an fs-checkpoint being
@@ -205,6 +216,9 @@ public class PackageWatchdog {
     @GuardedBy("mLock")
     private boolean mSyncRequired = false;
 
+    @GuardedBy("mLock")
+    private long mLastMitigation = -1000000;
+
     @FunctionalInterface
     @VisibleForTesting
     interface SystemClock {
@@ -239,6 +253,7 @@ public class PackageWatchdog {
         mNumberOfNativeCrashPollsRemaining = NUMBER_OF_NATIVE_CRASH_POLLS;
         mBootThreshold = new BootThreshold(DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
                 DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS);
+
         loadFromFile();
         sPackageWatchdog = this;
     }
@@ -394,6 +409,16 @@ public class PackageWatchdog {
             Slog.w(TAG, "Could not resolve a list of failing packages");
             return;
         }
+        synchronized (mLock) {
+            final long now = mSystemClock.uptimeMillis();
+            if (Flags.recoverabilityDetection()) {
+                if (now >= mLastMitigation
+                        && (now - mLastMitigation) < getMitigationWindowMs()) {
+                    Slog.i(TAG, "Skipping onPackageFailure mitigation");
+                    return;
+                }
+            }
+        }
         mLongTaskHandler.post(() -> {
             synchronized (mLock) {
                 if (mAllObservers.isEmpty()) {
@@ -443,8 +468,13 @@ public class PackageWatchdog {
                                 mitigationCount =
                                         currentMonitoredPackage.getMitigationCountLocked();
                             }
-                            currentObserverToNotify.execute(versionedPackage,
-                                    failureReason, mitigationCount);
+                            if (Flags.recoverabilityDetection()) {
+                                maybeExecute(currentObserverToNotify, versionedPackage,
+                                        failureReason, currentObserverImpact, mitigationCount);
+                            } else {
+                                currentObserverToNotify.execute(versionedPackage,
+                                        failureReason, mitigationCount);
+                            }
                         }
                     }
                 }
@@ -474,37 +504,85 @@ public class PackageWatchdog {
             }
         }
         if (currentObserverToNotify != null) {
-            currentObserverToNotify.execute(failingPackage,  failureReason, 1);
+            if (Flags.recoverabilityDetection()) {
+                maybeExecute(currentObserverToNotify, failingPackage, failureReason,
+                        currentObserverImpact, /*mitigationCount=*/ 1);
+            } else {
+                currentObserverToNotify.execute(failingPackage,  failureReason, 1);
+            }
         }
     }
+
+    private void maybeExecute(PackageHealthObserver currentObserverToNotify,
+                              VersionedPackage versionedPackage,
+                              @FailureReasons int failureReason,
+                              int currentObserverImpact,
+                              int mitigationCount) {
+        if (currentObserverImpact < getUserImpactLevelLimit()) {
+            synchronized (mLock) {
+                mLastMitigation = mSystemClock.uptimeMillis();
+            }
+            currentObserverToNotify.execute(versionedPackage, failureReason, mitigationCount);
+        }
+    }
+
+    private long getMitigationWindowMs() {
+        return SystemProperties.getLong(MITIGATION_WINDOW_MS, DEFAULT_MITIGATION_WINDOW_MS);
+    }
+
 
     /**
      * Called when the system server boots. If the system server is detected to be in a boot loop,
      * query each observer and perform the mitigation action with the lowest user impact.
+     *
+     * Note: PackageWatchdog considers system_server restart loop as bootloop. Full reboots
+     * are not counted in bootloop.
      */
+    @SuppressWarnings("GuardedBy")
     public void noteBoot() {
         synchronized (mLock) {
-            if (mBootThreshold.incrementAndTest()) {
-                mBootThreshold.reset();
+            // if boot count has reached threshold, start mitigation.
+            // We wait until threshold number of restarts only for the first time. Perform
+            // mitigations for every restart after that.
+            boolean mitigate = mBootThreshold.incrementAndTest();
+            if (mitigate) {
+                if (!Flags.recoverabilityDetection()) {
+                    mBootThreshold.reset();
+                }
                 int mitigationCount = mBootThreshold.getMitigationCount() + 1;
                 PackageHealthObserver currentObserverToNotify = null;
+                ObserverInternal currentObserverInternal = null;
                 int currentObserverImpact = Integer.MAX_VALUE;
                 for (int i = 0; i < mAllObservers.size(); i++) {
                     final ObserverInternal observer = mAllObservers.valueAt(i);
                     PackageHealthObserver registeredObserver = observer.registeredObserver;
                     if (registeredObserver != null) {
-                        int impact = registeredObserver.onBootLoop(mitigationCount);
+                        int impact = Flags.recoverabilityDetection()
+                                ? registeredObserver.onBootLoop(
+                                        observer.getBootMitigationCount() + 1)
+                                : registeredObserver.onBootLoop(mitigationCount);
                         if (impact != PackageHealthObserverImpact.USER_IMPACT_LEVEL_0
                                 && impact < currentObserverImpact) {
                             currentObserverToNotify = registeredObserver;
+                            currentObserverInternal = observer;
                             currentObserverImpact = impact;
                         }
                     }
                 }
                 if (currentObserverToNotify != null) {
-                    mBootThreshold.setMitigationCount(mitigationCount);
-                    mBootThreshold.saveMitigationCountToMetadata();
-                    currentObserverToNotify.executeBootLoopMitigation(mitigationCount);
+                    if (Flags.recoverabilityDetection()) {
+                        int currentObserverMitigationCount =
+                                currentObserverInternal.getBootMitigationCount() + 1;
+                        currentObserverInternal.setBootMitigationCount(
+                                currentObserverMitigationCount);
+                        saveAllObserversBootMitigationCountToMetadata(METADATA_FILE);
+                        currentObserverToNotify.executeBootLoopMitigation(
+                                currentObserverMitigationCount);
+                    } else {
+                        mBootThreshold.setMitigationCount(mitigationCount);
+                        mBootThreshold.saveMitigationCountToMetadata();
+                        currentObserverToNotify.executeBootLoopMitigation(mitigationCount);
+                    }
                 }
             }
         }
@@ -551,7 +629,7 @@ public class PackageWatchdog {
         mNumberOfNativeCrashPollsRemaining--;
         // Check if native watchdog reported a crash
         if ("1".equals(SystemProperties.get("sys.init.updatable_crashing"))) {
-            // We rollback everything available when crash is unattributable
+            // We rollback all available low impact rollbacks when crash is unattributable
             onPackageFailure(Collections.EMPTY_LIST, FAILURE_REASON_NATIVE_CRASH);
             // we stop polling after an attempt to execute rollback, regardless of whether the
             // attempt succeeds or not
@@ -574,14 +652,23 @@ public class PackageWatchdog {
         mShortTaskHandler.post(()->checkAndMitigateNativeCrashes());
     }
 
+    private int getUserImpactLevelLimit() {
+        return SystemProperties.getInt(MAJOR_USER_IMPACT_LEVEL_THRESHOLD,
+                DEFAULT_MAJOR_USER_IMPACT_LEVEL_THRESHOLD);
+    }
+
     /** Possible severity values of the user impact of a {@link PackageHealthObserver#execute}. */
     @Retention(SOURCE)
     @IntDef(value = {PackageHealthObserverImpact.USER_IMPACT_LEVEL_0,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_10,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_20,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_30,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_50,
-                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_60,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_70,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_71,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_75,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_80,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_90,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_100})
     public @interface PackageHealthObserverImpact {
         /** No action to take. */
@@ -589,11 +676,15 @@ public class PackageWatchdog {
         /* Action has low user impact, user of a device will barely notice. */
         int USER_IMPACT_LEVEL_10 = 10;
         /* Actions having medium user impact, user of a device will likely notice. */
+        int USER_IMPACT_LEVEL_20 = 20;
         int USER_IMPACT_LEVEL_30 = 30;
         int USER_IMPACT_LEVEL_50 = 50;
-        int USER_IMPACT_LEVEL_60 = 60;
         int USER_IMPACT_LEVEL_70 = 70;
         /* Action has high user impact, a last resort, user of a device will be very frustrated. */
+        int USER_IMPACT_LEVEL_71 = 71;
+        int USER_IMPACT_LEVEL_75 = 75;
+        int USER_IMPACT_LEVEL_80 = 80;
+        int USER_IMPACT_LEVEL_90 = 90;
         int USER_IMPACT_LEVEL_100 = 100;
     }
 
@@ -1151,6 +1242,12 @@ public class PackageWatchdog {
         }
     }
 
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    void registerObserverInternal(ObserverInternal observerInternal) {
+        mAllObservers.put(observerInternal.name, observerInternal);
+    }
+
     /**
      * Represents an observer monitoring a set of packages along with the failure thresholds for
      * each package.
@@ -1158,17 +1255,23 @@ public class PackageWatchdog {
      * <p> Note, the PackageWatchdog#mLock must always be held when reading or writing
      * instances of this class.
      */
-    private static class ObserverInternal {
+    static class ObserverInternal {
         public final String name;
         @GuardedBy("mLock")
         private final ArrayMap<String, MonitoredPackage> mPackages = new ArrayMap<>();
         @Nullable
         @GuardedBy("mLock")
         public PackageHealthObserver registeredObserver;
+        private int mMitigationCount;
 
         ObserverInternal(String name, List<MonitoredPackage> packages) {
+            this(name, packages, /*mitigationCount=*/ 0);
+        }
+
+        ObserverInternal(String name, List<MonitoredPackage> packages, int mitigationCount) {
             this.name = name;
             updatePackagesLocked(packages);
+            this.mMitigationCount = mitigationCount;
         }
 
         /**
@@ -1180,6 +1283,9 @@ public class PackageWatchdog {
             try {
                 out.startTag(null, TAG_OBSERVER);
                 out.attribute(null, ATTR_NAME, name);
+                if (Flags.recoverabilityDetection()) {
+                    out.attributeInt(null, ATTR_MITIGATION_COUNT, mMitigationCount);
+                }
                 for (int i = 0; i < mPackages.size(); i++) {
                     MonitoredPackage p = mPackages.valueAt(i);
                     p.writeLocked(out);
@@ -1190,6 +1296,14 @@ public class PackageWatchdog {
                 Slog.w(TAG, "Cannot save observer", e);
                 return false;
             }
+        }
+
+        public int getBootMitigationCount() {
+            return mMitigationCount;
+        }
+
+        public void setBootMitigationCount(int mitigationCount) {
+            mMitigationCount = mitigationCount;
         }
 
         @GuardedBy("mLock")
@@ -1296,6 +1410,7 @@ public class PackageWatchdog {
          **/
         public static ObserverInternal read(TypedXmlPullParser parser, PackageWatchdog watchdog) {
             String observerName = null;
+            int observerMitigationCount = 0;
             if (TAG_OBSERVER.equals(parser.getName())) {
                 observerName = parser.getAttributeValue(null, ATTR_NAME);
                 if (TextUtils.isEmpty(observerName)) {
@@ -1306,6 +1421,16 @@ public class PackageWatchdog {
             List<MonitoredPackage> packages = new ArrayList<>();
             int innerDepth = parser.getDepth();
             try {
+                if (Flags.recoverabilityDetection()) {
+                    try {
+                        observerMitigationCount =
+                                parser.getAttributeInt(null, ATTR_MITIGATION_COUNT);
+                    } catch (XmlPullParserException e) {
+                        Slog.i(
+                            TAG,
+                            "ObserverInternal mitigation count was not present.");
+                    }
+                }
                 while (XmlUtils.nextElementWithin(parser, innerDepth)) {
                     if (TAG_PACKAGE.equals(parser.getName())) {
                         try {
@@ -1326,7 +1451,7 @@ public class PackageWatchdog {
             if (packages.isEmpty()) {
                 return null;
             }
-            return new ObserverInternal(observerName, packages);
+            return new ObserverInternal(observerName, packages, observerMitigationCount);
         }
 
         /** Dumps information about this observer and the packages it watches. */
@@ -1686,6 +1811,27 @@ public class PackageWatchdog {
         }
     }
 
+    @GuardedBy("mLock")
+    @SuppressWarnings("GuardedBy")
+    void saveAllObserversBootMitigationCountToMetadata(String filePath) {
+        HashMap<String, Integer> bootMitigationCounts = new HashMap<>();
+        for (int i = 0; i < mAllObservers.size(); i++) {
+            final ObserverInternal observer = mAllObservers.valueAt(i);
+            bootMitigationCounts.put(observer.name, observer.getBootMitigationCount());
+        }
+
+        try {
+            FileOutputStream fileStream = new FileOutputStream(new File(filePath));
+            ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+            objectStream.writeObject(bootMitigationCounts);
+            objectStream.flush();
+            objectStream.close();
+            fileStream.close();
+        } catch (Exception e) {
+            Slog.i(TAG, "Could not save observers metadata to file: " + e);
+        }
+    }
+
     /**
      * Handles the thresholding logic for system server boots.
      */
@@ -1704,42 +1850,45 @@ public class PackageWatchdog {
             setCount(0);
         }
 
-        private int getCount() {
-            return SystemProperties.getInt(PROP_RESCUE_BOOT_COUNT, 0);
+        protected int getCount() {
+            return CrashRecoveryProperties.rescueBootCount().orElse(0);
         }
 
-        private void setCount(int count) {
-            SystemProperties.set(PROP_RESCUE_BOOT_COUNT, Integer.toString(count));
+        protected void setCount(int count) {
+            CrashRecoveryProperties.rescueBootCount(count);
         }
 
         public long getStart() {
-            return SystemProperties.getLong(PROP_RESCUE_BOOT_START, 0);
+            return CrashRecoveryProperties.rescueBootStart().orElse(0L);
         }
 
         public int getMitigationCount() {
-            return SystemProperties.getInt(PROP_BOOT_MITIGATION_COUNT, 0);
+            return CrashRecoveryProperties.bootMitigationCount().orElse(0);
         }
 
         public void setStart(long start) {
-            setPropertyStart(PROP_RESCUE_BOOT_START, start);
+            CrashRecoveryProperties.rescueBootStart(getStartTime(start));
         }
 
         public void setMitigationStart(long start) {
-            setPropertyStart(PROP_BOOT_MITIGATION_WINDOW_START, start);
+            CrashRecoveryProperties.bootMitigationStart(getStartTime(start));
         }
 
         public long getMitigationStart() {
-            return SystemProperties.getLong(PROP_BOOT_MITIGATION_WINDOW_START, 0);
+            return CrashRecoveryProperties.bootMitigationStart().orElse(0L);
         }
 
         public void setMitigationCount(int count) {
-            SystemProperties.set(PROP_BOOT_MITIGATION_COUNT, Integer.toString(count));
+            CrashRecoveryProperties.bootMitigationCount(count);
         }
 
-        public void setPropertyStart(String property, long start) {
+        private static long constrain(long amount, long low, long high) {
+            return amount < low ? low : (amount > high ? high : amount);
+        }
+
+        public long getStartTime(long start) {
             final long now = mSystemClock.uptimeMillis();
-            final long newStart = MathUtils.constrain(start, 0, now);
-            SystemProperties.set(property, Long.toString(newStart));
+            return constrain(start, 0, now);
         }
 
         public void saveMitigationCountToMetadata() {
@@ -1765,8 +1914,14 @@ public class PackageWatchdog {
 
 
         /** Increments the boot counter, and returns whether the device is bootlooping. */
+        @GuardedBy("mLock")
         public boolean incrementAndTest() {
-            readMitigationCountFromMetadataIfNecessary();
+            if (Flags.recoverabilityDetection()) {
+                readAllObserversBootMitigationCountIfNecessary(METADATA_FILE);
+            } else {
+                readMitigationCountFromMetadataIfNecessary();
+            }
+
             final long now = mSystemClock.uptimeMillis();
             if (now - getStart() < 0) {
                 Slog.e(TAG, "Window was less than zero. Resetting start to current time.");
@@ -1774,8 +1929,12 @@ public class PackageWatchdog {
                 setMitigationStart(now);
             }
             if (now - getMitigationStart() > DEFAULT_DEESCALATION_WINDOW_MS) {
-                setMitigationCount(0);
                 setMitigationStart(now);
+                if (Flags.recoverabilityDetection()) {
+                    resetAllObserversBootMitigationCount();
+                } else {
+                    setMitigationCount(0);
+                }
             }
             final long window = now - getStart();
             if (window >= mTriggerWindow) {
@@ -1786,7 +1945,58 @@ public class PackageWatchdog {
                 int count = getCount() + 1;
                 setCount(count);
                 EventLogTags.writeRescueNote(Process.ROOT_UID, count, window);
+                if (Flags.recoverabilityDetection()) {
+                    // After a reboot (e.g. by WARM_REBOOT or mainline rollback) we apply
+                    // mitigations without waiting for DEFAULT_BOOT_LOOP_TRIGGER_COUNT.
+                    return (count >= mBootTriggerCount)
+                            || (performedMitigationsDuringWindow() && count > 1);
+                }
                 return count >= mBootTriggerCount;
+            }
+        }
+
+        @GuardedBy("mLock")
+        private boolean performedMitigationsDuringWindow() {
+            for (ObserverInternal observerInternal: mAllObservers.values()) {
+                if (observerInternal.getBootMitigationCount() > 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @GuardedBy("mLock")
+        private void resetAllObserversBootMitigationCount() {
+            for (int i = 0; i < mAllObservers.size(); i++) {
+                final ObserverInternal observer = mAllObservers.valueAt(i);
+                observer.setBootMitigationCount(0);
+            }
+            saveAllObserversBootMitigationCountToMetadata(METADATA_FILE);
+        }
+
+        @GuardedBy("mLock")
+        @SuppressWarnings("GuardedBy")
+        void readAllObserversBootMitigationCountIfNecessary(String filePath) {
+            File metadataFile = new File(filePath);
+            if (metadataFile.exists()) {
+                try {
+                    FileInputStream fileStream = new FileInputStream(metadataFile);
+                    ObjectInputStream objectStream = new ObjectInputStream(fileStream);
+                    HashMap<String, Integer> bootMitigationCounts =
+                            (HashMap<String, Integer>) objectStream.readObject();
+                    objectStream.close();
+                    fileStream.close();
+
+                    for (int i = 0; i < mAllObservers.size(); i++) {
+                        final ObserverInternal observer = mAllObservers.valueAt(i);
+                        if (bootMitigationCounts.containsKey(observer.name)) {
+                            observer.setBootMitigationCount(
+                                    bootMitigationCounts.get(observer.name));
+                        }
+                    }
+                } catch (Exception e) {
+                    Slog.i(TAG, "Could not read observer metadata file: " + e);
+                }
             }
         }
 

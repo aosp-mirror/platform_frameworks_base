@@ -1,0 +1,50 @@
+package: "com.android.server.job"
+container: "system"
+
+flag {
+    name: "batch_active_bucket_jobs"
+    namespace: "backstage_power"
+    description: "Include jobs in the ACTIVE bucket in the job batching effort. Don't let them run as freely as they're ready."
+    bug: "326607666"
+}
+
+flag {
+    name: "batch_connectivity_jobs_per_network"
+    namespace: "backstage_power"
+    description: "Have JobScheduler attempt to delay the start of some connectivity jobs until there are several ready or the network is active"
+    bug: "28382445"
+}
+
+flag {
+    name: "do_not_force_rush_execution_at_boot"
+    namespace: "backstage_power"
+    description: "Don't force rush job execution right after boot completion"
+    bug: "321598070"
+}
+
+flag {
+    name: "relax_prefetch_connectivity_constraint_only_on_charger"
+    namespace: "backstage_power"
+    description: "Only relax a prefetch job's connectivity constraint when the device is charging and battery is not low"
+    bug: "299329948"
+}
+
+flag {
+    name: "count_quota_fix"
+    namespace: "backstage_power"
+    description: "Fix job count quota check"
+    bug: "300862949"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+   name: "thermal_restrictions_to_fgs_jobs"
+   namespace: "backstage_power"
+   description: "Apply thermal restrictions to FGS jobs."
+   bug: "315157163"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}

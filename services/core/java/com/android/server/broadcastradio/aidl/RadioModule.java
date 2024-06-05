@@ -38,10 +38,10 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArraySet;
-import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.broadcastradio.RadioEventLogger;
 import com.android.server.broadcastradio.RadioServiceUserController;
 import com.android.server.utils.Slogf;
 
@@ -59,7 +59,7 @@ final class RadioModule {
 
     private final Object mLock = new Object();
     private final Handler mHandler;
-    private final RadioLogger mLogger;
+    private final RadioEventLogger mLogger;
     private final RadioManager.ModuleProperties mProperties;
 
     /**
@@ -142,12 +142,11 @@ final class RadioModule {
         public void onProgramListUpdated(ProgramListChunk programListChunk) {
             fireLater(() -> {
                 synchronized (mLock) {
-                    android.hardware.radio.ProgramList.Chunk chunk =
-                            ConversionUtils.chunkFromHalProgramListChunk(programListChunk);
-                    mProgramInfoCache.filterAndApplyChunk(chunk);
+                    mProgramInfoCache.filterAndApplyChunk(programListChunk);
 
                     for (int i = 0; i < mAidlTunerSessions.size(); i++) {
-                        mAidlTunerSessions.valueAt(i).onMergedProgramListUpdateFromHal(chunk);
+                        mAidlTunerSessions.valueAt(i).onMergedProgramListUpdateFromHal(
+                                programListChunk);
                     }
                 }
             });
@@ -168,6 +167,11 @@ final class RadioModule {
             fireLater(() -> {
                 synchronized (mLock) {
                     fanoutAidlCallbackLocked((cb, uid) -> {
+                        if (!ConversionUtils.configFlagMeetsSdkVersionRequirement(flag, uid)) {
+                            Slogf.e(TAG, "onConfigFlagUpdated: cannot send program info "
+                                    + "requiring higher target SDK version");
+                            return;
+                        }
                         cb.onConfigFlagUpdated(flag, value);
                     });
                 }
@@ -193,7 +197,7 @@ final class RadioModule {
         mProperties = Objects.requireNonNull(properties, "properties cannot be null");
         mService = Objects.requireNonNull(service, "service cannot be null");
         mHandler = new Handler(Looper.getMainLooper());
-        mLogger = new RadioLogger(TAG, RADIO_EVENT_LOGGER_QUEUE_SIZE);
+        mLogger = new RadioEventLogger(TAG, RADIO_EVENT_LOGGER_QUEUE_SIZE);
     }
 
     @Nullable
@@ -242,10 +246,6 @@ final class RadioModule {
         return mProperties;
     }
 
-    void setInternalHalCallback() throws RemoteException {
-        mService.setTunerCallback(mHalTunerCallback);
-    }
-
     TunerSession openSession(android.hardware.radio.ITunerCallback userCb)
             throws RemoteException {
         mLogger.logRadioEvent("Open TunerSession");
@@ -253,10 +253,14 @@ final class RadioModule {
         Boolean antennaConnected;
         RadioManager.ProgramInfo currentProgramInfo;
         synchronized (mLock) {
+            boolean isFirstTunerSession = mAidlTunerSessions.isEmpty();
             tunerSession = new TunerSession(this, mService, userCb);
             mAidlTunerSessions.add(tunerSession);
             antennaConnected = mAntennaConnected;
             currentProgramInfo = mCurrentProgramInfo;
+            if (isFirstTunerSession) {
+                mService.setTunerCallback(mHalTunerCallback);
+            }
         }
         // Propagate state to new client.
         // Note: These callbacks are invoked while holding mLock to prevent race conditions
@@ -280,7 +284,6 @@ final class RadioModule {
         synchronized (mLock) {
             tunerSessions = new TunerSession[mAidlTunerSessions.size()];
             mAidlTunerSessions.toArray(tunerSessions);
-            mAidlTunerSessions.clear();
         }
 
         for (TunerSession tunerSession : tunerSessions) {
@@ -398,6 +401,14 @@ final class RadioModule {
             mAidlTunerSessions.remove(tunerSession);
         }
         onTunerSessionProgramListFilterChanged(null);
+        if (mAidlTunerSessions.isEmpty()) {
+            try {
+                mService.unsetTunerCallback();
+            } catch (RemoteException ex) {
+                Slogf.wtf(TAG, ex, "Failed to unregister HAL callback for module %d",
+                        mProperties.getId());
+            }
+        }
     }
 
     // add to mHandler queue
@@ -513,7 +524,7 @@ final class RadioModule {
         return BitmapFactory.decodeByteArray(rawImage, 0, rawImage.length);
     }
 
-    void dumpInfo(IndentingPrintWriter pw) {
+    void dumpInfo(android.util.IndentingPrintWriter pw) {
         pw.printf("RadioModule\n");
 
         pw.increaseIndent();

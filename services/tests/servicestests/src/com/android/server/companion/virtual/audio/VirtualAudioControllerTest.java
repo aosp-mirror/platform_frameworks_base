@@ -25,9 +25,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.media.AudioPlaybackConfiguration;
@@ -73,24 +73,27 @@ public class VirtualAudioControllerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
-        mVirtualAudioController = new VirtualAudioController(mContext);
+        mVirtualAudioController = new VirtualAudioController(mContext,
+                AttributionSource.myAttributionSource());
         mGenericWindowPolicyController =
                 new GenericWindowPolicyController(
                         FLAG_SECURE,
                         SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                        AttributionSource.myAttributionSource(),
                         /* allowedUsers= */ new ArraySet<>(),
-                        /* allowedCrossTaskNavigations= */ new ArraySet<>(),
-                        /* blockedCrossTaskNavigations= */ new ArraySet<>(),
-                        /* allowedActivities= */ new ArraySet<>(),
-                        /* blockedActivities= */ new ArraySet<>(),
-                        VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED,
+                        /* activityLaunchAllowedByDefault= */ true,
+                        /* activityPolicyExemptions= */ new ArraySet<>(),
+                        /* crossTaskNavigationAllowedByDefault= */ true,
+                        /* crossTaskNavigationExemptions= */ new ArraySet<>(),
+                        /* permissionDialogComponent */ null,
                         /* activityListener= */ null,
                         /* pipBlockedCallback= */ null,
                         /* activityBlockedCallback= */ null,
                         /* secureWindowCallback= */ null,
                         /* intentListenerCallback= */ null,
                         /* displayCategories= */ new ArraySet<>(),
-                        /* showTasksInHostDeviceRecents= */ true);
+                        /* showTasksInHostDeviceRecents= */ true,
+                        /* customHomeComponent= */ null);
     }
 
 

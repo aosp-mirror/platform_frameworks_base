@@ -38,9 +38,9 @@ android_test {
         "androidx.test.ext.junit",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
-        "truth-prebuilt",
+        "truth",
         "testables",
-        "ub-uiautomator",
+        "flag-junit",
     ],
 
     libs: [
@@ -56,7 +56,10 @@ android_test {
     ],
 
     platform_apis: true,
-    test_suites: ["device-tests"],
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
 
     certificate: "platform",
 }

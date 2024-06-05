@@ -6,6 +6,6 @@ shift 2
 
 # Convert each removed.txt to the "dex format" equivalent, and print all output.
 for f in "$@"; do
-    "$metalava_path" --no-banner "$f" --dex-api "${tmp_dir}/tmp"
+    "$metalava_path" signature-to-dex "$f" "${tmp_dir}/tmp"
     cat "${tmp_dir}/tmp"
 done

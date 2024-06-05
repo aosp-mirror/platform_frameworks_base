@@ -85,7 +85,7 @@ public class RestrictedLockUtils {
      */
     @RequiresApi(Build.VERSION_CODES.M)
     public static void sendShowAdminSupportDetailsIntent(Context context, EnforcedAdmin admin) {
-        final Intent intent = getShowAdminSupportDetailsIntent(context, admin);
+        final Intent intent = getShowAdminSupportDetailsIntent(admin);
         int targetUserId = UserHandle.myUserId();
         if (admin != null) {
             if (admin.user != null
@@ -98,9 +98,16 @@ public class RestrictedLockUtils {
     }
 
     /**
-     * Gets the intent to trigger the {@code android.settings.ShowAdminSupportDetailsDialog}.
+     * @deprecated No context needed. Use {@link #getShowAdminSupportDetailsIntent(EnforcedAdmin)}.
      */
     public static Intent getShowAdminSupportDetailsIntent(Context context, EnforcedAdmin admin) {
+        return getShowAdminSupportDetailsIntent(admin);
+    }
+
+    /**
+     * Gets the intent to trigger the {@code android.settings.ShowAdminSupportDetailsDialog}.
+     */
+    public static Intent getShowAdminSupportDetailsIntent(EnforcedAdmin admin) {
         final Intent intent = new Intent(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS);
         if (admin != null) {
             if (admin.component != null) {
@@ -108,26 +115,6 @@ public class RestrictedLockUtils {
             }
             intent.putExtra(Intent.EXTRA_USER, admin.user);
         }
-        return intent;
-    }
-
-    /**
-     * Shows restricted setting dialog.
-     */
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    public static void sendShowRestrictedSettingDialogIntent(Context context,
-            String packageName, int uid) {
-        final Intent intent = getShowRestrictedSettingsIntent(packageName, uid);
-        context.startActivity(intent);
-    }
-
-    /**
-     * Gets restricted settings dialog intent.
-     */
-    private static Intent getShowRestrictedSettingsIntent(String packageName, int uid) {
-        final Intent intent = new Intent(Settings.ACTION_SHOW_RESTRICTED_SETTING_DIALOG);
-        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
-        intent.putExtra(Intent.EXTRA_UID, uid);
         return intent;
     }
 
@@ -237,5 +224,35 @@ public class RestrictedLockUtils {
                     + ", user=" + user
                     + '}';
         }
+    }
+
+    /**
+     * Shows restricted setting dialog.
+     *
+     * @deprecated TODO(b/308921175): This will be deleted with the
+     * {@link android.security.Flags#extendEcmToAllSettings} feature flag. Do not use for any new
+     * code.
+     */
+    @Deprecated
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    public static void sendShowRestrictedSettingDialogIntent(Context context,
+                                                             String packageName, int uid) {
+        final Intent intent = getShowRestrictedSettingsIntent(packageName, uid);
+        context.startActivity(intent);
+    }
+
+    /**
+     * Gets restricted settings dialog intent.
+     *
+     * @deprecated TODO(b/308921175): This will be deleted with the
+     * {@link android.security.Flags#extendEcmToAllSettings} feature flag. Do not use for any new
+     * code.
+     */
+    @Deprecated
+    private static Intent getShowRestrictedSettingsIntent(String packageName, int uid) {
+        final Intent intent = new Intent(Settings.ACTION_SHOW_RESTRICTED_SETTING_DIALOG);
+        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
+        intent.putExtra(Intent.EXTRA_UID, uid);
+        return intent;
     }
 }

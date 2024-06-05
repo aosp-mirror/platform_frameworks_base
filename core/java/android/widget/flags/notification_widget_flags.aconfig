@@ -1,0 +1,59 @@
+package: "android.widget.flags"
+container: "system"
+
+flag {
+   name: "notif_linearlayout_optimized"
+   namespace: "systemui"
+   description: "Enables notification specific LinearLayout optimization"
+   bug: "316110233"
+}
+
+flag {
+  name: "call_style_set_data_async"
+  namespace: "systemui"
+  description: "Offloads caller icon drawable loading to the background thread"
+  bug: "293961072"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "conversation_style_set_avatar_async"
+  namespace: "systemui"
+  description: "Offloads conversation avatar drawable loading to the background thread"
+  bug: "305540309"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "toast_no_weakref"
+  namespace: "systemui"
+  description: "Do not use WeakReference for custom view Toast"
+  bug: "321732224"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "big_picture_style_discard_empty_icon_bitmap_drawables"
+    namespace: "systemui"
+    description: "BigPictureStyle: Ignore Icon BitmapDrawables without Bitmaps"
+    bug: "335878768"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+  name: "messaging_child_request_layout"
+  namespace: "systemui"
+  description: "MessagingChild always needs to be measured during MessagingLinearLayout onMeasure."
+  bug: "324537506"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

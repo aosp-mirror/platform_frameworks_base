@@ -20,11 +20,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BatteryChargingFull
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.ui.SettingsBody
@@ -32,11 +30,13 @@ import com.android.settingslib.spa.widget.ui.SettingsBody
 @Composable
 internal fun BasePreference(
     title: String,
-    summary: State<String>,
+    summary: () -> String,
     modifier: Modifier = Modifier,
+    titleContentDescription: String? = null,
+    summaryContentDescription: () -> String? = { null },
     singleLineSummary: Boolean = false,
     icon: @Composable (() -> Unit)? = null,
-    enabled: State<Boolean> = true.toState(),
+    enabled: () -> Boolean = { true },
     paddingStart: Dp = SettingsDimension.itemPaddingStart,
     paddingEnd: Dp = SettingsDimension.itemPaddingEnd,
     paddingVertical: Dp = SettingsDimension.itemPaddingVertical,
@@ -44,12 +44,13 @@ internal fun BasePreference(
 ) {
     BaseLayout(
         title = title,
+        titleContentDescription = titleContentDescription,
         subTitle = {
-            if (singleLineSummary) {
-                SettingsBody(body = summary, maxLines = 1)
-            } else {
-                SettingsBody(body = summary)
-            }
+            SettingsBody(
+                body = summary(),
+                contentDescription = summaryContentDescription(),
+                maxLines = if (singleLineSummary) 1 else Int.MAX_VALUE,
+            )
         },
         modifier = modifier,
         icon = icon,
@@ -67,7 +68,7 @@ private fun BasePreferencePreview() {
     SettingsTheme {
         BasePreference(
             title = "Screen Saver",
-            summary = "Clock".toState(),
+            summary = { "Clock" },
         )
     }
 }
@@ -78,7 +79,7 @@ private fun BasePreferenceIconPreview() {
     SettingsTheme {
         BasePreference(
             title = "Screen Saver",
-            summary = "Clock".toState(),
+            summary = { "Clock" },
             icon = {
                 Icon(imageVector = Icons.Outlined.BatteryChargingFull, contentDescription = null)
             },

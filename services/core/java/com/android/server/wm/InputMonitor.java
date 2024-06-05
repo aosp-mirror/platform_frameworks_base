@@ -57,7 +57,6 @@ import android.os.InputConfig;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.InputChannel;
@@ -73,7 +72,7 @@ import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 final class InputMonitor {
@@ -104,7 +103,7 @@ final class InputMonitor {
      * The set of input consumer added to the window manager by name, which consumes input events
      * for the windows below it.
      */
-    private final ArrayMap<String, InputConsumerImpl> mInputConsumers = new ArrayMap();
+    private final ArrayList<InputConsumerImpl> mInputConsumers = new ArrayList<>();
 
     /**
      * Set when recents (overview) is active as part of a shell transition. While set, any focus
@@ -113,7 +112,7 @@ final class InputMonitor {
      * z-layering reference so that we can place the recents input consumer above it.
      */
     private WeakReference<ActivityRecord> mActiveRecentsActivity = null;
-    private WeakReference<ActivityRecord> mActiveRecentsLayerRef = null;
+    private WeakReference<Task> mActiveRecentsLayerRef = null;
 
     private class UpdateInputWindows implements Runnable {
         @Override
@@ -164,31 +163,35 @@ final class InputMonitor {
         mDisplayRemoved = true;
     }
 
-    private void addInputConsumer(String name, InputConsumerImpl consumer) {
-        mInputConsumers.put(name, consumer);
+    private void addInputConsumer(InputConsumerImpl consumer) {
+        mInputConsumers.add(consumer);
         consumer.linkToDeathRecipient();
         consumer.layout(mInputTransaction, mDisplayWidth, mDisplayHeight);
         updateInputWindowsLw(true /* force */);
     }
 
-    boolean destroyInputConsumer(String name) {
-        if (disposeInputConsumer(mInputConsumers.remove(name))) {
-            updateInputWindowsLw(true /* force */);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean disposeInputConsumer(InputConsumerImpl consumer) {
-        if (consumer != null) {
-            consumer.disposeChannelsLw(mInputTransaction);
-            return true;
+    boolean destroyInputConsumer(IBinder token) {
+        for (int i = 0; i < mInputConsumers.size(); i++) {
+            final InputConsumerImpl consumer = mInputConsumers.get(i);
+            if (consumer != null && consumer.mToken == token) {
+                consumer.disposeChannelsLw(mInputTransaction);
+                mInputConsumers.remove(consumer);
+                updateInputWindowsLw(true /* force */);
+                return true;
+            }
         }
         return false;
     }
 
     InputConsumerImpl getInputConsumer(String name) {
-        return mInputConsumers.get(name);
+        // Search in reverse order as the latest input consumer with the name takes precedence
+        for (int i = mInputConsumers.size() - 1; i >= 0; i--) {
+            final InputConsumerImpl consumer = mInputConsumers.get(i);
+            if (consumer.mName.equals(name)) {
+                return consumer;
+            }
+        }
+        return null;
     }
 
     void layoutInputConsumers(int dw, int dh) {
@@ -200,7 +203,7 @@ final class InputMonitor {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "layoutInputConsumer");
             for (int i = mInputConsumers.size() - 1; i >= 0; i--) {
-                mInputConsumers.valueAt(i).layout(mInputTransaction, dw, dh);
+                mInputConsumers.get(i).layout(mInputTransaction, dw, dh);
             }
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -212,19 +215,20 @@ final class InputMonitor {
     // (set so by this function) and must meet some condition for visibility on each update.
     void resetInputConsumers(SurfaceControl.Transaction t) {
         for (int i = mInputConsumers.size() - 1; i >= 0; i--) {
-            mInputConsumers.valueAt(i).hide(t);
+            mInputConsumers.get(i).hide(t);
         }
     }
 
     void createInputConsumer(IBinder token, String name, InputChannel inputChannel, int clientPid,
             UserHandle clientUser) {
-        if (mInputConsumers.containsKey(name)) {
+        final InputConsumerImpl existingConsumer = getInputConsumer(name);
+        if (existingConsumer != null && existingConsumer.mClientUser.equals(clientUser)) {
             throw new IllegalStateException("Existing input consumer found with name: " + name
-                    + ", display: " + mDisplayId);
+                    + ", display: " + mDisplayId + ", user: " + clientUser);
         }
 
         final InputConsumerImpl consumer = new InputConsumerImpl(mService, token, name,
-                inputChannel, clientPid, clientUser, mDisplayId);
+                inputChannel, clientPid, clientUser, mDisplayId, mInputTransaction);
         switch (name) {
             case INPUT_CONSUMER_WALLPAPER:
                 consumer.mWindowHandle.inputConfig |= InputConfig.DUPLICATE_TOUCH_TO_WALLPAPER;
@@ -239,7 +243,7 @@ final class InputMonitor {
                 throw new IllegalArgumentException("Illegal input consumer : " + name
                         + ", display: " + mDisplayId);
         }
-        addInputConsumer(name, consumer);
+        addInputConsumer(consumer);
     }
 
     @VisibleForTesting
@@ -252,7 +256,7 @@ final class InputMonitor {
         inputWindowHandle.setDispatchingTimeoutMillis(w.getInputDispatchingTimeoutMillis());
         inputWindowHandle.setTouchOcclusionMode(w.getTouchOcclusionMode());
         inputWindowHandle.setPaused(w.mActivityRecord != null && w.mActivityRecord.paused);
-        inputWindowHandle.setWindowToken(w.mClient);
+        inputWindowHandle.setWindowToken(w.mClient.asBinder());
 
         inputWindowHandle.setName(w.getName());
 
@@ -385,12 +389,16 @@ final class InputMonitor {
     /**
      * Inform InputMonitor when recents is active so it can enable the recents input consumer.
      * @param activity The active recents activity. {@code null} means recents is not active.
-     * @param layer An activity whose Z-layer is used as a reference for how to sort the consumer.
+     * @param layer A task whose Z-layer is used as a reference for how to sort the consumer.
      */
-    void setActiveRecents(@Nullable ActivityRecord activity, @Nullable ActivityRecord layer) {
+    void setActiveRecents(@Nullable ActivityRecord activity, @Nullable Task layer) {
         final boolean clear = activity == null;
+        final boolean wasActive = mActiveRecentsActivity != null && mActiveRecentsLayerRef != null;
         mActiveRecentsActivity = clear ? null : new WeakReference<>(activity);
         mActiveRecentsLayerRef = clear ? null : new WeakReference<>(layer);
+        if (clear && wasActive) {
+            setUpdateInputWindowsNeededLw();
+        }
     }
 
     private static <T> T getWeak(WeakReference<T> ref) {
@@ -431,8 +439,10 @@ final class InputMonitor {
                         final InputMethodManagerInternal inputMethodManagerInternal =
                                 LocalServices.getService(InputMethodManagerInternal.class);
                         if (inputMethodManagerInternal != null) {
-                            inputMethodManagerInternal.hideCurrentInputMethod(
-                                    SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
+                            // TODO(b/308479256): Check if hiding "all" IMEs is OK or not.
+                            inputMethodManagerInternal.hideAllInputMethods(
+                                    SoftInputShowHideReason.HIDE_RECENTS_ANIMATION,
+                                    mDisplayContent.getDisplayId());
                         }
                         // Ensure removing the IME snapshot when the app no longer to show on the
                         // task snapshot (also taking the new task snaphot to update the overview).
@@ -451,7 +461,7 @@ final class InputMonitor {
                         // in animating before the next app window focused, or IME icon
                         // persists on the bottom when swiping the task to recents.
                         InputMethodManagerInternal.get().updateImeWindowStatus(
-                                true /* disableImeIcon */);
+                                true /* disableImeIcon */, mDisplayContent.getDisplayId());
                     }
                 }
                 return;
@@ -541,11 +551,11 @@ final class InputMonitor {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        final Set<String> inputConsumerKeys = mInputConsumers.keySet();
-        if (!inputConsumerKeys.isEmpty()) {
+        if (!mInputConsumers.isEmpty()) {
             pw.println(prefix + "InputConsumers:");
-            for (String key : inputConsumerKeys) {
-                mInputConsumers.get(key).dump(pw, key, prefix);
+            for (int i = 0; i < mInputConsumers.size(); i++) {
+                final InputConsumerImpl consumer = mInputConsumers.get(i);
+                consumer.dump(pw, consumer.mName, prefix);
             }
         }
     }
@@ -732,7 +742,7 @@ final class InputMonitor {
                 new InputWindowHandle(null /* inputApplicationHandle */, displayId));
         inputWindowHandle.setName(name);
         inputWindowHandle.setLayoutParamsType(TYPE_SECURE_SYSTEM_OVERLAY);
-        inputWindowHandle.setTrustedOverlay(true);
+        inputWindowHandle.setTrustedOverlay(t, sc, true);
         populateOverlayInputInfo(inputWindowHandle);
         setInputWindowInfoIfNeeded(t, sc, inputWindowHandle);
     }

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InsetsSource.ID_IME_CAPTION_BAR;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.LAST;
 import static android.view.WindowInsets.Type.SIZE;
@@ -52,12 +53,15 @@ public class InsetsSourceTest {
 
     private final InsetsSource mSource = new InsetsSource(0 /* id */, navigationBars());
     private final InsetsSource mImeSource = new InsetsSource(1 /* id */, ime());
+    private final InsetsSource mImeCaptionSource = new InsetsSource(
+            ID_IME_CAPTION_BAR, captionBar());
     private final InsetsSource mCaptionSource = new InsetsSource(2 /* id */, captionBar());
 
     @Before
     public void setUp() {
         mSource.setVisible(true);
         mImeSource.setVisible(true);
+        mImeCaptionSource.setVisible(true);
         mCaptionSource.setVisible(true);
     }
 
@@ -106,6 +110,18 @@ public class InsetsSourceTest {
         mImeSource.setFrame(new Rect(100, 400, 500, 500));
         Insets insets = mImeSource.calculateInsets(new Rect(0, 0, 500, 500),
                 false /* ignoreVisibility */);
+        assertEquals(Insets.of(0, 0, 0, 100), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_imeCaptionBar() {
+        mImeCaptionSource.setFrame(new Rect(0, 400, 500, 500));
+        Insets insets = mImeCaptionSource.calculateInsets(new Rect(0, 0, 500, 500), false);
+        assertEquals(Insets.of(0, 0, 0, 100), insets);
+
+        // Place caption bar at top; IME caption bar must always return bottom insets
+        mImeCaptionSource.setFrame(new Rect(0, 0, 500, 100));
+        insets = mImeCaptionSource.calculateInsets(new Rect(0, 0, 500, 500), false);
         assertEquals(Insets.of(0, 0, 0, 100), insets);
     }
 
@@ -261,6 +277,216 @@ public class InsetsSourceTest {
                 }
             }
         }
+    }
+
+    @Test
+    public void testCalculateBoundingRects_noBoundingRects_createsSingleRect() {
+        mSource.setFrame(new Rect(0, 0, 1000, 100));
+        mSource.setBoundingRects(null);
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(0, 0, 1000, 1000), false);
+
+        assertEquals(1, rects.length);
+        assertEquals(new Rect(0, 0, 1000, 100), rects[0]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_noBoundingRectsAndFrameNotAtOrigin_createsSingleRect() {
+        mSource.setFrame(new Rect(100, 100, 1200, 200));
+        mSource.setBoundingRects(null);
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(100, 100, 1100, 1100), false);
+
+        assertEquals(1, rects.length);
+        assertEquals(new Rect(0, 0, 1000, 100), rects[0]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_noBoundingRectsAndLargerFrame_singleRectFitsRelFrame() {
+        mSource.setFrame(new Rect(0, 0, 1000, 100));
+        mSource.setBoundingRects(null);
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(0, 0, 500, 1000), false);
+
+        assertEquals(1, rects.length);
+        assertEquals(new Rect(0, 0, 500, 100), rects[0]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_frameAtOrigin_resultRelativeToRelFrame() {
+        mSource.setFrame(new Rect(0, 0, 1000, 100));
+        mSource.setBoundingRects(new Rect[]{
+                new Rect(0, 0, 300, 100),
+                new Rect(800, 0, 1000, 100),
+        });
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(0, 0, 1000, 1000), false);
+
+        assertEquals(2, rects.length);
+        assertEquals(new Rect(0, 0, 300, 100), rects[0]);
+        assertEquals(new Rect(800, 0, 1000, 100), rects[1]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_notAtOrigin_resultRelativeToRelFrame() {
+        mSource.setFrame(new Rect(100, 100, 1100, 200));
+        mSource.setBoundingRects(new Rect[]{
+                new Rect(0, 0, 300, 100),    // 300x100, aligned left
+                new Rect(800, 0, 1000, 100), // 200x100, aligned right
+        });
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(100, 100, 1100, 1100), false);
+
+        assertEquals(2, rects.length);
+        assertEquals(new Rect(0, 0, 300, 100), rects[0]);
+        assertEquals(new Rect(800, 0, 1000, 100), rects[1]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_boundingRectFullyInsideFrameInWindow() {
+        mSource.setFrame(new Rect(0, 0, 1000, 100));
+        mSource.setBoundingRects(new Rect[]{
+                new Rect(100, 0, 400, 100), // Inside |frame| and |relativeFrame|.
+        });
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(0, 0, 500, 100), false);
+
+        assertEquals(1, rects.length);
+        assertEquals(new Rect(100, 0, 400, 100), rects[0]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_boundingRectOutsideFrameInWindow_dropped() {
+        mSource.setFrame(new Rect(0, 0, 1000, 100));
+        mSource.setBoundingRects(new Rect[]{
+                new Rect(700, 0, 1000, 100), // Inside |frame|, but outside |relativeFrame|.
+        });
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(0, 0, 500, 100), false);
+
+        assertEquals(0, rects.length);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_boundingRectPartlyOutsideFrameInWindow_cropped() {
+        mSource.setFrame(new Rect(0, 0, 1000, 100));
+        mSource.setBoundingRects(new Rect[]{
+                new Rect(400, 0, 600, 100), // Inside |frame|, and only half inside |relativeFrame|.
+        });
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(0, 0, 500, 100), false);
+
+        assertEquals(1, rects.length);
+        assertEquals(new Rect(400, 0, 500, 100), rects[0]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_framesNotAtOrigin_resultRelativeToWindowFrame() {
+        mSource.setFrame(new Rect(100, 100, 1100, 200));
+        mSource.setBoundingRects(new Rect[]{
+                new Rect(0, 0, 300, 100), // 300x100 aligned to left.
+                new Rect(800, 0, 1000, 100) // 200x100 align to right.
+        });
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(100, 100, 1100, 1100), false);
+
+        assertEquals(2, rects.length);
+        assertEquals(new Rect(0, 0, 300, 100), rects[0]);
+        assertEquals(new Rect(800, 0, 1000, 100), rects[1]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_captionBar() {
+        mCaptionSource.setFrame(new Rect(0, 0, 1000, 100));
+        mCaptionSource.setBoundingRects(new Rect[]{
+                new Rect(0, 0, 200, 100), // 200x100, aligned left.
+                new Rect(800, 0, 1000, 100) // 200x100, aligned right.
+        });
+
+        final Rect[] rects = mCaptionSource.calculateBoundingRects(
+                new Rect(0, 0, 1000, 1000), false);
+
+        assertEquals(2, rects.length);
+        assertEquals(new Rect(0, 0, 200, 100), rects[0]);
+        assertEquals(new Rect(800, 0, 1000, 100), rects[1]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_captionBarFrameMisaligned_rectsFixedToTop() {
+        mCaptionSource.setFrame(new Rect(500, 500, 1500, 600));
+        mCaptionSource.setBoundingRects(new Rect[]{
+                new Rect(0, 0, 100, 100), // 100x100, aligned to left/top of frame
+        });
+
+        final Rect[] rects = mCaptionSource.calculateBoundingRects(
+                new Rect(495, 495, 1500, 1500), false);
+
+        assertEquals(1, rects.length);
+        // rect should be aligned to the top of relative frame, as if the caption frame had been
+        // corrected to be aligned at the top.
+        assertEquals(new Rect(0, 0, 100, 100), rects[0]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_imeCaptionBarFrameMisaligned_rectsFixedToBottom() {
+        mImeCaptionSource.setFrame(new Rect(500, 1400, 1500, 1500));
+        mImeCaptionSource.setBoundingRects(new Rect[]{
+                new Rect(0, 0, 100, 100), // 100x100, aligned to left/top of frame
+        });
+
+        final Rect[] rects = mImeCaptionSource.calculateBoundingRects(
+                new Rect(495, 495, 1500, 1500), false);
+
+        assertEquals(1, rects.length);
+        // rect should be aligned to the bottom of relative frame, as if the ime caption frame had
+        // been corrected to be aligned at the top.
+        assertEquals(new Rect(0, 905, 100, 1005), rects[0]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_imeCaptionBar() {
+        mImeCaptionSource.setFrame(new Rect(0, 900, 1000, 1000)); // Frame at the bottom.
+        mImeCaptionSource.setBoundingRects(new Rect[]{
+                new Rect(0, 0, 200, 100), // 200x100, aligned left.
+        });
+
+        final Rect[] rects = mImeCaptionSource.calculateBoundingRects(
+                new Rect(0, 0, 1000, 1000), false);
+
+        assertEquals(1, rects.length);
+        assertEquals(new Rect(0, 900, 200, 1000), rects[0]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_invisible() {
+        mSource.setFrame(new Rect(0, 0, 1000, 100));
+        mSource.setBoundingRects(new Rect[]{
+                new Rect(0, 0, 300, 100),
+                new Rect(800, 0, 1000, 100),
+        });
+        mSource.setVisible(false);
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(0, 0, 1000, 1000),
+                false /* ignoreVisibility */);
+
+        assertEquals(0, rects.length);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_ignoreVisibility() {
+        mSource.setFrame(new Rect(0, 0, 1000, 100));
+        mSource.setBoundingRects(new Rect[]{
+                new Rect(0, 0, 300, 100),
+                new Rect(800, 0, 1000, 100),
+        });
+        mSource.setVisible(false);
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(0, 0, 1000, 1000),
+                true /* ignoreVisibility */);
+
+        assertEquals(2, rects.length);
+        assertEquals(new Rect(0, 0, 300, 100), rects[0]);
+        assertEquals(new Rect(800, 0, 1000, 100), rects[1]);
     }
 
     // Parcel and equals already tested via InsetsStateTest

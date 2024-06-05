@@ -16,6 +16,8 @@
 
 package com.android.server.webkit;
 
+import static android.webkit.Flags.updateServiceV2;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +30,7 @@ import android.os.PatternMatcher;
 import android.os.Process;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.webkit.IWebViewUpdateService;
@@ -35,6 +38,7 @@ import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
 
 import com.android.internal.util.DumpUtils;
+import com.android.modules.expresslog.Histogram;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
@@ -50,8 +54,16 @@ public class WebViewUpdateService extends SystemService {
 
     private static final String TAG = "WebViewUpdateService";
 
+    private static final Histogram sPrepareWebViewInSystemServerLatency = new Histogram(
+            "webview.value_prepare_webview_in_system_server_latency",
+            new Histogram.ScaledRangeOptions(20, 0, 1, 1.5f));
+
+    private static final Histogram sAppWaitingForRelroCompletionDelay = new Histogram(
+            "webview.value_app_waiting_for_relro_completion_delay",
+            new Histogram.ScaledRangeOptions(20, 0, 1, 1.4f));
+
     private BroadcastReceiver mWebViewUpdatedReceiver;
-    private WebViewUpdateServiceImpl mImpl;
+    private WebViewUpdateServiceInterface mImpl;
 
     static final int PACKAGE_CHANGED = 0;
     static final int PACKAGE_ADDED = 1;
@@ -60,7 +72,11 @@ public class WebViewUpdateService extends SystemService {
 
     public WebViewUpdateService(Context context) {
         super(context);
-        mImpl = new WebViewUpdateServiceImpl(context, SystemImpl.getInstance());
+        if (updateServiceV2()) {
+            mImpl = new WebViewUpdateServiceImpl2(context, SystemImpl.getInstance());
+        } else {
+            mImpl = new WebViewUpdateServiceImpl(context, SystemImpl.getInstance());
+        }
     }
 
     @Override
@@ -126,7 +142,10 @@ public class WebViewUpdateService extends SystemService {
     }
 
     public void prepareWebViewInSystemServer() {
+        long currentTimeMs = SystemClock.uptimeMillis();
         mImpl.prepareWebViewInSystemServer();
+        sPrepareWebViewInSystemServerLatency.logSample(
+                (float) (SystemClock.uptimeMillis() - currentTimeMs));
     }
 
     private static String packageNameFromIntent(Intent intent) {
@@ -151,8 +170,13 @@ public class WebViewUpdateService extends SystemService {
         public void onShellCommand(FileDescriptor in, FileDescriptor out,
                 FileDescriptor err, String[] args, ShellCallback callback,
                 ResultReceiver resultReceiver) {
-            (new WebViewUpdateServiceShellCommand(this)).exec(
-                    this, in, out, err, args, callback, resultReceiver);
+            if (updateServiceV2()) {
+                (new WebViewUpdateServiceShellCommand2(this))
+                        .exec(this, in, out, err, args, callback, resultReceiver);
+            } else {
+                (new WebViewUpdateServiceShellCommand(this))
+                        .exec(this, in, out, err, args, callback, resultReceiver);
+            }
         }
 
 
@@ -193,8 +217,12 @@ public class WebViewUpdateService extends SystemService {
                 throw new IllegalStateException("Cannot create a WebView from the SystemServer");
             }
 
+            long startTimeMs = SystemClock.uptimeMillis();
             final WebViewProviderResponse webViewProviderResponse =
                     WebViewUpdateService.this.mImpl.waitForAndGetProvider();
+            long endTimeMs = SystemClock.uptimeMillis();
+            sAppWaitingForRelroCompletionDelay.logSample((float) (endTimeMs - startTimeMs));
+
             if (webViewProviderResponse.packageInfo != null) {
                 grantVisibilityToCaller(
                         webViewProviderResponse.packageInfo.packageName, Binder.getCallingUid());
@@ -247,6 +275,11 @@ public class WebViewUpdateService extends SystemService {
         }
 
         @Override // Binder call
+        public WebViewProviderInfo getDefaultWebViewPackage() {
+            return WebViewUpdateService.this.mImpl.getDefaultWebViewPackage();
+        }
+
+        @Override // Binder call
         public WebViewProviderInfo[] getAllWebViewPackages() {
             return WebViewUpdateService.this.mImpl.getWebViewPackages();
         }
@@ -269,18 +302,31 @@ public class WebViewUpdateService extends SystemService {
 
         @Override // Binder call
         public boolean isMultiProcessEnabled() {
+            if (updateServiceV2()) {
+                throw new IllegalStateException(
+                        "isMultiProcessEnabled shouldn't be called if update_service_v2 flag is"
+                                + " set.");
+            }
             return WebViewUpdateService.this.mImpl.isMultiProcessEnabled();
         }
 
         @Override // Binder call
         public void enableMultiProcess(boolean enable) {
-            if (getContext().checkCallingPermission(
-                        android.Manifest.permission.WRITE_SECURE_SETTINGS)
+            if (updateServiceV2()) {
+                throw new IllegalStateException(
+                        "enableMultiProcess shouldn't be called if update_service_v2 flag is set.");
+            }
+            if (getContext()
+                            .checkCallingPermission(
+                                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
                     != PackageManager.PERMISSION_GRANTED) {
-                String msg = "Permission Denial: enableMultiProcess() from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
-                        + " requires " + android.Manifest.permission.WRITE_SECURE_SETTINGS;
+                String msg =
+                        "Permission Denial: enableMultiProcess() from pid="
+                                + Binder.getCallingPid()
+                                + ", uid="
+                                + Binder.getCallingUid()
+                                + " requires "
+                                + android.Manifest.permission.WRITE_SECURE_SETTINGS;
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }

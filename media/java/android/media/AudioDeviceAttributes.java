@@ -177,7 +177,7 @@ public final class AudioDeviceAttributes implements Parcelable {
      * @param name the name of the device, or an empty string for devices without one
      */
     public AudioDeviceAttributes(int nativeType, @NonNull String address, @NonNull String name) {
-        mRole = (nativeType & AudioSystem.DEVICE_BIT_IN) != 0 ? ROLE_INPUT : ROLE_OUTPUT;
+        mRole = AudioSystem.isInputDevice(nativeType) ? ROLE_INPUT : ROLE_OUTPUT;
         mType = AudioDeviceInfo.convertInternalDeviceToDeviceType(nativeType);
         mAddress = address;
         mName = name;
@@ -325,7 +325,7 @@ public final class AudioDeviceAttributes implements Parcelable {
                 + " role:" + roleToString(mRole)
                 + " type:" + (mRole == ROLE_OUTPUT ? AudioSystem.getOutputDeviceName(mNativeType)
                         : AudioSystem.getInputDeviceName(mNativeType))
-                + " addr:" + mAddress
+                + " addr:" + Utils.anonymizeBluetoothAddress(mNativeType, mAddress)
                 + " name:" + mName
                 + " profiles:" + mAudioProfiles.toString()
                 + " descriptors:" + mAudioDescriptors.toString());

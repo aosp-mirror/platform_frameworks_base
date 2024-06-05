@@ -29,10 +29,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
- * Interface to access and modify the permanent and temporary power save whitelist. The two lists
- * are kept separately. Apps placed on the permanent whitelist are only removed via an explicit
- * removeFromWhitelist call. Apps whitelisted by default by the system cannot be removed. Apps
- * placed on the temporary whitelist are removed from that whitelist after a predetermined amount of
+ * Interface to access and modify the permanent and temporary power save allowlist. The two lists
+ * are kept separately. Apps placed on the permanent allowlist are only removed via an explicit
+ * removeFromAllowlist call. Apps whitelisted by default by the system cannot be removed. Apps
+ * placed on the temporary allowlist are removed from that allowlist after a predetermined amount of
  * time.
  *
  * @deprecated Use {@link PowerExemptionManager} instead
@@ -50,18 +50,18 @@ public class PowerWhitelistManager {
     private final PowerExemptionManager mPowerExemptionManager;
 
     /**
-     * Indicates that an unforeseen event has occurred and the app should be whitelisted to handle
+     * Indicates that an unforeseen event has occurred and the app should be allowlisted to handle
      * it.
      */
     public static final int EVENT_UNSPECIFIED = PowerExemptionManager.EVENT_UNSPECIFIED;
 
     /**
-     * Indicates that an SMS event has occurred and the app should be whitelisted to handle it.
+     * Indicates that an SMS event has occurred and the app should be allowlisted to handle it.
      */
     public static final int EVENT_SMS = PowerExemptionManager.EVENT_SMS;
 
     /**
-     * Indicates that an MMS event has occurred and the app should be whitelisted to handle it.
+     * Indicates that an MMS event has occurred and the app should be allowlisted to handle it.
      */
     public static final int EVENT_MMS = PowerExemptionManager.EVENT_MMS;
 
@@ -310,6 +310,11 @@ public class PowerWhitelistManager {
      * @hide
      */
     public static final int REASON_SHELL = PowerExemptionManager.REASON_SHELL;
+    /**
+     * Tile onClick event
+     * @hide
+     */
+    public static final int REASON_TILE_ONCLICK = PowerExemptionManager.REASON_TILE_ONCLICK;
 
     /**
      * The list of BG-FGS-Launch and temp-allowlist reason code.
@@ -381,7 +386,7 @@ public class PowerWhitelistManager {
     }
 
     /**
-     * Add the specified package to the permanent power save whitelist.
+     * Add the specified package to the permanent power save allowlist.
      *
      * @deprecated Use {@link PowerExemptionManager#addToPermanentAllowList(String)} instead
      */
@@ -392,7 +397,7 @@ public class PowerWhitelistManager {
     }
 
     /**
-     * Add the specified packages to the permanent power save whitelist.
+     * Add the specified packages to the permanent power save allowlist.
      *
      * @deprecated Use {@link PowerExemptionManager#addToPermanentAllowList(List)} instead
      */
@@ -403,10 +408,10 @@ public class PowerWhitelistManager {
     }
 
     /**
-     * Get a list of app IDs of app that are whitelisted. This does not include temporarily
-     * whitelisted apps.
+     * Get a list of app IDs of app that are allowlisted. This does not include temporarily
+     * allowlisted apps.
      *
-     * @param includingIdle Set to true if the app should be whitelisted from device idle as well
+     * @param includingIdle Set to true if the app should be allowlisted from device idle as well
      *                      as other power save restrictions
      * @deprecated Use {@link PowerExemptionManager#getAllowListedAppIds(boolean)} instead
      * @hide
@@ -418,10 +423,10 @@ public class PowerWhitelistManager {
     }
 
     /**
-     * Returns true if the app is whitelisted from power save restrictions. This does not include
-     * temporarily whitelisted apps.
+     * Returns true if the app is allowlisted from power save restrictions. This does not include
+     * temporarily allowlisted apps.
      *
-     * @param includingIdle Set to true if the app should be whitelisted from device
+     * @param includingIdle Set to true if the app should be allowlisted from device
      *                      idle as well as other power save restrictions
      * @deprecated Use {@link PowerExemptionManager#isAllowListed(String, boolean)} instead
      * @hide
@@ -432,11 +437,11 @@ public class PowerWhitelistManager {
     }
 
     /**
-     * Remove an app from the permanent power save whitelist. Only apps that were added via
+     * Remove an app from the permanent power save allowlist. Only apps that were added via
      * {@link #addToWhitelist(String)} or {@link #addToWhitelist(List)} will be removed. Apps
-     * whitelisted by default by the system cannot be removed.
+     * allowlisted by default by the system cannot be removed.
      *
-     * @param packageName The app to remove from the whitelist
+     * @param packageName The app to remove from the allowlist
      * @deprecated Use {@link PowerExemptionManager#removeFromPermanentAllowList(String)} instead
      */
     @Deprecated
@@ -446,10 +451,10 @@ public class PowerWhitelistManager {
     }
 
     /**
-     * Add an app to the temporary whitelist for a short amount of time.
+     * Add an app to the temporary allowlist for a short amount of time.
      *
-     * @param packageName The package to add to the temp whitelist
-     * @param durationMs  How long to keep the app on the temp whitelist for (in milliseconds)
+     * @param packageName The package to add to the temp allowlist
+     * @param durationMs  How long to keep the app on the temp allowlist for (in milliseconds)
      * @param reasonCode one of {@link ReasonCode}, use {@link #REASON_UNKNOWN} if not sure.
      * @param reason a optional human readable reason string, could be null or empty string.
      * @deprecated Use {@link PowerExemptionManager#addToTemporaryAllowList(
@@ -463,10 +468,10 @@ public class PowerWhitelistManager {
     }
 
     /**
-     * Add an app to the temporary whitelist for a short amount of time.
+     * Add an app to the temporary allowlist for a short amount of time.
      *
-     * @param packageName The package to add to the temp whitelist
-     * @param durationMs  How long to keep the app on the temp whitelist for (in milliseconds)
+     * @param packageName The package to add to the temp allowlist
+     * @param durationMs  How long to keep the app on the temp allowlist for (in milliseconds)
      * @deprecated Use {@link PowerExemptionManager#addToTemporaryAllowList(
      *             String, int, String, long)} instead
      */
@@ -478,15 +483,15 @@ public class PowerWhitelistManager {
     }
 
     /**
-     * Add an app to the temporary whitelist for a short amount of time for a specific reason. The
-     * temporary whitelist is kept separately from the permanent whitelist and apps are
-     * automatically removed from the temporary whitelist after a predetermined amount of time.
+     * Add an app to the temporary allowlist for a short amount of time for a specific reason. The
+     * temporary allowlist is kept separately from the permanent allowlist and apps are
+     * automatically removed from the temporary allowlist after a predetermined amount of time.
      *
-     * @param packageName The package to add to the temp whitelist
-     * @param event       The reason to add the app to the temp whitelist
-     * @param reason      A human-readable reason explaining why the app is temp whitelisted. Only
+     * @param packageName The package to add to the temp allowlist
+     * @param event       The reason to add the app to the temp allowlist
+     * @param reason      A human-readable reason explaining why the app is temp allowlisted. Only
      *                    used for logging purposes. Could be null or empty string.
-     * @return The duration (in milliseconds) that the app is whitelisted for
+     * @return The duration (in milliseconds) that the app is allowlisted for
      * @deprecated Use {@link PowerExemptionManager#addToTemporaryAllowListForEvent(
      *             String, int, String, int)} instead
      */
@@ -499,16 +504,16 @@ public class PowerWhitelistManager {
     }
 
     /**
-     * Add an app to the temporary whitelist for a short amount of time for a specific reason. The
-     * temporary whitelist is kept separately from the permanent whitelist and apps are
-     * automatically removed from the temporary whitelist after a predetermined amount of time.
+     * Add an app to the temporary allowlist for a short amount of time for a specific reason. The
+     * temporary allowlist is kept separately from the permanent allowlist and apps are
+     * automatically removed from the temporary allowlist after a predetermined amount of time.
      *
-     * @param packageName The package to add to the temp whitelist
-     * @param event       The reason to add the app to the temp whitelist
+     * @param packageName The package to add to the temp allowlist
+     * @param event       The reason to add the app to the temp allowlist
      * @param reasonCode  one of {@link ReasonCode}, use {@link #REASON_UNKNOWN} if not sure.
-     * @param reason      A human-readable reason explaining why the app is temp whitelisted. Only
+     * @param reason      A human-readable reason explaining why the app is temp allowlisted. Only
      *                    used for logging purposes. Could be null or empty string.
-     * @return The duration (in milliseconds) that the app is whitelisted for
+     * @return The duration (in milliseconds) that the app is allowlisted for
      * @deprecated Use {@link PowerExemptionManager#addToTemporaryAllowListForEvent(
      *             String, int, String, int)} instead
      */

@@ -14,95 +14,244 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.bouncer.ui.viewmodel
 
-import androidx.annotation.VisibleForTesting
+import android.content.Context
+import android.view.KeyEvent.KEYCODE_0
+import android.view.KeyEvent.KEYCODE_9
+import android.view.KeyEvent.KEYCODE_DEL
+import android.view.KeyEvent.KEYCODE_NUMPAD_0
+import android.view.KeyEvent.KEYCODE_NUMPAD_9
+import android.view.KeyEvent.isConfirmKey
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import com.android.keyguard.PinShapeAdapter
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
-import com.android.systemui.util.kotlin.pairwise
+import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
+import com.android.systemui.res.R
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input for the PIN code bouncer UI. */
 class PinBouncerViewModel(
-    private val applicationScope: CoroutineScope,
-    private val interactor: BouncerInteractor,
+    applicationContext: Context,
+    viewModelScope: CoroutineScope,
+    interactor: BouncerInteractor,
     isInputEnabled: StateFlow<Boolean>,
+    private val onIntentionalUserInput: () -> Unit,
+    private val simBouncerInteractor: SimBouncerInteractor,
+    authenticationMethod: AuthenticationMethodModel,
 ) :
     AuthMethodBouncerViewModel(
+        viewModelScope = viewModelScope,
+        interactor = interactor,
         isInputEnabled = isInputEnabled,
     ) {
-
-    private val entered = MutableStateFlow<List<Int>>(emptyList())
     /**
-     * The length of the PIN digits that were input so far, two values are supplied the previous and
-     * the current.
+     * Whether the sim-related UI in the pin view is showing.
+     *
+     * This UI is used to unlock a locked sim.
      */
-    val pinLengths: StateFlow<Pair<Int, Int>> =
-        entered
-            .pairwise()
-            .map { it.previousValue.size to it.newValue.size }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = 0 to 0,
-            )
-    private var resetPinJob: Job? = null
+    val isSimAreaVisible = authenticationMethod == AuthenticationMethodModel.Sim
+    val isLockedEsim: StateFlow<Boolean?> = simBouncerInteractor.isLockedEsim
+    val errorDialogMessage: StateFlow<String?> = simBouncerInteractor.errorDialogMessage
+    val isSimUnlockingDialogVisible: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val pinShapes = PinShapeAdapter(applicationContext)
+    private val mutablePinInput = MutableStateFlow(PinInputViewModel.empty())
 
-    /** Notifies that the UI has been shown to the user. */
-    fun onShown() {
-        interactor.resetMessage()
+    /** Currently entered pin keys. */
+    val pinInput: StateFlow<PinInputViewModel> = mutablePinInput
+
+    /** The length of the PIN for which we should show a hint. */
+    val hintedPinLength: StateFlow<Int?> =
+        if (isSimAreaVisible) {
+                flowOf(null)
+            } else {
+                interactor.hintedPinLength
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+
+    /** Appearance of the backspace button. */
+    val backspaceButtonAppearance: StateFlow<ActionButtonAppearance> =
+        combine(
+                mutablePinInput,
+                interactor.isAutoConfirmEnabled,
+            ) { mutablePinEntries, isAutoConfirmEnabled ->
+                computeBackspaceButtonAppearance(
+                    pinInput = mutablePinEntries,
+                    isAutoConfirmEnabled = isAutoConfirmEnabled,
+                )
+            }
+            .stateIn(
+                scope = viewModelScope,
+                // Make sure this is kept as WhileSubscribed or we can run into a bug where the
+                // downstream continues to receive old/stale/cached values.
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = ActionButtonAppearance.Hidden,
+            )
+
+    /** Appearance of the confirm button. */
+    val confirmButtonAppearance: StateFlow<ActionButtonAppearance> =
+        interactor.isAutoConfirmEnabled
+            .map { if (it) ActionButtonAppearance.Hidden else ActionButtonAppearance.Shown }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = ActionButtonAppearance.Hidden,
+            )
+
+    override val authenticationMethod: AuthenticationMethodModel = authenticationMethod
+
+    override val lockoutMessageId = R.string.kg_too_many_failed_pin_attempts_dialog_message
+
+    init {
+        viewModelScope.launch { simBouncerInteractor.subId.collect { onResetSimFlow() } }
     }
+
+    /** Notifies that the user dismissed the sim pin error dialog. */
+    fun onErrorDialogDismissed() {
+        viewModelScope.launch { simBouncerInteractor.onErrorDialogDismissed() }
+    }
+
+    /**
+     * Whether the digit buttons should be animated when touched. Note that this doesn't affect the
+     * delete or enter buttons; those should always animate.
+     */
+    val isDigitButtonAnimationEnabled: StateFlow<Boolean> =
+        interactor.isPinEnhancedPrivacyEnabled
+            .map { !it }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = !interactor.isPinEnhancedPrivacyEnabled.value,
+            )
 
     /** Notifies that the user clicked on a PIN button with the given digit value. */
     fun onPinButtonClicked(input: Int) {
-        resetPinJob?.cancel()
-        resetPinJob = null
+        val pinInput = mutablePinInput.value
 
-        if (entered.value.isEmpty()) {
-            interactor.clearMessage()
+        onIntentionalUserInput()
+
+        val maxInputLength = hintedPinLength.value ?: Int.MAX_VALUE
+        if (pinInput.getPin().size < maxInputLength) {
+            mutablePinInput.value = pinInput.append(input)
+            tryAuthenticate(useAutoConfirm = true)
         }
-
-        entered.value += input
     }
 
     /** Notifies that the user clicked the backspace button. */
     fun onBackspaceButtonClicked() {
-        if (entered.value.isEmpty()) {
-            return
-        }
-
-        entered.value = entered.value.toMutableList().apply { removeLast() }
+        mutablePinInput.value = mutablePinInput.value.deleteLast()
     }
 
     /** Notifies that the user long-pressed the backspace button. */
     fun onBackspaceButtonLongPressed() {
-        resetPinJob?.cancel()
-        resetPinJob =
-            applicationScope.launch {
-                while (entered.value.isNotEmpty()) {
-                    onBackspaceButtonClicked()
-                    delay(BACKSPACE_LONG_PRESS_DELAY_MS)
-                }
-            }
+        clearInput()
     }
 
     /** Notifies that the user clicked the "enter" button. */
     fun onAuthenticateButtonClicked() {
-        if (!interactor.authenticate(entered.value)) {
-            showFailureAnimation()
+        if (authenticationMethod == AuthenticationMethodModel.Sim) {
+            viewModelScope.launch {
+                isSimUnlockingDialogVisible.value = true
+                simBouncerInteractor.verifySim(getInput())
+                isSimUnlockingDialogVisible.value = false
+                clearInput()
+            }
+        } else {
+            tryAuthenticate(useAutoConfirm = false)
         }
-
-        entered.value = emptyList()
     }
 
-    companion object {
-        @VisibleForTesting const val BACKSPACE_LONG_PRESS_DELAY_MS = 80L
+    fun onDisableEsimButtonClicked() {
+        viewModelScope.launch { simBouncerInteractor.disableEsim() }
     }
+
+    /** Resets the sim screen and shows a default message. */
+    private fun onResetSimFlow() {
+        simBouncerInteractor.resetSimPukUserInput()
+        clearInput()
+    }
+
+    override fun clearInput() {
+        mutablePinInput.value = mutablePinInput.value.clearAll()
+    }
+
+    override fun getInput(): List<Any> {
+        return mutablePinInput.value.getPin()
+    }
+
+    private fun computeBackspaceButtonAppearance(
+        pinInput: PinInputViewModel,
+        isAutoConfirmEnabled: Boolean,
+    ): ActionButtonAppearance {
+        val isEmpty = pinInput.isEmpty()
+
+        return when {
+            isAutoConfirmEnabled && isEmpty -> ActionButtonAppearance.Hidden
+            isAutoConfirmEnabled -> ActionButtonAppearance.Subtle
+            else -> ActionButtonAppearance.Shown
+        }
+    }
+
+    /**
+     * Notifies that a key event has occurred.
+     *
+     * @return `true` when the [KeyEvent] was consumed as user input on bouncer; `false` otherwise.
+     */
+    fun onKeyEvent(type: KeyEventType, keyCode: Int): Boolean {
+        return when (type) {
+            KeyEventType.KeyUp -> {
+                if (isConfirmKey(keyCode)) {
+                    onAuthenticateButtonClicked()
+                    true
+                } else {
+                    false
+                }
+            }
+            KeyEventType.KeyDown -> {
+                when (keyCode) {
+                    KEYCODE_DEL -> {
+                        onBackspaceButtonClicked()
+                        true
+                    }
+                    in KEYCODE_0..KEYCODE_9 -> {
+                        onPinButtonClicked(keyCode - KEYCODE_0)
+                        true
+                    }
+                    in KEYCODE_NUMPAD_0..KEYCODE_NUMPAD_9 -> {
+                        onPinButtonClicked(keyCode - KEYCODE_NUMPAD_0)
+                        true
+                    }
+                    else -> {
+                        false
+                    }
+                }
+            }
+            else -> false
+        }
+    }
+}
+
+/** Appearance of pin-pad action buttons. */
+enum class ActionButtonAppearance {
+    /** Button must not be shown. */
+    Hidden,
+
+    /** Button is shown, but with no background to make it less prominent. */
+    Subtle,
+
+    /** Button is shown. */
+    Shown,
 }

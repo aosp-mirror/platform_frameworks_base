@@ -20,11 +20,9 @@ import android.graphics.Rect
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
-import android.tools.common.datatypes.Size
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.device.traces.io.ResultWriter
-import android.tools.device.traces.monitors.surfaceflinger.LayersTraceMonitor
-import android.tools.device.traces.monitors.withSFTracing
+import android.tools.datatypes.Size
+import android.tools.flicker.subject.layers.LayersTraceSubject
+import android.tools.traces.monitors.withSFTracing
 import org.junit.After
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -41,16 +39,13 @@ class ResizeTasksSyncTest {
     @get:Rule
     var scenarioRule: ActivityScenarioRule<TaskOrganizerMultiWindowTest> =
             ActivityScenarioRule<TaskOrganizerMultiWindowTest>(
-                    TaskOrganizerMultiWindowTest::class.java)
+                    TaskOrganizerMultiWindowTest::class.java
+            )
 
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
 
     @Before
     fun setup() {
-        val monitor = LayersTraceMonitor()
-        if (monitor.isEnabled) {
-            monitor.stop(ResultWriter())
-        }
         val firstTaskBounds = Rect(0, 0, 1080, 1000)
         val secondTaskBounds = Rect(0, 1000, 1080, 2000)
 
@@ -71,7 +66,7 @@ class ResizeTasksSyncTest {
         val firstBounds = Rect(0, 0, 1080, 800)
         val secondBounds = Rect(0, 1000, 1080, 1800)
 
-        val trace = withSFTracing(TRACE_FLAGS) {
+        val trace = withSFTracing() {
             lateinit var resizeReadyLatch: CountDownLatch
             scenarioRule.getScenario().onActivity {
                 resizeReadyLatch = it.resizeTaskView(firstBounds, secondBounds)
@@ -106,7 +101,6 @@ class ResizeTasksSyncTest {
     }
 
     companion object {
-        private const val TRACE_FLAGS = 0x1 // TRACE_CRITICAL
         private const val FIRST_ACTIVITY = "Activity1"
         private const val SECOND_ACTIVITY = "Activity2"
     }

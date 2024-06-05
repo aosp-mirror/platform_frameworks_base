@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.input.InputManagerGlobal;
+import android.os.IInputConstants;
 import android.util.ArrayMap;
 import android.util.Pools.SynchronizedPool;
 
@@ -53,11 +54,13 @@ public final class VelocityTracker {
     public @interface VelocityTrackableMotionEventAxis {}
 
     /**
-     * Velocity Tracker Strategy: Invalid.
+     * Use the default Velocity Tracker Strategy. Different axes may use different default
+     * strategies.
      *
      * @hide
      */
-    public static final int VELOCITY_TRACKER_STRATEGY_DEFAULT = -1;
+    public static final int VELOCITY_TRACKER_STRATEGY_DEFAULT =
+            IInputConstants.VELOCITY_TRACKER_STRATEGY_DEFAULT;
 
     /**
      * Velocity Tracker Strategy: Impulse.
@@ -66,7 +69,8 @@ public final class VelocityTracker {
      *
      * @hide
      */
-    public static final int VELOCITY_TRACKER_STRATEGY_IMPULSE = 0;
+    public static final int VELOCITY_TRACKER_STRATEGY_IMPULSE =
+            IInputConstants.VELOCITY_TRACKER_STRATEGY_IMPULSE;
 
     /**
      * Velocity Tracker Strategy: LSQ1.
@@ -77,7 +81,8 @@ public final class VelocityTracker {
      *
      * @hide
      */
-    public static final int VELOCITY_TRACKER_STRATEGY_LSQ1 = 1;
+    public static final int VELOCITY_TRACKER_STRATEGY_LSQ1 =
+            IInputConstants.VELOCITY_TRACKER_STRATEGY_LSQ1;
 
     /**
      * Velocity Tracker Strategy: LSQ2.
@@ -88,7 +93,8 @@ public final class VelocityTracker {
      *
      * @hide
      */
-    public static final int VELOCITY_TRACKER_STRATEGY_LSQ2 = 2;
+    public static final int VELOCITY_TRACKER_STRATEGY_LSQ2 =
+            IInputConstants.VELOCITY_TRACKER_STRATEGY_LSQ2;
 
     /**
      * Velocity Tracker Strategy: LSQ3.
@@ -98,7 +104,8 @@ public final class VelocityTracker {
      *
      * @hide
      */
-    public static final int VELOCITY_TRACKER_STRATEGY_LSQ3 = 3;
+    public static final int VELOCITY_TRACKER_STRATEGY_LSQ3 =
+            IInputConstants.VELOCITY_TRACKER_STRATEGY_LSQ3;
 
     /**
      * Velocity Tracker Strategy: WLSQ2_DELTA.
@@ -106,7 +113,8 @@ public final class VelocityTracker {
      *
      * @hide
      */
-    public static final int VELOCITY_TRACKER_STRATEGY_WLSQ2_DELTA = 4;
+    public static final int VELOCITY_TRACKER_STRATEGY_WLSQ2_DELTA =
+            IInputConstants.VELOCITY_TRACKER_STRATEGY_WLSQ2_DELTA;
 
     /**
      * Velocity Tracker Strategy: WLSQ2_CENTRAL.
@@ -114,7 +122,8 @@ public final class VelocityTracker {
      *
      * @hide
      */
-    public static final int VELOCITY_TRACKER_STRATEGY_WLSQ2_CENTRAL = 5;
+    public static final int VELOCITY_TRACKER_STRATEGY_WLSQ2_CENTRAL =
+            IInputConstants.VELOCITY_TRACKER_STRATEGY_WLSQ2_CENTRAL;
 
     /**
      * Velocity Tracker Strategy: WLSQ2_RECENT.
@@ -122,7 +131,8 @@ public final class VelocityTracker {
      *
      * @hide
      */
-    public static final int VELOCITY_TRACKER_STRATEGY_WLSQ2_RECENT = 6;
+    public static final int VELOCITY_TRACKER_STRATEGY_WLSQ2_RECENT =
+            IInputConstants.VELOCITY_TRACKER_STRATEGY_WLSQ2_RECENT;
 
     /**
      * Velocity Tracker Strategy: INT1.
@@ -134,7 +144,8 @@ public final class VelocityTracker {
      *
      * @hide
      */
-    public static final int VELOCITY_TRACKER_STRATEGY_INT1 = 7;
+    public static final int VELOCITY_TRACKER_STRATEGY_INT1 =
+            IInputConstants.VELOCITY_TRACKER_STRATEGY_INT1;
 
     /**
      * Velocity Tracker Strategy: INT2.
@@ -144,7 +155,8 @@ public final class VelocityTracker {
      *
      * @hide
      */
-    public static final int VELOCITY_TRACKER_STRATEGY_INT2 = 8;
+    public static final int VELOCITY_TRACKER_STRATEGY_INT2 =
+            IInputConstants.VELOCITY_TRACKER_STRATEGY_INT2;
 
     /**
      * Velocity Tracker Strategy: Legacy.
@@ -155,7 +167,8 @@ public final class VelocityTracker {
      *
      * @hide
      */
-    public static final int VELOCITY_TRACKER_STRATEGY_LEGACY = 9;
+    public static final int VELOCITY_TRACKER_STRATEGY_LEGACY =
+            IInputConstants.VELOCITY_TRACKER_STRATEGY_LEGACY;
 
 
     /**
@@ -251,7 +264,6 @@ public final class VelocityTracker {
 
     /**
      * Obtains a velocity tracker with the specified strategy.
-     * For testing and comparison purposes only.
      *
      * @param strategy The strategy Id, VELOCITY_TRACKER_STRATEGY_DEFAULT to use the default.
      * @return The velocity tracker.
@@ -259,6 +271,9 @@ public final class VelocityTracker {
      * @hide
      */
     public static VelocityTracker obtain(int strategy) {
+        if (strategy == VELOCITY_TRACKER_STRATEGY_DEFAULT) {
+            return obtain();
+        }
         return new VelocityTracker(strategy);
     }
 

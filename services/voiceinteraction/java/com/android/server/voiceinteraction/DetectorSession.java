@@ -20,6 +20,8 @@ import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.LOG_COMPAT_CHANGE;
 import static android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG;
 import static android.Manifest.permission.RECORD_AUDIO;
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.service.attention.AttentionService.PROXIMITY_UNKNOWN;
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_EXTERNAL;
 import static android.service.voice.HotwordDetectionService.ENABLE_PROXIMITY_RESULT;
@@ -46,6 +48,9 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENT
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_SECURITY_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_UNEXPECTED_CALLBACK;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECT_UNEXPECTED_CALLBACK;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_EVENT_EGRESS_SIZE__EVENT_TYPE__HOTWORD_DETECTION;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_EVENT_EGRESS_SIZE__EVENT_TYPE__HOTWORD_REJECTION;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_EVENT_EGRESS_SIZE__EVENT_TYPE__HOTWORD_TRAINING_DATA;
 import static com.android.server.voiceinteraction.HotwordDetectionConnection.ENFORCE_HOTWORD_PHRASE_ID;
 
 import android.annotation.NonNull;
@@ -68,6 +73,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.service.voice.AlwaysOnHotwordDetector;
+import android.service.voice.HotwordAudioStream;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetectionServiceFailure;
@@ -76,6 +83,7 @@ import android.service.voice.HotwordRejectedResult;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.VisualQueryDetectionServiceFailure;
+import android.service.voice.VoiceInteractionManagerInternal.WearableHotwordDetectionCallback;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
@@ -166,10 +174,17 @@ abstract class DetectorSession {
     private static final int METRICS_CALLBACK_ON_STATUS_REPORTED_EXCEPTION =
             HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_STATUS_REPORTED_EXCEPTION;
 
+    private static final int HOTWORD_EVENT_TYPE_DETECTION =
+            HOTWORD_EVENT_EGRESS_SIZE__EVENT_TYPE__HOTWORD_DETECTION;
+    private static final int HOTWORD_EVENT_TYPE_REJECTION =
+            HOTWORD_EVENT_EGRESS_SIZE__EVENT_TYPE__HOTWORD_REJECTION;
+    private static final int HOTWORD_EVENT_TYPE_TRAINING_DATA =
+            HOTWORD_EVENT_EGRESS_SIZE__EVENT_TYPE__HOTWORD_TRAINING_DATA;
+
     private final Executor mAudioCopyExecutor = Executors.newCachedThreadPool();
     // TODO: This may need to be a Handler(looper)
     final ScheduledExecutorService mScheduledExecutorService;
-    private final AppOpsManager mAppOpsManager;
+    final AppOpsManager mAppOpsManager;
     final HotwordAudioStreamCopier mHotwordAudioStreamCopier;
     final AtomicBoolean mUpdateStateAfterStartFinished = new AtomicBoolean(false);
     final IHotwordRecognitionStatusCallback mCallback;
@@ -177,6 +192,7 @@ abstract class DetectorSession {
     final Object mLock;
     final int mVoiceInteractionServiceUid;
     final Context mContext;
+    final int mUserId;
 
     @Nullable AttentionManagerInternal mAttentionManagerInternal = null;
 
@@ -185,7 +201,7 @@ abstract class DetectorSession {
 
     /** Identity used for attributing app ops when delivering data to the Interactor. */
     @Nullable
-    private final Identity mVoiceInteractorIdentity;
+    final Identity mVoiceInteractorIdentity;
     @GuardedBy("mLock")
     ParcelFileDescriptor mCurrentAudioSink;
     @GuardedBy("mLock")
@@ -209,12 +225,13 @@ abstract class DetectorSession {
             @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity,
             @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging,
-            @NonNull DetectorRemoteExceptionListener listener) {
+            @NonNull DetectorRemoteExceptionListener listener, int userId) {
         mRemoteExceptionListener = listener;
         mRemoteDetectionService = remoteDetectionService;
         mLock = lock;
         mContext = context;
         mToken = token;
+        mUserId = userId;
         mCallback = callback;
         mVoiceInteractionServiceUid = voiceInteractionServiceUid;
         mVoiceInteractorIdentity = voiceInteractorIdentity;
@@ -233,7 +250,8 @@ abstract class DetectorSession {
 
         if (ENABLE_PROXIMITY_RESULT) {
             mAttentionManagerInternal = LocalServices.getService(AttentionManagerInternal.class);
-            if (mAttentionManagerInternal != null) {
+            if (mAttentionManagerInternal != null
+                    && mAttentionManagerInternal.isProximitySupported()) {
                 mAttentionManagerInternal.onStartProximityUpdates(mProximityCallbackInternal);
             }
         }
@@ -392,7 +410,101 @@ abstract class DetectorSession {
                 audioStream,
                 audioFormat,
                 options,
-                callback);
+                callback,
+                /* shouldCloseAudioStreamWithDelayOnDetect= */ true,
+                /* shouldCheckPermissionsAndAppOpsOnDetected= */ true);
+    }
+
+    void startListeningFromWearableLocked(
+            ParcelFileDescriptor audioStream,
+            AudioFormat audioFormat,
+            PersistableBundle options,
+            WearableHotwordDetectionCallback wearableCallback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningFromWearableLocked");
+        }
+        IMicrophoneHotwordDetectionVoiceInteractionCallback voiceInteractionCallback =
+                new IMicrophoneHotwordDetectionVoiceInteractionCallback() {
+                    @Override
+                    public void onDetected(
+                            HotwordDetectedResult hotwordDetectedResult,
+                            AudioFormat audioFormatFromCallback,
+                            ParcelFileDescriptor audioStreamFromCallback) {
+                        wearableCallback.onDetected();
+                        try {
+                            // This uses the DSP hotword code path to send the result to
+                            // AlwaysOnHotwordDetector. DSP trigger and wearable trigger operates
+                            // independently.
+                            mCallback.onKeyphraseDetectedFromExternalSource(hotwordDetectedResult);
+                        } catch (RemoteException ex) {
+                            Slog.w(
+                                    TAG,
+                                    "RemoteException when sending HotwordDetectedResult to"
+                                        + " VoiceInteractionService.",
+                                    ex);
+                            wearableCallback.onError(
+                                    "RemoteException when sending HotwordDetectedResult to"
+                                        + " VoiceInteractionService.");
+                            notifyOnDetectorRemoteException();
+                        }
+
+                        // Close the local copies of the file descriptors after sending them to
+                        // another process.
+                        for (HotwordAudioStream resultAudioStream :
+                                hotwordDetectedResult.getAudioStreams()) {
+                            try {
+                                resultAudioStream.getAudioStreamParcelFileDescriptor().close();
+                            } catch (IOException ex) {
+                                Slog.i(
+                                        TAG,
+                                        "Unable to close audio stream parcel file descriptor,",
+                                        ex);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onHotwordDetectionServiceFailure(
+                            HotwordDetectionServiceFailure hotwordDetectionServiceFailure) {
+                        wearableCallback.onError(
+                                "onHotwordDetectionServiceFailure: "
+                                        + hotwordDetectionServiceFailure);
+                    }
+
+                    @Override
+                    public void onRejected(HotwordRejectedResult hotwordRejectedResult) {
+                        wearableCallback.onRejected();
+                    }
+
+                    @Override
+                    public IBinder asBinder() {
+                        // This callback will only be used locally within the same process.
+                        return null;
+                    }
+                };
+        /*
+         * By setting shouldCheckPermissionsAndAppOpsOnDetected to false, when the audio
+         * stream is sent from the sandboxed HotwordDetectionService to the non-sandboxed
+         * VoiceInteractionService as a result of second-stage hotword detection, audio-related
+         * permissions will not be checked against the VoiceInteractionService and the AppOpsManager
+         * will not be notified of the data flow to the VoiceInteractionService. These checks are
+         * not performed because the audio stream here originates from a remotely connected wearable
+         * device. It does not originate from the microphone of the device where this code runs on,
+         * or a microphone directly controlled by this system. Permission checks are expected to
+         * happen on the remote wearable device. From the perspective of this system, the audio
+         * stream is data received from an external source.
+         *
+         * Not notifying AppOpsManager allows this device's microphone indicator to remain off when
+         * this data flow happens. It avoids confusion since the audio does not originate from
+         * this device. The wearable is expected to turn on its own microphone indicator.
+         */
+        handleExternalSourceHotwordDetectionLocked(
+                audioStream,
+                audioFormat,
+                options,
+                voiceInteractionCallback,
+                /* shouldCloseAudioStreamWithDelayOnDetect= */ false,
+                /* shouldCheckPermissionsAndAppOpsOnDetected= */ false);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -400,7 +512,9 @@ abstract class DetectorSession {
             ParcelFileDescriptor audioStream,
             AudioFormat audioFormat,
             @Nullable PersistableBundle options,
-            IMicrophoneHotwordDetectionVoiceInteractionCallback callback) {
+            IMicrophoneHotwordDetectionVoiceInteractionCallback callback,
+            boolean shouldCloseAudioStreamWithDelayOnDetect,
+            boolean shouldCheckPermissionsAndAppOpsOnDetected) {
         if (DEBUG) {
             Slog.d(TAG, "#handleExternalSourceHotwordDetectionLocked");
         }
@@ -469,12 +583,22 @@ abstract class DetectorSession {
         // TODO: what if we cancelled and started a new one?
         mRemoteDetectionService.run(
                 service -> {
+                    PersistableBundle optionsToSend = options;
+                    if (android.app.wearable.Flags.enableHotwordWearableSensingApi()) {
+                        if (optionsToSend == null) {
+                            optionsToSend = new PersistableBundle();
+                        }
+                        optionsToSend.putBoolean(
+                                HotwordDetectionService
+                                        .KEY_SYSTEM_WILL_CLOSE_AUDIO_STREAM_AFTER_CALLBACK,
+                                shouldCloseAudioStreamWithDelayOnDetect);
+                    }
                     service.detectFromMicrophoneSource(
                             serviceAudioSource,
                             // TODO: consider making a proxy callback + copy of audio format
                             AUDIO_SOURCE_EXTERNAL,
                             audioFormat,
-                            options,
+                            optionsToSend,
                             new IDspHotwordDetectionCallback.Stub() {
                                 @Override
                                 public void onRejected(HotwordRejectedResult result)
@@ -517,41 +641,54 @@ abstract class DetectorSession {
                                                 getDetectorType(),
                                                 METRICS_EXTERNAL_SOURCE_DETECTED,
                                                 mVoiceInteractionServiceUid);
-                                        mScheduledExecutorService.schedule(
-                                                () -> {
-                                                    bestEffortClose(serviceAudioSink, audioSource);
-                                                },
-                                                EXTERNAL_HOTWORD_CLEANUP_MILLIS,
-                                                TimeUnit.MILLISECONDS);
-
-                                        try {
-                                            enforcePermissionsForDataDelivery();
-                                        } catch (SecurityException e) {
-                                            Slog.w(TAG, "Ignoring #onDetected due to a "
-                                                    + "SecurityException", e);
-                                            HotwordMetricsLogger.writeDetectorEvent(
-                                                    getDetectorType(),
-                                                    EXTERNAL_SOURCE_DETECT_SECURITY_EXCEPTION,
-                                                    mVoiceInteractionServiceUid);
+                                        if (shouldCloseAudioStreamWithDelayOnDetect) {
+                                            mScheduledExecutorService.schedule(
+                                                    () -> {
+                                                        bestEffortClose(
+                                                                serviceAudioSink, audioSource);
+                                                    },
+                                                    EXTERNAL_HOTWORD_CLEANUP_MILLIS,
+                                                    TimeUnit.MILLISECONDS);
+                                        }
+                                        if (shouldCheckPermissionsAndAppOpsOnDetected) {
                                             try {
-                                                callback.onHotwordDetectionServiceFailure(
+                                                enforcePermissionsForDataDelivery();
+                                            } catch (SecurityException e) {
+                                                Slog.w(
+                                                        TAG,
+                                                        "Ignoring #onDetected due to a "
+                                                                + "SecurityException",
+                                                        e);
+                                                HotwordMetricsLogger.writeDetectorEvent(
+                                                        getDetectorType(),
+                                                        EXTERNAL_SOURCE_DETECT_SECURITY_EXCEPTION,
+                                                        mVoiceInteractionServiceUid);
+                                                try {
+                                                    callback.onHotwordDetectionServiceFailure(
                                                         new HotwordDetectionServiceFailure(
                                                                 ONDETECTED_GOT_SECURITY_EXCEPTION,
                                                                 "Security exception occurs in "
                                                                         + "#onDetected method"));
-                                            } catch (RemoteException e1) {
-                                                notifyOnDetectorRemoteException();
-                                                throw e1;
+                                                } catch (RemoteException e1) {
+                                                    notifyOnDetectorRemoteException();
+                                                    throw e1;
+                                                }
+                                                return;
                                             }
-                                            return;
                                         }
                                         HotwordDetectedResult newResult;
                                         try {
-                                            newResult = mHotwordAudioStreamCopier
-                                                    .startCopyingAudioStreams(triggerResult);
+                                            newResult =
+                                                mHotwordAudioStreamCopier
+                                                    .startCopyingAudioStreams(
+                                                        triggerResult,
+                                                        shouldCheckPermissionsAndAppOpsOnDetected);
                                         } catch (IOException e) {
-                                            Slog.w(TAG, "Ignoring #onDetected due to a "
-                                                    + "IOException", e);
+                                            Slog.w(
+                                                    TAG,
+                                                    "Ignoring #onDetected due to a "
+                                                            + "IOException",
+                                                    e);
                                             // TODO: Write event
                                             try {
                                                 callback.onHotwordDetectionServiceFailure(
@@ -565,7 +702,12 @@ abstract class DetectorSession {
                                             return;
                                         }
                                         try {
-                                            callback.onDetected(newResult, /* audioFormat= */ null,
+                                            // The ParcelFileDescriptors in newResult might be
+                                            // closed after this call. Parcelling newResult can
+                                            // throw an exception
+                                            callback.onDetected(
+                                                    newResult,
+                                                    /* audioFormat= */ null,
                                                     /* audioStream= */ null);
                                         } catch (RemoteException e) {
                                             notifyOnDetectorRemoteException();
@@ -575,8 +717,7 @@ abstract class DetectorSession {
                                                 + HotwordDetectedResult.getUsageSize(newResult)
                                                 + " bits from hotword trusted process");
                                         if (mDebugHotwordLogging) {
-                                            Slog.i(TAG,
-                                                    "Egressed detected result: " + newResult);
+                                            Slog.i(TAG, "Egressed detected result: " + newResult);
                                         }
                                     }
                                 }
@@ -752,11 +893,21 @@ abstract class DetectorSession {
                                 "Failed to obtain permission RECORD_AUDIO for identity "
                                         + mVoiceInteractorIdentity);
                     }
-                    int hotwordOp = AppOpsManager.strOpToOp(
-                            AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
-                    mAppOpsManager.noteOpNoThrow(hotwordOp,
-                            mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
-                            mVoiceInteractorIdentity.attributionTag, HOTWORD_DETECTION_OP_MESSAGE);
+                    int opMode = mAppOpsManager.unsafeCheckOpNoThrow(
+                            AppOpsManager.opToPublicName(AppOpsPolicy.getVoiceActivationOp()),
+                            mVoiceInteractorIdentity.uid,
+                            mVoiceInteractorIdentity.packageName);
+                    if (opMode == MODE_DEFAULT || opMode == MODE_ALLOWED) {
+                        mAppOpsManager.noteOpNoThrow(
+                                AppOpsPolicy.getVoiceActivationOp(),
+                                mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
+                                mVoiceInteractorIdentity.attributionTag,
+                                HOTWORD_DETECTION_OP_MESSAGE);
+                    } else {
+                        throw new SecurityException(
+                                "The app op OP_RECEIVE_SANDBOX_TRIGGER_AUDIO is denied for "
+                                        + "identity" + mVoiceInteractorIdentity);
+                    }
                 } else {
                     enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
                             RECORD_AUDIO, HOTWORD_DETECTION_OP_MESSAGE);
@@ -775,7 +926,7 @@ abstract class DetectorSession {
      * @param permission The identifier of the permission we want to check.
      * @param reason     The reason why we're requesting the permission, for auditing purposes.
      */
-    private static void enforcePermissionForDataDelivery(@NonNull Context context,
+    protected static void enforcePermissionForDataDelivery(@NonNull Context context,
             @NonNull Identity identity, @NonNull String permission, @NonNull String reason) {
         final int status = PermissionUtil.checkPermissionForDataDelivery(context, identity,
                 permission, reason);

@@ -17,10 +17,11 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.service.notification.NotificationListenerService.REASON_APP_CANCEL
 import android.service.notification.NotificationListenerService.REASON_CANCEL
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -39,7 +40,7 @@ import java.util.concurrent.Executor
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class ShadeEventCoordinatorTest : SysuiTestCase() {
     private lateinit var coordinator: ShadeEventCoordinator
@@ -50,7 +51,7 @@ class ShadeEventCoordinatorTest : SysuiTestCase() {
     private lateinit var entry2: NotificationEntry
 
     @Mock private lateinit var pipeline: NotifPipeline
-    @Mock private lateinit var logger: ShadeEventCoordinatorLogger
+    private val logger = ShadeEventCoordinatorLogger(logcatLogBuffer())
     @Mock private lateinit var executor: Executor
     @Mock private lateinit var notifRemovedByUserCallback: Runnable
     @Mock private lateinit var shadeEmptiedCallback: Runnable

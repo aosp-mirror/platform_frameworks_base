@@ -52,6 +52,7 @@ a similar way.
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar -->
     <style name="Theme.DeviceDefault.NoActionBar" parent="Theme.Material.NoActionBar">
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -70,6 +71,8 @@ a similar way.
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar.  This theme
          sets {@link android.R.attr#windowFullscreen} to true.  -->
     <style name="Theme.DeviceDefault.NoActionBar.Fullscreen" parent="Theme.Material.NoActionBar.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -90,6 +93,7 @@ a similar way.
     sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
     to true. -->
     <style name="Theme.DeviceDefault.NoActionBar.Overscan" parent="Theme.Material.NoActionBar.Overscan">
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -129,6 +133,8 @@ a similar way.
         <item name="colorControlActivated">?attr/colorControlHighlight</item>
         <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>
         <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
+        <item name="iconfactoryIconSize">@dimen/resolver_icon_size</item>
+        <item name="iconfactoryBadgeSize">@dimen/resolver_badge_size</item>
     </style>
 
     <!-- Use a dark theme for watches. -->
@@ -142,15 +148,15 @@ a similar way.
         <item name="windowAnimationStyle">@style/Animation.InputMethod</item>
         <item name="imeFullscreenBackground">?colorBackground</item>
         <item name="imeExtractEnterAnimation">@anim/input_method_extract_enter</item>
-        <item name="windowSwipeToDismiss">false</item>
+        <item name="windowSwipeToDismiss">true</item>
     </style>
 
     <!-- DeviceDefault theme for dialog windows and activities. In contrast to Material, the
     watch theme is not floating. You can set this theme on an activity if you would like to make
     an activity that looks like a Dialog.-->
     <style name="Theme.DeviceDefault.Dialog" parent="Theme.Material.Dialog" >
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
+        <item name="android:windowFullscreen">true</item>
+
         <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
         <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
 
@@ -175,6 +181,99 @@ a similar way.
         <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_device_default</item>
     </style>
 
+    <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Material.Dialog.Alert">
+        <item name="android:windowFullscreen">true</item>
+        <!-- Dialog attributes -->
+        <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
+        <item name="alertDialogTheme">@style/Theme.DeviceDefault.Dialog.Alert</item>
+        <!-- Color palette -->
+        <item name="colorPrimary">@color/primary_device_default_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
+        <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorAccentPrimary">@color/accent_primary_device_default</item>
+        <item name="colorAccentSecondary">@color/accent_secondary_device_default</item>
+        <item name="colorAccentTertiary">@color/accent_tertiary_device_default</item>
+        <item name="colorAccentPrimaryVariant">@color/accent_primary_variant_dark_device_default</item>
+        <item name="colorAccentSecondaryVariant">@color/accent_secondary_variant_dark_device_default</item>
+        <item name="colorAccentTertiaryVariant">@color/accent_tertiary_variant_dark_device_default</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceHighlight">@color/surface_highlight_dark</item>
+        <item name="colorSurfaceVariant">@color/surface_variant_dark</item>
+        <item name="colorSurfaceHeader">@color/surface_header_dark</item>
+        <item name="colorError">@color/error_color_device_default_dark</item>
+        <item name="colorBackground">@color/background_device_default_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
+        <item name="textColorPrimary">@color/text_color_primary_device_default_dark</item>
+        <item name="textColorSecondary">@color/text_color_secondary_device_default_dark</item>
+        <item name="textColorTertiary">@color/text_color_tertiary_device_default_dark</item>
+        <item name="textColorPrimaryInverse">@color/text_color_primary_device_default_light</item>
+        <item name="textColorSecondaryInverse">@color/text_color_secondary_device_default_light</item>
+        <item name="textColorTertiaryInverse">@color/text_color_tertiary_device_default_light</item>
+        <item name="textColorOnAccent">@color/text_color_on_accent_device_default</item>
+        <item name="colorForeground">@color/foreground_device_default_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_device_default_light</item>
+
+        <!-- Text styles -->
+        <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
+
+        <!-- Button styles -->
+        <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
+        <item name="buttonBarButtonStyle">@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Progress bar attributes -->
+        <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
+        <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
+
+        <item name="materialColorOnSecondaryFixedVariant">@color/system_on_secondary_fixed_variant</item>
+        <item name="materialColorOnTertiaryFixedVariant">@color/system_on_tertiary_fixed_variant</item>
+        <item name="materialColorSurfaceContainerLowest">@color/system_surface_container_lowest_dark</item>
+        <item name="materialColorOnPrimaryFixedVariant">@color/system_on_primary_fixed_variant</item>
+        <item name="materialColorOnSecondaryContainer">@color/system_on_secondary_container_dark</item>
+        <item name="materialColorOnTertiaryContainer">@color/system_on_tertiary_container_dark</item>
+        <item name="materialColorSurfaceContainerLow">@color/system_surface_container_low_dark</item>
+        <item name="materialColorOnPrimaryContainer">@color/system_on_primary_container_dark</item>
+        <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
+        <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
+        <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
+        <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
+        <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
+        <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
+        <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
+        <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
+        <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
+        <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
+        <item name="materialColorPrimaryContainer">@color/system_primary_container_dark</item>
+        <item name="materialColorOnBackground">@color/system_on_background_dark</item>
+        <item name="materialColorPrimaryFixed">@color/system_primary_fixed</item>
+        <item name="materialColorOnSecondary">@color/system_on_secondary_dark</item>
+        <item name="materialColorOnTertiary">@color/system_on_tertiary_dark</item>
+        <item name="materialColorSurfaceDim">@color/system_surface_dim_dark</item>
+        <item name="materialColorSurfaceBright">@color/system_surface_bright_dark</item>
+        <item name="materialColorOnError">@color/system_on_error_dark</item>
+        <item name="materialColorSurface">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceContainerHigh">@color/system_surface_container_high_dark</item>
+        <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
+        <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
+        <item name="materialColorOutline">@color/system_outline_dark</item>
+        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
+        <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
+        <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
+        <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
+        <item name="materialColorPrimary">@color/system_primary_dark</item>
+        <item name="materialColorSecondary">@color/system_secondary_dark</item>
+        <item name="materialColorTertiary">@color/system_tertiary_dark</item>
+        <item name="materialColorError">@color/system_error_dark</item>
+    </style>
+
     <!-- DeviceDefault theme for a window that should look like the Settings app.  -->
     <style name="Theme.DeviceDefault.Settings" parent="Theme.DeviceDefault"/>
     <style name="Theme.DeviceDefault.Settings.NoActionBar" parent="Theme.DeviceDefault"/>
@@ -185,9 +284,9 @@ a similar way.
     <style name="Theme.DeviceDefault.Settings.Dialog.Presentation" parent="Theme.DeviceDefault.Dialog.Presentation"/>
     <style name="Theme.DeviceDefault.Settings.SearchBar" parent="Theme.DeviceDefault.SearchBar"/>
 
-    <style name="Theme.DeviceDefault.Settings.Dialog.Alert" parent="Theme.Material.Dialog.Alert">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
+    <style name="Theme.DeviceDefault.Settings.Dialog.Alert" parent="Theme.DeviceDefault.Dialog.Alert">
+        <item name="android:windowFullscreen">true</item>
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -204,8 +303,6 @@ a similar way.
     </style>
 
     <style name="Theme.DeviceDefault.Settings.CompactMenu" parent="Theme.Material.CompactMenu">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -224,8 +321,7 @@ a similar way.
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} that has a nice minimum width for a
     regular dialog. -->
     <style name="Theme.DeviceDefault.Dialog.MinWidth" parent="Theme.Material.Dialog.MinWidth">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
+        <item name="android:windowFullscreen">true</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -243,8 +339,8 @@ a similar way.
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} without an action bar -->
     <style name="Theme.DeviceDefault.Dialog.NoActionBar" parent="Theme.Material.Dialog.NoActionBar">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -263,8 +359,8 @@ a similar way.
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog_NoActionBar} that has a nice minimum width
     for a regular dialog. -->
     <style name="Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" parent="Theme.Material.Dialog.NoActionBar.MinWidth">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -302,6 +398,8 @@ a similar way.
     full-screen on smaller screens (small, normal) or as a dialog on larger screens (large,
     xlarge). -->
     <style name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar" parent="Theme.Material.DialogWhenLarge.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -319,6 +417,7 @@ a similar way.
 
     <!-- DeviceDefault theme for a presentation window on a secondary display. -->
     <style name="Theme.DeviceDefault.Dialog.Presentation" parent="Theme.Material.Dialog.Presentation">
+        <item name="android:windowFullscreen">true</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -338,6 +437,8 @@ a similar way.
     decorations, so you basically have an empty rectangle in which to place your content. It makes
     the window floating, with a transparent background, and turns off dimming behind the window. -->
     <style name="Theme.DeviceDefault.Panel" parent="Theme.Material.Panel">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionBar">false</item>
         <!-- Color palette Dark -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
@@ -407,26 +508,10 @@ a similar way.
         <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_device_default</item>
     </style>
 
-    <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Material.Dialog.Alert">
-        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
-
-        <!-- Color palette Dialog -->
-        <item name="colorPrimary">@color/primary_device_default_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>
-        <item name="colorForeground">@color/foreground_device_default_dark</item>
-        <item name="colorAccent">@color/accent_device_default_dark</item>
-        <item name="colorBackground">@color/background_device_default_dark</item>
-        <item name="colorBackgroundFloating">@color/background_floating_device_default_dark</item>
-        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_device_default</item>
-        <item name="colorButtonNormal">@color/button_normal_device_default_dark</item>
-        <item name="colorError">@color/error_color_device_default_dark</item>
-        <item name="disabledAlpha">@dimen/disabled_alpha_device_default</item>
-        <item name="primaryContentAlpha">@dimen/primary_content_alpha_device_default</item>
-        <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_device_default</item>
-    </style>
-
     <!-- Theme for the dialog shown when an app crashes or ANRs. Override to make it dark. -->
     <style name="Theme.DeviceDefault.Dialog.AppError" parent="Theme.DeviceDefault.Dialog.Alert">
+        <item name="alertDialogStyle">@style/BaseErrorDialog.DeviceDefault</item>
+        <item name="dialogPreferredPadding">@dimen/base_error_dialog_padding</item>
         <item name="windowContentTransitions">false</item>
         <item name="windowActivityTransitions">false</item>
         <item name="windowCloseOnTouchOutside">false</item>
@@ -449,8 +534,6 @@ a similar way.
     </style>
 
     <style name="Theme.DeviceDefault.Dialog.NoFrame" parent="Theme.Material.Dialog.NoFrame">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
         <!-- Color palette Dialog -->
         <item name="colorPrimary">@color/primary_device_default_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_dark</item>

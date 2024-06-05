@@ -16,6 +16,9 @@
 
 package android.security;
 
+import android.os.ParcelFileDescriptor;
+import android.os.IInstalld;
+
 /**
  * Binder interface to communicate with FileIntegrityService.
  * @hide
@@ -23,4 +26,10 @@ package android.security;
 interface IFileIntegrityService {
     boolean isApkVeritySupported();
     boolean isAppSourceCertificateTrusted(in byte[] certificateBytes, in String packageName);
+
+    IInstalld.IFsveritySetupAuthToken createAuthToken(in ParcelFileDescriptor authFd);
+
+    @EnforcePermission("SETUP_FSVERITY")
+    int setupFsverity(IInstalld.IFsveritySetupAuthToken authToken, in String filePath,
+            in String packageName);
 }

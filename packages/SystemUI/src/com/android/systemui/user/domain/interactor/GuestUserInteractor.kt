@@ -70,8 +70,10 @@ constructor(
     val isGuestUserResetting: Boolean = repository.isGuestUserResetting
 
     init {
-        resumeSessionReceiver.register()
-        resetOrExitSessionReceiver.register()
+        if (applicationContext.userId == UserHandle.USER_SYSTEM) {
+            resumeSessionReceiver.register()
+            resetOrExitSessionReceiver.register()
+        }
     }
 
     /** Notifies that the device has finished booting. */
@@ -227,7 +229,8 @@ constructor(
                     )
                 }
                 try {
-                    WindowManagerGlobal.getWindowManagerService().lockNow(/* options= */ null)
+                    checkNotNull(WindowManagerGlobal.getWindowManagerService())
+                        .lockNow(/* options= */ null)
                 } catch (e: RemoteException) {
                     Log.e(
                         TAG,

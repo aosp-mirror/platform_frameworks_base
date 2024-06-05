@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.admin.Authority;
 import android.app.admin.DeviceAdminAuthority;
 import android.app.admin.DpcAuthority;
+import android.app.admin.PackagePermissionPolicyKey;
 import android.app.admin.RoleAuthority;
 import android.app.admin.UnknownAuthority;
 import android.content.ComponentName;
@@ -105,6 +106,32 @@ final class EnforcingAdmin {
                 userId, activeAdmin);
     }
 
+    static EnforcingAdmin createEnforcingAdmin(android.app.admin.EnforcingAdmin admin) {
+        Objects.requireNonNull(admin);
+        Authority authority = admin.getAuthority();
+        Set<String> internalAuthorities = new HashSet<>();
+        if (DpcAuthority.DPC_AUTHORITY.equals(authority)) {
+            return new EnforcingAdmin(
+                    admin.getPackageName(), admin.getComponentName(),
+                    Set.of(DPC_AUTHORITY), admin.getUserHandle().getIdentifier(),
+                    /* activeAdmin = */ null);
+        } else if (DeviceAdminAuthority.DEVICE_ADMIN_AUTHORITY.equals(authority)) {
+            return new EnforcingAdmin(
+                    admin.getPackageName(), admin.getComponentName(),
+                    Set.of(DEVICE_ADMIN_AUTHORITY), admin.getUserHandle().getIdentifier(),
+                    /* activeAdmin = */ null);
+        } else if (authority instanceof RoleAuthority roleAuthority) {
+            return new EnforcingAdmin(
+                    admin.getPackageName(), admin.getComponentName(),
+                    Set.of(DEVICE_ADMIN_AUTHORITY), admin.getUserHandle().getIdentifier(),
+                    /* activeAdmin = */ null,
+                    /* isRoleAuthority = */ true);
+        }
+        return new EnforcingAdmin(admin.getPackageName(), admin.getComponentName(),
+                Set.of(), admin.getUserHandle().getIdentifier(),
+                /* activeAdmin = */ null);
+    }
+
     static String getRoleAuthorityOf(String roleName) {
         return ROLE_AUTHORITY_PREFIX + roleName;
     }
@@ -151,6 +178,20 @@ final class EnforcingAdmin {
         mComponentName = null;
         // authorities will be loaded when needed
         mAuthorities = null;
+        mActiveAdmin = activeAdmin;
+    }
+
+    private EnforcingAdmin(
+            String packageName, @Nullable ComponentName componentName, Set<String> authorities,
+            int userId, @Nullable ActiveAdmin activeAdmin, boolean isRoleAuthority) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(authorities);
+
+        mIsRoleAuthority = isRoleAuthority;
+        mPackageName = packageName;
+        mComponentName = componentName;
+        mAuthorities = new HashSet<>(authorities);
+        mUserId = userId;
         mActiveAdmin = activeAdmin;
     }
 
@@ -228,7 +269,8 @@ final class EnforcingAdmin {
         return new android.app.admin.EnforcingAdmin(
                 mPackageName,
                 authority,
-                UserHandle.of(mUserId));
+                UserHandle.of(mUserId),
+                mComponentName);
     }
 
     /**
@@ -324,8 +366,22 @@ final class EnforcingAdmin {
 
     @Override
     public String toString() {
-        return "EnforcingAdmin { mPackageName= " + mPackageName + ", mComponentName= "
-                + mComponentName + ", mAuthorities= " + mAuthorities + ", mUserId= "
-                + mUserId + ", mIsRoleAuthority= " + mIsRoleAuthority + " }";
+        StringBuilder sb = new StringBuilder();
+        sb.append("EnforcingAdmin { mPackageName= ");
+        sb.append(mPackageName);
+        if (mComponentName != null) {
+            sb.append(", mComponentName= ");
+            sb.append(mComponentName);
+        }
+        if (mAuthorities != null) {
+            sb.append(", mAuthorities= ");
+            sb.append(mAuthorities);
+        }
+        sb.append(", mUserId= ");
+        sb.append(mUserId);
+        sb.append(", mIsRoleAuthority= ");
+        sb.append(mIsRoleAuthority);
+        sb.append(" }");
+        return sb.toString();
     }
 }

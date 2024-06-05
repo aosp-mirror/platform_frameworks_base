@@ -36,4 +36,5 @@ message ProfilerInfoProto {
     // Denotes an agent (and its parameters) to attach for profiling.
     optional string agent = 6;
     optional int32 clock_type = 7;
+    optional int32 profiler_output_version = 8;
 }

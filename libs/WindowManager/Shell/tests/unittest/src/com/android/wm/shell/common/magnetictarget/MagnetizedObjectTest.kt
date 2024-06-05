@@ -22,7 +22,7 @@ import android.view.View
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.animation.PhysicsAnimatorTestUtils
+import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -30,6 +30,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
@@ -97,7 +98,7 @@ class MagnetizedObjectTest : ShellTestCase() {
 
         // The mock target view will pretend that it's 200x200, and at (400, 800). This means it's
         // occupying the bounds (400, 800, 600, 1000) and it has a center of (500, 900).
-        `when`(targetView.width).thenReturn(targetSize)  // width = 200
+        `when`(targetView.width).thenReturn(targetSize) // width = 200
         `when`(targetView.height).thenReturn(targetSize) // height = 200
         doAnswer { invocation ->
             (invocation.arguments[0] as IntArray).also { location ->
@@ -200,9 +201,11 @@ class MagnetizedObjectTest : ShellTestCase() {
                 getMotionEvent(x = 200, y = 200))
 
         // You can't become unstuck if you were never stuck in the first place.
-        verify(magnetListener, never()).onStuckToTarget(magneticTarget)
+        verify(magnetListener, never()).onStuckToTarget(magneticTarget,
+                magnetizedObject)
         verify(magnetListener, never()).onUnstuckFromTarget(
-                eq(magneticTarget), ArgumentMatchers.anyFloat(), ArgumentMatchers.anyFloat(),
+                eq(magneticTarget), eq(magnetizedObject),
+                ArgumentMatchers.anyFloat(), ArgumentMatchers.anyFloat(),
                 eq(false))
 
         // Move into and then around inside the magnetic field.
@@ -212,9 +215,10 @@ class MagnetizedObjectTest : ShellTestCase() {
                 getMotionEvent(x = targetCenterX + 100, y = targetCenterY + 100))
 
         // We should only have received one call to onStuckToTarget and none to unstuck.
-        verify(magnetListener, times(1)).onStuckToTarget(magneticTarget)
+        verify(magnetListener, times(1)).onStuckToTarget(magneticTarget, magnetizedObject)
         verify(magnetListener, never()).onUnstuckFromTarget(
-                eq(magneticTarget), ArgumentMatchers.anyFloat(), ArgumentMatchers.anyFloat(),
+                eq(magneticTarget), eq(magnetizedObject),
+                ArgumentMatchers.anyFloat(), ArgumentMatchers.anyFloat(),
                 eq(false))
 
         // Move out of the field and then release.
@@ -225,7 +229,8 @@ class MagnetizedObjectTest : ShellTestCase() {
         // We should have received one unstuck call and no more stuck calls. We also should never
         // have received an onReleasedInTarget call.
         verify(magnetListener, times(1)).onUnstuckFromTarget(
-                eq(magneticTarget), ArgumentMatchers.anyFloat(), ArgumentMatchers.anyFloat(),
+                eq(magneticTarget), eq(magnetizedObject),
+                ArgumentMatchers.anyFloat(), ArgumentMatchers.anyFloat(),
                 eq(false))
         verifyNoMoreInteractions(magnetListener)
     }
@@ -241,8 +246,8 @@ class MagnetizedObjectTest : ShellTestCase() {
                 getMotionEvent(
                         x = targetCenterX, y = targetCenterY))
 
-        verify(magnetListener, times(1)).onStuckToTarget(magneticTarget)
-        verify(magnetListener, never()).onReleasedInTarget(magneticTarget)
+        verify(magnetListener, times(1)).onStuckToTarget(magneticTarget, magnetizedObject)
+        verify(magnetListener, never()).onReleasedInTarget(magneticTarget, magnetizedObject)
 
         // Move back out.
         dispatchMotionEvents(
@@ -251,9 +256,11 @@ class MagnetizedObjectTest : ShellTestCase() {
                         y = targetCenterY - magneticFieldRadius))
 
         verify(magnetListener, times(1)).onUnstuckFromTarget(
-                eq(magneticTarget), ArgumentMatchers.anyFloat(), ArgumentMatchers.anyFloat(),
+                eq(magneticTarget),
+                eq(magnetizedObject),
+                ArgumentMatchers.anyFloat(), ArgumentMatchers.anyFloat(),
                 eq(false))
-        verify(magnetListener, never()).onReleasedInTarget(magneticTarget)
+        verify(magnetListener, never()).onReleasedInTarget(magneticTarget, magnetizedObject)
 
         // Move in again and release in the magnetic field.
         dispatchMotionEvents(
@@ -263,8 +270,8 @@ class MagnetizedObjectTest : ShellTestCase() {
                 getMotionEvent(
                         x = targetCenterX, y = targetCenterY, action = MotionEvent.ACTION_UP))
 
-        verify(magnetListener, times(2)).onStuckToTarget(magneticTarget)
-        verify(magnetListener).onReleasedInTarget(magneticTarget)
+        verify(magnetListener, times(2)).onStuckToTarget(magneticTarget, magnetizedObject)
+        verify(magnetListener).onReleasedInTarget(magneticTarget, magnetizedObject)
         verifyNoMoreInteractions(magnetListener)
     }
 
@@ -275,11 +282,11 @@ class MagnetizedObjectTest : ShellTestCase() {
         // Forcefully fling the object towards the target (but never touch the magnetic field).
         dispatchMotionEvents(
                 getMotionEvent(
-                        x = targetCenterX,
+                        x = 0,
                         y = 0,
                         action = MotionEvent.ACTION_DOWN),
                 getMotionEvent(
-                        x = targetCenterX,
+                        x = targetCenterX / 2,
                         y = targetCenterY / 2),
                 getMotionEvent(
                         x = targetCenterX,
@@ -287,7 +294,7 @@ class MagnetizedObjectTest : ShellTestCase() {
                         action = MotionEvent.ACTION_UP))
 
         // Nevertheless it should have ended up stuck to the target.
-        verify(magnetListener, times(1)).onStuckToTarget(magneticTarget)
+        verify(magnetListener, times(1)).onStuckToTarget(magneticTarget, magnetizedObject)
     }
 
     @Test
@@ -365,7 +372,7 @@ class MagnetizedObjectTest : ShellTestCase() {
                 getMotionEvent(x = 100, y = 900))
 
         // Verify that we received an onStuck for the second target, and no others.
-        verify(magnetListener).onStuckToTarget(secondMagneticTarget)
+        verify(magnetListener).onStuckToTarget(secondMagneticTarget, magnetizedObject)
         verifyNoMoreInteractions(magnetListener)
 
         // Drag into the original target.
@@ -375,8 +382,9 @@ class MagnetizedObjectTest : ShellTestCase() {
 
         // We should have unstuck from the second one and stuck into the original one.
         verify(magnetListener).onUnstuckFromTarget(
-                eq(secondMagneticTarget), anyFloat(), anyFloat(), eq(false))
-        verify(magnetListener).onStuckToTarget(magneticTarget)
+                eq(secondMagneticTarget), eq(magnetizedObject),
+                anyFloat(), anyFloat(), eq(false))
+        verify(magnetListener).onStuckToTarget(magneticTarget, magnetizedObject)
         verifyNoMoreInteractions(magnetListener)
     }
 
@@ -393,7 +401,7 @@ class MagnetizedObjectTest : ShellTestCase() {
                 getMotionEvent(x = 100, y = 650, action = MotionEvent.ACTION_UP))
 
         // Verify that we received an onStuck for the second target.
-        verify(magnetListener).onStuckToTarget(secondMagneticTarget)
+        verify(magnetListener).onStuckToTarget(secondMagneticTarget, magnetizedObject)
 
         // Fling towards the first target.
         dispatchMotionEvents(
@@ -402,18 +410,82 @@ class MagnetizedObjectTest : ShellTestCase() {
                 getMotionEvent(x = 500, y = 650, action = MotionEvent.ACTION_UP))
 
         // Verify that we received onStuck for the original target.
-        verify(magnetListener).onStuckToTarget(magneticTarget)
+        verify(magnetListener).onStuckToTarget(magneticTarget, magnetizedObject)
+    }
+
+    @Test
+    fun testMagneticTargetHasScreenOffset_moveIntoAndReleaseInTarget() {
+        magneticTarget.screenVerticalOffset = 500
+
+        dispatchMotionEvents(getMotionEvent(x = targetCenterX, y = targetCenterY))
+        // Moved into the target location, but it should be shifted due to screen offset.
+        // Should not get stuck.
+        verify(magnetListener, never()).onStuckToTarget(magneticTarget, magnetizedObject)
+
+        dispatchMotionEvents(getMotionEvent(x = targetCenterX, y = targetCenterY + 500))
+        verify(magnetListener).onStuckToTarget(magneticTarget, magnetizedObject)
+
+        dispatchMotionEvents(
+            getMotionEvent(
+                x = targetCenterX,
+                y = targetCenterY + 500,
+                action = MotionEvent.ACTION_UP
+            )
+        )
+
+        verify(magnetListener).onReleasedInTarget(magneticTarget, magnetizedObject)
+        verifyNoMoreInteractions(magnetListener)
+    }
+
+    @Test
+    fun testMagneticTargetHasScreenOffset_screenOffsetUpdates() {
+        magneticTarget.screenVerticalOffset = 500
+        val adjustedTargetCenter = targetCenterY + 500
+
+        dispatchMotionEvents(getMotionEvent(x = targetCenterX, y = adjustedTargetCenter))
+        dispatchMotionEvents(getMotionEvent(x = 0, y = 0))
+        verify(magnetListener).onStuckToTarget(magneticTarget, magnetizedObject)
+        verify(magnetListener)
+                .onUnstuckFromTarget(eq(magneticTarget), eq(magnetizedObject),
+                        anyFloat(), anyFloat(), anyBoolean())
+
+        // Offset if removed, we should now get stuck at the target location
+        magneticTarget.screenVerticalOffset = 0
+        dispatchMotionEvents(getMotionEvent(x = targetCenterX, y = targetCenterY))
+        verify(magnetListener, times(2)).onStuckToTarget(magneticTarget, magnetizedObject)
+    }
+
+    @Test
+    fun testMagneticTargetHasScreenOffset_flingTowardsTarget() {
+        timeStep = 10
+
+        magneticTarget.screenVerticalOffset = 500
+        val adjustedTargetCenter = targetCenterY + 500
+
+        // Forcefully fling the object towards the target (but never touch the magnetic field).
+        dispatchMotionEvents(
+            getMotionEvent(x = 0, y = 0, action = MotionEvent.ACTION_DOWN),
+            getMotionEvent(x = targetCenterX / 2, y = adjustedTargetCenter / 2),
+            getMotionEvent(
+                x = targetCenterX,
+                y = adjustedTargetCenter - magneticFieldRadius * 2,
+                action = MotionEvent.ACTION_UP
+            )
+        )
+
+        // Nevertheless it should have ended up stuck to the target.
+        verify(magnetListener, times(1)).onStuckToTarget(magneticTarget, magnetizedObject)
     }
 
     private fun getSecondMagneticTarget(): MagnetizedObject.MagneticTarget {
         // The first target view is at bounds (400, 800, 600, 1000) and it has a center of
         // (500, 900). We'll add a second one at bounds (0, 800, 200, 1000) with center (100, 900).
         val secondTargetView = mock(View::class.java)
-        var secondTargetCenterX = 100
-        var secondTargetCenterY = 900
+        val secondTargetCenterX = 100
+        val secondTargetCenterY = 900
 
         `when`(secondTargetView.context).thenReturn(context)
-        `when`(secondTargetView.width).thenReturn(targetSize)  // width = 200
+        `when`(secondTargetView.width).thenReturn(targetSize) // width = 200
         `when`(secondTargetView.height).thenReturn(targetSize) // height = 200
         doAnswer { invocation ->
             (invocation.arguments[0] as Runnable).run()

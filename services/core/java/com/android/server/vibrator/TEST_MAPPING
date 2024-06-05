@@ -1,0 +1,13 @@
+{
+  "imports": [
+    {
+      "path": "frameworks/base/services/tests/vibrator"
+    },
+    {
+      "path": "cts/tests/vibrator"
+    },
+    {
+      "path": "frameworks/hardware/interfaces/vibrator/aidl"
+    }
+  ]
+}

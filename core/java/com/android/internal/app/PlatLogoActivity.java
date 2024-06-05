@@ -69,7 +69,7 @@ public class PlatLogoActivity extends Activity {
 
     private static final long LAUNCH_TIME = 5000L;
 
-    private static final String U_EGG_UNLOCK_SETTING = "egg_mode_u";
+    private static final String EGG_UNLOCK_SETTING = "egg_mode_v";
 
     private static final float MIN_WARP = 1f;
     private static final float MAX_WARP = 10f; // after all these years
@@ -259,7 +259,7 @@ public class PlatLogoActivity extends Activity {
             }
             return true;
         }
-        return false;
+        return super.onKeyDown(keyCode,event);
     }
 
     @Override
@@ -268,7 +268,7 @@ public class PlatLogoActivity extends Activity {
             stopWarp();
             return true;
         }
-        return false;
+        return super.onKeyUp(keyCode,event);
     }
 
     private void startWarp() {
@@ -309,13 +309,12 @@ public class PlatLogoActivity extends Activity {
 
     private void launchNextStage(boolean locked) {
         final ContentResolver cr = getContentResolver();
-
         try {
             if (shouldWriteSettings()) {
                 Log.v(TAG, "Saving egg locked=" + locked);
                 syncTouchPressure();
                 Settings.System.putLong(cr,
-                        U_EGG_UNLOCK_SETTING,
+                        EGG_UNLOCK_SETTING,
                         locked ? 0 : System.currentTimeMillis());
             }
         } catch (RuntimeException e) {

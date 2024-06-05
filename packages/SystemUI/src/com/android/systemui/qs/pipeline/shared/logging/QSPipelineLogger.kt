@@ -16,10 +16,13 @@
 
 package com.android.systemui.qs.pipeline.shared.logging
 
-import android.annotation.UserIdInt
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.qs.pipeline.dagger.QSAutoAddLog
+import com.android.systemui.qs.pipeline.dagger.QSRestoreLog
 import com.android.systemui.qs.pipeline.dagger.QSTileListLog
+import com.android.systemui.qs.pipeline.data.model.RestoreData
+import com.android.systemui.qs.pipeline.data.repository.UserTileSpecRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 
@@ -32,10 +35,14 @@ class QSPipelineLogger
 @Inject
 constructor(
     @QSTileListLog private val tileListLogBuffer: LogBuffer,
+    @QSAutoAddLog private val tileAutoAddLogBuffer: LogBuffer,
+    @QSRestoreLog private val restoreLogBuffer: LogBuffer,
 ) {
 
     companion object {
         const val TILE_LIST_TAG = "QSTileListLog"
+        const val AUTO_ADD_TAG = "QSAutoAddableLog"
+        const val RESTORE_TAG = "QSRestoreLog"
     }
 
     /**
@@ -57,20 +64,37 @@ constructor(
         )
     }
 
-    /**
-     * Logs when the tiles change in Settings.
-     *
-     * This could be caused by SystemUI, or restore.
-     */
-    fun logTilesChangedInSettings(newTiles: String, @UserIdInt user: Int) {
+    fun logTilesRestoredAndReconciled(
+        currentTiles: List<TileSpec>,
+        reconciledTiles: List<TileSpec>,
+        user: Int,
+    ) {
         tileListLogBuffer.log(
             TILE_LIST_TAG,
-            LogLevel.VERBOSE,
+            LogLevel.DEBUG,
             {
-                str1 = newTiles
+                str1 = currentTiles.toString()
+                str2 = reconciledTiles.toString()
                 int1 = user
             },
-            { "Tiles changed in settings for user $int1: $str1" }
+            { "Tiles restored and reconciled for user: $int1\nWas: $str1\nSet to: $str2" }
+        )
+    }
+
+    fun logProcessTileChange(
+        action: UserTileSpecRepository.ChangeAction,
+        newList: List<TileSpec>,
+        userId: Int,
+    ) {
+        tileListLogBuffer.log(
+            TILE_LIST_TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = action.toString()
+                str2 = newList.toString()
+                int1 = userId
+            },
+            { "Processing $str1 for user $int1\nNew list: $str2" }
         )
     }
 
@@ -136,6 +160,108 @@ constructor(
         )
     }
 
+    fun logAutoAddTilesParsed(userId: Int, tiles: Set<TileSpec>) {
+        tileAutoAddLogBuffer.log(
+            AUTO_ADD_TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = tiles.toString()
+                int1 = userId
+            },
+            { "Auto add tiles parsed for user $int1: $str1" }
+        )
+    }
+
+    fun logAutoAddTilesRestoredReconciled(userId: Int, tiles: Set<TileSpec>) {
+        tileAutoAddLogBuffer.log(
+            AUTO_ADD_TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = tiles.toString()
+                int1 = userId
+            },
+            { "Auto-add tiles reconciled for user $int1: $str1" }
+        )
+    }
+
+    fun logTileAutoAdded(userId: Int, spec: TileSpec, position: Int) {
+        tileAutoAddLogBuffer.log(
+            AUTO_ADD_TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = userId
+                int2 = position
+                str1 = spec.toString()
+            },
+            { "Tile $str1 auto added for user $int1 at position $int2" }
+        )
+    }
+
+    fun logTileAutoRemoved(userId: Int, spec: TileSpec) {
+        tileAutoAddLogBuffer.log(
+            AUTO_ADD_TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = userId
+                str1 = spec.toString()
+            },
+            { "Tile $str1 auto removed for user $int1" }
+        )
+    }
+
+    fun logTileUnmarked(userId: Int, spec: TileSpec) {
+        tileAutoAddLogBuffer.log(
+            AUTO_ADD_TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = userId
+                str1 = spec.toString()
+            },
+            { "Tile $str1 unmarked as auto-added for user $int1" }
+        )
+    }
+
+    fun logSettingsRestoredOnUserSetupComplete(userId: Int) {
+        restoreLogBuffer.log(
+            RESTORE_TAG,
+            LogLevel.DEBUG,
+            { int1 = userId },
+            { "Restored from single intent after user setup complete for user $int1" }
+        )
+    }
+
+    fun logSettingsRestored(restoreData: RestoreData) {
+        restoreLogBuffer.log(
+            RESTORE_TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = restoreData.userId
+                str1 = restoreData.restoredTiles.toString()
+                str2 = restoreData.restoredAutoAddedTiles.toString()
+            },
+            {
+                "Restored settings data for user $int1\n" +
+                    "\tRestored tiles: $str1\n" +
+                    "\tRestored auto added tiles: $str2"
+            }
+        )
+    }
+
+    fun logRestoreProcessorApplied(
+        restoreProcessorClassName: String?,
+        step: RestorePreprocessorStep,
+    ) {
+        restoreLogBuffer.log(
+            RESTORE_TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = restoreProcessorClassName
+                str2 = step.name
+            },
+            { "Restore $str2 processed by $str1" }
+        )
+    }
+
     /** Reasons for destroying an existing tile. */
     enum class TileDestroyedReason(val readable: String) {
         TILE_REMOVED("Tile removed from  current set"),
@@ -143,5 +269,10 @@ constructor(
         NEW_TILE_NOT_AVAILABLE("New tile not available"),
         EXISTING_TILE_NOT_AVAILABLE("Existing tile not available"),
         TILE_NOT_PRESENT_IN_NEW_USER("Tile not present in new user"),
+    }
+
+    enum class RestorePreprocessorStep {
+        PREPROCESSING,
+        POSTPROCESSING
     }
 }

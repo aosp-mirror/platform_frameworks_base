@@ -500,7 +500,7 @@ key PLUS {
 
 key ESCAPE {
     base:                               none
-    alt, meta:                          fallback HOME
+    alt:                                fallback HOME
     ctrl:                               fallback MENU
 }
 

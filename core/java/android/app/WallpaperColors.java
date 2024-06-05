@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Size;
@@ -144,6 +145,7 @@ public final class WallpaperColors implements Parcelable {
             throw new IllegalArgumentException("Drawable cannot be null");
         }
 
+        Trace.beginSection("WallpaperColors#fromDrawable");
         Rect initialBounds = drawable.copyBounds();
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
@@ -165,6 +167,7 @@ public final class WallpaperColors implements Parcelable {
         bitmap.recycle();
 
         drawable.setBounds(initialBounds);
+        Trace.endSection();
         return colors;
     }
 
@@ -195,7 +198,7 @@ public final class WallpaperColors implements Parcelable {
     public static WallpaperColors fromBitmap(@NonNull Bitmap bitmap,
             @FloatRange (from = 0f, to = 1f) float dimAmount) {
         Objects.requireNonNull(bitmap, "Bitmap can't be null");
-
+        Trace.beginSection("WallpaperColors#fromBitmap");
         final int bitmapArea = bitmap.getWidth() * bitmap.getHeight();
         boolean shouldRecycle = false;
         if (bitmapArea > MAX_WALLPAPER_EXTRACTION_AREA) {
@@ -247,6 +250,7 @@ public final class WallpaperColors implements Parcelable {
             bitmap.recycle();
         }
 
+        Trace.endSection();
         return new WallpaperColors(populationByColor, HINT_FROM_BITMAP | hints);
     }
 
@@ -462,7 +466,7 @@ public final class WallpaperColors implements Parcelable {
      * Gets the most visually representative color of the wallpaper.
      * "Visually representative" means easily noticeable in the image,
      * probably happening at high frequency.
-     *
+     *fromBitmap
      * @return A color.
      */
     public @NonNull Color getPrimaryColor() {
@@ -545,6 +549,7 @@ public final class WallpaperColors implements Parcelable {
             return 0;
         }
 
+        Trace.beginSection("WallpaperColors#calculateDarkHints");
         dimAmount = MathUtils.saturate(dimAmount);
         int[] pixels = new int[source.getWidth() * source.getHeight()];
         double totalLuminance = 0;
@@ -607,6 +612,7 @@ public final class WallpaperColors implements Parcelable {
                     " maxD: " + maxDarkPixels + " numPixels: " + pixels.length);
         }
 
+        Trace.endSection();
         return hints;
     }
 

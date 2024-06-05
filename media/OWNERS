@@ -3,25 +3,19 @@ atneya@google.com
 elaurent@google.com
 essick@google.com
 etalvala@google.com
-hdmoon@google.com
 hunga@google.com
-insun@google.com
-jaewan@google.com
-jinpark@google.com
+jchowdhary@google.com
 jmtrivi@google.com
 jsharkey@android.com
-klhyun@google.com
 lajos@google.com
 nchalko@google.com
 philburk@google.com
 quxiangfang@google.com
+shuzhenwang@google.com
 wonsik@google.com
 
 # go/android-fwk-media-solutions for info on areas of ownership.
 include platform/frameworks/av:/media/janitors/media_solutions_OWNERS
-
-# SEO
-sungsoo@google.com
 
 # SEA/KIR/BVE
 jtinker@google.com

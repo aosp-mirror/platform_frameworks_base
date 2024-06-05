@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.pm.Flags;
 import android.content.pm.IPackageManager;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
@@ -164,6 +165,10 @@ public class ModuleInfoProvider {
                 mi.setName(moduleName);
                 mi.setApexModuleName(
                         mApexManager.getApexModuleNameForPackageName(modulePackageName));
+
+                if (Flags.provideInfoOfApkInApex()) {
+                    mi.setApkInApexPackageNames(mApexManager.getApksInApex(modulePackageName));
+                }
 
                 mModuleInfo.put(modulePackageName, mi);
             }

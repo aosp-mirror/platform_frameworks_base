@@ -38,6 +38,8 @@ class UsageStatsShellCommand extends ShellCommand {
         switch (cmd) {
             case "clear-last-used-timestamps":
                 return runClearLastUsedTimestamps();
+            case "delete-package-data":
+                return deletePackageData();
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -51,14 +53,38 @@ class UsageStatsShellCommand extends ShellCommand {
         pw.println("    Print this help text.");
         pw.println();
         pw.println("clear-last-used-timestamps PACKAGE_NAME [-u | --user USER_ID]");
-        pw.println("    Clears any existing usage data for the given package.");
+        pw.println("    Clears the last used timestamps for the given package.");
+        pw.println();
+        pw.println("delete-package-data PACKAGE_NAME [-u | --user USER_ID]");
+        pw.println("    Deletes all the usage stats for the given package.");
         pw.println();
     }
 
     @SuppressLint("AndroidFrameworkRequiresPermission")
     private int runClearLastUsedTimestamps() {
         final String packageName = getNextArgRequired();
+        final int userId = getUserId();
+        if (userId == -1) {
+            return -1;
+        }
 
+        mService.clearLastUsedTimestamps(packageName, userId);
+        return 0;
+    }
+
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    private int deletePackageData() {
+        final String packageName = getNextArgRequired();
+        final int userId = getUserId();
+        if (userId == -1) {
+            return -1;
+        }
+
+        mService.deletePackageData(packageName, userId);
+        return 0;
+    }
+
+    private int getUserId() {
         int userId = UserHandle.USER_CURRENT;
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -72,8 +98,6 @@ class UsageStatsShellCommand extends ShellCommand {
         if (userId == UserHandle.USER_CURRENT) {
             userId = ActivityManager.getCurrentUser();
         }
-
-        mService.clearLastUsedTimestamps(packageName, userId);
-        return 0;
+        return userId;
     }
 }

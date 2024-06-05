@@ -29,6 +29,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.LongSparseArray;
 import android.util.Pools;
 import android.util.Slog;
@@ -38,10 +39,12 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 
 final class AttributedOp {
     private final @NonNull AppOpsService mAppOpsService;
     public final @Nullable String tag;
+    public final @NonNull String persistentDeviceId;
     public final @NonNull AppOpsService.Op parent;
 
     /**
@@ -81,9 +84,10 @@ final class AttributedOp {
     @Nullable ArrayMap<IBinder, InProgressStartOpEvent> mPausedInProgressEvents;
 
     AttributedOp(@NonNull AppOpsService appOpsService, @Nullable String tag,
-            @NonNull AppOpsService.Op parent) {
+            @NonNull String persistentDeviceId, @NonNull AppOpsService.Op parent) {
         mAppOpsService = appOpsService;
         this.tag = tag;
+        this.persistentDeviceId = persistentDeviceId;
         this.parent = parent;
     }
 
@@ -92,16 +96,17 @@ final class AttributedOp {
      *
      * @param proxyUid            The uid of the proxy
      * @param proxyPackageName    The package name of the proxy
-     * @param proxyAttributionTag the attributionTag in the proxies package
+     * @param proxyAttributionTag The attributionTag in the proxies package
+     * @param proxyDeviceId       The device Id of the proxy
      * @param uidState            UID state of the app noteOp/startOp was called for
      * @param flags               OpFlags of the call
      */
     public void accessed(int proxyUid, @Nullable String proxyPackageName,
-            @Nullable String proxyAttributionTag, @AppOpsManager.UidState int uidState,
-            @AppOpsManager.OpFlags int flags) {
+            @Nullable String proxyAttributionTag, @Nullable String proxyDeviceId,
+            @AppOpsManager.UidState int uidState, @AppOpsManager.OpFlags int flags) {
         long accessTime = System.currentTimeMillis();
-        accessed(accessTime, -1, proxyUid, proxyPackageName,
-                proxyAttributionTag, uidState, flags);
+        accessed(accessTime, -1, proxyUid, proxyPackageName, proxyAttributionTag, proxyDeviceId,
+                uidState, flags);
 
         mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
                 parent.packageName, tag, uidState, flags, accessTime,
@@ -115,14 +120,16 @@ final class AttributedOp {
      * @param duration            The duration of the event
      * @param proxyUid            The uid of the proxy
      * @param proxyPackageName    The package name of the proxy
-     * @param proxyAttributionTag the attributionTag in the proxies package
+     * @param proxyAttributionTag The attributionTag in the proxies package
+     * @param proxyDeviceId       The device Id of the proxy
      * @param uidState            UID state of the app noteOp/startOp was called for
      * @param flags               OpFlags of the call
      */
     @SuppressWarnings("GuardedBy") // Lock is held on mAppOpsService
     public void accessed(long noteTime, long duration, int proxyUid,
             @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
-            @AppOpsManager.UidState int uidState, @AppOpsManager.OpFlags int flags) {
+            @Nullable String proxyDeviceId, @AppOpsManager.UidState int uidState,
+            @AppOpsManager.OpFlags int flags) {
         long key = makeKey(uidState, flags);
 
         if (mAccessEvents == null) {
@@ -132,7 +139,7 @@ final class AttributedOp {
         AppOpsManager.OpEventProxyInfo proxyInfo = null;
         if (proxyUid != Process.INVALID_UID) {
             proxyInfo = mAppOpsService.mOpEventProxyInfoPool.acquire(proxyUid, proxyPackageName,
-                    proxyAttributionTag);
+                    proxyAttributionTag, proxyDeviceId);
         }
 
         AppOpsManager.NoteOpEvent existingEvent = mAccessEvents.get(key);
@@ -186,33 +193,37 @@ final class AttributedOp {
      * Update state when start was called
      *
      * @param clientId            Id of the startOp caller
+     * @param virtualDeviceId     The virtual device id of the startOp caller
      * @param proxyUid            The UID of the proxy app
      * @param proxyPackageName    The package name of the proxy app
      * @param proxyAttributionTag The attribution tag of the proxy app
+     * @param proxyDeviceId       The device id of the proxy app
      * @param uidState            UID state of the app startOp is called for
      * @param flags               The proxy flags
      * @param attributionFlags    The attribution flags associated with this operation.
-     * @param attributionChainId  The if of the attribution chain this operations is a part of.
+     * @param attributionChainId  The if of the attribution chain this operations is a part of
      */
-    public void started(@NonNull IBinder clientId, int proxyUid,
+    public void started(@NonNull IBinder clientId, int virtualDeviceId, int proxyUid,
             @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
-            @AppOpsManager.UidState int uidState, @AppOpsManager.OpFlags int flags,
-            @AppOpsManager.AttributionFlags
-                    int attributionFlags, int attributionChainId) throws RemoteException {
-        startedOrPaused(clientId, proxyUid, proxyPackageName,
-                proxyAttributionTag, uidState, flags, /* triggeredByUidStateChange */ false,
-                /* isStarted */ true, attributionFlags, attributionChainId);
+            @Nullable String proxyDeviceId, @AppOpsManager.UidState int uidState,
+            @AppOpsManager.OpFlags int flags, @AppOpsManager.AttributionFlags int attributionFlags,
+            int attributionChainId) throws RemoteException {
+        startedOrPaused(clientId, virtualDeviceId, proxyUid, proxyPackageName, proxyAttributionTag,
+                proxyDeviceId, uidState, flags, attributionFlags, attributionChainId, false,
+                true);
     }
 
     @SuppressWarnings("GuardedBy") // Lock is held on mAppOpsService
-    private void startedOrPaused(@NonNull IBinder clientId, int proxyUid,
+    private void startedOrPaused(@NonNull IBinder clientId, int virtualDeviceId, int proxyUid,
             @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
-            @AppOpsManager.UidState int uidState, @AppOpsManager.OpFlags int flags,
-            boolean triggeredByUidStateChange, boolean isStarted, @AppOpsManager.AttributionFlags
-            int attributionFlags, int attributionChainId) throws RemoteException {
+            @Nullable String proxyDeviceId, @AppOpsManager.UidState int uidState,
+            @AppOpsManager.OpFlags int flags, @AppOpsManager.AttributionFlags int attributionFlags,
+            int attributionChainId, boolean triggeredByUidStateChange, boolean isStarted)
+            throws RemoteException {
         if (!triggeredByUidStateChange && !parent.isRunning() && isStarted) {
             mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
-                    parent.packageName, tag, true, attributionFlags, attributionChainId);
+                    parent.packageName, tag, virtualDeviceId, true, attributionFlags,
+                    attributionChainId);
         }
 
         if (isStarted && mInProgressEvents == null) {
@@ -227,9 +238,9 @@ final class AttributedOp {
         InProgressStartOpEvent event = events.get(clientId);
         if (event == null) {
             event = mAppOpsService.mInProgressStartOpEventPool.acquire(startTime,
-                    SystemClock.elapsedRealtime(), clientId, tag,
+                    SystemClock.elapsedRealtime(), clientId, tag, virtualDeviceId,
                     PooledLambda.obtainRunnable(AppOpsService::onClientDeath, this, clientId),
-                    proxyUid, proxyPackageName, proxyAttributionTag, uidState, flags,
+                    proxyUid, proxyPackageName, proxyAttributionTag, proxyDeviceId, uidState, flags,
                     attributionFlags, attributionChainId);
             events.put(clientId, event);
         } else {
@@ -244,6 +255,20 @@ final class AttributedOp {
             mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
                     parent.packageName, tag, uidState, flags, startTime, attributionFlags,
                     attributionChainId);
+        }
+    }
+
+    public void doForAllInProgressStartOpEvents(Consumer<InProgressStartOpEvent> action) {
+        ArrayMap<IBinder, AttributedOp.InProgressStartOpEvent> events = isPaused()
+                ? mPausedInProgressEvents : mInProgressEvents;
+        if (events == null) {
+            return;
+        }
+
+        int numStartedOps = events.size();
+        ArraySet<IBinder> keys = new ArraySet<>(events.keySet());
+        for (int i = 0; i < numStartedOps; i++) {
+            action.accept(events.get(keys.valueAt(i)));
         }
     }
 
@@ -320,8 +345,8 @@ final class AttributedOp {
                     // TODO ntmyren: Also callback for single attribution tag activity changes
                     if (!triggeredByUidStateChange && !parent.isRunning()) {
                         mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op,
-                                parent.uid, parent.packageName, tag, false,
-                                event.getAttributionFlags(), event.getAttributionChainId());
+                                parent.uid, parent.packageName, tag, event.getVirtualDeviceId(),
+                                false, event.getAttributionFlags(), event.getAttributionChainId());
                     }
                 }
             }
@@ -360,13 +385,14 @@ final class AttributedOp {
     /**
      * Create an event that will be started, if the op is unpaused.
      */
-    public void createPaused(@NonNull IBinder clientId, int proxyUid,
-            @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
-            @AppOpsManager.UidState int uidState, @AppOpsManager.OpFlags int flags,
-            @AppOpsManager.AttributionFlags
-                    int attributionFlags, int attributionChainId) throws RemoteException {
-        startedOrPaused(clientId, proxyUid, proxyPackageName, proxyAttributionTag,
-                uidState, flags, false, false, attributionFlags, attributionChainId);
+    public void createPaused(@NonNull IBinder clientId, int virtualDeviceId,
+            int proxyUid, @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
+            @Nullable String proxyDeviceId, @AppOpsManager.UidState int uidState,
+            @AppOpsManager.OpFlags int flags, @AppOpsManager.AttributionFlags int attributionFlags,
+            int attributionChainId) throws RemoteException {
+        startedOrPaused(clientId, virtualDeviceId, proxyUid, proxyPackageName, proxyAttributionTag,
+                proxyDeviceId, uidState, flags, attributionFlags, attributionChainId, false,
+                false);
     }
 
     /**
@@ -387,7 +413,7 @@ final class AttributedOp {
             finishOrPause(event.getClientId(), false, true);
 
             mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
-                    parent.packageName, tag, false,
+                    parent.packageName, tag, event.getVirtualDeviceId(), false,
                     event.getAttributionFlags(), event.getAttributionChainId());
         }
         mInProgressEvents = null;
@@ -419,14 +445,15 @@ final class AttributedOp {
                     event.getAttributionFlags(), event.getAttributionChainId());
             if (shouldSendActive) {
                 mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
-                        parent.packageName, tag, true, event.getAttributionFlags(),
-                        event.getAttributionChainId());
+                        parent.packageName, tag, event.getVirtualDeviceId(), true,
+                        event.getAttributionFlags(), event.getAttributionChainId());
             }
             // Note: this always sends MODE_ALLOWED, even if the mode is FOREGROUND
             // TODO ntmyren: figure out how to get the real mode.
             mAppOpsService.scheduleOpStartedIfNeededLocked(parent.op, parent.uid,
-                    parent.packageName, tag, event.getFlags(), MODE_ALLOWED, START_TYPE_RESUMED,
-                    event.getAttributionFlags(), event.getAttributionChainId());
+                    parent.packageName, tag, event.getVirtualDeviceId(), event.getFlags(),
+                    MODE_ALLOWED, START_TYPE_RESUMED, event.getAttributionFlags(),
+                    event.getAttributionChainId());
         }
         mPausedInProgressEvents = null;
     }
@@ -487,14 +514,16 @@ final class AttributedOp {
                     // Call started() to add a new start event object and then add the
                     // previously removed unfinished start counts back
                     if (proxy != null) {
-                        startedOrPaused(event.getClientId(), proxy.getUid(),
-                                proxy.getPackageName(), proxy.getAttributionTag(), newState,
-                                event.getFlags(), true, isRunning,
-                                event.getAttributionFlags(), event.getAttributionChainId());
+                        startedOrPaused(event.getClientId(), event.getVirtualDeviceId(),
+                                proxy.getUid(), proxy.getPackageName(), proxy.getAttributionTag(),
+                                proxy.getDeviceId(), newState, event.getFlags(),
+                                event.getAttributionFlags(), event.getAttributionChainId(), true,
+                                isRunning);
                     } else {
-                        startedOrPaused(event.getClientId(), Process.INVALID_UID, null, null,
-                                newState, event.getFlags(), true, isRunning,
-                                event.getAttributionFlags(), event.getAttributionChainId());
+                        startedOrPaused(event.getClientId(), event.getVirtualDeviceId(),
+                                Process.INVALID_UID, null, null, null,
+                                newState, event.getFlags(), event.getAttributionFlags(),
+                                event.getAttributionChainId(), true, isRunning);
                     }
 
                     events = isRunning ? mInProgressEvents : mPausedInProgressEvents;
@@ -508,7 +537,7 @@ final class AttributedOp {
                                 "Cannot switch to new uidState " + newState);
                     }
                     mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op,
-                            parent.uid, parent.packageName, tag, false,
+                            parent.uid, parent.packageName, tag, event.getVirtualDeviceId(), false,
                             eventAttributionFlags, eventAttributionChainId);
                 }
             }
@@ -622,7 +651,7 @@ final class AttributedOp {
 
                 accessEvents.append(makeKey(event.getUidState(), event.getFlags()),
                         new AppOpsManager.NoteOpEvent(event.getStartTime(),
-                                now - event.getStartElapsedTime(),
+                                Math.max(now - event.getStartElapsedTime(), 0),
                                 event.getProxy()));
             }
         }
@@ -643,6 +672,9 @@ final class AttributedOp {
 
         /** Id of the client that started the event */
         private @NonNull IBinder mClientId;
+
+        /** virtual device id */
+        private int mVirtualDeviceId;
 
         /** The attribution tag for this operation */
         private @Nullable String mAttributionTag;
@@ -685,7 +717,7 @@ final class AttributedOp {
          * @throws RemoteException If the client is dying
          */
         InProgressStartOpEvent(long startTime, long startElapsedTime,
-                @NonNull IBinder clientId, @Nullable String attributionTag,
+                @NonNull IBinder clientId, int virtualDeviceId, @Nullable String attributionTag,
                 @NonNull Runnable onDeath, @AppOpsManager.UidState int uidState,
                 @Nullable AppOpsManager.OpEventProxyInfo proxy, @AppOpsManager.OpFlags int flags,
                 @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId)
@@ -693,6 +725,7 @@ final class AttributedOp {
             mStartTime = startTime;
             mStartElapsedTime = startElapsedTime;
             mClientId = clientId;
+            mVirtualDeviceId = virtualDeviceId;
             mAttributionTag = attributionTag;
             mOnDeath = onDeath;
             mUidState = uidState;
@@ -737,7 +770,7 @@ final class AttributedOp {
          * @throws RemoteException If the client is dying
          */
         public void reinit(long startTime, long startElapsedTime, @NonNull IBinder clientId,
-                @Nullable String attributionTag, @NonNull Runnable onDeath,
+                @Nullable String attributionTag, int virtualDeviceId, @NonNull Runnable onDeath,
                 @AppOpsManager.UidState int uidState, @AppOpsManager.OpFlags int flags,
                 @Nullable AppOpsManager.OpEventProxyInfo proxy,
                 @AppOpsManager.AttributionFlags int attributionFlags,
@@ -749,6 +782,7 @@ final class AttributedOp {
             mClientId = clientId;
             mAttributionTag = attributionTag;
             mOnDeath = onDeath;
+            mVirtualDeviceId = virtualDeviceId;
             mUidState = uidState;
             mFlags = flags;
 
@@ -802,6 +836,11 @@ final class AttributedOp {
             return mAttributionChainId;
         }
 
+        /** @return virtual device id for the access */
+        public int getVirtualDeviceId() {
+            return mVirtualDeviceId;
+        }
+
         public void setStartTime(long startTime) {
             mStartTime = startTime;
         }
@@ -824,29 +863,31 @@ final class AttributedOp {
         }
 
         InProgressStartOpEvent acquire(long startTime, long elapsedTime, @NonNull IBinder clientId,
-                @Nullable String attributionTag, @NonNull Runnable onDeath, int proxyUid,
-                @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
-                @AppOpsManager.UidState int uidState, @AppOpsManager.OpFlags int flags,
-                @AppOpsManager.AttributionFlags
-                        int attributionFlags, int attributionChainId) throws RemoteException {
+                @Nullable String attributionTag, int virtualDeviceId,  @NonNull Runnable onDeath,
+                int proxyUid, @Nullable String proxyPackageName,
+                @Nullable String proxyAttributionTag, @Nullable String proxyDeviceId,
+                @AppOpsManager.UidState int uidState,
+                @AppOpsManager.OpFlags int flags, @AppOpsManager.AttributionFlags
+                int attributionFlags, int attributionChainId) throws RemoteException {
 
             InProgressStartOpEvent recycled = acquire();
 
             AppOpsManager.OpEventProxyInfo proxyInfo = null;
             if (proxyUid != Process.INVALID_UID) {
                 proxyInfo = mOpEventProxyInfoPool.acquire(proxyUid, proxyPackageName,
-                        proxyAttributionTag);
+                        proxyAttributionTag, proxyDeviceId);
             }
 
             if (recycled != null) {
-                recycled.reinit(startTime, elapsedTime, clientId, attributionTag, onDeath,
-                        uidState, flags, proxyInfo, attributionFlags, attributionChainId,
+                recycled.reinit(startTime, elapsedTime, clientId, attributionTag, virtualDeviceId,
+                        onDeath, uidState, flags, proxyInfo, attributionFlags, attributionChainId,
                         mOpEventProxyInfoPool);
                 return recycled;
             }
 
-            return new InProgressStartOpEvent(startTime, elapsedTime, clientId, attributionTag,
-                    onDeath, uidState, proxyInfo, flags, attributionFlags, attributionChainId);
+            return new InProgressStartOpEvent(startTime, elapsedTime, clientId, virtualDeviceId,
+                    attributionTag, onDeath, uidState, proxyInfo, flags, attributionFlags,
+                    attributionChainId);
         }
     }
 
@@ -858,16 +899,18 @@ final class AttributedOp {
             super(maxUnusedPooledObjects);
         }
 
-        AppOpsManager.OpEventProxyInfo acquire(@IntRange(from = 0) int uid,
+        AppOpsManager.OpEventProxyInfo acquire(
+                @IntRange(from = 0) int uid,
                 @Nullable String packageName,
-                @Nullable String attributionTag) {
+                @Nullable String attributionTag,
+                @Nullable String deviceId) {
             AppOpsManager.OpEventProxyInfo recycled = acquire();
             if (recycled != null) {
-                recycled.reinit(uid, packageName, attributionTag);
+                recycled.reinit(uid, packageName, attributionTag, deviceId);
                 return recycled;
             }
 
-            return new AppOpsManager.OpEventProxyInfo(uid, packageName, attributionTag);
+            return new AppOpsManager.OpEventProxyInfo(uid, packageName, attributionTag, deviceId);
         }
     }
 }

@@ -113,7 +113,7 @@
             android:excludeFromRecents="true"
             />
 
-        <activity android:name="com.android.systemui.screenshot.ScrollViewActivity"
+        <activity android:name="com.android.systemui.screenshot.scroll.ScrollViewActivity"
                   android:exported="false" />
 
         <activity android:name="com.android.systemui.screenshot.RecyclerViewActivity"
@@ -192,7 +192,7 @@
             android:excludeFromRecents="true" />
 
         <activity
-            android:name="com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity"
+            android:name="com.android.systemui.logcat.LogAccessDialogActivityTest$DialogTestable"
             android:exported="false"
             android:permission="com.android.systemui.permission.SELF"
             android:excludeFromRecents="true" />
@@ -207,10 +207,22 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.android.systemui.accessibility.EmptyAccessibilityShortcutTargetActivity"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.ACCESSIBILITY_SHORTCUT_TARGET" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accessibilityshortcut.target"
+                android:resource="@xml/accessibility_shortcut_test_activity" />
+        </activity>
     </application>
 
     <instrumentation android:name="android.testing.TestableInstrumentation"
         android:targetPackage="com.android.systemui.tests"
-        android:label="Tests for SystemUI">
-    </instrumentation>
+        android:label="Tests for SystemUI" />
 </manifest>

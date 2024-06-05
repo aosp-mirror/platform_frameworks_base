@@ -26,7 +26,6 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_SERVICE;
 import static com.android.systemui.screenshot.LogConfig.logTag;
 import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_CAPTURE_FAILED;
-import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER;
 
 import android.annotation.MainThread;
 import android.app.Service;
@@ -46,14 +45,13 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
+import android.view.Display;
 import android.widget.Toast;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ScreenshotRequest;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
 
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -63,8 +61,6 @@ import javax.inject.Inject;
 public class TakeScreenshotService extends Service {
     private static final String TAG = logTag(TakeScreenshotService.class);
 
-    private final ScreenshotController mScreenshot;
-
     private final UserManager mUserManager;
     private final DevicePolicyManager mDevicePolicyManager;
     private final UiEventLogger mUiEventLogger;
@@ -72,26 +68,28 @@ public class TakeScreenshotService extends Service {
     private final Handler mHandler;
     private final Context mContext;
     private final @Background Executor mBgExecutor;
-    private final RequestProcessor mProcessor;
-    private final FeatureFlags mFeatureFlags;
+    private final TakeScreenshotExecutor mTakeScreenshotExecutor;
 
+    @SuppressWarnings("deprecation")
     private final BroadcastReceiver mCloseSystemDialogs = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction()) && mScreenshot != null) {
+            if (ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 if (DEBUG_DISMISS) {
                     Log.d(TAG, "Received ACTION_CLOSE_SYSTEM_DIALOGS");
                 }
-                if (!mScreenshot.isPendingSharedTransition()) {
-                    mScreenshot.dismissScreenshot(SCREENSHOT_DISMISSED_OTHER);
-                }
+                mTakeScreenshotExecutor.onCloseSystemDialogsReceived();
             }
         }
     };
 
     /** Informs about coarse grained state of the Controller. */
     public interface RequestCallback {
-        /** Respond to the current request indicating the screenshot request failed. */
+        /**
+         * Respond to the current request indicating the screenshot request failed.
+         * <p>
+         * After this, the service will be disconnected and all visible UI is removed.
+         */
         void reportError();
 
         /** The controller has completed handling this request UI has been removed */
@@ -99,24 +97,25 @@ public class TakeScreenshotService extends Service {
     }
 
     @Inject
-    public TakeScreenshotService(ScreenshotController screenshotController, UserManager userManager,
-            DevicePolicyManager devicePolicyManager, UiEventLogger uiEventLogger,
-            ScreenshotNotificationsController notificationsController, Context context,
-            @Background Executor bgExecutor, FeatureFlags featureFlags,
-            RequestProcessor processor) {
+    public TakeScreenshotService(
+            UserManager userManager,
+            DevicePolicyManager devicePolicyManager,
+            UiEventLogger uiEventLogger,
+            ScreenshotNotificationsController.Factory notificationsControllerFactory,
+            Context context,
+            @Background Executor bgExecutor,
+            TakeScreenshotExecutor takeScreenshotExecutor) {
         if (DEBUG_SERVICE) {
             Log.d(TAG, "new " + this);
         }
         mHandler = new Handler(Looper.getMainLooper(), this::handleMessage);
-        mScreenshot = screenshotController;
         mUserManager = userManager;
         mDevicePolicyManager = devicePolicyManager;
         mUiEventLogger = uiEventLogger;
-        mNotificationsController = notificationsController;
+        mNotificationsController = notificationsControllerFactory.create(Display.DEFAULT_DISPLAY);
         mContext = context;
         mBgExecutor = bgExecutor;
-        mFeatureFlags = featureFlags;
-        mProcessor = processor;
+        mTakeScreenshotExecutor = takeScreenshotExecutor;
     }
 
     @Override
@@ -142,7 +141,7 @@ public class TakeScreenshotService extends Service {
         if (DEBUG_SERVICE) {
             Log.d(TAG, "onUnbind");
         }
-        mScreenshot.removeWindow();
+        mTakeScreenshotExecutor.removeWindows();
         unregisterReceiver(mCloseSystemDialogs);
         return false;
     }
@@ -150,7 +149,7 @@ public class TakeScreenshotService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mScreenshot.onDestroy();
+        mTakeScreenshotExecutor.onDestroy();
         if (DEBUG_SERVICE) {
             Log.d(TAG, "onDestroy");
         }
@@ -163,6 +162,7 @@ public class TakeScreenshotService extends Service {
             mReplyTo = replyTo;
         }
 
+        @Override
         public void reportError() {
             reportUri(mReplyTo, null);
             sendComplete(mReplyTo);
@@ -187,7 +187,6 @@ public class TakeScreenshotService extends Service {
     }
 
     @MainThread
-    @VisibleForTesting
     void handleRequest(ScreenshotRequest request, Consumer<Uri> onSaved,
             RequestCallback callback) {
         // If the storage for this user is locked, we have no place to store
@@ -218,26 +217,9 @@ public class TakeScreenshotService extends Service {
         }
 
         Log.d(TAG, "Processing screenshot data");
-        ScreenshotData screenshotData = ScreenshotData.fromRequest(request);
-        try {
-            mProcessor.processAsync(screenshotData,
-                    (data) -> dispatchToController(data, onSaved, callback));
-        } catch (IllegalStateException e) {
-            Log.e(TAG, "Failed to process screenshot request!", e);
-            logFailedRequest(request);
-            mNotificationsController.notifyScreenshotError(
-                    R.string.screenshot_failed_to_capture_text);
-            callback.reportError();
-        }
+        mTakeScreenshotExecutor.executeScreenshotsAsync(request, onSaved, callback);
     }
 
-    private void dispatchToController(ScreenshotData screenshot,
-            Consumer<Uri> uriConsumer, RequestCallback callback) {
-        mUiEventLogger.log(ScreenshotEvent.getScreenshotSource(screenshot.getSource()), 0,
-                screenshot.getPackageNameString());
-        Log.d(TAG, "Screenshot request: " + screenshot);
-        mScreenshot.handleScreenshot(screenshot, uriConsumer, callback);
-    }
 
     private void logFailedRequest(ScreenshotRequest request) {
         ComponentName topComponent = request.getTopComponent();

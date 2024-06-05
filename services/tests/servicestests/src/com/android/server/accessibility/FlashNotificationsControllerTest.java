@@ -366,6 +366,7 @@ public class FlashNotificationsControllerTest {
     private void assumeCameraTorchAvailable() {
         assumeTrue(mCameraManager != null);
         assumeTrue(!mCameraInfoMap.isEmpty());
+        assumeTrue(mCameraInfoMap.values().stream().anyMatch(info -> info.mIsValid));
     }
 
     private void simulateCallSequence() throws InterruptedException {

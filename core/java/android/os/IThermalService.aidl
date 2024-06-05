@@ -111,4 +111,9 @@ interface IThermalService {
      *     occur; returns NaN if the headroom or forecast is unavailable
      */
     float getThermalHeadroom(int forecastSeconds);
+
+    /**
+     * @return thermal headroom for each thermal status
+     */
+    float[] getThermalHeadroomThresholds();
 }

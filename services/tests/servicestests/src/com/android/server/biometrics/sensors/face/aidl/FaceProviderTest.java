@@ -16,39 +16,61 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static android.os.UserHandle.USER_NULL;
+import static android.os.UserHandle.USER_SYSTEM;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.common.CommonProps;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.SensorProps;
+import android.hardware.face.FaceAuthenticateOptions;
+import android.hardware.face.HidlFaceSensorConfig;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
-import androidx.annotation.NonNull;
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.R;
+import com.android.server.biometrics.BiometricHandlerProvider;
 import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
+import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -58,26 +80,41 @@ import java.util.ArrayList;
 @SmallTest
 public class FaceProviderTest {
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+
     private static final String TAG = "FaceProviderTest";
+
+    private static final float FRR_THRESHOLD = 0.2f;
 
     @Mock
     private Context mContext;
     @Mock
     private UserManager mUserManager;
     @Mock
+    private Resources mResources;
+    @Mock
     private IFace mDaemon;
     @Mock
     private BiometricContext mBiometricContext;
     @Mock
     private BiometricStateCallback mBiometricStateCallback;
+    @Mock
+    private AuthenticationStateListeners mAuthenticationStateListeners;
+    @Mock
+    private BiometricHandlerProvider mBiometricHandlerProvider;
+    @Mock
+    private Handler mBiometricCallbackHandler;
+    @Mock
+    private BiometricScheduler<IFace, ISession> mScheduler;
+    @Mock
+    AuthSessionCoordinator mAuthSessionCoordinator;
 
+    private final TestLooper mLooper = new TestLooper();
     private SensorProps[] mSensorProps;
     private LockoutResetDispatcher mLockoutResetDispatcher;
-    private TestableFaceProvider mFaceProvider;
-
-    private static void waitForIdle() {
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-    }
+    private FaceProvider mFaceProvider;
 
     @Before
     public void setUp() throws RemoteException {
@@ -86,6 +123,15 @@ public class FaceProviderTest {
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
         when(mUserManager.getAliveUsers()).thenReturn(new ArrayList<>());
         when(mDaemon.createSession(anyInt(), anyInt(), any())).thenReturn(mock(ISession.class));
+
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mResources.getFraction(R.fraction.config_biometricNotificationFrrThreshold, 1, 1))
+                .thenReturn(FRR_THRESHOLD);
+        when(mBiometricHandlerProvider.getBiometricCallbackHandler()).thenReturn(
+                mBiometricCallbackHandler);
+        when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
+        when(mBiometricHandlerProvider.getFaceHandler()).thenReturn(new Handler(
+                mLooper.getLooper()));
 
         final SensorProps sensor1 = new SensorProps();
         sensor1.commonProps = new CommonProps();
@@ -98,8 +144,10 @@ public class FaceProviderTest {
 
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
 
-        mFaceProvider = new TestableFaceProvider(mDaemon, mContext, mBiometricStateCallback,
-                mSensorProps, TAG, mLockoutResetDispatcher, mBiometricContext);
+        mFaceProvider = new FaceProvider(mContext, mBiometricStateCallback,
+                mAuthenticationStateListeners, mSensorProps, TAG, mLockoutResetDispatcher,
+                mBiometricContext, mDaemon, mBiometricHandlerProvider,
+                false /* resetLockoutRequiresChallenge */, false /* testHalEnabled */);
     }
 
     @Test
@@ -114,8 +162,35 @@ public class FaceProviderTest {
 
             assertThat(currentClient).isInstanceOf(FaceInternalCleanupClient.class);
             assertThat(currentClient.getSensorId()).isEqualTo(prop.commonProps.sensorId);
-            assertThat(currentClient.getTargetUserId()).isEqualTo(UserHandle.USER_SYSTEM);
+            assertThat(currentClient.getTargetUserId()).isEqualTo(USER_SYSTEM);
         }
+    }
+
+    @Test
+    public void testAddingHidlSensors() {
+        when(mResources.getIntArray(anyInt())).thenReturn(new int[]{});
+        when(mResources.getBoolean(anyInt())).thenReturn(false);
+
+        final int faceId = 0;
+        final int faceStrength = 15;
+        final String config = String.format("%d:8:%d", faceId, faceStrength);
+        final HidlFaceSensorConfig faceSensorConfig = new HidlFaceSensorConfig();
+        faceSensorConfig.parse(config, mContext);
+        final HidlFaceSensorConfig[] hidlFaceSensorConfig =
+                new HidlFaceSensorConfig[]{faceSensorConfig};
+        mFaceProvider = new FaceProvider(mContext,
+                mBiometricStateCallback, mAuthenticationStateListeners, hidlFaceSensorConfig, TAG,
+                mLockoutResetDispatcher, mBiometricContext, mDaemon,
+                mBiometricHandlerProvider, true /* resetLockoutRequiresChallenge */,
+                true /* testHalEnabled */);
+
+        assertThat(mFaceProvider.mFaceSensors.get(faceId)
+                .getLazySession().get().getUserId()).isEqualTo(USER_NULL);
+
+        waitForIdle();
+
+        assertThat(mFaceProvider.mFaceSensors.get(faceId)
+                .getLazySession().get().getUserId()).isEqualTo(USER_SYSTEM);
     }
 
     @SuppressWarnings("rawtypes")
@@ -130,6 +205,7 @@ public class FaceProviderTest {
         for (SensorProps prop : mSensorProps) {
             final BiometricScheduler scheduler =
                     mFaceProvider.mFaceSensors.get(prop.commonProps.sensorId).getScheduler();
+            scheduler.reset();
             for (int i = 0; i < numFakeOperations; i++) {
                 final HalClientMonitor testMonitor = mock(HalClientMonitor.class);
                 when(testMonitor.getFreshDaemon()).thenReturn(new Object());
@@ -142,7 +218,7 @@ public class FaceProviderTest {
         for (SensorProps prop : mSensorProps) {
             final BiometricScheduler scheduler =
                     mFaceProvider.mFaceSensors.get(prop.commonProps.sensorId).getScheduler();
-            assertEquals(numFakeOperations, scheduler.getCurrentPendingCount());
+            assertEquals(numFakeOperations - 1, scheduler.getCurrentPendingCount());
             assertNotNull(scheduler.getCurrentClient());
         }
 
@@ -160,24 +236,54 @@ public class FaceProviderTest {
         }
     }
 
-    private static class TestableFaceProvider extends FaceProvider {
-        private final IFace mDaemon;
+    @Test
+    public void testAuthenticateCallbackHandler() {
+        waitForIdle();
 
-        TestableFaceProvider(@NonNull IFace daemon,
-                @NonNull Context context,
-                @NonNull BiometricStateCallback biometricStateCallback,
-                @NonNull SensorProps[] props,
-                @NonNull String halInstanceName,
-                @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-                @NonNull BiometricContext biometricContext) {
-            super(context, biometricStateCallback, props, halInstanceName, lockoutResetDispatcher,
-                    biometricContext);
-            mDaemon = daemon;
-        }
+        mFaceProvider.mFaceSensors.get(0).setScheduler(mScheduler);
+        mFaceProvider.scheduleAuthenticate(mock(IBinder.class), 0 /* operationId */,
+                0 /* cookie */, new ClientMonitorCallbackConverter(
+                        new IBiometricSensorReceiver.Default()),
+                new FaceAuthenticateOptions.Builder()
+                        .setSensorId(0)
+                        .build(),
+                false /* restricted */, 1 /* statsClient */,
+                true /* allowBackgroundAuthentication */);
 
-        @Override
-        synchronized IFace getHalInstance() {
-            return mDaemon;
-        }
+        waitForIdle();
+
+        ArgumentCaptor<ClientMonitorCallback> callbackArgumentCaptor = ArgumentCaptor.forClass(
+                ClientMonitorCallback.class);
+        ArgumentCaptor<BaseClientMonitor> clientMonitorArgumentCaptor = ArgumentCaptor.forClass(
+                BaseClientMonitor.class);
+        ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(
+                Message.class);
+
+        verify(mScheduler).scheduleClientMonitor(clientMonitorArgumentCaptor.capture(),
+                callbackArgumentCaptor.capture());
+
+        BaseClientMonitor client = clientMonitorArgumentCaptor.getValue();
+        ClientMonitorCallback callback = callbackArgumentCaptor.getValue();
+        callback.onClientStarted(client);
+
+        verify(mBiometricCallbackHandler).sendMessageAtTime(messageCaptor.capture(), anyLong());
+
+        messageCaptor.getValue().getCallback().run();
+
+        verify(mAuthSessionCoordinator).authStartedFor(anyInt(), anyInt(), anyLong());
+
+        callback.onClientFinished(client, true /* success */);
+
+        verify(mBiometricCallbackHandler, times(2)).sendMessageAtTime(
+                messageCaptor.capture(), anyLong());
+
+        messageCaptor.getValue().getCallback().run();
+
+        verify(mAuthSessionCoordinator).authEndedFor(anyInt(), anyInt(), anyInt(), anyLong(),
+                anyBoolean());
+    }
+
+    private void waitForIdle() {
+        mLooper.dispatchAll();
     }
 }

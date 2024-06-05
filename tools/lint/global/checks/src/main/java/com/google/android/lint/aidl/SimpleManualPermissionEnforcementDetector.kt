@@ -53,10 +53,9 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
                 lintFix
         )
 
-        // TODO(b/265014041): turn on errors once all code that would cause one is fixed
-        // if (enforcePermissionFix.errorLevel) {
-        //     incident.overrideSeverity(Severity.ERROR)
-        // }
+        if (enforcePermissionFix.errorLevel) {
+            incident.overrideSeverity(Severity.ERROR)
+        }
 
         context.report(incident)
     }

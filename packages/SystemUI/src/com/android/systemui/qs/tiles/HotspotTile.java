@@ -25,7 +25,6 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.Log;
-import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
@@ -33,7 +32,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
-import com.android.systemui.R;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -44,6 +43,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
 
@@ -112,7 +112,7 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         final boolean isEnabled = mState.value;
         if (!isEnabled && mDataSaverController.isDataSaverEnabled()) {
             return;
@@ -180,7 +180,8 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
     private String getSecondaryLabel(boolean isActive, boolean isTransient,
             boolean isDataSaverEnabled, int numConnectedDevices, boolean isWifiTetheringAllowed) {
         if (!isWifiTetheringAllowed) {
-            return mContext.getString(R.string.wifitrackerlib_admin_restricted_network);
+            return mContext.getString(
+                    com.android.wifitrackerlib.R.string.wifitrackerlib_admin_restricted_network);
         } else if (isTransient) {
             return mContext.getString(R.string.quick_settings_hotspot_secondary_label_transient);
         } else if (isDataSaverEnabled) {

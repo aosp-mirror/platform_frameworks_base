@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,8 +34,8 @@ import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.Settings;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -44,6 +43,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -85,6 +85,7 @@ public class DozeParametersTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private UserTracker mUserTracker;
+    @Mock private DozeInteractor mDozeInteractor;
     @Captor private ArgumentCaptor<BatteryStateChangeCallback> mBatteryStateChangeCallback;
 
     /**
@@ -128,7 +129,8 @@ public class DozeParametersTest extends SysuiTestCase {
             mKeyguardUpdateMonitor,
             mConfigurationController,
             mStatusBarStateController,
-            mUserTracker
+            mUserTracker,
+            mDozeInteractor
         );
 
         verify(mBatteryController).addCallback(mBatteryStateChangeCallback.capture());
@@ -186,9 +188,7 @@ public class DozeParametersTest extends SysuiTestCase {
 
     @Test
     public void testGetAlwaysOn_whenBatterySaverCallback() {
-        DozeParameters.Callback callback = mock(DozeParameters.Callback.class);
-        mDozeParameters.addCallback(callback);
-
+        reset(mDozeInteractor);
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
         when(mBatteryController.isAodPowerSave()).thenReturn(true);
 
@@ -196,16 +196,16 @@ public class DozeParametersTest extends SysuiTestCase {
         mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
         mBatteryStateChangeCallback.getValue().onPowerSaveChanged(true);
 
-        verify(callback, times(2)).onAlwaysOnChange();
+        verify(mDozeInteractor, times(2)).setAodAvailable(anyBoolean());
         verify(mScreenOffAnimationController, times(2)).onAlwaysOnChanged(false);
         assertThat(mDozeParameters.getAlwaysOn()).isFalse();
 
         reset(mScreenOffAnimationController);
-        reset(callback);
+        reset(mDozeInteractor);
         when(mBatteryController.isAodPowerSave()).thenReturn(false);
         mBatteryStateChangeCallback.getValue().onPowerSaveChanged(true);
 
-        verify(callback).onAlwaysOnChange();
+        verify(mDozeInteractor).setAodAvailable(anyBoolean());
         verify(mScreenOffAnimationController).onAlwaysOnChanged(true);
         assertThat(mDozeParameters.getAlwaysOn()).isTrue();
     }

@@ -22,10 +22,10 @@ import android.content.pm.UserInfo
 import android.graphics.Bitmap
 import android.os.UserManager
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin
-import com.android.settingslib.RestrictedLockUtilsInternal
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.user.data.source.UserRecord
 import com.android.systemui.user.shared.model.UserActionModel
+import com.android.systemui.utils.UserRestrictionChecker
 
 /**
  * Defines utility functions for helping with legacy data code for users.
@@ -68,6 +68,7 @@ object LegacyUserDataHelper {
         actionType: UserActionModel,
         isRestricted: Boolean,
         isSwitchToEnabled: Boolean,
+        userRestrictionChecker: UserRestrictionChecker,
     ): UserRecord {
         return UserRecord(
             isGuest = actionType == UserActionModel.ENTER_GUEST_MODE,
@@ -79,6 +80,7 @@ object LegacyUserDataHelper {
                 getEnforcedAdmin(
                     context = context,
                     selectedUserId = selectedUserId,
+                    userRestrictionChecker = userRestrictionChecker,
                 ),
             isManageUsers = actionType == UserActionModel.NAVIGATE_TO_USER_MANAGEMENT,
         )
@@ -103,9 +105,10 @@ object LegacyUserDataHelper {
     private fun getEnforcedAdmin(
         context: Context,
         selectedUserId: Int,
+        userRestrictionChecker: UserRestrictionChecker
     ): EnforcedAdmin? {
         val admin =
-            RestrictedLockUtilsInternal.checkIfRestrictionEnforced(
+            userRestrictionChecker.checkIfRestrictionEnforced(
                 context,
                 UserManager.DISALLOW_ADD_USER,
                 selectedUserId,
@@ -113,7 +116,7 @@ object LegacyUserDataHelper {
                 ?: return null
 
         return if (
-            !RestrictedLockUtilsInternal.hasBaseUserRestriction(
+            !userRestrictionChecker.hasBaseUserRestriction(
                 context,
                 UserManager.DISALLOW_ADD_USER,
                 selectedUserId,

@@ -16,22 +16,30 @@
 
 package com.android.systemui.statusbar.notification.row
 
-import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.INFO
+import com.android.systemui.log.core.LogLevel.INFO
+import com.android.systemui.log.dagger.NotifInflationLog
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
 
 class RowContentBindStageLogger @Inject constructor(
-    @NotificationLog private val buffer: LogBuffer
+    @NotifInflationLog private val buffer: LogBuffer
 ) {
-    fun logStageParams(entry: NotificationEntry, stageParams: RowContentBindParams) {
+    fun logExecutingStage(entry: NotificationEntry, stageParams: RowContentBindParams) {
         buffer.log(TAG, INFO, {
             str1 = entry.logKey
             str2 = stageParams.toString()
         }, {
-            "Invalidated notif $str1 with params: $str2"
+            "executing bind stage for $str1 with params $str2"
+        })
+    }
+
+    fun logAbortStageCancelledBind(entry: NotificationEntry) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+        }, {
+            "cancelled bind to abort stage for $str1"
         })
     }
 }

@@ -236,9 +236,24 @@ TEST_F(CompilerTest, DoNotTranslateTest) {
   // The first string (000) is translatable, the second is not
   // ar-XB uses "\u200F\u202E...\u202C\u200F"
   std::vector<std::string> expected_translatable = {
-      "000", "111", // default locale
-      "[000 one]", // en-XA
-      "\xE2\x80\x8F\xE2\x80\xAE" "000" "\xE2\x80\xAC\xE2\x80\x8F", // ar-XB
+      "(F)[000 one]",  // en-XA-feminine
+      "(F)\xE2\x80\x8F\xE2\x80\xAE"
+      "000"
+      "\xE2\x80\xAC\xE2\x80\x8F",  // ar-XB-feminine
+      "(M)[000 one]",              // en-XA-masculine
+      "(M)\xE2\x80\x8F\xE2\x80\xAE"
+      "000"
+      "\xE2\x80\xAC\xE2\x80\x8F",  // ar-XB-masculine
+      "(N)[000 one]",              // en-XA-neuter
+      "(N)\xE2\x80\x8F\xE2\x80\xAE"
+      "000"
+      "\xE2\x80\xAC\xE2\x80\x8F",  // ar-XB-neuter
+      "000",                       // default locale
+      "111",                       // default locale
+      "[000 one]",                 // en-XA
+      "\xE2\x80\x8F\xE2\x80\xAE"
+      "000"
+      "\xE2\x80\xAC\xE2\x80\x8F",  // ar-XB
   };
   AssertTranslations(this, "foo", expected_translatable);
   AssertTranslations(this, "foo_donottranslate", expected_translatable);
@@ -326,7 +341,7 @@ TEST_F(CompilerTest, RelativePathTest) {
   // Check resources.pb contains relative sources.
   io::IFile* proto_file =
       apk.get()->GetFileCollection()->FindFile("resources.pb");
-  std::unique_ptr<io::InputStream> proto_stream = proto_file->OpenInputStream();
+  std::unique_ptr<android::InputStream> proto_stream = proto_file->OpenInputStream();
   io::ProtoInputStreamReader proto_reader(proto_stream.get());
   pb::ResourceTable pb_table;
   proto_reader.ReadMessage(&pb_table);

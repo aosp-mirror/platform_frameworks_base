@@ -17,21 +17,18 @@ import org.mockito.junit.MockitoJUnit
 @SmallTest
 class UnfoldTransitionWallpaperControllerTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var wallpaperController: WallpaperController
+    @Mock private lateinit var wallpaperController: WallpaperController
 
-    private val progressProvider = TestUnfoldTransitionProvider()
+    private val progressProvider = FakeUnfoldTransitionProvider()
 
-    @JvmField
-    @Rule
-    val mockitoRule = MockitoJUnit.rule()
+    @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
     private lateinit var unfoldWallpaperController: UnfoldTransitionWallpaperController
 
     @Before
     fun setup() {
-        unfoldWallpaperController = UnfoldTransitionWallpaperController(progressProvider,
-            wallpaperController)
+        unfoldWallpaperController =
+            UnfoldTransitionWallpaperController(progressProvider, wallpaperController)
         unfoldWallpaperController.init()
     }
 

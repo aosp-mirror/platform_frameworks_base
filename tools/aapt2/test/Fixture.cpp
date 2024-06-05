@@ -20,6 +20,7 @@
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
 #include <android-base/utf8.h>
+#include <androidfw/FileStream.h>
 #include <androidfw/StringPiece.h>
 #include <dirent.h>
 #include <gmock/gmock.h>
@@ -28,7 +29,6 @@
 #include "Diagnostics.h"
 #include "cmd/Compile.h"
 #include "cmd/Link.h"
-#include "io/FileStream.h"
 #include "util/Files.h"
 
 using testing::Eq;

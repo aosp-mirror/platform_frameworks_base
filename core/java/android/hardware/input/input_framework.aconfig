@@ -1,0 +1,56 @@
+package: "com.android.hardware.input"
+container: "system"
+
+# Project link: https://gantry.corp.google.com/projects/android_platform_input_native/changes
+
+flag {
+    namespace: "input_native"
+    name: "keyboard_layout_preview_flag"
+    description: "Controls whether a preview will be shown in Settings when selecting a physical keyboard layout"
+    bug: "293579375"
+}
+
+
+flag {
+    namespace: "input_native"
+    name: "keyboard_a11y_sticky_keys_flag"
+    description: "Controls if the sticky keys accessibility feature for physical keyboard is available to the user"
+    bug: "294546335"
+}
+
+flag {
+    namespace: "input_native"
+    name: "keyboard_a11y_bounce_keys_flag"
+    description: "Controls if the bounce keys accessibility feature for physical keyboard is available to the user"
+    bug: "294546335"
+}
+
+flag {
+    namespace: "input_native"
+    name: "pointer_coords_is_resampled_api"
+    is_exported: true
+    description: "Makes MotionEvent.PointerCoords#isResampled() a public API"
+    bug: "298197511"
+}
+
+flag {
+    namespace: "input_native"
+    name: "emoji_and_screenshot_keycodes_available"
+    is_exported: true
+    description: "Add new KeyEvent keycodes for opening Emoji Picker and Taking Screenshots"
+    bug: "315307777"
+}
+
+flag {
+    namespace: "input_native"
+    name: "keyboard_a11y_slow_keys_flag"
+    description: "Controls if the slow keys accessibility feature for physical keyboard is available to the user"
+    bug: "294546335"
+}
+
+flag {
+    namespace: "input_native"
+    name: "touchpad_tap_dragging"
+    description: "Offers a setting to enable touchpad tap dragging"
+    bug: "321978150"
+}

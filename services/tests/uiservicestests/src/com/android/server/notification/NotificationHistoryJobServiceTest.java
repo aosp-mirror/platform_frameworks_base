@@ -20,8 +20,12 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -70,11 +74,12 @@ public class NotificationHistoryJobServiceTest extends UiServiceTestCase {
 
     @Before
     public void setUp() throws Exception {
-        mJobService = new NotificationHistoryJobService();
+        mJobService = spy(new NotificationHistoryJobService());
+        mJobService.attachBaseContext(mContext);
+        mJobService.onCreate();
+        mJobService.onBind(/* intent= */ null);  // Create JobServiceEngine within JobService.
+        doNothing().when(mJobService).jobFinished(any(), eq(false));
 
-        final Field field = JobService.class.getDeclaredField("mEngine");
-        field.setAccessible(true);
-        field.set(mJobService, mock(JobServiceEngine.class));
         mContext.addMockSystemService(JobScheduler.class, mMockJobScheduler);
 
         // add NotificationManagerInternal to LocalServices

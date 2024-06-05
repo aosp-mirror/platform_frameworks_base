@@ -16,39 +16,59 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import com.android.app.tracing.traceSection
+import com.android.server.notification.Flags.screenshareNotificationHiding
+import com.android.systemui.Flags.screenshareNotificationHidingBugFix
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
-import com.android.systemui.util.traceSection
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController
 import javax.inject.Inject
 
 /**
- * A small coordinator which updates the notif stack (the view layer which holds notifications)
- * with high-level data after the stack is populated with the final entries.
+ * A small coordinator which updates the notif stack (the view layer which holds notifications) with
+ * high-level data after the stack is populated with the final entries.
  */
 @CoordinatorScope
-class StackCoordinator @Inject internal constructor(
+class StackCoordinator
+@Inject
+internal constructor(
     private val groupExpansionManagerImpl: GroupExpansionManagerImpl,
-    private val notificationIconAreaController: NotificationIconAreaController
+    private val notificationIconAreaController: NotificationIconAreaController,
+    private val renderListInteractor: RenderNotificationListInteractor,
+    private val activeNotificationsInteractor: ActiveNotificationsInteractor,
+    private val sensitiveNotificationProtectionController:
+        SensitiveNotificationProtectionController,
 ) : Coordinator {
 
     override fun attach(pipeline: NotifPipeline) {
         pipeline.addOnAfterRenderListListener(::onAfterRenderList)
-        // TODO(b/282865576): This has an issue where it makes changes to some groups without
-        // notifying listeners. To be fixed in QPR, but for now let's comment it out to avoid the
-        // group expansion bug.
-        // groupExpansionManagerImpl.attach(pipeline)
+        groupExpansionManagerImpl.attach(pipeline)
     }
 
     fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) =
         traceSection("StackCoordinator.onAfterRenderList") {
-            controller.setNotifStats(calculateNotifStats(entries))
-            notificationIconAreaController.updateNotificationIcons(entries)
+            val notifStats = calculateNotifStats(entries)
+            if (FooterViewRefactor.isEnabled) {
+                activeNotificationsInteractor.setNotifStats(notifStats)
+            } else {
+                controller.setNotifStats(notifStats)
+            }
+            if (NotificationIconContainerRefactor.isEnabled || FooterViewRefactor.isEnabled) {
+                renderListInteractor.setRenderedList(entries)
+            }
+            if (!NotificationIconContainerRefactor.isEnabled) {
+                notificationIconAreaController.updateNotificationIcons(entries)
+            }
         }
 
     private fun calculateNotifStats(entries: List<ListEntry>): NotifStats {
@@ -56,13 +76,16 @@ class StackCoordinator @Inject internal constructor(
         var hasClearableAlertingNotifs = false
         var hasNonClearableSilentNotifs = false
         var hasClearableSilentNotifs = false
+        val isSensitiveContentProtectionActive = screenshareNotificationHiding() &&
+            screenshareNotificationHidingBugFix() &&
+            sensitiveNotificationProtectionController.isSensitiveStateActive
         entries.forEach {
             val section = checkNotNull(it.section) { "Null section for ${it.key}" }
             val entry = checkNotNull(it.representativeEntry) { "Null notif entry for ${it.key}" }
             val isSilent = section.bucket == BUCKET_SILENT
             // NOTE: NotificationEntry.isClearable will internally check group children to ensure
             //  the group itself definitively clearable.
-            val isClearable = entry.isClearable
+            val isClearable = !isSensitiveContentProtectionActive && entry.isClearable
             when {
                 isSilent && isClearable -> hasClearableSilentNotifs = true
                 isSilent && !isClearable -> hasNonClearableSilentNotifs = true

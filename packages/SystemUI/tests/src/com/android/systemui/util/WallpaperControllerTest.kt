@@ -19,47 +19,43 @@ package com.android.systemui.util
 import android.app.WallpaperInfo
 import android.app.WallpaperManager
 import android.os.IBinder
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.view.ViewRootImpl
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.wallpapers.data.repository.FakeWallpaperRepository
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.doThrow
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @SmallTest
 class WallpaperControllerTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var wallpaperManager: WallpaperManager
-    @Mock
-    private lateinit var root: View
-    @Mock
-    private lateinit var viewRootImpl: ViewRootImpl
-    @Mock
-    private lateinit var windowToken: IBinder
+    @Mock private lateinit var wallpaperManager: WallpaperManager
+    @Mock private lateinit var root: View
+    @Mock private lateinit var viewRootImpl: ViewRootImpl
+    @Mock private lateinit var windowToken: IBinder
+    private val wallpaperRepository = FakeWallpaperRepository()
 
-    @JvmField
-    @Rule
-    val mockitoRule = MockitoJUnit.rule()
+    @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
     private lateinit var wallaperController: WallpaperController
 
@@ -69,7 +65,7 @@ class WallpaperControllerTest : SysuiTestCase() {
         `when`(root.windowToken).thenReturn(windowToken)
         `when`(root.isAttachedToWindow).thenReturn(true)
 
-        wallaperController = WallpaperController(wallpaperManager)
+        wallaperController = WallpaperController(wallpaperManager, wallpaperRepository)
 
         wallaperController.rootView = root
     }
@@ -90,9 +86,7 @@ class WallpaperControllerTest : SysuiTestCase() {
 
     @Test
     fun setUnfoldTransitionZoom_defaultUnfoldTransitionIsDisabled_doesNotUpdateWallpaperZoom() {
-        wallaperController.onWallpaperInfoUpdated(createWallpaperInfo(
-            useDefaultTransition = false
-        ))
+        wallpaperRepository.wallpaperInfo.value = createWallpaperInfo(useDefaultTransition = false)
 
         wallaperController.setUnfoldTransitionZoom(0.5f)
 
@@ -128,7 +122,8 @@ class WallpaperControllerTest : SysuiTestCase() {
 
     @Test
     fun setNotificationZoom_exceptionWhenUpdatingZoom_doesNotFail() {
-        doThrow(IllegalArgumentException("test exception")).`when`(wallpaperManager)
+        doThrow(IllegalArgumentException("test exception"))
+            .`when`(wallpaperManager)
             .setWallpaperZoomOut(any(), anyFloat())
 
         wallaperController.setNotificationShadeZoom(0.5f)
@@ -138,8 +133,7 @@ class WallpaperControllerTest : SysuiTestCase() {
 
     private fun createWallpaperInfo(useDefaultTransition: Boolean = true): WallpaperInfo {
         val info = mock(WallpaperInfo::class.java)
-        whenever(info.shouldUseDefaultUnfoldTransition())
-            .thenReturn(useDefaultTransition)
+        whenever(info.shouldUseDefaultUnfoldTransition()).thenReturn(useDefaultTransition)
         return info
     }
 }

@@ -41,6 +41,8 @@ import static android.telephony.TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_AC
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.companion.virtual.VirtualDevice;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.Attribution;
@@ -52,10 +54,12 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Process;
 import android.os.UserHandle;
+import android.permission.flags.Flags;
 import android.provider.DeviceConfig;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -75,6 +79,8 @@ import java.util.Objects;
 public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedListener,
         AppOpsManager.OnOpStartedListener {
 
+    private static final String LOG_TAG = PermissionUsageHelper.class.getName();
+
     /**
      * Whether to show the mic and camera icons.
      */
@@ -85,11 +91,6 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
      */
     private static final String PROPERTY_LOCATION_INDICATORS_ENABLED =
             "location_indicators_enabled";
-
-    /**
-     * Whether to show the Permissions Hub.
-     */
-    private static final String PROPERTY_PERMISSIONS_HUB_2_ENABLED = "permissions_hub_2_enabled";
 
     /**
      * How long after an access to show it as "recent"
@@ -106,14 +107,9 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
     private static final long DEFAULT_RUNNING_TIME_MS = 5000L;
     private static final long DEFAULT_RECENT_TIME_MS = 15000L;
 
-    private static boolean shouldShowPermissionsHub() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_PERMISSIONS_HUB_2_ENABLED, false);
-    }
-
     private static boolean shouldShowIndicators() {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_CAMERA_MIC_ICONS_ENABLED, true) || shouldShowPermissionsHub();
+                PROPERTY_CAMERA_MIC_ICONS_ENABLED, true);
     }
 
     private static boolean shouldShowLocationIndicator() {
@@ -169,6 +165,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
     private ArrayMap<UserHandle, Context> mUserContexts;
     private PackageManager mPkgManager;
     private AppOpsManager mAppOpsManager;
+    private VirtualDeviceManager mVirtualDeviceManager;
     @GuardedBy("mAttributionChains")
     private final ArrayMap<Integer, ArrayList<AccessChainLink>> mAttributionChains =
             new ArrayMap<>();
@@ -182,6 +179,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
         mContext = context;
         mPkgManager = context.getPackageManager();
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
+        mVirtualDeviceManager = context.getSystemService(VirtualDeviceManager.class);
         mUserContexts = new ArrayMap<>();
         mUserContexts.put(Process.myUserHandle(), mContext);
         // TODO ntmyren: make this listen for flag enable/disable changes
@@ -290,9 +288,11 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
     }
 
     /**
-     * @see PermissionManager.getIndicatorAppOpUsageData
+     * Return Op usage for CAMERA, LOCATION AND MICROPHONE for all packages for a device.
+     * The returned data is to power privacy indicator.
      */
-    public @NonNull List<PermissionGroupUsage> getOpUsageData(boolean isMicMuted) {
+    public @NonNull List<PermissionGroupUsage> getOpUsageDataByDevice(
+            boolean includeMicrophoneUsage, String deviceId) {
         List<PermissionGroupUsage> usages = new ArrayList<>();
 
         if (!shouldShowIndicators()) {
@@ -303,11 +303,11 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
         if (shouldShowLocationIndicator()) {
             ops.addAll(LOCATION_OPS);
         }
-        if (!isMicMuted) {
+        if (includeMicrophoneUsage) {
             ops.addAll(MIC_OPS);
         }
 
-        Map<String, List<OpUsage>> rawUsages = getOpUsages(ops);
+        Map<String, List<OpUsage>> rawUsages = getOpUsagesByDevice(ops, deviceId);
 
         ArrayList<String> usedPermGroups = new ArrayList<>(rawUsages.keySet());
 
@@ -359,12 +359,38 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
                         new PermissionGroupUsage(usage.packageName, usage.uid, usage.lastAccessTime,
                                 permGroup,
                                 usage.isRunning, isPhone, usage.attributionTag, attributionLabel,
-                                usagesWithLabels.valueAt(usageNum)));
+                                usagesWithLabels.valueAt(usageNum), deviceId));
             }
         }
 
         return usages;
     }
+
+    /**
+     * Return Op usage for CAMERA, LOCATION AND MICROPHONE for all packages and all connected
+     * devices.
+     * The returned data is to power privacy indicator.
+     */
+    public @NonNull List<PermissionGroupUsage> getOpUsageDataForAllDevices(
+            boolean includeMicrophoneUsage) {
+        List<PermissionGroupUsage> allUsages = new ArrayList<>();
+        List<VirtualDevice> virtualDevices = mVirtualDeviceManager.getVirtualDevices();
+        ArraySet<String> persistentDeviceIds = new ArraySet<>();
+
+        for (int num = 0; num < virtualDevices.size(); num++) {
+            persistentDeviceIds.add(virtualDevices.get(num).getPersistentDeviceId());
+        }
+        persistentDeviceIds.add(VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
+
+        for (int index = 0; index < persistentDeviceIds.size(); index++) {
+            allUsages.addAll(
+                    getOpUsageDataByDevice(includeMicrophoneUsage,
+                            persistentDeviceIds.valueAt(index)));
+        }
+
+        return allUsages;
+    }
+
 
     private void updateSubattributionLabelsMap(List<OpUsage> usages,
             ArrayMap<String, Map<String, String>> subAttributionLabelsMap) {
@@ -453,12 +479,24 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
      * running/recent info, if the usage is a phone call, per permission group.
      *
      * @param opNames a list of op names to get usage for
+     * @param deviceId which device to get op usage for
      * @return A map of permission group -> list of usages that are recent or running
      */
-    private Map<String, List<OpUsage>> getOpUsages(List<String> opNames) {
+    private Map<String, List<OpUsage>> getOpUsagesByDevice(List<String> opNames, String deviceId) {
         List<AppOpsManager.PackageOps> ops;
         try {
-            ops = mAppOpsManager.getPackagesForOps(opNames.toArray(new String[opNames.size()]));
+            if (Flags.deviceAwarePermissionApisEnabled()) {
+                ops = mAppOpsManager.getPackagesForOps(opNames.toArray(new String[opNames.size()]),
+                        deviceId);
+            } else if (!Objects.equals(deviceId,
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT)) {
+                Slog.w(LOG_TAG,
+                        "device_aware_permission_apis_enabled flag not enabled when deviceId is "
+                                + "not default");
+                return Collections.emptyMap();
+            } else {
+                ops = mAppOpsManager.getPackagesForOps(opNames.toArray(new String[opNames.size()]));
+            }
         } catch (NullPointerException e) {
             // older builds might not support all the app-ops requested
             return Collections.emptyMap();

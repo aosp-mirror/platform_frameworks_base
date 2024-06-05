@@ -135,6 +135,9 @@ import java.util.function.DoubleUnaryOperator;
 @AnyThread
 @SuppressWarnings("StaticInitializerReferencesSubClass")
 @SuppressAutoDoc
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
+@android.ravenwood.annotation.RavenwoodClassLoadHook(
+        android.ravenwood.annotation.RavenwoodClassLoadHook.LIBANDROID_LOADING_HOOK)
 public abstract class ColorSpace {
     /**
      * Standard CIE 1931 2° illuminant A, encoded in xyY.
@@ -199,6 +202,8 @@ public abstract class ColorSpace {
 
     private static final float[] SRGB_PRIMARIES = { 0.640f, 0.330f, 0.300f, 0.600f, 0.150f, 0.060f };
     private static final float[] NTSC_1953_PRIMARIES = { 0.67f, 0.33f, 0.21f, 0.71f, 0.14f, 0.08f };
+    private static final float[] DCI_P3_PRIMARIES =
+            { 0.680f, 0.320f, 0.265f, 0.690f, 0.150f, 0.060f };
     private static final float[] BT2020_PRIMARIES =
             { 0.708f, 0.292f, 0.170f, 0.797f, 0.131f, 0.046f };
     /**
@@ -210,6 +215,9 @@ public abstract class ColorSpace {
 
     private static final Rgb.TransferParameters SRGB_TRANSFER_PARAMETERS =
             new Rgb.TransferParameters(1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045, 2.4);
+
+    private static final Rgb.TransferParameters SMPTE_170M_TRANSFER_PARAMETERS =
+            new Rgb.TransferParameters(1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081, 1 / 0.45);
 
     // HLG transfer with an SDR whitepoint of 203 nits
     private static final Rgb.TransferParameters BT2020_HLG_TRANSFER_PARAMETERS =
@@ -1559,10 +1567,10 @@ public abstract class ColorSpace {
                 DataSpace.DATASPACE_SCRGB_LINEAR, Named.LINEAR_EXTENDED_SRGB.ordinal());
         sNamedColorSpaces[Named.BT709.ordinal()] = new ColorSpace.Rgb(
                 "Rec. ITU-R BT.709-5",
-                new float[] { 0.640f, 0.330f, 0.300f, 0.600f, 0.150f, 0.060f },
+                SRGB_PRIMARIES,
                 ILLUMINANT_D65,
                 null,
-                new Rgb.TransferParameters(1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081, 1 / 0.45),
+                SMPTE_170M_TRANSFER_PARAMETERS,
                 Named.BT709.ordinal()
         );
         sDataToColorSpaces.put(DataSpace.DATASPACE_BT709, Named.BT709.ordinal());
@@ -1577,7 +1585,7 @@ public abstract class ColorSpace {
         sDataToColorSpaces.put(DataSpace.DATASPACE_BT2020, Named.BT2020.ordinal());
         sNamedColorSpaces[Named.DCI_P3.ordinal()] = new ColorSpace.Rgb(
                 "SMPTE RP 431-2-2007 DCI (P3)",
-                new float[] { 0.680f, 0.320f, 0.265f, 0.690f, 0.150f, 0.060f },
+                DCI_P3_PRIMARIES,
                 new float[] { 0.314f, 0.351f },
                 2.6,
                 0.0f, 1.0f,
@@ -1586,7 +1594,7 @@ public abstract class ColorSpace {
         sDataToColorSpaces.put(DataSpace.DATASPACE_DCI_P3, Named.DCI_P3.ordinal());
         sNamedColorSpaces[Named.DISPLAY_P3.ordinal()] = new ColorSpace.Rgb(
                 "Display P3",
-                new float[] { 0.680f, 0.320f, 0.265f, 0.690f, 0.150f, 0.060f },
+                DCI_P3_PRIMARIES,
                 ILLUMINANT_D65,
                 null,
                 SRGB_TRANSFER_PARAMETERS,
@@ -1598,7 +1606,7 @@ public abstract class ColorSpace {
                 NTSC_1953_PRIMARIES,
                 ILLUMINANT_C,
                 null,
-                new Rgb.TransferParameters(1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081, 1 / 0.45),
+                SMPTE_170M_TRANSFER_PARAMETERS,
                 Named.NTSC_1953.ordinal()
         );
         sNamedColorSpaces[Named.SMPTE_C.ordinal()] = new ColorSpace.Rgb(
@@ -1606,7 +1614,7 @@ public abstract class ColorSpace {
                 new float[] { 0.630f, 0.340f, 0.310f, 0.595f, 0.155f, 0.070f },
                 ILLUMINANT_D65,
                 null,
-                new Rgb.TransferParameters(1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081, 1 / 0.45),
+                SMPTE_170M_TRANSFER_PARAMETERS,
                 Named.SMPTE_C.ordinal()
         );
         sNamedColorSpaces[Named.ADOBE_RGB.ordinal()] = new ColorSpace.Rgb(
@@ -2485,9 +2493,16 @@ public abstract class ColorSpace {
             return mNativePtr;
         }
 
-        private static native long nativeGetNativeFinalizer();
-        private static native long nativeCreate(float a, float b, float c, float d,
-                float e, float f, float g, float[] xyz);
+        /**
+         * These methods can't be put in the Rgb class directly, because ColorSpace's
+         * static initializer instantiates Rgb, whose constructor needs them, which is a variation
+         * of b/337329128.
+         */
+        static class Native {
+            static native long nativeGetNativeFinalizer();
+            static native long nativeCreate(float a, float b, float c, float d,
+                    float e, float f, float g, float[] xyz);
+        }
 
         private static DoubleUnaryOperator generateOETF(TransferParameters function) {
             if (function.isHLGish()) {
@@ -2954,7 +2969,7 @@ public abstract class ColorSpace {
 
                 // This mimics the old code that was in native.
                 float[] nativeTransform = adaptToIlluminantD50(mWhitePoint, mTransform);
-                mNativePtr = nativeCreate((float) mTransferParameters.a,
+                mNativePtr = Native.nativeCreate((float) mTransferParameters.a,
                                           (float) mTransferParameters.b,
                                           (float) mTransferParameters.c,
                                           (float) mTransferParameters.d,
@@ -2970,7 +2985,7 @@ public abstract class ColorSpace {
 
         private static class NoImagePreloadHolder {
             public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                ColorSpace.Rgb.class.getClassLoader(), nativeGetNativeFinalizer(), 0);
+                ColorSpace.Rgb.class.getClassLoader(), Native.nativeGetNativeFinalizer(), 0);
         }
 
         /**
@@ -3057,7 +3072,7 @@ public abstract class ColorSpace {
          * primaries for such a ColorSpace does not make sense, so we use a special
          * set of primaries that are all 1s.</p>
          *
-         * @return A new non-null array of 2 floats
+         * @return A new non-null array of 6 floats
          *
          * @see #getPrimaries(float[])
          */

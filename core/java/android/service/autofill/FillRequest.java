@@ -127,6 +127,12 @@ public final class FillRequest implements Parcelable {
      */
     public static final @RequestFlags int FLAG_SCREEN_HAS_CREDMAN_FIELD = 0x400;
 
+    /**
+     * Indicate whether the user has focused on a credman field view.
+     * @hide
+     */
+    public static final @RequestFlags int FLAG_VIEW_REQUESTS_CREDMAN_SERVICE = 0x800;
+
     /** @hide */
     public static final int INVALID_REQUEST_ID = Integer.MIN_VALUE;
 
@@ -241,7 +247,8 @@ public final class FillRequest implements Parcelable {
         FLAG_IME_SHOWING,
         FLAG_RESET_FILL_DIALOG_STATE,
         FLAG_PCC_DETECTION,
-        FLAG_SCREEN_HAS_CREDMAN_FIELD
+        FLAG_SCREEN_HAS_CREDMAN_FIELD,
+        FLAG_VIEW_REQUESTS_CREDMAN_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
     @DataClass.Generated.Member
@@ -275,6 +282,8 @@ public final class FillRequest implements Parcelable {
                     return "FLAG_PCC_DETECTION";
             case FLAG_SCREEN_HAS_CREDMAN_FIELD:
                     return "FLAG_SCREEN_HAS_CREDMAN_FIELD";
+            case FLAG_VIEW_REQUESTS_CREDMAN_SERVICE:
+                    return "FLAG_VIEW_REQUESTS_CREDMAN_SERVICE";
             default: return Integer.toHexString(value);
         }
     }
@@ -368,7 +377,8 @@ public final class FillRequest implements Parcelable {
                         | FLAG_IME_SHOWING
                         | FLAG_RESET_FILL_DIALOG_STATE
                         | FLAG_PCC_DETECTION
-                        | FLAG_SCREEN_HAS_CREDMAN_FIELD);
+                        | FLAG_SCREEN_HAS_CREDMAN_FIELD
+                        | FLAG_VIEW_REQUESTS_CREDMAN_SERVICE);
         this.mInlineSuggestionsRequest = inlineSuggestionsRequest;
         this.mDelayedFillIntentSender = delayedFillIntentSender;
 
@@ -555,7 +565,8 @@ public final class FillRequest implements Parcelable {
                         | FLAG_IME_SHOWING
                         | FLAG_RESET_FILL_DIALOG_STATE
                         | FLAG_PCC_DETECTION
-                        | FLAG_SCREEN_HAS_CREDMAN_FIELD);
+                        | FLAG_SCREEN_HAS_CREDMAN_FIELD
+                        | FLAG_VIEW_REQUESTS_CREDMAN_SERVICE);
         this.mInlineSuggestionsRequest = inlineSuggestionsRequest;
         this.mDelayedFillIntentSender = delayedFillIntentSender;
 
@@ -577,10 +588,10 @@ public final class FillRequest implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1682097266850L,
+            time = 1701010178309L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/autofill/FillRequest.java",
-            inputSignatures = "public static final @android.service.autofill.FillRequest.RequestFlags int FLAG_MANUAL_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_COMPATIBILITY_MODE_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_PASSWORD_INPUT_TYPE\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_VIEW_NOT_FOCUSED\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_SUPPORTS_FILL_DIALOG\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_IME_SHOWING\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_RESET_FILL_DIALOG_STATE\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_PCC_DETECTION\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_SCREEN_HAS_CREDMAN_FIELD\npublic static final  int INVALID_REQUEST_ID\nprivate final  int mId\nprivate final @android.annotation.NonNull java.util.List<android.service.autofill.FillContext> mFillContexts\nprivate final @android.annotation.NonNull java.util.List<java.lang.String> mHints\nprivate final @android.annotation.Nullable android.os.Bundle mClientState\nprivate final @android.service.autofill.FillRequest.RequestFlags int mFlags\nprivate final @android.annotation.Nullable android.view.inputmethod.InlineSuggestionsRequest mInlineSuggestionsRequest\nprivate final @android.annotation.Nullable android.content.IntentSender mDelayedFillIntentSender\nprivate  void onConstructed()\nclass FillRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstructor=true, genHiddenConstDefs=true)")
+            inputSignatures = "public static final @android.service.autofill.FillRequest.RequestFlags int FLAG_MANUAL_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_COMPATIBILITY_MODE_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_PASSWORD_INPUT_TYPE\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_VIEW_NOT_FOCUSED\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_SUPPORTS_FILL_DIALOG\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_IME_SHOWING\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_RESET_FILL_DIALOG_STATE\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_PCC_DETECTION\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_SCREEN_HAS_CREDMAN_FIELD\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_VIEW_REQUESTS_CREDMAN_SERVICE\npublic static final  int INVALID_REQUEST_ID\nprivate final  int mId\nprivate final @android.annotation.NonNull java.util.List<android.service.autofill.FillContext> mFillContexts\nprivate final @android.annotation.NonNull java.util.List<java.lang.String> mHints\nprivate final @android.annotation.Nullable android.os.Bundle mClientState\nprivate final @android.service.autofill.FillRequest.RequestFlags int mFlags\nprivate final @android.annotation.Nullable android.view.inputmethod.InlineSuggestionsRequest mInlineSuggestionsRequest\nprivate final @android.annotation.Nullable android.content.IntentSender mDelayedFillIntentSender\nprivate  void onConstructed()\nclass FillRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstructor=true, genHiddenConstDefs=true)")
     @Deprecated
     private void __metadata() {}
 

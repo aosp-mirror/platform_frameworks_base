@@ -26,13 +26,19 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
-import android.testing.AndroidTestingRunner;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.doze.util.BurnInHelperKt;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.core.FakeLogBuffer;
+import com.android.systemui.res.R;
+import com.android.systemui.shade.LargeScreenHeaderHelper;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,9 +47,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private static final int SCREEN_HEIGHT = 2000;
     private static final int EMPTY_HEIGHT = 0;
@@ -51,8 +58,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private static final float OPAQUE = 1.f;
     private static final float TRANSPARENT = 0.f;
 
-    @Mock
-    private Resources mResources;
+    @Mock private Resources mResources;
 
     private KeyguardClockPositionAlgorithm mClockPositionAlgorithm;
     private KeyguardClockPositionAlgorithm.Result mClockPosition;
@@ -77,12 +83,15 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mStaticMockSession = mockitoSession()
+                .strictness(Strictness.WARN)
                 .mockStatic(BurnInHelperKt.class)
+                .mockStatic(LargeScreenHeaderHelper.class)
                 .startMocking();
 
-        mClockPositionAlgorithm = new KeyguardClockPositionAlgorithm();
+        LogBuffer logBuffer = FakeLogBuffer.Factory.Companion.create();
+        mClockPositionAlgorithm = new KeyguardClockPositionAlgorithm(logBuffer);
         when(mResources.getDimensionPixelSize(anyInt())).thenReturn(0);
-        mClockPositionAlgorithm.loadDimens(mResources);
+        mClockPositionAlgorithm.loadDimens(mContext, mResources);
 
         mClockPosition = new KeyguardClockPositionAlgorithm.Result();
     }
@@ -290,18 +299,44 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     }
 
     @Test
-    public void notifPaddingMakesUpToFullMarginInSplitShade() {
+    @DisableFlags(Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
+    public void notifPaddingMakesUpToFullMarginInSplitShade_refactorFlagOff_usesResource() {
+        int keyguardSplitShadeTopMargin = 100;
+        int largeScreenHeaderHeightResource = 70;
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin))
-                .thenReturn(100);
+                .thenReturn(keyguardSplitShadeTopMargin);
         when(mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height))
-                .thenReturn(70);
-        mClockPositionAlgorithm.loadDimens(mResources);
+                .thenReturn(largeScreenHeaderHeightResource);
+        mClockPositionAlgorithm.loadDimens(mContext, mResources);
         givenLockScreen();
         mIsSplitShade = true;
         // WHEN the position algorithm is run
         positionClock();
-        // THEN the notif padding makes up lacking margin (margin - header height = 30).
-        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(30);
+        // THEN the notif padding makes up lacking margin (margin - header height).
+        int expectedPadding = keyguardSplitShadeTopMargin - largeScreenHeaderHeightResource;
+        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(expectedPadding);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
+    public void notifPaddingMakesUpToFullMarginInSplitShade_refactorFlagOn_usesHelper() {
+        int keyguardSplitShadeTopMargin = 100;
+        int largeScreenHeaderHeightHelper = 50;
+        int largeScreenHeaderHeightResource = 70;
+        when(LargeScreenHeaderHelper.getLargeScreenHeaderHeight(mContext))
+                .thenReturn(largeScreenHeaderHeightHelper);
+        when(mResources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin))
+                .thenReturn(keyguardSplitShadeTopMargin);
+        when(mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height))
+                .thenReturn(largeScreenHeaderHeightResource);
+        mClockPositionAlgorithm.loadDimens(mContext, mResources);
+        givenLockScreen();
+        mIsSplitShade = true;
+        // WHEN the position algorithm is run
+        positionClock();
+        // THEN the notif padding makes up lacking margin (margin - header height).
+        int expectedPadding = keyguardSplitShadeTopMargin - largeScreenHeaderHeightHelper;
+        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(expectedPadding);
     }
 
     @Test
@@ -587,7 +622,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private void setSplitShadeTopMargin(int value) {
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin))
                 .thenReturn(value);
-        mClockPositionAlgorithm.loadDimens(mResources);
+        mClockPositionAlgorithm.loadDimens(mContext, mResources);
     }
 
     private void givenHighestBurnInOffset() {
@@ -601,7 +636,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private void givenMaxBurnInOffset(int offset) {
         when(mResources.getDimensionPixelSize(R.dimen.burn_in_prevention_offset_y_clock))
                 .thenReturn(offset);
-        mClockPositionAlgorithm.loadDimens(mResources);
+        mClockPositionAlgorithm.loadDimens(mContext, mResources);
     }
 
     private void givenAOD() {

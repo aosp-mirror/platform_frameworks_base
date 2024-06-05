@@ -657,4 +657,35 @@ public class Utils {
         // on the fly.
         private final boolean mForceRemoveConsistency; // default false
     }
+
+    /**
+     * Convert a Bluetooth MAC address to an anonymized one when exposed to a non privileged app
+     * Must match the implementation of BluetoothUtils.toAnonymizedAddress()
+     * @param address MAC address to be anonymized
+     * @return anonymized MAC address
+     */
+    public static @Nullable String anonymizeBluetoothAddress(@Nullable String address) {
+        if (address == null) {
+            return null;
+        }
+        if (address.length() != "AA:BB:CC:DD:EE:FF".length()) {
+            return address;
+        }
+        return "XX:XX:XX:XX" + address.substring("XX:XX:XX:XX".length());
+    }
+
+    /**
+     * Convert a Bluetooth MAC address to an anonymized one if the internal device type corresponds
+     * to a Bluetooth.
+     * @param deviceType the internal type of the audio device
+     * @param address MAC address to be anonymized
+     * @return anonymized MAC address
+     */
+    public static @Nullable String anonymizeBluetoothAddress(
+            int deviceType, @Nullable String address) {
+        if (!AudioSystem.isBluetoothDevice(deviceType)) {
+            return address;
+        }
+        return anonymizeBluetoothAddress(address);
+    }
 }

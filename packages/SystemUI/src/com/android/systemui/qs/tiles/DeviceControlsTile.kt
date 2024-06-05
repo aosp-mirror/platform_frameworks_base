@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2021 The Android Open Source Project
  *
@@ -21,12 +22,11 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.service.quicksettings.Tile
-import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.R
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.res.R
+import com.android.systemui.animation.Expandable
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE
@@ -100,26 +100,30 @@ class DeviceControlsTile @Inject constructor(
         }
     }
 
-    override fun handleClick(view: View?) {
+    override fun handleClick(expandable: Expandable?) {
         if (state.state == Tile.STATE_UNAVAILABLE) {
             return
         }
 
         val intent = Intent().apply {
             component = ComponentName(mContext, controlsComponent.getControlsUiController().get()
-                .resolveActivity())
+                    .resolveActivity())
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra(ControlsUiController.EXTRA_ANIMATE, true)
         }
-        val animationController = view?.let {
-            ActivityLaunchAnimator.Controller.fromView(
-                    it, InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE)
-        }
+        val animationController =
+            expandable?.activityTransitionController(
+                    InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE
+            )
 
         mUiHandler.post {
             val showOverLockscreenWhenLocked = state.state == Tile.STATE_ACTIVE
             mActivityStarter.startActivity(
-                intent, true /* dismissShade */, animationController, showOverLockscreenWhenLocked)
+                intent,
+                true /* dismissShade */,
+                animationController,
+                showOverLockscreenWhenLocked,
+            )
         }
     }
 
@@ -130,7 +134,7 @@ class DeviceControlsTile @Inject constructor(
         if (controlsComponent.isEnabled() && hasControlsApps.get()) {
             if (controlsComponent.getVisibility() == AVAILABLE) {
                 val selection = controlsComponent
-                    .getControlsController().get().getPreferredSelection()
+                        .getControlsController().get().getPreferredSelection()
                 state.state = if (selection is SelectedItem.StructureItem &&
                         selection.structure.controls.isEmpty()) {
                     Tile.STATE_INACTIVE
@@ -157,7 +161,7 @@ class DeviceControlsTile @Inject constructor(
         return null
     }
 
-    override fun handleLongClick(view: View?) {}
+    override fun handleLongClick(expandable: Expandable?) {}
 
     override fun getTileLabel(): CharSequence {
         return mContext.getText(controlsComponent.getTileTitleId())

@@ -17,7 +17,7 @@
 package com.android.systemui.camera
 
 import android.content.Intent
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import com.android.systemui.SysuiTestCase
 import org.junit.Assert.assertFalse

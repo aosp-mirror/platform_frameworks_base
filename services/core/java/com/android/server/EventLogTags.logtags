@@ -81,13 +81,13 @@ option java_package com.android.server
 # when a notification has been clicked
 27520 notification_clicked (key|3),(lifespan|1),(freshness|1),(exposure|1),(rank|1),(count|1)
 # when a notification action button has been clicked
-27521 notification_action_clicked (key|3),(action_index|1),(lifespan|1),(freshness|1),(exposure|1),(rank|1),(count|1)
+27521 notification_action_clicked (key|3),(piIdentifier|3),(pendingIntent|3),(action_index|1),(lifespan|1),(freshness|1),(exposure|1),(rank|1),(count|1)
 # when a notification has been canceled
 27530 notification_canceled (key|3),(reason|1),(lifespan|1),(freshness|1),(exposure|1),(rank|1),(count|1),(listener|3)
 # replaces 27510 with a row per notification
 27531 notification_visibility (key|3),(visibile|1),(lifespan|1),(freshness|1),(exposure|1),(rank|1)
 # a notification emited noise, vibration, or light
-27532 notification_alert (key|3),(buzz|1),(beep|1),(blink|1)
+27532 notification_alert (key|3),(buzz|1),(beep|1),(blink|1),(politeness|1)
 # a notification was added to a autogroup
 27533 notification_autogrouped (key|3)
 # notification was removed from an autogroup
@@ -179,6 +179,8 @@ option java_package com.android.server
 3130 pm_snapshot_stats (build_count|1|1),(reuse_count|1|1),(big_builds|1|1),(short_lived|1|1),(max_build_time|1|3),(cumm_build_time|2|3)
 # Snapshot rebuild instance
 3131 pm_snapshot_rebuild (build_time|1|3),(lifetime|1|3)
+# Caller information to clear application data
+3132 pm_clear_app_data_caller (pid|1),(uid|1),(package|3)
 
 # ---------------------------
 # InputMethodManagerService.java
@@ -216,6 +218,14 @@ option java_package com.android.server
 # ---------------------------
 # Auto-brightness adjustments by the user.
 35000 auto_brightness_adj (old_lux|5),(old_brightness|5),(new_lux|5),(new_brightness|5)
+
+# ---------------------------
+# Installer.java
+# ---------------------------
+# Caller Information to clear application data
+39000 installer_clear_app_data_caller (pid|1),(uid|1),(package|3),(flags|1)
+# Call stack to clear application data
+39001 installer_clear_app_data_call_stack (method|3),(class|3),(file|3),(line|1)
 
 # ---------------------------
 # ConnectivityService.java

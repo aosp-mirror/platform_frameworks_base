@@ -45,6 +45,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import java.util.NoSuchElementException;
 
@@ -63,6 +64,7 @@ public class AdminSecondaryLockScreenController {
     private Handler mHandler;
     private IKeyguardClient mClient;
     private KeyguardSecurityCallback mKeyguardCallback;
+    private SelectedUserInteractor mSelectedUserInteractor;
 
     private final ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -76,7 +78,7 @@ public class AdminSecondaryLockScreenController {
                 } catch (RemoteException e) {
                     // Failed to link to death, just dismiss and unbind the service for now.
                     Log.e(TAG, "Lost connection to secondary lockscreen service", e);
-                    dismiss(KeyguardUpdateMonitor.getCurrentUser());
+                    dismiss(mSelectedUserInteractor.getSelectedUserId());
                 }
             }
         }
@@ -110,7 +112,7 @@ public class AdminSecondaryLockScreenController {
                 mView.setChildSurfacePackage(surfacePackage);
             } else {
                 mHandler.post(() -> {
-                    dismiss(KeyguardUpdateMonitor.getCurrentUser());
+                    dismiss(mSelectedUserInteractor.getSelectedUserId());
                 });
             }
         }
@@ -131,7 +133,7 @@ public class AdminSecondaryLockScreenController {
     protected SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            final int userId = KeyguardUpdateMonitor.getCurrentUser();
+            final int userId = mSelectedUserInteractor.getSelectedUserId();
             mUpdateMonitor.registerCallback(mUpdateCallback);
 
             if (mClient != null) {
@@ -158,7 +160,7 @@ public class AdminSecondaryLockScreenController {
 
     private AdminSecondaryLockScreenController(Context context, KeyguardSecurityContainer parent,
             KeyguardUpdateMonitor updateMonitor, KeyguardSecurityCallback callback,
-            @Main Handler handler) {
+            @Main Handler handler, SelectedUserInteractor selectedUserInteractor) {
         mContext = context;
         mHandler = handler;
         mParent = parent;
@@ -166,6 +168,7 @@ public class AdminSecondaryLockScreenController {
         mKeyguardCallback = callback;
         mView = new AdminSecurityView(mContext, mSurfaceHolderCallback);
         mView.setId(View.generateViewId());
+        mSelectedUserInteractor = selectedUserInteractor;
     }
 
     /**
@@ -218,13 +221,13 @@ public class AdminSecondaryLockScreenController {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error in onCreateKeyguardSurface", e);
-            dismiss(KeyguardUpdateMonitor.getCurrentUser());
+            dismiss(mSelectedUserInteractor.getSelectedUserId());
         }
     }
 
     private void dismiss(int userId) {
         mHandler.removeCallbacksAndMessages(null);
-        if (mView.isAttachedToWindow() && userId == KeyguardUpdateMonitor.getCurrentUser()) {
+        if (mView.isAttachedToWindow() && userId == mSelectedUserInteractor.getSelectedUserId()) {
             hide();
             if (mKeyguardCallback != null) {
                 mKeyguardCallback.dismiss(/* securityVerified= */ true, userId,
@@ -265,19 +268,24 @@ public class AdminSecondaryLockScreenController {
         private final KeyguardSecurityContainer mParent;
         private final KeyguardUpdateMonitor mUpdateMonitor;
         private final Handler mHandler;
+        private final SelectedUserInteractor mSelectedUserInteractor;
 
         @Inject
-        public Factory(Context context, KeyguardSecurityContainer parent,
-                KeyguardUpdateMonitor updateMonitor, @Main Handler handler) {
+        public Factory(Context context,
+                KeyguardSecurityContainer parent,
+                KeyguardUpdateMonitor updateMonitor,
+                @Main Handler handler,
+                SelectedUserInteractor selectedUserInteractor) {
             mContext = context;
             mParent = parent;
             mUpdateMonitor = updateMonitor;
             mHandler = handler;
+            mSelectedUserInteractor = selectedUserInteractor;
         }
 
         public AdminSecondaryLockScreenController create(KeyguardSecurityCallback callback) {
             return new AdminSecondaryLockScreenController(mContext, mParent, mUpdateMonitor,
-                    callback, mHandler);
+                    callback, mHandler, mSelectedUserInteractor);
         }
     }
 }

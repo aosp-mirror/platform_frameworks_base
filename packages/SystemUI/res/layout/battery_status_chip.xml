@@ -25,7 +25,8 @@
     <LinearLayout
         android:id="@+id/rounded_container"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/ongoing_appops_chip_height"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/ongoing_appops_chip_height"
         android:layout_gravity="center"
         android:background="@drawable/statusbar_chip_bg"
         android:clipToOutline="true"
@@ -36,7 +37,7 @@
         <com.android.systemui.battery.BatteryMeterView
             android:id="@+id/battery_meter_view"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp" />
 
     </LinearLayout>

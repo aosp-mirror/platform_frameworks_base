@@ -3,6 +3,7 @@
 //########################################################################
 
 package {
+    default_team: "trendy_team_framework_android_packages",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -41,9 +42,8 @@ android_test {
         "mockito-target-minus-junit4",
         "platform-test-annotations",
         "ShortcutManagerTestUtils",
-        "truth-prebuilt",
+        "truth",
         "testables",
-        "ub-uiautomator",
         "platformprotosnano",
         "framework-protos",
         "hamcrest-library",
@@ -52,7 +52,7 @@ android_test {
         "servicestests-utils",
         "service-permission.impl",
         "testng",
-        "truth-prebuilt",
+        "truth",
         "junit",
         "junit-params",
         "platform-compat-test-rules",
@@ -94,7 +94,7 @@ android_test {
         "libutils",
         "netd_aidl_interface-V5-cpp",
     ],
-
+    compile_multilib: "both",
     dxflags: ["--multi-dex"],
 
     java_resources: [
@@ -104,6 +104,8 @@ android_test {
         ":PackageParserTestApp4",
         ":PackageParserTestApp5",
         ":PackageParserTestApp6",
+        ":PackageParserTestApp7",
+        ":PackageParserTestApp8",
     ],
     resource_zips: [":PackageManagerServiceServerTests_apks_as_resources"],
 

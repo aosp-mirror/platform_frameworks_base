@@ -37,7 +37,7 @@ static inline uint32_t hashround(uint32_t hash, int c) {
 
 static uint32_t hash(const android::String16& hashableString) {
     uint32_t hash = 5381;
-    const char16_t* str = hashableString.string();
+    const char16_t* str = hashableString.c_str();
     while (int c = *str++) hash = hashround(hash, c);
     return hash;
 }

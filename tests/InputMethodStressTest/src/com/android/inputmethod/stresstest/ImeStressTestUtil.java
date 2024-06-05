@@ -40,6 +40,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -149,19 +150,27 @@ public final class ImeStressTestUtil {
     }
 
     /**
+     * Requests EditText view focus on the main thread, and assert this returns {@code true}.
+     */
+    public static void requestFocusAndVerify(TestActivity activity) {
+        boolean result = callOnMainSync(activity::requestFocus);
+        assertWithMessage("View focus request should have succeeded").that(result).isTrue();
+    }
+
+    /**
      * Waits until {@code pred} returns true, or throws on timeout.
      *
      * <p>The given {@code pred} will be called on the main thread.
      */
     public static void waitOnMainUntil(String message, Callable<Boolean> pred) {
-        eventually(() -> assertWithMessage(message).that(pred.call()).isTrue(), TIMEOUT);
+        eventually(() -> assertWithMessage(message).that(callOnMainSync(pred)).isTrue(), TIMEOUT);
     }
 
     /** Waits until IME is shown, or throws on timeout. */
     public static void waitOnMainUntilImeIsShown(View view) {
         eventually(
                 () ->
-                        assertWithMessage("IME should be shown")
+                        assertWithMessage("IME should have been shown")
                                 .that(callOnMainSync(() -> isImeShown(view)))
                                 .isTrue(),
                 TIMEOUT);
@@ -171,27 +180,28 @@ public final class ImeStressTestUtil {
     public static void waitOnMainUntilImeIsHidden(View view) {
         eventually(
                 () ->
-                        assertWithMessage("IME should be hidden")
+                        assertWithMessage("IME should have been hidden")
                                 .that(callOnMainSync(() -> isImeShown(view)))
                                 .isFalse(),
                 TIMEOUT);
     }
 
-    /** Waits until window get focus, or throws on timeout. */
+    /** Waits until window gains focus, or throws on timeout. */
     public static void waitOnMainUntilWindowGainsFocus(View view) {
         eventually(
                 () ->
-                        assertWithMessage("Window should gain focus")
+                        assertWithMessage(
+                                "Window should have gained focus; value of hasWindowFocus:")
                                 .that(callOnMainSync(view::hasWindowFocus))
                                 .isTrue(),
                 TIMEOUT);
     }
 
-    /** Waits until view get focus, or throws on timeout. */
+    /** Waits until view gains focus, or throws on timeout. */
     public static void waitOnMainUntilViewGainsFocus(View view) {
         eventually(
                 () ->
-                        assertWithMessage("View should gain focus")
+                        assertWithMessage("View should have gained focus; value of hasFocus:")
                                 .that(callOnMainSync(view::hasFocus))
                                 .isTrue(),
                 TIMEOUT);
@@ -201,7 +211,7 @@ public final class ImeStressTestUtil {
     public static void verifyImeIsAlwaysHidden(View view) {
         always(
                 () ->
-                        assertWithMessage("IME should be hidden")
+                        assertWithMessage("IME should have been hidden")
                                 .that(callOnMainSync(() -> isImeShown(view)))
                                 .isFalse(),
                 TIMEOUT);
@@ -211,7 +221,8 @@ public final class ImeStressTestUtil {
     public static void verifyWindowNeverGainsFocus(View view) {
         always(
                 () ->
-                        assertWithMessage("window should never gain focus")
+                        assertWithMessage(
+                                "Window should not have gained focus; value of hasWindowFocus:")
                                 .that(callOnMainSync(view::hasWindowFocus))
                                 .isFalse(),
                 TIMEOUT);
@@ -221,7 +232,7 @@ public final class ImeStressTestUtil {
     public static void verifyViewNeverGainsFocus(View view) {
         always(
                 () ->
-                        assertWithMessage("view should never gain ime focus")
+                        assertWithMessage("View should not have gained focus; value of hasFocus:")
                                 .that(callOnMainSync(view::hasFocus))
                                 .isFalse(),
                 TIMEOUT);
@@ -254,8 +265,23 @@ public final class ImeStressTestUtil {
         }
     }
 
+    /**
+     * Returns {@code true} if the activity can't receive IME focus, based on its window flags,
+     * and {@code false} otherwise.
+     *
+     * @param activity the activity to check.
+     */
     public static boolean hasUnfocusableWindowFlags(Activity activity) {
-        int windowFlags = activity.getWindow().getAttributes().flags;
+        return hasUnfocusableWindowFlags(activity.getWindow().getAttributes().flags);
+    }
+
+    /**
+     * Returns {@code true} if the activity can't receive IME focus, based on its window flags,
+     * and {@code false} otherwise.
+     *
+     * @param windowFlags the window flags to check.
+     */
+    public static boolean hasUnfocusableWindowFlags(int windowFlags) {
         return (windowFlags & LayoutParams.FLAG_NOT_FOCUSABLE) != 0
                 || (windowFlags & LayoutParams.FLAG_ALT_FOCUSABLE_IM) != 0
                 || (windowFlags & LayoutParams.FLAG_LOCAL_FOCUS_MODE) != 0;
@@ -302,22 +328,26 @@ public final class ImeStressTestUtil {
 
         private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
                 new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
+                    @NonNull
                     @Override
                     public WindowInsetsAnimation.Bounds onStart(
-                            WindowInsetsAnimation animation, WindowInsetsAnimation.Bounds bounds) {
+                            @NonNull WindowInsetsAnimation animation,
+                            @NonNull WindowInsetsAnimation.Bounds bounds) {
                         mIsAnimating = true;
                         return super.onStart(animation, bounds);
                     }
 
                     @Override
-                    public void onEnd(WindowInsetsAnimation animation) {
+                    public void onEnd(@NonNull WindowInsetsAnimation animation) {
                         super.onEnd(animation);
                         mIsAnimating = false;
                     }
 
+                    @NonNull
                     @Override
                     public WindowInsets onProgress(
-                            WindowInsets insets, List<WindowInsetsAnimation> runningAnimations) {
+                            @NonNull WindowInsets insets,
+                            @NonNull List<WindowInsetsAnimation> runningAnimations) {
                         return insets;
                     }
                 };
@@ -363,6 +393,7 @@ public final class ImeStressTestUtil {
                 mEditText.setFocusableInTouchMode(false);
             }
             rootView.addView(mEditText, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+            rootView.setFitsSystemWindows(true);
             setContentView(rootView);
 
             if (requestFocus) {
@@ -392,9 +423,9 @@ public final class ImeStressTestUtil {
         public boolean showImeWithInputMethodManager() {
             boolean showResult =
                     getInputMethodManager()
-                            .showSoftInput(mEditText, InputMethodManager.SHOW_IMPLICIT);
+                            .showSoftInput(mEditText, 0 /* flags */);
             if (showResult) {
-                Log.i(TAG, "IMM#showSoftInput successfully");
+                Log.i(TAG, "IMM#showSoftInput succeeded");
             } else {
                 Log.i(TAG, "IMM#showSoftInput failed");
             }
@@ -404,9 +435,10 @@ public final class ImeStressTestUtil {
         /** Hide IME with InputMethodManager. */
         public boolean hideImeWithInputMethodManager() {
             boolean hideResult =
-                    getInputMethodManager().hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
+                    getInputMethodManager()
+                            .hideSoftInputFromWindow(mEditText.getWindowToken(), 0 /* flags */);
             if (hideResult) {
-                Log.i(TAG, "IMM#hideSoftInput successfully");
+                Log.i(TAG, "IMM#hideSoftInput succeeded");
             } else {
                 Log.i(TAG, "IMM#hideSoftInput failed");
             }
@@ -420,7 +452,7 @@ public final class ImeStressTestUtil {
             }
             Log.i(TAG, "showImeWithWIC()");
             WindowInsetsController windowInsetsController = mEditText.getWindowInsetsController();
-            assertWithMessage("WindowInsetsController shouldn't be null.")
+            assertWithMessage("WindowInsetsController")
                     .that(windowInsetsController)
                     .isNotNull();
             windowInsetsController.show(WindowInsets.Type.ime());
@@ -433,7 +465,7 @@ public final class ImeStressTestUtil {
             }
             Log.i(TAG, "hideImeWithWIC()");
             WindowInsetsController windowInsetsController = mEditText.getWindowInsetsController();
-            assertWithMessage("WindowInsetsController shouldn't be null.")
+            assertWithMessage("WindowInsetsController")
                     .that(windowInsetsController)
                     .isNotNull();
             windowInsetsController.hide(WindowInsets.Type.ime());
@@ -481,13 +513,14 @@ public final class ImeStressTestUtil {
             return mIsAnimating;
         }
 
-        public void requestFocus() {
-            boolean requestFocusResult = getEditText().requestFocus();
+        public boolean requestFocus() {
+            boolean requestFocusResult = mEditText.requestFocus();
             if (requestFocusResult) {
-                Log.i(TAG, "Request focus successfully");
+                Log.i(TAG, "View#requestFocus succeeded");
             } else {
-                Log.i(TAG, "Request focus failed");
+                Log.i(TAG, "View#requestFocus failed");
             }
+            return requestFocusResult;
         }
     }
 }

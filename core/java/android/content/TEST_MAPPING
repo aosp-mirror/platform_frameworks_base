@@ -7,7 +7,7 @@
           "include-annotation": "android.platform.test.annotations.Presubmit"
         },
         {
-          "exclude-annotation": "android.platform.test.annotations.LargeTest"
+          "exclude-annotation": "androidx.test.filters.LargeTest"
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -41,11 +41,9 @@
         }
       ],
       "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java", "(/|^)ComponentCallbacksController.java"]
-    }
-  ],
-  "presubmit-large": [
+    },
     {
-      "name": "CtsContentTestCases",
+      "name": "CtsWindowManagerTestCases",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -58,6 +56,18 @@
         }
       ],
       "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java"]
+    },
+    {
+      "name": "CtsWindowManagerBackgroundActivityTestCases",
+      "file_patterns": ["(/|^)IntentSender.java"]
     }
+  ],
+  "ravenwood-presubmit": [
+    {
+      "name": "CtsContentTestCasesRavenwood",
+      "host": true
+    }
+  ],
+  "postsubmit": [
   ]
 }

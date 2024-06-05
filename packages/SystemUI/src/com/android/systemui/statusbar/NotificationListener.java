@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static com.android.systemui.statusbar.RemoteInputController.processForRemoteInput;
-
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
@@ -33,9 +31,11 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
+import com.android.systemui.statusbar.domain.interactor.SilentNotificationStatusIconsVisibilityInteractor;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
 import com.android.systemui.statusbar.notification.collection.PipelineDumper;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 import com.android.systemui.util.time.SystemClock;
@@ -62,6 +62,7 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
 
     private final Context mContext;
     private final NotificationManager mNotificationManager;
+    private final SilentNotificationStatusIconsVisibilityInteractor mStatusIconInteractor;
     private final SystemClock mSystemClock;
     private final Executor mMainExecutor;
     private final List<NotificationHandler> mNotificationHandlers = new ArrayList<>();
@@ -78,12 +79,14 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
     public NotificationListener(
             Context context,
             NotificationManager notificationManager,
+            SilentNotificationStatusIconsVisibilityInteractor statusIconInteractor,
             SystemClock systemClock,
             @Main Executor mainExecutor,
             PluginManager pluginManager) {
         super(pluginManager);
         mContext = context;
         mNotificationManager = notificationManager;
+        mStatusIconInteractor = statusIconInteractor;
         mSystemClock = systemClock;
         mMainExecutor = mainExecutor;
     }
@@ -97,7 +100,9 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
     }
 
     /** Registers a listener that's notified when any notification-related settings change. */
+    @Deprecated
     public void addNotificationSettingsListener(NotificationSettingsListener listener) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
         mSettingsListeners.add(listener);
     }
 
@@ -142,8 +147,6 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
         if (DEBUG) Log.d(TAG, "onNotificationPosted: " + sbn);
         if (sbn != null && !onPluginNotificationPosted(sbn, rankingMap)) {
             mMainExecutor.execute(() -> {
-                processForRemoteInput(sbn.getNotification(), mContext);
-
                 for (NotificationHandler handler : mNotificationHandlers) {
                     handler.onNotificationPosted(sbn, rankingMap);
                 }
@@ -234,8 +237,12 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
 
     @Override
     public void onSilentStatusBarIconsVisibilityChanged(boolean hideSilentStatusIcons) {
-        for (NotificationSettingsListener listener : mSettingsListeners) {
-            listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
+        if (NotificationIconContainerRefactor.isEnabled()) {
+            mStatusIconInteractor.setHideSilentStatusIcons(hideSilentStatusIcons);
+        } else {
+            for (NotificationSettingsListener listener : mSettingsListeners) {
+                listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
+            }
         }
     }
 
@@ -298,6 +305,7 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
         return ranking;
     }
 
+    @Deprecated
     public interface NotificationSettingsListener {
 
         default void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) { }

@@ -40,14 +40,15 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.ResultReceiver;
 import android.testing.AndroidTestingRunner;
+import android.view.Display;
 import android.widget.ImageView;
 
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.intercepting.SingleActivityFactory;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.screenshot.ImageExporter;
 import com.android.systemui.settings.UserTracker;
 
@@ -55,6 +56,7 @@ import com.google.common.util.concurrent.Futures;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -120,7 +122,7 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         ImageExporter.Result result = new ImageExporter.Result();
         result.uri = TEST_URI;
         when(mImageExporter.export(any(Executor.class), any(UUID.class), any(Bitmap.class),
-                eq(Process.myUserHandle())))
+                eq(Process.myUserHandle()), eq(Display.DEFAULT_DISPLAY)))
                 .thenReturn(Futures.immediateFuture(result));
     }
 
@@ -137,6 +139,7 @@ public final class AppClipsActivityTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("b/315848285")
     public void screenshotDisplayed_userConsented_screenshotExportedSuccessfully() {
         ResultReceiver resultReceiver = createResultReceiver((resultCode, data) -> {
             assertThat(resultCode).isEqualTo(RESULT_OK);

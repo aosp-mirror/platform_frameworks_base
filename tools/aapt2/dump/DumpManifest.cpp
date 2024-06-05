@@ -29,8 +29,8 @@
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
 #include "androidfw/ConfigDescription.h"
+#include "androidfw/FileStream.h"
 #include "io/File.h"
-#include "io/FileStream.h"
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlDom.h"
 
@@ -216,9 +216,7 @@ class SupportsScreen;
 
 class ManifestExtractor {
  public:
-
-  explicit ManifestExtractor(LoadedApk* apk, DumpManifestOptions& options)
-      : apk_(apk), options_(options) { }
+  explicit ManifestExtractor(LoadedApk* apk, DumpManifestOptions& options);
 
   class Element {
    public:
@@ -509,7 +507,7 @@ class ManifestExtractor {
 
  private:
   std::unique_ptr<xml::XmlResource> doc_;
-  std::unique_ptr<CommonFeatureGroup> commonFeatureGroup_ = util::make_unique<CommonFeatureGroup>();
+  std::unique_ptr<CommonFeatureGroup> commonFeatureGroup_;
   std::map<std::string, ConfigDescription> locales_;
   std::map<uint16_t, ConfigDescription> densities_;
   std::vector<Element*> parent_stack_;
@@ -837,9 +835,9 @@ class UsesSdkBadging : public ManifestExtractor::Element {
 
   void Print(text::Printer* printer) override {
     if (min_sdk) {
-      printer->Print(StringPrintf("sdkVersion:'%d'\n", *min_sdk));
+      printer->Print(StringPrintf("minSdkVersion:'%d'\n", *min_sdk));
     } else if (min_sdk_name) {
-      printer->Print(StringPrintf("sdkVersion:'%s'\n", min_sdk_name->data()));
+      printer->Print(StringPrintf("minSdkVersion:'%s'\n", min_sdk_name->data()));
     }
     if (max_sdk) {
       printer->Print(StringPrintf("maxSdkVersion:'%d'\n", *max_sdk));
@@ -2469,6 +2467,12 @@ static void ToProto(ManifestExtractor::Element* el, pb::Badging* out_badging) {
   for (auto& child : el->children()) {
     ToProto(child.get(), out_badging);
   }
+}
+
+// Define this constructor after the CommonFeatureGroup class definition to avoid errors with using
+// std::unique_ptr on an incomplete type.
+ManifestExtractor::ManifestExtractor(LoadedApk* apk, DumpManifestOptions& options)
+    : apk_(apk), options_(options), commonFeatureGroup_(util::make_unique<CommonFeatureGroup>()) {
 }
 
 bool ManifestExtractor::Extract(android::IDiagnostics* diag) {

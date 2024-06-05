@@ -18,6 +18,7 @@ package android.hardware.radio;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -101,7 +102,7 @@ public class RadioManager {
     public @interface RadioStatusType{}
 
 
-    // keep in sync with radio_class_t in /system/core/incluse/system/radio.h
+    // keep in sync with radio_class_t in /system/core/include/system/radio.h
     /** Radio module class supporting FM (including HD radio) and AM */
     public static final int CLASS_AM_FM = 0;
     /** Radio module class supporting satellite radio */
@@ -122,6 +123,7 @@ public class RadioManager {
     /** AM HD radio or DRM band.
      * @see BandDescriptor */
     public static final int BAND_AM_HD = 3;
+    /** @removed mistakenly exposed previously */
     @IntDef(prefix = { "BAND_" }, value = {
         BAND_INVALID,
         BAND_AM,
@@ -152,24 +154,29 @@ public class RadioManager {
     /**
      * Forces mono audio stream reception.
      *
-     * Analog broadcasts can recover poor reception conditions by jointing
+     * <p>Analog broadcasts can recover poor reception conditions by jointing
      * stereo channels into one. Mainly for, but not limited to AM/FM.
      */
     public static final int CONFIG_FORCE_MONO = 1;
     /**
      * Forces the analog playback for the supporting radio technology.
      *
-     * User may disable digital playback for FM HD Radio or hybrid FM/DAB with
-     * this option. This is purely user choice, ie. does not reflect digital-
+     * <p>User may disable digital playback for FM HD Radio or hybrid FM/DAB with
+     * this option. This is purely user choice, i.e. does not reflect digital-
      * analog handover state managed from the HAL implementation side.
      *
-     * Some radio technologies may not support this, ie. DAB.
+     * <p>Some radio technologies may not support this, i.e. DAB.
+     *
+     * @deprecated Use {@link #CONFIG_FORCE_ANALOG_FM} instead. If {@link #CONFIG_FORCE_ANALOG_FM}
+     * is supported in HAL, {@link RadioTuner#setConfigFlag} and {@link RadioTuner#isConfigFlagSet}
+     * with CONFIG_FORCE_ANALOG will set/get the value of {@link #CONFIG_FORCE_ANALOG_FM}.
      */
+    @Deprecated
     public static final int CONFIG_FORCE_ANALOG = 2;
     /**
      * Forces the digital playback for the supporting radio technology.
      *
-     * User may disable digital-analog handover that happens with poor
+     * <p>User may disable digital-analog handover that happens with poor
      * reception conditions. With digital forced, the radio will remain silent
      * instead of switching to analog channel if it's available. This is purely
      * user choice, it does not reflect the actual state of handover.
@@ -178,7 +185,7 @@ public class RadioManager {
     /**
      * RDS Alternative Frequencies.
      *
-     * If set and the currently tuned RDS station broadcasts on multiple
+     * <p>If set and the currently tuned RDS station broadcasts on multiple
      * channels, radio tuner automatically switches to the best available
      * alternative.
      */
@@ -186,7 +193,7 @@ public class RadioManager {
     /**
      * RDS region-specific program lock-down.
      *
-     * Allows user to lock to the current region as they move into the
+     * <p>Allows user to lock to the current region as they move into the
      * other region.
      */
     public static final int CONFIG_RDS_REG = 5;
@@ -199,6 +206,30 @@ public class RadioManager {
     /** Enables DAB-FM soft-linking (related content). */
     public static final int CONFIG_DAB_FM_SOFT_LINKING = 9;
 
+    /**
+     * Forces the FM analog playback for the supporting radio technology.
+     *
+     * <p>User may disable FM digital playback for FM HD Radio or hybrid FM/DAB
+     * with this option. This is purely user choice, i.e. does not reflect
+     * digital-analog handover state managed from the HAL implementation side.
+     *
+     * <p>Some radio technologies may not support this, i.e. DAB.
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int CONFIG_FORCE_ANALOG_FM = 10;
+
+    /**
+     * Forces the AM analog playback for the supporting radio technology.
+     *
+     * <p>User may disable FM digital playback for AM HD Radio or hybrid AM/DAB
+     * with this option. This is purely user choice, i.e. does not reflect
+     * digital-analog handover state managed from the HAL implementation side.
+     *
+     * <p>Some radio technologies may not support this, i.e. DAB.
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int CONFIG_FORCE_ANALOG_AM = 11;
+
     /** @hide */
     @IntDef(prefix = { "CONFIG_" }, value = {
         CONFIG_FORCE_MONO,
@@ -210,15 +241,18 @@ public class RadioManager {
         CONFIG_DAB_FM_LINKING,
         CONFIG_DAB_DAB_SOFT_LINKING,
         CONFIG_DAB_FM_SOFT_LINKING,
+        CONFIG_FORCE_ANALOG_FM,
+        CONFIG_FORCE_ANALOG_AM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ConfigFlag {}
 
-    /*****************************************************************************
+    /**
      * Lists properties, options and radio bands supported by a given broadcast radio module.
-     * Each module has a unique ID used to address it when calling RadioManager APIs.
-     * Module properties are returned by {@link #listModules(List <ModuleProperties>)} method.
-     ****************************************************************************/
+     *
+     * <p>Each module has a unique ID used to address it when calling RadioManager APIs.
+     * Module properties are returned by {@link #listModules(List)} method.
+     */
     public static class ModuleProperties implements Parcelable {
 
         private final int mId;
@@ -282,8 +316,11 @@ public class RadioManager {
             return set.stream().mapToInt(Integer::intValue).toArray();
         }
 
-        /** Unique module identifier provided by the native service.
-         * For use with {@link #openTuner(int, BandConfig, boolean, Callback, Handler)}.
+        /**
+         * Unique module identifier provided by the native service.
+         *
+         * <p>or use with
+         * {@link #openTuner(int, BandConfig, boolean, RadioTuner.Callback, Handler)}.
          * @return the radio module unique identifier.
          */
         public int getId() {
@@ -291,22 +328,24 @@ public class RadioManager {
         }
 
         /**
-         * Module service (driver) name as registered with HIDL.
+         * Module service (driver) name as registered with HIDL or AIDL HAL.
          * @return the module service name.
          */
         public @NonNull String getServiceName() {
             return mServiceName;
         }
 
-        /** Module class identifier: {@link #CLASS_AM_FM}, {@link #CLASS_SAT}, {@link #CLASS_DT}
+        /**
+         * Module class identifier: {@link #CLASS_AM_FM}, {@link #CLASS_SAT}, {@link #CLASS_DT}
          * @return the radio module class identifier.
          */
         public int getClassId() {
             return mClassId;
         }
 
-        /** Human readable broadcast radio module implementor
-         * @return the name of the radio module implementator.
+        /**
+         * Human readable broadcast radio module implementor
+         * @return the name of the radio module implementer.
          */
         public String getImplementor() {
             return mImplementor;
@@ -319,31 +358,38 @@ public class RadioManager {
             return mProduct;
         }
 
-        /** Human readable broadcast radio module version number
+        /**
+         * Human readable broadcast radio module version number
          * @return the radio module version.
          */
         public String getVersion() {
             return mVersion;
         }
 
-        /** Radio module serial number.
-         * Can be used for subscription services.
+        /**
+         * Radio module serial number.
+         *
+         * <p>This can be used for subscription services.
          * @return the radio module serial number.
          */
         public String getSerial() {
             return mSerial;
         }
 
-        /** Number of tuners available.
-         * This is the number of tuners that can be open simultaneously.
+        /**
+         * Number of tuners available.
+         *
+         * <p>This is the number of tuners that can be open simultaneously.
          * @return the number of tuners supported.
          */
         public int getNumTuners() {
             return mNumTuners;
         }
 
-        /** Number tuner audio sources available. Must be less or equal to getNumTuners().
-         * When more than one tuner is supported, one is usually for playback and has one
+        /**
+         * Number tuner audio sources available. Must be less or equal to {@link #getNumTuners}.
+         *
+         * <p>When more than one tuner is supported, one is usually for playback and has one
          * associated audio source and the other is for pre scanning and building a
          * program list.
          * @return the number of audio sources available.
@@ -354,20 +400,24 @@ public class RadioManager {
         }
 
         /**
-         * Checks, if BandConfig initialization (after {@link RadioManager#openTuner})
+         * Checks, if {@link BandConfig} initialization (after {@link RadioManager#openTuner})
          * is required to be done before other operations or not.
          *
-         * If it is, the client has to wait for {@link RadioTuner.Callback#onConfigurationChanged}
-         * callback before executing any other operations. Otherwise, such operation will fail
-         * returning {@link RadioManager#STATUS_INVALID_OPERATION} error code.
+         * <p>If it is, the client has to wait for
+         * {@link RadioTuner.Callback#onConfigurationChanged} callback before executing any other
+         * operations. Otherwise, such operation will fail returning
+         * {@link RadioManager#STATUS_INVALID_OPERATION} error code.
          */
         public boolean isInitializationRequired() {
             return mIsInitializationRequired;
         }
 
-        /** {@code true} if audio capture is possible from radio tuner output.
-         * This indicates if routing to audio devices not connected to the same HAL as the FM radio
-         * is possible (e.g. to USB) or DAR (Digital Audio Recorder) feature can be implemented.
+        /**
+         * {@code true} if audio capture is possible from radio tuner output.
+         *
+         * <p>This indicates if routing to audio devices not connected to the same HAL as the FM
+         * radio is possible (e.g. to USB) or DAR (Digital Audio Recorder) feature can be
+         * implemented.
          * @return {@code true} if audio capture is possible, {@code false} otherwise.
          */
         public boolean isCaptureSupported() {
@@ -388,8 +438,8 @@ public class RadioManager {
         /**
          * Checks, if a given program type is supported by this tuner.
          *
-         * If a program type is supported by radio module, it means it can tune
-         * to ProgramSelector of a given type.
+         * <p>If a program type is supported by radio module, it means it can tune
+         * to {@link ProgramSelector} of a given type.
          *
          * @return {@code true} if a given program type is supported.
          */
@@ -400,8 +450,8 @@ public class RadioManager {
         /**
          * Checks, if a given program identifier is supported by this tuner.
          *
-         * If an identifier is supported by radio module, it means it can use it for
-         * tuning to ProgramSelector with either primary or secondary Identifier of
+         * <p>If an identifier is supported by radio module, it means it can use it for
+         * tuning to {@link ProgramSelector} with either primary or secondary Identifier of
          * a given type.
          *
          * @return {@code true} if a given program type is supported.
@@ -413,9 +463,9 @@ public class RadioManager {
         /**
          * A frequency table for Digital Audio Broadcasting (DAB).
          *
-         * The key is a channel name, i.e. 5A, 7B.
+         * <p>The key is a channel name, i.e. 5A, 7B.
          *
-         * The value is a frequency, in kHz.
+         * <p>The value is a frequency, in kHz.
          *
          * @return a frequency table, or {@code null} if the module doesn't support DAB
          */
@@ -427,17 +477,18 @@ public class RadioManager {
          * A map of vendor-specific opaque strings, passed from HAL without changes.
          * Format of these strings can vary across vendors.
          *
-         * It may be used for extra features, that's not supported by a platform,
+         * <p>It may be used for extra features, that's not supported by a platform,
          * for example: preset-slots=6; ultra-hd-capable=false.
          *
-         * Keys must be prefixed with unique vendor Java-style namespace,
-         * eg. 'com.somecompany.parameter1'.
+         * <p>Keys must be prefixed with unique vendor Java-style namespace,
+         * e.g. 'com.somecompany.parameter1'.
          */
         public @NonNull Map<String, String> getVendorInfo() {
             return mVendorInfo;
         }
 
-        /** List of descriptors for all bands supported by this module.
+        /**
+         * List of descriptors for all bands supported by this module.
          * @return an array of {@link BandDescriptor}.
          */
         public BandDescriptor[] getBands() {
@@ -557,7 +608,9 @@ public class RadioManager {
     }
 
     /** Radio band descriptor: an element in ModuleProperties bands array.
-     * It is either an instance of {@link FmBandDescriptor} or {@link AmBandDescriptor} */
+     *
+     * <p>It is either an instance of {@link FmBandDescriptor} or {@link AmBandDescriptor}
+     */
     public static class BandDescriptor implements Parcelable {
 
         private final int mRegion;
@@ -577,16 +630,18 @@ public class RadioManager {
             mSpacing = spacing;
         }
 
-        /** Region this band applies to. E.g. {@link #REGION_ITU_1}
+        /**
+         * Region this band applies to. E.g. {@link #REGION_ITU_1}
          * @return the region this band is associated to.
          */
         public int getRegion() {
             return mRegion;
         }
-        /** Band type, e.g {@link #BAND_FM}. Defines the subclass this descriptor can be cast to:
+        /**
+         * Band type, e.g. {@link #BAND_FM}. Defines the subclass this descriptor can be cast to:
          * <ul>
-         *  <li>{@link #BAND_FM} or {@link #BAND_FM_HD} cast to {@link FmBandDescriptor}, </li>
-         *  <li>{@link #BAND_AM} cast to {@link AmBandDescriptor}, </li>
+         *     <li>{@link #BAND_FM} or {@link #BAND_FM_HD} cast to {@link FmBandDescriptor}</li>
+         *     <li>{@link #BAND_AM} cast to {@link AmBandDescriptor}</li>
          * </ul>
          * @return the band type.
          */
@@ -612,23 +667,29 @@ public class RadioManager {
             return mType == BAND_FM || mType == BAND_FM_HD;
         }
 
-        /** Lower band limit expressed in units according to band type.
-         * Currently all defined band types express channels as frequency in kHz
+        /**
+         * Lower band limit expressed in units according to band type.
+         *
+         * <p>Currently all defined band types express channels as frequency in kHz.
          * @return the lower band limit.
          */
         public int getLowerLimit() {
             return mLowerLimit;
         }
-        /** Upper band limit expressed in units according to band type.
-         * Currently all defined band types express channels as frequency in kHz
+        /**
+         * Upper band limit expressed in units according to band type.
+         *
+         * <p>Currently all defined band types express channels as frequency in kHz.
          * @return the upper band limit.
          */
         public int getUpperLimit() {
             return mUpperLimit;
         }
-        /** Channel spacing in units according to band type.
-         * Currently all defined band types express channels as frequency in kHz
-         * @return the channel spacing.
+        /**
+         * Channel spacing in units according to band type.
+         *
+         * <p>Currently all defined band types express channels as frequency in kHz
+         * @return the channel spacing.</p>
          */
         public int getSpacing() {
             return mSpacing;
@@ -725,9 +786,11 @@ public class RadioManager {
         }
     }
 
-    /** FM band descriptor
+    /**
+     * FM band descriptor
      * @see #BAND_FM
-     * @see #BAND_FM_HD */
+     * @see #BAND_FM_HD
+     */
     public static class FmBandDescriptor extends BandDescriptor {
         private final boolean mStereo;
         private final boolean mRds;
@@ -746,19 +809,22 @@ public class RadioManager {
             mEa = ea;
         }
 
-        /** Stereo is supported
+        /**
+         * Stereo is supported
          * @return {@code true} if stereo is supported, {@code false} otherwise.
          */
         public boolean isStereoSupported() {
             return mStereo;
         }
-        /** RDS or RBDS(if region is ITU2) is supported
+        /**
+         * RDS or RBDS(if region is ITU2) is supported
          * @return {@code true} if RDS or RBDS is supported, {@code false} otherwise.
          */
         public boolean isRdsSupported() {
             return mRds;
         }
-        /** Traffic announcement is supported
+        /**
+         * Traffic announcement is supported
          * @return {@code true} if TA is supported, {@code false} otherwise.
          */
         public boolean isTaSupported() {
@@ -771,8 +837,9 @@ public class RadioManager {
             return mAf;
         }
 
-        /** Emergency Announcement is supported
-         * @return {@code true} if Emergency annoucement is supported, {@code false} otherwise.
+        /**
+         * Emergency Announcement is supported
+         * @return {@code true} if Emergency announcement is supported, {@code false} otherwise.
          */
         public boolean isEaSupported() {
             return mEa;
@@ -857,8 +924,10 @@ public class RadioManager {
         }
     }
 
-    /** AM band descriptor.
-     * @see #BAND_AM */
+    /**
+     * AM band descriptor.
+     * @see #BAND_AM
+     */
     public static class AmBandDescriptor extends BandDescriptor {
 
         private final boolean mStereo;
@@ -870,8 +939,9 @@ public class RadioManager {
             mStereo = stereo;
         }
 
-        /** Stereo is supported
-         *  @return {@code true} if stereo is supported, {@code false} otherwise.
+        /**
+         * Stereo is supported
+         * @return {@code true} if stereo is supported, {@code false} otherwise.
          */
         public boolean isStereoSupported() {
             return mStereo;
@@ -958,39 +1028,47 @@ public class RadioManager {
             return mDescriptor;
         }
 
-        /** Region this band applies to. E.g. {@link #REGION_ITU_1}
-         *  @return the region associated with this band.
+        /**
+         * Region this band applies to. E.g. {@link #REGION_ITU_1}
+         * @return the region associated with this band.
          */
         public int getRegion() {
             return mDescriptor.getRegion();
         }
-        /** Band type, e.g {@link #BAND_FM}. Defines the subclass this descriptor can be cast to:
+        /**
+         * Band type, e.g. {@link #BAND_FM}. Defines the subclass this descriptor can be cast to:
          * <ul>
-         *  <li>{@link #BAND_FM} or {@link #BAND_FM_HD} cast to {@link FmBandDescriptor}, </li>
-         *  <li>{@link #BAND_AM} cast to {@link AmBandDescriptor}, </li>
+         *     <li>{@link #BAND_FM} or {@link #BAND_FM_HD} cast to {@link FmBandDescriptor}</li>
+         *     <li>{@link #BAND_AM} cast to {@link AmBandDescriptor}</li>
          * </ul>
          *  @return the band type.
          */
         public int getType() {
             return mDescriptor.getType();
         }
-        /** Lower band limit expressed in units according to band type.
-         * Currently all defined band types express channels as frequency in kHz
-         *  @return the lower band limit.
+        /**
+         * Lower band limit expressed in units according to band type.
+         *
+         * <p>Currently all defined band types express channels as frequency in kHz.
+         * @return the lower band limit.
          */
         public int getLowerLimit() {
             return mDescriptor.getLowerLimit();
         }
-        /** Upper band limit expressed in units according to band type.
-         * Currently all defined band types express channels as frequency in kHz
-         *  @return the upper band limit.
+        /**
+         * Upper band limit expressed in units according to band type.
+         *
+         * <p>Currently all defined band types express channels as frequency in kHz.
+         * @return the upper band limit.
          */
         public int getUpperLimit() {
             return mDescriptor.getUpperLimit();
         }
-        /** Channel spacing in units according to band type.
-         * Currently all defined band types express channels as frequency in kHz
-         *  @return the channel spacing.
+        /**
+         * Channel spacing in units according to band type.
+         *
+         * <p>Currently all defined band types express channels as frequency in kHz.
+         * @return the channel spacing.
          */
         public int getSpacing() {
             return mDescriptor.getSpacing();
@@ -1056,9 +1134,11 @@ public class RadioManager {
         }
     }
 
-    /** FM band configuration.
+    /**
+     * FM band configuration.
      * @see #BAND_FM
-     * @see #BAND_FM_HD */
+     * @see #BAND_FM_HD
+     */
     public static class FmBandConfig extends BandConfig {
         private final boolean mStereo;
         private final boolean mRds;
@@ -1086,28 +1166,32 @@ public class RadioManager {
             mEa = ea;
         }
 
-        /** Get stereo enable state
+        /**
+         * Get stereo enable state
          * @return the enable state.
          */
         public boolean getStereo() {
             return mStereo;
         }
 
-        /** Get RDS or RBDS(if region is ITU2) enable state
+        /**
+         * Get RDS or RBDS(if region is ITU2) enable state
          * @return the enable state.
          */
         public boolean getRds() {
             return mRds;
         }
 
-        /** Get Traffic announcement enable state
+        /**
+         * Get Traffic announcement enable state
          * @return the enable state.
          */
         public boolean getTa() {
             return mTa;
         }
 
-        /** Get Alternate Frequency Switching enable state
+        /**
+         * Get Alternate Frequency Switching enable state
          * @return the enable state.
          */
         public boolean getAf() {
@@ -1252,7 +1336,8 @@ public class RadioManager {
                 return config;
             }
 
-            /** Set stereo enable state
+            /**
+             * Set stereo enable state
              * @param state The new enable state.
              * @return the same Builder instance.
              */
@@ -1261,7 +1346,8 @@ public class RadioManager {
                 return this;
             }
 
-            /** Set RDS or RBDS(if region is ITU2) enable state
+            /**
+             * Set RDS or RBDS(if region is ITU2) enable state
              * @param state The new enable state.
              * @return the same Builder instance.
              */
@@ -1270,7 +1356,8 @@ public class RadioManager {
                 return this;
             }
 
-            /** Set Traffic announcement enable state
+            /**
+             * Set Traffic announcement enable state
              * @param state The new enable state.
              * @return the same Builder instance.
              */
@@ -1279,7 +1366,8 @@ public class RadioManager {
                 return this;
             }
 
-            /** Set Alternate Frequency Switching enable state
+            /**
+             * Set Alternate Frequency Switching enable state
              * @param state The new enable state.
              * @return the same Builder instance.
              */
@@ -1288,7 +1376,8 @@ public class RadioManager {
                 return this;
             }
 
-            /** Set Emergency Announcement enable state
+            /**
+             * Set Emergency Announcement enable state
              * @param state The new enable state.
              * @return the same Builder instance.
              */
@@ -1299,8 +1388,10 @@ public class RadioManager {
         };
     }
 
-    /** AM band configuration.
-     * @see #BAND_AM */
+    /**
+     * AM band configuration.
+     * @see #BAND_AM
+     */
     public static class AmBandConfig extends BandConfig {
         private final boolean mStereo;
 
@@ -1316,7 +1407,8 @@ public class RadioManager {
             mStereo = stereo;
         }
 
-        /** Get stereo enable state
+        /**
+         * Get stereo enable state
          * @return the enable state.
          */
         public boolean getStereo() {
@@ -1420,7 +1512,8 @@ public class RadioManager {
                 return config;
             }
 
-            /** Set stereo enable state
+            /**
+             * Set stereo enable state
              * @param state The new enable state.
              * @return the same Builder instance.
              */
@@ -1434,13 +1527,17 @@ public class RadioManager {
     /** Radio program information. */
     public static class ProgramInfo implements Parcelable {
 
-        // sourced from hardware/interfaces/broadcastradio/2.0/types.hal
+        // sourced from
+        // hardware/interfaces/broadcastradio/aidl/android/hardware/broadcastradio/ProgramInfo.aidl
         private static final int FLAG_LIVE = 1 << 0;
         private static final int FLAG_MUTED = 1 << 1;
         private static final int FLAG_TRAFFIC_PROGRAM = 1 << 2;
         private static final int FLAG_TRAFFIC_ANNOUNCEMENT = 1 << 3;
         private static final int FLAG_TUNED = 1 << 4;
         private static final int FLAG_STEREO = 1 << 5;
+        private static final int FLAG_SIGNAL_ACQUIRED = 1 << 6;
+        private static final int FLAG_HD_SIS_ACQUIRED = 1 << 7;
+        private static final int FLAG_HD_AUDIO_ACQUIRED = 1 << 8;
 
         @NonNull private final ProgramSelector mSelector;
         @Nullable private final ProgramSelector.Identifier mLogicallyTunedTo;
@@ -1485,10 +1582,10 @@ public class RadioManager {
         /**
          * Identifier currently used for program selection.
          *
-         * This identifier can be used to determine which technology is
+         * <p>This identifier can be used to determine which technology is
          * currently being used for reception.
          *
-         * Some program selectors contain tuning information for different radio
+         * <p>Some program selectors contain tuning information for different radio
          * technologies (i.e. FM RDS and DAB). For example, user may tune using
          * a ProgramSelector with RDS_PI primary identifier, but the tuner hardware
          * may choose to use DAB technology to make actual tuning. This identifier
@@ -1501,7 +1598,7 @@ public class RadioManager {
         /**
          * Identifier currently used by hardware to physically tune to a channel.
          *
-         * Some radio technologies broadcast the same program on multiple channels,
+         * <p>Some radio technologies broadcast the same program on multiple channels,
          * i.e. with RDS AF the same program may be broadcasted on multiple
          * alternative frequencies; the same DAB program may be broadcast on
          * multiple ensembles. This identifier points to the channel to which the
@@ -1514,11 +1611,11 @@ public class RadioManager {
         /**
          * Primary identifiers of related contents.
          *
-         * Some radio technologies provide pointers to other programs that carry
+         * <p>Some radio technologies provide pointers to other programs that carry
          * related content (i.e. DAB soft-links). This field is a list of pointers
          * to other programs on the program list.
          *
-         * Please note, that these identifiers does not have to exist on the program
+         * <p>Please note, that these identifiers does not have to exist on the program
          * list - i.e. DAB tuner may provide information on FM RDS alternatives
          * despite not supporting FM RDS. If the system has multiple tuners, another
          * one may have it on its list.
@@ -1527,10 +1624,11 @@ public class RadioManager {
             return mRelatedContent;
         }
 
-        /** Main channel expressed in units according to band type.
+        /**
+         * Main channel expressed in units according to band type.
          * Currently all defined band types express channels as frequency in kHz
          * @return the program channel
-         * @deprecated Use {@link getSelector()} instead.
+         * @deprecated Use {@link ProgramInfo#getSelector} instead.
          */
         @Deprecated
         public int getChannel() {
@@ -1542,9 +1640,10 @@ public class RadioManager {
             }
         }
 
-        /** Sub channel ID. E.g 1 for HD radio HD1
+        /**
+         * Sub channel ID. E.g. 1 for HD radio HD1
          * @return the program sub channel
-         * @deprecated Use {@link getSelector()} instead.
+         * @deprecated Use {@link ProgramInfo#getSelector} instead.
          */
         @Deprecated
         public int getSubChannel() {
@@ -1564,16 +1663,18 @@ public class RadioManager {
             return (mInfoFlags & FLAG_TUNED) != 0;
         }
 
-        /** {@code true} if the received program is stereo
+        /**
+         * {@code true} if the received program is stereo
          * @return {@code true} if stereo, {@code false} otherwise.
          */
         public boolean isStereo() {
             return (mInfoFlags & FLAG_STEREO) != 0;
         }
 
-        /** {@code true} if the received program is digital (e.g HD radio)
+        /**
+         * {@code true} if the received program is digital (e.g. HD radio)
          * @return {@code true} if digital, {@code false} otherwise.
-         * @deprecated Use {@link getLogicallyTunedTo()} instead.
+         * @deprecated Use {@link ProgramInfo#getLogicallyTunedTo()} instead.
          */
         @Deprecated
         public boolean isDigital() {
@@ -1587,18 +1688,20 @@ public class RadioManager {
 
         /**
          * {@code true} if the program is currently playing live stream.
-         * This may result in a slightly altered reception parameters,
-         * usually targetted at reduced latency.
+         *
+         * <p>This may result in a slightly altered reception parameters,
+         * usually targeted at reduced latency.
          */
         public boolean isLive() {
             return (mInfoFlags & FLAG_LIVE) != 0;
         }
 
         /**
-         * {@code true} if radio stream is not playing, ie. due to bad reception
+         * {@code true} if radio stream is not playing, i.e. due to bad reception
          * conditions or buffering. In this state volume knob MAY be disabled to
          * prevent user increasing volume too much.
-         * It does NOT mean the user has muted audio.
+         *
+         * <p>It does NOT mean the user has muted audio.
          */
         public boolean isMuted() {
             return (mInfoFlags & FLAG_MUTED) != 0;
@@ -1621,6 +1724,28 @@ public class RadioManager {
         }
 
         /**
+         * @return {@code true} if the signal has been acquired.
+         */
+        @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+        public boolean isSignalAcquired() {
+            return (mInfoFlags & FLAG_SIGNAL_ACQUIRED) != 0;
+        }
+        /**
+         * @return {@code true} if HD Station Information Service (SIS) information is available.
+         */
+        @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+        public boolean isHdSisAvailable() {
+            return (mInfoFlags & FLAG_HD_SIS_ACQUIRED) != 0;
+        }
+        /**
+         * @return {@code true} if HD audio is available.
+         */
+        @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+        public boolean isHdAudioAvailable() {
+            return (mInfoFlags & FLAG_HD_AUDIO_ACQUIRED) != 0;
+        }
+
+        /**
          * Signal quality (as opposed to the name) indication from 0 (no signal)
          * to 100 (excellent)
          * @return the signal quality indication.
@@ -1630,8 +1755,9 @@ public class RadioManager {
         }
 
         /** Metadata currently received from this station.
-         * null if no metadata have been received
-         * @return current meta data received from this program.
+         *
+         * @return current meta data received from this program, {@code null} if no metadata have
+         * been received
          */
         public RadioMetadata getMetadata() {
             return mMetadata;
@@ -1641,11 +1767,11 @@ public class RadioManager {
          * A map of vendor-specific opaque strings, passed from HAL without changes.
          * Format of these strings can vary across vendors.
          *
-         * It may be used for extra features, that's not supported by a platform,
+         * <p>It may be used for extra features, that's not supported by a platform,
          * for example: paid-service=true; bitrate=320kbps.
          *
-         * Keys must be prefixed with unique vendor Java-style namespace,
-         * eg. 'com.somecompany.parameter1'.
+         * <p>Keys must be prefixed with unique vendor Java-style namespace,
+         * e.g. 'com.somecompany.parameter1'.
          */
         public @NonNull Map<String, String> getVendorInfo() {
             return mVendorInfo;
@@ -1772,13 +1898,14 @@ public class RadioManager {
 
     /**
      * Open an interface to control a tuner on a given broadcast radio module.
-     * Optionally selects and applies the configuration passed as "config" argument.
+     *
+     * <p>Optionally selects and applies the configuration passed as "config" argument.
      * @param moduleId radio module identifier {@link ModuleProperties#getId()}. Mandatory.
      * @param config desired band and configuration to apply when enabling the hardware module.
      * optional, can be null.
      * @param withAudio {@code true} to request a tuner with an audio source.
      * This tuner is intended for live listening or recording or a radio program.
-     * If {@code false}, the tuner can only be used to retrieve program informations.
+     * If {@code false}, the tuner can only be used to retrieve program information.
      * @param callback {@link RadioTuner.Callback} interface. Mandatory.
      * @param handler the Handler on which the callbacks will be received.
      * Can be null if default handler is OK.
@@ -1860,7 +1987,8 @@ public class RadioManager {
      * Removes previously registered announcement listener.
      *
      * @param listener announcement listener, previously registered with
-     *        {@link addAnnouncementListener}
+     *        {@link #addAnnouncementListener(Executor, Set, Announcement.OnListUpdatedListener)}
+     *        or {@link #addAnnouncementListener(Set, Announcement.OnListUpdatedListener)}
      */
     @RequiresPermission(Manifest.permission.ACCESS_BROADCAST_RADIO)
     public void removeAnnouncementListener(@NonNull Announcement.OnListUpdatedListener listener) {

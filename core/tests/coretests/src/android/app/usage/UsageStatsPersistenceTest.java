@@ -18,8 +18,7 @@ package android.app.usage;
 
 import static junit.framework.Assert.fail;
 
-import android.test.suitebuilder.annotation.SmallTest;
-
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ArrayUtils;
@@ -72,7 +71,7 @@ public class UsageStatsPersistenceTest {
             "mShortcutId", "mShortcutIdToken", "mBucketAndReason", "mInstanceId",
             "mNotificationChannelId", "mNotificationChannelIdToken", "mTaskRootPackage",
             "mTaskRootPackageToken", "mTaskRootClass", "mTaskRootClassToken", "mLocusId",
-            "mLocusIdToken"};
+            "mLocusIdToken", "mExtras", "mUserInteractionExtrasToken"};
     // All fields in this list are defined in UsageEvents.Event but not persisted
     private static final String[] USAGEEVENTS_IGNORED_FIELDS = {"mAction", "mContentAnnotations",
             "mContentType", "DEVICE_EVENT_PACKAGE_NAME", "FLAG_IS_PACKAGE_INSTANT_APP",

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.biometrics.domain.interactor
 
 import android.hardware.biometrics.AuthenticateOptions
@@ -6,21 +22,18 @@ import android.hardware.biometrics.IBiometricContextListener.FoldState
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.display.data.repository.DeviceStateRepository
+import com.android.systemui.display.data.repository.fakeDeviceStateRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
-import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
-import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
-import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
-import com.android.systemui.unfold.updates.FOLD_UPDATE_START_OPENING
-import com.android.systemui.unfold.updates.FoldStateProvider
-import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -28,36 +41,30 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class LogContextInteractorImplTest : SysuiTestCase() {
-
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
 
-    private val testScope = TestScope()
-
-    @Mock private lateinit var foldProvider: FoldStateProvider
-
-    private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val deviceStateRepository = kosmos.fakeDeviceStateRepository
+    private val udfpsOverlayInteractor = kosmos.udfpsOverlayInteractor
+    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
 
     private lateinit var interactor: LogContextInteractorImpl
 
     @Before
     fun setup() {
-        keyguardTransitionRepository = FakeKeyguardTransitionRepository()
         interactor =
             LogContextInteractorImpl(
                 testScope.backgroundScope,
-                foldProvider,
-                KeyguardTransitionInteractor(
-                    keyguardTransitionRepository,
-                    testScope.backgroundScope
-                ),
+                deviceStateRepository,
+                kosmos.keyguardTransitionInteractor,
+                udfpsOverlayInteractor,
             )
     }
 
@@ -161,39 +168,50 @@ class LogContextInteractorImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun isHardwareIgnoringTouchesChanges() =
+        testScope.runTest {
+            val isHardwareIgnoringTouches by collectLastValue(interactor.isHardwareIgnoringTouches)
+
+            udfpsOverlayInteractor.setHandleTouches(true)
+            assertThat(isHardwareIgnoringTouches).isFalse()
+
+            udfpsOverlayInteractor.setHandleTouches(false)
+            assertThat(isHardwareIgnoringTouches).isTrue()
+        }
+
+    @Test
     fun foldStateChanges() =
         testScope.runTest {
-            val foldState = collectLastValue(interactor.foldState)
-            runCurrent()
-            val listener = foldProvider.captureListener()
+            val foldState by collectLastValue(interactor.foldState)
 
-            listener.onFoldUpdate(FOLD_UPDATE_START_OPENING)
-            assertThat(foldState()).isEqualTo(FoldState.UNKNOWN)
+            deviceStateRepository.emit(DeviceStateRepository.DeviceState.HALF_FOLDED)
+            assertThat(foldState).isEqualTo(FoldState.HALF_OPENED)
 
-            listener.onFoldUpdate(FOLD_UPDATE_FINISH_HALF_OPEN)
-            assertThat(foldState()).isEqualTo(FoldState.HALF_OPENED)
+            deviceStateRepository.emit(DeviceStateRepository.DeviceState.CONCURRENT_DISPLAY)
+            assertThat(foldState).isEqualTo(FoldState.FULLY_OPENED)
 
-            listener.onFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN)
-            assertThat(foldState()).isEqualTo(FoldState.FULLY_OPENED)
+            deviceStateRepository.emit(DeviceStateRepository.DeviceState.UNFOLDED)
+            assertThat(foldState).isEqualTo(FoldState.FULLY_OPENED)
 
-            listener.onFoldUpdate(FOLD_UPDATE_START_CLOSING)
-            assertThat(foldState()).isEqualTo(FoldState.FULLY_OPENED)
+            deviceStateRepository.emit(DeviceStateRepository.DeviceState.FOLDED)
+            assertThat(foldState).isEqualTo(FoldState.FULLY_CLOSED)
 
-            listener.onFoldUpdate(FOLD_UPDATE_FINISH_CLOSED)
-            assertThat(foldState()).isEqualTo(FoldState.FULLY_CLOSED)
+            deviceStateRepository.emit(DeviceStateRepository.DeviceState.REAR_DISPLAY)
+            assertThat(foldState).isEqualTo(FoldState.FULLY_OPENED)
+
+            deviceStateRepository.emit(DeviceStateRepository.DeviceState.UNKNOWN)
+            assertThat(foldState).isEqualTo(FoldState.UNKNOWN)
         }
 
     @Test
     fun contextSubscriberChanges() =
         testScope.runTest {
-            runCurrent()
-            val foldListener = foldProvider.captureListener()
-            foldListener.onFoldUpdate(FOLD_UPDATE_START_CLOSING)
-            foldListener.onFoldUpdate(FOLD_UPDATE_FINISH_CLOSED)
+            deviceStateRepository.emit(DeviceStateRepository.DeviceState.FOLDED)
             keyguardTransitionRepository.startTransitionTo(KeyguardState.AOD)
 
             var folded: Int? = null
             var displayState: Int? = null
+            var ignoreTouches: Boolean? = null
             val job =
                 interactor.addBiometricContextListener(
                     object : IBiometricContextListener.Stub() {
@@ -204,25 +222,34 @@ class LogContextInteractorImplTest : SysuiTestCase() {
                         override fun onDisplayStateChanged(newDisplayState: Int) {
                             displayState = newDisplayState
                         }
+
+                        override fun onHardwareIgnoreTouchesChanged(newIgnoreTouches: Boolean) {
+                            ignoreTouches = newIgnoreTouches
+                        }
                     }
                 )
             runCurrent()
 
             assertThat(folded).isEqualTo(FoldState.FULLY_CLOSED)
             assertThat(displayState).isEqualTo(AuthenticateOptions.DISPLAY_STATE_AOD)
+            assertThat(ignoreTouches).isFalse()
 
-            foldListener.onFoldUpdate(FOLD_UPDATE_START_OPENING)
-            foldListener.onFoldUpdate(FOLD_UPDATE_FINISH_HALF_OPEN)
+            deviceStateRepository.emit(DeviceStateRepository.DeviceState.HALF_FOLDED)
             keyguardTransitionRepository.startTransitionTo(KeyguardState.LOCKSCREEN)
             runCurrent()
 
             assertThat(folded).isEqualTo(FoldState.HALF_OPENED)
             assertThat(displayState).isEqualTo(AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN)
 
+            udfpsOverlayInteractor.setHandleTouches(false)
+            runCurrent()
+
+            assertThat(ignoreTouches).isTrue()
+
             job.cancel()
 
             // stale updates should be ignored
-            foldListener.onFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN)
+            deviceStateRepository.emit(DeviceStateRepository.DeviceState.UNFOLDED)
             keyguardTransitionRepository.startTransitionTo(KeyguardState.AOD)
             runCurrent()
 
@@ -233,8 +260,3 @@ class LogContextInteractorImplTest : SysuiTestCase() {
 
 private suspend fun FakeKeyguardTransitionRepository.startTransitionTo(newState: KeyguardState) =
     sendTransitionStep(TransitionStep(to = newState, transitionState = TransitionState.STARTED))
-
-private fun FoldStateProvider.captureListener() =
-    withArgCaptor<FoldStateProvider.FoldUpdatesListener> {
-        verify(this@captureListener).addCallback(capture())
-    }

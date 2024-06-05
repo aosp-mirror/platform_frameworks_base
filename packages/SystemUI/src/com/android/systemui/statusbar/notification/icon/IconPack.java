@@ -31,9 +31,9 @@ public final class IconPack {
     @Nullable private final StatusBarIconView mStatusBarIcon;
     @Nullable private final StatusBarIconView mShelfIcon;
     @Nullable private final StatusBarIconView mAodIcon;
-    @Nullable private final StatusBarIconView mCenteredIcon;
 
     @Nullable private StatusBarIcon mSmallIconDescriptor;
+    @Nullable private StatusBarIcon mAppIconDescriptor;
     @Nullable private StatusBarIcon mPeopleAvatarDescriptor;
 
     private boolean mIsImportantConversation;
@@ -43,7 +43,7 @@ public final class IconPack {
      * haven't been inflated yet or there was an error while inflating them).
      */
     public static IconPack buildEmptyPack(@Nullable IconPack fromSource) {
-        return new IconPack(false, null, null, null, null, fromSource);
+        return new IconPack(false, null, null, null, fromSource);
     }
 
     /**
@@ -53,9 +53,8 @@ public final class IconPack {
             @NonNull StatusBarIconView statusBarIcon,
             @NonNull StatusBarIconView shelfIcon,
             @NonNull StatusBarIconView aodIcon,
-            @Nullable StatusBarIconView centeredIcon,
             @Nullable IconPack source) {
-        return new IconPack(true, statusBarIcon, shelfIcon, aodIcon, centeredIcon, source);
+        return new IconPack(true, statusBarIcon, shelfIcon, aodIcon, source);
     }
 
     private IconPack(
@@ -63,12 +62,10 @@ public final class IconPack {
             @Nullable StatusBarIconView statusBarIcon,
             @Nullable StatusBarIconView shelfIcon,
             @Nullable StatusBarIconView aodIcon,
-            @Nullable StatusBarIconView centeredIcon,
             @Nullable IconPack source) {
         mAreIconsAvailable = areIconsAvailable;
         mStatusBarIcon = statusBarIcon;
         mShelfIcon = shelfIcon;
-        mCenteredIcon = centeredIcon;
         mAodIcon = aodIcon;
         if (source != null) {
             mIsImportantConversation = source.mIsImportantConversation;
@@ -89,11 +86,6 @@ public final class IconPack {
     @Nullable
     public StatusBarIconView getShelfIcon() {
         return mShelfIcon;
-    }
-
-    @Nullable
-    public StatusBarIconView getCenteredIcon() {
-        return mCenteredIcon;
     }
 
     /** The version of the icon that's shown when pulsing (in AOD). */
@@ -118,6 +110,15 @@ public final class IconPack {
 
     void setPeopleAvatarDescriptor(@Nullable StatusBarIcon peopleAvatarDescriptor) {
         mPeopleAvatarDescriptor = peopleAvatarDescriptor;
+    }
+
+    @Nullable
+    StatusBarIcon getAppIconDescriptor() {
+        return mAppIconDescriptor;
+    }
+
+    void setAppIconDescriptor(@Nullable StatusBarIcon appIconDescriptor) {
+        mAppIconDescriptor = appIconDescriptor;
     }
 
     boolean isImportantConversation() {

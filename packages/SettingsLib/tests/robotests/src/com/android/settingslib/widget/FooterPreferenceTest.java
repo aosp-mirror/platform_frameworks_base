@@ -28,7 +28,7 @@ import android.widget.TextView;
 
 import androidx.preference.PreferenceViewHolder;
 
-import com.android.settingslib.R;
+import com.android.settingslib.widget.preference.footer.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,9 +64,8 @@ public class FooterPreferenceTest {
 
         mFooterPreference.onBindViewHolder(holder);
 
-        assertThat(((TextView) holder.findViewById(
-                R.id.settingslib_learn_more)).getText().toString())
-                .isEqualTo("Custom learn more");
+        TextView learnMoreView = (TextView) holder.findViewById(R.id.settingslib_learn_more);
+        assertThat(learnMoreView.getText().toString()).isEqualTo("Custom learn more");
     }
 
     @Test
@@ -95,7 +94,7 @@ public class FooterPreferenceTest {
     public void onBindViewHolder_whenTitleIsNull_shouldNotRaiseNpe() {
         PreferenceViewHolder viewHolder = spy(PreferenceViewHolder.createInstanceForTests(
                 LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null)));
-        when(viewHolder.findViewById(R.id.title)).thenReturn(null);
+        when(viewHolder.findViewById(androidx.core.R.id.title)).thenReturn(null);
 
         Throwable actualThrowable = null;
         try {

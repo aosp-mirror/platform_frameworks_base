@@ -36,6 +36,7 @@ import dalvik.annotation.optimization.FastNative;
  * href="{@docRoot}tools/debugging/systrace.html">Analyzing Display and Performance
  * with Systrace</a>.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Trace {
     /*
      * Writes trace events to the kernel trace buffer.  These trace events can be
@@ -123,9 +124,25 @@ public final class Trace {
 
     @UnsupportedAppUsage
     @CriticalNative
-    private static native long nativeGetEnabledTags();
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static native boolean nativeIsTagEnabled(long tag);
+    @android.ravenwood.annotation.RavenwoodReplace
     private static native void nativeSetAppTracingAllowed(boolean allowed);
+    @android.ravenwood.annotation.RavenwoodReplace
     private static native void nativeSetTracingEnabled(boolean allowed);
+
+    private static boolean nativeIsTagEnabled$ravenwood(long traceTag) {
+        // Tracing currently completely disabled under Ravenwood
+        return false;
+    }
+
+    private static void nativeSetAppTracingAllowed$ravenwood(boolean allowed) {
+        // Tracing currently completely disabled under Ravenwood
+    }
+
+    private static void nativeSetTracingEnabled$ravenwood(boolean allowed) {
+        // Tracing currently completely disabled under Ravenwood
+    }
 
     @FastNative
     private static native void nativeTraceCounter(long tag, String name, long value);
@@ -147,6 +164,8 @@ public final class Trace {
     private static native void nativeInstant(long tag, String name);
     @FastNative
     private static native void nativeInstantForTrack(long tag, String trackName, String name);
+    @FastNative
+    private static native void nativeRegisterWithPerfetto();
 
     private Trace() {
     }
@@ -162,8 +181,7 @@ public final class Trace {
     @UnsupportedAppUsage
     @SystemApi(client = MODULE_LIBRARIES)
     public static boolean isTagEnabled(long traceTag) {
-        long tags = nativeGetEnabledTags();
-        return (tags & traceTag) != 0;
+        return nativeIsTagEnabled(traceTag);
     }
 
     /**
@@ -444,7 +462,8 @@ public final class Trace {
      * these characters they will be replaced with a space character in the trace.
      *
      * @param sectionName The name of the code section to appear in the trace.  This may be at
-     * most 127 Unicode code units long.
+     *                    most 127 Unicode code units long.
+     * @throws IllegalArgumentException if {@code sectionName} is too long.
      */
     public static void beginSection(@NonNull String sectionName) {
         if (isTagEnabled(TRACE_TAG_APP)) {
@@ -504,5 +523,16 @@ public final class Trace {
         if (isTagEnabled(TRACE_TAG_APP)) {
             nativeTraceCounter(TRACE_TAG_APP, counterName, counterValue);
         }
+    }
+
+    /**
+     * Initialize the perfetto SDK. This must be called before any tracing
+     * calls so that perfetto SDK can be used, otherwise libcutils would be
+     * used.
+     *
+     * @hide
+     */
+    public static void registerWithPerfetto() {
+        nativeRegisterWithPerfetto();
     }
 }

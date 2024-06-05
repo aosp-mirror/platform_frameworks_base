@@ -19,14 +19,20 @@ package com.android.settingslib;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
 import static android.app.admin.DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+import static android.app.role.RoleManager.ROLE_FINANCED_DEVICE_KIOSK;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
+import static com.android.settingslib.Utils.getColorAttrDefaultColor;
+
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.ecm.EnhancedConfirmationManager;
+import android.app.admin.PackagePolicy;
+import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -45,11 +51,14 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.widget.LockPatternUtils;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -60,6 +69,10 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
 
     private static final String LOG_TAG = "RestrictedLockUtils";
     private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
+
+    // TODO(b/281701062): reference role name from role manager once its exposed.
+    private static final String ROLE_DEVICE_LOCK_CONTROLLER =
+            "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER";
 
     /**
      * @return drawables for displaying with settings that are locked by a device admin.
@@ -76,6 +89,70 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
 
         restrictedPadlock.setBounds(0, 0, iconSize, iconSize);
         return restrictedPadlock;
+    }
+
+    /**
+     * Checks if a given permission requires additional confirmation for the given package
+     *
+     * @return An intent to show the user if additional confirmation is required, null otherwise
+     */
+    @Nullable
+    public static Intent checkIfRequiresEnhancedConfirmation(@NonNull Context context,
+            @NonNull String settingIdentifier, @NonNull String packageName) {
+
+        if (!android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                || !android.security.Flags.extendEcmToAllSettings()) {
+            return null;
+        }
+
+        EnhancedConfirmationManager ecManager = (EnhancedConfirmationManager) context
+                .getSystemService(Context.ECM_ENHANCED_CONFIRMATION_SERVICE);
+        try {
+            if (ecManager.isRestricted(packageName, settingIdentifier)) {
+                return ecManager.createRestrictedSettingDialogIntent(
+                        packageName, settingIdentifier);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(LOG_TAG, "package not found: " + packageName, e);
+        }
+
+        return null;
+    }
+
+    /**
+     * <p>This is {@code true} when the setting is a protected setting (i.e., a sensitive resource),
+     * and the app is restricted (i.e., considered dangerous), and the user has not yet cleared the
+     * app's restriction status (i.e., by clicking "Allow restricted settings" for this app).     *
+     */
+    public static boolean isEnhancedConfirmationRestricted(@NonNull Context context,
+            @NonNull String settingIdentifier, @NonNull String packageName) {
+        if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                && android.security.Flags.extendEcmToAllSettings()) {
+            try {
+                return context.getSystemService(EnhancedConfirmationManager.class)
+                        .isRestricted(packageName, settingIdentifier);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(LOG_TAG, "Exception when retrieving package:" + packageName, e);
+                return false;
+            }
+        } else {
+            try {
+                if (!settingIdentifier.equals(AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE)) {
+                    return false;
+                }
+                int uid = context.getPackageManager().getPackageUid(packageName, 0);
+                final int mode = context.getSystemService(AppOpsManager.class)
+                        .noteOpNoThrow(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
+                        uid, packageName);
+                final boolean ecmEnabled = context.getResources().getBoolean(
+                        com.android.internal.R.bool.config_enhancedConfirmationModeEnabled);
+                return ecmEnabled && mode != AppOpsManager.MODE_ALLOWED
+                        && mode != AppOpsManager.MODE_DEFAULT;
+            } catch (Exception e) {
+                // Fallback in case if app ops is not available in testing.
+                return false;
+            }
+        }
     }
 
     /**
@@ -125,7 +202,8 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
             return null;
         }
 
-        final EnforcedAdmin admin = getProfileOrDeviceOwner(context, enforcingUser.getUserHandle());
+        final EnforcedAdmin admin =
+                getProfileOrDeviceOwner(context, userRestriction, enforcingUser.getUserHandle());
         if (admin != null) {
             return admin;
         }
@@ -409,7 +487,7 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
      */
     public static EnforcedAdmin checkIfUsbDataSignalingIsDisabled(Context context, int userId) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        if (dpm == null || dpm.isUsbDataSignalingEnabledForUser(userId)) {
+        if (dpm == null || dpm.isUsbDataSignalingEnabled()) {
             return null;
         } else {
             EnforcedAdmin admin = getProfileOrDeviceOwner(context, getUserHandleOf(userId));
@@ -422,16 +500,27 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
     }
 
     /**
-     * Check if {@param packageName} is restricted by the profile or device owner from using
-     * metered data.
+     * Check if user control over metered data usage of {@code packageName} is disabled by the
+     * profile or device owner.
      *
      * @return EnforcedAdmin object containing the enforced admin component and admin user details,
-     * or {@code null} if the {@param packageName} is not restricted.
+     * or {@code null} if the user control is not disabled.
      */
-    public static EnforcedAdmin checkIfMeteredDataRestricted(Context context,
+    public static EnforcedAdmin checkIfMeteredDataUsageUserControlDisabled(Context context,
             String packageName, int userId) {
+        RoleManager roleManager = context.getSystemService(RoleManager.class);
+        UserHandle userHandle = getUserHandleOf(userId);
+        if (roleManager.getRoleHoldersAsUser(ROLE_FINANCED_DEVICE_KIOSK, userHandle)
+                .contains(packageName)
+                || roleManager.getRoleHoldersAsUser(ROLE_DEVICE_LOCK_CONTROLLER, userHandle)
+                .contains(packageName)) {
+            // There is no actual device admin for a financed device, but metered data usage
+            // control should still be disabled for both controller and kiosk apps.
+            return new EnforcedAdmin();
+        }
+
         final EnforcedAdmin enforcedAdmin = getProfileOrDeviceOwner(context,
-                getUserHandleOf(userId));
+                userHandle);
         if (enforcedAdmin == null) {
             return null;
         }
@@ -638,7 +727,8 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         removeExistingRestrictedSpans(sb);
 
         if (admin != null) {
-            final int disabledColor = context.getColor(R.color.disabled_text_color);
+            final int disabledColor = getColorAttrDefaultColor(context,
+                    android.R.attr.textColorHint);
             sb.setSpan(new ForegroundColorSpan(disabledColor), 0, sb.length(),
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             ImageSpan image = new RestrictedLockImageSpan(context);
@@ -732,6 +822,29 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         EnforcedAdmin admin =
                 RestrictedLockUtils.getProfileOrDeviceOwner(
                         context, UserHandle.of(UserHandle.USER_SYSTEM));
+        if (admin != null) {
+            return admin;
+        }
+        int profileId = getManagedProfileId(context, UserHandle.USER_SYSTEM);
+        return RestrictedLockUtils.getProfileOrDeviceOwner(context, UserHandle.of(profileId));
+    }
+
+    /**
+     * Check if there are restrictions on an application from being a Credential Manager provider.
+     *
+     * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
+     * or {@code null} if the setting is not managed.
+     */
+    public static @Nullable EnforcedAdmin checkIfApplicationCanBeCredentialManagerProvider(
+            @NonNull Context context, @NonNull String packageName) {
+        final DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        final PackagePolicy pp = dpm.getCredentialManagerPolicy();
+
+        if (pp == null || pp.isPackageAllowed(packageName, new HashSet<>())) {
+            return null;
+        }
+
+        EnforcedAdmin admin = RestrictedLockUtilsInternal.getDeviceOwner(context);
         if (admin != null) {
             return admin;
         }

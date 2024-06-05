@@ -260,7 +260,7 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
     status_t opStatus =
         mp->setDataSource(
                 httpService,
-                pathStr,
+                pathStr.c_str(),
                 headersVector.size() > 0? &headersVector : NULL);
 
     process_media_player_call(
@@ -1234,7 +1234,7 @@ static bool throwDrmExceptionAsNecessary(JNIEnv *env, status_t err, const char *
     String8 vendorMessage;
     if (err >= ERROR_DRM_VENDOR_MIN && err <= ERROR_DRM_VENDOR_MAX) {
         vendorMessage = String8::format("DRM vendor-defined error: %d", err);
-        drmMessage = vendorMessage.string();
+        drmMessage = vendorMessage.c_str();
     }
 
     if (err == BAD_VALUE) {
@@ -1260,7 +1260,7 @@ static bool throwDrmExceptionAsNecessary(JNIEnv *env, status_t err, const char *
                 msg = drmMessage;
             } else {
                 errbuf = String8::format("%s: %s", msg, drmMessage);
-                msg = errbuf.string();
+                msg = errbuf.c_str();
             }
         }
         throwDrmStateException(env, msg, err);

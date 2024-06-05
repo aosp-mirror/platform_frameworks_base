@@ -20,7 +20,8 @@
 #include "renderthread/EglManager.h"
 #include "tests/common/TestUtils.h"
 
-#include <SkImagePriv.h>
+#include <SkImageAndroid.h>
+#include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include "include/gpu/GpuTypes.h" // from Skia
 
 using namespace android;
@@ -34,7 +35,7 @@ static size_t getCacheUsage(GrDirectContext* grContext) {
 }
 
 // TOOD(258700630): fix this test and re-enable
-RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, DISABLED_trimMemory) {
+RENDERTHREAD_TEST(CacheManager, DISABLED_trimMemory) {
     int32_t width = DeviceInfo::get()->getWidth();
     int32_t height = DeviceInfo::get()->getHeight();
     GrDirectContext* grContext = renderThread.getGrContext();
@@ -46,8 +47,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, DISABLED_trimMemory) {
 
     while (getCacheUsage(grContext) <= renderThread.cacheManager().getBackgroundCacheSize()) {
         SkImageInfo info = SkImageInfo::MakeA8(width, height);
-        sk_sp<SkSurface> surface = SkSurface::MakeRenderTarget(grContext, skgpu::Budgeted::kYes,
-                                                               info);
+        sk_sp<SkSurface> surface = SkSurfaces::RenderTarget(grContext, skgpu::Budgeted::kYes,
+                                                            info);
         surface->getCanvas()->drawColor(SK_AlphaTRANSPARENT);
 
         grContext->flushAndSubmit();
@@ -57,9 +58,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, DISABLED_trimMemory) {
 
     // create an image and pin it so that we have something with a unique key in the cache
     sk_sp<Bitmap> bitmap = Bitmap::allocateHeapBitmap(SkImageInfo::MakeA8(width, height));
-    sk_sp<SkImage> image = bitmap->makeImage();
-    ASSERT_TRUE(SkImage_pinAsTexture(image.get(), grContext));
-
+    sk_sp<SkImage> image = bitmap->makeImage(); // calls skgpu::ganesh::PinAsTexture under the hood.
+    ASSERT_TRUE(skgpu::ganesh::PinAsTexture(grContext, image.get()));
     // attempt to trim all memory while we still hold strong refs
     renderThread.cacheManager().trimMemory(TrimLevel::COMPLETE);
     ASSERT_TRUE(0 == grContext->getResourceCachePurgeableBytes());
@@ -71,7 +71,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, DISABLED_trimMemory) {
     }
 
     // unpin the image which should add a unique purgeable key to the cache
-    SkImage_unpinAsTexture(image.get(), grContext);
+    skgpu::ganesh::UnpinTexture(grContext, image.get());
 
     // verify that we have enough purgeable bytes
     const size_t purgeableBytes = grContext->getResourceCachePurgeableBytes();

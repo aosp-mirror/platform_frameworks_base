@@ -59,6 +59,7 @@ import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.usage.AppIdleHistory.STANDBY_BUCKET_UNKNOWN;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -129,6 +130,8 @@ import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.usage.AppIdleHistory.AppUsageHistory;
+import com.android.tools.r8.keepanno.annotations.KeepItemKind;
+import com.android.tools.r8.keepanno.annotations.UsedByReflection;
 
 import libcore.util.EmptyArray;
 
@@ -587,6 +590,8 @@ public class AppStandbyController
         }
     }
 
+    // This constructor is reflectively invoked from framework code in AppStandbyInternal.
+    @UsedByReflection(kind = KeepItemKind.CLASS_AND_METHODS)
     public AppStandbyController(Context context) {
         this(new Injector(context, AppSchedulingModuleThread.get().getLooper()));
     }
@@ -670,7 +675,8 @@ public class AppStandbyController
                         /*packageName=*/ null,
                         new IAppOpsCallback.Stub() {
                             @Override
-                            public void opChanged(int op, int uid, String packageName) {
+                            public void opChanged(int op, int uid, String packageName,
+                                    String persistentDeviceId) {
                                 final int userId = UserHandle.getUserId(uid);
                                 synchronized (mSystemExemptionAppOpMode) {
                                     mSystemExemptionAppOpMode.delete(uid);
@@ -701,7 +707,7 @@ public class AppStandbyController
                 initializeDefaultsForSystemApps(UserHandle.USER_SYSTEM);
             }
 
-            if (mPendingOneTimeCheckIdleStates) {
+            if (!Flags.avoidIdleCheck() && mPendingOneTimeCheckIdleStates) {
                 postOneTimeCheckIdleStates();
             }
 
@@ -1015,7 +1021,7 @@ public class AppStandbyController
                                         == REASON_SUB_DEFAULT_APP_RESTORED)) {
                             newBucket = getBucketForLocked(packageName, userId, elapsedRealtime);
                             if (DEBUG) {
-                                Slog.d(TAG, "Evaluated AOSP newBucket = "
+                                Slog.d(TAG, "Evaluated " + packageName + " newBucket = "
                                         + standbyBucketToString(newBucket));
                             }
                             reason = REASON_MAIN_TIMEOUT;
@@ -1983,6 +1989,11 @@ public class AppStandbyController
                 mAdminProtectedPackages.put(userId, packageNames);
             }
         }
+        if (android.app.admin.flags.Flags.disallowUserControlBgUsageFix()) {
+            if (!Flags.avoidIdleCheck()) {
+                postCheckIdleStates(userId);
+            }
+        }
     }
 
     @Override
@@ -2146,6 +2157,15 @@ public class AppStandbyController
         }
     }
 
+    /**
+     * Flush the handler.
+     * Returns true if successfully flushed within the timeout, otherwise return false.
+     */
+    @VisibleForTesting
+    boolean flushHandler(@DurationMillisLong long timeoutMillis) {
+        return mHandler.runWithScissors(() -> {}, timeoutMillis);
+    }
+
     @Override
     public void flushToDisk() {
         synchronized (mAppIdleLock) {
@@ -2258,7 +2278,8 @@ public class AppStandbyController
             }
             synchronized (mSystemExemptionAppOpMode) {
                 if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
-                    mSystemExemptionAppOpMode.delete(UserHandle.getUid(userId, getAppId(pkgName)));
+                    final int uid = intent.getIntExtra(Intent.EXTRA_UID, Process.INVALID_UID);
+                    mSystemExemptionAppOpMode.delete(uid);
                 }
             }
 
@@ -2373,9 +2394,14 @@ public class AppStandbyController
             final boolean isHeadLess = !systemLauncherActivities.contains(pkg);
 
             if (updateHeadlessSystemAppCache(pkg, isHeadLess)) {
-                mHandler.obtainMessage(MSG_CHECK_PACKAGE_IDLE_STATE,
-                        UserHandle.USER_SYSTEM, -1, pkg)
-                    .sendToTarget();
+                if (!Flags.avoidIdleCheck()) {
+                    // Checking idle state for the each individual headless system app
+                    // during the boot up is not necessary, a full idle check for all
+                    // usres will be scheduled after boot completed.
+                    mHandler.obtainMessage(MSG_CHECK_PACKAGE_IDLE_STATE,
+                                    UserHandle.USER_SYSTEM, -1, pkg)
+                            .sendToTarget();
+                }
             }
         }
         final long end = SystemClock.uptimeMillis();
@@ -2419,6 +2445,11 @@ public class AppStandbyController
 
     @Override
     public void dumpState(String[] args, PrintWriter pw) {
+        pw.println("Flags: ");
+        pw.println("    " + Flags.FLAG_AVOID_IDLE_CHECK
+                + ": " + Flags.avoidIdleCheck());
+        pw.println();
+
         synchronized (mCarrierPrivilegedLock) {
             pw.println("Carrier privileged apps (have=" + mHaveCarrierPrivilegedApps
                     + "): " + mCarrierPrivilegedApps);
@@ -2534,6 +2565,38 @@ public class AppStandbyController
                 pw.print("  ");
                 pw.print(mSystemPackagesAppIds.get(i));
                 if (i != 0) pw.println(",");
+            }
+        }
+        pw.println("]");
+        pw.println();
+
+        pw.println("mActiveAdminApps=[");
+        synchronized (mActiveAdminApps) {
+            final int size = mActiveAdminApps.size();
+            for (int i = 0; i < size; ++i) {
+                final int userId = mActiveAdminApps.keyAt(i);
+                pw.print(" ");
+                pw.print(userId);
+                pw.print(": ");
+                pw.print(mActiveAdminApps.valueAt(i));
+                if (i != size - 1) pw.print(",");
+                pw.println();
+            }
+        }
+        pw.println("]");
+        pw.println();
+
+        pw.println("mAdminProtectedPackages=[");
+        synchronized (mAdminProtectedPackages) {
+            final int size = mAdminProtectedPackages.size();
+            for (int i = 0; i < size; ++i) {
+                final int userId = mAdminProtectedPackages.keyAt(i);
+                pw.print(" ");
+                pw.print(userId);
+                pw.print(": ");
+                pw.print(mAdminProtectedPackages.valueAt(i));
+                if (i != size - 1) pw.print(",");
+                pw.println();
             }
         }
         pw.println("]");

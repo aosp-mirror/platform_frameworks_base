@@ -32,6 +32,7 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
 
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class FastPrintWriter extends PrintWriter {
     private static class DummyWriter extends Writer {
         @Override

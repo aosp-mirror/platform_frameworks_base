@@ -172,7 +172,7 @@ message SystemPropertiesProto {
         optional Status tombstoned = 29;
         optional Status ueventd = 30;
         optional Status update_engine = 31;
-        optional Status update_verifier_nonencrypted = 32;
+        optional Status update_verifier = 32;
         optional Status virtual_touchpad = 33;
         optional Status vndservicemanager = 34;
         optional Status vold = 35;
@@ -558,3 +558,4 @@ message SystemPropertiesProto {
 
     // Next Tag: 32
 }
+

@@ -48,6 +48,7 @@ import java.util.function.Consumer;
  * be accessed or modified concurrently by multiple threads or processes. The caller is responsible
  * for ensuring appropriate mutual exclusion invariants whenever it accesses the file.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class AtomicFile {
     private static final String LOG_TAG = "AtomicFile";
 
@@ -68,6 +69,8 @@ public class AtomicFile {
      * @hide Internal constructor that also allows you to have the class
      * automatically log commit events.
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy =
+            SystemConfigFileCommitEventLogger.class)
     public AtomicFile(File baseName, String commitTag) {
         this(baseName, new SystemConfigFileCommitEventLogger(commitTag));
     }
@@ -135,10 +138,7 @@ public class AtomicFile {
     @Deprecated
     public FileOutputStream startWrite(long startTime) throws IOException {
         if (mCommitEventLogger != null) {
-            if (startTime != 0) {
-                mCommitEventLogger.setStartTime(startTime);
-            }
-
+            mCommitEventLogger.setStartTime(startTime);
             mCommitEventLogger.onStartWrite();
         }
 

@@ -18,9 +18,8 @@ package com.android.settingslib.spaprivileged.template.app
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.os.Process
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.ui.text.AnnotatedString
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.rememberContext
@@ -37,10 +36,10 @@ interface TogglePermissionAppListModel<T : AppRecord> {
     val footerResId: Int
     val switchRestrictionKeys: List<String>
         get() = emptyList()
-    @Composable
-    fun footerContent(): (@Composable () -> Unit)? {
-        return null
-    }
+
+    val enhancedConfirmationKey: String?
+        get() = null
+
     /**
      * Loads the extra info for the App List, and generates the [AppRecord] List.
      *
@@ -68,7 +67,7 @@ interface TogglePermissionAppListModel<T : AppRecord> {
      * Gets whether the permission is allowed for the given app.
      */
     @Composable
-    fun isAllowed(record: T): State<Boolean?>
+    fun isAllowed(record: T): () -> Boolean?
 
     /**
      * Gets whether the permission on / off is changeable for the given app.
@@ -79,7 +78,27 @@ interface TogglePermissionAppListModel<T : AppRecord> {
      * Sets whether the permission is allowed for the given app.
      */
     fun setAllowed(record: T, newAllowed: Boolean)
+
+    @Composable
+    fun InfoPageAdditionalContent(record: T, isAllowed: () -> Boolean?) {}
 }
+
+/**
+ * And if the given app has system or root UID.
+ *
+ * If true, the app gets all permissions, so the permission toggle always not changeable.
+ */
+fun AppRecord.isSystemOrRootUid(): Boolean = app.uid in listOf(Process.SYSTEM_UID, Process.ROOT_UID)
+
+/**
+ * Gets whether the permission on / off is changeable for the given app.
+ *
+ * And if the given app has system or root UID, it gets all permissions, so always not changeable.
+ */
+fun <T : AppRecord> TogglePermissionAppListModel<T>.isChangeableWithSystemUidCheck(
+    record: T,
+): Boolean = !record.isSystemOrRootUid() && isChangeable(record)
+
 
 interface TogglePermissionAppListProvider {
     val permissionType: String

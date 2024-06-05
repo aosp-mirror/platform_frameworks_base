@@ -70,6 +70,11 @@ class ViewHierarchyAnimator {
          * If a new layout change happens while an animation is already in progress, the animation
          * is updated to continue from the current values to the new end state.
          *
+         * By default, child views whole layout changes are animated as well. However, this can be
+         * controlled by [animateChildren]. If children are included, a set of [excludedViews] can
+         * be passed. If any dependent view from [rootView] matches an entry in this set, changes to
+         * that view will not be animated.
+         *
          * The animator continues to respond to layout changes until [stopAnimating] is called.
          *
          * Successive calls to this method override the previous settings ([interpolator] and
@@ -82,9 +87,18 @@ class ViewHierarchyAnimator {
         fun animate(
             rootView: View,
             interpolator: Interpolator = DEFAULT_INTERPOLATOR,
-            duration: Long = DEFAULT_DURATION
+            duration: Long = DEFAULT_DURATION,
+            animateChildren: Boolean = true,
+            excludedViews: Set<View> = emptySet()
         ): Boolean {
-            return animate(rootView, interpolator, duration, ephemeral = false)
+            return animate(
+                rootView,
+                interpolator,
+                duration,
+                ephemeral = false,
+                animateChildren = animateChildren,
+                excludedViews = excludedViews
+            )
         }
 
         /**
@@ -95,16 +109,27 @@ class ViewHierarchyAnimator {
         fun animateNextUpdate(
             rootView: View,
             interpolator: Interpolator = DEFAULT_INTERPOLATOR,
-            duration: Long = DEFAULT_DURATION
+            duration: Long = DEFAULT_DURATION,
+            animateChildren: Boolean = true,
+            excludedViews: Set<View> = emptySet()
         ): Boolean {
-            return animate(rootView, interpolator, duration, ephemeral = true)
+            return animate(
+                rootView,
+                interpolator,
+                duration,
+                ephemeral = true,
+                animateChildren = animateChildren,
+                excludedViews = excludedViews
+            )
         }
 
         private fun animate(
             rootView: View,
             interpolator: Interpolator,
             duration: Long,
-            ephemeral: Boolean
+            ephemeral: Boolean,
+            animateChildren: Boolean,
+            excludedViews: Set<View> = emptySet()
         ): Boolean {
             if (
                 !occupiesSpace(
@@ -119,7 +144,13 @@ class ViewHierarchyAnimator {
             }
 
             val listener = createUpdateListener(interpolator, duration, ephemeral)
-            addListener(rootView, listener, recursive = true)
+            addListener(
+                rootView,
+                listener,
+                recursive = true,
+                animateChildren = animateChildren,
+                excludedViews = excludedViews
+            )
             return true
         }
 
@@ -921,8 +952,12 @@ class ViewHierarchyAnimator {
         private fun addListener(
             view: View,
             listener: View.OnLayoutChangeListener,
-            recursive: Boolean = false
+            recursive: Boolean = false,
+            animateChildren: Boolean = true,
+            excludedViews: Set<View> = emptySet()
         ) {
+            if (excludedViews.contains(view)) return
+
             // Make sure that only one listener is active at a time.
             val previousListener = view.getTag(R.id.tag_layout_listener)
             if (previousListener != null && previousListener is View.OnLayoutChangeListener) {
@@ -931,9 +966,15 @@ class ViewHierarchyAnimator {
 
             view.addOnLayoutChangeListener(listener)
             view.setTag(R.id.tag_layout_listener, listener)
-            if (view is ViewGroup && recursive) {
+            if (animateChildren && view is ViewGroup && recursive) {
                 for (i in 0 until view.childCount) {
-                    addListener(view.getChildAt(i), listener, recursive = true)
+                    addListener(
+                        view.getChildAt(i),
+                        listener,
+                        recursive = true,
+                        animateChildren = animateChildren,
+                        excludedViews = excludedViews
+                    )
                 }
             }
         }

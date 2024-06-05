@@ -40,16 +40,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.hardware.input.InputManagerGlobal;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.KeyEvent;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.recents.OverviewProxyService;
 
 import org.junit.Before;
@@ -59,7 +60,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 @SmallTest
 public class KeyButtonViewTest extends SysuiTestCase {
@@ -76,6 +77,7 @@ public class KeyButtonViewTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
         mDependency.injectMockDependency(OverviewProxyService.class);
+        mDependency.injectMockDependency(AssistManager.class);
         mUiEventLogger = mDependency.injectMockDependency(UiEventLogger.class);
 
         TestableLooper.get(this).runWithLooper(() -> {

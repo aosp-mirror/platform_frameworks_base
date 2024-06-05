@@ -18,6 +18,13 @@ package com.android.systemui.common.ui.view;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.ViewGroup;
@@ -26,12 +33,17 @@ import android.widget.SeekBar;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Tests for {@link SeekBarWithIconButtonsView}
@@ -48,14 +60,22 @@ public class SeekBarWithIconButtonsViewTest extends SysuiTestCase {
     private SeekBar mSeekbar;
     private SeekBarWithIconButtonsView mIconDiscreteSliderLinearLayout;
 
+    @Mock
+    private OnSeekBarWithIconButtonsChangeListener mOnSeekBarChangeListener;
+
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
         mIconDiscreteSliderLinearLayout = new SeekBarWithIconButtonsView(mContext);
         mIconStart = mIconDiscreteSliderLinearLayout.findViewById(R.id.icon_start);
         mIconEnd = mIconDiscreteSliderLinearLayout.findViewById(R.id.icon_end);
         mIconStartFrame = mIconDiscreteSliderLinearLayout.findViewById(R.id.icon_start_frame);
         mIconEndFrame = mIconDiscreteSliderLinearLayout.findViewById(R.id.icon_end_frame);
         mSeekbar = mIconDiscreteSliderLinearLayout.findViewById(R.id.seekbar);
+
+        mIconDiscreteSliderLinearLayout.setOnSeekBarWithIconButtonsChangeListener(
+                mOnSeekBarChangeListener);
     }
 
     @Test
@@ -106,6 +126,49 @@ public class SeekBarWithIconButtonsViewTest extends SysuiTestCase {
         mIconStartFrame.performClick();
 
         assertThat(mSeekbar.getProgress()).isEqualTo(0);
+    }
+
+    @Test
+    public void setProgress_onlyOnProgressChangedTriggeredWithFromUserFalse() {
+        reset(mOnSeekBarChangeListener);
+        mIconDiscreteSliderLinearLayout.setProgress(1);
+
+        verify(mOnSeekBarChangeListener).onProgressChanged(
+                eq(mSeekbar), /* progress= */ eq(1), /* fromUser= */ eq(false));
+        verify(mOnSeekBarChangeListener, never()).onStartTrackingTouch(/* seekBar= */ any());
+        verify(mOnSeekBarChangeListener, never()).onStopTrackingTouch(/* seekBar= */ any());
+        verify(mOnSeekBarChangeListener, never()).onUserInteractionFinalized(
+                /* seekBar= */any(), /* control= */ anyInt());
+    }
+
+    @Test
+    public void clickIconEnd_triggerCallbacksInSequence() {
+        final int magnitude = mIconDiscreteSliderLinearLayout.getChangeMagnitude();
+        mIconDiscreteSliderLinearLayout.setProgress(0);
+        reset(mOnSeekBarChangeListener);
+
+        mIconEndFrame.performClick();
+
+        InOrder inOrder = Mockito.inOrder(mOnSeekBarChangeListener);
+        inOrder.verify(mOnSeekBarChangeListener).onProgressChanged(
+                eq(mSeekbar), /* progress= */ eq(magnitude), /* fromUser= */ eq(true));
+        inOrder.verify(mOnSeekBarChangeListener).onUserInteractionFinalized(
+                eq(mSeekbar), eq(OnSeekBarWithIconButtonsChangeListener.ControlUnitType.BUTTON));
+    }
+
+    @Test
+    public void clickIconStart_triggerCallbacksInSequence() {
+        final int magnitude = mIconDiscreteSliderLinearLayout.getChangeMagnitude();
+        mIconDiscreteSliderLinearLayout.setProgress(magnitude);
+        reset(mOnSeekBarChangeListener);
+
+        mIconStartFrame.performClick();
+
+        InOrder inOrder = Mockito.inOrder(mOnSeekBarChangeListener);
+        inOrder.verify(mOnSeekBarChangeListener).onProgressChanged(
+                eq(mSeekbar), /* progress= */ eq(0), /* fromUser= */ eq(true));
+        inOrder.verify(mOnSeekBarChangeListener).onUserInteractionFinalized(
+                eq(mSeekbar), eq(OnSeekBarWithIconButtonsChangeListener.ControlUnitType.BUTTON));
     }
 
     @Test

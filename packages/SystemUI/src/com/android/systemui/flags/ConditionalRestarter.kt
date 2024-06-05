@@ -19,13 +19,17 @@ package com.android.systemui.flags
 import android.util.Log
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.flags.ConditionalRestarter.Condition
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Named
-import kotlinx.coroutines.CoroutineDispatcher
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 
 /** Restarts the process after all passed in [Condition]s are true. */
@@ -36,20 +40,19 @@ constructor(
     private val conditions: Set<@JvmSuppressWildcards Condition>,
     @Named(RESTART_DELAY) private val restartDelaySec: Long,
     @Application private val applicationScope: CoroutineScope,
-    @Background private val backgroundDispatcher: CoroutineDispatcher,
+    @Background private val backgroundDispatcher: CoroutineContext,
 ) : Restarter {
 
-    private var restartJob: Job? = null
     private var pendingReason = ""
     private var androidRestartRequested = false
 
     override fun restartSystemUI(reason: String) {
-        Log.d(FeatureFlagsDebug.TAG, "SystemUI Restart requested. Restarting when idle.")
+        Log.d(FeatureFlagsClassicDebug.TAG, "SystemUI Restart requested. Restarting when idle.")
         scheduleRestart(reason)
     }
 
     override fun restartAndroid(reason: String) {
-        Log.d(FeatureFlagsDebug.TAG, "Android Restart requested. Restarting when idle.")
+        Log.d(FeatureFlagsClassicDebug.TAG, "Android Restart requested. Restarting when idle.")
         androidRestartRequested = true
         scheduleRestart(reason)
     }
@@ -57,17 +60,19 @@ constructor(
     private fun scheduleRestart(reason: String = "") {
         pendingReason = if (reason.isEmpty()) pendingReason else reason
 
-        if (conditions.all { c -> c.canRestartNow(this::scheduleRestart) }) {
-            if (restartJob == null) {
-                restartJob =
-                    applicationScope.launch(backgroundDispatcher) {
+        applicationScope.launch(backgroundDispatcher) {
+            combine(conditions.map { condition -> condition.canRestartNow }) { it.all { it } }
+                // Once all conditions are met, delay.
+                .transformLatest { allConditionsMet ->
+                    if (allConditionsMet) {
                         delay(TimeUnit.SECONDS.toMillis(restartDelaySec))
-                        restartNow()
+                        emit(Unit)
                     }
-            }
-        } else {
-            restartJob?.cancel()
-            restartJob = null
+                }
+                // Once we have successfully delayed _once_, continue to restart.
+                .first()
+
+            restartNow()
         }
     }
 
@@ -94,7 +99,7 @@ constructor(
          * multiple [Condition]s are being checked. If any one [Condition] returns false, all the
          * [Condition]s will need to be rechecked on the next restart attempt.
          */
-        fun canRestartNow(retryFn: () -> Unit): Boolean
+        val canRestartNow: Flow<Boolean>
     }
 
     companion object {

@@ -30,7 +30,8 @@ android_test {
         "mockito-target",
         "service-rkp.impl",
         "services.core",
-        "truth-prebuilt",
+        "truth",
+        "truth-java8-extension",
     ],
     test_suites: [
         "device-tests",

@@ -17,12 +17,12 @@ package com.android.systemui.statusbar.notification.row
 
 import android.annotation.ColorInt
 import android.graphics.Color
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.Utils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.FakeShadowView
 import com.android.systemui.statusbar.notification.NotificationUtils
@@ -34,7 +34,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class ActivatableNotificationViewTest : SysuiTestCase() {
     private val mContentView: View = mock()
@@ -61,8 +61,9 @@ class ActivatableNotificationViewTest : SysuiTestCase() {
                 else -> null
             } as T?
         }
-        mNormalColor =
-            Utils.getColorAttrDefaultColor(mContext, com.android.internal.R.attr.colorSurface)
+
+        mNormalColor = Utils.getColorAttrDefaultColor(mContext,
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh)
     }
 
     @Test

@@ -16,6 +16,8 @@
 
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.flags.Flags.enableCachedBluetoothDeviceDedup;
+
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothCsipSetCoordinator;
@@ -55,6 +57,7 @@ public class BluetoothEventManager {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final LocalBluetoothAdapter mLocalAdapter;
+    private final LocalBluetoothManager mBtManager;
     private final CachedBluetoothDeviceManager mDeviceManager;
     private final IntentFilter mAdapterIntentFilter, mProfileIntentFilter;
     private final Map<String, Handler> mHandlerMap;
@@ -78,10 +81,15 @@ public class BluetoothEventManager {
      * userHandle passed in is {@code null}, we register event receiver for the
      * {@code context.getUser()} handle.
      */
-    BluetoothEventManager(LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager, Context context,
-            android.os.Handler handler, @Nullable UserHandle userHandle) {
+    BluetoothEventManager(
+            LocalBluetoothAdapter adapter,
+            LocalBluetoothManager btManager,
+            CachedBluetoothDeviceManager deviceManager,
+            Context context,
+            android.os.Handler handler,
+            @Nullable UserHandle userHandle) {
         mLocalAdapter = adapter;
+        mBtManager = btManager;
         mDeviceManager = deviceManager;
         mAdapterIntentFilter = new IntentFilter();
         mProfileIntentFilter = new IntentFilter();
@@ -130,6 +138,8 @@ public class BluetoothEventManager {
         // ACL connection changed broadcasts
         addHandler(BluetoothDevice.ACTION_ACL_CONNECTED, new AclStateChangedHandler());
         addHandler(BluetoothDevice.ACTION_ACL_DISCONNECTED, new AclStateChangedHandler());
+
+        addHandler(BluetoothAdapter.ACTION_AUTO_ON_STATE_CHANGED, new AutoOnStateChangedHandler());
 
         registerAdapterIntentReceiver();
     }
@@ -206,10 +216,26 @@ public class BluetoothEventManager {
         }
     }
 
-    void dispatchProfileConnectionStateChanged(@NonNull CachedBluetoothDevice device, int state,
-            int bluetoothProfile) {
+    void dispatchProfileConnectionStateChanged(
+            @NonNull CachedBluetoothDevice device, int state, int bluetoothProfile) {
         for (BluetoothCallback callback : mCallbacks) {
             callback.onProfileConnectionStateChanged(device, state, bluetoothProfile);
+        }
+
+        // Trigger updateFallbackActiveDeviceIfNeeded when ASSISTANT profile disconnected when
+        // audio sharing is enabled.
+        if (bluetoothProfile == BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT
+                && state == BluetoothAdapter.STATE_DISCONNECTED
+                && BluetoothUtils.isAudioSharingEnabled()) {
+            LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
+            if (profileManager != null
+                    && profileManager.getLeAudioBroadcastProfile() != null
+                    && profileManager.getLeAudioBroadcastProfile().isProfileReady()
+                    && profileManager.getLeAudioBroadcastAssistantProfile() != null
+                    && profileManager.getLeAudioBroadcastAssistantProfile().isProfileReady()) {
+                Log.d(TAG, "updateFallbackActiveDeviceIfNeeded, ASSISTANT profile disconnected");
+                profileManager.getLeAudioBroadcastProfile().updateFallbackActiveDeviceIfNeeded();
+            }
         }
     }
 
@@ -230,30 +256,30 @@ public class BluetoothEventManager {
 
     @VisibleForTesting
     void dispatchActiveDeviceChanged(
-            @Nullable CachedBluetoothDevice activeDevice,
-            int bluetoothProfile) {
+            @Nullable CachedBluetoothDevice activeDevice, int bluetoothProfile) {
+        CachedBluetoothDevice targetDevice = activeDevice;
         for (CachedBluetoothDevice cachedDevice : mDeviceManager.getCachedDevicesCopy()) {
-            Set<CachedBluetoothDevice> memberSet = cachedDevice.getMemberDevice();
-            boolean isActive = Objects.equals(cachedDevice, activeDevice);
-            if (!isActive && !memberSet.isEmpty()) {
-                for (CachedBluetoothDevice memberCachedDevice : memberSet) {
-                    isActive = Objects.equals(memberCachedDevice, activeDevice);
-                    if (isActive) {
-                        Log.d(TAG,
-                                "The active device is the member device "
-                                        + activeDevice.getDevice().getAnonymizedAddress()
-                                        + ". change activeDevice as main device "
-                                        + cachedDevice.getDevice().getAnonymizedAddress());
-                        activeDevice = cachedDevice;
-                        break;
-                    }
-                }
+            // should report isActive from main device or it will cause trouble to other callers.
+            CachedBluetoothDevice subDevice = cachedDevice.getSubDevice();
+            CachedBluetoothDevice finalTargetDevice = targetDevice;
+            if (targetDevice != null
+                    && ((subDevice != null && subDevice.equals(targetDevice))
+                    || cachedDevice.getMemberDevice().stream().anyMatch(
+                            memberDevice -> memberDevice.equals(finalTargetDevice)))) {
+                Log.d(TAG,
+                        "The active device is the sub/member device "
+                                + targetDevice.getDevice().getAnonymizedAddress()
+                                + ". change targetDevice as main device "
+                                + cachedDevice.getDevice().getAnonymizedAddress());
+                targetDevice = cachedDevice;
             }
-            cachedDevice.onActiveDeviceChanged(isActive, bluetoothProfile);
+            boolean isActiveDevice = cachedDevice.equals(targetDevice);
+            cachedDevice.onActiveDeviceChanged(isActiveDevice, bluetoothProfile);
             mDeviceManager.onActiveDeviceChanged(cachedDevice);
         }
+
         for (BluetoothCallback callback : mCallbacks) {
-            callback.onActiveDeviceChanged(activeDevice, bluetoothProfile);
+            callback.onActiveDeviceChanged(targetDevice, bluetoothProfile);
         }
     }
 
@@ -375,6 +401,10 @@ public class BluetoothEventManager {
                 Log.w(TAG, "Got bonding state changed for " + device +
                         ", but we have no record of that device.");
                 cachedDevice = mDeviceManager.addDevice(device);
+            }
+
+            if (enableCachedBluetoothDeviceDedup() && bondState == BluetoothDevice.BOND_BONDED) {
+                mDeviceManager.removeDuplicateInstanceForIdentityAddress(device);
             }
 
             for (BluetoothCallback callback : mCallbacks) {
@@ -528,7 +558,6 @@ public class BluetoothEventManager {
                 default:
                     Log.w(TAG, "ActiveDeviceChangedHandler: unknown action " + action);
                     return;
-
             }
             dispatchAclStateChanged(activeDevice, state);
         }
@@ -544,6 +573,23 @@ public class BluetoothEventManager {
                 return;
             }
             dispatchAudioModeChanged();
+        }
+    }
+
+    private class AutoOnStateChangedHandler implements Handler {
+
+        @Override
+        public void onReceive(Context context, Intent intent, BluetoothDevice device) {
+            String action = intent.getAction();
+            if (action == null) {
+                Log.w(TAG, "AutoOnStateChangedHandler() action is null");
+                return;
+            }
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_AUTO_ON_STATE,
+                    BluetoothAdapter.ERROR);
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onAutoOnStateChanged(state);
+            }
         }
     }
 }

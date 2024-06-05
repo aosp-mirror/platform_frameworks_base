@@ -2,7 +2,7 @@ package com.android.systemui.statusbar.notification.interruption
 
 import com.android.systemui.log.dagger.NotificationHeadsUpLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.INFO
+import com.android.systemui.log.core.LogLevel.INFO
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject

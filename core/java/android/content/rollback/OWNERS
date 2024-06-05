@@ -1,5 +1,3 @@
-# Bug component: 557916
+# Bug component: 819107
 
-narayan@google.com
-nandana@google.com
-olilan@google.com
+include /services/core/java/com/android/server/crashrecovery/OWNERS

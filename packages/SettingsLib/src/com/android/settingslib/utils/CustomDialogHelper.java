@@ -23,6 +23,7 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -193,6 +194,14 @@ public class CustomDialogHelper {
     }
 
     /**
+     * Sets message padding of the dialog.
+     */
+    public CustomDialogHelper setMessagePadding(int dp) {
+        mDialogMessage.setPadding(dp, dp, dp, dp);
+        return this;
+    }
+
+    /**
      * Sets icon of the dialog.
      */
     public CustomDialogHelper setIcon(Drawable icon) {
@@ -273,5 +282,14 @@ public class CustomDialogHelper {
                 break;
         }
         return this;
+    }
+
+    /**
+     * Requests focus on dialog title when used. Used to let talkback know that the dialog content
+     * is updated and needs to be read from the beginning.
+     */
+    public void requestFocusOnTitle() {
+        mDialogTitle.requestFocus();
+        mDialogTitle.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
     }
 }

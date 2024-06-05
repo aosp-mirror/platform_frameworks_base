@@ -25,6 +25,8 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 /**
  * The state info of app when it's cached, used by the optimizer.
  */
@@ -274,7 +276,20 @@ final class ProcessCachedOptimizerRecord {
 
     @GuardedBy("mProcLock")
     void setShouldNotFreeze(boolean shouldNotFreeze) {
+        setShouldNotFreeze(shouldNotFreeze, false);
+    }
+
+    /**
+     * @return {@code true} if it's a dry run and it's going to unfreeze the process
+     * if it was a real run.
+     */
+    @GuardedBy("mProcLock")
+    boolean setShouldNotFreeze(boolean shouldNotFreeze, boolean dryRun) {
+        if (dryRun) {
+            return mFrozen && !shouldNotFreeze;
+        }
         mShouldNotFreeze = shouldNotFreeze;
+        return false;
     }
 
     @GuardedBy("mProcLock")
@@ -327,6 +342,7 @@ final class ProcessCachedOptimizerRecord {
     }
 
     @GuardedBy("mProcLock")
+    @NeverCompile
     void dump(PrintWriter pw, String prefix, long nowUptime) {
         pw.print(prefix); pw.print("lastCompactTime="); pw.print(mLastCompactTime);
         pw.print(" lastCompactProfile=");

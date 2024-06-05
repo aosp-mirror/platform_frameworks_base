@@ -37,7 +37,7 @@ interface IRingtonePlayer {
         boolean hapticGeneratorEnabled);
 
     /** Used for Notification sound playback. */
-    oneway void playAsync(in Uri uri, in UserHandle user, boolean looping, in AudioAttributes aa);
+    oneway void playAsync(in Uri uri, in UserHandle user, boolean looping, in AudioAttributes aa, float volume);
     oneway void stopAsync();
 
     /** Return the title of the media. */

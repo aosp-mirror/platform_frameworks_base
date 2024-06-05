@@ -16,25 +16,26 @@
 package android.net.wifi;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.os.Binder;
 import android.os.Process;
-import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.security.legacykeystore.ILegacyKeystore;
 import android.util.Log;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
- * @hide This class allows wifi framework to store and access wifi certificate blobs.
+ * This class allows the storage and retrieval of non-standard Wifi certificate blobs.
+ * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+@SystemApi
+@SuppressLint("UnflaggedApi") // Promoting from @SystemApi(MODULE_LIBRARIES)
 public final class WifiKeystore {
     private static final String TAG = "WifiKeystore";
-    private static final String LEGACY_KEYSTORE_SERVICE_NAME = "android.security.legacykeystore";
-
-    private static ILegacyKeystore getService() {
-        return ILegacyKeystore.Stub.asInterface(
-                ServiceManager.checkService(LEGACY_KEYSTORE_SERVICE_NAME));
-    }
 
     /** @hide */
     WifiKeystore() {
@@ -48,15 +49,21 @@ public final class WifiKeystore {
      * @return true if the blob was successfully added. False otherwise.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi
+    @SuppressLint("UnflaggedApi")
     public static boolean put(@NonNull String alias, @NonNull byte[] blob) {
+        // ConnectivityBlobStore uses the calling uid as a key into the DB.
+        // Clear identity to ensure that callers from system apps and the Wifi framework
+        // are able to access the same values.
+        final long identity = Binder.clearCallingIdentity();
         try {
             Log.i(TAG, "put blob. alias " + alias);
-            getService().put(alias, Process.WIFI_UID, blob);
-            return true;
+            return WifiBlobStore.getInstance().put(alias, blob);
         } catch (Exception e) {
             Log.e(TAG, "Failed to put blob.", e);
             return false;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -65,22 +72,31 @@ public final class WifiKeystore {
      * @param alias Name of the blob to retrieve.
      * @return The unstructured blob, that is the blob that was stored using
      *         {@link android.net.wifi.WifiKeystore#put}.
-     *         Returns null if no blob was found.
+     *         Returns empty byte[] if no blob was found.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi
+    @SuppressLint("UnflaggedApi")
     public static @NonNull byte[] get(@NonNull String alias) {
+        final long identity = Binder.clearCallingIdentity();
         try {
             Log.i(TAG, "get blob. alias " + alias);
-            return getService().get(alias, Process.WIFI_UID);
+            byte[] blob = WifiBlobStore.getInstance().get(alias);
+            if (blob != null) {
+                return blob;
+            }
+            Log.i(TAG, "Searching for blob in Legacy Keystore");
+            return WifiBlobStore.getLegacyKeystore().get(alias, Process.WIFI_UID);
         } catch (ServiceSpecificException e) {
             if (e.errorCode != ILegacyKeystore.ERROR_ENTRY_NOT_FOUND) {
                 Log.e(TAG, "Failed to get blob.", e);
             }
         } catch (Exception e) {
             Log.e(TAG, "Failed to get blob.", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
-        return null;
+        return new byte[0];
     }
 
     /**
@@ -89,19 +105,30 @@ public final class WifiKeystore {
      * @return True if a blob was removed. False if no such blob was found.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi
+    @SuppressLint("UnflaggedApi")
     public static boolean remove(@NonNull String alias) {
+        boolean blobStoreSuccess = false;
+        boolean legacyKsSuccess = false;
+        final long identity = Binder.clearCallingIdentity();
         try {
-            getService().remove(alias, Process.WIFI_UID);
-            return true;
+            Log.i(TAG, "remove blob. alias " + alias);
+            blobStoreSuccess = WifiBlobStore.getInstance().remove(alias);
+            // Legacy Keystore will throw an exception if the alias is not found.
+            WifiBlobStore.getLegacyKeystore().remove(alias, Process.WIFI_UID);
+            legacyKsSuccess = true;
         } catch (ServiceSpecificException e) {
             if (e.errorCode != ILegacyKeystore.ERROR_ENTRY_NOT_FOUND) {
                 Log.e(TAG, "Failed to remove blob.", e);
             }
         } catch (Exception e) {
             Log.e(TAG, "Failed to remove blob.", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
-        return false;
+        Log.i(TAG, "Removal status: wifiBlobStore=" + blobStoreSuccess
+                + ", legacyKeystore=" + legacyKsSuccess);
+        return blobStoreSuccess || legacyKsSuccess;
     }
 
     /**
@@ -110,16 +137,28 @@ public final class WifiKeystore {
      *         The return value may be empty but never null.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi
+    @SuppressLint("UnflaggedApi")
     public static @NonNull String[] list(@NonNull String prefix) {
+        final long identity = Binder.clearCallingIdentity();
         try {
-            final String[] aliases = getService().list(prefix, Process.WIFI_UID);
-            for (int i = 0; i < aliases.length; ++i) {
-                aliases[i] = aliases[i].substring(prefix.length());
+            // Aliases from WifiBlobStore will be pre-trimmed.
+            final String[] blobStoreAliases = WifiBlobStore.getInstance().list(prefix);
+            final String[] legacyAliases =
+                    WifiBlobStore.getLegacyKeystore().list(prefix, Process.WIFI_UID);
+            for (int i = 0; i < legacyAliases.length; ++i) {
+                legacyAliases[i] = legacyAliases[i].substring(prefix.length());
             }
-            return aliases;
+            // Deduplicate aliases before returning.
+            Set<String> uniqueAliases = new HashSet<>();
+            uniqueAliases.addAll(Arrays.asList(blobStoreAliases));
+            uniqueAliases.addAll(Arrays.asList(legacyAliases));
+            String[] uniqueAliasArray = new String[uniqueAliases.size()];
+            return uniqueAliases.toArray(uniqueAliasArray);
         } catch (Exception e) {
             Log.e(TAG, "Failed to list blobs.", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
         return new String[0];
     }

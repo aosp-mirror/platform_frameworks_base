@@ -10,7 +10,10 @@ package {
 android_test {
     name: "UiBench",
     sdk_version: "current",
-    min_sdk_version: "21",
+    // As Perfetto trace recording is supported on non-rooted devices
+    // since Android 12. Set min/target sdk version to 31.
+    target_sdk_version: "31",
+    min_sdk_version: "31",
     // omit gradle 'build' dir
     srcs: ["src/**/*.java"],
     // use appcompat/support lib from the tree, so improvements/
@@ -24,6 +27,5 @@ android_test {
         "androidx.recyclerview_recyclerview",
         "androidx.leanback_leanback",
     ],
-    certificate: "platform",
     test_suites: ["device-tests"],
 }

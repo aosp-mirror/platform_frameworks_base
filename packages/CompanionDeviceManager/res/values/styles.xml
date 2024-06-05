@@ -40,6 +40,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
+        <item name="android:textDirection">locale</item>
         <item name="android:layout_marginLeft">14dp</item>
         <item name="android:layout_marginRight">14dp</item>
         <item name="android:textSize">20sp</item>
@@ -53,14 +54,17 @@
         <item name="android:layout_marginTop">18dp</item>
         <item name="android:layout_marginLeft">18dp</item>
         <item name="android:layout_marginRight">18dp</item>
+        <item name="android:textDirection">locale</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="VendorHelperBackButton"
            parent="@android:style/Widget.Material.Button.Borderless.Colored">
-        <item name="android:layout_width">70dp</item>
+        <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">48dp</item>
+        <item name="android:layout_marginStart">12dp</item>
+        <item name="android:layout_marginEnd">12dp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@android:color/system_neutral1_900</item>
@@ -69,11 +73,13 @@
 
     <style name="PositiveButton"
            parent="@android:style/Widget.Material.Button.Borderless.Colored">
-        <item name="android:layout_width">300dp</item>
-        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginBottom">2dp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">14sp</item>
+        <item name="android:layout_marginStart">32dp</item>
+        <item name="android:layout_marginEnd">32dp</item>
         <item name="android:textColor">@android:color/system_neutral1_900</item>
         <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
         <item name="android:background">@drawable/btn_positive_bottom</item>
@@ -81,11 +87,13 @@
 
     <style name="NegativeButton"
            parent="@android:style/Widget.Material.Button.Borderless.Colored">
-        <item name="android:layout_width">300dp</item>
-        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">14sp</item>
+        <item name="android:layout_marginStart">32dp</item>
+        <item name="android:layout_marginEnd">32dp</item>
         <item name="android:textColor">@android:color/system_neutral1_900</item>
         <item name="android:layout_marginTop">4dp</item>
         <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
@@ -98,6 +106,8 @@
         <item name="android:layout_height">36dp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">14sp</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingRight">6dp</item>
         <item name="android:background">@drawable/btn_negative_multiple_devices</item>
         <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
     </style>

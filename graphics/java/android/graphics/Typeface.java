@@ -600,7 +600,7 @@ public class Typeface {
          * {@link #setWeight} and {@link #setItalic}.
          *
          * If {@link #setWeight} is not called, the fallback family keeps the default weight.
-         * Similary, if {@link #setItalic} is not called, the fallback family keeps the default
+         * Similarly, if {@link #setItalic} is not called, the fallback family keeps the default
          * italic information. For example, calling {@code builder.setFallback("sans-serif-light")}
          * is equivalent to calling {@code builder.setFallback("sans-serif").setWeight(300)} in
          * terms of fallback. The default weight and italic information are overridden by calling
@@ -794,7 +794,7 @@ public class Typeface {
         /**
          * Returns the maximum capacity of custom fallback families.
          *
-         * This includes the the first font family passed to the constructor.
+         * This includes the first font family passed to the constructor.
          * It is guaranteed that the value will be greater than or equal to 64.
          *
          * @return the maximum number of font families for the custom fallback
@@ -816,7 +816,7 @@ public class Typeface {
         /**
          * Sets a system fallback by name.
          *
-         * You can specify generic font familiy names or OEM specific family names. If the system
+         * You can specify generic font family names or OEM specific family names. If the system
          * don't have a specified fallback, the default fallback is used instead.
          * For more information about generic font families, see <a
          * href="https://www.w3.org/TR/css-fonts-4/#generic-font-families">CSS specification</a>
@@ -1475,7 +1475,10 @@ public class Typeface {
         String locale = SystemProperties.get("persist.sys.locale", "en-US");
         String script = ULocale.addLikelySubtags(ULocale.forLanguageTag(locale)).getScript();
 
-        FontConfig config = SystemFonts.getSystemPreinstalledFontConfig();
+        // The feature flag cannot be referred from Zygote. Use legacy fonts.xml for preloading font
+        // files.
+        // TODO(nona): Use new XML file once the feature is fully launched.
+        FontConfig config = SystemFonts.getSystemPreinstalledFontConfigFromLegacyXml();
         for (int i = 0; i < config.getFontFamilies().size(); ++i) {
             FontConfig.FontFamily family = config.getFontFamilies().get(i);
             if (!family.getLocaleList().isEmpty()) {

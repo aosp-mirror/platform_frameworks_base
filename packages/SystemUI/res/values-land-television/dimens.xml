@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
+<!-- TODO(b/289498394) move this to the TvSystemUI target -->
 <resources>
   <!-- Height of volume bar -->
   <dimen name="volume_dialog_panel_height">190dp</dimen>
@@ -28,9 +28,6 @@
   <dimen name="tv_volume_dialog_bubble_size">36dp</dimen>
   <dimen name="tv_volume_dialog_row_padding">6dp</dimen>
   <dimen name="tv_volume_number_text_size">16sp</dimen>
-  <dimen name="tv_volume_seek_bar_thumb_diameter">24dp</dimen>
-  <dimen name="tv_volume_seek_bar_thumb_focus_ring_width">8dp</dimen>
+  <dimen name="tv_volume_seek_bar_thumb_diameter">16dp</dimen>
   <dimen name="tv_volume_icons_size">20dp</dimen>
-  <dimen name="tv_volume_seek_bar_thumb_shadow_radius">4.0</dimen>
-  <dimen name="tv_volume_seek_bar_thumb_shadow_dy">4.0</dimen>
 </resources>

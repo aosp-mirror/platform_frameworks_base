@@ -1,0 +1,12 @@
+{
+  "imports": [
+    {
+      "path": "frameworks/native/services/inputflinger"
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "UinputTests"
+    }
+  ]
+}

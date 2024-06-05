@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.face.IFace;
+import android.hardware.biometrics.face.ISession;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -32,9 +33,9 @@ import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
-import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
+import com.android.server.biometrics.sensors.face.hidl.HidlToAidlSessionAdapter;
 
 import java.util.function.Supplier;
 
@@ -48,20 +49,20 @@ public class FaceResetLockoutClient extends HalClientMonitor<AidlSession> implem
     private static final String TAG = "FaceResetLockoutClient";
 
     private final HardwareAuthToken mHardwareAuthToken;
-    private final LockoutCache mLockoutCache;
+    private final LockoutTracker mLockoutTracker;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final int mBiometricStrength;
 
-    FaceResetLockoutClient(@NonNull Context context,
+    public FaceResetLockoutClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, int userId, String owner, int sensorId,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
-            @NonNull byte[] hardwareAuthToken, @NonNull LockoutCache lockoutTracker,
+            @NonNull byte[] hardwareAuthToken, @NonNull LockoutTracker lockoutTracker,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @Authenticators.Types int biometricStrength) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, logger, biometricContext);
         mHardwareAuthToken = HardwareAuthTokenUtils.toHardwareAuthToken(hardwareAuthToken);
-        mLockoutCache = lockoutTracker;
+        mLockoutTracker = lockoutTracker;
         mLockoutResetDispatcher = lockoutResetDispatcher;
         mBiometricStrength = biometricStrength;
     }
@@ -80,7 +81,11 @@ public class FaceResetLockoutClient extends HalClientMonitor<AidlSession> implem
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().getSession().resetLockout(mHardwareAuthToken);
+            final ISession session = getFreshDaemon().getSession();
+            session.resetLockout(mHardwareAuthToken);
+            if (session instanceof HidlToAidlSessionAdapter) {
+                mCallback.onClientFinished(this, true /* success */);
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to reset lockout", e);
             mCallback.onClientFinished(this, false /* success */);
@@ -88,7 +93,7 @@ public class FaceResetLockoutClient extends HalClientMonitor<AidlSession> implem
     }
 
     void onLockoutCleared() {
-        resetLocalLockoutStateToNone(getSensorId(), getTargetUserId(), mLockoutCache,
+        resetLocalLockoutStateToNone(getSensorId(), getTargetUserId(), mLockoutTracker,
                 mLockoutResetDispatcher, getBiometricContext().getAuthSessionCoordinator(),
                 mBiometricStrength, getRequestId());
         mCallback.onClientFinished(this, true /* success */);
@@ -107,7 +112,7 @@ public class FaceResetLockoutClient extends HalClientMonitor<AidlSession> implem
      * be used instead.
      */
     static void resetLocalLockoutStateToNone(int sensorId, int userId,
-            @NonNull LockoutCache lockoutTracker,
+            @NonNull LockoutTracker lockoutTracker,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull AuthSessionCoordinator authSessionCoordinator,
             @Authenticators.Types int biometricStrength, long requestId) {

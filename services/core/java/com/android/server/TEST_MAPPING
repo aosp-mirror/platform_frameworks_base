@@ -1,7 +1,13 @@
 {
     "presubmit": [
         {
-            "name": "CtsLocationFineTestCases"
+            "name": "CtsLocationFineTestCases",
+            "options": [
+                {
+                    // TODO: Wait for test to deflake - b/293934372
+                    "exclude-filter":"android.location.cts.fine.ScanningSettingsTest"
+                }
+             ]
         },
         {
             "name": "CtsLocationCoarseTestCases"
@@ -14,10 +20,10 @@
             "file_patterns": ["NotificationManagerService\\.java"]
         },
         {
-            "name": "CtsWindowManagerDeviceTestCases",
+            "name": "CtsWindowManagerDeviceWindow",
             "options": [
                 {
-                    "include-filter": "android.server.wm.ToastWindowTest"
+                    "include-filter": "android.server.wm.window.ToastWindowTest"
                 }
             ],
             "file_patterns": ["NotificationManagerService\\.java"]
@@ -56,6 +62,27 @@
             "file_patterns": ["SensorPrivacyService\\.java"]
         },
         {
+            "name": "FrameworksMockingServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.SensitiveContentProtectionManagerServiceContentTest"
+                },
+                {
+                    "include-filter": "com.android.server.SensitiveContentProtectionManagerServiceNotificationTest"
+                }
+            ],
+            "file_patterns": ["SensitiveContentProtectionManagerService\\.java"]
+        },
+        {
+            "name": "FrameworksMockingServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.StorageManagerServiceTest"
+                }
+            ],
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
             "name": "FrameworksServicesTests",
             "options": [
                 {
@@ -65,29 +92,55 @@
             "file_patterns": ["BinaryTransparencyService\\.java"]
         },
         {
-            "name": "BinaryTransparencyHostTest",
-            "file_patterns": [
-                "BinaryTransparencyService\\.java"
-            ]
-        },
-        {
-            "name": "CtsMediaProjectionTestCases",
+            "name": "FrameworksServicesTests",
             "options": [
                 {
-                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                    "include-filter": "com.android.server.PinnerServiceTest"
                 },
                 {
                     "exclude-annotation": "org.junit.Ignore"
                 }
-            ]
+            ],
+            "file_patterns": ["PinnerService\\.java"]
+        },
+        {
+            "name": "BinaryTransparencyHostTest",
+            "file_patterns": ["BinaryTransparencyService\\.java"]
         },
         {
             // GWP-ASan's CTS test ensures that recoverable tombstones work,
             // which is emitted by the NativeTombstoneManager.
             "name": "CtsGwpAsanTestCases"
+        },
+        {
+            "name": "FrameworksVcnTests",
+            "file_patterns": ["VcnManagementService\\.java"]
+        },
+        {
+            "name": "CtsVcnTestCases",
+            "file_patterns": ["VcnManagementService\\.java"]
+        },
+        {
+            "name": "FrameworksVpnTests",
+            "options": [
+                {
+                    "exclude-annotation": "com.android.testutils.SkipPresubmit"
+                }
+            ],
+            "file_patterns": ["VpnManagerService\\.java"]
+        },
+        {
+            "name": "FrameworksNetTests"
+        },
+        {
+            "name": "CtsSuspendAppsTestCases"
+        },
+        {
+            "name": "CtsWindowManagerBackgroundActivityTestCases",
+            "file_patterns": [
+                "Background.*\\.java",
+                "Activity.*\\.java"
+            ]
         }
     ],
     "presubmit-large": [
@@ -105,6 +158,54 @@
                 }
             ],
             "file_patterns": ["ClipboardService\\.java"]
+        },
+        {
+            "name": "CtsHostsideNetworkTests",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "com.android.testutils.SkipPresubmit"
+                }
+            ],
+            "file_patterns": ["VpnManagerService\\.java"]
         }
-    ]
+    ],
+    "postsubmit": [
+        // these tests need to establish SLO baseline, see go/test-mapping-slo-guide
+        {
+            "name": "CtsPackageManagerTestCases"
+        },
+        {
+            "name": "FrameworksServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.PinnerServiceTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                }
+            ],
+            "file_patterns": ["PinnerService\\.java"]
+        },
+        {
+            "name": "SelinuxFrameworksTests"
+        },
+        {
+            "name": "WmTests",
+            "file_patterns": [
+                "Background.*\\.java",
+                "Activity.*\\.java"
+            ],
+            "options": [
+                {
+                    "include-filter": "com.android.server.wm.BackgroundActivityStart*"
+                }
+            ]
+        }
+   ]
 }

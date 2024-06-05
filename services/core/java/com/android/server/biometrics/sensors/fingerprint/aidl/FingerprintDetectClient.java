@@ -19,10 +19,12 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.BiometricRequestConstants;
+import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.events.AuthenticationStartedInfo;
+import android.hardware.biometrics.events.AuthenticationStoppedInfo;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
-import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -33,6 +35,7 @@ import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.sensors.AcquisitionClient;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.DetectionConsumer;
@@ -44,30 +47,35 @@ import java.util.function.Supplier;
  * Performs fingerprint detection without exposing any matching information (e.g. accept/reject
  * have the same haptic, lockout counter is not increased).
  */
-class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements DetectionConsumer {
+public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
+        implements DetectionConsumer {
 
     private static final String TAG = "FingerprintDetectClient";
 
     private final boolean mIsStrongBiometric;
     private final FingerprintAuthenticateOptions mOptions;
+
+    @NonNull private final AuthenticationStateListeners mAuthenticationStateListeners;
+
     @NonNull private final SensorOverlays mSensorOverlays;
     @Nullable private ICancellationSignal mCancellationSignal;
 
-    FingerprintDetectClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
+    public FingerprintDetectClient(@NonNull Context context,
+            @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener,
             @NonNull FingerprintAuthenticateOptions options,
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
+            @NonNull AuthenticationStateListeners authenticationStateListeners,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
-            @Nullable IUdfpsOverlay udfpsOverlay,
             boolean isStrongBiometric) {
         super(context, lazyDaemon, token, listener, options.getUserId(),
                 options.getOpPackageName(), 0 /* cookie */, options.getSensorId(),
                 true /* shouldVibrate */, biometricLogger, biometricContext);
         setRequestId(requestId);
+        mAuthenticationStateListeners = authenticationStateListeners;
         mIsStrongBiometric = isStrongBiometric;
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController,
-                null /* sideFpsController*/, udfpsOverlay);
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController);
         mOptions = options;
     }
 
@@ -79,7 +87,12 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
 
     @Override
     protected void stopHalOperation() {
+        resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
+        mAuthenticationStateListeners.onAuthenticationStopped(
+                new AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
+        );
         unsubscribeBiometricContext();
 
         if (mCancellationSignal != null) {
@@ -94,35 +107,55 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
 
     @Override
     protected void startHalOperation() {
-        mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD,
+        resetIgnoreDisplayTouches();
+        mSensorOverlays.show(getSensorId(), BiometricRequestConstants.REASON_AUTH_KEYGUARD,
                 this);
-
+        mAuthenticationStateListeners.onAuthenticationStarted(
+            new AuthenticationStartedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                    BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
+        );
         try {
-            mCancellationSignal = doDetectInteraction();
+            doDetectInteraction();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting finger detect", e);
             mSensorOverlays.hide(getSensorId());
+            mAuthenticationStateListeners.onAuthenticationStopped(
+                    new AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                            BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
+            );
             mCallback.onClientFinished(this, false /* success */);
         }
     }
 
-    private ICancellationSignal doDetectInteraction() throws RemoteException {
+    private void doDetectInteraction() throws RemoteException {
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {
             final OperationContextExt opContext = getOperationContext();
-            final ICancellationSignal cancel = session.getSession().detectInteractionWithContext(
-                    opContext.toAidlContext(mOptions));
             getBiometricContext().subscribe(opContext, ctx -> {
+                try {
+                    mCancellationSignal = session.getSession().detectInteractionWithContext(
+                            ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to start detect interaction", e);
+                    mSensorOverlays.hide(getSensorId());
+                    mAuthenticationStateListeners.onAuthenticationStopped(
+                            new AuthenticationStoppedInfo.Builder(
+                                    BiometricSourceType.FINGERPRINT,
+                                    BiometricRequestConstants.REASON_AUTH_KEYGUARD
+                            ).build()
+                    );
+                    mCallback.onClientFinished(this, false /* success */);
+                }
+            }, ctx -> {
                 try {
                     session.getSession().onContextChanged(ctx);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to notify context changed", e);
                 }
-            });
-            return cancel;
+            }, mOptions);
         } else {
-            return session.getSession().detectInteraction();
+            mCancellationSignal = session.getSession().detectInteraction();
         }
     }
 

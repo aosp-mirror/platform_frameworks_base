@@ -16,6 +16,17 @@
 
 package com.android.internal.accessibility;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.content.ComponentName;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
+import android.os.Build;
+
 import com.android.internal.os.RoSystemProperties;
 
 import java.lang.reflect.Field;
@@ -37,5 +48,33 @@ public class TestUtils {
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Creates fake accessibility service info.
+     */
+    public static AccessibilityServiceInfo createFakeServiceInfo(
+            String packageLabel, String serviceComponent,
+            String serviceSummary, boolean isAlwaysOnService) {
+        ApplicationInfo applicationInfo = mock(ApplicationInfo.class);
+        applicationInfo.targetSdkVersion = Build.VERSION_CODES.R;
+        ServiceInfo serviceInfo = mock(ServiceInfo.class);
+        ResolveInfo resolveInfo = mock(ResolveInfo.class);
+        resolveInfo.serviceInfo = serviceInfo;
+        resolveInfo.serviceInfo.applicationInfo = applicationInfo;
+        when(resolveInfo.loadLabel(any())).thenReturn(packageLabel);
+
+        AccessibilityServiceInfo a11yServiceInfo = mock(AccessibilityServiceInfo.class);
+        when(a11yServiceInfo.getResolveInfo()).thenReturn(resolveInfo);
+        when(a11yServiceInfo.getComponentName())
+                .thenReturn(ComponentName.unflattenFromString(serviceComponent));
+        when(a11yServiceInfo.loadSummary(any())).thenReturn(serviceSummary);
+
+        if (isAlwaysOnService) {
+            a11yServiceInfo.flags |= AccessibilityServiceInfo
+                    .FLAG_REQUEST_ACCESSIBILITY_BUTTON;
+        }
+
+        return a11yServiceInfo;
     }
 }

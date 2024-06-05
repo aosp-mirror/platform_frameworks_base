@@ -16,7 +16,13 @@
 
 package com.android.internal.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Writer;
@@ -26,18 +32,18 @@ import java.util.List;
 /**
  * Tests for {@link IndentingPrintWriter}.
  */
-public class LineBreakBufferedWriterTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class LineBreakBufferedWriterTest {
 
     private ByteArrayOutputStream mStream;
     private RecordingWriter mWriter;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUp() throws Exception {
         mWriter = new RecordingWriter();
     }
 
+    @Test
     public void testLessThanBufferSize() {
         final LineBreakBufferedWriter lw = new LineBreakBufferedWriter(mWriter, 1000);
 
@@ -49,6 +55,7 @@ public class LineBreakBufferedWriterTest extends TestCase {
         assertOutput("Hello\nWorld\nTest\n");
     }
 
+    @Test
     public void testMoreThanBufferSizeNoLineBreaks() {
         final LineBreakBufferedWriter lw = new LineBreakBufferedWriter(mWriter, 20);
 
@@ -71,6 +78,7 @@ public class LineBreakBufferedWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testMoreThanBufferSizeNoLineBreaksSingleString() {
         final LineBreakBufferedWriter lw = new LineBreakBufferedWriter(mWriter, 20);
 
@@ -92,6 +100,7 @@ public class LineBreakBufferedWriterTest extends TestCase {
         }
     }
 
+    @Test
     public void testMoreThanBufferSizeLineBreakBefore() {
         final LineBreakBufferedWriter lw = new LineBreakBufferedWriter(mWriter, 20);
 
@@ -104,6 +113,7 @@ public class LineBreakBufferedWriterTest extends TestCase {
         assertOutput("aaaaaaaaaa", "bbbbcccccccccc");
     }
 
+    @Test
     public void testMoreThanBufferSizeLineBreakBeforeSingleString() {
         final LineBreakBufferedWriter lw = new LineBreakBufferedWriter(mWriter, 20);
 
@@ -115,6 +125,7 @@ public class LineBreakBufferedWriterTest extends TestCase {
         assertOutput("aaaaaaaaaa", "bbbbcccccccccc");
     }
 
+    @Test
     public void testMoreThanBufferSizeLineBreakNew() {
         final LineBreakBufferedWriter lw = new LineBreakBufferedWriter(mWriter, 20);
 
@@ -127,6 +138,7 @@ public class LineBreakBufferedWriterTest extends TestCase {
         assertOutput("aaaaaaaaaabbbbbc\nd", "ddddddddd");
     }
 
+    @Test
     public void testMoreThanBufferSizeLineBreakBeforeAndNew() {
         final LineBreakBufferedWriter lw = new LineBreakBufferedWriter(mWriter, 20);
 
@@ -139,6 +151,7 @@ public class LineBreakBufferedWriterTest extends TestCase {
         assertOutput("aaaaaaaaaa\nbbbbbc\nd", "ddddddddd");
     }
 
+    @Test
     public void testMoreThanBufferSizeInt() {
         final LineBreakBufferedWriter lw = new LineBreakBufferedWriter(mWriter, 15);
 
@@ -151,6 +164,7 @@ public class LineBreakBufferedWriterTest extends TestCase {
         assertOutput("123456789098765", "4321");
     }
 
+    @Test
     public void testMoreThanBufferSizeChar() {
         final LineBreakBufferedWriter lw = new LineBreakBufferedWriter(mWriter, 15);
 
@@ -165,6 +179,7 @@ public class LineBreakBufferedWriterTest extends TestCase {
         assertOutput("$$$$$$$$$$%%%%%", "%%%%%");
     }
 
+    @Test
     public void testMoreThanBufferSizeLineBreakNewChars() {
         final LineBreakBufferedWriter lw = new LineBreakBufferedWriter(mWriter, 20);
 
@@ -177,6 +192,7 @@ public class LineBreakBufferedWriterTest extends TestCase {
         assertOutput("aaaaaaaaaabbbbbc\nd", "ddddddddd");
     }
 
+    @Test
     public void testMoreThenInitialCapacitySimpleWrites() {
         // This check is different from testMoreThanBufferSizeChar. The initial capacity is lower
         // than the maximum buffer size here.

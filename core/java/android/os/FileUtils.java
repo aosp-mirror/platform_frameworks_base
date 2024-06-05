@@ -25,6 +25,7 @@ import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
 import static android.system.OsConstants.EINVAL;
 import static android.system.OsConstants.ENOSYS;
 import static android.system.OsConstants.F_OK;
+import static android.system.OsConstants.EIO;
 import static android.system.OsConstants.O_ACCMODE;
 import static android.system.OsConstants.O_APPEND;
 import static android.system.OsConstants.O_CREAT;
@@ -37,6 +38,7 @@ import static android.system.OsConstants.SPLICE_F_MORE;
 import static android.system.OsConstants.SPLICE_F_MOVE;
 import static android.system.OsConstants.S_ISFIFO;
 import static android.system.OsConstants.S_ISREG;
+import static android.system.OsConstants.S_ISSOCK;
 import static android.system.OsConstants.W_OK;
 
 import android.annotation.NonNull;
@@ -52,9 +54,11 @@ import android.provider.DocumentsContract.Document;
 import android.provider.MediaStore;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.system.OsConstants;
 import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.DataUnit;
+import android.util.EmptyArray;
 import android.util.Log;
 import android.util.Slog;
 import android.webkit.MimeTypeMap;
@@ -64,7 +68,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.SizedInputStream;
 
 import libcore.io.IoUtils;
-import libcore.util.EmptyArray;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -94,6 +97,7 @@ import java.util.zip.CheckedInputStream;
 /**
  * Utility methods useful for working with files.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class FileUtils {
     private static final String TAG = "FileUtils";
 
@@ -116,9 +120,6 @@ public final class FileUtils {
     private FileUtils() {
     }
 
-    private static final String CAMERA_DIR_LOWER_CASE = "/storage/emulated/" + UserHandle.myUserId()
-            + "/dcim/camera";
-
     /** Regular expression for safe filenames: no spaces or metacharacters.
       *
       * Use a preload holder so that FileUtils can be compile-time initialized.
@@ -132,6 +133,21 @@ public final class FileUtils {
     private static volatile int sMediaProviderAppId = -1;
 
     private static final long COPY_CHECKPOINT_BYTES = 524288;
+
+    static {
+        sEnableCopyOptimizations = shouldEnableCopyOptimizations();
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static boolean shouldEnableCopyOptimizations() {
+        // Advanced copy operations enabled by default
+        return true;
+    }
+
+    private static boolean shouldEnableCopyOptimizations$ravenwood() {
+        // Disabled under Ravenwood due to missing kernel support
+        return false;
+    }
 
     /**
      * Listener that is called periodically as progress is made.
@@ -150,6 +166,7 @@ public final class FileUtils {
      * @hide
      */
     @UnsupportedAppUsage
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static int setPermissions(File path, int mode, int uid, int gid) {
         return setPermissions(path.getAbsolutePath(), mode, uid, gid);
     }
@@ -164,6 +181,7 @@ public final class FileUtils {
      * @hide
      */
     @UnsupportedAppUsage
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static int setPermissions(String path, int mode, int uid, int gid) {
         try {
             Os.chmod(path, mode);
@@ -194,6 +212,7 @@ public final class FileUtils {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static int setPermissions(FileDescriptor fd, int mode, int uid, int gid) {
         try {
             Os.fchmod(fd, mode);
@@ -221,6 +240,7 @@ public final class FileUtils {
      * @param to File where attributes should be copied to.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static void copyPermissions(@NonNull File from, @NonNull File to) throws IOException {
         try {
             final StructStat stat = Os.stat(from.getAbsolutePath());
@@ -236,6 +256,7 @@ public final class FileUtils {
      * @hide
      */
     @Deprecated
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static int getUid(String path) {
         try {
             return Os.stat(path).st_uid;
@@ -314,11 +335,7 @@ public final class FileUtils {
         }
         try (FileOutputStream out = new FileOutputStream(destFile)) {
             copy(in, out);
-            try {
-                Os.fsync(out.getFD());
-            } catch (ErrnoException e) {
-                throw e.rethrowAsIOException();
-            }
+            sync(out);
         }
     }
 
@@ -459,6 +476,8 @@ public final class FileUtils {
                     }
                 } else if (S_ISFIFO(st_in.st_mode) || S_ISFIFO(st_out.st_mode)) {
                     return copyInternalSplice(in, out, count, signal, executor, listener);
+                } else if (S_ISSOCK(st_in.st_mode) || S_ISSOCK(st_out.st_mode)) {
+                    return copyInternalSpliceSocket(in, out, count, signal, executor, listener);
                 }
             } catch (ErrnoException e) {
                 throw e.rethrowAsIOException();
@@ -475,6 +494,7 @@ public final class FileUtils {
      * @hide
      */
     @VisibleForTesting
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static long copyInternalSplice(FileDescriptor in, FileDescriptor out, long count,
             CancellationSignal signal, Executor executor, ProgressListener listener)
             throws ErrnoException {
@@ -509,6 +529,86 @@ public final class FileUtils {
         }
         return progress;
     }
+    /**
+     * Requires one of input or output to be a socket file.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static long copyInternalSpliceSocket(FileDescriptor in, FileDescriptor out, long count,
+            CancellationSignal signal, Executor executor, ProgressListener listener)
+            throws ErrnoException {
+        long progress = 0;
+        long checkpoint = 0;
+        long countToRead = count;
+        long countInPipe = 0;
+        long t;
+
+        FileDescriptor[] pipes = Os.pipe();
+
+        while (countToRead > 0 || countInPipe > 0) {
+            if (countToRead > 0) {
+                t = Os.splice(in, null, pipes[1], null, Math.min(countToRead, COPY_CHECKPOINT_BYTES),
+                              SPLICE_F_MOVE | SPLICE_F_MORE);
+                if (t < 0) {
+                    // splice error
+                    Slog.e(TAG, "splice error, fdIn --> pipe, copy size:" + count +
+                           ", copied:" + progress +
+                           ", read:" + (count - countToRead) +
+                           ", in pipe:" + countInPipe);
+                    break;
+                } else if (t == 0) {
+                    // end of input, input count larger than real size
+                    Slog.w(TAG, "Reached the end of the input file. The size to be copied exceeds the actual size, copy size:" + count +
+                           ", copied:" + progress +
+                           ", read:" + (count - countToRead) +
+                           ", in pipe:" + countInPipe);
+                    countToRead = 0;
+                } else {
+                    countInPipe += t;
+                    countToRead -= t;
+                }
+            }
+
+            if (countInPipe > 0) {
+                t = Os.splice(pipes[0], null, out, null, Math.min(countInPipe, COPY_CHECKPOINT_BYTES),
+                              SPLICE_F_MOVE | SPLICE_F_MORE);
+                // The data is already in the pipeline, so the return value will not be zero.
+                // If it is 0, it means an error has occurred. So here use t<=0.
+                if (t <= 0) {
+                    Slog.e(TAG, "splice error, pipe --> fdOut, copy size:" + count +
+                           ", copied:" + progress +
+                           ", read:" + (count - countToRead) +
+                           ", in pipe: " + countInPipe);
+                    throw new ErrnoException("splice, pipe --> fdOut", EIO);
+                } else {
+                    progress += t;
+                    checkpoint += t;
+                    countInPipe -= t;
+                }
+            }
+
+            if (checkpoint >= COPY_CHECKPOINT_BYTES) {
+                if (signal != null) {
+                    signal.throwIfCanceled();
+                }
+                if (executor != null && listener != null) {
+                    final long progressSnapshot = progress;
+                    executor.execute(() -> {
+                        listener.onProgress(progressSnapshot);
+                    });
+                }
+                checkpoint = 0;
+            }
+        }
+        if (executor != null && listener != null) {
+            final long progressSnapshot = progress;
+            executor.execute(() -> {
+                listener.onProgress(progressSnapshot);
+            });
+        }
+        return progress;
+    }
 
     /**
      * Requires both input and output to be a regular file.
@@ -516,6 +616,7 @@ public final class FileUtils {
      * @hide
      */
     @VisibleForTesting
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static long copyInternalSendfile(FileDescriptor in, FileDescriptor out, long count,
             CancellationSignal signal, Executor executor, ProgressListener listener)
             throws ErrnoException {
@@ -1176,6 +1277,7 @@ public final class FileUtils {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = MimeTypeMap.class)
     public static String[] splitFileName(String mimeType, String displayName) {
         String name;
         String ext;
@@ -1294,32 +1396,30 @@ public final class FileUtils {
      * Round the given size of a storage device to a nice round power-of-two
      * value, such as 256MB or 32GB. This avoids showing weird values like
      * "29.5GB" in UI.
-     *
-     * Some storage devices are still using GiB (powers of 1024) over
-     * GB (powers of 1000) measurements and this method takes it into account.
-     *
      * Round ranges:
      * ...
-     * [256 GiB + 1; 512 GiB] -> 512 GB
-     * [512 GiB + 1; 1 TiB]   -> 1 TB
-     * [1 TiB + 1; 2 TiB]     -> 2 TB
+     * (128 GB; 256 GB]   -> 256 GB
+     * (256 GB; 512 GB]   -> 512 GB
+     * (512 GB; 1000 GB]  -> 1000 GB
+     * (1000 GB; 2000 GB] -> 2000 GB
+     * ...
      * etc
      *
      * @hide
      */
     public static long roundStorageSize(long size) {
         long val = 1;
-        long kiloPow = 1;
-        long kibiPow = 1;
-        while ((val * kibiPow) < size) {
+        long pow = 1;
+        while ((val * pow) < size) {
             val <<= 1;
             if (val > 512) {
                 val = 1;
-                kibiPow *= 1024;
-                kiloPow *= 1000;
+                pow *= 1000;
             }
         }
-        return val * kiloPow;
+
+        Log.d(TAG, String.format("Rounded bytes from %d to %d", size, val * pow));
+        return val * pow;
     }
 
     private static long toBytes(long value, String unit) {
@@ -1425,11 +1525,13 @@ public final class FileUtils {
      *   indicate a failure to flush bytes to the underlying resource.
      */
     @Deprecated
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires ART support")
     public static void closeQuietly(@Nullable FileDescriptor fd) {
         IoUtils.closeQuietly(fd);
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static int translateModeStringToPosix(String mode) {
         // Quick check for invalid chars
         for (int i = 0; i < mode.length(); i++) {
@@ -1464,6 +1566,7 @@ public final class FileUtils {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static String translateModePosixToString(int mode) {
         String res = "";
         if ((mode & O_ACCMODE) == O_RDWR) {
@@ -1485,6 +1588,7 @@ public final class FileUtils {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static int translateModePosixToPfd(int mode) {
         int res = 0;
         if ((mode & O_ACCMODE) == O_RDWR) {
@@ -1509,6 +1613,7 @@ public final class FileUtils {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static int translateModePfdToPosix(int mode) {
         int res = 0;
         if ((mode & MODE_READ_WRITE) == MODE_READ_WRITE) {
@@ -1533,6 +1638,7 @@ public final class FileUtils {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static int translateModeAccessToPosix(int mode) {
         if (mode == F_OK) {
             // There's not an exact mapping, so we attempt a read-only open to
@@ -1551,6 +1657,7 @@ public final class FileUtils {
 
     /** {@hide} */
     @VisibleForTesting
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static ParcelFileDescriptor convertToModernFd(FileDescriptor fd) {
         Context context = AppGlobals.getInitialApplication();
         if (UserHandle.getAppId(Process.myUid()) == getMediaProviderAppId(context)) {
@@ -1567,6 +1674,7 @@ public final class FileUtils {
         }
     }
 
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     private static int getMediaProviderAppId(Context context) {
         if (sMediaProviderAppId != -1) {
             return sMediaProviderAppId;
@@ -1607,10 +1715,12 @@ public final class FileUtils {
             return this;
         }
 
+        @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
         public static MemoryPipe createSource(byte[] data) throws IOException {
             return new MemoryPipe(data, false).startInternal();
         }
 
+        @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
         public static MemoryPipe createSink(byte[] data) throws IOException {
             return new MemoryPipe(data, true).startInternal();
         }

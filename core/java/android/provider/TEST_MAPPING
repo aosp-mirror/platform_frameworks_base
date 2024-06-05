@@ -8,6 +8,9 @@
                 }
             ]
         },
+	{
+	    "name": "CtsMediaProviderTestCases"
+	},
         {
             "name": "CalendarProviderTests"
         },
@@ -21,12 +24,17 @@
             "name": "SettingsProviderTest"
         },
         {
-            "name": "CtsAppSecurityHostTestCases",
+            "name": "CtsPackageManagerHostTestCases",
             "options": [
                 {
                     "include-filter": "android.appsecurity.cts.ReadableSettingsFieldsTest"
                 }
             ]
+        }
+    ],
+    "postsubmit": [
+        {
+            "name": "CtsDeviceConfigTestCases"
         }
     ]
 }

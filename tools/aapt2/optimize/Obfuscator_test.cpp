@@ -19,6 +19,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "ResourceTable.h"
 #include "android-base/file.h"
@@ -26,12 +27,17 @@
 
 using ::aapt::test::GetValue;
 using ::testing::AnyOf;
+using ::testing::Contains;
 using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::IsFalse;
 using ::testing::IsTrue;
 using ::testing::Not;
 using ::testing::NotNull;
+
+namespace aapt {
+
+namespace {
 
 android::StringPiece GetExtension(android::StringPiece path) {
   auto iter = std::find(path.begin(), path.end(), '.');
@@ -45,7 +51,22 @@ void FillTable(aapt::test::ResourceTableBuilder& builder, int start, int end) {
   }
 }
 
-namespace aapt {
+class FakeObfuscator : public Obfuscator {
+ public:
+  explicit FakeObfuscator(OptimizeOptions& optimize_options,
+                          const std::unordered_map<std::string, std::string>& shortened_name_map)
+      : Obfuscator(optimize_options), shortened_name_map_(shortened_name_map) {
+  }
+
+ protected:
+  std::string ShortenFileName(android::StringPiece file_path, int output_length) override {
+    return shortened_name_map_[std::string(file_path)];
+  }
+
+ private:
+  std::unordered_map<std::string, std::string> shortened_name_map_;
+  DISALLOW_COPY_AND_ASSIGN(FakeObfuscator);
+};
 
 TEST(ObfuscatorTest, FileRefPathsChangedInResourceTable) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
@@ -127,7 +148,7 @@ TEST(ObfuscatorTest, SkipPathShortenExemptions) {
   EXPECT_THAT(path_map.find("res/drawables/xmlfile2.xml"), Not(Eq(path_map.end())));
 
   FileReference* ref = GetValue<FileReference>(table.get(), "android:drawable/xmlfile");
-  EXPECT_THAT(ref, NotNull());
+  ASSERT_THAT(ref, NotNull());
   ASSERT_THAT(HasFailure(), IsFalse());
   // The path of first drawable in exemption was not changed
   EXPECT_THAT("res/drawables/xmlfile.xml", Eq(*ref->path));
@@ -161,11 +182,76 @@ TEST(ObfuscatorTest, KeepExtensions) {
   ASSERT_THAT(path_map.find("res/drawable/xmlfile.xml"), Not(Eq(path_map.end())));
   ASSERT_THAT(path_map.find("res/drawable/pngfile.png"), Not(Eq(path_map.end())));
 
-  auto shortend_xml_path = path_map[original_xml_path];
-  auto shortend_png_path = path_map[original_png_path];
-
   EXPECT_THAT(GetExtension(path_map[original_xml_path]), Eq(android::StringPiece(".xml")));
   EXPECT_THAT(GetExtension(path_map[original_png_path]), Eq(android::StringPiece(".png")));
+}
+
+TEST(ObfuscatorTest, ShortenedToReservedWindowsNames) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+
+  std::string original_path_1 = "res/drawable/pngfile_1.png";
+  std::string original_path_2 = "res/drawable/pngfile_2.png";
+  std::string original_path_3 = "res/drawable/pngfile_3.png";
+  std::string original_path_4 = "res/drawable/pngfile_4.png";
+  std::string original_path_5 = "res/drawable/pngfile_5.png";
+  std::string original_path_6 = "res/drawable/pngfile_6.png";
+  std::string original_path_7 = "res/drawable/pngfile_7.png";
+  std::string original_path_8 = "res/drawable/pngfile_8.png";
+  std::string original_path_9 = "res/drawable/pngfile_9.png";
+
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddFileReference("android:drawable/pngfile_1", original_path_1)
+          .AddFileReference("android:drawable/pngfile_2", original_path_2)
+          .AddFileReference("android:drawable/pngfile_3", original_path_3)
+          .AddFileReference("android:drawable/pngfile_4", original_path_4)
+          .AddFileReference("android:drawable/pngfile_5", original_path_5)
+          .AddFileReference("android:drawable/pngfile_6", original_path_6)
+          .AddFileReference("android:drawable/pngfile_7", original_path_7)
+          .AddFileReference("android:drawable/pngfile_8", original_path_8)
+          .AddFileReference("android:drawable/pngfile_9", original_path_9)
+          .Build();
+
+  OptimizeOptions options{.shorten_resource_paths = true};
+  std::map<std::string, std::string>& path_map = options.table_flattener_options.shortened_path_map;
+  auto obfuscator = FakeObfuscator(
+      options,
+      {
+          {original_path_1, "CON"},
+          {original_path_2, "Prn"},
+          {original_path_3, "AuX"},
+          {original_path_4, "nul"},
+          {original_path_5, "cOM"},
+          {original_path_6, "lPt"},
+          {original_path_7, "lPt"},
+          {original_path_8, "lPt"},  // 6, 7, and 8 will be appended with a number to disambiguate
+          {original_path_9, "F0o"},  // This one is not reserved
+      });
+  ASSERT_TRUE(obfuscator.Consume(context.get(), table.get()));
+
+  // Expect that the path map is populated
+  ASSERT_THAT(path_map.find(original_path_1), Not(Eq(path_map.end())));
+  ASSERT_THAT(path_map.find(original_path_2), Not(Eq(path_map.end())));
+  ASSERT_THAT(path_map.find(original_path_3), Not(Eq(path_map.end())));
+  ASSERT_THAT(path_map.find(original_path_4), Not(Eq(path_map.end())));
+  ASSERT_THAT(path_map.find(original_path_5), Not(Eq(path_map.end())));
+  ASSERT_THAT(path_map.find(original_path_6), Not(Eq(path_map.end())));
+  ASSERT_THAT(path_map.find(original_path_7), Not(Eq(path_map.end())));
+  ASSERT_THAT(path_map.find(original_path_8), Not(Eq(path_map.end())));
+  ASSERT_THAT(path_map.find(original_path_9), Not(Eq(path_map.end())));
+
+  EXPECT_THAT(path_map[original_path_1], Eq("res/_CON.png"));
+  EXPECT_THAT(path_map[original_path_2], Eq("res/_Prn.png"));
+  EXPECT_THAT(path_map[original_path_3], Eq("res/_AuX.png"));
+  EXPECT_THAT(path_map[original_path_4], Eq("res/_nul.png"));
+  EXPECT_THAT(path_map[original_path_5], Eq("res/_cOM.png"));
+  EXPECT_THAT(path_map[original_path_9], Eq("res/F0o.png"));
+
+  std::set<std::string> lpt_shortened_names{path_map[original_path_6], path_map[original_path_7],
+                                            path_map[original_path_8]};
+  EXPECT_THAT(lpt_shortened_names, Contains("res/_lPt.png"));
+  EXPECT_THAT(lpt_shortened_names, Contains("res/_lPt1.png"));
+  EXPECT_THAT(lpt_shortened_names, Contains("res/_lPt2.png"));
 }
 
 TEST(ObfuscatorTest, DeterministicallyHandleCollisions) {
@@ -247,7 +333,9 @@ TEST(ObfuscatorTest, DumpIdResourceMap) {
   ASSERT_TRUE(Obfuscator(options).Consume(context.get(), table.get()));
 
   // Expect that the id resource name map is populated
+  ASSERT_THAT(id_resource_map.find(0x7f020000), Not(Eq(id_resource_map.end())));
   EXPECT_THAT(id_resource_map.at(0x7f020000), Eq("mycolor"));
+  ASSERT_THAT(id_resource_map.find(0x7f030000), Not(Eq(id_resource_map.end())));
   EXPECT_THAT(id_resource_map.at(0x7f030000), Eq("mystring"));
   EXPECT_THAT(id_resource_map.find(0x7f030001), Eq(id_resource_map.end()));
   EXPECT_THAT(id_resource_map.find(0x7f030002), Eq(id_resource_map.end()));
@@ -300,17 +388,18 @@ TEST(ObfuscatorTest, WriteObfuscationMapInProtocolBufferFormat) {
   ASSERT_TRUE(obfuscator.Consume(test::ContextBuilder().Build().get(),
                                  getProtocolBufferTableUnderTest().get()));
 
-  obfuscator.WriteObfuscationMap("obfuscated_map.pb");
+  const auto map_path = testing::TempDir() + "/obfuscated_map.pb";
+  ASSERT_TRUE(obfuscator.WriteObfuscationMap(map_path));
 
   std::string pbOut;
-  android::base::ReadFileToString("obfuscated_map.pb", &pbOut, false /* follow_symlinks */);
+  ASSERT_TRUE(android::base::ReadFileToString(map_path, &pbOut, false /* follow_symlinks */));
   EXPECT_THAT(pbOut, HasSubstr("drawable/xmlfile.xml"));
   EXPECT_THAT(pbOut, HasSubstr("drawable/pngfile.png"));
   EXPECT_THAT(pbOut, HasSubstr("mycolor"));
   EXPECT_THAT(pbOut, HasSubstr("mystring"));
   pb::ResourceMappings resourceMappings;
-  EXPECT_THAT(resourceMappings.ParseFromString(pbOut), IsTrue());
-  EXPECT_THAT(resourceMappings.collapsed_names().resource_names_size(), Eq(2));
+  ASSERT_THAT(resourceMappings.ParseFromString(pbOut), IsTrue());
+  ASSERT_THAT(resourceMappings.collapsed_names().resource_names_size(), Eq(2));
   auto& resource_names = resourceMappings.collapsed_names().resource_names();
   EXPECT_THAT(resource_names.at(0).name(), AnyOf(Eq("mycolor"), Eq("mystring")));
   EXPECT_THAT(resource_names.at(1).name(), AnyOf(Eq("mycolor"), Eq("mystring")));
@@ -328,11 +417,14 @@ TEST(ObfuscatorTest, WriteObfuscatingMapWithNonEnabledOption) {
   ASSERT_TRUE(obfuscator.Consume(test::ContextBuilder().Build().get(),
                                  getProtocolBufferTableUnderTest().get()));
 
-  obfuscator.WriteObfuscationMap("obfuscated_map.pb");
+  const auto map_path = testing::TempDir() + "/obfuscated_map.pb";
+  ASSERT_TRUE(obfuscator.WriteObfuscationMap(map_path));
 
   std::string pbOut;
-  android::base::ReadFileToString("obfuscated_map.pb", &pbOut, false /* follow_symlinks */);
+  ASSERT_TRUE(android::base::ReadFileToString(map_path, &pbOut, false /* follow_symlinks */));
   ASSERT_THAT(pbOut, Eq(""));
 }
+
+}  // namespace
 
 }  // namespace aapt

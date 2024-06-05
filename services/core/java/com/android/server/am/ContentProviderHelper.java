@@ -34,7 +34,9 @@ import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_E
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerService.TAG_MU;
+import static com.android.server.am.Flags.serviceBindingOomAdjPolicy;
 
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -96,7 +98,9 @@ import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -115,6 +119,8 @@ public class ContentProviderHelper {
     private final ArrayList<ContentProviderRecord> mLaunchingProviders = new ArrayList<>();
     private final ProviderMap mProviderMap;
     private boolean mSystemProvidersInstalled;
+
+    private final Map<String, Boolean> mCloneProfileAuthorityRedirectionCache = new HashMap<>();
 
     ContentProviderHelper(ActivityManagerService service, boolean createProviderMap) {
         mService = service;
@@ -173,6 +179,7 @@ public class ContentProviderHelper {
         final int expectedUserId = userId;
         synchronized (mService) {
             long startTime = SystemClock.uptimeMillis();
+            long startTimeNs = SystemClock.uptimeNanos();
 
             ProcessRecord r = null;
             if (caller != null) {
@@ -201,9 +208,24 @@ public class ContentProviderHelper {
             final UserProperties userProps = umInternal.getUserProperties(userId);
             final boolean isMediaSharedWithParent =
                     userProps != null && userProps.isMediaSharedWithParent();
-            if (!isAuthorityRedirectedForCloneProfile(name) || !isMediaSharedWithParent) {
+            if (!isAuthorityRedirectedForCloneProfileCached(name) || !isMediaSharedWithParent) {
                 // First check if this content provider has been published...
                 cpr = mProviderMap.getProviderByName(name, userId);
+                // In case we are on media authority and callingUid is cloned app asking to access
+                // the contentProvider of user 0 by specifying content as
+                // content://<parent-id>@media/external/file, we skip checkUser.
+                if (isAuthorityRedirectedForCloneProfileCached(name)) {
+                    final int callingUserId = UserHandle.getUserId(callingUid);
+                    final UserProperties userPropsCallingUser =
+                            umInternal.getUserProperties(callingUserId);
+                    final boolean isMediaSharedWithParentForCallingUser =
+                            userPropsCallingUser != null
+                                    && userPropsCallingUser.isMediaSharedWithParent();
+                    if (isMediaSharedWithParentForCallingUser
+                            && umInternal.getProfileParentId(callingUserId) == userId) {
+                        checkCrossUser = false;
+                    }
+                }
             }
             // If that didn't work, check if it exists for user 0 and then
             // verify that it's a singleton provider before using it.
@@ -218,7 +240,7 @@ public class ContentProviderHelper {
                                         r == null ? callingUid : r.uid, cpi.applicationInfo.uid)) {
                         userId = UserHandle.USER_SYSTEM;
                         checkCrossUser = false;
-                    } else if (isAuthorityRedirectedForCloneProfile(name)) {
+                    } else if (isAuthorityRedirectedForCloneProfileCached(name)) {
                         if (isMediaSharedWithParent) {
                             userId = umInternal.getProfileParentId(userId);
                             checkCrossUser = false;
@@ -256,7 +278,6 @@ public class ContentProviderHelper {
                 if (r != null && cpr.canRunHere(r)) {
                     checkAssociationAndPermissionLocked(r, cpi, callingUid, userId, checkCrossUser,
                             cpr.name.flattenToShortString(), startTime);
-                    enforceContentProviderRestrictionsForSdkSandbox(cpi);
 
                     // This provider has been published or is in the process
                     // of being published...  but it is also allowed to run
@@ -271,11 +292,13 @@ public class ContentProviderHelper {
                             PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                             PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
                             cpi.packageName, callingPackage,
-                            callingProcessState, callingProcessState);
+                            callingProcessState, callingProcessState,
+                            false, 0L);
                     return holder;
                 }
 
-                // Don't expose providers between normal apps and instant apps
+                // Don't expose providers between normal apps and instant apps; enforce limited
+                // package visibility (introduced in Android 11); etc.
                 try {
                     if (AppGlobals.getPackageManager()
                             .resolveContentProvider(name, /*flags=*/ 0, userId) == null) {
@@ -300,8 +323,10 @@ public class ContentProviderHelper {
 
                     checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                     final int verifiedAdj = cpr.proc.mState.getVerifiedAdj();
-                    boolean success = mService.updateOomAdjLocked(cpr.proc,
-                            OOM_ADJ_REASON_GET_PROVIDER);
+                    boolean success = !serviceBindingOomAdjPolicy()
+                            || mService.mOomAdjuster.evaluateProviderConnectionAdd(r, cpr.proc)
+                            ? mService.updateOomAdjLocked(cpr.proc, OOM_ADJ_REASON_GET_PROVIDER)
+                            : true;
                     // XXX things have changed so updateOomAdjLocked doesn't actually tell us
                     // if the process has been successfully adjusted.  So to reduce races with
                     // it, we will check whether the process still exists.  Note that this doesn't
@@ -346,7 +371,7 @@ public class ContentProviderHelper {
                                 PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                                 PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
                                 cpi.packageName, callingPackage,
-                                callingProcessState, providerProcessState);
+                                callingProcessState, providerProcessState, false, 0L);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(origId);
@@ -457,7 +482,6 @@ public class ContentProviderHelper {
                     // info and allow the caller to instantiate it.  Only do
                     // this if the provider is the same user as the caller's
                     // process, or can run as root (so can be in any process).
-                    enforceContentProviderRestrictionsForSdkSandbox(cpi);
                     return cpr.newHolder(null, true);
                 }
 
@@ -488,12 +512,12 @@ public class ContentProviderHelper {
                                     cpr.appInfo.packageName, userId, Event.APP_COMPONENT_USED);
                         }
 
-                        // Content provider is now in use, its package can't be stopped.
                         try {
                             checkTime(startTime,
                                     "getContentProviderImpl: before set stopped state");
-                            mService.mPackageManagerInt.setPackageStoppedState(
-                                    cpr.appInfo.packageName, false, userId);
+                            mService.mPackageManagerInt.notifyComponentUsed(
+                                    cpr.appInfo.packageName, userId, callingPackage,
+                                    cpr.toString());
                             checkTime(startTime, "getContentProviderImpl: after set stopped state");
                         } catch (IllegalArgumentException e) {
                             Slog.w(TAG, "Failed trying to unstop package "
@@ -525,12 +549,16 @@ public class ContentProviderHelper {
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
                                     cpi.packageName, callingPackage,
-                                    callingProcessState, proc.mState.getCurProcState());
+                                    callingProcessState, proc.mState.getCurProcState(),
+                                    false, 0L);
                         } else {
-                            final int packageState =
-                                    ((cpr.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0)
+                            final boolean stopped =
+                                    (cpr.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
+                            final int packageState = stopped
                                     ? PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
                                     : PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+                            final boolean firstLaunch = !mService.wasPackageEverLaunched(
+                                    cpi.packageName, userId);
                             checkTime(startTime, "getContentProviderImpl: before start process");
                             proc = mService.startProcessLocked(
                                     cpi.processName, cpr.appInfo, false, 0,
@@ -546,12 +574,20 @@ public class ContentProviderHelper {
                                         + ": process is bad");
                                 return null;
                             }
+                            if (DEBUG_PROCESSES) {
+                                Slog.d(TAG, "Logging provider access for " + cpi.packageName
+                                        + ", stopped=" + stopped + ", firstLaunch=" + firstLaunch);
+                            }
                             FrameworkStatsLog.write(
                                     PROVIDER_ACQUISITION_EVENT_REPORTED,
                                     proc.uid, callingUid,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD,
                                     packageState, cpi.packageName, callingPackage,
-                                    callingProcessState, ActivityManager.PROCESS_STATE_NONEXISTENT);
+                                    callingProcessState, ActivityManager.PROCESS_STATE_NONEXISTENT,
+                                    firstLaunch,
+                                    0L /* TODO: stoppedDuration */);
+                            mService.mProcessList.getAppStartInfoTracker()
+                                    .handleProcessContentProviderStart(startTimeNs, proc);
                         }
                         cpr.launchingApp = proc;
                         mLaunchingProviders.add(cpr);
@@ -609,8 +645,6 @@ public class ContentProviderHelper {
                 // Return a holder instance even if we are waiting for the publishing of the
                 // provider, client will check for the holder.provider to see if it needs to wait
                 // for it.
-                //todo(b/265965249) Need to perform cleanup before calling enforce method here
-                enforceContentProviderRestrictionsForSdkSandbox(cpi);
                 return cpr.newHolder(conn, false);
             }
         }
@@ -672,7 +706,6 @@ public class ContentProviderHelper {
                     + " caller=" + callerName + "/" + Binder.getCallingUid());
             return null;
         }
-        enforceContentProviderRestrictionsForSdkSandbox(cpi);
         return cpr.newHolder(conn, false);
     }
 
@@ -1078,7 +1111,7 @@ public class ContentProviderHelper {
             return false;
         }
 
-        if (isAuthorityRedirectedForCloneProfile(holder.info.authority)
+        if (isAuthorityRedirectedForCloneProfileCached(holder.info.authority)
                 && resolveParentUserIdForCloneProfile(userId) != userId) {
             // Since clone profile shares certain providers with its parent and the access is
             // re-directed as well, the holder may not actually be installed on the clone profile.
@@ -1113,7 +1146,7 @@ public class ContentProviderHelper {
             userId = UserHandle.getCallingUserId();
         }
 
-        if (isAuthorityRedirectedForCloneProfile(authority)) {
+        if (isAuthorityRedirectedForCloneProfileCached(authority)) {
             UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
             UserInfo userInfo = umInternal.getUserInfo(userId);
 
@@ -1150,7 +1183,6 @@ public class ContentProviderHelper {
             appName = r.toString();
         }
 
-        enforceContentProviderRestrictionsForSdkSandbox(cpi);
         return checkContentProviderPermission(cpi, callingPid, Binder.getCallingUid(),
                 userId, checkUser, appName);
     }
@@ -1235,9 +1267,9 @@ public class ContentProviderHelper {
             ProviderInfo cpi = providers.get(i);
             boolean singleton = mService.isSingleton(cpi.processName, cpi.applicationInfo,
                     cpi.name, cpi.flags);
-            if (singleton && app.userId != UserHandle.USER_SYSTEM) {
-                // This is a singleton provider, but a user besides the
-                // default user is asking to initialize a process it runs
+            if (isSingletonOrSystemUserOnly(cpi) && app.userId != UserHandle.USER_SYSTEM) {
+                // This is a singleton or a SYSTEM user only provider, but a user besides the
+                // SYSTEM user is asking to initialize a process it runs
                 // in...  well, no, it doesn't actually run in this process,
                 // it runs in the process of the default user.  Get rid of it.
                 providers.remove(i);
@@ -1384,8 +1416,7 @@ public class ContentProviderHelper {
                                     final boolean processMatch =
                                             Objects.equals(pi.processName, app.processName)
                                             || pi.multiprocess;
-                                    final boolean userMatch = !mService.isSingleton(
-                                            pi.processName, pi.applicationInfo, pi.name, pi.flags)
+                                    final boolean userMatch = !isSingletonOrSystemUserOnly(pi)
                                             || app.userId == UserHandle.USER_SYSTEM;
                                     final boolean isInstantApp = pi.applicationInfo.isInstantApp();
                                     final boolean splitInstalled = pi.splitName == null
@@ -1516,7 +1547,9 @@ public class ContentProviderHelper {
             }
             mService.stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid,
                     cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
-            if (updateOomAdj) {
+            if (updateOomAdj && (!serviceBindingOomAdjPolicy()
+                    || mService.mOomAdjuster.evaluateProviderConnectionRemoval(conn.client,
+                            cpr.proc))) {
                 mService.updateOomAdjLocked(conn.provider.proc, OOM_ADJ_REASON_REMOVE_PROVIDER);
             }
         }
@@ -1524,11 +1557,17 @@ public class ContentProviderHelper {
 
     /**
      * Check if {@link ProcessRecord} has a possible chance at accessing the
-     * given {@link ProviderInfo}. Final permission checking is always done
+     * given {@link ProviderInfo}. First permission checking is for enforcing
+     * ContentProvider Restrictions from SdkSandboxManager.
+     * Final permission checking is always done
      * in {@link ContentProvider}.
      */
     private String checkContentProviderPermission(ProviderInfo cpi, int callingPid, int callingUid,
             int userId, boolean checkUser, String appName) {
+        if (!canAccessContentProviderFromSdkSandbox(cpi, callingUid)) {
+            return "ContentProvider access not allowed from sdk sandbox UID. "
+                    + "ProviderInfo: " + cpi.toString();
+        }
         boolean checkedGrants = false;
         if (checkUser) {
             // Looking for cross-user grants before enforcing the typical cross-users permissions
@@ -1918,11 +1957,10 @@ public class ContentProviderHelper {
         }
     }
 
-    // Binder.clearCallingIdentity() shouldn't be called before this method
-    // as Binder should have its original callingUid for the check
-    private void enforceContentProviderRestrictionsForSdkSandbox(ProviderInfo cpi) {
-        if (!Process.isSdkSandboxUid(Binder.getCallingUid())) {
-            return;
+    private boolean canAccessContentProviderFromSdkSandbox(ProviderInfo cpi,
+                                                                    int callingUid) {
+        if (!Process.isSdkSandboxUid(callingUid)) {
+            return true;
         }
         final SdkSandboxManagerLocal sdkSandboxManagerLocal =
                 LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
@@ -1931,11 +1969,7 @@ public class ContentProviderHelper {
                     + "when checking whether SDK sandbox uid may "
                     + "access the contentprovider.");
         }
-        if (!sdkSandboxManagerLocal
-                .canAccessContentProviderFromSdkSandbox(cpi)) {
-            throw new SecurityException(
-                    "SDK sandbox uid may not access contentprovider " + cpi.name);
-        }
+        return sdkSandboxManagerLocal.canAccessContentProviderFromSdkSandbox(cpi);
     }
 
     /**
@@ -1958,5 +1992,25 @@ public class ContentProviderHelper {
     protected boolean dumpProviderProto(FileDescriptor fd, PrintWriter pw, String name,
             String[] args) {
         return mProviderMap.dumpProviderProto(fd, pw, name, args);
+    }
+
+    private boolean isAuthorityRedirectedForCloneProfileCached(String auth) {
+        if (mCloneProfileAuthorityRedirectionCache.containsKey(auth)) {
+            final Boolean retVal = mCloneProfileAuthorityRedirectionCache.get(auth);
+            return retVal == null ? false : retVal.booleanValue();
+        } else {
+            boolean isAuthRedirected = isAuthorityRedirectedForCloneProfile(auth);
+            mCloneProfileAuthorityRedirectionCache.put(auth, isAuthRedirected);
+            return isAuthRedirected;
+        }
+    }
+
+    /**
+     * Returns true if Provider is either singleUser or systemUserOnly provider.
+     */
+    private boolean isSingletonOrSystemUserOnly(ProviderInfo pi) {
+        return (android.multiuser.Flags.enableSystemUserOnlyForServicesAndProviders()
+                && mService.isSystemUserOnly(pi.flags))
+                || mService.isSingleton(pi.processName, pi.applicationInfo, pi.name, pi.flags);
     }
 }

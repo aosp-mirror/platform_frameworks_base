@@ -19,8 +19,6 @@ package com.android.wm.shell.back;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
-import static com.android.wm.shell.back.BackAnimationConstants.UPDATE_SYSUI_FLAGS_THRESHOLD;
-
 import android.annotation.NonNull;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -45,6 +43,7 @@ public class BackAnimationBackground {
     private boolean mIsRequestingStatusBarAppearance;
     private boolean mBackgroundIsDark;
     private Rect mStartBounds;
+    private int mStatusbarHeight;
 
     public BackAnimationBackground(RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
@@ -52,12 +51,14 @@ public class BackAnimationBackground {
 
     /**
      * Ensures the back animation background color layer is present.
+     *
      * @param startRect The start bounds of the closing target.
      * @param color The background color.
      * @param transaction The animation transaction.
+     * @param statusbarHeight The height of the statusbar (in px).
      */
-    void ensureBackground(Rect startRect, int color,
-            @NonNull SurfaceControl.Transaction transaction) {
+    public void ensureBackground(Rect startRect, int color,
+            @NonNull SurfaceControl.Transaction transaction, int statusbarHeight) {
         if (mBackgroundSurface != null) {
             return;
         }
@@ -79,9 +80,15 @@ public class BackAnimationBackground {
                 .show(mBackgroundSurface);
         mStartBounds = startRect;
         mIsRequestingStatusBarAppearance = false;
+        mStatusbarHeight = statusbarHeight;
     }
 
-    void removeBackground(@NonNull SurfaceControl.Transaction transaction) {
+    /**
+     * Remove the back animation background.
+     *
+     * @param transaction The animation transaction.
+     */
+    public void removeBackground(@NonNull SurfaceControl.Transaction transaction) {
         if (mBackgroundSurface == null) {
             return;
         }
@@ -93,16 +100,26 @@ public class BackAnimationBackground {
         mIsRequestingStatusBarAppearance = false;
     }
 
+    /**
+     * Attach a {@link StatusBarCustomizer} instance to allow status bar animate with back progress.
+     *
+     * @param customizer The {@link StatusBarCustomizer} to be used.
+     */
     void setStatusBarCustomizer(StatusBarCustomizer customizer) {
         mCustomizer = customizer;
     }
 
-    void onBackProgressed(float progress) {
+    /**
+     * Update back animation background with for the progress.
+     *
+     * @param top The top coordinate of the closing target
+     */
+    public void customizeStatusBarAppearance(int top) {
         if (mCustomizer == null || mStartBounds.isEmpty()) {
             return;
         }
 
-        final boolean shouldCustomizeSystemBar = progress > UPDATE_SYSUI_FLAGS_THRESHOLD;
+        final boolean shouldCustomizeSystemBar = top > mStatusbarHeight / 2;
         if (shouldCustomizeSystemBar == mIsRequestingStatusBarAppearance) {
             return;
         }
@@ -114,7 +131,14 @@ public class BackAnimationBackground {
                     mStartBounds);
             mCustomizer.customizeStatusBarAppearance(region);
         } else {
-            mCustomizer.customizeStatusBarAppearance(null);
+            resetStatusBarCustomization();
         }
+    }
+
+    /**
+     * Resets the statusbar customization
+     */
+    public void resetStatusBarCustomization() {
+        mCustomizer.customizeStatusBarAppearance(null);
     }
 }

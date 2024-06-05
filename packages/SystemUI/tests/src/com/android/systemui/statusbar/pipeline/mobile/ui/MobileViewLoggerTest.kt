@@ -54,7 +54,7 @@ class MobileViewLoggerTest : SysuiTestCase() {
     @Test
     fun collectionStarted_dumpHasInfo() {
         val view = TextView(context)
-        val viewModel = QsMobileIconViewModel(commonViewModel, flags)
+        val viewModel = QsMobileIconViewModel(commonViewModel)
 
         underTest.logCollectionStarted(view, viewModel)
 
@@ -66,8 +66,8 @@ class MobileViewLoggerTest : SysuiTestCase() {
     fun collectionStarted_multipleViews_dumpHasInfo() {
         val view = TextView(context)
         val view2 = TextView(context)
-        val viewModel = QsMobileIconViewModel(commonViewModel, flags)
-        val viewModel2 = KeyguardMobileIconViewModel(commonViewModel, flags)
+        val viewModel = QsMobileIconViewModel(commonViewModel)
+        val viewModel2 = KeyguardMobileIconViewModel(commonViewModel)
 
         underTest.logCollectionStarted(view, viewModel)
         underTest.logCollectionStarted(view2, viewModel2)
@@ -81,8 +81,8 @@ class MobileViewLoggerTest : SysuiTestCase() {
     fun collectionStopped_dumpHasInfo() {
         val view = TextView(context)
         val view2 = TextView(context)
-        val viewModel = QsMobileIconViewModel(commonViewModel, flags)
-        val viewModel2 = KeyguardMobileIconViewModel(commonViewModel, flags)
+        val viewModel = QsMobileIconViewModel(commonViewModel)
+        val viewModel2 = KeyguardMobileIconViewModel(commonViewModel)
 
         underTest.logCollectionStarted(view, viewModel)
         underTest.logCollectionStarted(view2, viewModel2)

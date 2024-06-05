@@ -26,6 +26,8 @@ import android.widget.TextView;
 
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.preference.barchart.R;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -71,9 +73,9 @@ public class BarChartPreferenceTest {
         mDetailsView = mBarChartView.findViewById(R.id.bar_chart_details);
 
         mBarChartInfo = new BarChartInfo.Builder()
-                .setTitle(R.string.debug_app)
-                .setDetails(R.string.debug_app)
-                .setEmptyText(R.string.debug_app)
+                .setTitle(com.android.settingslib.R.string.debug_app)
+                .setDetails(com.android.settingslib.R.string.debug_app)
+                .setEmptyText(com.android.settingslib.R.string.debug_app)
                 .setDetailsOnClickListener(v -> {
                 })
                 .build();
@@ -82,21 +84,21 @@ public class BarChartPreferenceTest {
     @Test
     public void initializeBarChart_titleSet_shouldSetTitleInChartView() {
         final BarChartInfo barChartInfo = new BarChartInfo.Builder()
-                .setTitle(R.string.debug_app)
+                .setTitle(com.android.settingslib.R.string.debug_app)
                 .build();
 
         mPreference.initializeBarChart(barChartInfo);
         mPreference.onBindViewHolder(mHolder);
 
         assertThat(mTitleView.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mTitleView.getText()).isEqualTo(mContext.getText(R.string.debug_app));
+        assertThat(mTitleView.getText()).isEqualTo(mContext.getText(com.android.settingslib.R.string.debug_app));
     }
 
     @Test
     public void initializeBarChart_noBarViewSet_shouldShowTitleAndEmptyView() {
         final BarChartInfo barChartInfo = new BarChartInfo.Builder()
-                .setTitle(R.string.debug_app)
-                .setEmptyText(R.string.debug_app)
+                .setTitle(com.android.settingslib.R.string.debug_app)
+                .setEmptyText(com.android.settingslib.R.string.debug_app)
                 .build();
 
         mPreference.initializeBarChart(barChartInfo);
@@ -113,11 +115,11 @@ public class BarChartPreferenceTest {
     @Test
     public void initializeBarChart_detailsSet_shouldShowBarChartDetailsView() {
         final BarChartInfo barChartInfo = new BarChartInfo.Builder()
-                .setTitle(R.string.debug_app)
-                .setDetails(R.string.debug_app)
+                .setTitle(com.android.settingslib.R.string.debug_app)
+                .setDetails(com.android.settingslib.R.string.debug_app)
                 .addBarViewInfo(
                         new BarViewInfo(mIcon, 10, null /* title */,
-                                mContext.getText(R.string.debug_app) /* summary */,
+                                mContext.getText(com.android.settingslib.R.string.debug_app) /* summary */,
                                 null /* contentDescription */))
                 .build();
 
@@ -125,17 +127,17 @@ public class BarChartPreferenceTest {
         mPreference.onBindViewHolder(mHolder);
 
         assertThat(mDetailsView.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mDetailsView.getText()).isEqualTo(mContext.getText(R.string.debug_app));
+        assertThat(mDetailsView.getText()).isEqualTo(mContext.getText(com.android.settingslib.R.string.debug_app));
     }
 
     @Test
     public void initializeBarChart_detailsNotSet_shouldHideBarChartDetailsView() {
         // We don't call BarChartInfo.Builder#setDetails yet.
         final BarChartInfo barChartInfo = new BarChartInfo.Builder()
-                .setTitle(R.string.debug_app)
+                .setTitle(com.android.settingslib.R.string.debug_app)
                 .addBarViewInfo(
                         new BarViewInfo(mIcon, 10, null /* title */,
-                                mContext.getText(R.string.debug_app) /* summary */,
+                                mContext.getText(com.android.settingslib.R.string.debug_app) /* summary */,
                                 null /* contentDescription */))
                 .build();
 
@@ -148,13 +150,13 @@ public class BarChartPreferenceTest {
     @Test
     public void initializeBarChart_clickListenerSet_shouldSetClickListenerOnDetailsView() {
         final BarChartInfo barChartInfo = new BarChartInfo.Builder()
-                .setTitle(R.string.debug_app)
-                .setDetails(R.string.debug_app)
+                .setTitle(com.android.settingslib.R.string.debug_app)
+                .setDetails(com.android.settingslib.R.string.debug_app)
                 .setDetailsOnClickListener(v -> {
                 })
                 .addBarViewInfo(
                         new BarViewInfo(mIcon, 10, null /* title */,
-                                mContext.getText(R.string.debug_app) /* summary */,
+                                mContext.getText(com.android.settingslib.R.string.debug_app) /* summary */,
                                 null /* contentDescription */))
                 .build();
 

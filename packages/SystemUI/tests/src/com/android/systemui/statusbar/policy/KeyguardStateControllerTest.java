@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.BiometricSourceType;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -35,7 +36,9 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import dagger.Lazy;
 
@@ -43,11 +46,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Random;
-
 
 @SmallTest
 @TestableLooper.RunWithLooper
@@ -64,7 +67,14 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     @Mock
     private Lazy<KeyguardUnlockAnimationController> mKeyguardUnlockAnimationControllerLazy;
     @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
+    @Mock
     private KeyguardUpdateMonitorLogger mLogger;
+    @Mock
+    private FeatureFlags mFeatureFlags;
+
+    @Captor
+    private ArgumentCaptor<KeyguardUpdateMonitorCallback> mUpdateCallbackCaptor;
 
     @Before
     public void setup() {
@@ -75,12 +85,31 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
                 mLockPatternUtils,
                 mKeyguardUnlockAnimationControllerLazy,
                 mLogger,
-                mDumpManager);
+                mDumpManager,
+                mFeatureFlags,
+                mSelectedUserInteractor);
     }
 
     @Test
     public void testAddCallback_registersListener() {
         verify(mKeyguardUpdateMonitor).registerCallback(any());
+    }
+
+    @Test
+    public void testFaceAuthEnrolleddChanged_calledWhenFaceEnrollmentStateChanges() {
+        KeyguardStateController.Callback callback = mock(KeyguardStateController.Callback.class);
+
+        when(mKeyguardUpdateMonitor.isFaceEnabledAndEnrolled()).thenReturn(false);
+        verify(mKeyguardUpdateMonitor).registerCallback(mUpdateCallbackCaptor.capture());
+        mKeyguardStateController.addCallback(callback);
+        assertThat(mKeyguardStateController.isFaceEnrolledAndEnabled()).isFalse();
+
+        when(mKeyguardUpdateMonitor.isFaceEnabledAndEnrolled()).thenReturn(true);
+        mUpdateCallbackCaptor.getValue().onBiometricEnrollmentStateChanged(
+                BiometricSourceType.FACE);
+
+        assertThat(mKeyguardStateController.isFaceEnrolledAndEnabled()).isTrue();
+        verify(callback).onFaceEnrolledChanged();
     }
 
     @Test
@@ -119,6 +148,36 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
         // Unless user is authenticated
         when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(anyInt())).thenReturn(true);
         ((KeyguardStateControllerImpl) mKeyguardStateController).update(false /* alwaysUpdate */);
+        assertThat(mKeyguardStateController.canDismissLockScreen()).isTrue();
+    }
+
+    @Test
+    public void testCanSkipLockScreen_updateCalledOnFacesCleared() {
+        verify(mKeyguardUpdateMonitor).registerCallback(mUpdateCallbackCaptor.capture());
+
+        // Cannot skip after there's a password/pin/pattern
+        when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
+        ((KeyguardStateControllerImpl) mKeyguardStateController).update(false /* alwaysUpdate */);
+        assertThat(mKeyguardStateController.canDismissLockScreen()).isFalse();
+
+        // Unless user is authenticated
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(anyInt())).thenReturn(true);
+        mUpdateCallbackCaptor.getValue().onFacesCleared();
+        assertThat(mKeyguardStateController.canDismissLockScreen()).isTrue();
+    }
+
+    @Test
+    public void testCanSkipLockScreen_updateCalledOnFingerprintssCleared() {
+        verify(mKeyguardUpdateMonitor).registerCallback(mUpdateCallbackCaptor.capture());
+
+        // Cannot skip after there's a password/pin/pattern
+        when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
+        ((KeyguardStateControllerImpl) mKeyguardStateController).update(false /* alwaysUpdate */);
+        assertThat(mKeyguardStateController.canDismissLockScreen()).isFalse();
+
+        // Unless user is authenticated
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(anyInt())).thenReturn(true);
+        mUpdateCallbackCaptor.getValue().onFingerprintsCleared();
         assertThat(mKeyguardStateController.canDismissLockScreen()).isTrue();
     }
 
@@ -177,16 +236,14 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     @Test
     public void testOnEnabledTrustAgentsChangedCallback() {
         final Random random = new Random();
-        final ArgumentCaptor<KeyguardUpdateMonitorCallback> updateCallbackCaptor =
-                ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
 
-        verify(mKeyguardUpdateMonitor).registerCallback(updateCallbackCaptor.capture());
+        verify(mKeyguardUpdateMonitor).registerCallback(mUpdateCallbackCaptor.capture());
         final KeyguardStateController.Callback stateCallback =
                 mock(KeyguardStateController.Callback.class);
         mKeyguardStateController.addCallback(stateCallback);
 
         when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
-        updateCallbackCaptor.getValue().onEnabledTrustAgentsChanged(random.nextInt());
+        mUpdateCallbackCaptor.getValue().onEnabledTrustAgentsChanged(random.nextInt());
         verify(stateCallback).onUnlockedChanged();
     }
 }

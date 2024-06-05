@@ -343,7 +343,7 @@ class ExplicitHealthCheckController {
             };
 
             mContext.bindServiceAsUser(intent, mConnection,
-                    Context.BIND_AUTO_CREATE, UserHandle.of(UserHandle.USER_SYSTEM));
+                    Context.BIND_AUTO_CREATE, UserHandle.SYSTEM);
             Slog.i(TAG, "Explicit health check service is bound");
         }
     }

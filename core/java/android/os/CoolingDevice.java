@@ -55,7 +55,11 @@ public final class CoolingDevice implements Parcelable {
             TYPE_TPU,
             TYPE_POWER_AMPLIFIER,
             TYPE_DISPLAY,
-            TYPE_SPEAKER
+            TYPE_SPEAKER,
+            TYPE_WIFI,
+            TYPE_CAMERA,
+            TYPE_FLASHLIGHT,
+            TYPE_USB_PORT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
@@ -84,6 +88,14 @@ public final class CoolingDevice implements Parcelable {
     public static final int TYPE_DISPLAY = CoolingType.DISPLAY;
     /** Speaker cooling device */
     public static final int TYPE_SPEAKER = CoolingType.SPEAKER;
+    /** WiFi cooling device */
+    public static final int TYPE_WIFI = CoolingType.WIFI;
+    /** Camera cooling device */
+    public static final int TYPE_CAMERA = CoolingType.CAMERA;
+    /** Flashlight cooling device */
+    public static final int TYPE_FLASHLIGHT = CoolingType.FLASHLIGHT;
+    /** USB PORT cooling device */
+    public static final int TYPE_USB_PORT = CoolingType.USB_PORT;
 
     /**
      * Verify a valid cooling device type.
@@ -91,7 +103,7 @@ public final class CoolingDevice implements Parcelable {
      * @return true if a cooling device type is valid otherwise false.
      */
     public static boolean isValidType(@Type int type) {
-        return type >= TYPE_FAN && type <= TYPE_SPEAKER;
+        return type >= TYPE_FAN && type <= TYPE_USB_PORT;
     }
 
     public CoolingDevice(long value, @Type int type, @NonNull String name) {

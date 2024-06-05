@@ -19,17 +19,21 @@ package com.android.server.pm;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
+import static android.content.pm.PackageManager.PROPERTY_ANDROID_SAFETY_LABEL;
 import static android.content.pm.SigningDetails.CertCapabilities.SHARED_USER_ID;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 
+import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
-import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
+import static com.android.server.pm.PackageInstallerSession.APP_METADATA_FILE_ACCESS_MODE;
+import static com.android.server.pm.PackageInstallerSession.getAppMetadataSizeLimit;
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
-import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PREFERRED;
+import static com.android.server.pm.PackageManagerService.DEFAULT_FILE_ACCESS_MODE;
+import static com.android.server.pm.PackageManagerService.DEFAULT_NATIVE_LIBRARY_FILE_ACCESS_MODE;
 import static com.android.server.pm.PackageManagerService.RANDOM_CODEPATH_PREFIX;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
@@ -41,33 +45,32 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ComponentInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.PackagePartitions;
 import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.res.ApkAssets;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
+import android.os.CancellationSignal;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
+import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
@@ -82,9 +85,8 @@ import android.system.Os;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.LogPrinter;
-import android.util.Printer;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -94,16 +96,12 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.HexDump;
 import com.android.server.EventLogTags;
-import com.android.server.IntentResolver;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.Watchdog;
-import com.android.server.am.ActivityManagerUtils;
-import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackageSplit;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import dalvik.system.VMRuntime;
@@ -127,10 +125,14 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
@@ -150,11 +152,6 @@ public class PackageManagerServiceUtils {
             pkgSetting -> pkgSetting.getPkg().isApex();
     public static final Predicate<PackageStateInternal> REMOVE_IF_NULL_PKG =
             pkgSetting -> pkgSetting.getPkg() == null;
-
-    // This is a horrible hack to workaround b/240373119, specifically for fixing the T branch.
-    // A proper fix should be implemented in master instead.
-    public static final ThreadLocal<Boolean> DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS =
-            ThreadLocal.withInitial(() -> false);
 
     /**
      * Type used with {@link #canJoinSharedUserId(String, SigningDetails, SharedUserSetting, int)}
@@ -178,20 +175,6 @@ public class PackageManagerServiceUtils {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SharedUserIdJoinType {}
-
-    /**
-     * Components of apps targeting Android T and above will stop receiving intents from
-     * external callers that do not match its declared intent filters.
-     *
-     * When an app registers an exported component in its manifest and adds an <intent-filter>,
-     * the component can be started by any intent - even those that do not match the intent filter.
-     * This has proven to be something that many developers find counterintuitive.
-     * Without checking the intent when the component is started, in some circumstances this can
-     * allow 3P apps to trigger internal-only functionality.
-     */
-    @ChangeId
-    @Disabled  /* Revert enforcement: b/274147456 */
-    private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     /**
      * The initial enabled state of the cache before other checks are done.
@@ -403,7 +386,11 @@ public class PackageManagerServiceUtils {
      * <br />
      * {@link PackageManager#SIGNATURE_NO_MATCH}: if the two signature sets differ.
      */
-    public static int compareSignatures(Signature[] s1, Signature[] s2) {
+    public static int compareSignatures(SigningDetails sd1, SigningDetails sd2) {
+        return compareSignatureArrays(sd1.getSignatures(), sd2.getSignatures());
+    }
+
+    static int compareSignatureArrays(Signature[] s1, Signature[] s2) {
         if (s1 == null) {
             return s2 == null
                     ? PackageManager.SIGNATURE_NEITHER_SIGNED
@@ -445,10 +432,10 @@ public class PackageManagerServiceUtils {
      * set or if the signing details of the package are unknown.
      */
     public static boolean comparePackageSignatures(PackageSetting pkgSetting,
-            Signature[] signatures) {
+            SigningDetails otherSigningDetails) {
         final SigningDetails signingDetails = pkgSetting.getSigningDetails();
         return signingDetails == SigningDetails.UNKNOWN
-                || compareSignatures(signingDetails.getSignatures(), signatures)
+                || compareSignatures(signingDetails, otherSigningDetails)
                 == PackageManager.SIGNATURE_MATCH;
     }
 
@@ -513,11 +500,8 @@ public class PackageManagerServiceUtils {
     }
 
     /**
-     * Make sure the updated priv app is signed with the same key as the original APK file on the
-     * /system partition.
-     *
-     * <p>The rationale is that {@code disabledPkg} is a PackageSetting backed by xml files in /data
-     * and is not tamperproof.
+     * Verifies the updated system app has a signature that is consistent with the pre-installed
+     * version or the signing lineage.
      */
     private static boolean matchSignatureInSystem(@NonNull String packageName,
             @NonNull SigningDetails signingDetails, PackageSetting disabledPkgSetting) {
@@ -543,15 +527,12 @@ public class PackageManagerServiceUtils {
 
     /** Returns true if standard APK Verity is enabled. */
     static boolean isApkVerityEnabled() {
+        if (android.security.Flags.deprecateFsvSig()) {
+            return false;
+        }
         return Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.R
                 || SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED)
                         == FSVERITY_ENABLED;
-    }
-
-    /** Returns true to force apk verification if the package is considered privileged. */
-    static boolean isApkVerificationForced(@Nullable PackageSetting ps) {
-        // TODO(b/154310064): re-enable.
-        return false;
     }
 
     /**
@@ -559,6 +540,7 @@ public class PackageManagerServiceUtils {
      * @returns {@code true} if the compat signatures were matched; otherwise, {@code false}.
      * @throws PackageManagerException if the signatures did not match.
      */
+    @SuppressWarnings("ReferenceEquality")
     public static boolean verifySignatures(PackageSetting pkgSetting,
             @Nullable SharedUserSetting sharedUserSetting,
             PackageSetting disabledPkgSetting, SigningDetails parsedSignatures,
@@ -567,13 +549,23 @@ public class PackageManagerServiceUtils {
         final String packageName = pkgSetting.getPackageName();
         boolean compatMatch = false;
         if (pkgSetting.getSigningDetails().getSignatures() != null) {
-            // Already existing package. Make sure signatures match
+            // For an already existing package, make sure the parsed signatures from the package
+            // match the one in PackageSetting.
             boolean match = parsedSignatures.checkCapability(
                     pkgSetting.getSigningDetails(),
                     SigningDetails.CertCapabilities.INSTALLED_DATA)
                             || pkgSetting.getSigningDetails().checkCapability(
                                     parsedSignatures,
                                     SigningDetails.CertCapabilities.ROLLBACK);
+            // Also make sure the parsed signatures are consistent with the disabled package
+            // setting, if any. The additional UNKNOWN check is because disabled package settings
+            // may not have SigningDetails currently, and we don't want to cause an uninstall.
+            if (android.security.Flags.extendVbChainToUpdatedApk()
+                    && match && disabledPkgSetting != null
+                    && disabledPkgSetting.getSigningDetails() != SigningDetails.UNKNOWN) {
+                match = matchSignatureInSystem(packageName, parsedSignatures, disabledPkgSetting);
+            }
+
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(packageName, pkgSetting.getSignatures(),
                         parsedSignatures);
@@ -590,11 +582,6 @@ public class PackageManagerServiceUtils {
                                         parsedSignatures,
                                         pkgSetting.getSigningDetails(),
                                         SigningDetails.CertCapabilities.ROLLBACK);
-            }
-
-            if (!match && isApkVerificationForced(disabledPkgSetting)) {
-                match = matchSignatureInSystem(packageName, pkgSetting.getSigningDetails(),
-                        disabledPkgSetting);
             }
 
             if (!match && isRollback) {
@@ -845,7 +832,7 @@ public class PackageManagerServiceUtils {
             FileUtils.copy(fileIn, outputStream);
             // Flush anything in buffer before chmod, because any writes after chmod will fail.
             outputStream.flush();
-            Os.fchmod(outputStream.getFD(), 0644);
+            Os.fchmod(outputStream.getFD(), DEFAULT_FILE_ACCESS_MODE);
             atomicFile.finishWrite(outputStream);
             return PackageManager.INSTALL_SUCCEEDED;
         } catch (IOException e) {
@@ -919,16 +906,22 @@ public class PackageManagerServiceUtils {
 
         final File packageFile = new File(packagePath);
         final long sizeBytes;
-        try {
-            sizeBytes = InstallLocationUtils.calculateInstalledSize(pkg, abiOverride);
-        } catch (IOException e) {
-            if (!packageFile.exists()) {
-                ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI;
-            } else {
-                ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_APK;
-            }
+        if (!PackageInstallerSession.isArchivedInstallation(flags)) {
+            try {
+                sizeBytes = InstallLocationUtils.calculateInstalledSize(pkg, abiOverride);
+            } catch (IOException e) {
+                if (!packageFile.exists()) {
+                    ret.recommendedInstallLocation =
+                            InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI;
+                } else {
+                    ret.recommendedInstallLocation =
+                            InstallLocationUtils.RECOMMEND_FAILED_INVALID_APK;
+                }
 
-            return ret;
+                return ret;
+            }
+        } else {
+            sizeBytes = 0;
         }
 
         final PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
@@ -1067,8 +1060,8 @@ public class PackageManagerServiceUtils {
 
         final File targetFile = new File(targetDir, targetName);
         final FileDescriptor targetFd = Os.open(targetFile.getAbsolutePath(),
-                O_RDWR | O_CREAT, 0644);
-        Os.chmod(targetFile.getAbsolutePath(), 0644);
+                O_RDWR | O_CREAT, DEFAULT_FILE_ACCESS_MODE);
+        Os.chmod(targetFile.getAbsolutePath(), DEFAULT_FILE_ACCESS_MODE);
         FileInputStream source = null;
         try {
             source = new FileInputStream(sourcePath);
@@ -1169,75 +1162,6 @@ public class PackageManagerServiceUtils {
     public static boolean isUpdatedSystemApp(PackageStateInternal ps) {
         return (ps.getFlags() & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
-
-    // Static to give access to ComputeEngine
-    public static void applyEnforceIntentFilterMatching(
-            PlatformCompat compat, ComponentResolverApi resolver,
-            List<ResolveInfo> resolveInfos, boolean isReceiver,
-            Intent intent, String resolvedType, int filterCallingUid) {
-        if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
-
-        final Printer logPrinter = DEBUG_INTENT_MATCHING
-                ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
-                : null;
-
-        for (int i = resolveInfos.size() - 1; i >= 0; --i) {
-            final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
-
-            // Do not enforce filter matching when the caller is system, root, or the same app
-            if (ActivityManager.checkComponentPermission(null, filterCallingUid,
-                    info.applicationInfo.uid, false) == PackageManager.PERMISSION_GRANTED) {
-                continue;
-            }
-
-            final ParsedMainComponent comp;
-            if (info instanceof ActivityInfo) {
-                if (isReceiver) {
-                    comp = resolver.getReceiver(info.getComponentName());
-                } else {
-                    comp = resolver.getActivity(info.getComponentName());
-                }
-            } else if (info instanceof ServiceInfo) {
-                comp = resolver.getService(info.getComponentName());
-            } else {
-                // This shall never happen
-                throw new IllegalArgumentException("Unsupported component type");
-            }
-
-            if (comp == null || comp.getIntents().isEmpty()) {
-                continue;
-            }
-
-            // Only enforce filter matching if target app's target SDK >= T
-            final boolean enforce = compat.isChangeEnabledInternal(
-                    ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo);
-
-            boolean match = false;
-            for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
-                IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
-                if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
-                    match = true;
-                    break;
-                }
-            }
-            if (!match) {
-                ActivityManagerUtils.logUnsafeIntentEvent(
-                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH,
-                        filterCallingUid, intent, resolvedType, enforce);
-                if (enforce) {
-                    Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
-                    Slog.w(TAG, "Access blocked: " + comp.getComponentName());
-                    if (DEBUG_INTENT_MATCHING) {
-                        Slog.v(TAG, "Component intent filters:");
-                        comp.getIntents().forEach(f -> f.getIntentFilter().dump(logPrinter, "  "));
-                        Slog.v(TAG, "-----------------------------");
-                    }
-                    resolveInfos.remove(i);
-                }
-            }
-        }
-    }
-
 
     /**
      * Do NOT use for intent resolution filtering. That should be done with
@@ -1532,5 +1456,196 @@ public class PackageManagerServiceUtils {
      */
     public static boolean isInstalledByAdb(String initiatingPackageName) {
         return initiatingPackageName == null || SHELL_PACKAGE_NAME.equals(initiatingPackageName);
+    }
+
+    /**
+     * Extract the app.metadata file from apk.
+     */
+    public static boolean extractAppMetadataFromApk(AndroidPackage pkg,
+            String appMetadataFilePath, boolean isSystem) {
+        if (appMetadataFilePath == null) {
+            return false;
+        }
+        File appMetadataFile = new File(appMetadataFilePath);
+        if (appMetadataFile.exists()) {
+            return true;
+        }
+        Map<String, Property> properties = pkg.getProperties();
+        if (!properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL)) {
+            return false;
+        }
+        Property fileInApkProperty = properties.get(PROPERTY_ANDROID_SAFETY_LABEL);
+        if (!fileInApkProperty.isResourceId()) {
+            return false;
+        }
+        if (isSystem && !appMetadataFile.getParentFile().exists()) {
+            try {
+                makeDirRecursive(appMetadataFile.getParentFile(), 0700);
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to create app metadata dir for package "
+                        + pkg.getPackageName() + ": " + e.getMessage());
+                return false;
+            }
+        }
+        List<AndroidPackageSplit> splits = pkg.getSplits();
+        AssetManager.Builder builder = new AssetManager.Builder();
+        for (int i = 0; i < splits.size(); i++) {
+            try {
+                builder.addApkAssets(ApkAssets.loadFromPath(splits.get(i).getPath()));
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to load resources from APK " + splits.get(i).getPath());
+            }
+        }
+        AssetManager assetManager = builder.build();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        displayMetrics.setToDefaults();
+        Resources res = new Resources(assetManager, displayMetrics, null);
+        AtomicBoolean copyFailed = new AtomicBoolean(false);
+        try (InputStream in = res.openRawResource(fileInApkProperty.getResourceId())) {
+            try (FileOutputStream out = new FileOutputStream(appMetadataFile)) {
+                if (isSystem) {
+                    FileUtils.copy(in, out);
+                } else {
+                    long sizeLimit = getAppMetadataSizeLimit();
+                    CancellationSignal signal = new CancellationSignal();
+                    FileUtils.copy(in, out, signal, Runnable::run, (long progress) -> {
+                        if (progress > sizeLimit) {
+                            copyFailed.set(true);
+                            signal.cancel();
+                        }
+                    });
+                }
+                Os.chmod(appMetadataFile.getAbsolutePath(),
+                        APP_METADATA_FILE_ACCESS_MODE);
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, e.getMessage());
+            copyFailed.set(true);
+        } finally {
+            if (copyFailed.get()) {
+                appMetadataFile.delete();
+            }
+        }
+        return !copyFailed.get();
+    }
+
+    public static void linkFilesToOldDirs(@NonNull Installer installer,
+                                           @NonNull String packageName,
+                                           @NonNull File newPath,
+                                           @Nullable Set<File> oldPaths) {
+        if (oldPaths == null || oldPaths.isEmpty()) {
+            return;
+        }
+        if (IncrementalManager.isIncrementalPath(newPath.getPath())) {
+            //TODO(b/291212866): handle incremental installs
+            return;
+        }
+        final File[] filesInNewPath = newPath.listFiles();
+        if (filesInNewPath == null || filesInNewPath.length == 0) {
+            return;
+        }
+        final List<File> splitApks = new ArrayList<>();
+        for (File file : filesInNewPath) {
+            if (!file.isDirectory() && file.toString().endsWith(".apk")) {
+                splitApks.add(file);
+            }
+        }
+        if (splitApks.isEmpty()) {
+            return;
+        }
+        final File[] splitApkNames = splitApks.toArray(new File[0]);
+        for (File oldPath : oldPaths) {
+            if (!oldPath.exists()) {
+                continue;
+            }
+            linkFilesAndSetModes(installer, packageName, newPath, oldPath, splitApkNames,
+                    DEFAULT_FILE_ACCESS_MODE);
+            linkNativeLibraries(installer, packageName, newPath, oldPath, LIB_DIR_NAME);
+            linkNativeLibraries(installer, packageName, newPath, oldPath, LIB64_DIR_NAME);
+        }
+
+    }
+
+    private static void linkNativeLibraries(@NonNull Installer installer,
+                                            @NonNull String packageName,
+                                            @NonNull File sourcePath, @NonNull File targetPath,
+                                            @NonNull String libDirName) {
+        final File sourceLibDir = new File(sourcePath, libDirName);
+        if (!sourceLibDir.exists()) {
+            return;
+        }
+        final File targetLibDir = new File(targetPath, libDirName);
+        if (!targetLibDir.exists()) {
+            try {
+                NativeLibraryHelper.createNativeLibrarySubdir(targetLibDir);
+            } catch (IOException e) {
+                Slog.w(PackageManagerService.TAG, "Failed to create native library dir at <"
+                        + targetLibDir + ">", e);
+                return;
+            }
+        }
+        final File[] archs = sourceLibDir.listFiles();
+        if (archs == null) {
+            return;
+        }
+        for (File arch : archs) {
+            final File targetArchDir = new File(targetLibDir, arch.getName());
+            if (!targetArchDir.exists()) {
+                try {
+                    NativeLibraryHelper.createNativeLibrarySubdir(targetArchDir);
+                } catch (IOException e) {
+                    Slog.w(PackageManagerService.TAG, "Failed to create native library subdir at <"
+                            + targetArchDir + ">", e);
+                    continue;
+                }
+            }
+            final File sourceArchDir = new File(sourceLibDir, arch.getName());
+            final File[] files = sourceArchDir.listFiles();
+            if (files == null || files.length == 0) {
+                continue;
+            }
+            linkFilesAndSetModes(installer, packageName, sourceArchDir, targetArchDir, files,
+                    DEFAULT_NATIVE_LIBRARY_FILE_ACCESS_MODE);
+        }
+    }
+
+    // Link the files with specified names from under the sourcePath to be under the targetPath
+    private static void linkFilesAndSetModes(@NonNull Installer installer, String packageName,
+            @NonNull File sourcePath, @NonNull File targetPath, @NonNull File[] files, int mode) {
+        for (File file : files) {
+            final String fileName = file.getName();
+            final File sourceFile = new File(sourcePath, fileName);
+            final File targetFile = new File(targetPath, fileName);
+            if (targetFile.exists()) {
+                if (DEBUG) {
+                    Slog.d(PackageManagerService.TAG, "Skipping existing linked file <"
+                            + targetFile + ">");
+                }
+                continue;
+            }
+            try {
+                installer.linkFile(packageName, fileName,
+                        sourcePath.getAbsolutePath(), targetPath.getAbsolutePath());
+                if (DEBUG) {
+                    Slog.d(PackageManagerService.TAG, "Linked <"
+                            + sourceFile + "> to <" + targetFile + ">");
+                }
+            } catch (Installer.InstallerException e) {
+                Slog.w(PackageManagerService.TAG, "Failed to link native library <"
+                        + sourceFile + "> to <" + targetFile + ">", e);
+                continue;
+            }
+            try {
+                Os.chmod(targetFile.getAbsolutePath(), mode);
+            } catch (ErrnoException e) {
+                Slog.w(PackageManagerService.TAG, "Failed to set mode for linked file <"
+                        + targetFile + ">", e);
+                continue;
+            }
+            if (!SELinux.restorecon(targetFile)) {
+                Slog.w(PackageManagerService.TAG, "Failed to restorecon for linked file <"
+                        + targetFile + ">");
+            }
+        }
     }
 }

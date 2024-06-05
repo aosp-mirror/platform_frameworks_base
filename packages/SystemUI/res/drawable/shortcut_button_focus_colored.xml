@@ -21,8 +21,8 @@
         android:color="?android:attr/colorControlHighlight">
         <item>
             <shape android:shape="rectangle">
-                <corners android:radius="16dp"/>
-                <solid android:color="?androidprv:attr/colorAccentPrimary"/>
+              <corners android:radius="@dimen/ksh_button_corner_radius"/>
+                <solid android:color="?androidprv:attr/materialColorPrimary"/>
             </shape>
         </item>
     </ripple>

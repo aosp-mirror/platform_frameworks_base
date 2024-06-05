@@ -18,8 +18,6 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.app.admin.BundlePolicyValue;
-import android.app.admin.PackagePolicyKey;
-import android.app.admin.PolicyKey;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -53,14 +51,8 @@ final class BundlePolicySerializer extends PolicySerializer<Bundle> {
     private static final String ATTR_TYPE_BUNDLE_ARRAY = "BA";
 
     @Override
-    void saveToXml(@NonNull PolicyKey policyKey, TypedXmlSerializer serializer,
-            @NonNull Bundle value) throws IOException {
+    void saveToXml(TypedXmlSerializer serializer, @NonNull Bundle value) throws IOException {
         Objects.requireNonNull(value);
-        Objects.requireNonNull(policyKey);
-        if (!(policyKey instanceof PackagePolicyKey)) {
-            throw new IllegalArgumentException("policyKey is not of type "
-                    + "PackagePolicyKey");
-        }
         writeBundle(value, serializer);
     }
 
@@ -92,7 +84,7 @@ final class BundlePolicySerializer extends PolicySerializer<Bundle> {
                 while (count > 0 && (type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                     if (type == XmlPullParser.START_TAG
                             && parser.getName().equals(TAG_VALUE)) {
-                        values.add(parser.nextText().trim());
+                        values.add(parser.nextText());
                         count--;
                     }
                 }
@@ -111,7 +103,7 @@ final class BundlePolicySerializer extends PolicySerializer<Bundle> {
                 restrictions.putParcelableArray(key,
                         bundleList.toArray(new Bundle[bundleList.size()]));
             } else {
-                String value = parser.nextText().trim();
+                String value = parser.nextText();
                 if (ATTR_TYPE_BOOLEAN.equals(valType)) {
                     restrictions.putBoolean(key, Boolean.parseBoolean(value));
                 } else if (ATTR_TYPE_INTEGER.equals(valType)) {

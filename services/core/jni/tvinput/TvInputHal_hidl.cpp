@@ -59,7 +59,11 @@ JTvInputHal::TvInputEventWrapper JTvInputHal::TvInputEventWrapper::createEventWr
     return event;
 }
 
-Return<void> JTvInputHal::TvInputCallback::notify(const HidlTvInputEvent& event) {
+JTvInputHal::HidlTvInputCallback::HidlTvInputCallback(JTvInputHal* hal) {
+    mHal = hal;
+}
+
+Return<void> JTvInputHal::HidlTvInputCallback::notify(const HidlTvInputEvent& event) {
     mHal->mLooper->sendMessage(new NotifyHandler(mHal,
                                                  TvInputEventWrapper::createEventWrapper(event)),
                                static_cast<int>(event.type));
@@ -70,9 +74,8 @@ JTvInputHal::ITvInputWrapper::ITvInputWrapper(sp<HidlITvInput>& hidlTvInput)
       : mIsHidl(true), mHidlTvInput(hidlTvInput) {}
 
 ::ndk::ScopedAStatus JTvInputHal::ITvInputWrapper::hidlSetCallback(
-        const std::shared_ptr<TvInputCallback>& in_callback) {
-    mHidlTvInput->setCallback(in_callback == nullptr ? nullptr
-                                                     : sp<TvInputCallback>(in_callback.get()));
+        const sp<HidlTvInputCallback>& in_callback) {
+    mHidlTvInput->setCallback(in_callback);
     return ::ndk::ScopedAStatus::ok();
 }
 

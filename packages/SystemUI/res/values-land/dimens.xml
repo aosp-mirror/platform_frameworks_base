@@ -28,12 +28,13 @@
 
     <!--  In landscape the security footer is actually part of the header,
     and needs to be as short as the header  -->
-    <dimen name="qs_security_footer_single_line_height">@*android:dimen/quick_qs_offset_height</dimen>
     <dimen name="qs_footer_padding">14dp</dimen>
-    <dimen name="qs_security_footer_background_inset">12dp</dimen>
 
     <dimen name="volume_tool_tip_top_margin">12dp</dimen>
     <dimen name="volume_row_slider_height">128dp</dimen>
+
+    <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
+    <dimen name="immersive_mode_cling_width">380dp</dimen>
 
     <dimen name="controls_activity_view_top_offset">25dp</dimen>
 
@@ -66,6 +67,9 @@
 
     <dimen name="controls_header_horizontal_padding">12dp</dimen>
     <dimen name="controls_content_margin_horizontal">16dp</dimen>
+    <dimen name="controls_content_padding">16dp</dimen>
+    <dimen name="control_list_vertical_spacing">8dp</dimen>
+    <dimen name="control_list_horizontal_spacing">16dp</dimen>
 
     <!-- Rear Display Education dimens -->
     <dimen name="rear_display_animation_width">246dp</dimen>
@@ -80,6 +84,15 @@
     <!-- Power Menu Lite -->
     <!-- These values are for small screen landscape. For larger landscape screens, they are
          overlaid -->
-    <dimen name="global_actions_button_size">72dp</dimen>
-    <dimen name="global_actions_button_padding">26dp</dimen>
+    <dimen name="global_actions_button_size">64dp</dimen>
+    <dimen name="global_actions_button_padding">20dp</dimen>
+
+    <!-- scroll view the size of 2 channel rows -->
+    <dimen name="notification_blocker_channel_list_height">128dp</dimen>
+
+    <dimen name="keyguard_indication_margin_bottom">8dp</dimen>
+    <dimen name="lock_icon_margin_bottom">24dp</dimen>
+
+    <!-- Keyboard shortcuts helper -->
+    <dimen name="ksh_container_horizontal_margin">48dp</dimen>
 </resources>

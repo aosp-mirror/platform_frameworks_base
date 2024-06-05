@@ -74,9 +74,9 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
-import android.util.MergedConfiguration;
 import android.util.Pair;
 
 import androidx.test.filters.MediumTest;
@@ -238,6 +238,24 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertFalse(wpc.hasActivities());
     }
 
+    @Test
+    public void testAttachApplication() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity.detachFromProcess();
+        mAtm.startProcessAsync(activity, false /* knownToBeDead */,
+                true /* isTop */, "test" /* hostingType */);
+        final WindowProcessController proc = mSystemServicesTestRule.addProcess(
+                activity.packageName, activity.processName,
+                6789 /* pid */, activity.info.applicationInfo.uid);
+        try {
+            mRootWindowContainer.attachApplication(proc);
+            verify(mSupervisor).realStartActivityLocked(eq(activity), eq(proc), anyBoolean(),
+                    anyBoolean());
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
     /**
      * This test ensures that we do not try to restore a task based off an invalid task id. We
      * should expect {@code null} to be returned in this case.
@@ -317,6 +335,31 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertTrue(firstActivity.mRequestForceTransition);
     }
 
+    @Test
+    public void testMultipleActivitiesTaskEnterPip() {
+        // Enable shell transition because the order of setting windowing mode is different.
+        registerTestTransitionPlayer();
+        final ActivityRecord transientActivity = new ActivityBuilder(mAtm)
+                .setCreateTask(true).build();
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm)
+                .setTask(activity1.getTask()).build();
+        activity2.setState(RESUMED, "test");
+
+        // Assume the top activity switches to a transient-launch, e.g. recents.
+        transientActivity.setState(RESUMED, "test");
+        transientActivity.getTask().moveToFront("test");
+
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity2,
+                null /* launchIntoPipHostActivity */, "test");
+        assertEquals("Created PiP task must not change focus", transientActivity.getTask(),
+                mRootWindowContainer.getTopDisplayFocusedRootTask());
+        final Task newPipTask = activity2.getTask();
+        assertEquals(newPipTask, mDisplayContent.getDefaultTaskDisplayArea().getRootPinnedTask());
+        assertNotEquals(newPipTask, activity1.getTask());
+        assertFalse("Created PiP task must not be in recents", newPipTask.inRecents);
+    }
+
     /**
      * When there is only one activity in the Task, and the activity is requesting to enter PIP, the
      * whole Task should enter PIP.
@@ -337,6 +380,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Ensure a task has moved over.
         ensureTaskPlacement(task, activity);
         assertTrue(task.inPinnedWindowingMode());
+        assertFalse("Entering PiP activity must not affect SysUiFlags",
+                activity.canAffectSystemUiFlags());
 
         // The activity with fixed orientation should not apply letterbox when entering PiP.
         final int requestedOrientation = task.getConfiguration().orientation
@@ -518,8 +563,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertNotEquals(activity.getConfiguration().orientation, rotatedConfig.orientation);
         // Assume the activity was shown in different orientation. For example, the top activity is
         // landscape and the portrait lockscreen is shown.
-        activity.setLastReportedConfiguration(
-                new MergedConfiguration(mAtm.getGlobalConfiguration(), rotatedConfig));
+        activity.setLastReportedConfiguration(mAtm.getGlobalConfiguration(), rotatedConfig);
         activity.setState(STOPPED, "sleep");
 
         display.setIsSleeping(true);
@@ -529,7 +573,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         mRootWindowContainer.applySleepTokens(true);
 
         // The display orientation should be changed by the activity so there is no relaunch.
-        verify(activity, never()).relaunchActivityLocked(anyBoolean());
+        verify(activity, never()).relaunchActivityLocked(anyBoolean(), anyInt());
         assertEquals(rotatedConfig.orientation, display.getConfiguration().orientation);
     }
 
@@ -549,10 +593,12 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         // Let's pretend that the app has crashed.
         firstActivity.app.setThread(null);
-        mRootWindowContainer.finishTopCrashedActivities(firstActivity.app, "test");
+        final Task finishedTask = mRootWindowContainer.finishTopCrashedActivities(
+                firstActivity.app, "test");
 
         // Verify that the root task was removed.
         assertEquals(originalRootTaskCount, defaultTaskDisplayArea.getRootTaskCount());
+        assertEquals(rootTask, finishedTask);
     }
 
     /**
@@ -786,7 +832,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         // Assume the task is at the topmost position
         assertFalse(rootTask.isTopRootTaskInDisplayArea());
-        doReturn(taskDisplayArea.getHomeActivity()).when(taskDisplayArea).topRunningActivity();
+        doReturn(taskDisplayArea.getHomeActivity()).when(taskDisplayArea).topRunningActivity(
+                anyBoolean());
 
         // Use the task as target to resume.
         mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -808,8 +855,6 @@ public class RootWindowContainerTests extends WindowTestsBase {
                 new TestDisplayContent.Builder(mAtm, 1000, 1500)
                         .setSystemDecorations(true).build();
 
-        doReturn(true).when(mRootWindowContainer)
-                .ensureVisibilityAndConfig(any(), anyInt(), anyBoolean(), anyBoolean());
         doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplayArea(any(), any(),
                 anyBoolean());
 
@@ -861,6 +906,24 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     /**
+     * Tests whether home can be started if it's not allowed by policy.
+     */
+    @Test
+    public void testCanStartHome_returnsFalse_ifDisallowedByPolicy() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        final WindowProcessController app = mock(WindowProcessController.class);
+        doReturn(app).when(mAtm).getProcessController(any(), anyInt());
+        doReturn(false).when(app).isInstrumenting();
+        final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
+        doReturn(false).when(taskDisplayArea).canHostHomeTask();
+
+        assertFalse(mRootWindowContainer.canStartHomeOnDisplayArea(info, taskDisplayArea,
+                false /* allowInstrumenting*/));
+    }
+
+
+    /**
      * Tests that secondary home activity should not be resolved if device is still locked.
      */
     @Test
@@ -870,7 +933,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
                 new TestDisplayContent.Builder(mAtm, 1000, 1500)
                         .setSystemDecorations(true).build();
 
-        // Use invalid user id to let StorageManager.isUserKeyUnlocked() return false.
+        // Use invalid user id to let StorageManager.isCeStorageUnlocked() return false.
         final int currentUser = mRootWindowContainer.mCurrentUser;
         mRootWindowContainer.mCurrentUser = -1;
 

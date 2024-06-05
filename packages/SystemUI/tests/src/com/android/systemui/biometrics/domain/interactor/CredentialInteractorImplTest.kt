@@ -11,8 +11,8 @@ import com.android.internal.widget.VerifyCredentialResponse
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.domain.model.BiometricOperationInfo
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
-import com.android.systemui.biometrics.domain.model.BiometricUserInfo
 import com.android.systemui.biometrics.promptInfo
+import com.android.systemui.biometrics.shared.model.BiometricUserInfo
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
@@ -87,6 +87,26 @@ class CredentialInteractorImplTest : SysuiTestCase() {
 
             assertThat(interactor.getCredentialOwnerOrSelfId(USER_ID)).isEqualTo(value)
         }
+    }
+
+    @Test
+    fun testParentProfile() {
+        for (value in listOf(12, 8, 4)) {
+            whenever(userManager.getProfileParent(eq(USER_ID)))
+                .thenReturn(UserInfo(value, "test", 0))
+
+            assertThat(interactor.getParentProfileIdOrSelfId(USER_ID)).isEqualTo(value)
+        }
+    }
+
+    @Test
+    fun useCredentialOwnerWhenParentProfileIsNull() {
+        val value = 1
+
+        whenever(userManager.getProfileParent(eq(USER_ID))).thenReturn(null)
+        whenever(userManager.getCredentialOwnerProfile(eq(USER_ID))).thenReturn(value)
+
+        assertThat(interactor.getParentProfileIdOrSelfId(USER_ID)).isEqualTo(value)
     }
 
     @Test fun pinCredentialWhenGood() = pinCredential(goodCredential())

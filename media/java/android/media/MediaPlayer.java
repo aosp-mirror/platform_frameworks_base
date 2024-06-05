@@ -931,8 +931,7 @@ public class MediaPlayer extends PlayerBase
      * @return a MediaPlayer object, or null if creation failed
      */
     public static MediaPlayer create(Context context, Uri uri, SurfaceHolder holder) {
-        int s = AudioSystem.newAudioSessionId();
-        return create(context, uri, holder, null, s > 0 ? s : 0);
+        return create(context, uri, holder, null, AudioSystem.AUDIO_SESSION_ALLOCATE);
     }
 
     /**
@@ -994,8 +993,7 @@ public class MediaPlayer extends PlayerBase
      * @return a MediaPlayer object, or null if creation failed
      */
     public static MediaPlayer create(Context context, int resid) {
-        int s = AudioSystem.newAudioSessionId();
-        return create(context, resid, null, s > 0 ? s : 0);
+        return create(context, resid, null, AudioSystem.AUDIO_SESSION_ALLOCATE);
     }
 
     /**
@@ -1057,7 +1055,7 @@ public class MediaPlayer extends PlayerBase
      * this API to pass the cookies as a list of HttpCookie. If the app has not installed
      * a CookieHandler already, this API creates a CookieManager and populates its CookieStore with
      * the provided cookies. If the app has installed its own handler already, this API requires the
-     * handler to be of CookieManager type such that the API can update the manager’s CookieStore.
+     * handler to be of CookieManager type such that the API can update the manager's CookieStore.
      *
      * <p><strong>Note</strong> that the cross domain redirection is allowed by default,
      * but that can be changed with key/value pairs through the headers parameter with
@@ -1156,6 +1154,7 @@ public class MediaPlayer extends PlayerBase
             setDataSource(afd);
             return true;
         } catch (NullPointerException | SecurityException | IOException ex) {
+            Log.w(TAG, "Error setting data source via ContentResolver", ex);
             return false;
         }
     }

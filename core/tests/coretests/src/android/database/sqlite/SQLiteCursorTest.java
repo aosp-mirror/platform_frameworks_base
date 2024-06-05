@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,5 +186,40 @@ public class SQLiteCursorTest extends AndroidTestCase {
             assertEquals(1, cw.getNumRows());
         }
         assertEquals("All rows should be visited", 10, n);
+    }
+
+    // Return the number of columns associated with a new cursor.
+    private int columnCount() {
+        final String query = "SELECT * FROM t1";
+        try (Cursor c = mDatabase.rawQuery(query, null)) {
+            return c.getColumnCount();
+        }
+    }
+
+    /**
+     * Verify that a cursor that is created after the database schema is updated, sees the updated
+     * schema.
+     */
+    public void testSchemaChangeCursor() {
+        // Create the t1 table and put some data in it.
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t1 (i int);");
+            mDatabase.execSQL("INSERT INTO t1 (i) VALUES (2)");
+            mDatabase.execSQL("INSERT INTO t1 (i) VALUES (3)");
+            mDatabase.execSQL("INSERT INTO t1 (i) VALUES (5)");
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        mDatabase.beginTransaction();
+        try {
+            assertEquals(1, columnCount());
+            mDatabase.execSQL("ALTER TABLE t1 ADD COLUMN j int");
+            assertEquals(2, columnCount());
+        } finally {
+            mDatabase.endTransaction();
+        }
     }
 }

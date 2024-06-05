@@ -18,18 +18,20 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.app.Activity.FULLSCREEN_MODE_REQUEST_ENTER;
+import static android.app.Activity.FULLSCREEN_MODE_REQUEST_EXIT;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.INVALID_WINDOWING_MODE;
 import static android.app.FullscreenRequestHandler.REMOTE_CALLBACK_RESULT_KEY;
 import static android.app.FullscreenRequestHandler.RESULT_APPROVED;
-import static android.app.FullscreenRequestHandler.RESULT_FAILED_NOT_DEFAULT_FREEFORM;
-import static android.app.FullscreenRequestHandler.RESULT_FAILED_NOT_IN_FREEFORM;
 import static android.app.FullscreenRequestHandler.RESULT_FAILED_NOT_IN_FULLSCREEN_WITH_HISTORY;
 import static android.app.FullscreenRequestHandler.RESULT_FAILED_NOT_TOP_FOCUSED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -55,6 +57,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
+import static com.android.window.flags.Flags.allowDisableActivityRecordInputSink;
 
 import android.Manifest;
 import android.annotation.ColorInt;
@@ -70,7 +73,6 @@ import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
 import android.app.compat.CompatChanges;
-import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.EnterPipRequestedItem;
 import android.app.servertransaction.PipStateTransactionItem;
 import android.compat.annotation.ChangeId;
@@ -80,6 +82,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -96,6 +99,7 @@ import android.view.RemoteAnimationDefinition;
 import android.window.SizeConfigurationBuckets;
 import android.window.TransitionInfo;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
@@ -103,7 +107,11 @@ import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.pm.KnownPackages;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
+import com.android.server.utils.quota.Categorizer;
+import com.android.server.utils.quota.Category;
+import com.android.server.utils.quota.CountQuotaTracker;
 import com.android.server.vr.VrManagerInternal;
 
 /**
@@ -118,6 +126,13 @@ class ActivityClientController extends IActivityClientController.Stub {
     private final WindowManagerGlobalLock mGlobalLock;
     private final ActivityTaskSupervisor mTaskSupervisor;
     private final Context mContext;
+
+    // Prevent malicious app abusing the Activity#setPictureInPictureParams API
+    @VisibleForTesting CountQuotaTracker mSetPipAspectRatioQuotaTracker;
+    // Limit to 60 times / minute
+    private static final int SET_PIP_ASPECT_RATIO_LIMIT = 60;
+    // The timeWindowMs here can not be smaller than QuotaTracker#MIN_WINDOW_SIZE_MS
+    private static final long SET_PIP_ASPECT_RATIO_TIME_WINDOW_MS = 60_000;
 
     /** Wrapper around VoiceInteractionServiceManager. */
     private AssistUtils mAssistUtils;
@@ -492,6 +507,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                 final boolean res;
                 final boolean finishWithRootActivity =
                         finishTask == Activity.FINISH_TASK_WITH_ROOT_ACTIVITY;
+                mTaskSupervisor.getBackgroundActivityLaunchController()
+                        .onActivityRequestedFinishing(r);
                 if (finishTask == Activity.FINISH_TASK_WITH_ACTIVITY
                         || (finishWithRootActivity && r == rootR)) {
                     // If requested, remove the task that is associated to this activity only if it
@@ -500,7 +517,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                     // keep backwards compatibility we remove the task from recents when finishing
                     // task with root activity.
                     mTaskSupervisor.removeTask(tr, false /*killProcess*/,
-                            finishWithRootActivity, "finish-activity", r.getUid(), r.info.name);
+                            finishWithRootActivity, "finish-activity", r.getUid(), r.getPid(),
+                            r.info.name);
                     res = true;
                     // Explicitly dismissing the activity so reset its relaunch flag.
                     r.mRelaunchReason = RELAUNCH_REASON_NONE;
@@ -615,7 +633,15 @@ class ActivityClientController extends IActivityClientController.Stub {
     @Override
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
         synchronized (mGlobalLock) {
-            return ActivityRecord.getTaskForActivityLocked(token, onlyRoot);
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            if (r == null) {
+                return INVALID_TASK_ID;
+            }
+            final Task task = r.getTask();
+            if (onlyRoot) {
+                return task.getRootActivity() == r ? task.mTaskId : INVALID_TASK_ID;
+            }
+            return task.mTaskId;
         }
     }
 
@@ -681,28 +707,81 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     @Override
     public int getLaunchedFromUid(IBinder token) {
+        return getUid(token, /* callerToken */ null, /* isActivityCallerCall */ false);
+    }
+
+    @Override
+    public String getLaunchedFromPackage(IBinder token) {
+        return getPackage(token, /* callerToken */ null, /* isActivityCallerCall */ false);
+    }
+
+    @Override
+    public int getActivityCallerUid(IBinder activityToken, IBinder callerToken) {
+        return getUid(activityToken, callerToken, /* isActivityCallerCall */ true);
+    }
+
+    @Override
+    public String getActivityCallerPackage(IBinder activityToken, IBinder callerToken) {
+        return getPackage(activityToken, callerToken, /* isActivityCallerCall */ true);
+    }
+
+    private int getUid(IBinder activityToken, IBinder callerToken, boolean isActivityCallerCall) {
         final int uid = Binder.getCallingUid();
         final boolean isInternalCaller = isInternalCallerGetLaunchedFrom(uid);
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            if (r != null && (isInternalCaller || canGetLaunchedFromLocked(uid, r))) {
-                return r.launchedFromUid;
+            final ActivityRecord r = ActivityRecord.forTokenLocked(activityToken);
+            if (r != null && (isInternalCaller || canGetLaunchedFromLocked(uid, r, callerToken,
+                    isActivityCallerCall)) && isValidCaller(r, callerToken, isActivityCallerCall)) {
+                return isActivityCallerCall ? r.getCallerUid(callerToken) : r.launchedFromUid;
             }
         }
         return INVALID_UID;
     }
 
-    @Override
-    public String getLaunchedFromPackage(IBinder token) {
+    private String getPackage(IBinder activityToken, IBinder callerToken,
+            boolean isActivityCallerCall) {
         final int uid = Binder.getCallingUid();
         final boolean isInternalCaller = isInternalCallerGetLaunchedFrom(uid);
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            if (r != null && (isInternalCaller || canGetLaunchedFromLocked(uid, r))) {
-                return r.launchedFromPackage;
+            final ActivityRecord r = ActivityRecord.forTokenLocked(activityToken);
+            if (r != null && (isInternalCaller || canGetLaunchedFromLocked(uid, r, callerToken,
+                    isActivityCallerCall)) && isValidCaller(r, callerToken, isActivityCallerCall)) {
+                return isActivityCallerCall
+                        ? r.getCallerPackage(callerToken) : r.launchedFromPackage;
             }
         }
         return null;
+    }
+
+    private boolean isValidCaller(ActivityRecord r, IBinder callerToken,
+            boolean isActivityCallerCall) {
+        return isActivityCallerCall ? r.hasCaller(callerToken) : callerToken == null;
+    }
+
+    /**
+     * @param uri This uri must NOT contain an embedded userId.
+     * @param userId The userId in which the uri is to be resolved.
+     */
+    @Override
+    public int checkActivityCallerContentUriPermission(IBinder activityToken, IBinder callerToken,
+            Uri uri, int modeFlags, int userId) {
+        // 1. Check if we have access to the URI - > throw if we don't
+        GrantUri grantUri = new GrantUri(userId, uri, modeFlags);
+        if (!mService.mUgmInternal.checkUriPermission(grantUri, Binder.getCallingUid(), modeFlags,
+                /* isFullAccessForContentUri */ true)) {
+            throw new SecurityException("You don't have access to the content URI, hence can't"
+                    + " check if the caller has access to it: " + uri);
+        }
+
+        // 2. Get the permission result for the caller
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(activityToken);
+            if (r != null) {
+                boolean granted = r.checkContentUriPermission(callerToken, grantUri, modeFlags);
+                return granted ? PERMISSION_GRANTED : PERMISSION_DENIED;
+            }
+        }
+        return PERMISSION_DENIED;
     }
 
     /** Whether the call to one of the getLaunchedFrom APIs is performed by an internal caller. */
@@ -728,9 +807,13 @@ class ActivityClientController extends IActivityClientController.Stub {
      * verifying whether the provided {@code ActivityRecord r} has opted in to sharing its
      * identity or if the uid of the activity matches that of the launching app.
      */
-    private static boolean canGetLaunchedFromLocked(int uid, ActivityRecord r) {
+    private static boolean canGetLaunchedFromLocked(int uid, ActivityRecord r,
+            IBinder callerToken, boolean isActivityCallerCall) {
         if (CompatChanges.isChangeEnabled(ACCESS_SHARED_IDENTITY, uid)) {
-            return r.mShareIdentity || r.launchedFromUid == uid;
+            boolean isShareIdentityEnabled = isActivityCallerCall
+                    ? r.isCallerShareIdentityEnabled(callerToken) : r.mShareIdentity;
+            int callerUid = isActivityCallerCall ? r.getCallerUid(callerToken) : r.launchedFromUid;
+            return isShareIdentityEnabled || callerUid == uid;
         }
         return false;
     }
@@ -768,17 +851,22 @@ class ActivityClientController extends IActivityClientController.Stub {
         try {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+                if (r == null) {
+                    return false;
+                }
                 // Create a transition if the activity is playing in case the below activity didn't
                 // commit invisible. That's because if any activity below this one has changed its
                 // visibility while playing transition, there won't able to commit visibility until
                 // the running transition finish.
-                final Transition transition = r != null
-                        && r.mTransitionController.inPlayingTransition(r)
+                final Transition transition = r.mTransitionController.isShellTransitionsEnabled()
                         && !r.mTransitionController.isCollecting()
                         ? r.mTransitionController.createTransition(TRANSIT_TO_BACK) : null;
-                final boolean changed = r != null && r.setOccludesParent(true);
+                final boolean changed = r.setOccludesParent(true);
                 if (transition != null) {
                     if (changed) {
+                        // Always set as scene transition because it expects to be a jump-cut.
+                        transition.setOverrideAnimation(TransitionInfo.AnimationOptions
+                                .makeSceneTransitionAnimOptions(), null, null);
                         r.mTransitionController.requestStartTransition(transition,
                                 null /*startTask */, null /* remoteTransition */,
                                 null /* displayChange */);
@@ -869,6 +957,7 @@ class ActivityClientController extends IActivityClientController.Stub {
     public boolean enterPictureInPictureMode(IBinder token, final PictureInPictureParams params) {
         final long origId = Binder.clearCallingIdentity();
         try {
+            ensureSetPipAspectRatioQuotaTracker();
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParams(
                         "enterPictureInPictureMode", token, params);
@@ -883,6 +972,7 @@ class ActivityClientController extends IActivityClientController.Stub {
     public void setPictureInPictureParams(IBinder token, final PictureInPictureParams params) {
         final long origId = Binder.clearCallingIdentity();
         try {
+            ensureSetPipAspectRatioQuotaTracker();
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParams(
                         "setPictureInPictureParams", token, params);
@@ -935,6 +1025,19 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     /**
+     * Initialize the {@link #mSetPipAspectRatioQuotaTracker} if applicable, which should happen
+     * out of {@link #mGlobalLock} to avoid deadlock (AM lock is used in QuotaTrack ctor).
+     */
+    private void ensureSetPipAspectRatioQuotaTracker() {
+        if (mSetPipAspectRatioQuotaTracker == null) {
+            mSetPipAspectRatioQuotaTracker = new CountQuotaTracker(mContext,
+                    Categorizer.SINGLE_CATEGORIZER);
+            mSetPipAspectRatioQuotaTracker.setCountLimit(Category.SINGLE_CATEGORY,
+                    SET_PIP_ASPECT_RATIO_LIMIT, SET_PIP_ASPECT_RATIO_TIME_WINDOW_MS);
+        }
+    }
+
+    /**
      * Checks the state of the system and the activity associated with the given {@param token} to
      * verify that picture-in-picture is supported for that activity.
      *
@@ -956,6 +1059,19 @@ class ActivityClientController extends IActivityClientController.Stub {
         if (!r.supportsPictureInPicture()) {
             throw new IllegalStateException(caller
                     + ": Current activity does not support picture-in-picture.");
+        }
+
+        // Rate limit how frequent an app can request aspect ratio change via
+        // Activity#setPictureInPictureParams
+        final int userId = UserHandle.getCallingUserId();
+        if (r.pictureInPictureArgs.hasSetAspectRatio()
+                && params.hasSetAspectRatio()
+                && !r.pictureInPictureArgs.getAspectRatio().equals(
+                params.getAspectRatio())
+                && !mSetPipAspectRatioQuotaTracker.noteEvent(
+                userId, r.packageName, "setPipAspectRatio")) {
+            throw new IllegalStateException(caller
+                    + ": Too many PiP aspect ratio change requests from " + r.packageName);
         }
 
         final float minAspectRatio = mContext.getResources().getFloat(
@@ -1008,10 +1124,8 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
 
         try {
-            final ClientTransaction transaction = ClientTransaction.obtain(
-                    r.app.getThread(), r.token);
-            transaction.addCallback(EnterPipRequestedItem.obtain());
-            mService.getLifecycleManager().scheduleTransaction(transaction);
+            mService.getLifecycleManager().scheduleTransactionItem(r.app.getThread(),
+                    EnterPipRequestedItem.obtain(r.token));
             return true;
         } catch (Exception e) {
             Slog.w(TAG, "Failed to send enter pip requested item: "
@@ -1023,17 +1137,11 @@ class ActivityClientController extends IActivityClientController.Stub {
     /**
      * Alert the client that the Picture-in-Picture state has changed.
      */
-    void onPictureInPictureStateChanged(@NonNull ActivityRecord r,
+    void onPictureInPictureUiStateChanged(@NonNull ActivityRecord r,
             PictureInPictureUiState pipState) {
-        if (!r.inPinnedWindowingMode()) {
-            throw new IllegalStateException("Activity is not in PIP mode");
-        }
-
         try {
-            final ClientTransaction transaction = ClientTransaction.obtain(
-                    r.app.getThread(), r.token);
-            transaction.addCallback(PipStateTransactionItem.obtain(pipState));
-            mService.getLifecycleManager().scheduleTransaction(transaction);
+            mService.getLifecycleManager().scheduleTransactionItem(r.app.getThread(),
+                    PipStateTransactionItem.obtain(r.token, pipState));
         } catch (Exception e) {
             Slog.w(TAG, "Failed to send pip state transaction item: "
                     + r.intent.getComponent(), e);
@@ -1086,19 +1194,14 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     private @FullscreenRequestHandler.RequestResult int validateMultiwindowFullscreenRequestLocked(
             Task topFocusedRootTask, int fullscreenRequest, ActivityRecord requesterActivity) {
-        // If the mode is not by default freeform, the freeform will be a user-driven event.
-        if (topFocusedRootTask.getParent().getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-            return RESULT_FAILED_NOT_DEFAULT_FREEFORM;
+        if (requesterActivity.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            return RESULT_APPROVED;
         }
         // If this is not coming from the currently top-most activity, reject the request.
         if (requesterActivity != topFocusedRootTask.getTopMostActivity()) {
             return RESULT_FAILED_NOT_TOP_FOCUSED;
         }
-        if (fullscreenRequest == FULLSCREEN_MODE_REQUEST_ENTER) {
-            if (topFocusedRootTask.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-                return RESULT_FAILED_NOT_IN_FREEFORM;
-            }
-        } else {
+        if (fullscreenRequest == FULLSCREEN_MODE_REQUEST_EXIT) {
             if (topFocusedRootTask.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
                 return RESULT_FAILED_NOT_IN_FULLSCREEN_WITH_HISTORY;
             }
@@ -1162,16 +1265,15 @@ class ActivityClientController extends IActivityClientController.Stub {
                 fullscreenRequest, r);
         reportMultiwindowFullscreenRequestValidatingResult(callback, validateResult);
         if (validateResult != RESULT_APPROVED) {
-            if (queued) {
-                transition.abort();
-            }
+            transition.abort();
             return;
         }
-        transition.collect(topFocusedRootTask);
-        executeMultiWindowFullscreenRequest(fullscreenRequest, topFocusedRootTask);
-        r.mTransitionController.requestStartTransition(transition, topFocusedRootTask,
+        final Task requestingTask = r.getTask();
+        transition.collect(requestingTask);
+        executeMultiWindowFullscreenRequest(fullscreenRequest, requestingTask);
+        r.mTransitionController.requestStartTransition(transition, requestingTask,
                 null /* remoteTransition */, null /* displayChange */);
-        transition.setReady(topFocusedRootTask, true);
+        transition.setReady(requestingTask, true);
     }
 
     private static void reportMultiwindowFullscreenRequestValidatingResult(IRemoteCallback callback,
@@ -1191,14 +1293,16 @@ class ActivityClientController extends IActivityClientController.Stub {
     private static void executeMultiWindowFullscreenRequest(int fullscreenRequest, Task requester) {
         final int targetWindowingMode;
         if (fullscreenRequest == FULLSCREEN_MODE_REQUEST_ENTER) {
-            requester.mMultiWindowRestoreWindowingMode =
-                    requester.getRequestedOverrideWindowingMode();
+            final int restoreWindowingMode = requester.getRequestedOverrideWindowingMode();
             targetWindowingMode = WINDOWING_MODE_FULLSCREEN;
+            requester.setWindowingMode(targetWindowingMode);
+            // The restore windowing mode must be set after the windowing mode is set since
+            // Task#setWindowingMode resets the restore windowing mode to WINDOWING_MODE_INVALID.
+            requester.mMultiWindowRestoreWindowingMode = restoreWindowingMode;
         } else {
             targetWindowingMode = requester.mMultiWindowRestoreWindowingMode;
-            requester.mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
+            requester.setWindowingMode(targetWindowingMode);
         }
-        requester.setWindowingMode(targetWindowingMode);
         if (targetWindowingMode == WINDOWING_MODE_FULLSCREEN) {
             requester.setBounds(null);
         }
@@ -1579,7 +1683,7 @@ class ActivityClientController extends IActivityClientController.Stub {
      * the Activities in the Task should be finished when it finishes. Otherwise, return {@code
      * false}.
      */
-    private boolean isRelativeTaskRootActivity(ActivityRecord r, ActivityRecord taskRoot) {
+    private static boolean isRelativeTaskRootActivity(ActivityRecord r, ActivityRecord taskRoot) {
         // Not a relative root if the given Activity is not the root Activity of its TaskFragment.
         final TaskFragment taskFragment = r.getTaskFragment();
         if (r != taskFragment.getActivity(ar -> !ar.finishing || ar == r,
@@ -1592,7 +1696,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         return taskRoot.getTaskFragment().getCompanionTaskFragment() == taskFragment;
     }
 
-    private boolean isTopActivityInTaskFragment(ActivityRecord activity) {
+    private static boolean isTopActivityInTaskFragment(ActivityRecord activity) {
         return activity.getTaskFragment().topRunningActivity() == activity;
     }
 
@@ -1608,9 +1712,6 @@ class ActivityClientController extends IActivityClientController.Stub {
     public void onBackPressed(IBinder token, IRequestFinishCallback callback) {
         final long origId = Binder.clearCallingIdentity();
         try {
-            final Intent baseActivityIntent;
-            final boolean launchedFromHome;
-            final boolean isLastRunningActivity;
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r == null) return;
@@ -1618,39 +1719,16 @@ class ActivityClientController extends IActivityClientController.Stub {
                 final Task task = r.getTask();
                 final ActivityRecord root = task.getRootActivity(false /*ignoreRelinquishIdentity*/,
                         true /*setToBottomIfNone*/);
-                final boolean isTaskRoot = r == root;
-                if (isTaskRoot) {
-                    if (mService.mWindowOrganizerController.mTaskOrganizerController
+                if (r == root && mService.mWindowOrganizerController.mTaskOrganizerController
                         .handleInterceptBackPressedOnTaskRoot(r.getRootTask())) {
-                        // This task is handled by a task organizer that has requested the back
-                        // pressed callback.
-                        return;
-                    }
-                } else if (!isRelativeTaskRootActivity(r, root)) {
-                    // Finish the Activity if the activity is not the task root or relative root.
-                    requestCallbackFinish(callback);
+                    // This task is handled by a task organizer that has requested the back
+                    // pressed callback.
                     return;
                 }
-
-                isLastRunningActivity = isTopActivityInTaskFragment(isTaskRoot ? root : r);
-
-                final boolean isBaseActivity = root.mActivityComponent.equals(task.realActivity);
-                baseActivityIntent = isBaseActivity ? root.intent : null;
-
-                launchedFromHome = root.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME);
-            }
-
-            // If the activity was launched directly from the home screen, then we should
-            // refrain from finishing the activity and instead move it to the back to keep it in
-            // memory. The requirements for this are:
-            //   1. The activity is the last running activity in the task.
-            //   2. The current activity is the base activity for the task.
-            //   3. The activity was launched by the home process, and is one of the main entry
-            //      points for the application.
-            if (baseActivityIntent != null && isLastRunningActivity
-                    && launchedFromHome && ActivityRecord.isMainIntent(baseActivityIntent)) {
-                moveActivityTaskToBack(token, true /* nonRoot */);
-                return;
+                if (shouldMoveTaskToBack(r, root)) {
+                    moveActivityTaskToBack(token, true /* nonRoot */);
+                    return;
+                }
             }
 
             // The default option for handling the back button is to finish the Activity.
@@ -1658,6 +1736,27 @@ class ActivityClientController extends IActivityClientController.Stub {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    static boolean shouldMoveTaskToBack(ActivityRecord r, ActivityRecord rootActivity) {
+        if (r != rootActivity && !isRelativeTaskRootActivity(r, rootActivity)) {
+            return false;
+        }
+        final boolean isBaseActivity = rootActivity.mActivityComponent.equals(
+                r.getTask().realActivity);
+        final Intent baseActivityIntent = isBaseActivity ? rootActivity.intent : null;
+
+        // If the activity was launched directly from the home screen, then we should
+        // refrain from finishing the activity and instead move it to the back to keep it in
+        // memory. The requirements for this are:
+        //   1. The activity is the last running activity in the task.
+        //   2. The current activity is the base activity for the task.
+        //   3. The activity was launched by the home process, and is one of the main entry
+        //      points for the application.
+        return baseActivityIntent != null
+                && isTopActivityInTaskFragment(r)
+                && rootActivity.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME)
+                && ActivityRecord.isMainIntent(baseActivityIntent);
     }
 
     @Override
@@ -1688,6 +1787,22 @@ class ActivityClientController extends IActivityClientController.Stub {
             if (r == null) return false;
 
             return r.mRequestedLaunchingTaskFragmentToken == taskFragmentToken;
+        }
+    }
+
+    @Override
+    public void setActivityRecordInputSinkEnabled(IBinder activityToken, boolean enabled) {
+        if (!allowDisableActivityRecordInputSink()) {
+            return;
+        }
+
+        mService.mAmInternal.enforceCallingPermission(
+                Manifest.permission.INTERNAL_SYSTEM_WINDOW, "setActivityRecordInputSinkEnabled");
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(activityToken);
+            if (r != null) {
+                r.mActivityRecordInputSinkEnabled = enabled;
+            }
         }
     }
 }

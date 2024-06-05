@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<!-- In order to pack the 0-4 and 0-5 ranges into a single element, we use a range offset. See
+SignalDrawable.java for usage. -->
+<level-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:minLevel="0" android:maxLevel="0" android:drawable="@drawable/ic_mobile_0_4_bar" />
+    <item android:minLevel="1" android:maxLevel="1" android:drawable="@drawable/ic_mobile_1_4_bar" />
+    <item android:minLevel="2" android:maxLevel="2" android:drawable="@drawable/ic_mobile_2_4_bar" />
+    <item android:minLevel="3" android:maxLevel="3" android:drawable="@drawable/ic_mobile_3_4_bar" />
+    <item android:minLevel="4" android:maxLevel="4" android:drawable="@drawable/ic_mobile_4_4_bar" />
+    <item android:minLevel="10" android:maxLevel="10" android:drawable="@drawable/ic_mobile_0_5_bar" />
+    <item android:minLevel="11" android:maxLevel="11" android:drawable="@drawable/ic_mobile_1_5_bar" />
+    <item android:minLevel="12" android:maxLevel="12" android:drawable="@drawable/ic_mobile_2_5_bar" />
+    <item android:minLevel="13" android:maxLevel="13" android:drawable="@drawable/ic_mobile_3_5_bar" />
+    <item android:minLevel="14" android:maxLevel="14" android:drawable="@drawable/ic_mobile_4_5_bar" />
+    <item android:minLevel="15" android:maxLevel="15" android:drawable="@drawable/ic_mobile_5_5_bar" />
+    
+    <!-- Error states, so we don't have to draw them manually anymore -->
+    <item android:minLevel="20" android:maxLevel="20" android:drawable="@drawable/ic_mobile_0_4_bar_error" />
+    <item android:minLevel="21" android:maxLevel="21" android:drawable="@drawable/ic_mobile_1_4_bar_error" />
+    <item android:minLevel="22" android:maxLevel="22" android:drawable="@drawable/ic_mobile_2_4_bar_error" />
+    <item android:minLevel="23" android:maxLevel="23" android:drawable="@drawable/ic_mobile_3_4_bar_error" />
+    <item android:minLevel="24" android:maxLevel="24" android:drawable="@drawable/ic_mobile_4_4_bar_error" />
+
+    <item android:minLevel="30" android:maxLevel="30" android:drawable="@drawable/ic_mobile_0_5_bar_error" />
+    <item android:minLevel="31" android:maxLevel="31" android:drawable="@drawable/ic_mobile_1_5_bar_error" />
+    <item android:minLevel="32" android:maxLevel="32" android:drawable="@drawable/ic_mobile_2_5_bar_error" />
+    <item android:minLevel="33" android:maxLevel="33" android:drawable="@drawable/ic_mobile_3_5_bar_error" />
+    <item android:minLevel="34" android:maxLevel="34" android:drawable="@drawable/ic_mobile_4_5_bar_error" />
+    <item android:minLevel="35" android:maxLevel="35" android:drawable="@drawable/ic_mobile_5_5_bar_error" />
+</level-list>

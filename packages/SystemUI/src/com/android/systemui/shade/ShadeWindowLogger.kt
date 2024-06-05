@@ -16,29 +16,19 @@
 
 package com.android.systemui.shade
 
-import android.view.WindowManager
-import com.android.systemui.log.dagger.ShadeWindowLog
 import com.android.systemui.log.ConstantStringsLogger
 import com.android.systemui.log.ConstantStringsLoggerImpl
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogMessage
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogLevel.DEBUG
+import com.android.systemui.log.core.LogMessage
+import com.android.systemui.log.dagger.ShadeWindowLog
 import javax.inject.Inject
 
 private const val TAG = "systemui.shadewindow"
 
 class ShadeWindowLogger @Inject constructor(@ShadeWindowLog private val buffer: LogBuffer) :
     ConstantStringsLogger by ConstantStringsLoggerImpl(buffer, TAG) {
-
-    fun logApplyingWindowLayoutParams(lp: WindowManager.LayoutParams) {
-        buffer.log(
-            TAG,
-            DEBUG,
-            { str1 = lp.toString() },
-            { "Applying new window layout params: $str1" }
-        )
-    }
 
     fun logNewState(state: Any) {
         buffer.log(

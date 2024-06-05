@@ -22,10 +22,10 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.annotation.IntDef;
 import android.content.ComponentCallbacks;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.text.Layout;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -36,8 +36,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.android.settingslib.Utils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -73,6 +72,12 @@ class MenuMessageView extends LinearLayout implements
         addView(mTextView, Index.TEXT_VIEW,
                 new LayoutParams(/* width= */ 0, WRAP_CONTENT, /* weight= */ 1));
         addView(mUndoButton, Index.UNDO_BUTTON, new LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
+
+        // The message box is not focusable, but will announce its contents when it appears.
+        // The textView and button are still interactable.
+        setClickable(false);
+        setFocusable(false);
+        setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
     }
 
     @Override
@@ -162,10 +167,11 @@ class MenuMessageView extends LinearLayout implements
         mTextView.setPadding(/* left= */ 0, textPadding, /* right= */ 0, textPadding);
         mTextView.setTextSize(COMPLEX_UNIT_PX, textSize);
         mTextView.setTextColor(textColor);
+        mTextView.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL);
 
-        final ColorStateList colorAccent = Utils.getColorAccent(getContext());
         mUndoButton.setText(res.getString(R.string.accessibility_floating_button_undo));
         mUndoButton.setTextSize(COMPLEX_UNIT_PX, textSize);
-        mUndoButton.setTextColor(colorAccent);
+        mUndoButton.setTextColor(textColor);
+        mUndoButton.setAllCaps(true);
     }
 }

@@ -18,15 +18,21 @@ package com.android.wm.shell.windowdecor;
 
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP;
 
+import android.annotation.NonNull;
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
@@ -34,6 +40,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Size;
 import android.view.Choreographer;
 import android.view.IWindowSession;
 import android.view.InputChannel;
@@ -42,10 +49,17 @@ import android.view.InputEventReceiver;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.SurfaceControl;
+import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerGlobal;
+import android.window.InputTransferToken;
 
-import com.android.internal.view.BaseIWindow;
+import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * An input event listener registered to InputDispatcher to receive input events on task edges and
@@ -55,32 +69,22 @@ import com.android.internal.view.BaseIWindow;
  */
 class DragResizeInputListener implements AutoCloseable {
     private static final String TAG = "DragResizeInputListener";
-
     private final IWindowSession mWindowSession = WindowManagerGlobal.getWindowSession();
-    private final Handler mHandler;
-    private final Choreographer mChoreographer;
-    private final InputManager mInputManager;
+    private final Supplier<SurfaceControl.Transaction> mSurfaceControlTransactionSupplier;
 
     private final int mDisplayId;
-    private final BaseIWindow mFakeWindow;
-    private final IBinder mFocusGrantToken;
+
+    private final IBinder mClientToken;
+
     private final SurfaceControl mDecorationSurface;
     private final InputChannel mInputChannel;
     private final TaskResizeInputEventReceiver mInputEventReceiver;
-    private final DragPositioningCallback mCallback;
 
-    private int mTaskWidth;
-    private int mTaskHeight;
-    private int mResizeHandleThickness;
-    private int mCornerSize;
-
-    private Rect mLeftTopCornerBounds;
-    private Rect mRightTopCornerBounds;
-    private Rect mLeftBottomCornerBounds;
-    private Rect mRightBottomCornerBounds;
-
-    private int mDragPointerId = -1;
-    private DragDetector mDragDetector;
+    private final SurfaceControl mInputSinkSurface;
+    private final IBinder mSinkClientToken;
+    private final InputChannel mSinkInputChannel;
+    private final DisplayController mDisplayController;
+    private final Region mTouchRegion = new Region();
 
     DragResizeInputListener(
             Context context,
@@ -88,131 +92,96 @@ class DragResizeInputListener implements AutoCloseable {
             Choreographer choreographer,
             int displayId,
             SurfaceControl decorationSurface,
-            DragPositioningCallback callback) {
-        mInputManager = context.getSystemService(InputManager.class);
-        mHandler = handler;
-        mChoreographer = choreographer;
+            DragPositioningCallback callback,
+            Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
+            Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
+            DisplayController displayController) {
+        mSurfaceControlTransactionSupplier = surfaceControlTransactionSupplier;
         mDisplayId = displayId;
         mDecorationSurface = decorationSurface;
-        // Use a fake window as the backing surface is a container layer and we don't want to create
-        // a buffer layer for it so we can't use ViewRootImpl.
-        mFakeWindow = new BaseIWindow();
-        mFakeWindow.setSession(mWindowSession);
-        mFocusGrantToken = new Binder();
+        mDisplayController = displayController;
+        mClientToken = new Binder();
+        final InputTransferToken inputTransferToken = new InputTransferToken();
         mInputChannel = new InputChannel();
         try {
             mWindowSession.grantInputChannel(
                     mDisplayId,
                     mDecorationSurface,
-                    mFakeWindow,
+                    mClientToken,
                     null /* hostInputToken */,
                     FLAG_NOT_FOCUSABLE,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
-                    0 /* inputFeatures */,
+                    INPUT_FEATURE_SPY,
                     TYPE_APPLICATION,
                     null /* windowToken */,
-                    mFocusGrantToken,
+                    inputTransferToken,
                     TAG + " of " + decorationSurface.toString(),
                     mInputChannel);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
 
-        mInputEventReceiver = new TaskResizeInputEventReceiver(
-                mInputChannel, mHandler, mChoreographer);
-        mCallback = callback;
-        mDragDetector = new DragDetector(mInputEventReceiver);
-        mDragDetector.setTouchSlop(ViewConfiguration.get(context).getScaledTouchSlop());
+        mInputEventReceiver = new TaskResizeInputEventReceiver(context, mInputChannel, callback,
+                handler, choreographer, () -> {
+            final DisplayLayout layout = mDisplayController.getDisplayLayout(mDisplayId);
+            return new Size(layout.width(), layout.height());
+        }, this::updateSinkInputChannel);
+        mInputEventReceiver.setTouchSlop(ViewConfiguration.get(context).getScaledTouchSlop());
+
+        mInputSinkSurface = surfaceControlBuilderSupplier.get()
+                .setName("TaskInputSink of " + decorationSurface)
+                .setContainerLayer()
+                .setParent(mDecorationSurface)
+                .setCallsite("DragResizeInputListener.constructor")
+                .build();
+        mSurfaceControlTransactionSupplier.get()
+                .setLayer(mInputSinkSurface, WindowDecoration.INPUT_SINK_Z_ORDER)
+                .show(mInputSinkSurface)
+                .apply();
+        mSinkClientToken = new Binder();
+        mSinkInputChannel = new InputChannel();
+        try {
+            mWindowSession.grantInputChannel(
+                    mDisplayId,
+                    mInputSinkSurface,
+                    mSinkClientToken,
+                    null /* hostInputToken */,
+                    FLAG_NOT_FOCUSABLE,
+                    0 /* privateFlags */,
+                    INPUT_FEATURE_NO_INPUT_CHANNEL,
+                    TYPE_INPUT_CONSUMER,
+                    null /* windowToken */,
+                    inputTransferToken,
+                    "TaskInputSink of " + decorationSurface,
+                    mSinkInputChannel);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
-     * Updates geometry of this drag resize handler. Needs to be called every time there is a size
-     * change to notify the input event receiver it's ready to take the next input event. Otherwise
-     * it'll keep batching move events and the drag resize process is stalled.
+     * Updates the geometry (the touch region) of this drag resize handler.
      *
-     * This is also used to update the touch regions of this handler every event dispatched here is
-     * a potential resize request.
-     *
-     * @param taskWidth The width of the task.
-     * @param taskHeight The height of the task.
-     * @param resizeHandleThickness The thickness of the resize handle in pixels.
-     * @param cornerSize The size of the resize handle centered in each corner.
-     * @param touchSlop The distance in pixels user has to drag with touch for it to register as
-     *                  a resize action.
+     * @param incomingGeometry The geometry update to apply for this task's drag resize regions.
+     * @param touchSlop        The distance in pixels user has to drag with touch for it to register
+     *                         as a resize action.
      * @return whether the geometry has changed or not
      */
-    boolean setGeometry(int taskWidth, int taskHeight, int resizeHandleThickness, int cornerSize,
-            int touchSlop) {
-        if (mTaskWidth == taskWidth && mTaskHeight == taskHeight
-                && mResizeHandleThickness == resizeHandleThickness
-                && mCornerSize == cornerSize) {
+    boolean setGeometry(@NonNull DragResizeWindowGeometry incomingGeometry, int touchSlop) {
+        DragResizeWindowGeometry geometry = mInputEventReceiver.getGeometry();
+        if (incomingGeometry.equals(geometry)) {
+            // Geometry hasn't changed size so skip all updates.
             return false;
+        } else {
+            geometry = incomingGeometry;
         }
+        mInputEventReceiver.setTouchSlop(touchSlop);
 
-        mTaskWidth = taskWidth;
-        mTaskHeight = taskHeight;
-        mResizeHandleThickness = resizeHandleThickness;
-        mCornerSize = cornerSize;
-        mDragDetector.setTouchSlop(touchSlop);
-
-        Region touchRegion = new Region();
-        final Rect topInputBounds = new Rect(
-                -mResizeHandleThickness,
-                -mResizeHandleThickness,
-                mTaskWidth + mResizeHandleThickness,
-                0);
-        touchRegion.union(topInputBounds);
-
-        final Rect leftInputBounds = new Rect(
-                -mResizeHandleThickness,
-                0,
-                0,
-                mTaskHeight);
-        touchRegion.union(leftInputBounds);
-
-        final Rect rightInputBounds = new Rect(
-                mTaskWidth,
-                0,
-                mTaskWidth + mResizeHandleThickness,
-                mTaskHeight);
-        touchRegion.union(rightInputBounds);
-
-        final Rect bottomInputBounds = new Rect(
-                -mResizeHandleThickness,
-                mTaskHeight,
-                mTaskWidth + mResizeHandleThickness,
-                mTaskHeight + mResizeHandleThickness);
-        touchRegion.union(bottomInputBounds);
-
-        // Set up touch areas in each corner.
-        int cornerRadius = mCornerSize / 2;
-        mLeftTopCornerBounds = new Rect(
-                -cornerRadius,
-                -cornerRadius,
-                cornerRadius,
-                cornerRadius);
-        touchRegion.union(mLeftTopCornerBounds);
-
-        mRightTopCornerBounds = new Rect(
-                mTaskWidth - cornerRadius,
-                -cornerRadius,
-                mTaskWidth + cornerRadius,
-                cornerRadius);
-        touchRegion.union(mRightTopCornerBounds);
-
-        mLeftBottomCornerBounds = new Rect(
-                -cornerRadius,
-                mTaskHeight - cornerRadius,
-                cornerRadius,
-                mTaskHeight + cornerRadius);
-        touchRegion.union(mLeftBottomCornerBounds);
-
-        mRightBottomCornerBounds = new Rect(
-                mTaskWidth - cornerRadius,
-                mTaskHeight - cornerRadius,
-                mTaskWidth + cornerRadius,
-                mTaskHeight + cornerRadius);
-        touchRegion.union(mRightBottomCornerBounds);
+        mTouchRegion.setEmpty();
+        // Apply the geometry to the touch region.
+        geometry.union(mTouchRegion);
+        mInputEventReceiver.setGeometry(geometry);
+        mInputEventReceiver.setTouchRegion(mTouchRegion);
 
         try {
             mWindowSession.updateInputChannel(
@@ -221,24 +190,60 @@ class DragResizeInputListener implements AutoCloseable {
                     mDecorationSurface,
                     FLAG_NOT_FOCUSABLE,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
-                    0 /* inputFeatures */,
-                    touchRegion);
+                    INPUT_FEATURE_SPY,
+                    mTouchRegion);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+
+        final Size taskSize = geometry.getTaskSize();
+        mSurfaceControlTransactionSupplier.get()
+                .setWindowCrop(mInputSinkSurface, taskSize.getWidth(), taskSize.getHeight())
+                .apply();
+        // The touch region of the TaskInputSink should be the touch region of this
+        // DragResizeInputHandler minus the task bounds. Pilfering events isn't enough to prevent
+        // input windows from handling down events, which will bring tasks in the back to front.
+        //
+        // Note not the entire touch region responds to both mouse and touchscreen events.
+        // Therefore, in the region that only responds to one of them, it would be a no-op to
+        // perform a gesture in the other type of events. We currently only have a mouse-only region
+        // out of the task bounds, and due to the roughness of touchscreen events, it's not a severe
+        // issue. However, were there touchscreen-only a region out of the task bounds, mouse
+        // gestures will become no-op in that region, even though the mouse gestures may appear to
+        // be performed on the input window behind the resize handle.
+        mTouchRegion.op(0, 0, taskSize.getWidth(), taskSize.getHeight(), Region.Op.DIFFERENCE);
+        updateSinkInputChannel(mTouchRegion);
         return true;
     }
 
     /**
-     * Generate a Region that encapsulates all 4 corner handles
+     * Generate a Region that encapsulates all 4 corner handles and window edges.
      */
-    Region getCornersRegion() {
-        Region region = new Region();
-        region.union(mLeftTopCornerBounds);
-        region.union(mLeftBottomCornerBounds);
-        region.union(mRightTopCornerBounds);
-        region.union(mRightBottomCornerBounds);
-        return region;
+    @NonNull Region getCornersRegion() {
+        return mInputEventReceiver.getCornersRegion();
+    }
+
+    private void updateSinkInputChannel(Region region) {
+        try {
+            mWindowSession.updateInputChannel(
+                    mSinkInputChannel.getToken(),
+                    mDisplayId,
+                    mInputSinkSurface,
+                    FLAG_NOT_FOCUSABLE,
+                    0 /* privateFlags */,
+                    INPUT_FEATURE_NO_INPUT_CHANNEL,
+                    region);
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    boolean shouldHandleEvent(@NonNull MotionEvent e, @NonNull Point offset) {
+        return mInputEventReceiver.shouldHandleEvent(e, offset);
+    }
+
+    boolean isHandlingDragResize() {
+        return mInputEventReceiver.isHandlingEvents();
     }
 
     @Override
@@ -246,22 +251,53 @@ class DragResizeInputListener implements AutoCloseable {
         mInputEventReceiver.dispose();
         mInputChannel.dispose();
         try {
-            mWindowSession.remove(mFakeWindow);
+            mWindowSession.remove(mClientToken);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+
+        mSinkInputChannel.dispose();
+        try {
+            mWindowSession.remove(mSinkClientToken);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        mSurfaceControlTransactionSupplier.get()
+                .remove(mInputSinkSurface)
+                .apply();
     }
 
-    private class TaskResizeInputEventReceiver extends InputEventReceiver
-            implements DragDetector.MotionEventHandler {
-        private final Choreographer mChoreographer;
-        private final Runnable mConsumeBatchEventRunnable;
+    private static class TaskResizeInputEventReceiver extends InputEventReceiver implements
+            DragDetector.MotionEventHandler {
+        @NonNull private final Context mContext;
+        private final InputManager mInputManager;
+        @NonNull private final InputChannel mInputChannel;
+        @NonNull private final DragPositioningCallback mCallback;
+        @NonNull private final Choreographer mChoreographer;
+        @NonNull private final Runnable mConsumeBatchEventRunnable;
+        @NonNull private final DragDetector mDragDetector;
+        @NonNull private final Supplier<Size> mDisplayLayoutSizeSupplier;
+        @NonNull private final Consumer<Region> mTouchRegionConsumer;
+        private final Rect mTmpRect = new Rect();
         private boolean mConsumeBatchEventScheduled;
+        private DragResizeWindowGeometry mDragResizeWindowGeometry;
+        private Region mTouchRegion;
         private boolean mShouldHandleEvents;
+        private int mLastCursorType = PointerIcon.TYPE_DEFAULT;
+        private Rect mDragStartTaskBounds;
+        private int mDragPointerId = -1;
 
-        private TaskResizeInputEventReceiver(
-                InputChannel inputChannel, Handler handler, Choreographer choreographer) {
+        private TaskResizeInputEventReceiver(@NonNull Context context,
+                @NonNull InputChannel inputChannel,
+                @NonNull DragPositioningCallback callback, @NonNull Handler handler,
+                @NonNull Choreographer choreographer,
+                @NonNull Supplier<Size> displayLayoutSizeSupplier,
+                @NonNull Consumer<Region> touchRegionConsumer) {
             super(inputChannel, handler.getLooper());
+            mContext = context;
+            mInputManager = context.getSystemService(InputManager.class);
+            mInputChannel = inputChannel;
+            mCallback = callback;
             mChoreographer = choreographer;
 
             mConsumeBatchEventRunnable = () -> {
@@ -274,6 +310,48 @@ class DragResizeInputListener implements AutoCloseable {
                     scheduleConsumeBatchEvent();
                 }
             };
+
+            mDragDetector = new DragDetector(this);
+            mDisplayLayoutSizeSupplier = displayLayoutSizeSupplier;
+            mTouchRegionConsumer = touchRegionConsumer;
+        }
+
+        /**
+         * Returns the geometry of the areas to drag resize.
+         */
+        DragResizeWindowGeometry getGeometry() {
+            return mDragResizeWindowGeometry;
+        }
+
+        /**
+         * Updates the geometry of the areas to drag resize.
+         */
+        void setGeometry(@NonNull DragResizeWindowGeometry dragResizeWindowGeometry) {
+            mDragResizeWindowGeometry = dragResizeWindowGeometry;
+        }
+
+        /**
+         * Sets how much slop to allow for touches.
+         */
+        void setTouchSlop(int touchSlop) {
+            mDragDetector.setTouchSlop(touchSlop);
+        }
+
+        /**
+         * Updates the region accepting input for drag resizing the task.
+         */
+        void setTouchRegion(@NonNull Region touchRegion) {
+            mTouchRegion = touchRegion;
+        }
+
+        /**
+         * Returns the union of all regions that can be touched for drag resizing; the corners and
+         * window edges.
+         */
+        @NonNull Region getCornersRegion() {
+            Region region = new Region();
+            mDragResizeWindowGeometry.union(region);
+            return region;
         }
 
         @Override
@@ -295,6 +373,10 @@ class DragResizeInputListener implements AutoCloseable {
             finishInputEvent(inputEvent, handleInputEvent(inputEvent));
         }
 
+        boolean isHandlingEvents() {
+            return mShouldHandleEvents;
+        }
+
         private boolean handleInputEvent(InputEvent inputEvent) {
             if (!(inputEvent instanceof MotionEvent)) {
                 return false;
@@ -303,27 +385,33 @@ class DragResizeInputListener implements AutoCloseable {
         }
 
         @Override
-        public boolean handleMotionEvent(MotionEvent e) {
+        public boolean handleMotionEvent(View v, MotionEvent e) {
             boolean result = false;
             // Check if this is a touch event vs mouse event.
             // Touch events are tracked in four corners. Other events are tracked in resize edges.
-            boolean isTouch = (e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
+            boolean isTouch = isTouchEvent(e);
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
-                    float x = e.getX(0);
-                    float y = e.getY(0);
-                    if (isTouch) {
-                        mShouldHandleEvents = isInCornerBounds(x, y);
-                    } else {
-                        mShouldHandleEvents = isInResizeHandleBounds(x, y);
-                    }
+                    mShouldHandleEvents = mDragResizeWindowGeometry.shouldHandleEvent(e, isTouch,
+                            new Point() /* offset */);
                     if (mShouldHandleEvents) {
                         mDragPointerId = e.getPointerId(0);
+                        float x = e.getX(0);
+                        float y = e.getY(0);
                         float rawX = e.getRawX(0);
                         float rawY = e.getRawY(0);
-                        int ctrlType = calculateCtrlType(isTouch, x, y);
-                        mCallback.onDragPositioningStart(ctrlType, rawX, rawY);
+                        int ctrlType = mDragResizeWindowGeometry.calculateCtrlType(isTouch, x, y);
+                        ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                                "%s: Handling action down, update ctrlType to %d", TAG, ctrlType);
+                        mDragStartTaskBounds = mCallback.onDragPositioningStart(ctrlType,
+                                rawX, rawY);
+                        // Increase the input sink region to cover the whole screen; this is to
+                        // prevent input and focus from going to other tasks during a drag resize.
+                        updateInputSinkRegionForDrag(mDragStartTaskBounds);
                         result = true;
+                    } else {
+                        ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                                "%s: Handling action down, but ignore event", TAG);
                     }
                     break;
                 }
@@ -331,10 +419,12 @@ class DragResizeInputListener implements AutoCloseable {
                     if (!mShouldHandleEvents) {
                         break;
                     }
+                    mInputManager.pilferPointers(mInputChannel.getToken());
                     int dragPointerIndex = e.findPointerIndex(mDragPointerId);
                     float rawX = e.getRawX(dragPointerIndex);
                     float rawY = e.getRawY(dragPointerIndex);
-                    mCallback.onDragPositioningMove(rawX, rawY);
+                    final Rect taskBounds = mCallback.onDragPositioningMove(rawX, rawY);
+                    updateInputSinkRegionForDrag(taskBounds);
                     result = true;
                     break;
                 }
@@ -342,8 +432,13 @@ class DragResizeInputListener implements AutoCloseable {
                 case MotionEvent.ACTION_CANCEL: {
                     if (mShouldHandleEvents) {
                         int dragPointerIndex = e.findPointerIndex(mDragPointerId);
-                        mCallback.onDragPositioningEnd(
+                        final Rect taskBounds = mCallback.onDragPositioningEnd(
                                 e.getRawX(dragPointerIndex), e.getRawY(dragPointerIndex));
+                        // If taskBounds has changed, setGeometry will be called and update the
+                        // sink region. Otherwise, we should revert it here.
+                        if (taskBounds.equals(mDragStartTaskBounds)) {
+                            mTouchRegionConsumer.accept(mTouchRegion);
+                        }
                     }
                     mShouldHandleEvents = false;
                     mDragPointerId = -1;
@@ -352,73 +447,35 @@ class DragResizeInputListener implements AutoCloseable {
                 }
                 case MotionEvent.ACTION_HOVER_ENTER:
                 case MotionEvent.ACTION_HOVER_MOVE: {
-                    updateCursorType(e.getXCursorPosition(), e.getYCursorPosition());
+                    updateCursorType(e.getDisplayId(), e.getDeviceId(),
+                            e.getPointerId(/*pointerIndex=*/0), e.getXCursorPosition(),
+                            e.getYCursorPosition());
                     result = true;
                     break;
                 }
                 case MotionEvent.ACTION_HOVER_EXIT:
-                    mInputManager.setPointerIconType(PointerIcon.TYPE_DEFAULT);
                     result = true;
                     break;
             }
             return result;
         }
 
-        private boolean isInCornerBounds(float xf, float yf) {
-            return calculateCornersCtrlType(xf, yf) != 0;
+        private void updateInputSinkRegionForDrag(Rect taskBounds) {
+            mTmpRect.set(taskBounds);
+            final Size displayLayoutSize = mDisplayLayoutSizeSupplier.get();
+            final Region dragTouchRegion = new Region(-taskBounds.left, -taskBounds.top,
+                    -taskBounds.left + displayLayoutSize.getWidth(),
+                    -taskBounds.top + displayLayoutSize.getHeight());
+            // Remove the localized task bounds from the touch region.
+            mTmpRect.offsetTo(0, 0);
+            dragTouchRegion.op(mTmpRect, Region.Op.DIFFERENCE);
+            mTouchRegionConsumer.accept(dragTouchRegion);
         }
 
-        private boolean isInResizeHandleBounds(float x, float y) {
-            return calculateResizeHandlesCtrlType(x, y) != 0;
-        }
-
-        @DragPositioningCallback.CtrlType
-        private int calculateCtrlType(boolean isTouch, float x, float y) {
-            if (isTouch) {
-                return calculateCornersCtrlType(x, y);
-            }
-            return calculateResizeHandlesCtrlType(x, y);
-        }
-
-        @DragPositioningCallback.CtrlType
-        private int calculateResizeHandlesCtrlType(float x, float y) {
-            int ctrlType = 0;
-            if (x < 0) {
-                ctrlType |= CTRL_TYPE_LEFT;
-            }
-            if (x > mTaskWidth) {
-                ctrlType |= CTRL_TYPE_RIGHT;
-            }
-            if (y < 0) {
-                ctrlType |= CTRL_TYPE_TOP;
-            }
-            if (y > mTaskHeight) {
-                ctrlType |= CTRL_TYPE_BOTTOM;
-            }
-            return ctrlType;
-        }
-
-        @DragPositioningCallback.CtrlType
-        private int calculateCornersCtrlType(float x, float y) {
-            int xi = (int) x;
-            int yi = (int) y;
-            if (mLeftTopCornerBounds.contains(xi, yi)) {
-                return CTRL_TYPE_LEFT | CTRL_TYPE_TOP;
-            }
-            if (mLeftBottomCornerBounds.contains(xi, yi)) {
-                return CTRL_TYPE_LEFT | CTRL_TYPE_BOTTOM;
-            }
-            if (mRightTopCornerBounds.contains(xi, yi)) {
-                return CTRL_TYPE_RIGHT | CTRL_TYPE_TOP;
-            }
-            if (mRightBottomCornerBounds.contains(xi, yi)) {
-                return CTRL_TYPE_RIGHT | CTRL_TYPE_BOTTOM;
-            }
-            return 0;
-        }
-
-        private void updateCursorType(float x, float y) {
-            @DragPositioningCallback.CtrlType int ctrlType = calculateResizeHandlesCtrlType(x, y);
+        private void updateCursorType(int displayId, int deviceId, int pointerId, float x,
+                float y) {
+            @DragPositioningCallback.CtrlType int ctrlType =
+                    mDragResizeWindowGeometry.calculateCtrlType(/* isTouch= */ false, x, y);
 
             int cursorType = PointerIcon.TYPE_DEFAULT;
             switch (ctrlType) {
@@ -439,7 +496,30 @@ class DragResizeInputListener implements AutoCloseable {
                     cursorType = PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
                     break;
             }
-            mInputManager.setPointerIconType(cursorType);
+            // Only update the cursor type to default once so that views behind the decor container
+            // layer that aren't in the active resizing regions have chances to update the cursor
+            // type. We would like to enforce the cursor type by setting the cursor type multilple
+            // times in active regions because we shouldn't allow the views behind to change it, as
+            // we'll pilfer the gesture initiated in this area. This is necessary because 1) we
+            // should allow the views behind regions only for touches to set the cursor type; and 2)
+            // there is a small region out of each rounded corner that's inside the task bounds,
+            // where views in the task can receive input events because we can't set touch regions
+            // of input sinks to have rounded corners.
+            if (mLastCursorType != cursorType || cursorType != PointerIcon.TYPE_DEFAULT) {
+                ProtoLog.d(WM_SHELL_DESKTOP_MODE, "%s: update pointer icon from %d to %d",
+                        TAG, mLastCursorType, cursorType);
+                mInputManager.setPointerIcon(PointerIcon.getSystemIcon(mContext, cursorType),
+                        displayId, deviceId, pointerId, mInputChannel.getToken());
+                mLastCursorType = cursorType;
+            }
+        }
+
+        private boolean shouldHandleEvent(MotionEvent e, Point offset) {
+            return mDragResizeWindowGeometry.shouldHandleEvent(e, offset);
+        }
+
+        private boolean isTouchEvent(MotionEvent e) {
+            return (e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
         }
     }
 }

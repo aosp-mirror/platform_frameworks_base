@@ -681,12 +681,6 @@ public final class ImageDecoder implements AutoCloseable {
         }
     };
 
-    /** @removed
-     * @deprecated Subsumed by {@link #DecodeException}.
-     */
-    @Deprecated
-    public static class IncompleteException extends IOException {};
-
     /**
      *  Interface for changing the default settings of a decode.
      *
@@ -712,24 +706,6 @@ public final class ImageDecoder implements AutoCloseable {
                 @NonNull ImageInfo info, @NonNull Source source);
 
     };
-
-    /** @removed
-     * @deprecated Replaced by {@link #DecodeException#SOURCE_EXCEPTION}.
-     */
-    @Deprecated
-    public static final int ERROR_SOURCE_EXCEPTION  = 1;
-
-    /** @removed
-     * @deprecated Replaced by {@link #DecodeException#SOURCE_INCOMPLETE}.
-     */
-    @Deprecated
-    public static final int ERROR_SOURCE_INCOMPLETE = 2;
-
-    /** @removed
-     * @deprecated Replaced by {@link #DecodeException#SOURCE_MALFORMED_DATA}.
-     */
-    @Deprecated
-    public static final int ERROR_SOURCE_ERROR      = 3;
 
     /**
      *  Information about an interrupted decode.
@@ -1178,14 +1154,6 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     // Modifiers
-    /** @removed
-     * @deprecated Renamed to {@link #setTargetSize}.
-     */
-    @Deprecated
-    public ImageDecoder setResize(int width, int height) {
-        this.setTargetSize(width, height);
-        return this;
-    }
 
     /**
      *  Specify the size of the output {@link Drawable} or {@link Bitmap}.
@@ -1215,15 +1183,6 @@ public final class ImageDecoder implements AutoCloseable {
 
         mDesiredWidth = width;
         mDesiredHeight = height;
-    }
-
-    /** @removed
-     * @deprecated Renamed to {@link #setTargetSampleSize}.
-     */
-    @Deprecated
-    public ImageDecoder setResize(int sampleSize) {
-        this.setTargetSampleSize(sampleSize);
-        return this;
     }
 
     private int getTargetDimension(int original, int sampleSize, int computed) {
@@ -1381,28 +1340,11 @@ public final class ImageDecoder implements AutoCloseable {
         mUnpremultipliedRequired = unpremultipliedRequired;
     }
 
-    /** @removed
-     * @deprecated Renamed to {@link #setUnpremultipliedRequired}.
-     */
-    @Deprecated
-    public ImageDecoder setRequireUnpremultiplied(boolean unpremultipliedRequired) {
-        this.setUnpremultipliedRequired(unpremultipliedRequired);
-        return this;
-    }
-
     /**
      *  Return whether the {@link Bitmap} will have unpremultiplied pixels.
      */
     public boolean isUnpremultipliedRequired() {
         return mUnpremultipliedRequired;
-    }
-
-    /** @removed
-     * @deprecated Renamed to {@link #isUnpremultipliedRequired}.
-     */
-    @Deprecated
-    public boolean getRequireUnpremultiplied() {
-        return this.isUnpremultipliedRequired();
     }
 
     /**
@@ -1528,28 +1470,11 @@ public final class ImageDecoder implements AutoCloseable {
         mMutable = mutable;
     }
 
-    /** @removed
-     * @deprecated Renamed to {@link #setMutableRequired}.
-     */
-    @Deprecated
-    public ImageDecoder setMutable(boolean mutable) {
-        this.setMutableRequired(mutable);
-        return this;
-    }
-
     /**
      *  Return whether the decoded {@link Bitmap} will be mutable.
      */
     public boolean isMutableRequired() {
         return mMutable;
-    }
-
-    /** @removed
-     * @deprecated Renamed to {@link #isMutableRequired}.
-     */
-    @Deprecated
-    public boolean getMutable() {
-        return this.isMutableRequired();
     }
 
     /**
@@ -1597,22 +1522,6 @@ public final class ImageDecoder implements AutoCloseable {
         return mConserveMemory ? MEMORY_POLICY_LOW_RAM : MEMORY_POLICY_DEFAULT;
     }
 
-    /** @removed
-     * @deprecated Replaced by {@link #setMemorySizePolicy}.
-     */
-    @Deprecated
-    public void setConserveMemory(boolean conserveMemory) {
-        mConserveMemory = conserveMemory;
-    }
-
-    /** @removed
-     * @deprecated Replaced by {@link #getMemorySizePolicy}.
-     */
-    @Deprecated
-    public boolean getConserveMemory() {
-        return mConserveMemory;
-    }
-
     /**
      *  Specify whether to potentially treat the output as an alpha mask.
      *
@@ -1632,24 +1541,6 @@ public final class ImageDecoder implements AutoCloseable {
         mDecodeAsAlphaMask = enabled;
     }
 
-    /** @removed
-     * @deprecated Renamed to {@link #setDecodeAsAlphaMaskEnabled}.
-     */
-    @Deprecated
-    public ImageDecoder setDecodeAsAlphaMask(boolean enabled) {
-        this.setDecodeAsAlphaMaskEnabled(enabled);
-        return this;
-    }
-
-    /** @removed
-     * @deprecated Renamed to {@link #setDecodeAsAlphaMaskEnabled}.
-     */
-    @Deprecated
-    public ImageDecoder setAsAlphaMask(boolean asAlphaMask) {
-        this.setDecodeAsAlphaMask(asAlphaMask);
-        return this;
-    }
-
     /**
      *  Return whether to treat single channel input as alpha.
      *
@@ -1660,22 +1551,6 @@ public final class ImageDecoder implements AutoCloseable {
      */
     public boolean isDecodeAsAlphaMaskEnabled() {
         return mDecodeAsAlphaMask;
-    }
-
-    /** @removed
-     * @deprecated Renamed to {@link #isDecodeAsAlphaMaskEnabled}.
-     */
-    @Deprecated
-    public boolean getDecodeAsAlphaMask() {
-        return mDecodeAsAlphaMask;
-    }
-
-    /** @removed
-     * @deprecated Renamed to {@link #isDecodeAsAlphaMaskEnabled}.
-     */
-    @Deprecated
-    public boolean getAsAlphaMask() {
-        return this.getDecodeAsAlphaMask();
     }
 
     /**

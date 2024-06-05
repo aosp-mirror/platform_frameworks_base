@@ -16,19 +16,15 @@
 
 package com.android.settingslib.mobile.dataservice;
 
-import static androidx.room.ForeignKey.CASCADE;
-
 import android.text.TextUtils;
-
-import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
-import androidx.room.Index;
 import androidx.room.PrimaryKey;
+
+import java.util.Objects;
 
 @Entity(tableName = DataServiceUtils.SubscriptionInfoData.TABLE_NAME)
 public class SubscriptionInfoEntity {
@@ -36,7 +32,7 @@ public class SubscriptionInfoEntity {
             String displayName, String carrierName, int dataRoaming, String mcc, String mnc,
             String countryIso, boolean isEmbedded, int cardId, int portIndex,
             boolean isOpportunistic, @Nullable String groupUUID, int subscriptionType,
-            String uniqueName, boolean isSubscriptionVisible, String formattedPhoneNumber,
+            String uniqueName, boolean isSubscriptionVisible, @Nullable String formattedPhoneNumber,
             boolean isFirstRemovableSubscription, boolean isDefaultSubscriptionSelection,
             boolean isValidSubscription, boolean isUsableSubscription,
             boolean isActiveSubscriptionId, boolean isAvailableSubscription,
@@ -123,6 +119,7 @@ public class SubscriptionInfoEntity {
     public boolean isSubscriptionVisible;
 
     @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_FORMATTED_PHONE_NUMBER)
+    @Nullable
     public String formattedPhoneNumber;
 
     @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_IS_FIRST_REMOVABLE_SUBSCRIPTION)
@@ -165,33 +162,32 @@ public class SubscriptionInfoEntity {
 
     @Override
     public int hashCode() {
-        int result = 17;
-        result = 31 * result + subId.hashCode();
-        result = 31 * result + simSlotIndex;
-        result = 31 * result + carrierId;
-        result = 31 * result + displayName.hashCode();
-        result = 31 * result + carrierName.hashCode();
-        result = 31 * result + dataRoaming;
-        result = 31 * result + mcc.hashCode();
-        result = 31 * result + mnc.hashCode();
-        result = 31 * result + countryIso.hashCode();
-        result = 31 * result + Boolean.hashCode(isEmbedded);
-        result = 31 * result + cardId;
-        result = 31 * result + portIndex;
-        result = 31 * result + Boolean.hashCode(isOpportunistic);
-        result = 31 * result + groupUUID.hashCode();
-        result = 31 * result + subscriptionType;
-        result = 31 * result + uniqueName.hashCode();
-        result = 31 * result + Boolean.hashCode(isSubscriptionVisible);
-        result = 31 * result + formattedPhoneNumber.hashCode();
-        result = 31 * result + Boolean.hashCode(isFirstRemovableSubscription);
-        result = 31 * result + Boolean.hashCode(isDefaultSubscriptionSelection);
-        result = 31 * result + Boolean.hashCode(isValidSubscription);
-        result = 31 * result + Boolean.hashCode(isUsableSubscription);
-        result = 31 * result + Boolean.hashCode(isActiveSubscriptionId);
-        result = 31 * result + Boolean.hashCode(isAvailableSubscription);
-        result = 31 * result + Boolean.hashCode(isActiveDataSubscriptionId);
-        return result;
+        return Objects.hash(
+                subId,
+                simSlotIndex,
+                carrierId,
+                displayName,
+                carrierName,
+                dataRoaming,
+                mcc,
+                mnc,
+                countryIso,
+                isEmbedded,
+                cardId,
+                portIndex,
+                isOpportunistic,
+                groupUUID,
+                subscriptionType,
+                uniqueName,
+                isSubscriptionVisible,
+                formattedPhoneNumber,
+                isFirstRemovableSubscription,
+                isDefaultSubscriptionSelection,
+                isValidSubscription,
+                isUsableSubscription,
+                isActiveSubscriptionId,
+                isAvailableSubscription,
+                isActiveDataSubscriptionId);
     }
 
     @Override

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "SkiaVulkanPipeline.h"
+#include "pipeline/skia/SkiaVulkanPipeline.h"
 
 #include <GrDirectContext.h>
 #include <GrTypes.h>
@@ -28,10 +28,10 @@
 #include "DeferredLayerUpdater.h"
 #include "LightingInfo.h"
 #include "Readback.h"
-#include "ShaderCache.h"
-#include "SkiaPipeline.h"
-#include "SkiaProfileRenderer.h"
-#include "VkInteropFunctorDrawable.h"
+#include "pipeline/skia/ShaderCache.h"
+#include "pipeline/skia/SkiaGpuPipeline.h"
+#include "pipeline/skia/SkiaProfileRenderer.h"
+#include "pipeline/skia/VkInteropFunctorDrawable.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/Frame.h"
 #include "renderthread/IRenderPipeline.h"
@@ -42,7 +42,8 @@ namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-SkiaVulkanPipeline::SkiaVulkanPipeline(renderthread::RenderThread& thread) : SkiaPipeline(thread) {
+SkiaVulkanPipeline::SkiaVulkanPipeline(renderthread::RenderThread& thread)
+        : SkiaGpuPipeline(thread) {
     thread.renderState().registerContextCallback(this);
 }
 
@@ -75,7 +76,7 @@ IRenderPipeline::DrawResult SkiaVulkanPipeline::draw(
         const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
         const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
         const std::vector<sp<RenderNode>>& renderNodes, FrameInfoVisualizer* profiler,
-        const HardwareBufferRenderParams& bufferParams) {
+        const HardwareBufferRenderParams& bufferParams, std::mutex& profilerLock) {
     sk_sp<SkSurface> backBuffer;
     SkMatrix preTransform;
     if (mHardwareBuffer) {
@@ -87,7 +88,7 @@ IRenderPipeline::DrawResult SkiaVulkanPipeline::draw(
     }
 
     if (backBuffer.get() == nullptr) {
-        return {false, -1};
+        return {false, -1, android::base::unique_fd{}};
     }
 
     // update the coordinates of the global light position based on surface rotation
@@ -103,17 +104,18 @@ IRenderPipeline::DrawResult SkiaVulkanPipeline::draw(
     // Draw visual debugging features
     if (CC_UNLIKELY(Properties::showDirtyRegions ||
                     ProfileType::None != Properties::getProfileType())) {
+        std::scoped_lock lock(profilerLock);
         SkCanvas* profileCanvas = backBuffer->getCanvas();
         SkAutoCanvasRestore saver(profileCanvas, true);
-        profileCanvas->concat(mVkSurface->getCurrentPreTransform());
+        profileCanvas->concat(preTransform);
         SkiaProfileRenderer profileRenderer(profileCanvas, frame.width(), frame.height());
         profiler->draw(profileRenderer);
     }
 
-    nsecs_t submissionTime = IRenderPipeline::DrawResult::kUnknownTime;
+    VulkanManager::VkDrawResult drawResult;
     {
         ATRACE_NAME("flush commands");
-        submissionTime = vulkanManager().finishFrame(backBuffer.get());
+        drawResult = vulkanManager().finishFrame(backBuffer.get());
     }
     layerUpdateQueue->clear();
 
@@ -122,11 +124,12 @@ IRenderPipeline::DrawResult SkiaVulkanPipeline::draw(
         dumpResourceCacheUsage();
     }
 
-    return {true, submissionTime};
+    return {true, drawResult.submissionTime, std::move(drawResult.presentFence)};
 }
 
-bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
-                                     FrameInfo* currentFrameInfo, bool* requireSwap) {
+bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, IRenderPipeline::DrawResult& drawResult,
+                                     const SkRect& screenDirty, FrameInfo* currentFrameInfo,
+                                     bool* requireSwap) {
     // Even if we decided to cancel the frame, from the perspective of jank
     // metrics the frame was swapped at this point
     currentFrameInfo->markSwapBuffers();
@@ -135,10 +138,10 @@ bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect
         return false;
     }
 
-    *requireSwap = drew;
+    *requireSwap = drawResult.success;
 
     if (*requireSwap) {
-        vulkanManager().swapBuffers(mVkSurface, screenDirty);
+        vulkanManager().swapBuffers(mVkSurface, screenDirty, std::move(drawResult.presentFence));
     }
 
     return *requireSwap;

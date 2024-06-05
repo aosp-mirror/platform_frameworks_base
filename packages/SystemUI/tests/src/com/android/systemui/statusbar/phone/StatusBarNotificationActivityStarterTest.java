@@ -20,6 +20,9 @@ import static android.service.notification.NotificationListenerService.REASON_CL
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.AdditionalAnswers.answerVoid;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,6 +43,7 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Handler;
@@ -47,9 +51,9 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -59,30 +63,40 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.classifier.FalsingCollectorFake;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.data.repository.FakePowerRepository;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeControllerImpl;
-import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.data.repository.FakeShadeRepository;
+import com.android.systemui.shade.data.repository.ShadeAnimationRepository;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
+import com.android.systemui.statusbar.notification.data.repository.NotificationLaunchAnimationRepository;
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -105,28 +119,30 @@ import java.util.List;
 import java.util.Optional;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
+
+    private static final int DISPLAY_ID = 0;
+    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     @Mock
     private AssistManager mAssistManager;
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
+    private CommandQueue mCommandQueue;
+    @Mock
     private NotificationClickNotifier mClickNotifier;
     @Mock
     private StatusBarStateController mStatusBarStateController;
+    @Mock private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
     private NotificationRemoteInputManager mRemoteInputManager;
     @Mock
-    private CentralSurfaces mCentralSurfaces;
-    @Mock
     private KeyguardStateController mKeyguardStateController;
-    @Mock
-    private NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     @Mock
     private Handler mHandler;
     @Mock
@@ -146,11 +162,14 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private StatusBarNotificationActivityStarter mNotificationActivityStarter;
     @Mock
-    private ActivityLaunchAnimator mActivityLaunchAnimator;
+    private ActivityTransitionAnimator mActivityTransitionAnimator;
     @Mock
     private InteractionJankMonitor mJankMonitor;
+    private FakePowerRepository mPowerRepository;
     @Mock
     private UserTracker mUserTracker;
+    @Mock
+    private HeadsUpManager mHeadsUpManager;
     private final FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private ExpandableNotificationRow mNotificationRow;
     private ExpandableNotificationRow mBubbleNotificationRow;
@@ -198,21 +217,30 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mUserTracker.getUserHandle()).thenReturn(
                 UserHandle.of(ActivityManager.getCurrentUser()));
 
-        HeadsUpManagerPhone headsUpManager = mock(HeadsUpManagerPhone.class);
+        mPowerRepository = new FakePowerRepository();
+        PowerInteractor mPowerInteractor = PowerInteractorFactory.create(
+                mPowerRepository,
+                new FalsingCollectorFake(),
+                mScreenOffAnimationController,
+                mStatusBarStateController).getPowerInteractor();
+
         NotificationLaunchAnimatorControllerProvider notificationAnimationProvider =
                 new NotificationLaunchAnimatorControllerProvider(
-                        mock(NotificationShadeWindowViewController.class), mock(
-                        NotificationListContainer.class),
-                        headsUpManager,
+                        new NotificationLaunchAnimationInteractor(
+                                new NotificationLaunchAnimationRepository()),
+                        mock(NotificationListContainer.class),
+                        mHeadsUpManager,
                         mJankMonitor);
         mNotificationActivityStarter =
                 new StatusBarNotificationActivityStarter(
                         getContext(),
+                        DISPLAY_ID,
                         mHandler,
                         mUiBgExecutor,
                         mVisibilityProvider,
-                        headsUpManager,
+                        mHeadsUpManager,
                         mActivityStarter,
+                        mCommandQueue,
                         mClickNotifier,
                         mStatusBarKeyguardViewManager,
                         mock(KeyguardManager.class),
@@ -223,20 +251,23 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mock(NotificationLockscreenUserManager.class),
                         mShadeController,
                         mKeyguardStateController,
-                        mNotificationInterruptStateProvider,
                         mock(LockPatternUtils.class),
                         mock(StatusBarRemoteInputCallback.class),
                         mActivityIntentHelper,
                         mock(MetricsLogger.class),
-                        mock(StatusBarNotificationActivityStarterLogger.class),
+                        new StatusBarNotificationActivityStarterLogger(logcatLogBuffer()),
                         mOnUserInteractionCallback,
-                        mCentralSurfaces,
                         mock(NotificationPresenter.class),
-                        mock(ShadeViewController.class),
-                        mActivityLaunchAnimator,
+                        mock(PanelExpansionInteractor.class),
+                        mock(NotificationShadeWindowController.class),
+                        mActivityTransitionAnimator,
+                        new ShadeAnimationInteractorLegacyImpl(
+                                new ShadeAnimationRepository(),
+                                new FakeShadeRepository()
+                        ),
                         notificationAnimationProvider,
                         mock(LaunchFullScreenIntentProvider.class),
-                        mock(FeatureFlags.class),
+                        mPowerInteractor,
                         mUserTracker
                 );
 
@@ -272,7 +303,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mCentralSurfaces.isOccluded()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
 
         // When
         mNotificationActivityStarter.onNotificationClicked(entry, mNotificationRow);
@@ -282,7 +313,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Then
         verify(mShadeController, atLeastOnce()).collapseShade();
 
-        verify(mActivityLaunchAnimator).startPendingIntentWithAnimation(any(),
+        verify(mActivityTransitionAnimator).startPendingIntentWithAnimation(any(),
                 eq(false) /* animate */, any(), any());
 
         verify(mAssistManager).hideAssist();
@@ -338,7 +369,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Given
         sbn.getNotification().contentIntent = null;
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mCentralSurfaces.isOccluded()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
 
         // When
         mNotificationActivityStarter.onNotificationClicked(entry, mBubbleNotificationRow);
@@ -366,7 +397,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Given
         sbn.getNotification().contentIntent = mContentIntent;
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mCentralSurfaces.isOccluded()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
 
         // When
         mNotificationActivityStarter.onNotificationClicked(entry, mBubbleNotificationRow);
@@ -387,12 +418,59 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnNotificationBubbleIconClicked_unbubble_keyGuardShowing()
+            throws RemoteException {
+        NotificationEntry entry = mBubbleNotificationRow.getEntry();
+        StatusBarNotification sbn = entry.getSbn();
+
+        // Given
+        sbn.getNotification().contentIntent = mContentIntent;
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+
+        // When
+        mNotificationActivityStarter.onNotificationBubbleIconClicked(entry);
+
+        // Then
+        verify(mBubblesManager).onUserChangedBubble(entry, false);
+
+        verify(mHeadsUpManager).removeNotification(entry.getKey(), true);
+
+        verifyNoMoreInteractions(mContentIntent);
+        verifyNoMoreInteractions(mShadeController);
+    }
+
+    @Test
+    public void testOnNotificationBubbleIconClicked_bubble_keyGuardShowing() {
+        NotificationEntry entry = mNotificationRow.getEntry();
+        StatusBarNotification sbn = entry.getSbn();
+
+        // Given
+        sbn.getNotification().contentIntent = mContentIntent;
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+
+        // When
+        mNotificationActivityStarter.onNotificationBubbleIconClicked(entry);
+
+        // Then
+        verify(mBubblesManager).onUserChangedBubble(entry, true);
+
+        verify(mHeadsUpManager).removeNotification(entry.getKey(), true);
+
+        verify(mContentIntent, atLeastOnce()).isActivity();
+        verifyNoMoreInteractions(mContentIntent);
+    }
+
+    @Test
     public void testOnFullScreenIntentWhenDozing_wakeUpDevice() {
         // GIVEN entry that can has a full screen intent that can show
+        PendingIntent fullScreenIntent = PendingIntent.getActivity(mContext, 1,
+                new Intent("fake_full_screen"), PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder nb = new Notification.Builder(mContext, "a")
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .setFullScreenIntent(mock(PendingIntent.class), true);
+                .setFullScreenIntent(fullScreenIntent, true);
         StatusBarNotification sbn = new StatusBarNotification("pkg", "pkg", 0,
                 "tag" + System.currentTimeMillis(), 0, 0,
                 nb.build(), new UserHandle(0), null, 0);
@@ -400,11 +478,13 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(entry.getImportance()).thenReturn(NotificationManager.IMPORTANCE_HIGH);
         when(entry.getSbn()).thenReturn(sbn);
 
-        // WHEN
+        // WHEN the intent is launched while dozing
+        when(mStatusBarStateController.isDozing()).thenReturn(true);
         mNotificationActivityStarter.launchFullScreenIntent(entry);
 
         // THEN display should try wake up for the full screen intent
-        verify(mCentralSurfaces).wakeUpForFullScreenIntent();
+        assertThat(mPowerRepository.getLastWakeReason()).isNotNull();
+        assertThat(mPowerRepository.getLastWakeWhy()).isNotNull();
     }
 
     @Test
@@ -414,6 +494,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // GIVEN entry that can has a full screen intent that can show
         PendingIntent mockFullScreenIntent = mock(PendingIntent.class);
         when(mockFullScreenIntent.getCreatorUid()).thenReturn(kTestUid);
+        when(mockFullScreenIntent.getIntent()).thenReturn(new Intent("fake_full_screen"));
         ResolveInfo resolveInfo = new ResolveInfo();
         resolveInfo.activityInfo = new ActivityInfo();
         resolveInfo.activityInfo.name = kTestActivityName;

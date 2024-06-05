@@ -20,18 +20,26 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
+
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.UserTracker;
+
+import kotlinx.coroutines.CoroutineDispatcher;
 
 import javax.inject.Inject;
 
 class SecureSettingsImpl implements SecureSettings {
     private final ContentResolver mContentResolver;
     private final UserTracker mUserTracker;
+    private final CoroutineDispatcher mBgDispatcher;
 
     @Inject
-    SecureSettingsImpl(ContentResolver contentResolver, UserTracker userTracker) {
+    SecureSettingsImpl(ContentResolver contentResolver, UserTracker userTracker,
+            @Background CoroutineDispatcher bgDispatcher) {
         mContentResolver = contentResolver;
         mUserTracker = userTracker;
+        mBgDispatcher = bgDispatcher;
     }
 
     @Override
@@ -47,6 +55,11 @@ class SecureSettingsImpl implements SecureSettings {
     @Override
     public Uri getUriFor(String name) {
         return Settings.Secure.getUriFor(name);
+    }
+
+    @Override
+    public CoroutineDispatcher getBackgroundDispatcher() {
+        return mBgDispatcher;
     }
 
     @Override
@@ -75,7 +88,7 @@ class SecureSettingsImpl implements SecureSettings {
     }
 
     @Override
-    public boolean putString(String name, String value, String tag, boolean makeDefault) {
+    public boolean putString(@NonNull String name, String value, String tag, boolean makeDefault) {
         return Settings.Secure.putString(mContentResolver, name, value, tag, makeDefault);
     }
 }

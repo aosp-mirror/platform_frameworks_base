@@ -21,11 +21,15 @@ import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.ACTIO
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.graphics.Rect;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
@@ -37,8 +41,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.accessibility.utils.TestUtils;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
@@ -48,6 +54,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Tests for {@link MenuItemAccessibilityDelegate}. */
 @SmallTest
@@ -59,16 +67,15 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
-    @Mock
-    private SecureSettings mSecureSettings;
-    @Mock
-    private DismissAnimationController.DismissCallback mStubDismissCallback;
-
+    private final SecureSettings mSecureSettings = TestUtils.mockSecureSettings();
     private RecyclerView mStubListView;
     private MenuView mMenuView;
+    private MenuViewLayer mMenuViewLayer;
     private MenuItemAccessibilityDelegate mMenuItemAccessibilityDelegate;
     private MenuAnimationController mMenuAnimationController;
     private final Rect mDraggableBounds = new Rect(100, 200, 300, 400);
+
+    private final AtomicBoolean mEditReceived = new AtomicBoolean(false);
 
     @Before
     public void setUp() {
@@ -80,25 +87,46 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
 
         final int halfScreenHeight =
                 stubWindowManager.getCurrentWindowMetrics().getBounds().height() / 2;
-        mMenuView = spy(new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance));
+        mMenuView = spy(new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance,
+                mSecureSettings));
         mMenuView.setTranslationY(halfScreenHeight);
+
+        mMenuViewLayer = spy(new MenuViewLayer(
+                mContext, stubWindowManager, mAccessibilityManager,
+                stubMenuViewModel, stubMenuViewAppearance, mMenuView,
+                mock(IAccessibilityFloatingMenu.class), mSecureSettings));
+        doNothing().when(mMenuViewLayer).gotoEditScreen();
 
         doReturn(mDraggableBounds).when(mMenuView).getMenuDraggableBounds();
         mStubListView = new RecyclerView(mContext);
-        mMenuAnimationController = spy(new MenuAnimationController(mMenuView));
+        mMenuAnimationController = spy(new MenuAnimationController(mMenuView,
+                stubMenuViewAppearance));
         mMenuItemAccessibilityDelegate =
                 new MenuItemAccessibilityDelegate(new RecyclerViewAccessibilityDelegate(
-                        mStubListView), mMenuAnimationController);
+                        mStubListView), mMenuAnimationController, mMenuViewLayer);
+        mEditReceived.set(false);
     }
 
     @Test
-    public void getAccessibilityActionList_matchSize() {
+    @DisableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
+    public void getAccessibilityActionList_matchSize_withoutEdit() {
         final AccessibilityNodeInfoCompat info =
                 new AccessibilityNodeInfoCompat(new AccessibilityNodeInfo());
 
         mMenuItemAccessibilityDelegate.onInitializeAccessibilityNodeInfo(mStubListView, info);
 
         assertThat(info.getActionList().size()).isEqualTo(6);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
+    public void getAccessibilityActionList_matchSize() {
+        final AccessibilityNodeInfoCompat info =
+                new AccessibilityNodeInfoCompat(new AccessibilityNodeInfo());
+
+        mMenuItemAccessibilityDelegate.onInitializeAccessibilityNodeInfo(mStubListView, info);
+
+        assertThat(info.getActionList().size()).isEqualTo(7);
     }
 
     @Test
@@ -168,13 +196,22 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
 
     @Test
     public void performRemoveMenuAction_success() {
-        mMenuAnimationController.setDismissCallback(mStubDismissCallback);
         final boolean removeMenuAction =
                 mMenuItemAccessibilityDelegate.performAccessibilityAction(mStubListView,
                         R.id.action_remove_menu, null);
 
         assertThat(removeMenuAction).isTrue();
-        verify(mMenuAnimationController).removeMenu();
+        verify(mMenuViewLayer).dispatchAccessibilityAction(R.id.action_remove_menu);
+    }
+
+    @Test
+    public void performEditAction_success() {
+        final boolean editAction =
+                mMenuItemAccessibilityDelegate.performAccessibilityAction(mStubListView,
+                        R.id.action_edit, null);
+
+        assertThat(editAction).isTrue();
+        verify(mMenuViewLayer).dispatchAccessibilityAction(R.id.action_edit);
     }
 
     @Test

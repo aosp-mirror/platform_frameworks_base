@@ -26,6 +26,7 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
@@ -193,16 +194,16 @@ public class TransactionExecutorHelper {
         switch (prevState) {
             // TODO(lifecycler): Extend to support all possible states.
             case ON_START:
-                lifecycleItem = StartActivityItem.obtain(null /* activityOptions */);
-                break;
+                // Fall through to return the PAUSE item to ensure the activity is properly
+                // resumed while relaunching.
             case ON_PAUSE:
-                lifecycleItem = PauseActivityItem.obtain();
+                lifecycleItem = PauseActivityItem.obtain(r.token);
                 break;
             case ON_STOP:
-                lifecycleItem = StopActivityItem.obtain(0 /* configChanges */);
+                lifecycleItem = StopActivityItem.obtain(r.token);
                 break;
             default:
-                lifecycleItem = ResumeActivityItem.obtain(false /* isForward */,
+                lifecycleItem = ResumeActivityItem.obtain(r.token, false /* isForward */,
                         false /* shouldSendCompatFakeFocus */);
                 break;
         }
@@ -234,22 +235,42 @@ public class TransactionExecutorHelper {
      *   Configuration - ActivityResult - Configuration - ActivityResult
      * index 1 will be returned, because ActivityResult request on position 1 will be the last
      * request that moves activity to the RESUMED state where it will eventually end.
+     * @deprecated to be removed with {@link TransactionExecutor#executeCallbacks}.
      */
-    static int lastCallbackRequestingState(ClientTransaction transaction) {
+    @Deprecated
+    static int lastCallbackRequestingState(@NonNull ClientTransaction transaction) {
         final List<ClientTransactionItem> callbacks = transaction.getCallbacks();
-        if (callbacks == null || callbacks.size() == 0) {
+        if (callbacks == null || callbacks.isEmpty()
+                || transaction.getLifecycleStateRequest() == null) {
             return -1;
         }
+        return lastCallbackRequestingStateIndex(callbacks, 0, callbacks.size() - 1,
+                transaction.getLifecycleStateRequest().getActivityToken());
+    }
 
+    /**
+     * Returns the index of the last callback between the start index and last index that requests
+     * the state for the given activity token in which that activity will be after execution.
+     * If there is a group of callbacks in the end that requests the same specific state or doesn't
+     * request any - we will find the first one from such group.
+     *
+     * E.g. ActivityResult requests RESUMED post-execution state, Configuration does not request any
+     * specific state. If there is a sequence
+     *   Configuration - ActivityResult - Configuration - ActivityResult
+     * index 1 will be returned, because ActivityResult request on position 1 will be the last
+     * request that moves activity to the RESUMED state where it will eventually end.
+     */
+    private static int lastCallbackRequestingStateIndex(@NonNull List<ClientTransactionItem> items,
+            int startIndex, int lastIndex, @NonNull IBinder activityToken) {
         // Go from the back of the list to front, look for the request closes to the beginning that
         // requests the state in which activity will end after all callbacks are executed.
         int lastRequestedState = UNDEFINED;
         int lastRequestingCallback = -1;
-        for (int i = callbacks.size() - 1; i >= 0; i--) {
-            final ClientTransactionItem callback = callbacks.get(i);
-            final int postExecutionState = callback.getPostExecutionState();
-            if (postExecutionState != UNDEFINED) {
-                // Found a callback that requests some post-execution state.
+        for (int i = lastIndex; i >= startIndex; i--) {
+            final ClientTransactionItem item = items.get(i);
+            final int postExecutionState = item.getPostExecutionState();
+            if (postExecutionState != UNDEFINED && activityToken.equals(item.getActivityToken())) {
+                // Found a callback that requests some post-execution state for the given activity.
                 if (lastRequestedState == UNDEFINED || lastRequestedState == postExecutionState) {
                     // It's either a first-from-end callback that requests state or it requests
                     // the same state as the last one. In both cases, we will use it as the new
@@ -265,15 +286,60 @@ public class TransactionExecutorHelper {
         return lastRequestingCallback;
     }
 
+    /**
+     * For the transaction item at {@code currentIndex}, if it is requesting post execution state,
+     * whether or not to exclude the last state. This only returns {@code true} when there is a
+     * following explicit {@link ActivityLifecycleItem} requesting the same state for the same
+     * activity, so that last state will be covered by the following {@link ActivityLifecycleItem}.
+     */
+    static boolean shouldExcludeLastLifecycleState(@NonNull List<ClientTransactionItem> items,
+            int currentIndex) {
+        final ClientTransactionItem item = items.get(currentIndex);
+        final IBinder activityToken = item.getActivityToken();
+        final int postExecutionState = item.getPostExecutionState();
+        if (activityToken == null || postExecutionState == UNDEFINED) {
+            // Not a transaction item requesting post execution state.
+            return false;
+        }
+        final int nextLifecycleItemIndex = findNextLifecycleItemIndex(items, currentIndex + 1,
+                activityToken);
+        if (nextLifecycleItemIndex == -1) {
+            // No following ActivityLifecycleItem for this activity token.
+            return false;
+        }
+        final ActivityLifecycleItem lifecycleItem =
+                (ActivityLifecycleItem) items.get(nextLifecycleItemIndex);
+        if (postExecutionState != lifecycleItem.getTargetState()) {
+            // The explicit ActivityLifecycleItem is not requesting the same state.
+            return false;
+        }
+        // Only exclude for the first non-lifecycle item that requests the same specific state.
+        return currentIndex == lastCallbackRequestingStateIndex(items, currentIndex,
+                nextLifecycleItemIndex - 1, activityToken);
+    }
+
+    /**
+     * Finds the index of the next {@link ActivityLifecycleItem} for the given activity token.
+     */
+    private static int findNextLifecycleItemIndex(@NonNull List<ClientTransactionItem> items,
+            int startIndex, @NonNull IBinder activityToken) {
+        final int size = items.size();
+        for (int i = startIndex; i < size; i++) {
+            final ClientTransactionItem item = items.get(i);
+            if (item.isActivityLifecycleItem() && item.getActivityToken().equals(activityToken)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     /** Dump transaction to string. */
-    static String transactionToString(ClientTransaction transaction,
-            ClientTransactionHandler transactionHandler) {
+    static String transactionToString(@NonNull ClientTransaction transaction,
+            @NonNull ClientTransactionHandler transactionHandler) {
         final StringWriter stringWriter = new StringWriter();
         final PrintWriter pw = new PrintWriter(stringWriter);
         final String prefix = tId(transaction);
-        transaction.dump(prefix, pw);
-        pw.append(prefix + "Target activity: ")
-                .println(getActivityName(transaction.getActivityToken(), transactionHandler));
+        transaction.dump(prefix, pw, transactionHandler);
         return stringWriter.toString();
     }
 

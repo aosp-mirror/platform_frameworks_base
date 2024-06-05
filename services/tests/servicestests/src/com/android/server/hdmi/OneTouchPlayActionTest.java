@@ -19,14 +19,17 @@ package com.android.server.hdmi;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
+import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 import static com.android.server.hdmi.OneTouchPlayAction.STATE_WAITING_FOR_REPORT_POWER_STATUS;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -46,6 +49,7 @@ import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 /** Tests for {@link OneTouchPlayAction} */
 @SmallTest
@@ -70,6 +74,7 @@ public class OneTouchPlayActionTest {
 
     private Context mContextSpy;
     private HdmiControlService mHdmiControlService;
+    private HdmiCecController mHdmiCecController;
     private FakeNativeWrapper mNativeWrapper;
     private FakePowerManagerWrapper mPowerManager;
     private FakeHdmiCecConfig mHdmiCecConfig;
@@ -101,6 +106,11 @@ public class OneTouchPlayActionTest {
             protected void writeStringSystemProperty(String key, String value) {
                 // do nothing
             }
+
+            @Override
+            protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                // do nothing
+            }
         };
 
         Looper looper = mTestLooper.getLooper();
@@ -108,17 +118,17 @@ public class OneTouchPlayActionTest {
         mHdmiControlService.setHdmiCecConfig(mHdmiCecConfig);
         setHdmiControlEnabled(hdmiControlEnabled);
         mNativeWrapper = new FakeNativeWrapper();
-        HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
+        mPhysicalAddress = 0x2000;
+        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
+        mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
-        mHdmiControlService.setCecController(hdmiCecController);
+        mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mPhysicalAddress = 0x2000;
-        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
         mNativeWrapper.clearResultMessages();
     }
@@ -616,6 +626,53 @@ public class OneTouchPlayActionTest {
 
         assertThat(mPowerManager.isInteractive()).isFalse();
         assertThat(callback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
+    }
+
+    @Test
+    public void onWakeUp_notInteractive_startOneTouchPlay() throws Exception {
+        setUp(true);
+
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mPowerManager.setInteractive(false);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isFalse();
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage textViewOn =
+                HdmiCecMessageBuilder.buildTextViewOn(
+                        mHdmiControlService.playback().getDeviceInfo().getLogicalAddress(),
+                        ADDR_TV);
+        assertThat(mNativeWrapper.getResultMessages()).contains(textViewOn);
+    }
+
+
+    @Test
+    public void onWakeUp_interruptedByOnStandby_notInteractive_OneTouchPlayNotStarted()
+            throws Exception {
+        setUp(true);
+        long allocationDelay = TimeUnit.SECONDS.toMillis(1);
+        mHdmiCecController.setLogicalAddressAllocationDelay(allocationDelay);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+        mPowerManager.setInteractive(false);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isFalse();
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage textViewOn =
+                HdmiCecMessageBuilder.buildTextViewOn(
+                        mHdmiControlService.playback().getDeviceInfo().getLogicalAddress(),
+                        ADDR_TV);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(textViewOn);
+
     }
 
     private static class TestActionTimer implements ActionTimer {

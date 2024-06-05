@@ -1,6 +1,5 @@
 # Camera
-per-file *Camera*,*camera* = cychen@google.com, epeev@google.com, etalvala@google.com
-per-file *Camera*,*camera* = shuzhenwang@google.com, yinchiayeh@google.com, zhijunhe@google.com
+per-file *Camera*,*camera* = file:platform/frameworks/av:/camera/OWNERS
 
 # Connectivity
 per-file android_net_* = codewiz@google.com, jchalard@google.com, lorenzo@google.com, reminv@google.com, satk@google.com
@@ -27,6 +26,7 @@ per-file android_view_VelocityTracker.* = file:/services/core/java/com/android/s
 # WindowManager
 per-file android_graphics_BLASTBufferQueue.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 per-file android_view_Surface* = file:/services/core/java/com/android/server/wm/OWNERS
+per-file android_view_WindowManagerGlobal.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 per-file android_window_* = file:/services/core/java/com/android/server/wm/OWNERS
 
 # Resources
@@ -104,3 +104,12 @@ per-file com_android_internal_os_*MultiStateCounter* = file:/BATTERY_STATS_OWNER
 
 # PM
 per-file com_android_internal_content_* = file:/PACKAGE_MANAGER_OWNERS
+
+# SQLite
+per-file android_database_SQLite* = file:/SQLITE_OWNERS
+
+# PerformanceHintManager
+per-file android_os_PerformanceHintManager.cpp = file:/ADPF_OWNERS
+
+# IF Tools
+per-file android_tracing_Perfetto* = file:platform/development:/tools/winscope/OWNERS

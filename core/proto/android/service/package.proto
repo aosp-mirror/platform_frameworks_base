@@ -101,6 +101,33 @@ message PackageProto {
             COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED = 4;
         }
 
+        // Information about the state of an archived app.
+        // All fields are gathered at the time of archival.
+        message ArchiveState {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            message ArchiveActivityInfo {
+                // Corresponds to android:label in the app's locale at the time of archival.
+                optional string title = 1;
+
+                // Icon of the archived app.
+                optional string icon_bitmap_path = 2;
+
+                // Only set if the app defined a monochrome icon.
+                optional string monochrome_icon_bitmap_path = 3;
+
+                // The component name of the original activity (pre-archival).
+                optional string original_component_name = 4;
+            }
+
+            /** Information about main activities. */
+            repeated ArchiveActivityInfo activity_infos = 1;
+
+            // Corresponds to android:label of the installer responsible for the unarchival of the
+            // app. Stored in the installer's locale at the time of archival.
+            optional string installer_title = 2;
+        }
+
         optional int32 id = 1;
         optional InstallType install_type = 2;
         // Is the app restricted by owner / admin
@@ -114,6 +141,8 @@ message PackageProto {
         optional int32 distraction_flags = 10;
         // UTC timestamp of first install for the user
         optional int32 first_install_time_ms = 11;
+        optional ArchiveState archive_state = 12;
+        repeated int32 suspending_user = 13;
     }
 
     message InstallSourceProto {

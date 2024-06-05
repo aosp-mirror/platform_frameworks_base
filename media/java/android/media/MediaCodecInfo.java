@@ -18,7 +18,15 @@ package android.media;
 
 import static android.media.Utils.intersectSortedDistinctRanges;
 import static android.media.Utils.sortDistinctRanges;
+import static android.media.codec.Flags.FLAG_DYNAMIC_COLOR_ASPECTS;
+import static android.media.codec.Flags.FLAG_HLG_EDITING;
+import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
+import static android.media.codec.Flags.FLAG_NULL_OUTPUT_SURFACE;
+import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
+import static android.media.MediaCodec.GetFlag;
 
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,6 +43,8 @@ import android.util.Range;
 import android.util.Rational;
 import android.util.Size;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -692,6 +702,99 @@ public final class MediaCodecInfo {
         public static final String FEATURE_HdrEditing = "hdr-editing";
 
         /**
+         * <b>video encoder only</b>: codec supports HLG editing.
+         * <p>
+         * HLG editing support means that the codec accepts 10-bit HDR
+         * input surface in both YUV and RGB pixel format. This feature
+         * is only meaningful when using a 10-bit (HLG) profile and
+         * 10-bit input.
+         * <p>
+         * This feature implies that the codec is capable of encoding
+         * 10-bit format, and that it supports RGBA_1010102 as
+         * well as P010, and optionally RGBA_FP16 input formats.
+         * <p>
+         * The difference between this feature and {@link
+         * FEATURE_HdrEditing} is that HLG does not require the
+         * generation of HDR metadata and does not use an explicit HDR
+         * profile.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_HLG_EDITING)
+        public static final String FEATURE_HlgEditing = "hlg-editing";
+
+        /**
+         * <b>video decoder only</b>: codec supports dynamically
+         * changing color aspects.
+         * <p>
+         * If true, the codec can propagate color aspect changes during
+         * decoding. This is only meaningful at session boundaries, e.g.
+         * upon processing Picture Parameter Sets prior to a new IDR.
+         * The color aspects may come from the bitstream, or may be
+         * provided using {@link MediaCodec#setParameters} calls.
+         * <p>
+         * If the codec supports both 8-bit and 10-bit profiles, this
+         * feature means that the codec can dynamically switch between 8
+         * and 10-bit profiles, but this is restricted to Surface mode
+         * only.
+         * <p>
+         * If the device supports HDR transfer functions, switching
+         * between SDR and HDR transfer is also supported. Together with
+         * the previous clause this means that switching between SDR and
+         * HDR sessions are supported in Surface mode, as SDR is
+         * typically encoded at 8-bit and HDR at 10-bit.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_DYNAMIC_COLOR_ASPECTS)
+        public static final String FEATURE_DynamicColorAspects = "dynamic-color-aspects";
+
+        /**
+         * <b>video encoder only</b>: codec supports region of interest encoding.
+         * <p>
+         * RoI encoding support means the codec accepts information that specifies the relative
+         * importance of different portions of each video frame. This allows the encoder to
+         * separate a video frame into critical and non-critical regions, and use more bits
+         * (better quality) to represent the critical regions and de-prioritize non-critical
+         * regions. In other words, the encoder chooses a negative qp bias for the critical
+         * portions and a zero or positive qp bias for the non-critical portions.
+         * <p>
+         * At a basic level, if the encoder decides to encode each frame with a uniform
+         * quantization value 'qpFrame' and a 'qpBias' is chosen/suggested for an LCU of the
+         * frame, then the actual qp of the LCU will be 'qpFrame + qpBias', although this value
+         * can be clamped basing on the min-max configured qp bounds for the current encoding
+         * session.
+         * <p>
+         * In a shot, if a group of LCUs pan out quickly they can be marked as non-critical
+         * thereby enabling the encoder to reserve fewer bits during their encoding. Contrarily,
+         * LCUs that remain in shot for a prolonged duration can be encoded at better quality in
+         * one frame thereby setting-up an excellent long-term reference for all future frames.
+         * <p>
+         * Note that by offsetting the quantization of each LCU, the overall bit allocation will
+         * differ from the originally estimated bit allocation, and the encoder will adjust the
+         * frame quantization for subsequent frames to meet the bitrate target. An effective
+         * selection of critical regions can set-up a golden reference and this can compensate
+         * for the bit burden that was introduced due to encoding RoI's at better quality.
+         * On the other hand, an ineffective choice of critical regions might increase the
+         * quality of certain parts of the image but this can hamper quality in subsequent frames.
+         * <p>
+         * @see MediaCodec#PARAMETER_KEY_QP_OFFSET_MAP
+         * @see MediaCodec#PARAMETER_KEY_QP_OFFSET_RECTS
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_REGION_OF_INTEREST)
+        public static final String FEATURE_Roi = "region-of-interest";
+
+        /**
+         * <b>video decoder only</b>: codec supports detaching the
+         * output surface when in Surface mode.
+         * <p> If true, the codec can be configured in Surface mode
+         * without an actual surface (in detached surface mode).
+         * @see MediaCodec#CONFIGURE_FLAG_DETACHED_SURFACE
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_NULL_OUTPUT_SURFACE)
+        public static final String FEATURE_DetachedSurface = "detached-surface";
+
+        /**
          * Query codec feature capabilities.
          * <p>
          * These features are supported to be used by the codec.  These
@@ -712,29 +815,66 @@ public final class MediaCodecInfo {
             return checkFeature(name, mFlagsRequired);
         }
 
-        private static final Feature[] decoderFeatures = {
-            new Feature(FEATURE_AdaptivePlayback, (1 << 0), true),
-            new Feature(FEATURE_SecurePlayback,   (1 << 1), false),
-            new Feature(FEATURE_TunneledPlayback, (1 << 2), false),
-            new Feature(FEATURE_PartialFrame,     (1 << 3), false),
-            new Feature(FEATURE_FrameParsing,     (1 << 4), false),
-            new Feature(FEATURE_MultipleFrames,   (1 << 5), false),
-            new Feature(FEATURE_DynamicTimestamp, (1 << 6), false),
-            new Feature(FEATURE_LowLatency,       (1 << 7), true),
-            // feature to exclude codec from REGULAR codec list
-            new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true),
-        };
+        // Flags are used for feature list creation so separate this into a private
+        // static class to delay reading the flags only when constructing the list.
+        private static class FeatureList {
+            private static Feature[] getDecoderFeatures() {
+                ArrayList<Feature> features = new ArrayList();
+                features.add(new Feature(FEATURE_AdaptivePlayback, (1 << 0), true));
+                features.add(new Feature(FEATURE_SecurePlayback,   (1 << 1), false));
+                features.add(new Feature(FEATURE_TunneledPlayback, (1 << 2), false));
+                features.add(new Feature(FEATURE_PartialFrame,     (1 << 3), false));
+                features.add(new Feature(FEATURE_FrameParsing,     (1 << 4), false));
+                features.add(new Feature(FEATURE_MultipleFrames,   (1 << 5), false));
+                features.add(new Feature(FEATURE_DynamicTimestamp, (1 << 6), false));
+                features.add(new Feature(FEATURE_LowLatency,       (1 << 7), true));
+                if (GetFlag(() -> android.media.codec.Flags.dynamicColorAspects())) {
+                    features.add(new Feature(FEATURE_DynamicColorAspects, (1 << 8), true));
+                }
+                if (GetFlag(() -> android.media.codec.Flags.nullOutputSurface())) {
+                    features.add(new Feature(FEATURE_DetachedSurface,     (1 << 9), true));
+                }
 
-        private static final Feature[] encoderFeatures = {
-            new Feature(FEATURE_IntraRefresh, (1 << 0), false),
-            new Feature(FEATURE_MultipleFrames, (1 << 1), false),
-            new Feature(FEATURE_DynamicTimestamp, (1 << 2), false),
-            new Feature(FEATURE_QpBounds, (1 << 3), false),
-            new Feature(FEATURE_EncodingStatistics, (1 << 4), false),
-            new Feature(FEATURE_HdrEditing, (1 << 5), false),
-            // feature to exclude codec from REGULAR codec list
-            new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true),
-        };
+                // feature to exclude codec from REGULAR codec list
+                features.add(new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true));
+
+                return features.toArray(new Feature[0]);
+            };
+
+            private static Feature[] decoderFeatures = getDecoderFeatures();
+
+            private static Feature[] getEncoderFeatures() {
+                ArrayList<Feature> features = new ArrayList();
+
+                features.add(new Feature(FEATURE_IntraRefresh, (1 << 0), false));
+                features.add(new Feature(FEATURE_MultipleFrames, (1 << 1), false));
+                features.add(new Feature(FEATURE_DynamicTimestamp, (1 << 2), false));
+                features.add(new Feature(FEATURE_QpBounds, (1 << 3), false));
+                features.add(new Feature(FEATURE_EncodingStatistics, (1 << 4), false));
+                features.add(new Feature(FEATURE_HdrEditing, (1 << 5), false));
+                if (GetFlag(() -> android.media.codec.Flags.hlgEditing())) {
+                    features.add(new Feature(FEATURE_HlgEditing, (1 << 6), true));
+                }
+                if (GetFlag(() -> android.media.codec.Flags.regionOfInterest())) {
+                    features.add(new Feature(FEATURE_Roi, (1 << 7), true));
+                }
+
+                // feature to exclude codec from REGULAR codec list
+                features.add(new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true));
+
+                return features.toArray(new Feature[0]);
+            };
+
+            private static Feature[] encoderFeatures = getEncoderFeatures();
+
+            public static Feature[] getFeatures(boolean isEncoder) {
+                if (isEncoder) {
+                    return encoderFeatures;
+                } else {
+                    return decoderFeatures;
+                }
+            }
+        }
 
         /** @hide */
         public String[] validFeatures() {
@@ -749,10 +889,7 @@ public final class MediaCodecInfo {
         }
 
         private Feature[] getValidFeatures() {
-            if (!isEncoder()) {
-                return decoderFeatures;
-            }
-            return encoderFeatures;
+            return FeatureList.getFeatures(isEncoder());
         }
 
         private boolean checkFeature(String name, int flags) {
@@ -1676,6 +1813,55 @@ public final class MediaCodecInfo {
         }
     }
 
+    /** @hide */
+    @IntDef(prefix = {"SECURITY_MODEL_"}, value = {
+        SECURITY_MODEL_SANDBOXED,
+        SECURITY_MODEL_MEMORY_SAFE,
+        SECURITY_MODEL_TRUSTED_CONTENT_ONLY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SecurityModel {}
+
+    /**
+     * In this model the codec is running in a sandboxed process. Even if a
+     * malicious content was fed to the codecs in this model, the impact will
+     * be contained in the sandboxed process.
+     */
+    @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
+    public static final int SECURITY_MODEL_SANDBOXED = 0;
+    /**
+     * In this model the codec is not running in a sandboxed process, but
+     * written in a memory-safe way. It typically means that the software
+     * implementation of the codec is written in a memory-safe language such
+     * as Rust.
+     */
+    @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
+    public static final int SECURITY_MODEL_MEMORY_SAFE = 1;
+    /**
+     * In this model the codec is suitable only for trusted content where
+     * the input can be verified to be well-formed and no malicious actor
+     * can alter it. For example, codecs in this model are not suitable
+     * for arbitrary media downloaded from the internet or present in a user
+     * directory. On the other hand, they could be suitable for media encoded
+     * in the backend that the app developer wholly controls.
+     * <p>
+     * Codecs with this security model is not included in
+     * {@link MediaCodecList#REGULAR_CODECS}, but included in
+     * {@link MediaCodecList#ALL_CODECS}.
+     */
+    @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
+    public static final int SECURITY_MODEL_TRUSTED_CONTENT_ONLY = 2;
+
+    /**
+     * Query the security model of the codec.
+     */
+    @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
+    @SecurityModel
+    public int getSecurityModel() {
+        // TODO b/297922713 --- detect security model of out-of-sandbox codecs
+        return SECURITY_MODEL_SANDBOXED;
+    }
+
     /**
      * A class that supports querying the video capabilities of a codec.
      */
@@ -2466,11 +2652,10 @@ public final class MediaCodecInfo {
             mBlockAspectRatioRange = POSITIVE_RATIONALS;
             mAspectRatioRange      = POSITIVE_RATIONALS;
 
-            // YUV 4:2:0 requires 2:2 alignment
-            mWidthAlignment = 2;
-            mHeightAlignment = 2;
-            mBlockWidth = 2;
-            mBlockHeight = 2;
+            mWidthAlignment = 1;
+            mHeightAlignment = 1;
+            mBlockWidth = 1;
+            mBlockHeight = 1;
             mSmallerDimensionUpperLimit = getSizeRange().getUpper();
         }
 

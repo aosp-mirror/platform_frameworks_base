@@ -772,24 +772,20 @@ final class OverlayManagerServiceImpl {
 
     OverlayPaths getEnabledOverlayPaths(@NonNull final String targetPackageName,
             final int userId, boolean includeImmutableOverlays) {
-        final List<OverlayInfo> overlays = mSettings.getOverlaysForTarget(targetPackageName,
-                userId);
-        final OverlayPaths.Builder paths = new OverlayPaths.Builder();
-        final int n = overlays.size();
-        for (int i = 0; i < n; i++) {
-            final OverlayInfo oi = overlays.get(i);
+        final var paths = new OverlayPaths.Builder();
+        mSettings.forEachMatching(userId, null, targetPackageName, oi -> {
             if (!oi.isEnabled()) {
-                continue;
+                return;
             }
             if (!includeImmutableOverlays && !oi.isMutable) {
-                continue;
+                return;
             }
             if (oi.isFabricated()) {
                 paths.addNonApkPath(oi.baseCodePath);
             } else {
                 paths.addApkPath(oi.baseCodePath);
             }
-        }
+        });
         return paths.build();
     }
 
@@ -821,10 +817,11 @@ final class OverlayManagerServiceImpl {
                     overlayPackage.getSplits().get(0).getPath());
         }
 
-        // Immutable RROs targeting to "android", ie framework-res.apk, are handled by native
-        // layers.
         final OverlayInfo updatedOverlayInfo = mSettings.getOverlayInfo(overlay, userId);
         @IdmapManager.IdmapStatus int idmapStatus = IDMAP_NOT_EXIST;
+
+        // Idmaps for immutable RROs targeting "android", i.e. framework-res.apk, are created at
+        // boot time in OverlayConfig.createImmutableFrameworkIdmapsInZygote().
         if (targetPackage != null && !("android".equals(info.getTargetPackageName())
                 && !isPackageConfiguredMutable(overlayPackage))) {
             idmapStatus = mIdmapManager.createIdmap(targetPackage, overlayPackageState,
@@ -924,5 +921,9 @@ final class OverlayManagerServiceImpl {
         OperationFailedException(@NonNull final String message, @NonNull Throwable cause) {
             super(message, cause);
         }
+    }
+
+    OverlayConfig getOverlayConfig() {
+        return mOverlayConfig;
     }
 }

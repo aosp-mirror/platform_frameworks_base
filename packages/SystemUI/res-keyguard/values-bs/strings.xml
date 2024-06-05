@@ -23,7 +23,7 @@
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Unesite PIN"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"Unesite PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Unesite uzorak"</string>
-    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Unesite uzorak"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Nacrtajte uzorak"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Unesite lozinku"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Unesite lozinku"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Nevažeća kartica."</string>
@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Punjenje"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Brzo punjenje"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Sporo punjenje"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Punjenje je optimizirano radi zaštite baterije"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problem s opremom za punjenje"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Pritisnite meni da otključate."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Punjenje je na čekanju radi zaštite baterije"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Provjera dodatne opreme za punjenje"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Mreža je zaključana"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Nema SIM-a"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Dodajte SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM nedostaje ili se ne može čitati. Dodajte SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Neupotrebljiv SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM je trajno deaktiviran.\n Kontaktirajte pružaoca bežičnih usluga za drugi SIM"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM je zaključan."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM je zaključan PUK-om."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Otključavanje SIM-a…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"PIN je potreban nakon zaključavanja"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Lozinka je potrebna nakon zaključavanja"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Uzorak je potreban nakon zaključavanja"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Ažuriranje će se instalirati u periodu neaktivnosti"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Ažuriranje će se instalirati dok se uređaj ne koristi"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Potrebna je dodatna zaštita. PIN dugo nije unošen."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Potrebna je dodatna zaštita. Lozinka dugo nije unošena."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Potrebna je dodatna zaštita. Uzorak dugo nije unošen."</string>
@@ -112,9 +108,12 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Uzorak je potreban nakon ponovnog pokretanja uređaja"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"PIN je potreban nakon ponovnog pokretanja uređaja"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Lozinka je potrebna nakon pokretanja uređaja"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Radi dodatne zaštite, umjesto toga koristite uzorak"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Radi dodatne zaštite, umjesto toga koristite PIN"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Radi dodatne zašitite, umjesto toga koristite lozinku"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Za dodatnu sigurnost koristite uzorak"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Za dodatnu sigurnost koristite PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Za dodatnu sigurnost koristite lozinku"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"PIN je potreban radi dodatne sigurnosti"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Uzorak je potreban radi dodatne sigurnosti"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Lozinka je potrebna radi dodatne sigurnosti"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Uređaj je zaključao administrator"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Uređaj je ručno zaključan"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nije prepoznato"</string>
@@ -127,8 +126,8 @@
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Otključajte uređaj da nastavite"</string>
     <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Unesite PIN da kasnije instalirate ažuriranje"</string>
     <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Unesite lozinku da kasnije instalirate ažuriranje"</string>
-    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Unesite uzorak da kasnije instalirate ažuriranje"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Nacrtajte uzorak da kasnije instalirate ažuriranje"</string>
     <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Uređaj je ažuriran. Unesite PIN da nastavite."</string>
     <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Uređaj je ažuriran. Unesite lozinku da nastavite."</string>
-    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Uređaj je ažuriran. Unesite uzorak da nastavite."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Uređaj je ažuriran. Nacrtajte uzorak da nastavite."</string>
 </resources>

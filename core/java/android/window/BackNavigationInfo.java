@@ -22,10 +22,14 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteCallback;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Information to be sent to SysUI about a back event.
@@ -69,8 +73,17 @@ public final class BackNavigationInfo implements Parcelable {
     /**
      * Key to access the boolean value passed in {#mOnBackNavigationDone} result bundle
      * that represents if back navigation has been triggered.
+     * @hide
      */
-    public static final String KEY_TRIGGER_BACK = "TriggerBack";
+    public static final String KEY_NAVIGATION_FINISHED = "NavigationFinished";
+
+    /**
+     * Key to access the boolean value passed in {#mOnBackNavigationDone} result bundle
+     * that represents if back gesture has been triggered.
+     * @hide
+     */
+    public static final String KEY_GESTURE_FINISHED = "GestureFinished";
+
 
     /**
      * Defines the type of back destinations a back even can lead to. This is used to define the
@@ -85,6 +98,7 @@ public final class BackNavigationInfo implements Parcelable {
             TYPE_CROSS_TASK,
             TYPE_CALLBACK
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface BackTargetType {
     }
 
@@ -97,6 +111,8 @@ public final class BackNavigationInfo implements Parcelable {
     private final boolean mAnimationCallback;
     @Nullable
     private final CustomAnimationInfo mCustomAnimationInfo;
+
+    private final int mLetterboxColor;
 
     /**
      * Create a new {@link BackNavigationInfo} instance.
@@ -111,13 +127,15 @@ public final class BackNavigationInfo implements Parcelable {
             @Nullable IOnBackInvokedCallback onBackInvokedCallback,
             boolean isPrepareRemoteAnimation,
             boolean isAnimationCallback,
-            @Nullable CustomAnimationInfo customAnimationInfo) {
+            @Nullable CustomAnimationInfo customAnimationInfo,
+            int letterboxColor) {
         mType = type;
         mOnBackNavigationDone = onBackNavigationDone;
         mOnBackInvokedCallback = onBackInvokedCallback;
         mPrepareRemoteAnimation = isPrepareRemoteAnimation;
         mAnimationCallback = isAnimationCallback;
         mCustomAnimationInfo = customAnimationInfo;
+        mLetterboxColor = letterboxColor;
     }
 
     private BackNavigationInfo(@NonNull Parcel in) {
@@ -127,6 +145,7 @@ public final class BackNavigationInfo implements Parcelable {
         mPrepareRemoteAnimation = in.readBoolean();
         mAnimationCallback = in.readBoolean();
         mCustomAnimationInfo = in.readTypedObject(CustomAnimationInfo.CREATOR);
+        mLetterboxColor = in.readInt();
     }
 
     /** @hide */
@@ -138,6 +157,7 @@ public final class BackNavigationInfo implements Parcelable {
         dest.writeBoolean(mPrepareRemoteAnimation);
         dest.writeBoolean(mAnimationCallback);
         dest.writeTypedObject(mCustomAnimationInfo, flags);
+        dest.writeInt(mLetterboxColor);
     }
 
     /**
@@ -180,6 +200,13 @@ public final class BackNavigationInfo implements Parcelable {
     }
 
     /**
+     * @return Letterbox color
+     * @hide
+     */
+    public int getLetterboxColor() {
+        return mLetterboxColor;
+    }
+    /**
      * Callback to be called when the back preview is finished in order to notify the server that
      * it can clean up the resources created for the animation.
      * @hide
@@ -188,7 +215,21 @@ public final class BackNavigationInfo implements Parcelable {
     public void onBackNavigationFinished(boolean triggerBack) {
         if (mOnBackNavigationDone != null) {
             Bundle result = new Bundle();
-            result.putBoolean(KEY_TRIGGER_BACK, triggerBack);
+            result.putBoolean(KEY_NAVIGATION_FINISHED, triggerBack);
+            mOnBackNavigationDone.sendResult(result);
+        }
+    }
+
+    /**
+     * Callback to be called when the back gesture is finished in order to notify the server that
+     * it can ask app to start rendering.
+     * @hide
+     * @param triggerBack Boolean indicating if back gesture has been triggered.
+     */
+    public void onBackGestureFinished(boolean triggerBack) {
+        if (mOnBackNavigationDone != null) {
+            Bundle result = new Bundle();
+            result.putBoolean(KEY_GESTURE_FINISHED, triggerBack);
             mOnBackNavigationDone.sendResult(result);
         }
     }
@@ -360,6 +401,8 @@ public final class BackNavigationInfo implements Parcelable {
         private CustomAnimationInfo mCustomAnimationInfo;
         private boolean mAnimationCallback = false;
 
+        private int mLetterboxColor = Color.TRANSPARENT;
+
         /**
          * @see BackNavigationInfo#getType()
          */
@@ -427,6 +470,14 @@ public final class BackNavigationInfo implements Parcelable {
         }
 
         /**
+         * @param color Non-transparent if there contain letterbox color.
+         */
+        public Builder setLetterboxColor(int color) {
+            mLetterboxColor = color;
+            return this;
+        }
+
+        /**
          * Builds and returns an instance of {@link BackNavigationInfo}
          */
         public BackNavigationInfo build() {
@@ -434,7 +485,8 @@ public final class BackNavigationInfo implements Parcelable {
                     mOnBackInvokedCallback,
                     mPrepareRemoteAnimation,
                     mAnimationCallback,
-                    mCustomAnimationInfo);
+                    mCustomAnimationInfo,
+                    mLetterboxColor);
         }
     }
 }

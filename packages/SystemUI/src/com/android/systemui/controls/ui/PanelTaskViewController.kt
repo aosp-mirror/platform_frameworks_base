@@ -18,7 +18,6 @@
 package com.android.systemui.controls.ui
 
 import android.app.ActivityOptions
-import android.app.ActivityTaskManager.INVALID_TASK_ID
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
@@ -28,7 +27,7 @@ import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Trace
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.util.boundsOnScreen
 import com.android.wm.shell.taskview.TaskView
 import java.util.concurrent.Executor
@@ -45,8 +44,6 @@ class PanelTaskViewController(
         taskView.alpha = 0f
     }
 
-    private var detailTaskId = INVALID_TASK_ID
-
     private val fillInIntent =
         Intent().apply {
             // Apply flags to make behaviour match documentLaunchMode=always.
@@ -57,7 +54,6 @@ class PanelTaskViewController(
     private val stateCallback =
         object : TaskView.Listener {
             override fun onInitialized() {
-
                 val options =
                     ActivityOptions.makeCustomAnimation(
                         activityContext,
@@ -88,12 +84,10 @@ class PanelTaskViewController(
             }
 
             override fun onTaskRemovalStarted(taskId: Int) {
-                detailTaskId = INVALID_TASK_ID
                 release()
             }
 
             override fun onTaskCreated(taskId: Int, name: ComponentName?) {
-                detailTaskId = taskId
                 taskView.alpha = 1f
             }
 

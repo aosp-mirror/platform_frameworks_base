@@ -23,9 +23,10 @@ import android.animation.ValueAnimator;
 import android.view.View;
 
 import com.android.app.animation.Interpolators;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 
 /**
 * A state of an expandable view
@@ -87,7 +88,6 @@ public class ExpandableViewState extends ViewState {
             | ExpandableViewState.LOCATION_MAIN_AREA;
 
     public int height;
-    public boolean dimmed;
     public boolean hideSensitive;
     public boolean belowSpeedBump;
     public boolean inShelf;
@@ -127,7 +127,6 @@ public class ExpandableViewState extends ViewState {
         if (viewState instanceof ExpandableViewState) {
             ExpandableViewState svs = (ExpandableViewState) viewState;
             height = svs.height;
-            dimmed = svs.dimmed;
             hideSensitive = svs.hideSensitive;
             belowSpeedBump = svs.belowSpeedBump;
             clipTopAmount = svs.clipTopAmount;
@@ -154,15 +153,14 @@ public class ExpandableViewState extends ViewState {
                 expandableView.setActualHeight(newHeight, false /* notifyListeners */);
             }
 
-            // apply dimming
-            expandableView.setDimmed(this.dimmed, false /* animate */);
-
             // apply hiding sensitive
             expandableView.setHideSensitive(
                     this.hideSensitive, false /* animated */, 0 /* delay */, 0 /* duration */);
 
             // apply below shelf speed bump
-            expandableView.setBelowSpeedBump(this.belowSpeedBump);
+            if (!NotificationIconContainerRefactor.isEnabled()) {
+                expandableView.setBelowSpeedBump(this.belowSpeedBump);
+            }
 
             // apply clipping
             final float oldClipTopAmount = expandableView.getClipTopAmount();
@@ -213,11 +211,10 @@ public class ExpandableViewState extends ViewState {
             abortAnimation(child, TAG_ANIMATOR_BOTTOM_INSET);
         }
 
-        // start dimmed animation
-        expandableView.setDimmed(this.dimmed, animationFilter.animateDimmed);
-
         // apply below the speed bump
-        expandableView.setBelowSpeedBump(this.belowSpeedBump);
+        if (!NotificationIconContainerRefactor.isEnabled()) {
+            expandableView.setBelowSpeedBump(this.belowSpeedBump);
+        }
 
         // start hiding sensitive animation
         expandableView.setHideSensitive(this.hideSensitive, animationFilter.animateHideSensitive,

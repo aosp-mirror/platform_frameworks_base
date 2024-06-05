@@ -42,7 +42,7 @@
             android:layout_marginBottom="16dp"
             android:scaleType="fitCenter"
             android:src="@null"
-            android:tint="?androidprv:attr/colorAccentPrimaryVariant"
+            android:tint="?androidprv:attr/materialColorPrimary"
             />
 
         <TextView

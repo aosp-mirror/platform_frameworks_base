@@ -1,0 +1,4 @@
+
+<transparency-info>
+    <app-info title="beervision" description="a beer app" containsAds="true" obeyAps="false" adsFingerprinting="false" securityFingerprinting="false" privacyPolicy="www.example.com" securityEndpoints="url1|url2|url3" firstPartyEndpoints="url1" serviceProviderEndpoints="url55|url56" category="Food and drink" email="max@maxloh.com" />
+</transparency-info>

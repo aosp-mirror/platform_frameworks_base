@@ -29,9 +29,10 @@ import android.os.PowerSaveState;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.ArrayMap;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
 
 import com.android.frameworks.servicestests.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -48,12 +49,8 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     private static final float DEFAULT_BRIGHTNESS_FACTOR = 0.5f;
     private static final float PRECISION = 0.001f;
     private static final int GPS_MODE = 0; // LOCATION_MODE_NO_CHANGE
-    private static final int DEFAULT_GPS_MODE =
-            PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
     private static final int SOUND_TRIGGER_MODE = 0; // SOUND_TRIGGER_MODE_ALL_ENABLED
-    private static final int DEFAULT_SOUND_TRIGGER_MODE =
-            PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY;
-    private static final String BATTERY_SAVER_CONSTANTS = "disable_vibration=true,"
+    private static final String BATTERY_SAVER_CONSTANTS = "disable_vibration=false,"
             + "advertise_is_enabled=true,"
             + "disable_animation=false,"
             + "enable_firewall=true,"
@@ -119,7 +116,9 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     @Suppress // TODO: b/317823111 - Remove once test fixed.
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyVibration_DefaultValueCorrect() {
-        testServiceDefaultValue_On(ServiceType.VIBRATION);
+        testDefaultValue(
+                com.android.internal.R.bool.config_batterySaver_full_disableVibration,
+                ServiceType.VIBRATION);
     }
 
     @SmallTest
@@ -130,27 +129,39 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicySound_DefaultValueCorrect() {
-        testServiceDefaultValue_On(ServiceType.SOUND);
+        final int defaultMode = getContext().getResources().getInteger(
+                com.android.internal.R.integer.config_batterySaver_full_soundTriggerMode);
+        if (defaultMode == PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED) {
+            testServiceDefaultValue_Off(ServiceType.SOUND);
+        } else {
+            testServiceDefaultValue_On(ServiceType.SOUND);
+        }
 
         mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_FULL);
         PowerSaveState stateOn =
                 mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.SOUND);
-        assertThat(stateOn.soundTriggerMode).isEqualTo(DEFAULT_SOUND_TRIGGER_MODE);
+        assertThat(stateOn.soundTriggerMode).isEqualTo(defaultMode);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyFullBackup_DefaultValueCorrect() {
-        testServiceDefaultValue_On(ServiceType.FULL_BACKUP);
+        testDefaultValue(
+                com.android.internal.R.bool.config_batterySaver_full_deferFullBackup,
+                ServiceType.FULL_BACKUP);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyKeyValueBackup_DefaultValueCorrect() {
-        testServiceDefaultValue_On(ServiceType.KEYVALUE_BACKUP);
+        testDefaultValue(
+                com.android.internal.R.bool.config_batterySaver_full_deferKeyValueBackup,
+                ServiceType.KEYVALUE_BACKUP);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyAnimation_DefaultValueCorrect() {
-        testServiceDefaultValue_Off(ServiceType.ANIMATION);
+        testDefaultValue(
+                com.android.internal.R.bool.config_batterySaver_full_disableAnimation,
+                ServiceType.ANIMATION);
     }
 
     @SmallTest
@@ -160,46 +171,53 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyNetworkFirewall_DefaultValueCorrect() {
-        testServiceDefaultValue_On(ServiceType.NETWORK_FIREWALL);
+        testDefaultValue(
+                com.android.internal.R.bool.config_batterySaver_full_enableFirewall,
+                ServiceType.NETWORK_FIREWALL);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyNightMode_DefaultValueCorrect() {
-        testServiceDefaultValue_On(ServiceType.NIGHT_MODE);
+        testDefaultValue(
+                com.android.internal.R.bool.config_batterySaver_full_enableNightMode,
+                ServiceType.NIGHT_MODE);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyDataSaver_DefaultValueCorrect() {
-        mBatterySaverPolicy.updateConstantsLocked("", "");
-        mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_FULL);
-        final PowerSaveState batterySaverStateOn =
-                mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.DATA_SAVER);
-        assertThat(batterySaverStateOn.batterySaverEnabled).isFalse();
-
-        mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_OFF);
-        final PowerSaveState batterySaverStateOff = mBatterySaverPolicy.getBatterySaverPolicy(
+        testDefaultValue(
+                com.android.internal.R.bool.config_batterySaver_full_enableDataSaver,
                 ServiceType.DATA_SAVER);
-        assertThat(batterySaverStateOff.batterySaverEnabled).isFalse();
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyScreenBrightness_DefaultValueCorrect() {
-        testServiceDefaultValue_Off(ServiceType.SCREEN_BRIGHTNESS);
+        testDefaultValue(
+                com.android.internal.R.bool.config_batterySaver_full_enableAdjustBrightness,
+                ServiceType.SCREEN_BRIGHTNESS);
     }
 
     @SmallTest
-    public void testGetBatterySaverPolicy_PolicyGps_DefaultValueCorrect() {
-        testServiceDefaultValue_On(ServiceType.LOCATION);
+    public void testGetBatterySaverPolicy_PolicyLocation_DefaultValueCorrect() {
+        final int defaultMode = getContext().getResources()
+                .getInteger(com.android.internal.R.integer.config_batterySaver_full_locationMode);
+        if (defaultMode == PowerManager.LOCATION_MODE_NO_CHANGE) {
+            testServiceDefaultValue_Off(ServiceType.LOCATION);
+        } else {
+            testServiceDefaultValue_On(ServiceType.LOCATION);
+        }
 
         mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_FULL);
         PowerSaveState stateOn =
                 mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION);
-        assertThat(stateOn.locationMode).isEqualTo(DEFAULT_GPS_MODE);
+        assertThat(stateOn.locationMode).isEqualTo(defaultMode);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyQuickDoze_DefaultValueCorrect() {
-        testServiceDefaultValue_On(ServiceType.QUICK_DOZE);
+        testDefaultValue(
+                com.android.internal.R.bool.config_batterySaver_full_enableQuickDoze,
+                ServiceType.QUICK_DOZE);
     }
 
     @Suppress // TODO: b/317823111 - Remove once test fixed.
@@ -214,7 +232,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     private void verifyBatterySaverConstantsUpdated() {
         final PowerSaveState vibrationState =
                 mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.VIBRATION);
-        assertThat(vibrationState.batterySaverEnabled).isTrue();
+        assertThat(vibrationState.batterySaverEnabled).isFalse();
 
         final PowerSaveState animationState =
                 mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.ANIMATION);
@@ -265,6 +283,14 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         //Should not crash
         mBatterySaverPolicy.updateConstantsLocked(BATTERY_SAVER_INCORRECT_CONSTANTS, "");
         mBatterySaverPolicy.updateConstantsLocked(null, "");
+    }
+
+    private void testDefaultValue(int boolResId, @ServiceType int type) {
+        if (getContext().getResources().getBoolean(boolResId)) {
+            testServiceDefaultValue_On(type);
+        } else {
+            testServiceDefaultValue_Off(type);
+        }
     }
 
     private void testServiceDefaultValue_On(@ServiceType int type) {

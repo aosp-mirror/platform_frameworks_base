@@ -19,7 +19,7 @@ package stub;
 import android.service.wallpaper.WallpaperService;
 
 /**
- * Dummy wallpaper service only for test purposes, won't draw anything.
+ * Placeholder wallpaper service only for test purposes, won't draw anything.
  */
 public class DummyWallpaperService extends WallpaperService {
     @Override

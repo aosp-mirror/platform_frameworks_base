@@ -526,7 +526,7 @@
     </string-array>
 
     <!-- USB configuration values for Developer Settings.
-         These are lists of USB functions passed to the USB Manager to change USB configuraton.
+         These are lists of USB functions passed to the USB Manager to change USB configuration.
          This can be overridden by devices with additional USB configurations.
          Do not translate. -->
     <string-array name="usb_configuration_values" translatable="false">
@@ -639,15 +639,6 @@
         <item>disabled</item>
     </array>
 
-    <!-- Images offered as options in the avatar picker. If populated, the avatar_image_descriptions
-         array must also be populated with a content description for each image. -->
-    <array name="avatar_images"/>
-
-    <!-- Content descriptions for each of the images in the avatar_images array. When overlaid
-         these values should be translated, but this empty array must not be translated or it may
-         replace the real descriptions with an empty array. -->
-    <string-array name="avatar_image_descriptions" translatable="false"/>
-
     <!-- NOTE: if you change this, you must also add the corresponding scale key and lookup table to
      frameworks/base/core/java/android/content/res/FontScaleConverterFactory.java -->
     <string-array name="entryvalues_font_size" translatable="false">
@@ -658,6 +649,22 @@
         <item>1.50</item>
         <item>1.80</item>
         <item>2.0</item>
+    </string-array>
+
+    <!-- Grammatical genders -->
+    <array name="grammatical_gender_entries">
+        <item>@string/not_specified</item>
+        <item>@string/neuter</item>
+        <item>@string/feminine</item>
+        <item>@string/masculine</item>
+    </array>
+
+    <!-- Values for grammatical genders -->
+    <string-array name="grammatical_gender_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
     </string-array>
 
 </resources>

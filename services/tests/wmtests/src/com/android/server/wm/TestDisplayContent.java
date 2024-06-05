@@ -30,29 +30,17 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 
 import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
-
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 class TestDisplayContent extends DisplayContent {
 
@@ -89,6 +77,10 @@ class TestDisplayContent extends DisplayContent {
         spyOn(inputMonitor);
         doNothing().when(inputMonitor).resumeDispatchingLw(any());
 
+        final InsetsPolicy insetsPolicy = getInsetsPolicy();
+        WindowTestsBase.suppressInsetsAnimation(insetsPolicy.getPermanentControlTarget());
+        WindowTestsBase.suppressInsetsAnimation(insetsPolicy.getTransientControlTarget());
+
         // For devices that set the sysprop ro.bootanim.set_orientation_<display_id>
         // See DisplayRotation#readDefaultDisplayRotation for context.
         // Without that, meaning of height and width in context of the tests can be swapped if
@@ -105,13 +97,8 @@ class TestDisplayContent extends DisplayContent {
         private boolean mSystemDecorations = false;
         private int mStatusBarHeight = 0;
         private SettingsEntry mOverrideSettings;
-        private DisplayMetrics mDisplayMetrics;
         @NonNull
         private DeviceStateController mDeviceStateController = mock(DeviceStateController.class);
-        @Mock
-        Context mMockContext;
-        @Mock
-        Resources mResources;
 
         Builder(ActivityTaskManagerService service, int width, int height) {
             mService = service;
@@ -124,8 +111,6 @@ class TestDisplayContent extends DisplayContent {
             // Set unique ID so physical display overrides are not inheritted from
             // DisplayWindowSettings.
             mInfo.uniqueId = generateUniqueId();
-            mDisplayMetrics = new DisplayMetrics();
-            updateDisplayMetrics();
         }
         Builder(ActivityTaskManagerService service, DisplayInfo info) {
             mService = service;
@@ -195,31 +180,7 @@ class TestDisplayContent extends DisplayContent {
             mInfo.logicalDensityDpi = dpi;
             return this;
         }
-        Builder updateDisplayMetrics() {
-            mInfo.getAppMetrics(mDisplayMetrics);
-            return this;
-        }
-        Builder setDefaultMinTaskSizeDp(int valueDp) {
-            MockitoAnnotations.initMocks(this);
-            doReturn(mMockContext).when(mService.mContext).createConfigurationContext(any());
-            doReturn(mResources).when(mMockContext).getResources();
-            doAnswer(
-                    new Answer() {
-                        @Override
-                        public Object answer(InvocationOnMock i) {
-                            Object[] args = i.getArguments();
-                            TypedValue v = (TypedValue) args[1];
-                            v.type = TypedValue.TYPE_DIMENSION;
-                            v.data = TypedValue.createComplexDimension(valueDp,
-                                    TypedValue.COMPLEX_UNIT_DIP);
-                            return null;
-                        }
-                    }
-            ).when(mResources).getValue(
-                    eq(com.android.internal.R.dimen.default_minimal_size_resizable_task),
-                    any(TypedValue.class), eq(true));
-            return this;
-        }
+
         Builder setDeviceStateController(@NonNull DeviceStateController deviceStateController) {
             mDeviceStateController = deviceStateController;
             return this;
@@ -254,7 +215,7 @@ class TestDisplayContent extends DisplayContent {
                 doReturn(false).when(newDisplay).supportsSystemDecorations();
             }
             // Update the display policy to make the screen fully turned on so animation is allowed
-            displayPolicy.screenTurnedOn(null /* screenOnListener */);
+            displayPolicy.screenTurningOn(null /* screenOnListener */);
             displayPolicy.finishKeyguardDrawn();
             displayPolicy.finishWindowsDrawn();
             displayPolicy.finishScreenTurningOn();

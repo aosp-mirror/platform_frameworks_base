@@ -18,15 +18,19 @@ package android.hardware.devicestate;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -36,7 +40,8 @@ import java.util.function.Consumer;
  *
  * @hide
  */
-@TestApi
+@SystemApi
+@FlaggedApi(android.hardware.devicestate.feature.flags.Flags.FLAG_DEVICE_STATE_PROPERTY_API)
 @SystemService(Context.DEVICE_STATE_SERVICE)
 public final class DeviceStateManager {
     /**
@@ -44,13 +49,22 @@ public final class DeviceStateManager {
      *
      * @hide
      */
-    public static final int INVALID_DEVICE_STATE = -1;
+    @TestApi
+    public static final int INVALID_DEVICE_STATE_IDENTIFIER = -1;
 
-    /** The minimum allowed device state identifier. */
-    public static final int MINIMUM_DEVICE_STATE = 0;
+    /**
+     * The minimum allowed device state identifier.
+     * @hide
+     */
+    @TestApi
+    public static final int MINIMUM_DEVICE_STATE_IDENTIFIER = 0;
 
-    /** The maximum allowed device state identifier. */
-    public static final int MAXIMUM_DEVICE_STATE = 255;
+    /**
+     * The maximum allowed device state identifier.
+     * @hide
+     */
+    @TestApi
+    public static final int MAXIMUM_DEVICE_STATE_IDENTIFIER = 10000;
 
     /**
      * Intent needed to launch the rear display overlay activity from SysUI
@@ -85,8 +99,8 @@ public final class DeviceStateManager {
      * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
      */
     @NonNull
-    public int[] getSupportedStates() {
-        return mGlobal.getSupportedStates();
+    public List<DeviceState> getSupportedDeviceStates() {
+        return mGlobal.getSupportedDeviceStates();
     }
 
     /**
@@ -107,7 +121,10 @@ public final class DeviceStateManager {
      * the {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission is held.
      *
      * @see DeviceStateRequest
+     * @hide
      */
+    @SuppressLint("RequiresPermission") // Lint doesn't handle conditional permission checks today
+    @TestApi
     @RequiresPermission(value = android.Manifest.permission.CONTROL_DEVICE_STATE,
             conditional = true)
     public void requestState(@NonNull DeviceStateRequest request,
@@ -124,7 +141,10 @@ public final class DeviceStateManager {
      *
      * @throws SecurityException if the caller is neither the current top-focused activity nor if
      * the {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission is held.
+     * @hide
      */
+    @SuppressLint("RequiresPermission") // Lint doesn't handle conditional permission checks today
+    @TestApi
     @RequiresPermission(value = android.Manifest.permission.CONTROL_DEVICE_STATE,
             conditional = true)
     public void cancelStateRequest() {
@@ -151,11 +171,11 @@ public final class DeviceStateManager {
      * emulated override requests take priority.
      *
      * @throws IllegalArgumentException if the requested state is unsupported.
-     * @throws SecurityException if the caller does not hold the
-     * {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission.
      *
      * @see DeviceStateRequest
+     * @hide
      */
+    @TestApi
     @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)
     public void requestBaseStateOverride(@NonNull DeviceStateRequest request,
             @Nullable @CallbackExecutor Executor executor,
@@ -169,9 +189,9 @@ public final class DeviceStateManager {
      * <p>
      * This method is noop if there is no base state request currently active.
      *
-     * @throws SecurityException if the caller does not hold the
-     * {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission.
+     * @hide
      */
+    @TestApi
     @RequiresPermission(Manifest.permission.CONTROL_DEVICE_STATE)
     public void cancelBaseStateOverride() {
         mGlobal.cancelBaseStateOverride();
@@ -206,26 +226,15 @@ public final class DeviceStateManager {
          * Guaranteed to be called once on registration of the callback with the initial value and
          * then on every subsequent change in the supported states.
          *
+         * The supported device states may change due to certain states becoming unavailable
+         * due to device configuration or device conditions such as if the device is too hot or
+         * external monitors have been connected.
+         *
          * @param supportedStates the new supported states.
          *
-         * @see DeviceStateManager#getSupportedStates()
+         * @see DeviceStateManager#getSupportedDeviceStates()
          */
-        default void onSupportedStatesChanged(@NonNull int[] supportedStates) {}
-
-        /**
-         * Called in response to a change in the base device state.
-         * <p>
-         * The base state is the state of the device without considering any requests made through
-         * calls to {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}
-         * from any client process. The base state is guaranteed to match the state provided with a
-         * call to {@link #onStateChanged(int)} when there are no active requests from any process.
-         * <p>
-         * Guaranteed to be called once on registration of the callback with the initial value and
-         * then on every subsequent change in the non-override state.
-         *
-         * @param state the new base device state.
-         */
-        default void onBaseStateChanged(int state) {}
+        default void onSupportedStatesChanged(@NonNull List<DeviceState> supportedStates) {}
 
         /**
          * Called in response to device state changes.
@@ -235,7 +244,7 @@ public final class DeviceStateManager {
          *
          * @param state the new device state.
          */
-        void onStateChanged(int state);
+        void onDeviceStateChanged(@NonNull DeviceState state);
     }
 
     /**
@@ -247,6 +256,7 @@ public final class DeviceStateManager {
     public static class FoldStateListener implements DeviceStateCallback {
         private final int[] mFoldedDeviceStates;
         private final Consumer<Boolean> mDelegate;
+        private final android.hardware.devicestate.feature.flags.FeatureFlags mFeatureFlags;
 
         @Nullable
         private Boolean lastResult;
@@ -259,11 +269,20 @@ public final class DeviceStateManager {
             mFoldedDeviceStates = context.getResources().getIntArray(
                     com.android.internal.R.array.config_foldedDeviceStates);
             mDelegate = listener;
+            mFeatureFlags = new android.hardware.devicestate.feature.flags.FeatureFlagsImpl();
         }
 
         @Override
-        public final void onStateChanged(int state) {
-            final boolean folded = ArrayUtils.contains(mFoldedDeviceStates, state);
+        public final void onDeviceStateChanged(@NonNull DeviceState deviceState) {
+            final boolean folded;
+            if (mFeatureFlags.deviceStatePropertyApi()) {
+                // TODO(b/325124054): Update when system server refactor is completed
+                folded = deviceState.hasProperty(
+                        DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY)
+                        || ArrayUtils.contains(mFoldedDeviceStates, deviceState.getIdentifier());
+            } else {
+                folded = ArrayUtils.contains(mFoldedDeviceStates, deviceState.getIdentifier());
+            }
 
             if (lastResult == null || !lastResult.equals(folded)) {
                 lastResult = folded;

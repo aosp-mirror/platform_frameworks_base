@@ -38,10 +38,11 @@ public class ShellSharedConstants {
     public static final String KEY_EXTRA_SHELL_RECENT_TASKS = "extra_shell_recent_tasks";
     // See IBackAnimation.aidl
     public static final String KEY_EXTRA_SHELL_BACK_ANIMATION = "extra_shell_back_animation";
-    // See IFloatingTasks.aidl
-    public static final String KEY_EXTRA_SHELL_FLOATING_TASKS = "extra_shell_floating_tasks";
     // See IDesktopMode.aidl
     public static final String KEY_EXTRA_SHELL_DESKTOP_MODE = "extra_shell_desktop_mode";
     // See IDragAndDrop.aidl
     public static final String KEY_EXTRA_SHELL_DRAG_AND_DROP = "extra_shell_drag_and_drop";
+    // See IRecentsAnimationController.aidl
+    public static final String KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION =
+            "extra_shell_can_hand_off_animation";
 }

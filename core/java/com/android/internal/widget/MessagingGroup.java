@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
+import android.app.Flags;
 import android.app.Person;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -55,7 +56,9 @@ import java.util.List;
  * A message of a {@link MessagingLayout}.
  */
 @RemoteViews.RemoteView
-public class MessagingGroup extends LinearLayout implements MessagingLinearLayout.MessagingChild {
+public class MessagingGroup extends NotificationOptimizedLinearLayout implements
+        MessagingLinearLayout.MessagingChild {
+
     private static final MessagingPool<MessagingGroup> sInstancePool =
             new MessagingPool<>(10);
 
@@ -197,6 +200,10 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         mSender = sender;
         if (nameOverride == null) {
             nameOverride = sender.getName();
+        }
+        if (Flags.cleanUpSpansAndNewLines() && nameOverride != null) {
+            // remove formatting from sender name
+            nameOverride = nameOverride.toString();
         }
         mSenderName = nameOverride;
         if (mSingleLine && !TextUtils.isEmpty(nameOverride)) {

@@ -20,11 +20,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
@@ -60,7 +60,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyObject
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class DeviceControlsControllerImplTest : SysuiTestCase() {
 
     @Mock

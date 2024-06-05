@@ -16,13 +16,14 @@
 
 #define LOG_TAG "VelocityTracker-JNI"
 
+#include <android-base/logging.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <cutils/properties.h>
 #include <input/Input.h>
 #include <input/VelocityTracker.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
-#include <utils/Log.h>
+
 #include "android_view_MotionEvent.h"
 #include "core_jni_helpers.h"
 
@@ -38,7 +39,7 @@ public:
     explicit VelocityTrackerState(const VelocityTracker::Strategy strategy);
 
     void clear();
-    void addMovement(const MotionEvent* event);
+    void addMovement(const MotionEvent& event);
     // TODO(b/32830165): consider supporting an overload that supports computing velocity only for
     // a subset of the supported axes.
     void computeCurrentVelocity(int32_t units, float maxVelocity);
@@ -56,7 +57,7 @@ void VelocityTrackerState::clear() {
     mVelocityTracker.clear();
 }
 
-void VelocityTrackerState::addMovement(const MotionEvent* event) {
+void VelocityTrackerState::addMovement(const MotionEvent& event) {
     mVelocityTracker.addMovement(event);
 }
 
@@ -101,13 +102,13 @@ static void android_view_VelocityTracker_nativeClear(JNIEnv* env, jclass clazz, 
 static void android_view_VelocityTracker_nativeAddMovement(JNIEnv* env, jclass clazz, jlong ptr,
         jobject eventObj) {
     const MotionEvent* event = android_view_MotionEvent_getNativePtr(env, eventObj);
-    if (!event) {
-        ALOGW("nativeAddMovement failed because MotionEvent was finalized.");
+    if (event == nullptr) {
+        LOG(WARNING) << "nativeAddMovement failed because MotionEvent was finalized.";
         return;
     }
 
     VelocityTrackerState* state = reinterpret_cast<VelocityTrackerState*>(ptr);
-    state->addMovement(event);
+    state->addMovement(*event);
 }
 
 static void android_view_VelocityTracker_nativeComputeCurrentVelocity(JNIEnv* env, jclass clazz,

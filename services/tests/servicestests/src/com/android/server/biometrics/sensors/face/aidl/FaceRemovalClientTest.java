@@ -76,7 +76,7 @@ public class FaceRemovalClientTest {
     @Mock
     private ClientMonitorCallback mCallback;
     @Mock
-    private Sensor.HalSessionCallback mHalSessionCallback;
+    private AidlResponseHandler mAidlResponseHandler;
     @Mock
     private BiometricUtils<Face> mUtils;
     @Mock
@@ -115,7 +115,7 @@ public class FaceRemovalClientTest {
 
     private FaceRemovalClient createClient(int version, int[] biometricIds) throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
-        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
+        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mAidlResponseHandler);
         return new FaceRemovalClient(mContext, () -> aidl, mToken,
                 mClientMonitorCallbackConverter, biometricIds, USER_ID,
                 "own-it", mUtils /* utils */, 5 /* sensorId */, mBiometricLogger, mBiometricContext,

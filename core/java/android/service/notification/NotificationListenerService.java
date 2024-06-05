@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.UiThread;
 import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -42,6 +43,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -309,6 +311,7 @@ public abstract class NotificationListenerService extends Service {
             REASON_ASSISTANT_CANCEL,
             REASON_LOCKDOWN,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface NotificationCancelReason{};
 
     /**
@@ -320,6 +323,7 @@ public abstract class NotificationListenerService extends Service {
             FLAG_FILTER_TYPE_SILENT,
             FLAG_FILTER_TYPE_ONGOING
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface NotificationFilterTypes {}
     /**
      * A flag value indicating that this notification listener can see conversation type
@@ -465,6 +469,7 @@ public abstract class NotificationListenerService extends Service {
      *            object as well as its identifying information (tag and id) and source
      *            (package name).
      */
+    @UiThread
     public void onNotificationPosted(StatusBarNotification sbn) {
         // optional
     }
@@ -478,6 +483,7 @@ public abstract class NotificationListenerService extends Service {
      * @param rankingMap The current ranking map that can be used to retrieve ranking information
      *                   for active notifications, including the newly posted one.
      */
+    @UiThread
     public void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
         onNotificationPosted(sbn);
     }
@@ -496,6 +502,7 @@ public abstract class NotificationListenerService extends Service {
      *            and source (package name) used to post the {@link android.app.Notification} that
      *            was just removed.
      */
+    @UiThread
     public void onNotificationRemoved(StatusBarNotification sbn) {
         // optional
     }
@@ -517,6 +524,7 @@ public abstract class NotificationListenerService extends Service {
      *                   for active notifications.
      *
      */
+    @UiThread
     public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap) {
         onNotificationRemoved(sbn);
     }
@@ -538,6 +546,7 @@ public abstract class NotificationListenerService extends Service {
      * @param rankingMap The current ranking map that can be used to retrieve ranking information
      *                   for active notifications.
      */
+    @UiThread
     public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap,
             @NotificationCancelReason int reason) {
         onNotificationRemoved(sbn, rankingMap);
@@ -549,6 +558,7 @@ public abstract class NotificationListenerService extends Service {
      *
      * @hide
      */
+    @UiThread
     @SystemApi
     public void onNotificationRemoved(@NonNull StatusBarNotification sbn,
             @NonNull RankingMap rankingMap, @NonNull NotificationStats stats, int reason) {
@@ -560,6 +570,7 @@ public abstract class NotificationListenerService extends Service {
      * the notification manager.  You are safe to call {@link #getActiveNotifications()}
      * at this time.
      */
+    @UiThread
     public void onListenerConnected() {
         // optional
     }
@@ -569,6 +580,7 @@ public abstract class NotificationListenerService extends Service {
      * notification manager.You will not receive any events after this call, and may only
      * call {@link #requestRebind(ComponentName)} at this time.
      */
+    @UiThread
     public void onListenerDisconnected() {
         // optional
     }
@@ -579,6 +591,7 @@ public abstract class NotificationListenerService extends Service {
      * @param rankingMap The current ranking map that can be used to retrieve ranking information
      *                   for active notifications.
      */
+    @UiThread
     public void onNotificationRankingUpdate(RankingMap rankingMap) {
         // optional
     }
@@ -589,6 +602,7 @@ public abstract class NotificationListenerService extends Service {
      *
      * @param hints The current {@link #getCurrentListenerHints() listener hints}.
      */
+    @UiThread
     public void onListenerHintsChanged(int hints) {
         // optional
     }
@@ -600,6 +614,7 @@ public abstract class NotificationListenerService extends Service {
      * @param hideSilentStatusIcons whether or not status bar icons should be hidden for silent
      *                              notifications
      */
+    @UiThread
     public void onSilentStatusBarIconsVisibilityChanged(boolean hideSilentStatusIcons) {
         // optional
     }
@@ -617,6 +632,7 @@ public abstract class NotificationListenerService extends Service {
      *                   {@link #NOTIFICATION_CHANNEL_OR_GROUP_UPDATED},
      *                   {@link #NOTIFICATION_CHANNEL_OR_GROUP_DELETED}.
      */
+    @UiThread
     public void onNotificationChannelModified(String pkg, UserHandle user,
             NotificationChannel channel, @ChannelOrGroupModificationTypes int modificationType) {
         // optional
@@ -635,6 +651,7 @@ public abstract class NotificationListenerService extends Service {
      *                   {@link #NOTIFICATION_CHANNEL_OR_GROUP_UPDATED},
      *                   {@link #NOTIFICATION_CHANNEL_OR_GROUP_DELETED}.
      */
+    @UiThread
     public void onNotificationChannelGroupModified(String pkg, UserHandle user,
             NotificationChannelGroup group, @ChannelOrGroupModificationTypes int modificationType) {
         // optional
@@ -647,6 +664,7 @@ public abstract class NotificationListenerService extends Service {
      * @param interruptionFilter The current
      *     {@link #getCurrentInterruptionFilter() interruption filter}.
      */
+    @UiThread
     public void onInterruptionFilterChanged(int interruptionFilter) {
         // optional
     }
@@ -896,8 +914,7 @@ public abstract class NotificationListenerService extends Service {
      * <p>This method will throw a security exception if you don't have access to notifications
      * for the given user.</p>
      * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
-     * device} or be the {@link NotificationAssistantService notification assistant} in order to
-     * use this method.
+     * device} or be the notification assistant in order to use this method.
      *
      * @param pkg The package to retrieve channels for.
      */
@@ -920,8 +937,7 @@ public abstract class NotificationListenerService extends Service {
      * <p>This method will throw a security exception if you don't have access to notifications
      * for the given user.</p>
      * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
-     * device} or be the {@link NotificationAssistantService notification assistant} in order to
-     * use this method.
+     * device} or be the notification assistant in order to use this method.
      *
      * @param pkg The package to retrieve channel groups for.
      */
@@ -1056,7 +1072,7 @@ public abstract class NotificationListenerService extends Service {
             ParceledListSlice<StatusBarNotification> parceledList = getNotificationInterface()
                     .getActiveNotificationsFromListener(mWrapper, keys, trim);
             return cleanUpNotificationList(parceledList);
-        } catch (android.os.RemoteException ex) {
+        } catch (android.os.RemoteException | BadParcelableException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
         return null;
@@ -1195,6 +1211,11 @@ public abstract class NotificationListenerService extends Service {
      * interruption filter depending on other listener requests or other global state.
      * <p>
      * Listen for updates using {@link #onInterruptionFilterChanged(int)}.
+     *
+     * <p>Apps targeting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above (with some
+     * exceptions, such as companion device managers) cannot modify the global interruption filter.
+     * Calling this method will instead activate or deactivate an
+     * {@link android.app.AutomaticZenRule} associated to the app.
      *
      * <p>The service should wait for the {@link #onListenerConnected()} event
      * before performing this operation.
@@ -2001,15 +2022,28 @@ public abstract class NotificationListenerService extends Service {
 
         /**
          * Returns a list of smart {@link Notification.Action} that can be added by the
-         * {@link NotificationAssistantService}
+         * notification assistant.
          */
         public @NonNull List<Notification.Action> getSmartActions() {
             return mSmartActions == null ? Collections.emptyList() : mSmartActions;
         }
 
+
         /**
-         * Returns a list of smart replies that can be added by the
-         * {@link NotificationAssistantService}
+         * Sets the smart {@link Notification.Action} objects.
+         *
+         * Should ONLY be used in cases where smartActions need to be removed from, then restored
+         * on, Ranking objects during Parceling, when they are transmitted between processes via
+         * Shared Memory.
+         *
+         * @hide
+         */
+        public void setSmartActions(@Nullable ArrayList<Notification.Action> smartActions) {
+            mSmartActions = smartActions;
+        }
+
+        /**
+         * Returns a list of smart replies that can be added by the notification assistant.
          */
         public @NonNull List<CharSequence> getSmartReplies() {
             return mSmartReplies == null ? Collections.emptyList() : mSmartReplies;
@@ -2353,11 +2387,9 @@ public abstract class NotificationListenerService extends Service {
 
         /**
          * Get a reference to the actual Ranking object corresponding to the key.
-         * Used only by unit tests.
          *
          * @hide
          */
-        @VisibleForTesting
         public Ranking getRawRankingObject(String key) {
             return mRankings.get(key);
         }

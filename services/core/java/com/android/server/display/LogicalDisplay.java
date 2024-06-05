@@ -17,6 +17,8 @@
 package com.android.server.display;
 
 import static com.android.server.display.DisplayDeviceInfo.TOUCH_NONE;
+import static com.android.server.wm.utils.DisplayInfoOverrides.WM_OVERRIDE_FIELDS;
+import static com.android.server.wm.utils.DisplayInfoOverrides.copyDisplayInfoFields;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -33,6 +35,7 @@ import android.view.SurfaceControl;
 
 import com.android.server.display.layout.Layout;
 import com.android.server.display.mode.DisplayModeDirector;
+import com.android.server.display.mode.SyntheticModeManager;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
@@ -137,6 +140,9 @@ final class LogicalDisplay {
     private final Rect mTempLayerStackRect = new Rect();
     private final Rect mTempDisplayRect = new Rect();
 
+    /** A session token that controls the offloading operations of this logical display. */
+    private DisplayOffloadSessionImpl mDisplayOffloadSession;
+
     /**
      * Name of a display group to which the display is assigned.
      */
@@ -187,13 +193,46 @@ final class LogicalDisplay {
     private SurfaceControl.RefreshRateRange mLayoutLimitedRefreshRate;
 
     /**
+     * The ID of the power throttling data that should be used.
+     */
+    private String mPowerThrottlingDataId;
+
+    /**
      * RefreshRateRange limitation for @Temperature.ThrottlingStatus
      */
     @NonNull
     private SparseArray<SurfaceControl.RefreshRateRange> mThermalRefreshRateThrottling =
             new SparseArray<>();
 
-    public LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
+    /**
+     * If enabled, will not check for {@link Display#FLAG_ROTATES_WITH_CONTENT} in LogicalDisplay
+     * and simply use the {@link DisplayInfo#rotation} supplied by WindowManager via
+     * {@link #setDisplayInfoOverrideFromWindowManagerLocked}
+     */
+    private boolean mAlwaysRotateDisplayDeviceEnabled;
+
+    /**
+     * If the aspect ratio of the resolution of the display does not match the physical aspect
+     * ratio of the display, then without this feature enabled, picture would appear stretched to
+     * the user. This is because applications assume that they are rendered on square pixels
+     * (meaning density of pixels in x and y directions are equal). This would result into circles
+     * appearing as ellipses to the user.
+     * To compensate for non-square (anisotropic) pixels, if this feature is enabled:
+     * 1. LogicalDisplay will add more pixels for the applications to render on, as if the pixels
+     * were square and occupied the full display.
+     * 2. SurfaceFlinger will squeeze this taller/wider surface into the available number of
+     * physical pixels in the current display resolution.
+     * 3. If a setting on the display itself is set to "fill the entire display panel" then the
+     * display will stretch the pixels to fill the display fully.
+     */
+    private final boolean mIsAnisotropyCorrectionEnabled;
+
+    LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
+        this(displayId, layerStack, primaryDisplayDevice, false, false);
+    }
+
+    LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice,
+            boolean isAnisotropyCorrectionEnabled, boolean isAlwaysRotateDisplayDeviceEnabled) {
         mDisplayId = displayId;
         mLayerStack = layerStack;
         mPrimaryDisplayDevice = primaryDisplayDevice;
@@ -202,7 +241,10 @@ final class LogicalDisplay {
         mIsEnabled = true;
         mIsInTransition = false;
         mThermalBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
+        mPowerThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
         mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
+        mIsAnisotropyCorrectionEnabled = isAnisotropyCorrectionEnabled;
+        mAlwaysRotateDisplayDeviceEnabled = isAlwaysRotateDisplayDeviceEnabled;
     }
 
     public void setDevicePositionLocked(int position) {
@@ -243,24 +285,8 @@ final class LogicalDisplay {
     public DisplayInfo getDisplayInfoLocked() {
         if (mInfo.get() == null) {
             DisplayInfo info = new DisplayInfo();
-            info.copyFrom(mBaseDisplayInfo);
-            if (mOverrideDisplayInfo != null) {
-                info.appWidth = mOverrideDisplayInfo.appWidth;
-                info.appHeight = mOverrideDisplayInfo.appHeight;
-                info.smallestNominalAppWidth = mOverrideDisplayInfo.smallestNominalAppWidth;
-                info.smallestNominalAppHeight = mOverrideDisplayInfo.smallestNominalAppHeight;
-                info.largestNominalAppWidth = mOverrideDisplayInfo.largestNominalAppWidth;
-                info.largestNominalAppHeight = mOverrideDisplayInfo.largestNominalAppHeight;
-                info.logicalWidth = mOverrideDisplayInfo.logicalWidth;
-                info.logicalHeight = mOverrideDisplayInfo.logicalHeight;
-                info.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
-                info.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
-                info.rotation = mOverrideDisplayInfo.rotation;
-                info.displayCutout = mOverrideDisplayInfo.displayCutout;
-                info.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
-                info.roundedCorners = mOverrideDisplayInfo.roundedCorners;
-                info.displayShape = mOverrideDisplayInfo.displayShape;
-            }
+            copyDisplayInfoFields(info, mBaseDisplayInfo, mOverrideDisplayInfo,
+                    WM_OVERRIDE_FIELDS);
             mInfo.set(info);
         }
         return mInfo.get();
@@ -383,7 +409,8 @@ final class LogicalDisplay {
      *
      * @param deviceRepo Repository of active {@link DisplayDevice}s.
      */
-    public void updateLocked(DisplayDeviceRepository deviceRepo) {
+    public void updateLocked(DisplayDeviceRepository deviceRepo,
+            SyntheticModeManager syntheticModeManager) {
         // Nothing to update if already invalid.
         if (mPrimaryDisplayDevice == null) {
             return;
@@ -401,6 +428,7 @@ final class LogicalDisplay {
         // logical display that they are sharing.  (eg. Adjust size for pixel-perfect
         // mirroring over HDMI.)
         DisplayDeviceInfo deviceInfo = mPrimaryDisplayDevice.getDisplayDeviceInfoLocked();
+        DisplayDeviceConfig config = mPrimaryDisplayDevice.getDisplayDeviceConfig();
         if (!Objects.equals(mPrimaryDisplayDeviceInfo, deviceInfo) || mDirty) {
             mBaseDisplayInfo.layerStack = mLayerStack;
             mBaseDisplayInfo.flags = 0;
@@ -441,6 +469,9 @@ final class LogicalDisplay {
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_ALWAYS_UNLOCKED;
             }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_ROTATES_WITH_CONTENT;
+            }
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_TOUCH_FEEDBACK_DISABLED;
             }
@@ -453,6 +484,15 @@ final class LogicalDisplay {
             Rect maskingInsets = getMaskingInsets(deviceInfo);
             int maskedWidth = deviceInfo.width - maskingInsets.left - maskingInsets.right;
             int maskedHeight = deviceInfo.height - maskingInsets.top - maskingInsets.bottom;
+
+            if (mIsAnisotropyCorrectionEnabled && deviceInfo.type == Display.TYPE_EXTERNAL
+                        && deviceInfo.xDpi > 0 && deviceInfo.yDpi > 0) {
+                if (deviceInfo.xDpi > deviceInfo.yDpi * DisplayDevice.MAX_ANISOTROPY) {
+                    maskedHeight = (int) (maskedHeight * deviceInfo.xDpi / deviceInfo.yDpi + 0.5);
+                } else if (deviceInfo.xDpi * DisplayDevice.MAX_ANISOTROPY < deviceInfo.yDpi) {
+                    maskedWidth = (int) (maskedWidth * deviceInfo.yDpi / deviceInfo.xDpi + 0.5);
+                }
+            }
 
             mBaseDisplayInfo.type = deviceInfo.type;
             mBaseDisplayInfo.address = deviceInfo.address;
@@ -467,8 +507,12 @@ final class LogicalDisplay {
             mBaseDisplayInfo.modeId = deviceInfo.modeId;
             mBaseDisplayInfo.renderFrameRate = deviceInfo.renderFrameRate;
             mBaseDisplayInfo.defaultModeId = deviceInfo.defaultModeId;
+            mBaseDisplayInfo.userPreferredModeId = deviceInfo.userPreferredModeId;
             mBaseDisplayInfo.supportedModes = Arrays.copyOf(
                     deviceInfo.supportedModes, deviceInfo.supportedModes.length);
+            mBaseDisplayInfo.appsSupportedModes = syntheticModeManager.createAppSupportedModes(
+                    config, mBaseDisplayInfo.supportedModes
+            );
             mBaseDisplayInfo.colorMode = deviceInfo.colorMode;
             mBaseDisplayInfo.supportedColorModes = Arrays.copyOf(
                     deviceInfo.supportedColorModes,
@@ -643,7 +687,12 @@ final class LogicalDisplay {
         // The orientation specifies how the physical coordinate system of the display
         // is rotated when the contents of the logical display are rendered.
         int orientation = Surface.ROTATION_0;
-        if ((displayDeviceInfo.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0) {
+
+        // FLAG_ROTATES_WITH_CONTENT is now handled in DisplayContent. When the flag
+        // mAlwaysRotateDisplayDeviceEnabled is removed, we should also remove this check for
+        // ROTATES_WITH_CONTENT here and always set the orientation.
+        if ((displayDeviceInfo.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0
+                    || mAlwaysRotateDisplayDeviceEnabled) {
             orientation = displayInfo.rotation;
         }
 
@@ -666,6 +715,31 @@ final class LogicalDisplay {
         physWidth -= maskingInsets.left + maskingInsets.right;
         physHeight -= maskingInsets.top + maskingInsets.bottom;
 
+        var displayLogicalWidth = displayInfo.logicalWidth;
+        var displayLogicalHeight = displayInfo.logicalHeight;
+
+        if (mIsAnisotropyCorrectionEnabled && displayDeviceInfo.type == Display.TYPE_EXTERNAL
+                    && displayDeviceInfo.xDpi > 0 && displayDeviceInfo.yDpi > 0) {
+            if (displayDeviceInfo.xDpi > displayDeviceInfo.yDpi * DisplayDevice.MAX_ANISOTROPY) {
+                var scalingFactor = displayDeviceInfo.yDpi / displayDeviceInfo.xDpi;
+                if (rotated) {
+                    displayLogicalWidth = (int) ((float) displayLogicalWidth * scalingFactor + 0.5);
+                } else {
+                    displayLogicalHeight = (int) ((float) displayLogicalHeight * scalingFactor
+                                                          + 0.5);
+                }
+            } else if (displayDeviceInfo.xDpi * DisplayDevice.MAX_ANISOTROPY
+                               < displayDeviceInfo.yDpi) {
+                var scalingFactor = displayDeviceInfo.xDpi / displayDeviceInfo.yDpi;
+                if (rotated) {
+                    displayLogicalHeight = (int) ((float) displayLogicalHeight * scalingFactor
+                                                          + 0.5);
+                } else {
+                    displayLogicalWidth = (int) ((float) displayLogicalWidth * scalingFactor + 0.5);
+                }
+            }
+        }
+
         // Determine whether the width or height is more constrained to be scaled.
         //    physWidth / displayInfo.logicalWidth    => letter box
         // or physHeight / displayInfo.logicalHeight  => pillar box
@@ -675,16 +749,16 @@ final class LogicalDisplay {
         // comparing them.
         int displayRectWidth, displayRectHeight;
         if ((displayInfo.flags & Display.FLAG_SCALING_DISABLED) != 0 || mDisplayScalingDisabled) {
-            displayRectWidth = displayInfo.logicalWidth;
-            displayRectHeight = displayInfo.logicalHeight;
-        } else if (physWidth * displayInfo.logicalHeight
-                < physHeight * displayInfo.logicalWidth) {
+            displayRectWidth = displayLogicalWidth;
+            displayRectHeight = displayLogicalHeight;
+        } else if (physWidth * displayLogicalHeight
+                < physHeight * displayLogicalWidth) {
             // Letter box.
             displayRectWidth = physWidth;
-            displayRectHeight = displayInfo.logicalHeight * physWidth / displayInfo.logicalWidth;
+            displayRectHeight = displayLogicalHeight * physWidth / displayLogicalWidth;
         } else {
             // Pillar box.
-            displayRectWidth = displayInfo.logicalWidth * physHeight / displayInfo.logicalHeight;
+            displayRectWidth = displayLogicalWidth * physHeight / displayLogicalHeight;
             displayRectHeight = physHeight;
         }
         int displayRectTop = (physHeight - displayRectHeight) / 2;
@@ -869,7 +943,10 @@ final class LogicalDisplay {
      * @param enabled True if enabled, false otherwise.
      */
     public void setEnabledLocked(boolean enabled) {
-        mIsEnabled = enabled;
+        if (enabled != mIsEnabled) {
+            mDirty = true;
+            mIsEnabled = enabled;
+        }
     }
 
     /**
@@ -898,6 +975,25 @@ final class LogicalDisplay {
             mThermalBrightnessThrottlingDataId = brightnessThrottlingDataId;
             mDirty = true;
         }
+    }
+
+    /**
+     * @param powerThrottlingDataId The ID of the brightness throttling data that this
+     *                                  display should use.
+     */
+    public void setPowerThrottlingDataIdLocked(String powerThrottlingDataId) {
+        if (!Objects.equals(powerThrottlingDataId, mPowerThrottlingDataId)) {
+            mPowerThrottlingDataId = powerThrottlingDataId;
+            mDirty = true;
+        }
+    }
+
+    /**
+     * Returns powerThrottlingDataId which is the ID of the brightness
+     * throttling data that this display should use.
+     */
+    public String getPowerThrottlingDataIdLocked() {
+        return mPowerThrottlingDataId;
     }
 
     /**
@@ -934,6 +1030,14 @@ final class LogicalDisplay {
         return mDisplayGroupName;
     }
 
+    public void setDisplayOffloadSessionLocked(DisplayOffloadSessionImpl session) {
+        mDisplayOffloadSession = session;
+    }
+
+    public DisplayOffloadSessionImpl getDisplayOffloadSessionLocked() {
+        return mDisplayOffloadSession;
+    }
+
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
         pw.println("mIsEnabled=" + mIsEnabled);
@@ -957,6 +1061,7 @@ final class LogicalDisplay {
         pw.println("mLeadDisplayId=" + mLeadDisplayId);
         pw.println("mLayoutLimitedRefreshRate=" + mLayoutLimitedRefreshRate);
         pw.println("mThermalRefreshRateThrottling=" + mThermalRefreshRateThrottling);
+        pw.println("mPowerThrottlingDataId=" + mPowerThrottlingDataId);
     }
 
     @Override

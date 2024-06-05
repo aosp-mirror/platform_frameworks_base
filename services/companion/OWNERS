@@ -1,4 +1,3 @@
-evanxinchen@google.com
-ewol@google.com
-guojing@google.com
-svetoslavganov@google.com
+include /core/java/android/companion/OWNERS
+
+per-file Android.bp,lint-baseline.xml,OWNERS=file:java/com/android/server/companion/virtual/OWNERS

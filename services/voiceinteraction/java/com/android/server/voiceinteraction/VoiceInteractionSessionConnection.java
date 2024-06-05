@@ -20,6 +20,7 @@ import static android.app.AppOpsManager.OP_ASSIST_SCREENSHOT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+import static android.service.voice.VoiceInteractionSession.KEY_FOREGROUND_ACTIVITIES;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 
@@ -35,6 +36,7 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.UriGrantsManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
@@ -112,6 +114,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     final Callback mCallback;
     final int mCallingUid;
     final Handler mHandler;
+    final IActivityTaskManager mActivityTaskManager;
     final IActivityManager mAm;
     final UriGrantsManagerInternal mUgmInternal;
     final IWindowManager mIWindowManager;
@@ -224,6 +227,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         mCallback = callback;
         mCallingUid = callingUid;
         mHandler = handler;
+        mActivityTaskManager = ActivityTaskManager.getService();
         mAm = ActivityManager.getService();
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mIWindowManager = IWindowManager.Stub.asInterface(
@@ -279,6 +283,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                 mFullyBound = mContext.bindServiceAsUser(mBindIntent, mFullConnection,
                         Context.BIND_AUTO_CREATE | Context.BIND_TREAT_LIKE_ACTIVITY
                                 | Context.BIND_SCHEDULE_LIKE_TOP_APP
+                                | Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE
                                 | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS,
                         new UserHandle(mUser));
             }
@@ -299,11 +304,30 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                 for (int i = 0; i < topActivitiesCount; i++) {
                     topActivitiesToken.add(topActivities.get(i).getActivityToken());
                 }
+                boolean fetchDataAllowed =
+                        (disabledContext & VoiceInteractionSession.SHOW_WITH_ASSIST) == 0;
+
+                // Ensure that the current activity supports assist data
+                boolean isAssistDataAllowed = false;
+                try {
+                    isAssistDataAllowed = mActivityTaskManager.isAssistDataAllowed();
+                } catch (RemoteException e) {
+                    // Should never happen
+                }
+
+                // TODO: Refactor to have all assist data allowed checks in one place.
+                if (fetchDataAllowed && isAssistDataAllowed) {
+                    ArrayList<ComponentName> topComponents = new ArrayList<>(topActivitiesCount);
+                    for (int i = 0; i < topActivitiesCount; i++) {
+                        topComponents.add(topActivities.get(i).getComponentName());
+                    }
+                    mShowArgs.putParcelableArrayList(KEY_FOREGROUND_ACTIVITIES, topComponents);
+                }
 
                 mAssistDataRequester.requestAssistData(topActivitiesToken,
                         fetchData,
                         fetchScreenshot,
-                        (disabledContext & VoiceInteractionSession.SHOW_WITH_ASSIST) == 0,
+                        fetchDataAllowed,
                         (disabledContext & VoiceInteractionSession.SHOW_WITH_SCREENSHOT) == 0,
                         mCallingUid,
                         mSessionComponentName.getPackageName(),

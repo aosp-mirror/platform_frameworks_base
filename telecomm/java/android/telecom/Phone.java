@@ -174,6 +174,9 @@ public final class Phone {
             checkCallTree(parcelableCall);
             call.internalUpdate(parcelableCall, mCallByTelecomCallId);
             fireCallAdded(call);
+            if (call.getState() == Call.STATE_DISCONNECTED) {
+                internalRemoveCall(call);
+            }
         } else {
             Log.w(this, "Call %s added, but it was already present", call.internalGetCallId());
             checkCallTree(parcelableCall);

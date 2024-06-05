@@ -16,15 +16,17 @@
 
 #define LOG_TAG "thermal"
 
-#include <cerrno>
-#include <thread>
-#include <limits>
-
-#include <android/thermal.h>
+#include <android-base/thread_annotations.h>
 #include <android/os/BnThermalStatusListener.h>
 #include <android/os/IThermalService.h>
+#include <android/thermal.h>
 #include <binder/IServiceManager.h>
+#include <thermal_private.h>
 #include <utils/Log.h>
+
+#include <cerrno>
+#include <limits>
+#include <thread>
 
 using android::sp;
 
@@ -32,11 +34,14 @@ using namespace android;
 using namespace android::os;
 
 struct ThermalServiceListener : public BnThermalStatusListener {
-    public:
-        virtual binder::Status onStatusChange(int32_t status) override;
-        ThermalServiceListener(AThermalManager *manager) {mMgr = manager;}
-    private:
-        AThermalManager *mMgr;
+public:
+    virtual binder::Status onStatusChange(int32_t status) override;
+    ThermalServiceListener(AThermalManager *manager) {
+        mMgr = manager;
+    }
+
+private:
+    AThermalManager *mMgr;
 };
 
 struct ListenerCallback {
@@ -44,22 +49,29 @@ struct ListenerCallback {
     void* data;
 };
 
+static IThermalService *gIThermalServiceForTesting = nullptr;
+
 struct AThermalManager {
-   public:
-        static AThermalManager* createAThermalManager();
-        AThermalManager() = delete;
-        ~AThermalManager();
-        status_t notifyStateChange(int32_t status);
-        status_t getCurrentThermalStatus(int32_t *status);
-        status_t addListener(AThermal_StatusCallback, void *data);
-        status_t removeListener(AThermal_StatusCallback, void *data);
-        status_t getThermalHeadroom(int32_t forecastSeconds, float *result);
-   private:
-       AThermalManager(sp<IThermalService> service);
-       sp<IThermalService> mThermalSvc;
-       sp<ThermalServiceListener> mServiceListener;
-       std::vector<ListenerCallback> mListeners;
-       std::mutex mMutex;
+public:
+    static AThermalManager *createAThermalManager();
+    AThermalManager() = delete;
+    ~AThermalManager();
+    status_t notifyStateChange(int32_t status);
+    status_t getCurrentThermalStatus(int32_t *status);
+    status_t addListener(AThermal_StatusCallback, void *data);
+    status_t removeListener(AThermal_StatusCallback, void *data);
+    status_t getThermalHeadroom(int32_t forecastSeconds, float *result);
+    status_t getThermalHeadroomThresholds(const AThermalHeadroomThreshold **, size_t *size);
+
+private:
+    AThermalManager(sp<IThermalService> service);
+    sp<IThermalService> mThermalSvc;
+    std::mutex mListenerMutex;
+    sp<ThermalServiceListener> mServiceListener GUARDED_BY(mListenerMutex);
+    std::vector<ListenerCallback> mListeners GUARDED_BY(mListenerMutex);
+    std::mutex mThresholdsMutex;
+    const AThermalHeadroomThreshold *mThresholds = nullptr; // GUARDED_BY(mThresholdsMutex)
+    size_t mThresholdsCount GUARDED_BY(mThresholdsMutex);
 };
 
 binder::Status ThermalServiceListener::onStatusChange(int32_t status) {
@@ -70,6 +82,9 @@ binder::Status ThermalServiceListener::onStatusChange(int32_t status) {
 }
 
 AThermalManager* AThermalManager::createAThermalManager() {
+    if (gIThermalServiceForTesting) {
+        return new AThermalManager(gIThermalServiceForTesting);
+    }
     sp<IBinder> binder =
             defaultServiceManager()->checkService(String16("thermalservice"));
 
@@ -81,12 +96,10 @@ AThermalManager* AThermalManager::createAThermalManager() {
 }
 
 AThermalManager::AThermalManager(sp<IThermalService> service)
-    : mThermalSvc(service),
-      mServiceListener(nullptr) {
-}
+      : mThermalSvc(std::move(service)), mServiceListener(nullptr) {}
 
 AThermalManager::~AThermalManager() {
-    std::unique_lock<std::mutex> lock(mMutex);
+    std::unique_lock<std::mutex> listenerLock(mListenerMutex);
 
     mListeners.clear();
     if (mServiceListener != nullptr) {
@@ -94,10 +107,13 @@ AThermalManager::~AThermalManager() {
         mThermalSvc->unregisterThermalStatusListener(mServiceListener, &success);
         mServiceListener = nullptr;
     }
+    listenerLock.unlock();
+    std::unique_lock<std::mutex> lock(mThresholdsMutex);
+    delete[] mThresholds;
 }
 
 status_t AThermalManager::notifyStateChange(int32_t status) {
-    std::unique_lock<std::mutex> lock(mMutex);
+    std::unique_lock<std::mutex> lock(mListenerMutex);
     AThermalStatus thermalStatus = static_cast<AThermalStatus>(status);
 
     for (auto listener : mListeners) {
@@ -107,7 +123,7 @@ status_t AThermalManager::notifyStateChange(int32_t status) {
 }
 
 status_t AThermalManager::addListener(AThermal_StatusCallback callback, void *data) {
-    std::unique_lock<std::mutex> lock(mMutex);
+    std::unique_lock<std::mutex> lock(mListenerMutex);
 
     if (callback == nullptr) {
         // Callback can not be nullptr
@@ -141,7 +157,7 @@ status_t AThermalManager::addListener(AThermal_StatusCallback callback, void *da
 }
 
 status_t AThermalManager::removeListener(AThermal_StatusCallback callback, void *data) {
-    std::unique_lock<std::mutex> lock(mMutex);
+    std::unique_lock<std::mutex> lock(mListenerMutex);
 
     auto it = std::remove_if(mListeners.begin(),
                              mListeners.end(),
@@ -195,6 +211,32 @@ status_t AThermalManager::getThermalHeadroom(int32_t forecastSeconds, float *res
         }
         return EPIPE;
     }
+    return OK;
+}
+
+status_t AThermalManager::getThermalHeadroomThresholds(const AThermalHeadroomThreshold **result,
+                                                       size_t *size) {
+    std::unique_lock<std::mutex> lock(mThresholdsMutex);
+    if (mThresholds == nullptr) {
+        auto thresholds = std::make_unique<std::vector<float>>();
+        binder::Status ret = mThermalSvc->getThermalHeadroomThresholds(thresholds.get());
+        if (!ret.isOk()) {
+            if (ret.exceptionCode() == binder::Status::EX_UNSUPPORTED_OPERATION) {
+                // feature is not enabled
+                return ENOSYS;
+            }
+            return EPIPE;
+        }
+        mThresholdsCount = thresholds->size();
+        auto t = new AThermalHeadroomThreshold[mThresholdsCount];
+        for (int i = 0; i < (int)mThresholdsCount; i++) {
+            t[i].headroom = (*thresholds)[i];
+            t[i].thermalStatus = static_cast<AThermalStatus>(i);
+        }
+        mThresholds = t;
+    }
+    *size = mThresholdsCount;
+    *result = mThresholds;
     return OK;
 }
 
@@ -291,14 +333,24 @@ int AThermal_unregisterThermalStatusListener(AThermalManager *manager,
  *  	   threshold. Returns NaN if the device does not support this functionality or if
  * 	       this function is called significantly faster than once per second.
  */
-float AThermal_getThermalHeadroom(AThermalManager *manager,
-        int forecastSeconds) {
+float AThermal_getThermalHeadroom(AThermalManager *manager, int forecastSeconds) {
     float result = 0.0f;
     status_t ret = manager->getThermalHeadroom(forecastSeconds, &result);
-
     if (ret != OK) {
         result = std::numeric_limits<float>::quiet_NaN();
     }
-
     return result;
+}
+
+int AThermal_getThermalHeadroomThresholds(AThermalManager *manager,
+                                          const AThermalHeadroomThreshold **outThresholds,
+                                          size_t *size) {
+    if (outThresholds == nullptr || *outThresholds != nullptr || size == nullptr) {
+        return EINVAL;
+    }
+    return manager->getThermalHeadroomThresholds(outThresholds, size);
+}
+
+void AThermal_setIThermalServiceForTesting(void *iThermalService) {
+    gIThermalServiceForTesting = static_cast<IThermalService *>(iThermalService);
 }

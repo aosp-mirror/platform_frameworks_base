@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -28,7 +29,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.systemui.R;
+import com.android.settingslib.Utils;
+import com.android.systemui.res.R;
 import com.android.wm.shell.animation.Interpolators;
 
 /**
@@ -49,8 +51,9 @@ public class TapAgainView extends TextView {
     }
 
     void updateColor() {
-        int textColor = getResources().getColor(R.color.notif_pill_text, mContext.getTheme());
-        setTextColor(textColor);
+        final @ColorInt int onSurface = Utils.getColorAttrDefaultColor(mContext,
+                com.android.internal.R.attr.materialColorOnSurface);
+        setTextColor(onSurface);
         setBackground(getResources().getDrawable(R.drawable.rounded_bg_full, mContext.getTheme()));
     }
 
@@ -83,7 +86,7 @@ public class TapAgainView extends TextView {
     public void animateOut() {
         long fadeOutDuration = 167L;  // From KeyguardIndicationTextView#getFadeOutDuration
         int yTranslation = mContext.getResources().getDimensionPixelSize(
-                com.android.systemui.R.dimen.keyguard_indication_y_translation);
+                com.android.systemui.res.R.dimen.keyguard_indication_y_translation);
 
         AnimatorSet animatorSet = new AnimatorSet();
         ObjectAnimator fadeOut = ObjectAnimator.ofFloat(this, View.ALPHA, 0f);

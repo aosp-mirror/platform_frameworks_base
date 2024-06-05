@@ -1,0 +1,17 @@
+// Signature format: 2.0
+package android.nfc {
+
+  public final class NfcAdapter {
+    method @Deprecated @android.compat.annotation.UnsupportedAppUsage public void disableForegroundNdefPush(android.app.Activity);
+    method @Deprecated @android.compat.annotation.UnsupportedAppUsage public void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
+    method @Deprecated @android.compat.annotation.UnsupportedAppUsage public boolean invokeBeam(android.app.Activity);
+    method @Deprecated @android.compat.annotation.UnsupportedAppUsage public boolean isNdefPushEnabled();
+    method @Deprecated @android.compat.annotation.UnsupportedAppUsage public void setBeamPushUris(android.net.Uri[], android.app.Activity);
+    method @Deprecated @android.compat.annotation.UnsupportedAppUsage public void setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity);
+    method @Deprecated @android.compat.annotation.UnsupportedAppUsage public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
+    method @Deprecated @android.compat.annotation.UnsupportedAppUsage public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...);
+    method @Deprecated @android.compat.annotation.UnsupportedAppUsage public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...);
+  }
+
+}
+

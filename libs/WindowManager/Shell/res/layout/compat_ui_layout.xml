@@ -55,7 +55,7 @@
 
     <include android:id="@+id/size_compat_hint"
         android:visibility="gone"
-        android:layout_width="@dimen/size_compat_hint_width"
+        android:layout_width="@dimen/compat_hint_width"
         android:layout_height="wrap_content"
         layout="@layout/compat_mode_hint"/>
 

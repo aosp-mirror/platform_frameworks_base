@@ -672,9 +672,20 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     @Override
     public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             event.startTracking();
             return true;
+        }
+        if (keyCode == KeyEvent.KEYCODE_ESCAPE) {
+            if (mCancelable) {
+                cancel();
+                event.startTracking();
+                return true;
+            } else if (mWindow.shouldCloseOnTouchOutside()) {
+                dismiss();
+                event.startTracking();
+                return true;
+            }
         }
 
         return false;
@@ -702,13 +713,18 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     @Override
     public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)
-                && event.isTracking()
-                && !event.isCanceled()
-                && (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)
-                || !allowsRegisterDefaultOnBackInvokedCallback())) {
-            onBackPressed();
-            return true;
+        if (event.isTracking() && !event.isCanceled()) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_BACK:
+                    if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)
+                            || !allowsRegisterDefaultOnBackInvokedCallback()) {
+                        onBackPressed();
+                        return true;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_ESCAPE:
+                    return true;
+            }
         }
         return false;
     }

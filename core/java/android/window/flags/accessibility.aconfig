@@ -1,0 +1,39 @@
+package: "com.android.window.flags"
+container: "system"
+
+flag {
+  name: "do_not_check_intersection_when_non_magnifiable_window_transitions"
+  namespace: "accessibility"
+  description: "The flag controls whether the intersection check for non-magnifiable windows is needed when onWindowTransition,"
+  bug: "312624253"
+}
+
+flag {
+  name: "always_draw_magnification_fullscreen_border"
+  namespace: "accessibility"
+  description: "Always draw fullscreen orange border in fullscreen magnification"
+  bug: "291891390"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "use_window_original_touchable_region_when_magnification_recompute_bounds"
+  namespace: "accessibility"
+  description: "The flag controls whether to use the window original touchable regions in accessibilityController recomputeBounds"
+  bug: "323366243"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "delay_notification_to_magnification_when_recents_window_to_front_transition"
+  namespace: "accessibility"
+  description: "The flag controls whether the delaying of notification for recents window to-front transition is needed. In accessibilityController other callbacks will decide sending or canceling the delayed notification."
+  bug: "324949652"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

@@ -19,10 +19,26 @@ import android.testing.LeakCheck;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FakeRotationLockController extends BaseLeakChecker<RotationLockControllerCallback>
         implements RotationLockController {
+    private boolean mIsLocked = false;
+    private final List<RotationLockControllerCallback> mCallbacks = new ArrayList<>();
     public FakeRotationLockController(LeakCheck test) {
         super(test, "rotation");
+    }
+
+    @Override
+    public void addCallback(RotationLockControllerCallback listener) {
+        mCallbacks.add(listener);
+        listener.onRotationLockStateChanged(mIsLocked, isRotationLockAffordanceVisible());
+    }
+
+    @Override
+    public void removeCallback(RotationLockControllerCallback listener) {
+        mCallbacks.remove(listener);
     }
 
     @Override
@@ -42,12 +58,15 @@ public class FakeRotationLockController extends BaseLeakChecker<RotationLockCont
 
     @Override
     public boolean isRotationLocked() {
-        return false;
+        return mIsLocked;
     }
 
     @Override
-    public void setRotationLocked(boolean locked) {
-
+    public void setRotationLocked(boolean locked, String caller) {
+        mIsLocked = locked;
+        for (RotationLockControllerCallback callback : mCallbacks) {
+            callback.onRotationLockStateChanged(locked, isRotationLockAffordanceVisible());
+        }
     }
 
     @Override
@@ -56,7 +75,7 @@ public class FakeRotationLockController extends BaseLeakChecker<RotationLockCont
     }
 
     @Override
-    public void setRotationLockedAtAngle(boolean locked, int rotation) {
+    public void setRotationLockedAtAngle(boolean locked, int rotation, String caller) {
 
     }
 }

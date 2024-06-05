@@ -29,6 +29,7 @@ import android.os.Parcelable;
  * Insets are immutable so may be treated as values.
  *
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Insets implements Parcelable {
     public static final @NonNull Insets NONE = new Insets(0, 0, 0, 0);
 

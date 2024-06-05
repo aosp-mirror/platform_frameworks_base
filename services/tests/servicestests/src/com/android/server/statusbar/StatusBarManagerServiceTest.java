@@ -484,6 +484,7 @@ public class StatusBarManagerServiceTest {
                 new Callback());
 
         verify(mMockStatusBar).requestAddTile(
+                eq(Binder.getCallingUid()),
                 eq(TEST_COMPONENT),
                 eq(APP_NAME),
                 eq(TILE_LABEL),
@@ -534,6 +535,7 @@ public class StatusBarManagerServiceTest {
         mStatusBarManagerService.requestAddTile(TEST_COMPONENT, TILE_LABEL, mIcon, user, callback);
 
         verify(mMockStatusBar).requestAddTile(
+                eq(Binder.getCallingUid()),
                 eq(TEST_COMPONENT),
                 eq(APP_NAME),
                 eq(TILE_LABEL),
@@ -555,6 +557,7 @@ public class StatusBarManagerServiceTest {
         mStatusBarManagerService.requestAddTile(TEST_COMPONENT, TILE_LABEL, mIcon, user, callback);
 
         verify(mMockStatusBar).requestAddTile(
+                eq(Binder.getCallingUid()),
                 eq(TEST_COMPONENT),
                 eq(APP_NAME),
                 eq(TILE_LABEL),
@@ -577,6 +580,7 @@ public class StatusBarManagerServiceTest {
         mStatusBarManagerService.requestAddTile(TEST_COMPONENT, TILE_LABEL, mIcon, user, callback);
 
         verify(mMockStatusBar).requestAddTile(
+                eq(Binder.getCallingUid()),
                 eq(TEST_COMPONENT),
                 eq(APP_NAME),
                 eq(TILE_LABEL),
@@ -599,6 +603,7 @@ public class StatusBarManagerServiceTest {
         mStatusBarManagerService.requestAddTile(TEST_COMPONENT, TILE_LABEL, mIcon, user, callback);
 
         verify(mMockStatusBar).requestAddTile(
+                eq(Binder.getCallingUid()),
                 eq(TEST_COMPONENT),
                 eq(APP_NAME),
                 eq(TILE_LABEL),
@@ -623,6 +628,7 @@ public class StatusBarManagerServiceTest {
                     new Callback());
 
             verify(mMockStatusBar, times(i + 1)).requestAddTile(
+                    eq(Binder.getCallingUid()),
                     eq(TEST_COMPONENT),
                     eq(APP_NAME),
                     eq(TILE_LABEL),
@@ -638,6 +644,7 @@ public class StatusBarManagerServiceTest {
 
         // Only called MAX_NUM_DENIALS times
         verify(mMockStatusBar, times(TileRequestTracker.MAX_NUM_DENIALS)).requestAddTile(
+                anyInt(),
                 any(),
                 any(),
                 any(),
@@ -658,6 +665,7 @@ public class StatusBarManagerServiceTest {
                     new Callback());
 
             verify(mMockStatusBar, times(i + 1)).requestAddTile(
+                    eq(Binder.getCallingUid()),
                     eq(TEST_COMPONENT),
                     eq(APP_NAME),
                     eq(TILE_LABEL),

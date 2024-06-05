@@ -136,11 +136,12 @@ public abstract class PowerManagerInternal {
      *
      * @param screenState The overridden screen state, or {@link Display#STATE_UNKNOWN}
      * to disable the override.
+     * @param reason The reason for overriding the screen state.
      * @param screenBrightness The overridden screen brightness, or
      * {@link PowerManager#BRIGHTNESS_DEFAULT} to disable the override.
      */
     public abstract void setDozeOverrideFromDreamManager(
-            int screenState, int screenBrightness);
+            int screenState, @Display.StateReason int reason, int screenBrightness);
 
     /**
      * Used by sidekick manager to tell the power manager if it shouldn't change the display state
@@ -313,6 +314,13 @@ public abstract class PowerManagerInternal {
      * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
      */
     public static final int MODE_DISPLAY_INACTIVE = 9;
+
+    /**
+     * Mode: It indicates that display is changing layout due to rotation or fold
+     * unfold behavior.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_DISPLAY_CHANGE = 17;
 
     /**
      * SetPowerMode() is called to enable/disable specific hint mode, which

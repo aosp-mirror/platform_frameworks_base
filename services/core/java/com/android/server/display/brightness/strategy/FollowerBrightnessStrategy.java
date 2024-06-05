@@ -16,12 +16,13 @@
 
 package com.android.server.display.brightness.strategy;
 
-import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
+import com.android.server.display.brightness.StrategyExecutionRequest;
+import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 
 import java.io.PrintWriter;
 
@@ -37,18 +38,22 @@ public class FollowerBrightnessStrategy implements DisplayBrightnessStrategy {
     // Set to PowerManager.BRIGHTNESS_INVALID_FLOAT when there's no brightness to follow set.
     private float mBrightnessToFollow;
 
+    // Indicates whether we should ramp slowly to the brightness value to follow.
+    private boolean mBrightnessToFollowSlowChange;
+
     public FollowerBrightnessStrategy(int displayId) {
         mDisplayId = displayId;
         mBrightnessToFollow = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        mBrightnessToFollowSlowChange = false;
     }
 
     @Override
     public DisplayBrightnessState updateBrightness(
-            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
+            StrategyExecutionRequest strategyExecutionRequest) {
         // Todo(b/241308599): Introduce a validator class and add validations before setting
         // the brightness
         return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_FOLLOWER,
-                mBrightnessToFollow, mBrightnessToFollow, getName());
+                mBrightnessToFollow, mBrightnessToFollow, getName(), mBrightnessToFollowSlowChange);
     }
 
     @Override
@@ -60,16 +65,33 @@ public class FollowerBrightnessStrategy implements DisplayBrightnessStrategy {
         return mBrightnessToFollow;
     }
 
-    public void setBrightnessToFollow(float brightnessToFollow) {
+    /**
+     * Updates brightness value and brightness slowChange flag
+     **/
+    public void setBrightnessToFollow(float brightnessToFollow, boolean slowChange) {
         mBrightnessToFollow = brightnessToFollow;
+        mBrightnessToFollowSlowChange = slowChange;
     }
 
     /**
      * Dumps the state of this class.
      */
+    @Override
     public void dump(PrintWriter writer) {
         writer.println("FollowerBrightnessStrategy:");
         writer.println("  mDisplayId=" + mDisplayId);
         writer.println("  mBrightnessToFollow:" + mBrightnessToFollow);
+        writer.println("  mBrightnessToFollowSlowChange:" + mBrightnessToFollowSlowChange);
+    }
+
+    @Override
+    public void strategySelectionPostProcessor(
+            StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
+        // DO NOTHING
+    }
+
+    @Override
+    public int getReason() {
+        return BrightnessReason.REASON_FOLLOWER;
     }
 }

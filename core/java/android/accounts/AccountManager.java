@@ -2015,7 +2015,7 @@ public class AccountManager {
      *     null for no callback
      * @param handler {@link Handler} identifying the callback thread,
      *     null for the main thread
-     * @return An {@link AccountManagerFuture} which resolves to a Boolean indicated wether it
+     * @return An {@link AccountManagerFuture} which resolves to a Boolean indicated whether it
      * succeeded.
      * @hide
      */
@@ -2384,12 +2384,8 @@ public class AccountManager {
                 } else {
                     return get(timeout, unit);
                 }
-            } catch (CancellationException e) {
-                throw new OperationCanceledException();
-            } catch (TimeoutException e) {
-                // fall through and cancel
-            } catch (InterruptedException e) {
-                // fall through and cancel
+            } catch (CancellationException | TimeoutException | InterruptedException e) {
+                throw new OperationCanceledException(e);
             } catch (ExecutionException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof IOException) {
@@ -2408,7 +2404,6 @@ public class AccountManager {
             } finally {
                 cancel(true /* interrupt if running */);
             }
-            throw new OperationCanceledException();
         }
 
         @Override

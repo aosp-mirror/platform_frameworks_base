@@ -1,12 +1,15 @@
 package com.android.systemui.qs;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE;
+import static com.android.systemui.qs.PageIndicator.PageScrollActionListener.LEFT;
+import static com.android.systemui.qs.PageIndicator.PageScrollActionListener.RIGHT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -21,16 +24,18 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.Scroller;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.qs.PageIndicator.PageScrollActionListener.Direction;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.res.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +47,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private static final int NO_PAGE = -1;
 
     private static final int REVEAL_SCROLL_DURATION_MILLIS = 750;
+    private static final int SINGLE_PAGE_SCROLL_DURATION_MILLIS = 300;
     private static final float BOUNCE_ANIMATION_TENSION = 1.3f;
     private static final long BOUNCE_ANIMATION_DURATION = 450L;
     private static final int TILE_ANIMATION_STAGGER_DELAY = 85;
@@ -62,8 +68,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private PageListener mPageListener;
 
     private boolean mListening;
-    private Scroller mScroller;
+    @VisibleForTesting Scroller mScroller;
 
+    /* set of animations used to indicate which tiles were just revealed  */
     @Nullable
     private AnimatorSet mBounceAnimatorSet;
     private float mLastExpansion;
@@ -76,6 +83,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mLastExcessHeight;
     private int mMinRows = 1;
     private int mMaxColumns = TileLayout.NO_MAX_COLUMNS;
+
+    /**
+     * it's fine to read this value when class is initialized because SysUI is always restarted
+     * when running tests in test harness, see SysUiTestIsolationRule. This check is done quite
+     * often - with every shade open action - so we don't want to potentially make it less
+     * performant only for test use case
+     */
+    private boolean mRunningInTestHarness = ActivityManager.isRunningInTestHarness();
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -290,6 +305,12 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         page.setMinRows(mMinRows);
         page.setMaxColumns(mMaxColumns);
         page.setSelected(false);
+
+        // All pages should have the same squishiness, so grabbing the value from the first page
+        // and giving it to new pages.
+        float squishiness = mPages.isEmpty() ? 1f : mPages.get(0).getSquishinessFraction();
+        page.setSquishinessFraction(squishiness);
+
         return page;
     }
 
@@ -297,6 +318,30 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mPageIndicator = indicator;
         mPageIndicator.setNumPages(mPages.size());
         mPageIndicator.setLocation(mPageIndicatorPosition);
+        mPageIndicator.setPageScrollActionListener(swipeDirection -> {
+            if (mScroller.isFinished()) {
+                scrollByX(getDeltaXForPageScrolling(swipeDirection),
+                        SINGLE_PAGE_SCROLL_DURATION_MILLIS);
+            }
+        });
+    }
+
+    private int getDeltaXForPageScrolling(@Direction int swipeDirection) {
+        if (swipeDirection == LEFT && getCurrentItem() != 0) {
+            return -getWidth();
+        } else if (swipeDirection == RIGHT && getCurrentItem() != mPages.size() - 1) {
+            return getWidth();
+        }
+        return 0;
+    }
+
+    private void scrollByX(int x, int durationMillis) {
+        if (x != 0) {
+            mScroller.startScroll(/* startX= */ getScrollX(), /* startY= */ getScrollY(),
+                    /* dx= */ x, /* dy= */ 0, /* duration= */ durationMillis);
+            // scroller just sets its state, we need to invalidate view to actually start scrolling
+            postInvalidateOnAnimation();
+        }
     }
 
     @Override
@@ -387,6 +432,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         for (int i = 0; i < NP; i++) {
             mPages.get(i).removeAllViews();
         }
+        if (mPageIndicator != null) {
+            mPageIndicator.setNumPages(numPages);
+        }
         if (NP == numPages) {
             return;
         }
@@ -398,7 +446,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             mLogger.d("Removing page");
             mPages.remove(mPages.size() - 1);
         }
-        mPageIndicator.setNumPages(mPages.size());
         setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
         if (mPageToRestore != NO_PAGE) {
@@ -438,6 +485,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
+    public int getMinRows() {
+        return mMinRows;
+    }
+
+    @Override
     public boolean setMaxColumns(int maxColumns) {
         mMaxColumns = maxColumns;
         boolean changed = false;
@@ -448,6 +500,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             }
         }
         return changed;
+    }
+
+    @Override
+    public int getMaxColumns() {
+        return mMaxColumns;
     }
 
     /**
@@ -549,10 +606,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         return mPages.get(0).mRecords.size();
     }
 
-    public void startTileReveal(Set<String> tileSpecs, final Runnable postAnimation) {
-        if (tileSpecs.isEmpty() || mPages.size() < 2 || getScrollX() != 0 || !beginFakeDrag()) {
-            // Do not start the reveal animation unless there are tiles to animate, multiple
-            // TileLayouts available and the user has not already started dragging.
+    public void startTileReveal(Set<String> tilesToReveal, final Runnable postAnimation) {
+        if (shouldNotRunAnimation(tilesToReveal)) {
+            return;
+        }
+        // This method has side effects (beings the fake drag, if it returns true). If we have
+        // decided that we want to do a tile reveal, we do a last check to verify that we can
+        // actually perform a fake drag.
+        if (!beginFakeDrag()) {
             return;
         }
 
@@ -560,13 +621,13 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         final TileLayout lastPage = mPages.get(lastPageNumber);
         final ArrayList<Animator> bounceAnims = new ArrayList<>();
         for (TileRecord tr : lastPage.mRecords) {
-            if (tileSpecs.contains(tr.tile.getTileSpec())) {
+            if (tilesToReveal.contains(tr.tile.getTileSpec())) {
                 bounceAnims.add(setupBounceAnimator(tr.tileView, bounceAnims.size()));
             }
         }
 
         if (bounceAnims.isEmpty()) {
-            // All tileSpecs are on the first page. Nothing to do.
+            // All tilesToReveal are on the first page. Nothing to do.
             // TODO: potentially show a bounce animation for first page QS tiles
             endFakeDrag();
             return;
@@ -583,9 +644,19 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         });
         setOffscreenPageLimit(lastPageNumber); // Ensure the page to reveal has been inflated.
         int dx = getWidth() * lastPageNumber;
-        mScroller.startScroll(getScrollX(), getScrollY(), isLayoutRtl() ? -dx : dx, 0,
-                REVEAL_SCROLL_DURATION_MILLIS);
-        postInvalidateOnAnimation();
+        scrollByX(isLayoutRtl() ? -dx : dx, REVEAL_SCROLL_DURATION_MILLIS);
+    }
+
+    private boolean shouldNotRunAnimation(Set<String> tilesToReveal) {
+        // None of these have side effects. That way, we don't need to rely on short-circuiting
+        // behavior
+        boolean noAnimationNeeded = tilesToReveal.isEmpty() || mPages.size() < 2;
+        boolean scrollingInProgress = getScrollX() != 0 || !isFakeDragging();
+        // checking mRunningInTestHarness to disable animation in functional testing as it caused
+        // flakiness and is not needed there. Alternative solutions were more complex and would
+        // still be either potentially flaky or modify internal data.
+        // For more info see b/253493927 and b/293234595
+        return noAnimationNeeded || scrollingInProgress || mRunningInTestHarness;
     }
 
     private int sanitizePageAction(int action) {

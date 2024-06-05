@@ -223,7 +223,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
     @VisibleForTesting
     Task getTopRootTask() {
-        return getRootTask(t -> true);
+        return getRootTask(alwaysTruePredicate());
     }
 
     @Nullable
@@ -412,7 +412,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // wasContained} restricts the preferred root task is set only when moving an existing
         // root task to top instead of adding a new root task that may be too early (e.g. in the
         // middle of launching or reparenting).
-        final boolean isTopFocusableTask = moveToTop && child.isTopActivityFocusable();
+        final boolean isTopFocusableTask = moveToTop && child != mRootPinnedTask
+                && child.isTopActivityFocusable();
         if (isTopFocusableTask) {
             mPreferredTopFocusableRootTask =
                     child.shouldBeVisible(null /* starting */) ? child : null;
@@ -1271,27 +1272,9 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     boolean pauseBackTasks(ActivityRecord resuming) {
         final int[] someActivityPaused = {0};
         forAllLeafTasks(leafTask -> {
-            // Check if the direct child resumed activity in the leaf task needed to be paused if
-            // the leaf task is not a leaf task fragment.
-            if (!leafTask.isLeafTaskFragment()) {
-                final ActivityRecord top = topRunningActivity();
-                final ActivityRecord resumedActivity = leafTask.getResumedActivity();
-                if (resumedActivity != null && top.getTaskFragment() != leafTask) {
-                    // Pausing the resumed activity because it is occluded by other task fragment.
-                    if (leafTask.startPausing(false /* uiSleeping*/, resuming, "pauseBackTasks")) {
-                        someActivityPaused[0]++;
-                    }
-                }
+            if (leafTask.pauseActivityIfNeeded(resuming, "pauseBackTasks")) {
+                someActivityPaused[0]++;
             }
-
-            leafTask.forAllLeafTaskFragments((taskFrag) -> {
-                final ActivityRecord resumedActivity = taskFrag.getResumedActivity();
-                if (resumedActivity != null && !taskFrag.canBeResumed(resuming)) {
-                    if (taskFrag.startPausing(false /* uiSleeping*/, resuming, "pauseBackTasks")) {
-                        someActivityPaused[0]++;
-                    }
-                }
-            }, true /* traverseTopToBottom */);
         }, true /* traverseTopToBottom */);
         return someActivityPaused[0] > 0;
     }
@@ -1784,7 +1767,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * Exposes the home task capability of the TaskDisplayArea
      */
     boolean canHostHomeTask() {
-        return mDisplayContent.supportsSystemDecorations() && mCanHostHomeTask;
+        return mDisplayContent.isHomeSupported() && mCanHostHomeTask;
     }
 
     /**
@@ -1794,13 +1777,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         void onRootTaskOrderChanged(Task rootTask);
     }
 
-    void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients) {
+    void ensureActivitiesVisible(ActivityRecord starting, boolean notifyClients) {
         mAtmService.mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
             forAllRootTasks(rootTask -> {
-                rootTask.ensureActivitiesVisible(starting, configChanges, preserveWindows,
-                        notifyClients);
+                rootTask.ensureActivitiesVisible(starting, notifyClients);
             });
         } finally {
             mAtmService.mTaskSupervisor.endActivityVisibilityUpdate();
@@ -1851,9 +1832,17 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                                         0 /* launchFlags */);
                 task.reparent(launchRoot == null ? toDisplayArea : launchRoot, POSITION_TOP);
 
-                // Set the windowing mode to undefined by default to let the root task inherited the
-                // windowing mode.
-                task.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+                // If the task is going to be reparented to the non-fullscreen root TDA and the task
+                // is set to FULLSCREEN explicitly, we keep the windowing mode as is. Otherwise, the
+                // task will inherit the display windowing mode unexpectedly.
+                final boolean keepWindowingMode = launchRoot == null
+                        && task.getRequestedOverrideWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                        && toDisplayArea.getWindowingMode() != WINDOWING_MODE_FULLSCREEN;
+                if (!keepWindowingMode) {
+                    // Set the windowing mode to undefined to let the root task inherited the
+                    // windowing mode.
+                    task.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+                }
                 lastReparentedRootTask = task;
             }
             // Root task may be removed from this display. Ensure each root task will be processed
@@ -1891,7 +1880,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         mTempConfiguration.setTo(getRequestedOverrideConfiguration());
         WindowConfiguration tempRequestWindowConfiguration = mTempConfiguration.windowConfiguration;
         tempRequestWindowConfiguration.setWindowingMode(windowingMode);
-        tempRequestWindowConfiguration.setDisplayWindowingMode(windowingMode);
         onRequestedOverrideConfigurationChanged(mTempConfiguration);
     }
 

@@ -29,9 +29,12 @@ import android.hardware.camera2.utils.SurfaceUtils;
 import android.media.Image;
 import android.media.ImageWriter;
 import android.os.Handler;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +50,8 @@ public final class CameraExtensionUtils {
 
     public static final int[] SUPPORTED_CAPTURE_OUTPUT_FORMATS = {
             CameraExtensionCharacteristics.PROCESSING_INPUT_FORMAT,
-            ImageFormat.JPEG
+            ImageFormat.JPEG,
+            ImageFormat.JPEG_R
     };
 
     public static class SurfaceInfo {
@@ -92,6 +96,10 @@ public final class CameraExtensionUtils {
                 (dataspace == StreamConfigurationMap.HAL_DATASPACE_V0_JFIF)) {
             surfaceInfo.mFormat = ImageFormat.JPEG;
             return surfaceInfo;
+        } else if ((nativeFormat == StreamConfigurationMap.HAL_PIXEL_FORMAT_BLOB)
+                && (dataspace == StreamConfigurationMap.HAL_DATASPACE_JPEG_R)) {
+            surfaceInfo.mFormat = ImageFormat.JPEG_R;
+            return surfaceInfo;
         }
 
         return surfaceInfo;
@@ -104,19 +112,30 @@ public final class CameraExtensionUtils {
         if (outputConfig == null) return null;
 
         SurfaceInfo surfaceInfo = querySurface(outputConfig.getSurface());
-        if (surfaceInfo.mFormat == captureFormat) {
-            if (supportedPostviewSizes.containsKey(captureFormat)) {
-                Size postviewSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
-                if (supportedPostviewSizes.get(surfaceInfo.mFormat)
-                        .contains(postviewSize)) {
-                    return outputConfig.getSurface();
-                } else {
-                    throw new IllegalArgumentException("Postview size not supported!");
-                }
+
+        if (Flags.extension10Bit()) {
+            Size postviewSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
+            if (supportedPostviewSizes.get(surfaceInfo.mFormat)
+                    .contains(postviewSize)) {
+                return outputConfig.getSurface();
+            } else {
+                throw new IllegalArgumentException("Postview size not supported!");
             }
         } else {
-            throw new IllegalArgumentException("Postview format should be equivalent to " +
-                    " the capture format!");
+            if (surfaceInfo.mFormat == captureFormat) {
+                if (supportedPostviewSizes.containsKey(captureFormat)) {
+                    Size postviewSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
+                    if (supportedPostviewSizes.get(surfaceInfo.mFormat)
+                            .contains(postviewSize)) {
+                        return outputConfig.getSurface();
+                    } else {
+                        throw new IllegalArgumentException("Postview size not supported!");
+                    }
+                }
+            } else {
+                throw new IllegalArgumentException("Postview format should be equivalent to "
+                        + " the capture format!");
+            }
         }
 
         return null;
@@ -125,9 +144,16 @@ public final class CameraExtensionUtils {
     public static Surface getBurstCaptureSurface(
             @NonNull List<OutputConfiguration> outputConfigs,
             @NonNull HashMap<Integer, List<Size>> supportedCaptureSizes) {
+        IntArray supportedCaptureOutputFormats =
+                new IntArray(CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.length);
+        supportedCaptureOutputFormats.addAll(
+                CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS);
+        if (Flags.extension10Bit()) {
+            supportedCaptureOutputFormats.add(ImageFormat.YCBCR_P010);
+        }
         for (OutputConfiguration config : outputConfigs) {
             SurfaceInfo surfaceInfo = querySurface(config.getSurface());
-            for (int supportedFormat : SUPPORTED_CAPTURE_OUTPUT_FORMATS) {
+            for (int supportedFormat : supportedCaptureOutputFormats.toArray()) {
                 if (surfaceInfo.mFormat == supportedFormat) {
                     Size captureSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
                     if (supportedCaptureSizes.containsKey(supportedFormat)) {

@@ -35,7 +35,9 @@ import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowRelayoutResult;
 import android.window.ClientWindowFrames;
+import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
 
 import java.util.List;
@@ -46,6 +48,19 @@ import java.util.List;
  * {@hide}
  */
 interface IWindowSession {
+
+    /**
+     * Bundle key to store the latest sync seq id for the relayout configuration.
+     * @see #relayout
+     */
+    const String KEY_RELAYOUT_BUNDLE_SEQID = "seqid";
+    /**
+     * Bundle key to store the latest ActivityWindowInfo associated with the relayout configuration.
+     * Will only be set if the relayout window is an activity window.
+     * @see #relayout
+     */
+    const String KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO = "activity_window_info";
+
     int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, int requestedVisibleTypes,
             out InputChannel outInputChannel, out InsetsState insetsState,
@@ -59,8 +74,25 @@ interface IWindowSession {
     int addToDisplayWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out InsetsState insetsState,
             out Rect attachedFrame, out float[] sizeCompatScale);
-    @UnsupportedAppUsage
-    void remove(IWindow window);
+
+    /**
+     * Removes a clientToken from WMS, which includes unlinking the input channel.
+     *
+     * @param clientToken The token that should be removed. This will normally be the IWindow token
+     * for a standard window. It can also be the generic clientToken that was used when calling
+     * grantInputChannel
+     */
+    void remove(IBinder clientToken);
+
+    /**
+     * @deprecated
+     */
+    int relayoutLegacy(IWindow window, in WindowManager.LayoutParams attrs,
+            int requestedWidth, int requestedHeight, int viewVisibility,
+            int flags, int seq, int lastSyncSeqId, out ClientWindowFrames outFrames,
+            out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
+            out InsetsState insetsState, out InsetsSourceControl.Array activeControls,
+            out Bundle bundle);
 
     /**
      * Change the parameters of a window.  You supply the
@@ -77,22 +109,12 @@ interface IWindowSession {
      * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING}.
      * @param seq The calling sequence of {@link #relayout} and {@link #relayoutAsync}.
      * @param lastSyncSeqId The last SyncSeqId that the client applied.
-     * @param outFrames The window frames used by the client side for layout.
-     * @param outMergedConfiguration New config container that holds global, override and merged
-     *                               config for window, if it is now becoming visible and the merged
-     *                               config has changed since it was last displayed.
-     * @param outSurfaceControl Object in which is placed the new display surface.
-     * @param insetsState The current insets state in the system.
-     * @param activeControls Objects which allow controlling {@link InsetsSource}s.
-     * @param bundle A temporary object to obtain the latest SyncSeqId.
+     * @param outRelayoutResult Data object contains the info to be returned from server side.
      * @return int Result flags, defined in {@link WindowManagerGlobal}.
      */
-    int relayout(IWindow window, in WindowManager.LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, int seq, int lastSyncSeqId, out ClientWindowFrames outFrames,
-            out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState, out InsetsSourceControl.Array activeControls,
-            out Bundle bundle);
+    int relayout(IWindow window, in WindowManager.LayoutParams attrs, int requestedWidth,
+            int requestedHeight, int viewVisibility, int flags, int seq, int lastSyncSeqId,
+            out @nullable WindowRelayoutResult outRelayoutResult);
 
     /**
      * Similar to {@link #relayout} but this is an oneway method which doesn't return anything.
@@ -140,13 +162,13 @@ interface IWindowSession {
             int seqId);
 
     @UnsupportedAppUsage
-    boolean performHapticFeedback(int effectId, boolean always);
+    boolean performHapticFeedback(int effectId, boolean always, boolean fromIme);
 
     /**
      * Called by attached views to perform predefined haptic feedback without requiring VIBRATE
      * permission.
      */
-    oneway void performHapticFeedbackAsync(int effectId, boolean always);
+    oneway void performHapticFeedbackAsync(int effectId, boolean always, boolean fromIme);
 
     /**
      * Initiate the drag operation itself
@@ -155,6 +177,8 @@ interface IWindowSession {
      * @param flags See {@code View#startDragAndDrop}
      * @param surface Surface containing drag shadow image
      * @param touchSource See {@code InputDevice#getSource()}
+     * @param touchDeviceId device ID of last touch event
+     * @param pointerId pointer ID of last touch event
      * @param touchX X coordinate of last touch point
      * @param touchY Y coordinate of last touch point
      * @param thumbCenterX X coordinate for the position within the shadow image that should be
@@ -164,9 +188,9 @@ interface IWindowSession {
      * @param data Data transferred by drag and drop
      * @return Token of drag operation which will be passed to cancelDragAndDrop.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     IBinder performDrag(IWindow window, int flags, in SurfaceControl surface, int touchSource,
-            float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
+            int touchDeviceId, int touchPointerId, float touchX, float touchY, float thumbCenterX,
+            float thumbCenterY, in ClipData data);
 
     /**
      * Drops the content of the current drag operation for accessibility
@@ -226,7 +250,7 @@ interface IWindowSession {
      */
     oneway void setWallpaperDisplayOffset(IBinder windowToken, int x, int y);
 
-    Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
+    oneway void sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, in Bundle extras, boolean sync);
 
     @UnsupportedAppUsage
@@ -264,8 +288,6 @@ interface IWindowSession {
 
     oneway void finishMovingTask(IWindow window);
 
-    oneway void updatePointerIcon(IWindow window);
-
     /**
      * Update a tap exclude region identified by provided id in the window. Touches on this region
      * will neither be dispatched to this window nor change the focus to this window. Passing an
@@ -284,6 +306,11 @@ interface IWindowSession {
     oneway void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
 
     /**
+     * Called when the DecorView gesture interception state has changed.
+     */
+    oneway void reportDecorViewGestureInterceptionChanged(IWindow window, in boolean intercepted);
+
+    /**
      * Called when the keep-clear areas for this window have changed.
      */
     oneway void reportKeepClearAreasChanged(IWindow window, in List<Rect> restricted,
@@ -291,11 +318,14 @@ interface IWindowSession {
 
     /**
     * Request the server to call setInputWindowInfo on a given Surface, and return
-    * an input channel where the client can receive input.
+    * an input channel where the client can receive input. For windows, the clientToken should be
+    * the IWindow binder object. For other requests, the token can be any unique IBinder token to
+    * be used as unique identifier.
     */
-    void grantInputChannel(int displayId, in SurfaceControl surface, in IWindow window,
-            in IBinder hostInputToken, int flags, int privateFlags, int inputFeatures, int type,
-            in IBinder windowToken, in IBinder focusGrantToken, String inputHandleName,
+    void grantInputChannel(int displayId, in SurfaceControl surface, in IBinder clientToken,
+            in @nullable InputTransferToken hostInputTransferToken, int flags, int privateFlags,
+            int inputFeatures, int type, in IBinder windowToken,
+            in InputTransferToken embeddedInputTransferToken, String inputHandleName,
             out InputChannel outInputChannel);
 
     /**
@@ -316,7 +346,8 @@ interface IWindowSession {
      *                     should be transferred back to the host window. If there is no host
      *                     window, the system will try to find a new focus target.
      */
-    void grantEmbeddedWindowFocus(IWindow window, in IBinder inputToken, boolean grantFocus);
+    void grantEmbeddedWindowFocus(IWindow window, in InputTransferToken inputToken,
+            boolean grantFocus);
 
     /**
      * Generates an DisplayHash that can be used to validate whether specific content was on
@@ -351,5 +382,13 @@ interface IWindowSession {
      */
     boolean cancelDraw(IWindow window);
 
-    boolean transferEmbeddedTouchFocusToHost(IWindow embeddedWindow);
+    /**
+     * Moves the focus to the adjacent window if there is one in the given direction. This can only
+     * move the focus to the window in the same leaf task.
+     *
+     * @param fromWindow The calling window that the focus is moved from.
+     * @param direction The {@link android.view.View.FocusDirection} that the new focus should go.
+     * @return {@code true} if the focus changes. Otherwise, {@code false}.
+     */
+    boolean moveFocusToAdjacentWindow(IWindow fromWindow, int direction);
 }

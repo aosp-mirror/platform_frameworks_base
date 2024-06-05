@@ -106,7 +106,7 @@ public interface DisplayHashResultCallback {
      * {@link android.view.View#generateDisplayHash(String, Rect, Executor,
      * DisplayHashResultCallback)} results in an error and cannot generate a display hash.
      *
-     * @param errorCode One of the values in {@link DisplayHashErrorCode}
+     * @param errorCode the error code
      */
     void onDisplayHashError(@DisplayHashErrorCode int errorCode);
 }

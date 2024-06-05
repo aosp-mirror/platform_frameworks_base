@@ -30,11 +30,14 @@ import static android.view.accessibility.AccessibilityManager.STATE_FLAG_TOUCH_E
 
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -44,8 +47,12 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.testing.DexmakerShareClassLoaderRule;
@@ -55,6 +62,7 @@ import android.view.Display;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.AccessibilityShortcutController;
 import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.After;
@@ -63,6 +71,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Map;
+import java.util.Set;
 
 /** Tests for AccessibilityUserState */
 public class AccessibilityUserStateTest {
@@ -87,6 +98,9 @@ public class AccessibilityUserStateTest {
     // Mock package-private class AccessibilityServiceConnection
     @Rule public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock private AccessibilityServiceInfo mMockServiceInfo;
 
@@ -148,7 +162,8 @@ public class AccessibilityUserStateTest {
         mUserState.mAccessibilityButtonTargets.add(COMPONENT_NAME.flattenToString());
         mUserState.setTargetAssignedToAccessibilityButton(COMPONENT_NAME.flattenToString());
         mUserState.setTouchExplorationEnabledLocked(true);
-        mUserState.setDisplayMagnificationEnabledLocked(true);
+        mUserState.setMagnificationSingleFingerTripleTapEnabledLocked(true);
+        mUserState.setMagnificationTwoFingerTripleTapEnabledLocked(true);
         mUserState.setAutoclickEnabledLocked(true);
         mUserState.setUserNonInteractiveUiTimeoutLocked(30);
         mUserState.setUserInteractiveUiTimeoutLocked(30);
@@ -170,7 +185,8 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.mAccessibilityButtonTargets.isEmpty());
         assertNull(mUserState.getTargetAssignedToAccessibilityButton());
         assertFalse(mUserState.isTouchExplorationEnabledLocked());
-        assertFalse(mUserState.isDisplayMagnificationEnabledLocked());
+        assertFalse(mUserState.isMagnificationSingleFingerTripleTapEnabledLocked());
+        assertFalse(mUserState.isMagnificationTwoFingerTripleTapEnabledLocked());
         assertFalse(mUserState.isAutoclickEnabledLocked());
         assertEquals(0, mUserState.getUserNonInteractiveUiTimeoutLocked());
         assertEquals(0, mUserState.getUserInteractiveUiTimeoutLocked());
@@ -188,7 +204,7 @@ public class AccessibilityUserStateTest {
 
         mUserState.addServiceLocked(mMockConnection);
 
-        verify(mMockConnection, never()).onAdded();
+        verify(mMockListener, never()).onServiceInfoChangedLocked(any());
     }
 
     @Test
@@ -197,7 +213,6 @@ public class AccessibilityUserStateTest {
 
         mUserState.addServiceLocked(mMockConnection);
 
-        verify(mMockConnection).onAdded();
         assertTrue(mUserState.getBoundServicesLocked().contains(mMockConnection));
         assertEquals(mMockConnection, mUserState.mComponentNameToServiceMap.get(COMPONENT_NAME));
         verify(mMockListener).onServiceInfoChangedLocked(eq(mUserState));
@@ -411,7 +426,70 @@ public class AccessibilityUserStateTest {
 
         assertEquals(focusStrokeWidthValue, mUserState.getFocusStrokeWidthLocked());
         assertEquals(focusColorValue, mUserState.getFocusColorLocked());
+    }
 
+    @Test
+    public void updateA11yQsTargetLocked_valueUpdated() {
+        Set<String> newTargets = Set.of(
+                AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString(),
+                AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME.flattenToString()
+        );
+
+        mUserState.updateA11yQsTargetLocked(newTargets);
+
+        assertThat(mUserState.getA11yQsTargets()).isEqualTo(newTargets);
+    }
+
+    @Test
+    public void getA11yQsTargets_returnsCopiedData() {
+        updateA11yQsTargetLocked_valueUpdated();
+
+        Set<String> targets = mUserState.getA11yQsTargets();
+        targets.clear();
+
+        assertThat(mUserState.getA11yQsTargets()).isNotEmpty();
+    }
+
+    @Test
+    public void updateA11yTilesInQsPanelLocked_valueUpdated() {
+        Set<ComponentName> newTargets = Set.of(
+                AccessibilityShortcutController.DALTONIZER_TILE_COMPONENT_NAME,
+                AccessibilityShortcutController.COLOR_INVERSION_TILE_COMPONENT_NAME
+        );
+
+        mUserState.updateA11yTilesInQsPanelLocked(newTargets);
+
+        assertThat(mUserState.getA11yQsTilesInQsPanel()).isEqualTo(newTargets);
+    }
+
+    @Test
+    public void getA11yQsTilesInQsPanel_returnsCopiedData() {
+        updateA11yTilesInQsPanelLocked_valueUpdated();
+
+        Set<ComponentName> targets = mUserState.getA11yQsTilesInQsPanel();
+        targets.clear();
+
+        assertThat(mUserState.getA11yQsTilesInQsPanel()).isNotEmpty();
+    }
+
+    @Test
+    public void getTileServiceToA11yServiceInfoMapLocked() {
+        final ComponentName tileComponent =
+                new ComponentName(COMPONENT_NAME.getPackageName(), "FakeTileService");
+        ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.packageName = tileComponent.getPackageName();
+        serviceInfo.name = COMPONENT_NAME.getClassName();
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.serviceInfo = serviceInfo;
+        when(mMockServiceInfo.getTileServiceName()).thenReturn(tileComponent.getClassName());
+        when(mMockServiceInfo.getResolveInfo()).thenReturn(resolveInfo);
+        mUserState.mInstalledServices.add(mMockServiceInfo);
+        mUserState.updateTileServiceMapForAccessibilityServiceLocked();
+
+        Map<ComponentName, AccessibilityServiceInfo> actual =
+                mUserState.getTileServiceToA11yServiceInfoMapLocked();
+
+        assertThat(actual).containsExactly(tileComponent, mMockServiceInfo);
     }
 
     private int getSecureIntForUser(String key, int userId) {

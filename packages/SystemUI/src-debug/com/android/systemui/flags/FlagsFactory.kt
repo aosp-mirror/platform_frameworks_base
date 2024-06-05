@@ -24,57 +24,50 @@ object FlagsFactory {
     val knownFlags: Map<String, Flag<*>>
         get() {
             // We need to access Flags in order to initialize our map.
-            assert(flagMap.contains(Flags.TEAMFOOD.name)) { "Where is teamfood?" }
+            assert(flagMap.contains(Flags.NULL_FLAG.name)) { "Where is the null flag?" }
             return flagMap
         }
 
     fun unreleasedFlag(
-        id: Int,
         name: String,
         namespace: String = "systemui",
         teamfood: Boolean = false
     ): UnreleasedFlag {
-        val flag = UnreleasedFlag(id = id, name = name, namespace = namespace, teamfood = teamfood)
+        val flag = UnreleasedFlag(name = name, namespace = namespace, teamfood = teamfood)
         checkForDupesAndAdd(flag)
         return flag
     }
 
     fun releasedFlag(
-        id: Int,
         name: String,
         namespace: String = "systemui",
     ): ReleasedFlag {
-        val flag = ReleasedFlag(id = id, name = name, namespace = namespace, teamfood = false)
+        val flag = ReleasedFlag(name = name, namespace = namespace)
         checkForDupesAndAdd(flag)
         return flag
     }
 
     fun resourceBooleanFlag(
-        id: Int,
         @BoolRes resourceId: Int,
         name: String,
         namespace: String = "systemui",
     ): ResourceBooleanFlag {
         val flag =
             ResourceBooleanFlag(
-                id = id,
                 name = name,
                 namespace = namespace,
                 resourceId = resourceId,
-                teamfood = false,
             )
         checkForDupesAndAdd(flag)
         return flag
     }
 
     fun sysPropBooleanFlag(
-        id: Int,
         name: String,
         namespace: String = "systemui",
         default: Boolean = false
     ): SysPropBooleanFlag {
-        val flag =
-            SysPropBooleanFlag(id = id, name = name, namespace = "systemui", default = default)
+        val flag = SysPropBooleanFlag(name = name, namespace = "systemui", default = default)
         checkForDupesAndAdd(flag)
         return flag
     }

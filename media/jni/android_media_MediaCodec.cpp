@@ -163,6 +163,13 @@ static struct {
 static struct {
     jclass clazz;
     jmethodID ctorId;
+    jmethodID sizeId;
+    jmethodID addId;
+} gArrayDequeInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctorId;
     jmethodID setInternalStateId;
     jfieldID contextId;
     jfieldID validId;
@@ -200,8 +207,14 @@ struct fields_t {
     jfieldID queueRequestIndexID;
     jfieldID outputFrameLinearBlockID;
     jfieldID outputFrameHardwareBufferID;
+    jfieldID outputFramebufferInfosID;
     jfieldID outputFrameChangedKeysID;
     jfieldID outputFrameFormatID;
+    jfieldID bufferInfoFlags;
+    jfieldID bufferInfoOffset;
+    jfieldID bufferInfoSize;
+    jfieldID bufferInfoPresentationTimeUs;
+
 };
 
 static fields_t gFields;
@@ -376,6 +389,14 @@ status_t JMediaCodec::setSurface(
     return err;
 }
 
+status_t JMediaCodec::detachOutputSurface() {
+    status_t err = mCodec->detachOutputSurface();
+    if (err == OK) {
+        mSurfaceTextureClient.clear();
+    }
+    return err;
+}
+
 status_t JMediaCodec::createInputSurface(
         sp<IGraphicBufferProducer>* bufferProducer) {
     return mCodec->createInputSurface(bufferProducer);
@@ -412,6 +433,22 @@ status_t JMediaCodec::queueInputBuffer(
             index, offset, size, timeUs, flags, errorDetailMsg);
 }
 
+status_t JMediaCodec::queueInputBuffers(
+        size_t index,
+        size_t offset,
+        size_t size,
+        const sp<RefBase> &infos,
+        AString *errorDetailMsg) {
+
+    sp<BufferInfosWrapper> auInfo((BufferInfosWrapper *)infos.get());
+    return mCodec->queueInputBuffers(
+            index,
+            offset,
+            size,
+            auInfo,
+            errorDetailMsg);
+}
+
 status_t JMediaCodec::queueSecureInputBuffer(
         size_t index,
         size_t offset,
@@ -429,30 +466,46 @@ status_t JMediaCodec::queueSecureInputBuffer(
             presentationTimeUs, flags, errorDetailMsg);
 }
 
+status_t JMediaCodec::queueSecureInputBuffers(
+        size_t index,
+        size_t offset,
+        size_t size,
+        const sp<RefBase> &auInfos_,
+        const sp<RefBase> &cryptoInfos_,
+        AString *errorDetailMsg) {
+    sp<BufferInfosWrapper> auInfos((BufferInfosWrapper *)auInfos_.get());
+    sp<CryptoInfosWrapper> cryptoInfos((CryptoInfosWrapper *)cryptoInfos_.get());
+    return mCodec->queueSecureInputBuffers(
+            index,
+            offset,
+            size,
+            auInfos,
+            cryptoInfos,
+            errorDetailMsg);
+}
+
 status_t JMediaCodec::queueBuffer(
-        size_t index, const std::shared_ptr<C2Buffer> &buffer, int64_t timeUs,
-        uint32_t flags, const sp<AMessage> &tunings, AString *errorDetailMsg) {
+        size_t index, const std::shared_ptr<C2Buffer> &buffer,
+        const sp<RefBase> &infos, const sp<AMessage> &tunings, AString *errorDetailMsg) {
+    sp<BufferInfosWrapper> auInfo((BufferInfosWrapper *)infos.get());
     return mCodec->queueBuffer(
-            index, buffer, timeUs, flags, tunings, errorDetailMsg);
+            index, buffer, auInfo, tunings, errorDetailMsg);
 }
 
 status_t JMediaCodec::queueEncryptedLinearBlock(
         size_t index,
         const sp<hardware::HidlMemory> &buffer,
         size_t offset,
-        const CryptoPlugin::SubSample *subSamples,
-        size_t numSubSamples,
-        const uint8_t key[16],
-        const uint8_t iv[16],
-        CryptoPlugin::Mode mode,
-        const CryptoPlugin::Pattern &pattern,
-        int64_t presentationTimeUs,
-        uint32_t flags,
+        size_t size,
+        const sp<RefBase> &infos,
+        const sp<RefBase> &cryptoInfos_,
         const sp<AMessage> &tunings,
         AString *errorDetailMsg) {
+    sp<BufferInfosWrapper> auInfo((BufferInfosWrapper *)infos.get());
+    sp<CryptoInfosWrapper> cryptoInfos((CryptoInfosWrapper *)cryptoInfos_.get());
     return mCodec->queueEncryptedBuffer(
-            index, buffer, offset, subSamples, numSubSamples, key, iv, mode, pattern,
-            presentationTimeUs, flags, tunings, errorDetailMsg);
+            index, buffer, offset, size, auInfo, cryptoInfos,
+            tunings, errorDetailMsg);
 }
 
 status_t JMediaCodec::dequeueInputBuffer(size_t *index, int64_t timeoutUs) {
@@ -722,6 +775,42 @@ status_t JMediaCodec::getImage(
     return OK;
 }
 
+void maybeSetBufferInfos(JNIEnv *env, jobject &frame, const sp<BufferInfosWrapper> &bufInfos) {
+    if (!bufInfos) {
+        return;
+    }
+    std::vector<AccessUnitInfo> &infos = bufInfos.get()->value;
+    if (infos.empty()) {
+        return;
+    }
+    ScopedLocalRef<jobject> dequeObj{env, env->NewObject(
+            gArrayDequeInfo.clazz, gArrayDequeInfo.ctorId)};
+    jint offset = 0;
+    std::vector<jobject> jObjectInfos;
+    for (int i = 0 ; i < infos.size(); i++) {
+        jobject bufferInfo = env->NewObject(
+                gBufferInfo.clazz, gBufferInfo.ctorId);
+        if (bufferInfo != NULL) {
+            env->CallVoidMethod(bufferInfo, gBufferInfo.setId,
+                    offset,
+                    (jint)(infos)[i].mSize,
+                    (infos)[i].mTimestamp,
+                    (infos)[i].mFlags);
+            (void)env->CallBooleanMethod(
+                    dequeObj.get(), gArrayDequeInfo.addId, bufferInfo);
+            offset += (infos)[i].mSize;
+            jObjectInfos.push_back(bufferInfo);
+        }
+    }
+    env->SetObjectField(
+            frame,
+            gFields.outputFramebufferInfosID,
+            dequeObj.get());
+    for (int i = 0; i < jObjectInfos.size(); i++) {
+        env->DeleteLocalRef(jObjectInfos[i]);
+    }
+}
+
 status_t JMediaCodec::getOutputFrame(
         JNIEnv *env, jobject frame, size_t index) const {
     sp<MediaCodecBuffer> buffer;
@@ -732,6 +821,11 @@ status_t JMediaCodec::getOutputFrame(
     }
 
     if (buffer->size() > 0) {
+        sp<RefBase> obj;
+        sp<BufferInfosWrapper> bufInfos;
+        if (buffer->meta()->findObject("accessUnitInfo", &obj)) {
+            bufInfos = std::move(((decltype(bufInfos.get()))obj.get()));
+        }
         std::shared_ptr<C2Buffer> c2Buffer = buffer->asC2Buffer();
         if (c2Buffer) {
             switch (c2Buffer->data().type()) {
@@ -747,6 +841,7 @@ status_t JMediaCodec::getOutputFrame(
                             (jlong)context.release(),
                             true);
                     env->SetObjectField(frame, gFields.outputFrameLinearBlockID, linearBlock.get());
+                    maybeSetBufferInfos(env, frame, bufInfos);
                     break;
                 }
                 case C2BufferData::GRAPHIC: {
@@ -787,6 +882,7 @@ status_t JMediaCodec::getOutputFrame(
                         (jlong)context.release(),
                         true);
                 env->SetObjectField(frame, gFields.outputFrameLinearBlockID, linearBlock.get());
+                maybeSetBufferInfos(env, frame, bufInfos);
             } else {
                 // No-op.
             }
@@ -1043,7 +1139,7 @@ static jthrowable createCodecException(
     CHECK(ctor != NULL);
 
     ScopedLocalRef<jstring> msgObj(
-            env, env->NewStringUTF(msg != NULL ? msg : String8::format("Error %#x", err)));
+            env, env->NewStringUTF(msg != NULL ? msg : String8::format("Error %#x", err).c_str()));
 
     // translate action code to Java equivalent
     switch (actionCode) {
@@ -1250,6 +1346,7 @@ static jthrowable createCryptoException(JNIEnv *env, status_t err,
 void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
     int32_t arg1, arg2 = 0;
     jobject obj = NULL;
+    std::vector<jobject> jObjectInfos;
     CHECK(msg->findInt32("callbackID", &arg1));
     JNIEnv *env = AndroidRuntime::getJNIEnv();
 
@@ -1284,6 +1381,35 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
             }
 
             env->CallVoidMethod(obj, gBufferInfo.setId, (jint)offset, (jint)size, timeUs, flags);
+            break;
+        }
+
+        case MediaCodec::CB_LARGE_FRAME_OUTPUT_AVAILABLE:
+        {
+            sp<RefBase> spobj = nullptr;
+            CHECK(msg->findInt32("index", &arg2));
+            CHECK(msg->findObject("accessUnitInfo", &spobj));
+            if (spobj != nullptr) {
+                sp<BufferInfosWrapper> bufferInfoParamsWrapper {
+                        (BufferInfosWrapper *)spobj.get()};
+                std::vector<AccessUnitInfo> &bufferInfoParams =
+                        bufferInfoParamsWrapper.get()->value;
+                obj = env->NewObject(gArrayDequeInfo.clazz, gArrayDequeInfo.ctorId);
+                jint offset = 0;
+                for (int i = 0 ; i < bufferInfoParams.size(); i++) {
+                    jobject bufferInfo = env->NewObject(gBufferInfo.clazz, gBufferInfo.ctorId);
+                    if (bufferInfo != NULL) {
+                        env->CallVoidMethod(bufferInfo, gBufferInfo.setId,
+                                            offset,
+                                            (jint)(bufferInfoParams)[i].mSize,
+                                            (bufferInfoParams)[i].mTimestamp,
+                                            (bufferInfoParams)[i].mFlags);
+                        (void)env->CallBooleanMethod(obj, gArrayDequeInfo.addId, bufferInfo);
+                        offset += (bufferInfoParams)[i].mSize;
+                        jObjectInfos.push_back(bufferInfo);
+                    }
+                }
+            }
             break;
         }
 
@@ -1346,6 +1472,9 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
             arg2,
             obj);
 
+    for (int i = 0; i < jObjectInfos.size(); i++) {
+        env->DeleteLocalRef(jObjectInfos[i]);
+    }
     env->DeleteLocalRef(obj);
 }
 
@@ -1677,6 +1806,20 @@ static void android_media_MediaCodec_native_setSurface(
     throwExceptionAsNecessary(env, err, codec);
 }
 
+static void android_media_MediaCodec_native_detachOutputSurface(
+        JNIEnv *env,
+        jobject thiz) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL || codec->initCheck() != OK) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION, codec);
+        return;
+    }
+
+    status_t err = codec->detachOutputSurface();
+    throwExceptionAsNecessary(env, err, codec);
+}
+
 sp<PersistentSurface> android_media_MediaCodec_getPersistentInputSurface(
         JNIEnv* env, jobject object) {
     sp<PersistentSurface> persistentSurface;
@@ -1913,6 +2056,104 @@ static void android_media_MediaCodec_queueInputBuffer(
             codec->getExceptionMessage(errorDetailMsg.c_str()).c_str());
 }
 
+static status_t extractInfosFromObject(
+        JNIEnv * const env,
+        jint * const initialOffset,
+        jint * const totalSize,
+        std::vector<AccessUnitInfo> * const infos,
+        const jobjectArray &objArray,
+        AString * const errorDetailMsg) {
+    if (totalSize == nullptr
+            || initialOffset == nullptr
+            || infos == nullptr) {
+        if (errorDetailMsg) {
+            *errorDetailMsg = "Error: Null arguments provided for extracting Access unit info";
+        }
+        return BAD_VALUE;
+    }
+    const jsize numEntries = env->GetArrayLength(objArray);
+    if (numEntries <= 0) {
+        if (errorDetailMsg) {
+            *errorDetailMsg = "Error: No BufferInfo found while queuing for large frame input";
+        }
+        return BAD_VALUE;
+    }
+    *initialOffset = 0;
+    *totalSize = 0;
+    for (jsize i = 0; i < numEntries; i++) {
+        jobject param = env->GetObjectArrayElement(objArray, i);
+        if (param == NULL) {
+            if (errorDetailMsg) {
+                *errorDetailMsg = "Error: Queuing a null BufferInfo";
+            }
+            return BAD_VALUE;
+        }
+        ssize_t offset = static_cast<ssize_t>(env->GetIntField(param, gFields.bufferInfoOffset));
+        ssize_t size = static_cast<ssize_t>(env->GetIntField(param, gFields.bufferInfoSize));
+        uint32_t flags = static_cast<uint32_t>(env->GetIntField(param, gFields.bufferInfoFlags));
+        if (i == 0) {
+            *initialOffset = offset;
+        }
+        if (CC_UNLIKELY((offset < 0)
+                || (size < 0)
+                || ((INT32_MAX - offset) < size)
+                || ((offset - (*initialOffset)) != *totalSize))) {
+            if (errorDetailMsg) {
+                *errorDetailMsg = "Error: offset/size in BufferInfo";
+            }
+            return BAD_VALUE;
+        }
+        if (flags == 0 && size == 0) {
+            if (errorDetailMsg) {
+                *errorDetailMsg = "Error: Queuing an empty BufferInfo";
+            }
+            return BAD_VALUE;
+        }
+        infos->emplace_back(
+                flags,
+                size,
+                env->GetLongField(param, gFields.bufferInfoPresentationTimeUs));
+        *totalSize += size;
+    }
+    return OK;
+}
+
+static void android_media_MediaCodec_queueInputBuffers(
+        JNIEnv *env,
+        jobject thiz,
+        jint index,
+        jobjectArray objArray) {
+    ALOGV("android_media_MediaCodec_queueInputBuffers");
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+    if (codec == NULL || codec->initCheck() != OK || objArray == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION, codec);
+        return;
+    }
+    sp<BufferInfosWrapper> infoObj =
+            new BufferInfosWrapper{decltype(infoObj->value)()};
+    AString errorDetailMsg;
+    jint initialOffset = 0;
+    jint totalSize = 0;
+    status_t err = extractInfosFromObject(
+            env,
+            &initialOffset,
+            &totalSize,
+            &infoObj->value,
+            objArray,
+            &errorDetailMsg);
+    if (err == OK) {
+        err = codec->queueInputBuffers(
+            index,
+            initialOffset,
+            totalSize,
+            infoObj,
+            &errorDetailMsg);
+    }
+    throwExceptionAsNecessary(
+            env, err, ACTION_CODE_FATAL,
+            codec->getExceptionMessage(errorDetailMsg.c_str()).c_str());
+}
+
 struct NativeCryptoInfo {
     NativeCryptoInfo(JNIEnv *env, jobject cryptoInfoObj)
         : mEnv{env},
@@ -2057,6 +2298,61 @@ struct NativeCryptoInfo {
     jbyte *mKey{nullptr};
     enum CryptoPlugin::Mode mMode;
     CryptoPlugin::Pattern mPattern;
+};
+
+// This class takes away all dependencies on java(env and jni) and
+// could be used for taking cryptoInfo objects to MediaCodec.
+struct MediaCodecCryptoInfo: public CodecCryptoInfo {
+    explicit MediaCodecCryptoInfo(const NativeCryptoInfo &cryptoInfo) {
+        if (cryptoInfo.mErr == OK) {
+            mNumSubSamples = cryptoInfo.mNumSubSamples;
+            mMode = cryptoInfo.mMode;
+            mPattern = cryptoInfo.mPattern;
+            if (cryptoInfo.mKey != nullptr) {
+                mKeyBuffer = ABuffer::CreateAsCopy(cryptoInfo.mKey, 16);
+                mKey = (uint8_t*)(mKeyBuffer.get() != nullptr ? mKeyBuffer.get()->data() : nullptr);
+            }
+            if (cryptoInfo.mIv != nullptr) {
+               mIvBuffer = ABuffer::CreateAsCopy(cryptoInfo.mIv, 16);
+               mIv = (uint8_t*)(mIvBuffer.get() != nullptr ? mIvBuffer.get()->data() : nullptr);
+            }
+            if (cryptoInfo.mSubSamples != nullptr) {
+                mSubSamplesBuffer = new ABuffer(sizeof(CryptoPlugin::SubSample) * mNumSubSamples);
+                if (mSubSamplesBuffer.get()) {
+                    CryptoPlugin::SubSample * samples =
+                            (CryptoPlugin::SubSample *)(mSubSamplesBuffer.get()->data());
+                    for (int s = 0 ; s < mNumSubSamples ; s++) {
+                        samples[s].mNumBytesOfClearData =
+                                cryptoInfo.mSubSamples[s].mNumBytesOfClearData;
+                        samples[s].mNumBytesOfEncryptedData =
+                                cryptoInfo.mSubSamples[s].mNumBytesOfEncryptedData;
+                    }
+                    mSubSamples = (CryptoPlugin::SubSample *)mSubSamplesBuffer.get()->data();
+                }
+            }
+
+        }
+    }
+
+    explicit MediaCodecCryptoInfo(jint size) {
+        mSubSamplesBuffer = new ABuffer(sizeof(CryptoPlugin::SubSample) * 1);
+        mNumSubSamples = 1;
+        if (mSubSamplesBuffer.get()) {
+            CryptoPlugin::SubSample * samples =
+                    (CryptoPlugin::SubSample *)(mSubSamplesBuffer.get()->data());
+            samples[0].mNumBytesOfClearData = size;
+            samples[0].mNumBytesOfEncryptedData = 0;
+            mSubSamples = (CryptoPlugin::SubSample *)mSubSamplesBuffer.get()->data();
+        }
+    }
+    ~MediaCodecCryptoInfo() {}
+
+protected:
+    // all backup buffers for the base object.
+    sp<ABuffer> mKeyBuffer;
+    sp<ABuffer> mIvBuffer;
+    sp<ABuffer> mSubSamplesBuffer;
+
 };
 
 static void android_media_MediaCodec_queueSecureInputBuffer(
@@ -2222,6 +2518,99 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
     delete[] subSamples;
     subSamples = NULL;
 
+    throwExceptionAsNecessary(
+            env, err, ACTION_CODE_FATAL,
+            codec->getExceptionMessage(errorDetailMsg.c_str()).c_str(), codec->getCrypto());
+}
+
+static status_t extractCryptoInfosFromObjectArray(JNIEnv * const env,
+        jint * const totalSize,
+        std::vector<std::unique_ptr<CodecCryptoInfo>> * const cryptoInfoObjs,
+        const jobjectArray &objArray,
+        AString * const errorDetailMsg) {
+    if (env == nullptr
+            || cryptoInfoObjs == nullptr
+            || totalSize == nullptr) {
+        if (errorDetailMsg) {
+            *errorDetailMsg = "Error: Null Parameters provided for extracting CryptoInfo";
+        }
+        return BAD_VALUE;
+    }
+    const jsize numEntries = env->GetArrayLength(objArray);
+    if (numEntries <= 0) {
+        if (errorDetailMsg) {
+            *errorDetailMsg = "Error: No CryptoInfo found while queuing for large frame input";
+        }
+        return BAD_VALUE;
+    }
+    cryptoInfoObjs->clear();
+    *totalSize = 0;
+    jint size = 0;
+    for (jsize i = 0; i < numEntries ; i++) {
+        jobject param = env->GetObjectArrayElement(objArray, i);
+        if (param == NULL) {
+            if (errorDetailMsg) {
+                *errorDetailMsg = "Error: Null Parameters provided for extracting CryptoInfo";
+            }
+            return BAD_VALUE;
+        }
+        NativeCryptoInfo nativeInfo(env, param);
+        std::unique_ptr<CodecCryptoInfo> info(new MediaCodecCryptoInfo(nativeInfo));
+        for (int i = 0; i < info->mNumSubSamples; i++) {
+            size += info->mSubSamples[i].mNumBytesOfClearData;
+            size += info->mSubSamples[i].mNumBytesOfEncryptedData;
+        }
+        cryptoInfoObjs->push_back(std::move(info));
+    }
+    *totalSize = size;
+    return OK;
+}
+
+
+static void android_media_MediaCodec_queueSecureInputBuffers(
+        JNIEnv *env,
+        jobject thiz,
+        jint index,
+        jobjectArray bufferInfosObjs,
+        jobjectArray cryptoInfoObjs) {
+    ALOGV("android_media_MediaCodec_queueSecureInputBuffers");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL || codec->initCheck() != OK) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION, codec);
+        return;
+    }
+    sp<BufferInfosWrapper> auInfos =
+            new BufferInfosWrapper{decltype(auInfos->value)()};
+    sp<CryptoInfosWrapper> cryptoInfos =
+        new CryptoInfosWrapper{decltype(cryptoInfos->value)()};
+    AString errorDetailMsg;
+    jint initialOffset = 0;
+    jint totalSize = 0;
+    status_t err = extractInfosFromObject(
+            env,
+            &initialOffset,
+            &totalSize,
+            &auInfos->value,
+            bufferInfosObjs,
+            &errorDetailMsg);
+    if (err == OK) {
+        err = extractCryptoInfosFromObjectArray(env,
+            &totalSize,
+            &cryptoInfos->value,
+            cryptoInfoObjs,
+            &errorDetailMsg);
+    }
+    if (err == OK) {
+        err = codec->queueSecureInputBuffers(
+                index,
+                initialOffset,
+                totalSize,
+                auInfos,
+                cryptoInfos,
+                &errorDetailMsg);
+    }
     throwExceptionAsNecessary(
             env, err, ACTION_CODE_FATAL,
             codec->getExceptionMessage(errorDetailMsg.c_str()).c_str(), codec->getCrypto());
@@ -2498,6 +2887,10 @@ static void extractMemoryFromContext(
         jint offset,
         jint size,
         sp<hardware::HidlMemory> *memory) {
+    if ((offset + size) > context->capacity()) {
+        ALOGW("extractMemoryFromContext: offset + size provided exceed capacity");
+        return;
+    }
     *memory = context->toHidlMemory();
     if (*memory == nullptr) {
         if (!context->mBlock) {
@@ -2505,23 +2898,26 @@ static void extractMemoryFromContext(
             return;
         }
         ALOGD("extractMemoryFromContext: realloc & copying from C2Block to IMemory (cap=%zu)",
-              context->capacity());
+                context->capacity());
         if (!obtain(context, context->capacity(),
                     context->mCodecNames, true /* secure */)) {
             ALOGW("extractMemoryFromContext: failed to obtain secure block");
             return;
         }
-        C2WriteView view = context->mBlock->map().get();
-        if (view.error() != C2_OK) {
-            ALOGW("extractMemoryFromContext: failed to map C2Block (%d)", view.error());
-            return;
-        }
-        uint8_t *memoryPtr = static_cast<uint8_t *>(context->mMemory->unsecurePointer());
-        memcpy(memoryPtr + offset, view.base() + offset, size);
-        context->mBlock.reset();
-        context->mReadWriteMapping.reset();
         *memory = context->toHidlMemory();
     }
+    if (context->mBlock == nullptr || context->mReadWriteMapping == nullptr) {
+        ALOGW("extractMemoryFromContext: Cannot extract memory as C2Block is not created/mapped");
+        return;
+    }
+    if (context->mReadWriteMapping->error() != C2_OK) {
+        ALOGW("extractMemoryFromContext: failed to map C2Block (%d)",
+                context->mReadWriteMapping->error());
+        return;
+    }
+    // We are proceeding to extract memory from C2Block
+    uint8_t *memoryPtr = static_cast<uint8_t *>(context->mMemory->unsecurePointer());
+    memcpy(memoryPtr + offset, context->mReadWriteMapping->base() + offset, size);
 }
 
 static void extractBufferFromContext(
@@ -2529,6 +2925,10 @@ static void extractBufferFromContext(
         jint offset,
         jint size,
         std::shared_ptr<C2Buffer> *buffer) {
+    if ((offset + size) > context->capacity()) {
+        ALOGW("extractBufferFromContext: offset + size provided exceed capacity");
+        return;
+    }
     *buffer = context->toC2Buffer(offset, size);
     if (*buffer == nullptr) {
         if (!context->mMemory) {
@@ -2559,8 +2959,7 @@ static void extractBufferFromContext(
 
 static void android_media_MediaCodec_native_queueLinearBlock(
         JNIEnv *env, jobject thiz, jint index, jobject bufferObj,
-        jint offset, jint size, jobject cryptoInfoObj,
-        jlong presentationTimeUs, jint flags, jobject keys, jobject values) {
+        jobjectArray cryptoInfoArray, jobjectArray objArray, jobject keys, jobject values) {
     ALOGV("android_media_MediaCodec_native_queueLinearBlock");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
@@ -2578,7 +2977,24 @@ static void android_media_MediaCodec_native_queueLinearBlock(
                 "error occurred while converting tunings from Java to native");
         return;
     }
-
+    jint totalSize = 0;
+    jint initialOffset = 0;
+    std::vector<AccessUnitInfo> infoVec;
+    AString errorDetailMsg;
+    err = extractInfosFromObject(env,
+            &initialOffset,
+            &totalSize,
+            &infoVec,
+            objArray,
+            &errorDetailMsg);
+    if (err != OK) {
+        throwExceptionAsNecessary(
+                env, INVALID_OPERATION, ACTION_CODE_FATAL,
+                codec->getExceptionMessage(errorDetailMsg.c_str()).c_str());
+        return;
+    }
+    sp<BufferInfosWrapper> infos =
+            new BufferInfosWrapper{std::move(infoVec)};
     std::shared_ptr<C2Buffer> buffer;
     sp<hardware::HidlMemory> memory;
     ScopedLocalRef<jobject> lock{env, env->GetObjectField(bufferObj, gLinearBlockInfo.lockId)};
@@ -2587,10 +3003,10 @@ static void android_media_MediaCodec_native_queueLinearBlock(
             JMediaCodecLinearBlock *context =
                 (JMediaCodecLinearBlock *)env->GetLongField(bufferObj, gLinearBlockInfo.contextId);
             if (codec->hasCryptoOrDescrambler()) {
-                extractMemoryFromContext(context, offset, size, &memory);
-                offset += context->mHidlMemoryOffset;
+                extractMemoryFromContext(context, initialOffset, totalSize, &memory);
+                initialOffset += context->mHidlMemoryOffset;
             } else {
-                extractBufferFromContext(context, offset, size, &buffer);
+                extractBufferFromContext(context, initialOffset, totalSize, &buffer);
             }
         }
         env->MonitorExit(lock.get());
@@ -2601,7 +3017,6 @@ static void android_media_MediaCodec_native_queueLinearBlock(
         return;
     }
 
-    AString errorDetailMsg;
     if (codec->hasCryptoOrDescrambler()) {
         if (!memory) {
             // It means there was an unexpected failure in extractMemoryFromContext above
@@ -2614,8 +3029,16 @@ static void android_media_MediaCodec_native_queueLinearBlock(
                     "MediaCodec.LinearBlock#obtain method to obtain a compatible buffer.");
             return;
         }
-        auto cryptoInfo =
-                cryptoInfoObj ? NativeCryptoInfo{size} : NativeCryptoInfo{env, cryptoInfoObj};
+        sp<CryptoInfosWrapper> cryptoInfos = nullptr;
+        jint sampleSize = totalSize;
+        if (cryptoInfoArray != nullptr) {
+            cryptoInfos = new CryptoInfosWrapper{decltype(cryptoInfos->value)()};
+            extractCryptoInfosFromObjectArray(env,
+                    &sampleSize,
+                    &cryptoInfos->value,
+                    cryptoInfoArray,
+                    &errorDetailMsg);
+        }
         if (env->ExceptionCheck()) {
             // Creation of cryptoInfo failed. Let the exception bubble up.
             return;
@@ -2623,13 +3046,10 @@ static void android_media_MediaCodec_native_queueLinearBlock(
         err = codec->queueEncryptedLinearBlock(
                 index,
                 memory,
-                offset,
-                cryptoInfo.mSubSamples, cryptoInfo.mNumSubSamples,
-                (const uint8_t *)cryptoInfo.mKey, (const uint8_t *)cryptoInfo.mIv,
-                cryptoInfo.mMode,
-                cryptoInfo.mPattern,
-                presentationTimeUs,
-                flags,
+                initialOffset,
+                sampleSize,
+                infos,
+                cryptoInfos,
                 tunings,
                 &errorDetailMsg);
         ALOGI_IF(err != OK, "queueEncryptedLinearBlock returned err = %d", err);
@@ -2646,7 +3066,7 @@ static void android_media_MediaCodec_native_queueLinearBlock(
             return;
         }
         err = codec->queueBuffer(
-                index, buffer, presentationTimeUs, flags, tunings, &errorDetailMsg);
+                index, buffer, infos, tunings, &errorDetailMsg);
     }
     throwExceptionAsNecessary(
             env, err, ACTION_CODE_FATAL,
@@ -2704,8 +3124,11 @@ static void android_media_MediaCodec_native_queueHardwareBuffer(
     std::shared_ptr<C2Buffer> buffer = C2Buffer::CreateGraphicBuffer(block->share(
             block->crop(), C2Fence{}));
     AString errorDetailMsg;
+    sp<BufferInfosWrapper> infos =
+        new BufferInfosWrapper{decltype(infos->value)()};
+    infos->value.emplace_back(flags, 0 /*not used*/, presentationTimeUs);
     err = codec->queueBuffer(
-            index, buffer, presentationTimeUs, flags, tunings, &errorDetailMsg);
+            index, buffer, infos, tunings, &errorDetailMsg);
     throwExceptionAsNecessary(
             env, err, ACTION_CODE_FATAL,
             codec->getExceptionMessage(errorDetailMsg.c_str()).c_str());
@@ -3036,7 +3459,7 @@ static void android_media_MediaCodec_setVideoScalingMode(
     if (mode != NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW
             && mode != NATIVE_WINDOW_SCALING_MODE_SCALE_CROP) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
-                          String8::format("Unrecognized mode: %d", mode));
+                          String8::format("Unrecognized mode: %d", mode).c_str());
         return;
     }
 
@@ -3213,6 +3636,10 @@ static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
     gFields.outputFrameLinearBlockID =
         env->GetFieldID(clazz.get(), "mLinearBlock", "Landroid/media/MediaCodec$LinearBlock;");
     CHECK(gFields.outputFrameLinearBlockID != NULL);
+
+    gFields.outputFramebufferInfosID =
+        env->GetFieldID(clazz.get(), "mBufferInfos", "Ljava/util/ArrayDeque;");
+    CHECK(gFields.outputFramebufferInfosID != NULL);
 
     gFields.outputFrameHardwareBufferID =
         env->GetFieldID(clazz.get(), "mHardwareBuffer", "Landroid/hardware/HardwareBuffer;");
@@ -3401,6 +3828,19 @@ static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
     gArrayListInfo.addId = env->GetMethodID(clazz.get(), "add", "(Ljava/lang/Object;)Z");
     CHECK(gArrayListInfo.addId != NULL);
 
+    clazz.reset(env->FindClass("java/util/ArrayDeque"));
+    CHECK(clazz.get() != NULL);
+    gArrayDequeInfo.clazz = (jclass)env->NewGlobalRef(clazz.get());
+
+    gArrayDequeInfo.ctorId = env->GetMethodID(clazz.get(), "<init>", "()V");
+    CHECK(gArrayDequeInfo.ctorId != NULL);
+
+    gArrayDequeInfo.sizeId = env->GetMethodID(clazz.get(), "size", "()I");
+    CHECK(gArrayDequeInfo.sizeId != NULL);
+
+    gArrayDequeInfo.addId = env->GetMethodID(clazz.get(), "add", "(Ljava/lang/Object;)Z");
+    CHECK(gArrayDequeInfo.addId != NULL);
+
     clazz.reset(env->FindClass("android/media/MediaCodec$LinearBlock"));
     CHECK(clazz.get() != NULL);
 
@@ -3444,13 +3884,20 @@ static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
 
     gBufferInfo.setId = env->GetMethodID(clazz.get(), "set", "(IIJI)V");
     CHECK(gBufferInfo.setId != NULL);
+
+    gFields.bufferInfoSize = env->GetFieldID(clazz.get(), "size", "I");
+    gFields.bufferInfoFlags = env->GetFieldID(clazz.get(), "flags", "I");
+    gFields.bufferInfoOffset = env->GetFieldID(clazz.get(), "offset", "I");
+    gFields.bufferInfoPresentationTimeUs =
+            env->GetFieldID(clazz.get(), "presentationTimeUs", "J");
 }
 
 static void android_media_MediaCodec_native_setup(
         JNIEnv *env, jobject thiz,
         jstring name, jboolean nameIsType, jboolean encoder, int pid, int uid) {
     if (name == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowException(env, "java/lang/NullPointerException",
+                          "No codec name specified");
         return;
     }
 
@@ -3466,27 +3913,27 @@ static void android_media_MediaCodec_native_setup(
     if (err == NAME_NOT_FOUND) {
         // fail and do not try again.
         jniThrowException(env, "java/lang/IllegalArgumentException",
-                String8::format("Failed to initialize %s, error %#x (NAME_NOT_FOUND)", tmp, err));
+                String8::format("Failed to initialize %s, error %#x (NAME_NOT_FOUND)", tmp, err).c_str());
         env->ReleaseStringUTFChars(name, tmp);
         return;
     }
     if (err == NO_MEMORY) {
         throwCodecException(env, err, ACTION_CODE_TRANSIENT,
-                String8::format("Failed to initialize %s, error %#x (NO_MEMORY)", tmp, err));
+                String8::format("Failed to initialize %s, error %#x (NO_MEMORY)", tmp, err).c_str());
         env->ReleaseStringUTFChars(name, tmp);
         return;
     }
     if (err == PERMISSION_DENIED) {
         jniThrowException(env, "java/lang/SecurityException",
                 String8::format("Failed to initialize %s, error %#x (PERMISSION_DENIED)", tmp,
-                err));
+                err).c_str());
         env->ReleaseStringUTFChars(name, tmp);
         return;
     }
     if (err != OK) {
         // believed possible to try again
         jniThrowException(env, "java/io/IOException",
-                String8::format("Failed to find matching codec %s, error %#x (?)", tmp, err));
+                String8::format("Failed to find matching codec %s, error %#x (?)", tmp, err).c_str());
         env->ReleaseStringUTFChars(name, tmp);
         return;
     }
@@ -3690,6 +4137,10 @@ static const JNINativeMethod gMethods[] = {
       "(Landroid/view/Surface;)V",
       (void *)android_media_MediaCodec_native_setSurface },
 
+    { "native_detachOutputSurface",
+      "()V",
+      (void *)android_media_MediaCodec_native_detachOutputSurface },
+
     { "createInputSurface", "()Landroid/view/Surface;",
       (void *)android_media_MediaCodec_createInputSurface },
 
@@ -3700,8 +4151,14 @@ static const JNINativeMethod gMethods[] = {
     { "native_queueInputBuffer", "(IIIJI)V",
       (void *)android_media_MediaCodec_queueInputBuffer },
 
+    { "native_queueInputBuffers", "(I[Ljava/lang/Object;)V",
+      (void *)android_media_MediaCodec_queueInputBuffers },
+
     { "native_queueSecureInputBuffer", "(IILandroid/media/MediaCodec$CryptoInfo;JI)V",
       (void *)android_media_MediaCodec_queueSecureInputBuffer },
+
+    { "native_queueSecureInputBuffers", "(I[Ljava/lang/Object;[Ljava/lang/Object;)V",
+      (void *)android_media_MediaCodec_queueSecureInputBuffers },
 
     { "native_mapHardwareBuffer",
       "(Landroid/hardware/HardwareBuffer;)Landroid/media/Image;",
@@ -3710,8 +4167,8 @@ static const JNINativeMethod gMethods[] = {
     { "native_closeMediaImage", "(J)V", (void *)android_media_MediaCodec_closeMediaImage },
 
     { "native_queueLinearBlock",
-      "(ILandroid/media/MediaCodec$LinearBlock;IILandroid/media/MediaCodec$CryptoInfo;JI"
-      "Ljava/util/ArrayList;Ljava/util/ArrayList;)V",
+      "(ILandroid/media/MediaCodec$LinearBlock;[Ljava/lang/Object;"
+      "[Ljava/lang/Object;Ljava/util/ArrayList;Ljava/util/ArrayList;)V",
       (void *)android_media_MediaCodec_native_queueLinearBlock },
 
     { "native_queueHardwareBuffer",

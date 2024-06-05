@@ -100,7 +100,7 @@ class AssetManager2 {
   using ApkAssetsWPtr = wp<const ApkAssets>;
   using ApkAssetsList = std::span<const ApkAssetsPtr>;
 
-  AssetManager2() = default;
+  AssetManager2();
   explicit AssetManager2(AssetManager2&& other) = default;
   AssetManager2(ApkAssetsList apk_assets, const ResTable_config& configuration);
 
@@ -124,6 +124,9 @@ class AssetManager2 {
   // new resource IDs.
   bool SetApkAssets(ApkAssetsList apk_assets, bool invalidate_caches = true);
   bool SetApkAssets(std::initializer_list<ApkAssetsPtr> apk_assets, bool invalidate_caches = true);
+  // This one is an optimization - it skips all calculations for applying the currently set
+  // configuration, expecting a configuration update later with a forced refresh.
+  void PresetApkAssets(ApkAssetsList apk_assets);
 
   const ApkAssetsPtr& GetApkAssets(ApkAssetsCookie cookie) const;
   int GetApkAssetsCount() const {
@@ -156,10 +159,14 @@ class AssetManager2 {
 
   // Sets/resets the configuration for this AssetManager. This will cause all
   // caches that are related to the configuration change to be invalidated.
-  void SetConfiguration(const ResTable_config& configuration);
+  void SetConfigurations(std::vector<ResTable_config> configurations, bool force_refresh = false);
 
-  inline const ResTable_config& GetConfiguration() const {
-    return configuration_;
+  inline const std::vector<ResTable_config>& GetConfigurations() const {
+    return configurations_;
+  }
+
+  inline void SetDefaultLocale(uint32_t default_locale) {
+    default_locale_ = default_locale;
   }
 
   // Returns all configurations for which there are resources defined, or an I/O error if reading
@@ -243,9 +250,14 @@ class AssetManager2 {
     friend AssetManager2;
     friend Theme;
     SelectedValue() = default;
-    SelectedValue(const ResolvedBag* bag, const ResolvedBag::Entry& entry) :
-        cookie(entry.cookie), data(entry.value.data), type(entry.value.dataType),
-        flags(bag->type_spec_flags), resid(0U), config({}) {};
+    SelectedValue(const ResolvedBag* bag, const ResolvedBag::Entry& entry)
+        : cookie(entry.cookie),
+          data(entry.value.data),
+          type(entry.value.dataType),
+          flags(bag->type_spec_flags),
+          resid(0U),
+          config() {
+    }
 
     // The cookie representing the ApkAssets in which the value resides.
     ApkAssetsCookie cookie = kInvalidCookie;
@@ -327,7 +339,8 @@ class AssetManager2 {
   // resource data failed.
   base::expected<uint32_t, NullOrIOError> GetResourceTypeSpecFlags(uint32_t resid) const;
 
-  const std::vector<uint32_t> GetBagResIdStack(uint32_t resid) const;
+  base::expected<const std::vector<uint32_t>*, NullOrIOError> GetBagResIdStack(
+      uint32_t resid) const;
 
   // Resets the resource resolution structures in preparation for the next resource retrieval.
   void ResetResourceResolution() const;
@@ -459,9 +472,11 @@ class AssetManager2 {
   // without taking too much memory.
   std::array<uint8_t, std::numeric_limits<uint8_t>::max() + 1> package_ids_;
 
-  // The current configuration set for this AssetManager. When this changes, cached resources
+  uint32_t default_locale_;
+
+  // The current configurations set for this AssetManager. When this changes, cached resources
   // may need to be purged.
-  ResTable_config configuration_ = {};
+  std::vector<ResTable_config> configurations_;
 
   // Cached set of bags. These are cached because they can inherit keys from parent bags,
   // which involves some calculation.
@@ -495,10 +510,10 @@ class AssetManager2 {
       // Marks what kind of override this step was.
       Type type;
 
+      ApkAssetsCookie cookie = kInvalidCookie;
+
       // Built name of configuration for this step.
       String8 config_name;
-
-      ApkAssetsCookie cookie = kInvalidCookie;
     };
 
     // Last resolved resource ID.

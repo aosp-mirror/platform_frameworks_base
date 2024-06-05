@@ -100,7 +100,15 @@ public interface NotificationInterruptStateProvider {
         /**
          * The notification is coming from a suspended packages, so FSI is suppressed.
          */
-        NO_FSI_SUSPENDED(false);
+        NO_FSI_SUSPENDED(false),
+        /**
+         * The device is not provisioned, launch FSI.
+         */
+        FSI_NOT_PROVISIONED(true),
+        /**
+         * The current user has not completed setup, launch FSI.
+         */
+        FSI_USER_SETUP_INCOMPLETE(true);
 
         public final boolean shouldLaunch;
 
@@ -176,4 +184,9 @@ public interface NotificationInterruptStateProvider {
      * Add a component that can suppress visual interruptions.
      */
     void addSuppressor(NotificationInterruptSuppressor suppressor);
+
+    /**
+     * Remove a component that can suppress visual interruptions.
+     */
+    void removeSuppressor(NotificationInterruptSuppressor suppressor);
 }

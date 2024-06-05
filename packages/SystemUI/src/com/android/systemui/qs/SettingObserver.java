@@ -20,15 +20,14 @@ import android.database.ContentObserver;
 import android.os.Handler;
 
 import com.android.systemui.statusbar.policy.Listenable;
-import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.settings.SettingsProxy;
 import com.android.systemui.util.settings.SystemSettings;
 
 /**
- * Helper for managing secure, global, and system settings through use of {@link SettingsProxy},
- * which is the common superclass of {@link SecureSettings}, {@link GlobalSettings}, and
- * {@link SystemSettings}.
+ * Helper for managing global settings through use of {@link SettingsProxy}. This should
+ * <em>not</em> be used for {@link SecureSettings} or {@link SystemSettings} since those must be
+ * user-aware (instead, use {@link UserSettingObserver}).
  */
 public abstract class SettingObserver extends ContentObserver implements Listenable {
     private final SettingsProxy mSettingsProxy;
@@ -36,23 +35,20 @@ public abstract class SettingObserver extends ContentObserver implements Listena
     private final int mDefaultValue;
 
     private boolean mListening;
-    private int mUserId;
     private int mObservedValue;
 
     protected abstract void handleValueChanged(int value, boolean observedChange);
 
-    public SettingObserver(SettingsProxy settingsProxy, Handler handler, String settingName,
-            int userId) {
-        this(settingsProxy, handler, settingName, userId, 0);
+    public SettingObserver(SettingsProxy settingsProxy, Handler handler, String settingName) {
+        this(settingsProxy, handler, settingName, 0);
     }
 
     public SettingObserver(SettingsProxy settingsProxy, Handler handler, String settingName,
-            int userId, int defaultValue) {
+            int defaultValue) {
         super(handler);
         mSettingsProxy = settingsProxy;
         mSettingName = settingName;
         mObservedValue = mDefaultValue = defaultValue;
-        mUserId = userId;
     }
 
     public int getValue() {
@@ -65,11 +61,11 @@ public abstract class SettingObserver extends ContentObserver implements Listena
      * @param value The new value for the setting.
      */
     public void setValue(int value) {
-        mSettingsProxy.putIntForUser(mSettingName, value, mUserId);
+        mSettingsProxy.putInt(mSettingName, value);
     }
 
     private int getValueFromProvider() {
-        return mSettingsProxy.getIntForUser(mSettingName, mDefaultValue, mUserId);
+        return mSettingsProxy.getInt(mSettingName, mDefaultValue);
     }
 
     @Override
@@ -78,10 +74,10 @@ public abstract class SettingObserver extends ContentObserver implements Listena
         mListening = listening;
         if (listening) {
             mObservedValue = getValueFromProvider();
-            mSettingsProxy.registerContentObserverForUser(
-                    mSettingsProxy.getUriFor(mSettingName), false, this, mUserId);
+            mSettingsProxy.registerContentObserverSync(
+                    mSettingsProxy.getUriFor(mSettingName), false, this);
         } else {
-            mSettingsProxy.unregisterContentObserver(this);
+            mSettingsProxy.unregisterContentObserverSync(this);
             mObservedValue = mDefaultValue;
         }
     }
@@ -92,21 +88,6 @@ public abstract class SettingObserver extends ContentObserver implements Listena
         final boolean changed = value != mObservedValue;
         mObservedValue = value;
         handleValueChanged(value, changed);
-    }
-
-    /**
-     * Set user handle for which to observe the setting.
-     */
-    public void setUserId(int userId) {
-        mUserId = userId;
-        if (mListening) {
-            setListening(false);
-            setListening(true);
-        }
-    }
-
-    public int getCurrentUser() {
-        return mUserId;
     }
 
     public String getKey() {

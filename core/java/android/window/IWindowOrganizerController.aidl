@@ -80,13 +80,8 @@ interface IWindowOrganizerController {
      * Finishes a transition. This must be called for all created transitions.
      * @param transitionToken Which transition to finish
      * @param t Changes to make before finishing but in the same SF Transaction. Can be null.
-     * @param callback Called when t is finished applying.
-     * @return An ID for the sync operation (see {@link #applySyncTransaction}. This will be
-     *         negative if no sync transaction was attached (null t or callback)
      */
-    int finishTransition(in IBinder transitionToken,
-            in @nullable WindowContainerTransaction t,
-            in IWindowContainerTransactionCallback callback);
+    void finishTransition(in IBinder transitionToken, in @nullable WindowContainerTransaction t);
 
     /** @return An interface enabling the management of task organizers. */
     ITaskOrganizerController getTaskOrganizerController();
@@ -98,10 +93,16 @@ interface IWindowOrganizerController {
     ITaskFragmentOrganizerController getTaskFragmentOrganizerController();
 
     /**
-     * Registers a transition player with Core. There is only one of these at a time and calling
-     * this will replace the existing one if set.
+     * Registers a transition player with Core. There is only one of these active at a time so
+     * calling this will replace the existing one (if set) until it is unregistered.
      */
     void registerTransitionPlayer(in ITransitionPlayer player);
+
+    /**
+     * Un-registers a transition player from Core. This will restore whichever player was active
+     * prior to registering this one.
+     */
+    void unregisterTransitionPlayer(in ITransitionPlayer player);
 
     /** @return An interface enabling the transition players to report its metrics. */
     ITransitionMetricsReporter getTransitionMetricsReporter();

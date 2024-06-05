@@ -36,7 +36,11 @@ import java.util.Objects;
  */
 @SystemApi
 public final class EuiccNotification implements Parcelable {
-    /** Event */
+    /**
+     * Event
+     *
+     * @removed mistakenly exposed previously
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "EVENT_" }, value = {
             EVENT_INSTALL,

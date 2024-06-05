@@ -15,6 +15,7 @@
 //
 
 package {
+    default_team: "trendy_team_fwk_nfc",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -23,9 +24,13 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+// TODO(b/303286040): Deprecate this API surface since this is no longer supported (see ag/443092)
 java_sdk_library {
     name: "com.android.nfc_extras",
     srcs: ["java/**/*.java"],
+    libs: [
+        "framework-nfc.impl",
+    ],
     api_packages: ["com.android.nfc_extras"],
     dist_group: "android",
 }

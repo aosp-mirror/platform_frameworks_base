@@ -37,7 +37,7 @@ abstract class NetworkTimeHelper {
      * a platform bug. This switch will be removed in a future release. If there are problems with
      * the new impl we'd like to hear about them.
      */
-    static final boolean USE_TIME_DETECTOR_IMPL = false;
+    static final boolean USE_TIME_DETECTOR_IMPL = true;
 
     /**
      * The callback interface used by {@link NetworkTimeHelper} to report the time to {@link

@@ -372,9 +372,9 @@ public final class WalletCard implements Parcelable {
         }
 
         /**
-         * Set of locations this card might be useful at. If {@link
-         * PackageManager.FEATURE_WALLET_LOCATION_BASED_SUGGESTIONS} is enabled, the card might be
-         * shown to the user when a user is near one of these locations.
+         * Set of locations this card might be useful at. If
+         * {@link android.content.pm.PackageManager#FEATURE_WALLET_LOCATION_BASED_SUGGESTIONS} is
+         * enabled, the card might be shown to the user when a user is near one of these locations.
          */
         @NonNull
         public Builder setCardLocations(@NonNull List<Location> cardLocations) {

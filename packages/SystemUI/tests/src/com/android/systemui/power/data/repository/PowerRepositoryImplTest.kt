@@ -21,10 +21,15 @@ import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.PowerManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
@@ -33,7 +38,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
@@ -44,8 +48,10 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class PowerRepositoryImplTest : SysuiTestCase() {
+
+    private val systemClock = FakeSystemClock()
 
     @Mock private lateinit var manager: PowerManager
     @Mock private lateinit var dispatcher: BroadcastDispatcher
@@ -62,7 +68,13 @@ class PowerRepositoryImplTest : SysuiTestCase() {
         isInteractive = true
         whenever(manager.isInteractive).then { isInteractive }
 
-        underTest = PowerRepositoryImpl(manager = manager, dispatcher = dispatcher)
+        underTest =
+            PowerRepositoryImpl(
+                manager,
+                context.applicationContext,
+                systemClock,
+                dispatcher,
+            )
     }
 
     @Test
@@ -159,6 +171,60 @@ class PowerRepositoryImplTest : SysuiTestCase() {
             assertThat(values).isEqualTo(listOf(true, false, true, false))
             job.cancel()
         }
+
+    @Test
+    fun wakeUp_notifiesPowerManager() {
+        systemClock.setUptimeMillis(345000)
+
+        underTest.wakeUp("fakeWhy", PowerManager.WAKE_REASON_GESTURE)
+
+        val reasonCaptor = argumentCaptor<String>()
+        verify(manager)
+            .wakeUp(eq(345000L), eq(PowerManager.WAKE_REASON_GESTURE), capture(reasonCaptor))
+        assertThat(reasonCaptor.value).contains("fakeWhy")
+    }
+
+    @Test
+    fun wakeUp_usesApplicationPackageName() {
+        underTest.wakeUp("fakeWhy", PowerManager.WAKE_REASON_GESTURE)
+
+        val reasonCaptor = argumentCaptor<String>()
+        verify(manager).wakeUp(any(), any(), capture(reasonCaptor))
+        assertThat(reasonCaptor.value).contains(context.applicationContext.packageName)
+    }
+
+    @Test
+    fun userActivity_notifiesPowerManager() {
+        systemClock.setUptimeMillis(345000)
+
+        underTest.userTouch()
+
+        val flagsCaptor = argumentCaptor<Int>()
+        verify(manager)
+            .userActivity(
+                eq(345000L),
+                eq(PowerManager.USER_ACTIVITY_EVENT_TOUCH),
+                capture(flagsCaptor)
+            )
+        assertThat(flagsCaptor.value).isNotEqualTo(PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS)
+        assertThat(flagsCaptor.value).isNotEqualTo(PowerManager.USER_ACTIVITY_FLAG_INDIRECT)
+    }
+
+    @Test
+    fun userActivity_notifiesPowerManager_noChangeLightsTrue() {
+        systemClock.setUptimeMillis(345000)
+
+        underTest.userTouch(noChangeLights = true)
+
+        val flagsCaptor = argumentCaptor<Int>()
+        verify(manager)
+            .userActivity(
+                eq(345000L),
+                eq(PowerManager.USER_ACTIVITY_EVENT_TOUCH),
+                capture(flagsCaptor)
+            )
+        assertThat(flagsCaptor.value).isEqualTo(PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS)
+    }
 
     private fun verifyRegistered() {
         // We must verify with all arguments, even those that are optional because they have default

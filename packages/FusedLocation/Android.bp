@@ -47,7 +47,7 @@ android_test {
     test_config: "test/AndroidTest.xml",
     srcs: [
         "test/src/**/*.java",
-        "src/**/*.java",  // include real sources because we're forced to test this directly
+        "src/**/*.java", // include real sources because we're forced to test this directly
     ],
     libs: [
         "android.test.base",
@@ -60,9 +60,9 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.ext.truth",
         "mockito-target-minus-junit4",
-        "truth-prebuilt",
+        "truth",
     ],
     platform_apis: true,
     certificate: "platform",
-    test_suites: ["device-tests"]
+    test_suites: ["device-tests"],
 }

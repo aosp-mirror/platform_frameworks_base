@@ -16,40 +16,41 @@
 
 package com.android.settingslib.spaprivileged.template.scaffold
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import com.android.settingslib.spa.widget.scaffold.MoreOptionsScope
 import com.android.settingslib.spaprivileged.model.enterprise.BaseUserRestricted
 import com.android.settingslib.spaprivileged.model.enterprise.BlockedByAdmin
+import com.android.settingslib.spaprivileged.model.enterprise.BlockedByEcm
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
+import com.android.settingslib.spaprivileged.model.enterprise.rememberRestrictedMode
 
 @Composable
 fun MoreOptionsScope.RestrictedMenuItem(
     text: String,
+    enabled: Boolean = true,
     restrictions: Restrictions,
     onClick: () -> Unit,
 ) {
-    RestrictedMenuItemImpl(text, restrictions, onClick, ::RestrictionsProviderImpl)
+    RestrictedMenuItemImpl(text, enabled, restrictions, onClick, ::RestrictionsProviderImpl)
 }
 
+@VisibleForTesting
 @Composable
 internal fun MoreOptionsScope.RestrictedMenuItemImpl(
     text: String,
+    enabled: Boolean = true,
     restrictions: Restrictions,
     onClick: () -> Unit,
     restrictionsProviderFactory: RestrictionsProviderFactory,
 ) {
-    val context = LocalContext.current
-    val restrictionsProvider = remember(restrictions) {
-        restrictionsProviderFactory(context, restrictions)
-    }
-    val restrictedMode = restrictionsProvider.restrictedModeState().value
-    MenuItem(text = text, enabled = restrictedMode !is BaseUserRestricted) {
+    val restrictedMode = restrictionsProviderFactory.rememberRestrictedMode(restrictions).value
+    MenuItem(text = text, enabled = enabled && restrictedMode !== BaseUserRestricted) {
         when (restrictedMode) {
             is BlockedByAdmin -> restrictedMode.sendShowAdminSupportDetailsIntent()
+            is BlockedByEcm -> restrictedMode.showRestrictedSettingsDetails()
             else -> onClick()
         }
     }

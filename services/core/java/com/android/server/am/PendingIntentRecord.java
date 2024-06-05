@@ -16,11 +16,19 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.START_SUCCESS;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_COMPAT;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+import static android.os.Process.ROOT_UID;
+import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
@@ -42,7 +50,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerWhitelistManager;
 import android.os.PowerWhitelistManager.ReasonCode;
-import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
@@ -52,11 +59,15 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TimeUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.modules.expresslog.Counter;
 import com.android.server.wm.SafeActivityOptions;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
@@ -68,10 +79,31 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     @Overridable
     private static final long DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER = 244637991;
-
     public static final int FLAG_ACTIVITY_SENDER = 1 << 0;
     public static final int FLAG_BROADCAST_SENDER = 1 << 1;
     public static final int FLAG_SERVICE_SENDER = 1 << 2;
+
+    public static final int CANCEL_REASON_NULL = 0;
+    public static final int CANCEL_REASON_USER_STOPPED = 1 << 0;
+    public static final int CANCEL_REASON_OWNER_UNINSTALLED = 1 << 1;
+    public static final int CANCEL_REASON_OWNER_FORCE_STOPPED = 1 << 2;
+    public static final int CANCEL_REASON_OWNER_CANCELED = 1 << 3;
+    public static final int CANCEL_REASON_HOSTING_ACTIVITY_DESTROYED = 1 << 4;
+    public static final int CANCEL_REASON_SUPERSEDED = 1 << 5;
+    public static final int CANCEL_REASON_ONE_SHOT_SENT = 1 << 6;
+
+    @IntDef({
+            CANCEL_REASON_NULL,
+            CANCEL_REASON_USER_STOPPED,
+            CANCEL_REASON_OWNER_UNINSTALLED,
+            CANCEL_REASON_OWNER_FORCE_STOPPED,
+            CANCEL_REASON_OWNER_CANCELED,
+            CANCEL_REASON_HOSTING_ACTIVITY_DESTROYED,
+            CANCEL_REASON_SUPERSEDED,
+            CANCEL_REASON_ONE_SHOT_SENT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CancellationReason {}
 
     final PendingIntentController controller;
     final Key key;
@@ -79,6 +111,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     public final WeakReference<PendingIntentRecord> ref;
     boolean sent = false;
     boolean canceled = false;
+    @CancellationReason int cancelReason = CANCEL_REASON_NULL;
     /**
      * Map IBinder to duration specified as Pair<Long, Integer>, Long is allowlist duration in
      * milliseconds, Integer is allowlist type defined at
@@ -362,13 +395,20 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
 
     private static BackgroundStartPrivileges getBackgroundStartPrivilegesAllowedByCaller(
             @Nullable Bundle options, int callingUid, @Nullable String callingPackage) {
-        if (options == null || !options.containsKey(
-                        ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED)) {
+        if (options == null) {
             return getDefaultBackgroundStartPrivileges(callingUid, callingPackage);
         }
-        return options.getBoolean(ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED)
-                ? BackgroundStartPrivileges.ALLOW_BAL
-                : BackgroundStartPrivileges.NONE;
+        switch (options.getInt(ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
+                MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED)) {
+            case MODE_BACKGROUND_ACTIVITY_START_DENIED:
+                return BackgroundStartPrivileges.NONE;
+            case MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED:
+                return getDefaultBackgroundStartPrivileges(callingUid, callingPackage);
+            case MODE_BACKGROUND_ACTIVITY_START_ALLOWED:
+            case MODE_BACKGROUND_ACTIVITY_START_COMPAT:
+            default:
+                return BackgroundStartPrivileges.ALLOW_BAL;
+        }
     }
 
     /**
@@ -384,13 +424,9 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             })
     public static BackgroundStartPrivileges getDefaultBackgroundStartPrivileges(
             int callingUid, @Nullable String callingPackage) {
-        if (UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
-            // We temporarily allow BAL for system processes, while we verify that all valid use
-            // cases are opted in explicitly to grant their BAL permission.
-            // Background: In many cases devices are running additional apps that share UID with
-            // the system. If one of these apps targets a lower SDK the change is not active, but
-            // as soon as that app is upgraded (or removed) BAL would be blocked. (b/283138430)
-            return BackgroundStartPrivileges.ALLOW_BAL;
+        if (callingUid == ROOT_UID || callingUid == SYSTEM_UID) {
+            // root and system must always opt in explicitly
+            return BackgroundStartPrivileges.ALLOW_FGS;
         }
         boolean isChangeEnabledForApp = callingPackage != null ? CompatChanges.isChangeEnabled(
                 DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER, callingPackage,
@@ -416,6 +452,9 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             String resolvedType, IBinder allowlistToken, IIntentReceiver finishedReceiver,
             String requiredPermission, IBinder resultTo, String resultWho, int requestCode,
             int flagsMask, int flagsValues, Bundle options) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+
         if (intent != null) intent.setDefusable(true);
         if (options != null) options.setDefusable(true);
 
@@ -426,12 +465,22 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         SafeActivityOptions mergedOptions = null;
         synchronized (controller.mLock) {
             if (canceled) {
+                if (cancelReason == CANCEL_REASON_OWNER_FORCE_STOPPED
+                        && controller.mAmInternal.getUidProcessState(callingUid)
+                                == PROCESS_STATE_TOP) {
+                    Counter.logIncrementWithUid(
+                            "app.value_force_stop_cancelled_pi_sent_from_top_per_caller",
+                            callingUid);
+                    Counter.logIncrementWithUid(
+                            "app.value_force_stop_cancelled_pi_sent_from_top_per_owner",
+                            uid);
+                }
                 return ActivityManager.START_CANCELED;
             }
 
             sent = true;
             if ((key.flags & PendingIntent.FLAG_ONE_SHOT) != 0) {
-                controller.cancelIntentSender(this, true);
+                controller.cancelIntentSender(this, true, CANCEL_REASON_ONE_SHOT_SENT);
             }
 
             finalIntent = key.requestIntent != null ? new Intent(key.requestIntent) : new Intent();
@@ -457,6 +506,26 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             // can specify a consistent launch mode even if the PendingIntent is immutable
             final ActivityOptions opts = ActivityOptions.fromBundle(options);
             if (opts != null) {
+                if (opts.getPendingIntentCreatorBackgroundActivityStartMode()
+                        != ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+                    Slog.wtf(TAG,
+                            "Resetting option "
+                                    + "setPendingIntentCreatorBackgroundActivityStartMode("
+                                    + opts.getPendingIntentCreatorBackgroundActivityStartMode()
+                                    + ") to SYSTEM_DEFINED from the options provided by the "
+                                    + "pending intent sender ("
+                                    + key.packageName
+                                    + ") because this option is meant for the pending intent "
+                                    + "creator");
+                    if (CompatChanges.isChangeEnabled(PendingIntent.PENDING_INTENT_OPTIONS_CHECK,
+                            callingUid)) {
+                        throw new IllegalArgumentException(
+                                "pendingIntentCreatorBackgroundActivityStartMode "
+                                + "must not be set when sending a PendingIntent");
+                    }
+                    opts.setPendingIntentCreatorBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
+                }
                 finalIntent.addFlags(opts.getPendingIntentLaunchFlags());
             }
 
@@ -489,9 +558,6 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
 
         }
         // We don't hold the controller lock beyond this point as we will be calling into AM and WM.
-
-        final int callingUid = Binder.getCallingUid();
-        final int callingPid = Binder.getCallingPid();
 
         // Only system senders can declare a broadcast to be alarm-originated.  We check
         // this here rather than in the general case handling below to fail before the other
@@ -677,6 +743,21 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         }
     }
 
+    @VisibleForTesting
+    static String cancelReasonToString(@CancellationReason int cancelReason) {
+        return switch (cancelReason) {
+            case CANCEL_REASON_NULL -> "NULL";
+            case CANCEL_REASON_USER_STOPPED -> "USER_STOPPED";
+            case CANCEL_REASON_OWNER_UNINSTALLED -> "OWNER_UNINSTALLED";
+            case CANCEL_REASON_OWNER_FORCE_STOPPED -> "OWNER_FORCE_STOPPED";
+            case CANCEL_REASON_OWNER_CANCELED -> "OWNER_CANCELED";
+            case CANCEL_REASON_HOSTING_ACTIVITY_DESTROYED -> "HOSTING_ACTIVITY_DESTROYED";
+            case CANCEL_REASON_SUPERSEDED -> "SUPERSEDED";
+            case CANCEL_REASON_ONE_SHOT_SENT -> "ONE_SHOT_SENT";
+            default -> "UNKNOWN";
+        };
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("uid="); pw.print(uid);
                 pw.print(" packageName="); pw.print(key.packageName);
@@ -697,7 +778,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         }
         if (sent || canceled) {
             pw.print(prefix); pw.print("sent="); pw.print(sent);
-                    pw.print(" canceled="); pw.println(canceled);
+                    pw.print(" canceled="); pw.print(canceled);
+                    pw.print(" cancelReason="); pw.println(cancelReasonToString(cancelReason));
         }
         if (mAllowlistDuration != null) {
             pw.print(prefix);

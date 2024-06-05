@@ -123,8 +123,11 @@ public final class UserTypeDetails {
     /** Resource ID of the badge without a background. Should be set if mIconBadge is set. */
     private @DrawableRes final int mBadgeNoBackground;
 
+    /** Resource ID of the status bar icon. */
+    private @DrawableRes final int mStatusBarIcon;
+
     /**
-     * Resource ID ({@link StringRes}) of the of the labels to describe badged apps; should be the
+     * Resource ID ({@link StringRes}) of the labels to describe badged apps; should be the
      * same format as com.android.internal.R.color.profile_badge_1. These are used for accessibility
      * services.
      *
@@ -158,6 +161,12 @@ public final class UserTypeDetails {
     private final @Nullable int[] mDarkThemeBadgeColors;
 
     /**
+     * Resource ID ({@link StringRes}) of the accessibility string that describes the user type.
+     * This is used by accessibility services like Talkback.
+     */
+    private final @StringRes int mAccessibilityString;
+
+    /**
      * The default {@link UserProperties} for the user type.
      * <p> The uninitialized value of each property is implied by {@link UserProperties.Builder}.
      */
@@ -167,12 +176,14 @@ public final class UserTypeDetails {
             @UserInfoFlag int baseType, @UserInfoFlag int defaultUserInfoPropertyFlags,
             @Nullable int[] labels, int maxAllowedPerParent,
             int iconBadge, int badgePlain, int badgeNoBackground,
+            int statusBarIcon,
             @Nullable int[] badgeLabels, @Nullable int[] badgeColors,
             @Nullable int[] darkThemeBadgeColors,
             @Nullable Bundle defaultRestrictions,
             @Nullable Bundle defaultSystemSettings,
             @Nullable Bundle defaultSecureSettings,
             @Nullable List<DefaultCrossProfileIntentFilter> defaultCrossProfileIntentFilters,
+            @StringRes int accessibilityString,
             @NonNull UserProperties defaultUserProperties) {
         this.mName = name;
         this.mEnabled = enabled;
@@ -187,10 +198,12 @@ public final class UserTypeDetails {
         this.mIconBadge = iconBadge;
         this.mBadgePlain = badgePlain;
         this.mBadgeNoBackground = badgeNoBackground;
+        this.mStatusBarIcon = statusBarIcon;
         this.mLabels = labels;
         this.mBadgeLabels = badgeLabels;
         this.mBadgeColors = badgeColors;
         this.mDarkThemeBadgeColors = darkThemeBadgeColors;
+        this.mAccessibilityString = accessibilityString;
         this.mDefaultUserProperties = defaultUserProperties;
     }
 
@@ -267,6 +280,11 @@ public final class UserTypeDetails {
         return mBadgeNoBackground;
     }
 
+    /** Resource ID of the status bar icon. */
+    public @DrawableRes int getStatusBarIcon() {
+        return mStatusBarIcon;
+    }
+
     /**
      * Returns the Resource ID of the badgeIndexth badge label, where the badgeIndex is expected
      * to be the {@link UserInfo#profileBadge} of the user.
@@ -311,6 +329,10 @@ public final class UserTypeDetails {
      */
     public @NonNull UserProperties getDefaultUserPropertiesReference() {
         return mDefaultUserProperties;
+    }
+
+    public @StringRes int getAccessibilityString() {
+        return mAccessibilityString;
     }
 
     public boolean isProfile() {
@@ -387,6 +409,7 @@ public final class UserTypeDetails {
         pw.print(prefix); pw.print("mIconBadge: "); pw.println(mIconBadge);
         pw.print(prefix); pw.print("mBadgePlain: "); pw.println(mBadgePlain);
         pw.print(prefix); pw.print("mBadgeNoBackground: "); pw.println(mBadgeNoBackground);
+        pw.print(prefix); pw.print("mStatusBarIcon: "); pw.println(mStatusBarIcon);
         pw.print(prefix); pw.print("mBadgeLabels.length: ");
         pw.println(mBadgeLabels != null ? mBadgeLabels.length : "0(null)");
         pw.print(prefix); pw.print("mBadgeColors.length: ");
@@ -419,6 +442,7 @@ public final class UserTypeDetails {
         private @DrawableRes int mBadgePlain = Resources.ID_NULL;
         private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
         private @DrawableRes int mStatusBarIcon = Resources.ID_NULL;
+        private @StringRes int mAccessibilityString = Resources.ID_NULL;
         // Default UserProperties cannot be null but for efficiency we don't initialize it now.
         // If it isn't set explicitly, {@link UserProperties.Builder#build()} will be used.
         private @Nullable UserProperties mDefaultUserProperties = null;
@@ -486,7 +510,11 @@ public final class UserTypeDetails {
             return this;
         }
 
-        /** Returns labels */
+        public Builder setStatusBarIcon(@DrawableRes int statusBarIcon) {
+            mStatusBarIcon = statusBarIcon;
+            return this;
+        }
+
         public Builder setLabels(@StringRes int ... labels) {
             mLabels = labels;
             return this;
@@ -510,6 +538,14 @@ public final class UserTypeDetails {
         public Builder setDefaultCrossProfileIntentFilters(
                 @Nullable List<DefaultCrossProfileIntentFilter> intentFilters) {
             mDefaultCrossProfileIntentFilters = intentFilters;
+            return this;
+        }
+
+        /**
+         * Sets the accessibility label associated with the user
+         */
+        public Builder setAccessibilityString(@StringRes int accessibilityString) {
+            mAccessibilityString = accessibilityString;
             return this;
         }
 
@@ -566,6 +602,7 @@ public final class UserTypeDetails {
                     mIconBadge,
                     mBadgePlain,
                     mBadgeNoBackground,
+                    mStatusBarIcon,
                     mBadgeLabels,
                     mBadgeColors,
                     mDarkThemeBadgeColors == null ? mBadgeColors : mDarkThemeBadgeColors,
@@ -573,6 +610,7 @@ public final class UserTypeDetails {
                     mDefaultSystemSettings,
                     mDefaultSecureSettings,
                     mDefaultCrossProfileIntentFilters,
+                    mAccessibilityString,
                     getDefaultUserProperties());
         }
 
@@ -622,5 +660,21 @@ public final class UserTypeDetails {
      */
     public boolean isManagedProfile() {
         return UserManager.isUserTypeManagedProfile(mName);
+    }
+
+    /**
+     * Returns whether the user type is a communal profile
+     * (i.e. {@link UserManager#USER_TYPE_PROFILE_COMMUNAL}).
+     */
+    public boolean isCommunalProfile() {
+        return UserManager.isUserTypeCommunalProfile(mName);
+    }
+
+    /**
+     * Returns whether the user type is a private profile
+     * (i.e. {@link UserManager#USER_TYPE_PROFILE_PRIVATE}).
+     */
+    public boolean isPrivateProfile() {
+        return UserManager.isUserTypePrivateProfile(mName);
     }
 }

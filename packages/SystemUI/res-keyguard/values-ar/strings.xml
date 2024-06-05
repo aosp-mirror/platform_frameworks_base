@@ -21,27 +21,23 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"‏أدخل رقم التعريف الشخصي (PIN)"</string>
-    <string name="keyguard_enter_pin" msgid="8114529922480276834">"أدخِل رقم التعريف الشخصي."</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"أدخِل رقم التعريف الشخصي"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"أدخل النقش"</string>
-    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ارسم النقش."</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ارسم النقش"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"أدخل كلمة المرور"</string>
-    <string name="keyguard_enter_password" msgid="6483623792371009758">"أدخِل كلمة المرور."</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"أدخِل كلمة المرور"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"بطاقة غير صالحة."</string>
-    <string name="keyguard_charged" msgid="5478247181205188995">"تم الشحن"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"اكتمل الشحن"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن لاسلكيًا"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن سريعًا"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن ببطء"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • تم تحسين الشحن لحماية البطارية"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"‫<xliff:g id="PERCENTAGE">%s</xliff:g> • مشكلة متعلّقة بجهاز الشحن الملحق"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"اضغط على \"القائمة\" لإلغاء التأمين."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"‫<xliff:g id="PERCENTAGE">%s</xliff:g> • الشحن معلّق لحماية البطارية"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"‫<xliff:g id="PERCENTAGE">%s</xliff:g> • يُرجى فحص ملحق الشحن."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"الشبكة مؤمّنة"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"‏لا تتوفر شريحة SIM."</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"‏يجب إضافة شريحة SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"‏شريحة SIM مفقودة أو غير قابلة للقراءة. يجب إضافة شريحة SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"‏شريحة SIM غير قابلة للاستخدام."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"‏تم إيقاف شريحة SIM نهائيًا.\n عليك التواصل مع مقدم خدمة اللاسلكي للحصول على شريحة SIM أخرى."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"‏شريحة SIM مُقفَلة."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"‏شريحة SIM مُقفَلة برمز PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"‏جارٍ إلغاء قفل شريحة SIM…"</string>
@@ -61,11 +57,11 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"رقم تعريف شخصي خاطئ"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"لقد أدخلت رقم تعريف شخصي غير صحيح. يُرجى إعادة المحاولة."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"جرّب فتح القفل باستخدام بصمة الإصبع."</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"لم يتم التعرّف على البصمة."</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"لم يتم التعرّف على البصمة"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"لم يتم التعرّف على الوجه."</string>
-    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"يُرجى إعادة المحاولة أو إدخال رقم التعريف الشخصي."</string>
-    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"يُرجى إعادة المحاولة أو إدخال كلمة المرور."</string>
-    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"يُرجى إعادة المحاولة أو رسم النقش."</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"يُرجى إعادة المحاولة أو إدخال رقم التعريف الشخصي"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"يُرجى إعادة المحاولة أو إدخال كلمة المرور"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"يُرجى إعادة المحاولة أو رسم النقش"</string>
     <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"‏يجب إدخال رقم PIN لأنّك أجريت محاولات كثيرة جدًا."</string>
     <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"يجب إدخال كلمة المرور لأنك أجريت محاولات كثيرة جدًا."</string>
     <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"يجب رسم النقش لأنّك أجريت محاولات كثيرة جدًا."</string>
@@ -73,10 +69,10 @@
     <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"افتح القفل بكلمة مرور أو ببصمة إصبع."</string>
     <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"افتح بالنقش أو بصمة الإصبع"</string>
     <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"لمزيد من الأمان، تم قفل الجهاز وفقًا لسياسة العمل."</string>
-    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"يجب إدخال رقم التعريف الشخصي بعد إلغاء التأمين."</string>
-    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"يجب إدخال كلمة المرور بعد إلغاء التأمين."</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"يجب إدخال رقم التعريف الشخصي بعد إلغاء الفتح الذكي."</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"يجب إدخال كلمة المرور بعد إلغاء الفتح الذكي."</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"يجب رسم النقش بعد إلغاء التأمين."</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"سيتم تثبيت التحديث خلال ساعات عدم النشاط."</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"سيتم تثبيت التحديث عندما لا يكون الجهاز قيد الاستخدام."</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"‏يجب تعزيز الأمان. لم يُستخدَم رقم PIN لبعض الوقت."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"يجب تعزيز الأمان. لم تستخدَم كلمة المرور لبعض الوقت."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"يجب تعزيز الأمان. لم يُستخدَم النقش لبعض الوقت."</string>
@@ -84,9 +80,9 @@
     <string name="kg_face_locked_out" msgid="2751559491287575">"يتعذّر فتح القفل بالوجه. أجريت محاولات كثيرة جدًا."</string>
     <string name="kg_fp_locked_out" msgid="6228277682396768830">"يتعذّر الفتح ببصمة الإصبع. أجريت محاولات كثيرة جدًا."</string>
     <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"ميزة \"الوكيل المعتمد\" غير متاحة."</string>
-    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"أجريت محاولات كثيرة جدًا بإدخال رقم تعريف شخصي خاطئ."</string>
-    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"أجريت محاولات كثيرة جدًا برسم نقش خاطئ."</string>
-    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"أجريت محاولات كثيرة جدًا بإدخال كلمة مرور خاطئة."</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"أجريت محاولات كثيرة جدًا باستخدام رقم تعريف شخصي خاطئ"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"أجريت محاولات كثيرة جدًا باستخدام نقش خاطئ"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"أجريت محاولات كثيرة جدًا باستخدام كلمة مرور خاطئة"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{أعِد المحاولة خلال ثانية واحدة.}zero{أعِد المحاولة خلال # ثانية.}two{أعِد المحاولة خلال ثانيتين.}few{أعِد المحاولة خلال # ثوانٍ.}many{أعِد المحاولة خلال # ثانية.}other{أعِد المحاولة خلال # ثانية.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"‏أدخل رقم التعريف الشخصي لشريحة SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"‏أدخل رقم التعريف الشخصي لشريحة SIM التابعة للمشغّل \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
@@ -112,9 +108,12 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"يجب رسم النقش بعد إعادة تشغيل الجهاز."</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"يجب إدخال رقم التعريف الشخصي بعد إعادة تشغيل الجهاز."</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"يجب إدخال كلمة المرور بعد إعادة تشغيل الجهاز."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"لمزيد من الأمان، استخدِم النقش بدلاً من ذلك."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"لمزيد من الأمان، أدخِل رقم التعريف الشخصي بدلاً من ذلك."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"لمزيد من الأمان، أدخِل كلمة المرور بدلاً من ذلك."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"لمزيد من الأمان، يجب استخدام النقش"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"لمزيد من الأمان، يجب إدخال رقم التعريف الشخصي"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"لمزيد من الأمان، يجب إدخال كلمة المرور"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"يجب إدخال رقم التعريف الشخصي لمزيد من الأمان"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"يجب رسم النقش لمزيد من الأمان"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"يجب إدخال كلمة المرور لمزيد من الأمان"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"اختار المشرف قفل الجهاز"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"تم حظر الجهاز يدويًا"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"لم يتم التعرّف عليه."</string>

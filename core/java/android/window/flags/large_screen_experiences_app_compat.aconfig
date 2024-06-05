@@ -1,0 +1,116 @@
+package: "com.android.window.flags"
+container: "system"
+
+flag {
+  name: "disable_thin_letterboxing_policy"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether reachability is disabled in case of thin letterboxing"
+  bug: "341027847"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "allows_screen_size_decoupled_from_status_bar_and_cutout"
+  namespace: "large_screen_experiences_app_compat"
+  description: "When necessary, configuration decoupled from status bar and display cutout"
+  bug: "291870756"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "movable_cutout_configuration"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Make it possible to move cutout across edges through device config"
+  bug: "302387383"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "density_390_api"
+  is_exported: true
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the API DisplayMetrics.DENSITY_390 is available"
+  bug: "297550533"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "app_compat_properties_api"
+  is_exported: true
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether app compat property APIs are public. Which includes: /n"
+                 "WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE,/n"
+                 "WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED,/n"
+                 "WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES,/n"
+                 "WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE,/n"
+                 "WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE"
+  bug: "316139088"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "user_min_aspect_ratio_app_default"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the API PackageManager.USER_MIN_ASPECT_RATIO_APP_DEFAULT is available"
+  bug: "310816437"
+}
+
+flag {
+  name: "allow_hide_scm_button"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether we should allow hiding the size compat restart button"
+  bug: "318840081"
+}
+
+flag {
+  name: "configurable_font_scale_default"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the font_scale is read from a device dependent configuration file"
+  bug: "319808237"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "immersive_app_repositioning"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Fix immersive apps changing size when repositioning"
+  bug: "334076352"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "camera_compat_for_freeform"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether to apply Camera Compat treatment to fixed-orientation apps in freeform windowing mode"
+  bug: "314952133"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "app_compat_refactoring"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the changes about app compat refactoring are enabled./n"
+                 "The goal is to simplify code readability unblocking the implementation of /n"
+                 "app compat feature like reachability, animations and others related to/n"
+                 "freeform windowing mode."
+  bug: "309593314"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "letterbox_background_wallpaper"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the blurred letterbox wallpaper background is enabled by default"
+  bug: "297195682"
+}
+
+flag {
+    name: "enable_compatui_sysui_launcher"
+    namespace: "large_screen_experiences_app_compat"
+    description: "Enables sysui animation for user aspect ratio button"
+    bug: "300357441"
+}

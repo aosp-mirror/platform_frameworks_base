@@ -16,16 +16,24 @@ package com.android.systemui.utils.leaks;
 
 import android.os.Bundle;
 import android.testing.LeakCheck;
-import android.view.View;
 
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCallback>
         implements BatteryController {
+    private boolean mIsAodPowerSave = false;
     private boolean mWirelessCharging;
+    private boolean mPowerSaveMode = false;
+    private boolean mIsPluggedIn = false;
+    private boolean mIsExtremePowerSave = false;
+
+    private final List<BatteryStateChangeCallback> mCallbacks = new ArrayList<>();
 
     public FakeBatteryController(LeakCheck test) {
         super(test, "battery");
@@ -43,27 +51,60 @@ public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCal
 
     @Override
     public void setPowerSaveMode(boolean powerSave) {
+        mPowerSaveMode = powerSave;
+        for (BatteryStateChangeCallback callback: mCallbacks) {
+            callback.onPowerSaveChanged(powerSave);
+        }
+    }
 
+    /**
+     * Note: this method ignores the View argument
+     */
+    @Override
+    public void setPowerSaveMode(boolean powerSave, Expandable expandable) {
+        setPowerSaveMode(powerSave);
     }
 
     @Override
-    public void setPowerSaveMode(boolean powerSave, View view) {
+    public boolean isExtremeSaverOn() {
+        return mIsExtremePowerSave;
+    }
 
+    /**
+     * Note: this does not affect the regular power saver. Triggers all callbacks, only on change.
+     */
+    public void setExtremeSaverOn(Boolean extremePowerSave) {
+        if (extremePowerSave == mIsExtremePowerSave) return;
+
+        mIsExtremePowerSave = extremePowerSave;
+        for (BatteryStateChangeCallback callback: mCallbacks) {
+            callback.onExtremeBatterySaverChanged(extremePowerSave);
+        }
     }
 
     @Override
     public boolean isPluggedIn() {
-        return false;
+        return mIsPluggedIn;
+    }
+
+    /**
+     * Notifies all registered callbacks
+     */
+    public void setPluggedIn(boolean pluggedIn) {
+        mIsPluggedIn = pluggedIn;
+        for (BatteryStateChangeCallback cb : mCallbacks) {
+            cb.onBatteryLevelChanged(0, pluggedIn, false);
+        }
     }
 
     @Override
     public boolean isPowerSave() {
-        return false;
+        return mPowerSaveMode;
     }
 
     @Override
     public boolean isAodPowerSave() {
-        return false;
+        return mIsAodPowerSave;
     }
 
     @Override
@@ -71,7 +112,21 @@ public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCal
         return mWirelessCharging;
     }
 
+    public void setIsAodPowerSave(boolean isAodPowerSave) {
+        mIsAodPowerSave = isAodPowerSave;
+    }
+
     public void setWirelessCharging(boolean wirelessCharging) {
         mWirelessCharging = wirelessCharging;
+    }
+
+    @Override
+    public void addCallback(BatteryStateChangeCallback listener) {
+        mCallbacks.add(listener);
+    }
+
+    @Override
+    public void removeCallback(BatteryStateChangeCallback listener) {
+        mCallbacks.remove(listener);
     }
 }

@@ -36,6 +36,7 @@ import android.view.SurfaceControl;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class RotationUtils {
 
     /**

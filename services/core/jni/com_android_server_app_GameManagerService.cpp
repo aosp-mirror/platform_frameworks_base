@@ -25,15 +25,21 @@
 
 namespace android {
 
-static void android_server_app_GameManagerService_nativeSetOverrideFrameRate(JNIEnv* env,
-                                                                             jclass clazz, jint uid,
-                                                                             jfloat frameRate) {
-    SurfaceComposerClient::setOverrideFrameRate(uid, frameRate);
+static void android_server_app_GameManagerService_nativeSetGameModeFrameRateOverride(
+        JNIEnv* env, jclass clazz, jint uid, jfloat frameRate) {
+    SurfaceComposerClient::setGameModeFrameRateOverride(uid, frameRate);
+}
+
+static void android_server_app_GameManagerService_nativeSetGameDefaultFrameRateOverride(
+        JNIEnv* env, jclass clazz, jint uid, jfloat frameRate) {
+    SurfaceComposerClient::setGameDefaultFrameRateOverride(uid, frameRate);
 }
 
 static const JNINativeMethod gMethods[] = {
-        {"nativeSetOverrideFrameRate", "(IF)V",
-         (void*)android_server_app_GameManagerService_nativeSetOverrideFrameRate},
+        {"nativeSetGameModeFrameRateOverride", "(IF)V",
+         (void*)android_server_app_GameManagerService_nativeSetGameModeFrameRateOverride},
+        {"nativeSetGameDefaultFrameRateOverride", "(IF)V",
+         (void*)android_server_app_GameManagerService_nativeSetGameDefaultFrameRateOverride},
 };
 
 int register_android_server_app_GameManagerService(JNIEnv* env) {

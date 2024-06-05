@@ -18,7 +18,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:divider="@drawable/controls_list_divider"
+    android:divider="@drawable/global_actions_list_divider"
     android:showDividers="middle"
 />
 

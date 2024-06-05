@@ -1,0 +1,27 @@
+package: "android.net.platform.flags"
+container: "system"
+
+# This file contains aconfig flags used from platform code
+# Flags used for module APIs must be in aconfig files under each modules
+
+flag {
+  name: "ipsec_transform_state"
+  namespace: "core_networking_ipsec"
+  description: "The flag controls the access for getIpSecTransformState and IpSecTransformState"
+  bug: "308011229"
+}
+
+flag {
+    name: "powered_off_finding_platform"
+    namespace: "nearby"
+    description: "Controls whether the Powered Off Finding feature is enabled"
+    bug: "307898240"
+}
+
+flag {
+  name: "register_nsd_offload_engine"
+  is_exported: true
+  namespace: "android_core_networking"
+  description: "Flag for registerOffloadEngine API in NsdManager"
+  bug: "294777050"
+}

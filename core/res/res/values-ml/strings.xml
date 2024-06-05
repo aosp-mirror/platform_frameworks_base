@@ -84,7 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"മൊബൈൽ നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റ് ചെയ്യാനാവുന്നില്ല"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"തിര‌ഞ്ഞെടുത്ത നെറ്റ്‌വർക്ക് മാറ്റുന്നത് പരീക്ഷിക്കുക. മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"എമർജൻസി കോളിംഗ് ലഭ്യമല്ല"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"വൈഫൈ വഴി എമർജൻസി കോളുകൾ ചെയ്യാനാകില്ല"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"എമർജൻസി കോളുകൾ ചെയ്യാൻ ഒരു മൊബൈൽ നെറ്റ്‌വർക്ക് ആവശ്യമാണ്"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"അലേർട്ടുകൾ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"കോൾ ഫോർവേഡിംഗ്"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"അടിയന്തര കോൾബാക്ക് മോഡ്"</string>
@@ -153,6 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> നിമിഷത്തിനുശേഷം <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: കൈമാറിയില്ല"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: കൈമാറിയിട്ടില്ല"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"മൊബൈൽ നെറ്റ്‍വർക്ക് സുരക്ഷ"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"എൻക്രിപ്ഷൻ, എൻക്രിപ്റ്റ് ചെയ്യാത്ത നെറ്റ്‍വര്‍ക്കുകൾക്കുള്ള അറിയിപ്പുകൾ"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"ഉപകരണ ഐഡി ആക്സസ് ചെയ്തു"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"നിങ്ങളുടെ <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> സിം ഉപയോഗിക്കുമ്പോൾ സമീപത്തുള്ള ഒരു നെറ്റ്‌വർക്ക് നിങ്ങളുടെ ഉപകരണത്തിൻ്റെ തനത് ഐഡി (IMSI അല്ലെങ്കിൽ IMEI), <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>-ന് റെക്കോർഡ് ചെയ്തു"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"നിങ്ങളുടെ <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> സിം ഉപയോഗിക്കുമ്പോൾ സമീപത്തുള്ള ഒരു നെറ്റ്‌വർക്ക് നിങ്ങളുടെ ഉപകരണത്തിൻ്റെ തനത് ഐഡി (IMSI അല്ലെങ്കിൽ IMEI), <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>-ന് റെക്കോർഡ് ചെയ്തു. \n\nനിങ്ങളുടെ ലൊക്കേഷൻ, ആക്റ്റിവിറ്റി അല്ലെങ്കിൽ ഐഡന്റിറ്റി ലോഗ് ചെയ്തിട്ടുണ്ടെന്നാണ് ഇതിനർത്ഥം. ഇത് പൊതുവായ രീതിയാണ്, എന്നാൽ സ്വകാര്യതയെ കുറിച്ച് ആശങ്കയുള്ളവർക്ക് ഇത് ഒരു പ്രശ്നമായിരിക്കാം."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> എന്ന എന്‍ക്രിപ്റ്റ് ചെയ്ത നെറ്റ്‍വര്‍ക്കിലേക്ക് കണക്റ്റ് ചെയ്തു"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> സിം കണക്ഷന്‍ ഇപ്പോൾ കൂടുതൽ സുരക്ഷിതമാണ്"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"എൻക്രിപ്റ്റ് ചെയ്യാത്ത നെറ്റ്‍വര്‍ക്കിലേക്ക് കണക്റ്റ് ചെയ്തു"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> സിം ഉപയോഗിക്കുമ്പോൾ കോളുകൾ, സന്ദേശങ്ങൾ, ഡാറ്റ എന്നിവയുടെ സുരക്ഷ അപകടത്തിലാകാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> സിം ഉപയോഗിക്കുമ്പോൾ കോളുകൾ, സന്ദേശങ്ങൾ, ഡാറ്റ എന്നിവയുടെ സുരക്ഷ അപകടത്തിലാകാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്.\n\nനിങ്ങളുടെ കണക്ഷൻ വീണ്ടും എൻക്രിപ്റ്റ് ചെയ്യുമ്പോൾ, നിങ്ങൾക്ക് മറ്റൊരു അറിയിപ്പ് ലഭിക്കും."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"മൊബൈൽ നെറ്റ്‍വർക്ക് സുരക്ഷാ ക്രമീകരണം"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"കൂടുതലറിയുക"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"മനസ്സിലായി"</string>
     <string name="fcComplete" msgid="1080909484660507044">"ഫീച്ചർ കോഡ് പൂർണ്ണമാണ്."</string>
     <string name="fcError" msgid="5325116502080221346">"കണക്ഷൻ പ്രശ്‌നം അല്ലെങ്കിൽ ഫീച്ചർ കോഡ് അസാധുവാണ്."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ശരി"</string>
@@ -188,6 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"ഈ ഉപകരണത്തിൽ തുടർന്നങ്ങോട്ട് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ ലഭ്യമല്ല"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"വളരെയധികം പാസ്‌വേഡ് ശ്രമങ്ങൾ"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"വ്യക്തിപരമായ ഉപയോഗത്തിനായി, ഉപകരണത്തിന്റെ ഔദ്യോഗിക ഉപയോഗം അഡ്‌മിൻ അവസാനിപ്പിച്ചു"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"സ്വകാര്യ സ്പേസ് നീക്കം ചെയ്തു"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"മാനേജ് ചെയ്യപ്പെടുന്ന ഈ ഉപകരണത്തിൽ നിങ്ങളുടെ സ്ഥാപനം സ്വകാര്യ സ്പേസുകൾ അനുവദിക്കുന്നില്ല."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ഉപകരണം മാനേജുചെയ്യുന്നുണ്ട്"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"നിങ്ങളുടെ സ്ഥാപനമാണ് ഈ ഉപകരണം മാനേജുചെയ്യുന്നത്, നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കുകയും ചെയ്തേക്കാം, വിശദാംശങ്ങൾ അറിയാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ആപ്പുകൾക്ക് നിങ്ങളുടെ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യാനാകും"</string>
@@ -270,6 +285,7 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"വോയ്‌സ് സഹായം"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"ലോക്ക്‌ഡൗൺ"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"മറുപടി"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"പുതിയ അറിയിപ്പ്"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"ഫിസിക്കൽ കീബോഡ്"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"സുരക്ഷ"</string>
@@ -290,6 +306,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ആപ്പുകൾ ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"മാഗ്നിഫിക്കേഷൻ"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ഉപയോഗസഹായി ഉപയോഗം"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"ഡിസ്‌പ്ലേ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> ആപ്പുകൾ ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ബാറ്ററി, ഡാറ്റ ഉപയോഗം എന്നിവയുടെ വിശദാംശങ്ങളറിയാൻ ടാപ്പുചെയ്യുക"</string>
@@ -345,6 +362,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"സ്ക്രീന്‍ഷോട്ട് എടുക്കുക"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ഡിസ്‌പ്ലേയുടെ സ്‌ക്രീൻഷോട്ട് എടുക്കാൻ കഴിയും."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"പ്രിവ്യൂ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"സ്റ്റാറ്റസ് ബാർ പ്രവർത്തനരഹിതമാക്കുക അല്ലെങ്കിൽ പരിഷ്‌ക്കരിക്കുക"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"നില ബാർ പ്രവർത്തരഹിതമാക്കുന്നതിന് അല്ലെങ്കിൽ സിസ്‌റ്റം ഐക്കണുകൾ ചേർക്കുന്നതിനും നീക്കംചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"സ്റ്റാറ്റസ് ബാർ ആയിരിക്കുക"</string>
@@ -369,6 +387,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"സ്വീകരിക്കുന്ന മുറയ്ക്ക് ബ്രോഡ്‌കാസ്‌റ്റ് സന്ദേശങ്ങൾ കൈമാറുന്നതിന് സെൽ ബ്രോഡ്‌കാസ്‌റ്റ് മോഡ്യൂളിലേക്ക് ബൈൻഡ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു. അടിയന്തര സാഹചര്യങ്ങളെ കുറിച്ച് നിങ്ങൾക്ക് മുന്നറിയിപ്പ് നൽകുന്നതിന് ചില ലൊക്കേഷനുകളിൽ സെൽ ബ്രോഡ്‌കാസ്‌റ്റ് അലേർട്ടുകൾ ഡെലിവറി ചെയ്യപ്പെടുന്നു. ഒരു അടിയന്തര സെൽ ബ്രോഡ്‌കാസ്റ്റ് ലഭിക്കുമ്പോൾ ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനത്തെയോ പ്രവർത്തനത്തെയോ തടസപ്പെടുത്താനിടയുണ്ട്."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"നടന്നുകൊണ്ടിരിക്കുന്ന കോളുകൾ മാനേജ് ചെയ്യുക"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"നിങ്ങളുടെ ഉപകരണത്തിൽ നടന്നുകൊണ്ടിരിക്കുന്ന കോളുകളുടെ വിശദാംശങ്ങൾ കാണാനും ഈ കോളുകൾ നിയന്ത്രിക്കാനും ആപ്പിനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"അറിയാവുന്ന അവസാനത്തെ സെൽ ഐഡന്റിറ്റി ആക്‌സസ് ചെയ്യുക."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"ടെലിഫോണി നൽകുന്ന, അറിയാവുന്ന അവസാനത്തെ സെൽ ഐഡന്റിറ്റി ആക്‌സസ് ചെയ്യാൻ ഒരു ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"സെൽ പ്രക്ഷേപണ സന്ദേശങ്ങൾ റീഡുചെയ്യുക"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"നിങ്ങളുടെ ഉപകരണത്തിൽ ലഭിച്ച സെൽ പ്രക്ഷേപണ സന്ദേശങ്ങൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. അടിയന്തര സാഹചര്യങ്ങളെക്കുറിച്ച് നിങ്ങൾക്ക് മുന്നറിയിപ്പ് നൽകാനായി ചില ലൊക്കേഷനുകളിൽ നൽകപ്പെടുന്നവയാണ് സെൽ പ്രക്ഷേപണ അലേർട്ടുകൾ. ഒരു അടിയന്തര സെൽ പ്രക്ഷേപണം ലഭിക്കുമ്പോൾ, ക്ഷുദ്രകരമായ അപ്ലിക്കേഷനുകൾ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനമോ പ്രവർത്തനമോ തടസ്സപ്പെടുത്താനിടയുണ്ട്."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"സബ്‌സ്ക്രൈബ് ചെയ്‌ത ഫീഡുകൾ വായിക്കുക"</string>
@@ -433,6 +453,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"\"systemExempted\" എന്ന തരം ഉപയോഗിച്ച് ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ പ്രയോജനപ്പെടുത്താൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"\"fileManagement\" എന്ന തരത്തിലുള്ള ഫോർഗ്രൗണ്ട് സേവനം റൺ ചെയ്യുക"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"\"fileManagement\" എന്ന തരത്തിലുള്ള ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ പ്രയോജനപ്പെടുത്താൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"\"mediaProcessing\" എന്ന തരം ഉപയോഗിച്ച് ഫോർഗ്രൗണ്ട് സേവനം റൺ ചെയ്യുക"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"\"mediaProcessing\" എന്ന തരം ഉപയോഗിച്ച് ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ പ്രയോജനപ്പെടുത്താൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" എന്ന തരം ഉപയോഗിച്ച് ഫോർഗ്രൗണ്ട് സേവനം റൺ ചെയ്യുക"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"\"specialUse\" എന്ന തരം ഉപയോഗിച്ച് ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ പ്രയോജനപ്പെടുത്താൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"അപ്ലിക്കേഷൻ സംഭരണയിടം അളക്കുക"</string>
@@ -501,6 +523,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"സിസ്‌റ്റം ക്യാമറ ഉപയോഗിച്ച് ഏത് സമയത്തും ചിത്രങ്ങളെടുക്കാനും വീഡിയോകൾ റെക്കോർഡ് ചെയ്യാനും ഈ വിശേഷാധികാര അല്ലെങ്കിൽ സിസ്‌റ്റം ആപ്പിന് കഴിയും. ആപ്പിലും android.permission.CAMERA അനുമതി ഉണ്ടായിരിക്കണം"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ക്യാമറയുള്ള ഉപകരണങ്ങൾ ഓണാക്കുന്നതിനെയോ അടയ്ക്കുന്നതിനെയോ കുറിച്ചുള്ള കോൾബാക്കുകൾ സ്വീകരിക്കാൻ ആപ്പിനെയോ സേവനത്തെയോ അനുവദിക്കുക."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ഏതെങ്കിലും ക്യാമറ ഉപകരണം തുറക്കുമ്പോഴോ (ഏത് ആപ്പ് ഉപയോഗിച്ചും) അടയ്ക്കുമ്പോഴോ ഈ ആപ്പിന് കോൾബാക്കുകൾ സ്വീകരിക്കാനാവും."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"ഹെഡ്‌ലെസ് സിസ്‌റ്റം യൂസറായി ക്യാമറ ആക്‌സസ് ചെയ്യാൻ ഒരു ആപ്പിനെയോ സേവനത്തെയോ അനുവദിക്കുക."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"ഹെഡ്‌ലെസ് സിസ്‌റ്റം യൂസറായി ക്യാമറ ആക്‌സസ് ചെയ്യാൻ ഈ ആപ്പിന് കഴിയും."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"വൈബ്രേറ്റുചെയ്യൽ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"വൈബ്രേറ്റർ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"വൈബ്രേറ്റ് ചെയ്യൽ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
@@ -536,6 +560,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"ഫോണിന്റെ ഇൻഫ്രാറെഡ് ട്രാൻസ്‌മിറ്റർ ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"വാൾപേപ്പർ സജ്ജീകരിക്കുക"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"സിസ്‌റ്റം വാൾപേപ്പറിനെ സജ്ജീകരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"മറച്ച പ്രൊഫൈലുകൾ ആക്സസ് ചെയ്യുക"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"മറച്ച പ്രൊഫൈലുകൾ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"നിങ്ങളുടെ വാൾപേപ്പർ വലുപ്പം ക്രമീകരിക്കുക"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"സിസ്‌റ്റം വലുപ്പ സൂചനകളെ സജ്ജീകരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"സമയ മേഖല സജ്ജീകരിക്കുക"</string>
@@ -590,6 +616,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"റൂട്ട് ലക്ഷ്യസ്ഥാനം, രജിസ്‌റ്റർ ചെയ്തിരിക്കുന്ന സഹായങ്ങൾ എന്നിവ പോലുള്ള, തിരഞ്ഞെടുത്ത NFC പേയ്‌മെന്റ് സേവനത്തെ സംബന്ധിച്ച വിവരങ്ങൾ ലഭിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"സമീപ ഫീൽഡുമായുള്ള ആശയവിനിമയം നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"നിയർ ഫീൽഡ് കമ്മ്യൂണിക്കേഷൻ (NFC) ടാഗുകളുമായും കാർഡുകളുമായും റീഡറുകളുമായുള്ള ആശയവിനിമയത്തിന് അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"സുരക്ഷിത ഘടക ഇടപാട് ഇവന്റ്"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"ഒരു സുരക്ഷിത ഘടകത്തിൽ നടക്കുന്ന ഇടപാടുകളെ കുറിച്ചുള്ള വിവരങ്ങൾ നേടാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"കീലോക്കും ഏതെങ്കിലും അനുബന്ധ പാസ്‌വേഡ് സുരക്ഷയും പ്രവർത്തനരഹിതമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ഒരു ഇൻകമിംഗ് കോൾ സ്വീകരിക്കുമ്പോൾ ഫോൺ കീലോക്ക് പ്രവർത്തനരഹിതമാക്കുന്നു, കോൾ അവസാനിക്കുമ്പോൾ കീലോക്ക് വീണ്ടും പ്രവർത്തനക്ഷമമാകുന്നു."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"സ്‌ക്രീൻ ലോക്ക് സങ്കീർണ്ണത അഭ്യർത്ഥിക്കുക"</string>
@@ -620,13 +648,14 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ബയോമെട്രിക് ഹാർ‌ഡ്‌വെയർ ലഭ്യമല്ല"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"പരിശോധിച്ചുറപ്പിക്കൽ റദ്ദാക്കി"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"തിരിച്ചറിഞ്ഞില്ല"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"മുഖം തിരിച്ചറിഞ്ഞിട്ടില്ല"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"പരിശോധിച്ചുറപ്പിക്കൽ റദ്ദാക്കി"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"പിന്നോ പാറ്റേണോ പാസ്‌വേഡോ സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"പിശക് പരിശോധിച്ചുറപ്പിക്കുന്നു"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"തുടരാൻ നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് നൽകുക"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"സെൻസറിൽ നന്നായി അമർത്തുക"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ഫിംഗർപ്രിന്റ് തിരിച്ചറിയാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"ഫിംഗർപ്രിന്റ് തിരിച്ചറിഞ്ഞിട്ടില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ഫിംഗർപ്രിന്റ് സെൻസർ വൃത്തിയാക്കിയ ശേഷം വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"സെൻസർ വൃത്തിയാക്കിയ ശേഷം വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"സെൻസറിൽ നന്നായി അമർത്തുക"</string>
@@ -640,21 +669,22 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ഫിംഗർപ്രിന്റ് തിരിച്ചറിഞ്ഞില്ല"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ഫിംഗർപ്രിന്റ് തിരിച്ചറിഞ്ഞില്ല"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"മുഖം തിരിച്ചറിഞ്ഞിട്ടില്ല. പകരം ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കൂ."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ഫിംഗർപ്രിന്റ് പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു, സ്ഥിരീകരിക്കുക അമർത്തുക"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ ലഭ്യമല്ല"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ഫിംഗർപ്രിന്റ് സജ്ജീകരിക്കാനാകില്ല"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ഫിംഗർപ്രിന്റ് സജ്ജീകരണം ടൈംഔട്ടായി. വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ഉപയോക്താവ് റദ്ദാക്കിയ ഫിംഗർപ്രിന്‍റ് പ്രവർത്തനം."</string>
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"ഫിംഗർപ്രിന്റിന്റെ പ്രവർത്തനം ഉപയോക്താവ് റദ്ദാക്കി"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"നിരവധി ശ്രമങ്ങൾ. പകരം സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"നിരവധി ശ്രമങ്ങൾ. പകരം സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ഫിംഗർപ്രിന്റ് പ്രോസസ് ചെയ്യാനാകില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"വിരലടയാളങ്ങൾ എൻറോൾ ചെയ്തിട്ടില്ല."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ഈ ഉപകരണത്തിൽ ഫിംഗർപ്രിന്റ് സെൻസറില്ല."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"സെൻസർ താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കി."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"വിരലടയാള സെൻസർ ഉപയോഗിക്കാനാകുന്നില്ല. റിപ്പയർ കേന്ദ്രം സന്ദർശിക്കുക"</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"ഫിംഗർപ്രിന്റുകളൊന്നും എൻറോൾ ചെയ്‌തിട്ടില്ല"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"ഈ ഉപകരണത്തിൽ ഫിംഗർപ്രിന്റ് സെൻസർ ഇല്ല"</string>
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"സെൻസർ താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"ഫിംഗർപ്രിന്റ് സെൻസർ ഉപയോഗിക്കാനാകില്ല. റിപ്പയർ കേന്ദ്രം സന്ദർശിക്കുക."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"പവർ ബട്ടൺ അമർത്തി"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ഫിംഗർ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കുക"</string>
@@ -665,14 +695,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"എന്തോ കുഴപ്പമുണ്ടായി. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ഫിംഗർപ്രിന്റ് ഐക്കൺ"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"ഉപകരണ അൺലോക്ക്"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"അൺലോക്ക് ചെയ്യാനുള്ള മറ്റൊരു മാർഗ്ഗം പരീക്ഷിച്ച് നോക്കൂ"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"ഫിംഗർപ്രിന്റ് തിരിച്ചറിയാൻ കഴിയാത്തപ്പോൾ, ഉദാഹരണത്തിന്, വിരൽ നനഞ്ഞിരിക്കുമ്പോൾ ഫേസ് അൺലോക്ക് ഉപയോഗിക്കുക"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"നിങ്ങളുടെ മുഖം തിരിച്ചറിയാനാകാത്തപ്പോൾ, ഉദാഹരണത്തിന്, ആവശ്യത്തിന് ലൈറ്റ് ഇല്ലാത്തപ്പോൾ ഫിംഗർപ്രിന്റ് അൺലോക്ക് ഉപയോഗിക്കുക"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ഫെയ്‌സ് അൺലോക്ക്"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ഫെയ്‌സ് അൺലോക്കുമായി ബന്ധപ്പെട്ട പ്രശ്നം"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"നിങ്ങളുടെ മുഖ മോഡൽ ഇല്ലാതാക്കാൻ ടാപ്പ് ചെയ്യുക, തുടർന്ന് അത് വീണ്ടും ചേർക്കുക"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"ഫെയ്‌സ് അൺലോക്ക് സജ്ജീകരിക്കുക"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"ഫോണിലേക്ക് നോക്കി അത് അൺലോക്ക് ചെയ്യുക"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ഫെയ്‌സ് അൺലോക്ക് ഉപയോഗിക്കാൻ, ക്രമീകരണം &gt; സ്വകാര്യത എന്നതിൽ "<b>"ക്യാമറാ ആക്‌സസ്"</b>" ഓണാക്കുക"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"അൺലോക്ക് ചെയ്യുന്നതിനുള്ള കൂടുതൽ വഴികൾ സജ്ജീകരിക്കുക"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ഫിംഗർപ്രിന്റ് ചേർക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ഫിംഗർപ്രിന്റ് അൺലോക്ക്"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"വിരലടയാള സെൻസർ ഉപയോഗിക്കാനാകുന്നില്ല"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"റിപ്പയർ കേന്ദ്രം സന്ദർശിക്കുക."</string>
@@ -689,7 +719,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"മുഖം കാണുന്നില്ല. ഫോൺ കണ്ണിന് നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"വളരെയധികം ചലനം. ഫോൺ അനക്കാതെ നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യുക."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"മുഖം തിരിച്ചറിയാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"മുഖം തിരിച്ചറിഞ്ഞിട്ടില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"നിങ്ങളുടെ തലയുടെ സ്ഥാനം ചെറുതായി മാറ്റുക"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"കൂടുതൽ കൃത്യമായി ഫോണിന് നേരെ നോക്കുക"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"കൂടുതൽ കൃത്യമായി ഫോണിന് നേരെ നോക്കുക"</string>
@@ -800,13 +830,15 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz-നേക്കാൾ ഉയർന്ന റേറ്റിൽ സെൻസർ ഡാറ്റ സാമ്പിൾ ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ഉപയോക്താവിന്റെ പ്രവർത്തനമില്ലാതെ തന്നെ ആപ്പ് അപ്ഡേറ്റ് ചെയ്യുക"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"മുമ്പ് ഹോൾഡർ ഇൻസ്റ്റാൾ ചെയ്ത ആപ്പ്, ഉപയോക്താവിന്റെ പ്രവർത്തനമില്ലാതെ തന്നെ അപ്ഡേറ്റ് ചെയ്യാൻ ആ ഹോൾഡറെ അനുവദിക്കുന്നു"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"മറ്റ് ആപ്പുകളുടെ ഉടമസ്ഥതയിലുള്ള E2EE കോൺടാക്റ്റ് കീകളുടെ പരിശോധിച്ചുറപ്പിക്കൽ നിലകൾ അപ്‌ഡേറ്റ് ചെയ്യുക"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"മറ്റ് ആപ്പുകളുടെ ഉടമസ്ഥതയിലുള്ള E2EE കോൺടാക്റ്റ് കീകളുടെ പരിശോധിച്ചുറപ്പിക്കൽ നിലകൾ അപ്‌ഡേറ്റ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡുകളിലും PIN-കളിലും അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ടാബ്‌ലെറ്റ് ലോക്കുചെയ്യുകയോ ടാബ്‌ലെറ്റിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"സ്‌ക്രീൻ അൺലോക്ക് ചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പ് ചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പ് ചെയ്‌തിട്ടുണ്ടെങ്കിൽ നിങ്ങളുടെ Android TV ലോക്ക് ചെയ്യുകയോ Android TV-യിലെ എല്ലാ ഡാറ്റയും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"സ്ക്രീൻ അൺലോക്ക് ചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പ് ചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക. നിരവധി തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പ് ചെയ്‌താൽ, ഇൻഫോറ്റേയിൻമെന്റ് സിസ്‌റ്റം ലോക്ക് ചെയ്യുകയോ ഇൻഫോറ്റേയിൻമെന്റ് സിസ്‌റ്റത്തിന്റെ ഡാറ്റ മുഴുവനും മായ്ക്കുകയോ ചെയ്യുക."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ഫോൺ ലോക്കുചെയ്യുകയോ ഫോണിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോചെയ്യുക."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ഫോൺ ലോക്കുചെയ്യുകയോ ഫോണിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോചെയ്യുക."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"സ്‌ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ പാസ്‌വേഡ് ടൈപ്പുചെയ്‌തെങ്കിൽ ടാബ്‌ലെറ്റ് ലോക്കുചെയ്യുകയോ ഈ എല്ലാ ഉപയോക്തൃവിവരവും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"സ്‌ക്രീൻ അൺലോക്ക് ചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പ് ചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പ് ചെയ്‌തിട്ടുണ്ടെങ്കിൽ നിങ്ങളുടെ Android TV ലോക്ക് ചെയ്യുകയോ ഈ ഉപയോക്തൃ ഡാറ്റയെല്ലാം മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"സ്ക്രീൻ അൺലോക്ക് ചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പ് ചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിച്ച്, നിരവധി തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പ് ചെയ്‌താൽ ഇൻഫോറ്റേയിൻമെന്റ് സിസ്‌റ്റം ലോക്ക് ചെയ്യുകയോ ഈ പ്രൊഫൈലിന്റെ ഡാറ്റ മുഴുവനും മായ്ക്കുകയോ ചെയ്യുക."</string>
@@ -1158,6 +1190,8 @@
     <string name="deleteText" msgid="4200807474529938112">"ഇല്ലാതാക്കുക"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ടൈപ്പുചെയ്യൽ രീതി"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ടെക്‌സ്‌റ്റ് പ്രവർത്തനങ്ങൾ"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"ഈ ഫീൽഡിൽ കയ്യെഴുത്ത് പിന്തുണയ്ക്കുന്നില്ല"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"പാസ്‍വേഡ് ഫീൽഡുകളിൽ കയ്യെഴുത്ത് പിന്തുണയ്ക്കുന്നില്ല"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"മടങ്ങുക"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ഇൻപുട്ട് രീതി മാറുക"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"സംഭരണയിടം കഴിഞ്ഞു"</string>
@@ -1393,7 +1427,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"നിരസിക്കുക"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ഇൻപുട്ട് രീതി തിരഞ്ഞെടുക്കുക"</string>
     <string name="show_ime" msgid="6406112007347443383">"ഫിസിക്കൽ കീബോർഡ് സജീവമായിരിക്കുമ്പോൾ സ്ക്രീനിൽ നിലനിർത്തുക"</string>
-    <string name="hardware" msgid="1800597768237606953">"വെർച്വൽ കീബോർഡ് കാണിക്കുക"</string>
+    <string name="hardware" msgid="3611039921284836033">"ഓൺ-സ്ക്രീൻ കീബോർഡ് ഉപയോഗിക്കൂ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> കോൺഫിഗർ ചെയ്യുക"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"യഥാർത്ഥ കീബോർഡുകൾ കോൺഫിഗർ ചെയ്യുക"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ഭാഷയും ലേഔട്ടും തിരഞ്ഞെടുക്കുന്നതിന് ടാപ്പ് ചെയ്യുക"</string>
@@ -1703,6 +1737,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ഇതിന് ഒരു ആപ്പുമായോ ഹാർഡ്‌വെയർ സെൻസറുമായോ ഉള്ള നിങ്ങളുടെ ആശയവിനിമയങ്ങൾ ട്രാക്ക് ചെയ്യാനും നിങ്ങളുടെ പേരിൽ ആശയവിനിമയം നടത്താനും കഴിയും."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"അനുവദിക്കൂ"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"നിരസിക്കുക"</string>
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"അൺഇൻസ്‌റ്റാൾ ചെയ്യുക"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ഒരു ആപ്പ്, അനുമതി അഭ്യർത്ഥന മറയ്‌ക്കുന്നതിനാൽ നിങ്ങളുടെ പ്രതികരണം പരിശോധിച്ചുറപ്പിക്കാനാകില്ല."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ഉപയോഗിച്ച് തുടങ്ങാൻ ഫീച്ചർ ടാപ്പ് ചെയ്യുക:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ഉപയോഗസഹായി ബട്ടണിന്റെ സഹായത്തോടെ, ഉപയോഗിക്കാൻ ഫീച്ചറുകൾ തിരഞ്ഞെടുക്കുക"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"വോളിയം കീ കുറുക്കുവഴിയിലൂടെ ഉപയോഗിക്കാൻ ഫീച്ചറുകൾ തിരഞ്ഞെടുക്കുക"</string>
@@ -1863,15 +1899,16 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"രണ്ടാമത്തെ ഔദ്യോഗിക <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"മൂന്നാമത്തെ ഔദ്യോഗിക <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"ക്ലോൺ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"സ്വകാര്യം <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ചെയ്യുംമുമ്പ് പിൻ ചോദിക്കൂ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"അൺപിന്നിനുമുമ്പ് അൺലോക്ക് പാറ്റേൺ ആവശ്യപ്പെടൂ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"അൺപിന്നിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടൂ"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"നിങ്ങളുടെ അഡ്‌മിൻ ഇൻസ്റ്റാൾ ചെയ്യുന്നത്"</string>
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"നിങ്ങളുടെ അഡ്‌മിൻ ഇൻസ്‌റ്റാൾ ചെയ്തത്.\nനൽകിയ അനുമതികൾ കാണാൻ ക്രമീകരണത്തിലേക്ക് പോകുക"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"നിങ്ങളുടെ അഡ്‌മിൻ അപ്‌ഡേറ്റ് ചെയ്യുന്നത്"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ശരി"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"\'ബാറ്ററി ലാഭിക്കൽ\' ഡാർക്ക് തീം ഓണാക്കുന്നു, ഒപ്പം പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"ബാറ്ററി ലാഭിക്കൽ ഡാർക്ക് തീം ഓണാക്കുന്നു, പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും അത് പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"\'ബാറ്ററി സേവർ\' ഡാർക്ക് തീം ഓണാക്കുന്നു, ഒപ്പം പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"ബാറ്ററി സേവർ ഡാർക്ക് തീം ഓണാക്കുന്നു, പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും അത് പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ഡാറ്റാ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ഓണാക്കുക"</string>
@@ -1896,6 +1933,12 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"വാരാന്ത്യം"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ഇവന്റ്"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ഉറക്കം"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> മാനേജ് ചെയ്യുന്നത്"</string>
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ഓണാണ്"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ഓഫാണ്"</string>
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"എല്ലാ കലണ്ടറിലും"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ചില ശബ്‌ദങ്ങൾ മ്യൂട്ട് ചെയ്യുന്നു"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്, ഫാക്‌ടറി വിവര പുനഃസജ്ജീകരണം ചെയ്യുന്നതുവരെ ഇതു അസ്ഥിരമായിരിക്കാനിടയുണ്ട്."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്. വിശദാംശങ്ങൾക്കായി നിർമ്മാതാവിനെ ബന്ധപ്പെടുക."</string>
@@ -1913,6 +1956,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"പരിശോധിച്ചുറപ്പിച്ചത്"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"വികസിപ്പിക്കുക"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"ചുരുക്കുക"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"ചുരുക്കി"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"വിപുലീകരിച്ചു"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"വികസിപ്പിക്കൽ ടോഗിൾ ചെയ്യുക"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB പെരിഫറൽ പോർട്ട്"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1953,10 +1998,13 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"വർക്ക് ആപ്പുകൾ പുനരാരംഭിക്കണോ?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"പുനരാരംഭിക്കുക"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"അടിയന്തരം"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"സ്‌ക്രീൻ ലോക്ക് സജ്ജീകരിക്കൂ"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"സ്‌ക്രീൻ ലോക്ക് സജ്ജീകരിക്കൂ"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"സ്വകാര്യ സ്പേസിന്, ഇതിൽ സ്ക്രീൻ ലോക്ക് സജ്ജീകരിക്കൂ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ആപ്പ് ലഭ്യമല്ല"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ലഭ്യമല്ല"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"അനുമതി ആവശ്യമാണ്"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"അനുമതി അഭ്യർത്ഥന നിയന്ത്രിച്ചു"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"ക്യാമറ ലഭ്യമല്ല"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ഫോണിൽ തുടരുക"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"മൈക്രോഫോൺ ലഭ്യമല്ല"</string>
@@ -1967,6 +2015,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ഇപ്പോൾ നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം Android TV ഉപകരണത്തിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ഇപ്പോൾ നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ഇപ്പോൾ നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> ഉപകരണത്തിൽ ഇത് ആക്‌സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ഫോണിൽ ശ്രമിച്ച് നോക്കൂ."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"ഈ ആപ്പ് അധിക അനുമതികൾ അഭ്യർത്ഥിക്കുന്നു, എന്നാൽ സ്‌ട്രീമിംഗ് സെഷനിടയിൽ അനുമതികൾ നൽകാനാകില്ല. ആദ്യം നിങ്ങളുടെ Android TV ഉപകരണത്തിൽ അനുമതി നൽകുക."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"ഈ ആപ്പ് അധിക അനുമതികൾ അഭ്യർത്ഥിക്കുന്നു, എന്നാൽ സ്‌ട്രീമിംഗ് സെഷനിടയിൽ അനുമതികൾ നൽകാനാകില്ല. ആദ്യം നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ അനുമതി നൽകുക."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"ഈ ആപ്പ് അധിക അനുമതികൾ അഭ്യർത്ഥിക്കുന്നു, എന്നാൽ സ്‌ട്രീമിംഗ് സെഷനിടയിൽ അനുമതികൾ നൽകാനാകില്ല. ആദ്യം നിങ്ങളുടെ ഫോണിൽ അനുമതി നൽകുക."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ഈ ആപ്പ് അധിക സുരക്ഷ അഭ്യർത്ഥിക്കുന്നു. പകരം നിങ്ങളുടെ Android TV ഉപകരണത്തിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ഈ ആപ്പ് അധിക സുരക്ഷ അഭ്യർത്ഥിക്കുന്നു. പകരം നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ഈ ആപ്പ് അധിക സുരക്ഷ അഭ്യർത്ഥിക്കുന്നു. പകരം നിങ്ങളുടെ ഫോണിൽ ശ്രമിച്ച് നോക്കൂ."</string>
@@ -2024,7 +2075,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" എന്നതിൽ അപ്‌ഡേറ്റ് ചെയ്യണോ?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g>, "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" എന്നതിൽ അപ്‌ഡേറ്റ് ചെയ്യണോ?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> എന്നിവ "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" എന്നതിൽ അപ്‌ഡേറ്റ് ചെയ്യണോ?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"ഇനിപ്പറയുന്ന ഇനങ്ങൾ "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" എന്നതിൽ അപ്‌ഡേറ്റ് ചെയ്യണോ: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"ഇനിപ്പറയുന്ന ഇനങ്ങൾ "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" എന്നതിൽ അപ്‌ഡേറ്റ് ചെയ്യണോ: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"സംരക്ഷിക്കുക"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"വേണ്ട, നന്ദി"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ഇപ്പോൾ വേണ്ട"</string>
@@ -2096,8 +2147,10 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ദിനചര്യ മോഡ് വിവരത്തെ കുറിച്ചുള്ള അറിയിപ്പ്"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ബാറ്ററി സേവർ ഓണാക്കി"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ബാറ്ററി ലൈഫ് വർദ്ധിപ്പിക്കാൻ ബാറ്ററി ഉപയോഗം കുറയ്ക്കുന്നു"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ബാറ്ററി ലാഭിക്കൽ"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കിയിരിക്കുന്നു"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"ബാറ്ററി സേവർ ഓണാണ്"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"ബാറ്ററി ലൈഫ് വർദ്ധിപ്പിക്കാൻ ബാറ്ററി സേവർ ഓണാക്കിയിരിക്കുന്നു"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ബാറ്ററി സേവർ"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ബാറ്ററി സേവർ ഓഫാക്കിയിരിക്കുന്നു"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ഫോണിൽ വേണ്ടത്ര ചാർജ് ഉണ്ട്. ഫീച്ചറുകൾക്ക് ഇനി നിയന്ത്രണമില്ല."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"ടാബ്‌ലെറ്റിൽ വേണ്ടത്ര ചാർജ് ഉണ്ട്. ഫീച്ചറുകൾക്ക് ഇനി നിയന്ത്രണമില്ല."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"ഉപകരണത്തിൽ വേണ്ടത്ര ചാർജ് ഉണ്ട്. ഫീച്ചറുകൾക്ക് ഇനി നിയന്ത്രണമില്ല."</string>
@@ -2143,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ലെഫ്റ്റ്"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad റൈറ്റ്"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad സെന്റർ"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിന്റെ അടിക്കുറിപ്പ് ബാർ."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> നിയന്ത്രിത ബക്കറ്റിലേക്ക് നീക്കി"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"ചിത്രം അയച്ചു"</string>
@@ -2170,6 +2222,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ഔദ്യോഗിക ആപ്പിലേക്ക് മാറണോ?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"സ്ഥാപനം ഔദ്യോഗിക ആപ്പുകളിൽ നിന്ന് കോളുകൾ ചെയ്യാൻ മാത്രമേ നിങ്ങളെ അനുവദിക്കുന്നുള്ളൂ"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"സ്ഥാപനം ഔദ്യോഗിക ആപ്പുകളിൽ നിന്ന് സന്ദേശമയയ്ക്കാൻ മാത്രമേ നിങ്ങളെ അനുവദിക്കുന്നുള്ളൂ"</string>
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"നിങ്ങളുടെ സ്വകാര്യ ഫോൺ ആപ്പിൽ നിന്ന് മാത്രമേ ഫോൺ വിളിക്കാനാകൂ. സ്വകാര്യ ഫോൺ ഉപയോഗിച്ചുള്ള കോളുകൾ നിങ്ങളുടെ സ്വകാര്യ കോൾ ചരിത്രത്തിലേക്ക് ചേർക്കും."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"നിങ്ങളുടെ സ്വകാര്യ സന്ദേശമയയ്ക്കൽ ആപ്പിൽ നിന്ന് മാത്രമേ നിങ്ങൾക്ക് SMS സന്ദേശങ്ങൾ അയയ്‌ക്കാനാകൂ."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"വ്യക്തിപരമായ ബ്രൗസർ ഉപയോഗിക്കുക"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ഔദ്യോഗിക ബ്രൗസർ ഉപയോഗിക്കുക"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"കോൾ ചെയ്യുക"</string>
@@ -2323,13 +2377,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"പശ്ചാത്തലത്തിൽ നിന്ന് ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ ആരംഭിക്കാൻ സഹകാരി ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"മൈക്രോഫോൺ ലഭ്യമാണ്"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"മൈക്രോഫോൺ ബ്ലോക്ക് ചെയ്‌തു"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ഡിസ്‌പ്ലേയിലേക്ക് മിറർ ചെയ്യാനാകില്ല"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"മറ്റൊരു കേബിൾ ഉപയോഗിച്ച് വീണ്ടും ശ്രമിക്കുക"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"നിങ്ങളുടെ ഉപകരണത്തിന് ചൂട് വളരെ കൂടുതലാണ്, അത് തണുക്കുന്നത് വരെ ഡിസ്‌പ്ലേയിലേക്ക് മിറർ ചെയ്യാനാകില്ല"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ഡ്യുവൽ സ്ക്രീൻ"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ഡ്യുവൽ സ്ക്രീൻ ഓണാണ്"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"ഉള്ളടക്കം കാണിക്കാൻ <xliff:g id="APP_NAME">%1$s</xliff:g> രണ്ട് ഡിസ്പ്ലേകളും ഉപയോഗിക്കുന്നു"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ഉപകരണത്തിന് ചൂട് കൂടുതലാണ്"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"നിങ്ങളുടെ ഫോൺ വളരെയധികം ചൂടാകുന്നതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"ബാറ്ററി ലാഭിക്കൽ ഓണായതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല. നിങ്ങൾക്ക് ഇത് ക്രമീകരണത്തിൽ ഓഫാക്കാം."</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"ബാറ്ററി സേവർ ഓണായതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല. നിങ്ങൾക്ക് ഇത് ക്രമീകരണത്തിൽ ഓഫാക്കാം."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"ക്രമീകരണത്തിലേക്ക് പോകുക"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ഓഫാക്കുക"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> കോൺഫിഗർ ചെയ്‌തു"</string>
@@ -2346,4 +2403,25 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ഔദ്യോഗികം 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"ടെസ്‌റ്റ്"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"കമ്മ്യൂണൽ"</string>
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"സ്വകാര്യ സ്പേസ്"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ക്ലോൺ ചെയ്യുക"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"കമ്മ്യൂണൽ"</string>
+    <string name="redacted_notification_message" msgid="1520587845842228816">"സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട അറിയിപ്പ് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ആപ്പ് ഉള്ളടക്കം, അതിന്റെ സുരക്ഷയ്ക്കായി സ്ക്രീൻ പങ്കിടലിൽ നിന്ന് മറച്ചിരിക്കുന്നു"</string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"സാറ്റലൈറ്റിലേക്ക് സ്വയമേവ കണക്റ്റ് ചെയ്തു"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"മൊബൈലോ വൈഫൈ നെറ്റ്‌വർക്കോ ഇല്ലാതെ തന്നെ സന്ദേശങ്ങൾ അയയ്‌ക്കാനും സ്വീകരിക്കാനും നിങ്ങൾക്ക് കഴിയും"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages തുറക്കുക"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ഇത് പ്രവർത്തിക്കുന്നത് എങ്ങനെയാണ്"</string>
+    <string name="unarchival_session_app_label" msgid="6811856981546348205">"തീർപ്പാക്കിയിട്ടില്ല..."</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ഫിംഗർപ്രിന്റ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അത് ഇല്ലാതാക്കി"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> എന്നിവ ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അവ ഇല്ലാതാക്കി"</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അത് ഇല്ലാതാക്കി. നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യുന്നതിനായി വീണ്ടും സജ്ജീകരിക്കുക."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> എന്നിവ ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അവ ഇല്ലാതാക്കി. നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യുന്നതിനായി അവ വീണ്ടും സജ്ജീകരിക്കുക."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"ഫെയ്‌സ് അൺലോക്ക് വീണ്ടും സജ്ജീകരിക്കുക"</string>
+    <string name="face_dangling_notification_msg" msgid="8806849376915541655">"നിങ്ങളുടെ മുഖ മോഡൽ ശരിയായി പ്രവർത്തിക്കാത്തതിനാൽ അത് ഇല്ലാതാക്കി. നിങ്ങളുടെ മുഖം ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യുന്നതിനായി വീണ്ടും സജ്ജീകരിക്കുക."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"സജ്ജീകരിക്കുക"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ഇപ്പോൾ വേണ്ട"</string>
 </resources>

@@ -19,17 +19,19 @@ package com.android.systemui.biometrics.data.repository
 import android.hardware.biometrics.SensorLocationInternal
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeFingerprintPropertyRepository : FingerprintPropertyRepository {
-
-    private val _isInitialized: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    override val isInitialized = _isInitialized.asStateFlow()
+@SysUISingleton
+class FakeFingerprintPropertyRepository @Inject constructor() : FingerprintPropertyRepository {
+    override val propertiesInitialized: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     private val _sensorId: MutableStateFlow<Int> = MutableStateFlow(-1)
-    override val sensorId: StateFlow<Int> = _sensorId.asStateFlow()
+    override val sensorId = _sensorId.asStateFlow()
 
     private val _strength: MutableStateFlow<SensorStrength> =
         MutableStateFlow(SensorStrength.CONVENIENCE)
@@ -37,12 +39,11 @@ class FakeFingerprintPropertyRepository : FingerprintPropertyRepository {
 
     private val _sensorType: MutableStateFlow<FingerprintSensorType> =
         MutableStateFlow(FingerprintSensorType.UNKNOWN)
-    override val sensorType: StateFlow<FingerprintSensorType> = _sensorType.asStateFlow()
+    override val sensorType = _sensorType.asStateFlow()
 
     private val _sensorLocations: MutableStateFlow<Map<String, SensorLocationInternal>> =
         MutableStateFlow(mapOf("" to SensorLocationInternal.DEFAULT))
-    override val sensorLocations: StateFlow<Map<String, SensorLocationInternal>> =
-        _sensorLocations.asStateFlow()
+    override val sensorLocations = _sensorLocations.asStateFlow()
 
     fun setProperties(
         sensorId: Int,
@@ -54,6 +55,41 @@ class FakeFingerprintPropertyRepository : FingerprintPropertyRepository {
         _strength.value = strength
         _sensorType.value = sensorType
         _sensorLocations.value = sensorLocations
-        _isInitialized.value = true
+        propertiesInitialized.value = true
     }
+
+    /** setProperties as if the device supports UDFPS_OPTICAL. */
+    fun supportsUdfps() {
+        setProperties(
+            sensorId = 0,
+            strength = SensorStrength.STRONG,
+            sensorType = FingerprintSensorType.UDFPS_OPTICAL,
+            sensorLocations = emptyMap(),
+        )
+    }
+
+    /** setProperties as if the device supports POWER_BUTTON fingerprint sensor. */
+    fun supportsSideFps() {
+        setProperties(
+            sensorId = 0,
+            strength = SensorStrength.STRONG,
+            sensorType = FingerprintSensorType.POWER_BUTTON,
+            sensorLocations = emptyMap(),
+        )
+    }
+
+    /** setProperties as if the device supports the rear fingerprint sensor. */
+    fun supportsRearFps() {
+        setProperties(
+            sensorId = 0,
+            strength = SensorStrength.STRONG,
+            sensorType = FingerprintSensorType.REAR,
+            sensorLocations = emptyMap(),
+        )
+    }
+}
+
+@Module
+interface FakeFingerprintPropertyRepositoryModule {
+    @Binds fun bindFake(fake: FakeFingerprintPropertyRepository): FingerprintPropertyRepository
 }

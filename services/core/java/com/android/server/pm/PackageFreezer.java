@@ -17,6 +17,8 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.pm.Flags;
 import android.content.pm.PackageManager;
 
 import dalvik.system.CloseGuard;
@@ -29,6 +31,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * app code/data to prevent the app from running while you're working.
  */
 final class PackageFreezer implements AutoCloseable {
+    @Nullable private InstallRequest mInstallRequest;
+
     private final String mPackageName;
 
     private final AtomicBoolean mClosed = new AtomicBoolean();
@@ -43,18 +47,29 @@ final class PackageFreezer implements AutoCloseable {
      * {@link PackageManager#INSTALL_DONT_KILL_APP} or
      * {@link PackageManager#DELETE_DONT_KILL_APP}.
      */
-    PackageFreezer(PackageManagerService pm) {
+
+    PackageFreezer(PackageManagerService pm, @Nullable InstallRequest request) {
         mPm = pm;
         mPackageName = null;
         mClosed.set(true);
         mCloseGuard.open("close");
+        mInstallRequest = request;
+        // We only focus on the install Freeze metrics now
+        if (mInstallRequest != null) {
+            mInstallRequest.onFreezeStarted();
+        }
     }
 
     PackageFreezer(String packageName, int userId, String killReason,
-            PackageManagerService pm, int exitInfoReason) {
+            PackageManagerService pm, int exitInfoReason, @Nullable InstallRequest request) {
         mPm = pm;
         mPackageName = packageName;
+        mInstallRequest = request;
         final PackageSetting ps;
+        // We only focus on the install Freeze metrics now
+        if (mInstallRequest != null) {
+            mInstallRequest.onFreezeStarted();
+        }
         synchronized (mPm.mLock) {
             final int refCounts = mPm.mFrozenPackages
                     .getOrDefault(mPackageName, 0 /* defaultValue */) + 1;
@@ -62,8 +77,13 @@ final class PackageFreezer implements AutoCloseable {
             ps = mPm.mSettings.getPackageLPr(mPackageName);
         }
         if (ps != null) {
-            mPm.killApplication(ps.getPackageName(), ps.getAppId(), userId, killReason,
-                    exitInfoReason);
+            if (Flags.waitApplicationKilled()) {
+                mPm.killApplicationSync(ps.getPackageName(), ps.getAppId(), userId, killReason,
+                        exitInfoReason);
+            } else {
+                mPm.killApplication(ps.getPackageName(), ps.getAppId(), userId, killReason,
+                        exitInfoReason);
+            }
         }
         mCloseGuard.open("close");
     }
@@ -91,6 +111,11 @@ final class PackageFreezer implements AutoCloseable {
                     mPm.mFrozenPackages.remove(mPackageName);
                 }
             }
+        }
+        // We only focus on the install Freeze metrics now
+        if (mInstallRequest != null) {
+            mInstallRequest.onFreezeCompleted();
+            mInstallRequest = null;
         }
     }
 }

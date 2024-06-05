@@ -21,10 +21,13 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import android.app.usage.Flags;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManager;
 import android.content.res.Configuration;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.os.PersistableBundle;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ArrayUtils;
@@ -98,6 +101,17 @@ public class IntervalStatsTests {
                     break;
                 case UsageEvents.Event.LOCUS_ID_SET:
                     event.mLocusId = "locus" + (i % 7); //"random" locus
+                    break;
+                case UsageEvents.Event.USER_INTERACTION:
+                    if (Flags.userInteractionTypeApi()) {
+                        // "random" user interaction extras.
+                        PersistableBundle extras = new PersistableBundle();
+                        extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY,
+                                "fake.namespace.category" + (i % 13));
+                        extras.putString(UsageStatsManager.EXTRA_EVENT_ACTION,
+                                "fakeaction" + (i % 13));
+                        event.mExtras = extras;
+                    }
                     break;
             }
 

@@ -16,6 +16,7 @@
 
 package android.security.keystore;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,7 +35,10 @@ import java.security.KeyPairGenerator;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -71,16 +75,18 @@ import javax.security.auth.x500.X500Principal;
  * {@link java.security.interfaces.ECPublicKey} or {@link java.security.interfaces.RSAPublicKey}
  * interfaces.
  *
- * <p>For asymmetric key pairs, a self-signed X.509 certificate will be also generated and stored in
- * the Android Keystore. This is because the {@link java.security.KeyStore} abstraction does not
- * support storing key pairs without a certificate. The subject, serial number, and validity dates
- * of the certificate can be customized in this spec. The self-signed certificate may be replaced at
- * a later time by a certificate signed by a Certificate Authority (CA).
+ * <p>For asymmetric key pairs, a X.509 certificate will be also generated and stored in the Android
+ * Keystore. This is because the {@link java.security.KeyStore} abstraction does not support storing
+ * key pairs without a certificate. The subject, serial number, and validity dates of the
+ * certificate can be customized in this spec. The certificate may be replaced at a later time by a
+ * certificate signed by a Certificate Authority (CA).
  *
- * <p>NOTE: If a private key is not authorized to sign the self-signed certificate, then the
- * certificate will be created with an invalid signature which will not verify. Such a certificate
- * is still useful because it provides access to the public key. To generate a valid signature for
- * the certificate the key needs to be authorized for all of the following:
+ * <p>NOTE: If attestation is not requested using {@link Builder#setAttestationChallenge(byte[])},
+ * generated certificate may be self-signed. If a private key is not authorized to sign the
+ * certificate, then the certificate will be created with an invalid signature which will not
+ * verify. Such a certificate is still useful because it provides access to the public key. To
+ * generate a valid signature for the certificate the key needs to be authorized for all of the
+ * following:
  * <ul>
  * <li>{@link KeyProperties#PURPOSE_SIGN},</li>
  * <li>operation without requiring the user to be authenticated (see
@@ -300,6 +306,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private final Date mKeyValidityForConsumptionEnd;
     private final @KeyProperties.PurposeEnum int mPurposes;
     private final @KeyProperties.DigestEnum String[] mDigests;
+    private final @NonNull @KeyProperties.DigestEnum Set<String> mMgf1Digests;
     private final @KeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
     private final @KeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
     private final @KeyProperties.BlockModeEnum String[] mBlockModes;
@@ -345,6 +352,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             Date keyValidityForConsumptionEnd,
             @KeyProperties.PurposeEnum int purposes,
             @KeyProperties.DigestEnum String[] digests,
+            @KeyProperties.DigestEnum Set<String> mgf1Digests,
             @KeyProperties.EncryptionPaddingEnum String[] encryptionPaddings,
             @KeyProperties.SignaturePaddingEnum String[] signaturePaddings,
             @KeyProperties.BlockModeEnum String[] blockModes,
@@ -404,6 +412,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(keyValidityForConsumptionEnd);
         mPurposes = purposes;
         mDigests = ArrayUtils.cloneIfNotEmpty(digests);
+        // No need to copy the input parameter because the Builder class passes in an immutable
+        // collection.
+        mMgf1Digests = mgf1Digests != null ? mgf1Digests : Collections.emptySet();
         mEncryptionPaddings =
                 ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(encryptionPaddings));
         mSignaturePaddings = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(signaturePaddings));
@@ -566,7 +577,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
 
     /**
      * Returns the set of digest algorithms (e.g., {@code SHA-256}, {@code SHA-384} with which the
-     * key can be used or {@code null} if not specified.
+     * key can be used.
      *
      * <p>See {@link KeyProperties}.{@code DIGEST} constants.
      *
@@ -591,6 +602,40 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     @NonNull
     public boolean isDigestsSpecified() {
         return mDigests != null;
+    }
+
+    /**
+     * Returns the set of digests that can be used by the MGF1 mask generation function
+     * (e.g., {@code SHA-256}, {@code SHA-384}) with the key. Useful with the {@code RSA-OAEP}
+     * scheme.
+     * If not explicitly specified during key generation, the default {@code SHA-1} digest is
+     * used and may be specified when using the key.
+     *
+     * <p>See {@link KeyProperties}.{@code DIGEST} constants.
+     *
+     * @throws IllegalStateException if this set has not been specified.
+     *
+     * @see #isMgf1DigestsSpecified()
+     */
+    @NonNull
+    @FlaggedApi(android.security.Flags.FLAG_MGF1_DIGEST_SETTER_V2)
+    public @KeyProperties.DigestEnum Set<String> getMgf1Digests() {
+        if (mMgf1Digests.isEmpty()) {
+            throw new IllegalStateException("Mask generation function (MGF) not specified");
+        }
+        return new HashSet(mMgf1Digests);
+    }
+
+    /**
+     * Returns {@code true} if the set of digests for the MGF1 mask generation function,
+     * with which the key can be used, has been specified. Useful with the {@code RSA-OAEP} scheme.
+     *
+     * @see #getMgf1Digests()
+     */
+    @NonNull
+    @FlaggedApi(android.security.Flags.FLAG_MGF1_DIGEST_SETTER_V2)
+    public boolean isMgf1DigestsSpecified() {
+        return !mMgf1Digests.isEmpty();
     }
 
     /**
@@ -835,9 +880,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     }
 
     /**
-     * Returns {@code true} if the screen must be unlocked for this key to be used for decryption or
-     * signing. Encryption and signature verification will still be available when the screen is
-     * locked.
+     * Returns {@code true} if the key is authorized to be used only while the device is unlocked.
      *
      * @see Builder#setUnlockedDeviceRequired(boolean)
      */
@@ -865,7 +908,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     /**
      * Returns whether this key is critical to the device encryption flow.
      *
-     * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
+     * @see Builder#setCriticalToDeviceEncryption(boolean)
      * @hide
      */
     public boolean isCriticalToDeviceEncryption() {
@@ -913,6 +956,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private Date mKeyValidityForOriginationEnd;
         private Date mKeyValidityForConsumptionEnd;
         private @KeyProperties.DigestEnum String[] mDigests;
+        private @NonNull @KeyProperties.DigestEnum Set<String> mMgf1Digests =
+                Collections.emptySet();
         private @KeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
         private @KeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
         private @KeyProperties.BlockModeEnum String[] mBlockModes;
@@ -943,12 +988,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          *        Android KeyStore. Must not be empty.
          * @param purposes set of purposes (e.g., encrypt, decrypt, sign) for which the key can be
          *        used. Attempts to use the key for any other purpose will be rejected.
-         *
-         *        <p>If the set of purposes for which the key can be used does not contain
-         *        {@link KeyProperties#PURPOSE_SIGN}, the self-signed certificate generated by
-         *        {@link KeyPairGenerator} of {@code AndroidKeyStore} provider will contain an
-         *        invalid signature. This is OK if the certificate is only used for obtaining the
-         *        public key from Android KeyStore.
          *
          *        <p>See {@link KeyProperties}.{@code PURPOSE} flags.
          */
@@ -982,6 +1021,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             mPurposes = sourceSpec.getPurposes();
             if (sourceSpec.isDigestsSpecified()) {
                 mDigests = sourceSpec.getDigests();
+            }
+            if (sourceSpec.isMgf1DigestsSpecified()) {
+                mMgf1Digests = sourceSpec.getMgf1Digests();
             }
             mEncryptionPaddings = sourceSpec.getEncryptionPaddings();
             mSignaturePaddings = sourceSpec.getSignaturePaddings();
@@ -1092,7 +1134,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
-         * Sets the subject used for the self-signed certificate of the generated key pair.
+         * Sets the subject used for the certificate of the generated key pair.
          *
          * <p>By default, the subject is {@code CN=fake}.
          */
@@ -1106,7 +1148,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
-         * Sets the serial number used for the self-signed certificate of the generated key pair.
+         * Sets the serial number used for the certificate of the generated key pair.
+         * To ensure compatibility with devices and certificate parsers, the value
+         * should be 20 bytes or shorter (see RFC 5280 section 4.1.2.2).
          *
          * <p>By default, the serial number is {@code 1}.
          */
@@ -1120,8 +1164,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
-         * Sets the start of the validity period for the self-signed certificate of the generated
-         * key pair.
+         * Sets the start of the validity period for the certificate of the generated key pair.
          *
          * <p>By default, this date is {@code Jan 1 1970}.
          */
@@ -1135,8 +1178,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
-         * Sets the end of the validity period for the self-signed certificate of the generated key
-         * pair.
+         * Sets the end of the validity period for the certificate of the generated key pair.
          *
          * <p>By default, this date is {@code Jan 1 2048}.
          */
@@ -1226,6 +1268,33 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         @NonNull
         public Builder setDigests(@KeyProperties.DigestEnum String... digests) {
             mDigests = ArrayUtils.cloneIfNotEmpty(digests);
+            return this;
+        }
+
+        /**
+         * Sets the set of hash functions (e.g., {@code SHA-256}, {@code SHA-384}) which could be
+         * used by the mask generation function MGF1 (which is used for certain operations with
+         * the key). Attempts to use the key with any other digest for the mask generation
+         * function will be rejected.
+         *
+         * <p>This can only be specified for signing/verification keys and RSA encryption/decryption
+         * keys used with RSA OAEP padding scheme because these operations involve a mask generation
+         * function (MGF1) with a digest.
+         * The default digest for MGF1 is {@code SHA-1}, which will be specified during key creation
+         * time if no digests have been explicitly provided.
+         * {@code null} may not be specified as a parameter to this method: It is not possible to
+         * disable MGF1 digest, a default must be present for when the caller tries to use it.
+         *
+         * <p>When using the key, the caller may not specify any digests that were not provided
+         * during key creation time. The caller may specify the default digest, {@code SHA-1}, if no
+         * digests were explicitly provided during key creation (but it is not necessary to do so).
+         *
+         * <p>See {@link KeyProperties}.{@code DIGEST} constants.
+         */
+        @NonNull
+        @FlaggedApi(android.security.Flags.FLAG_MGF1_DIGEST_SETTER_V2)
+        public Builder setMgf1Digests(@NonNull @KeyProperties.DigestEnum String... mgf1Digests) {
+            mMgf1Digests = Set.of(mgf1Digests);
             return this;
         }
 
@@ -1351,7 +1420,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * the key, it is also irreversibly invalidated once a new biometric is enrolled or once\
          * no more biometrics are enrolled, unless {@link
          * #setInvalidatedByBiometricEnrollment(boolean)} is used to allow validity after
-         * enrollment. Attempts to initialize cryptographic operations using such keys will throw
+         * enrollment, or {@code KeyProperties.AUTH_DEVICE_CREDENTIAL} is specified as part of
+         * the parameters to {@link #setUserAuthenticationParameters}.
+         * Attempts to initialize cryptographic operations using such keys will throw
          * {@link KeyPermanentlyInvalidatedException}.</li>
          * </ul>
          *
@@ -1522,12 +1593,14 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * key has purpose {@link android.security.keystore.KeyProperties#PURPOSE_SIGN}. If the key
          * does not have purpose {@link android.security.keystore.KeyProperties#PURPOSE_SIGN}, it is
          * not possible to use the key to sign a certificate, so the public key certificate will
-         * contain a dummy signature.
+         * contain a placeholder signature.
          *
          * <p>Symmetric keys, such as AES and HMAC keys, do not have public key certificates. If a
          * {@link #getAttestationChallenge()} returns non-null and the spec is used to generate a
          * symmetric (AES or HMAC) key, {@link javax.crypto.KeyGenerator#generateKey()} will throw
          * {@link java.security.InvalidAlgorithmParameterException}.
+         *
+         * <p>The challenge may be up to 128 bytes.
          */
         @NonNull
         public Builder setAttestationChallenge(byte[] attestationChallenge) {
@@ -1599,16 +1672,16 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * {@link #setUserAuthenticationValidityDurationSeconds} and
          * {@link #setUserAuthenticationRequired}). Once the device has been removed from the
          * user's body, the key will be considered unauthorized and the user will need to
-         * re-authenticate to use it. For keys without an authentication validity period this
-         * parameter has no effect.
+         * re-authenticate to use it. If the device does not have an on-body sensor or the key does
+         * not have an authentication validity period, this parameter has no effect.
+         * <p>
+         * Since Android 12 (API level 31), this parameter has no effect even on devices that have
+         * an on-body sensor. A future version of Android may restore enforcement of this parameter.
+         * Meanwhile, it is recommended to not use it.
          *
-         * <p>Similarly, on devices that do not have an on-body sensor, this parameter will have no
-         * effect; the device will always be considered to be "on-body" and the key will therefore
-         * remain authorized until the validity period ends.
-         *
-         * @param remainsValid if {@code true}, and if the device supports on-body detection, key
-         * will be invalidated when the device is removed from the user's body or when the
-         * authentication validity expires, whichever occurs first.
+         * @param remainsValid if {@code true}, and if the device supports enforcement of this
+         * parameter, the key will be invalidated when the device is removed from the user's body or
+         * when the authentication validity expires, whichever occurs first.
          */
         @NonNull
         public Builder setUserAuthenticationValidWhileOnBody(boolean remainsValid) {
@@ -1650,11 +1723,49 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
-         * Sets whether the keystore requires the screen to be unlocked before allowing decryption
-         * using this key. If this is set to {@code true}, any attempt to decrypt or sign using this
-         * key while the screen is locked will fail. A locked device requires a PIN, password,
-         * biometric, or other trusted factor to access. While the screen is locked, any associated
-         * public key can still be used (e.g for signature verification).
+         * Sets whether this key is authorized to be used only while the device is unlocked.
+         * <p>
+         * The device is considered to be locked for a user when the user's apps are currently
+         * inaccessible and some form of lock screen authentication is required to regain access to
+         * them. For the full definition, see {@link KeyguardManager#isDeviceLocked()}.
+         * <p>
+         * Public key operations aren't restricted by {@code setUnlockedDeviceRequired(true)} and
+         * may be performed even while the device is locked. In Android 11 (API level 30) and lower,
+         * encryption and verification operations with symmetric keys weren't restricted either.
+         * <p>
+         * Keys that use {@code setUnlockedDeviceRequired(true)} can be imported and generated even
+         * while the device is locked, as long as the device has been unlocked at least once since
+         * the last reboot. However, such keys cannot be used (except for the unrestricted
+         * operations mentioned above) until the device is unlocked. Apps that need to encrypt data
+         * while the device is locked such that it can only be decrypted while the device is
+         * unlocked can generate a key and encrypt the data in software, import the key into
+         * Keystore using {@code setUnlockedDeviceRequired(true)}, and zeroize the original key.
+         * <p>
+         * {@code setUnlockedDeviceRequired(true)} is related to but distinct from
+         * {@link #setUserAuthenticationRequired(boolean) setUserAuthenticationRequired(true)}.
+         * {@code setUnlockedDeviceRequired(true)} requires that the device be unlocked, whereas
+         * {@code setUserAuthenticationRequired(true)} requires that a specific type of strong
+         * authentication has happened within a specific time period. They may be used together or
+         * separately; there are cases in which one requirement can be satisfied but not the other.
+         * <p>
+         * <b>Warning:</b> Be careful using {@code setUnlockedDeviceRequired(true)} on Android 14
+         * (API level 34) and lower, since the following bugs existed in Android 12 through 14:
+         * <ul>
+         *   <li>When the user didn't have a secure lock screen, unlocked-device-required keys
+         *   couldn't be generated, imported, or used.</li>
+         *   <li>When the user's secure lock screen was removed, all of that user's
+         *   unlocked-device-required keys were automatically deleted.</li>
+         *   <li>Unlocking the device with a non-strong biometric, such as face on many devices,
+         *   didn't re-authorize the use of unlocked-device-required keys.</li>
+         *   <li>Unlocking the device with a biometric didn't re-authorize the use of
+         *   unlocked-device-required keys in profiles that share their parent user's lock.</li>
+         * </ul>
+         * These issues are fixed in Android 15, so apps can avoid them by using
+         * {@code setUnlockedDeviceRequired(true)} only on Android 15 and higher.
+         * Apps that use both {@code setUnlockedDeviceRequired(true)} and
+         * {@link #setUserAuthenticationRequired(boolean) setUserAuthenticationRequired(true)}
+         * are unaffected by the first two issues, since the first two issues describe expected
+         * behavior for {@code setUserAuthenticationRequired(true)}.
          */
         @NonNull
         public Builder setUnlockedDeviceRequired(boolean unlockedDeviceRequired) {
@@ -1780,6 +1891,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
                     mKeyValidityForConsumptionEnd,
                     mPurposes,
                     mDigests,
+                    mMgf1Digests,
                     mEncryptionPaddings,
                     mSignaturePaddings,
                     mBlockModes,

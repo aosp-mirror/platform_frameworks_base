@@ -38,7 +38,6 @@ import android.location.LocationManager;
 import android.location.util.identity.CallerIdentity;
 import android.os.BatteryStats;
 import android.os.Binder;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
@@ -275,17 +274,6 @@ public class GnssManagerService {
     }
 
     /**
-     * Send Ni Response, indicating a location request initiated by a network carrier.
-     */
-    public void sendNiResponse(int notifId, int userResponse) {
-        try {
-            mGnssLocationProvider.getNetInitiatedListener().sendNiResponse(notifId, userResponse);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Dump info for debugging.
      */
     public void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
@@ -326,9 +314,9 @@ public class GnssManagerService {
             ipw.decreaseIndent();
         }
 
-        GnssPowerStats powerStats = mGnssNative.getPowerStats();
+        GnssPowerStats powerStats = mGnssNative.getLastKnownPowerStats();
         if (powerStats != null) {
-            ipw.println("Last Power Stats:");
+            ipw.println("Last Known Power Stats:");
             ipw.increaseIndent();
             powerStats.dump(fd, ipw, args, mGnssNative.getCapabilities());
             ipw.decreaseIndent();

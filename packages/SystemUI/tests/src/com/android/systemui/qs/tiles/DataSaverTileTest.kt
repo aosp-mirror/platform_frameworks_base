@@ -17,13 +17,12 @@
 package com.android.systemui.qs.tiles
 
 import android.os.Handler
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
@@ -32,32 +31,34 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.DataSaverController
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class DataSaverTileTest : SysuiTestCase() {
 
     @Mock private lateinit var mHost: QSHost
     @Mock private lateinit var mMetricsLogger: MetricsLogger
-    @Mock private lateinit var mStatusBarStateController: StatusBarStateController
-    @Mock private lateinit var mActivityStarter: ActivityStarter
     @Mock private lateinit var mQsLogger: QSLogger
     private val falsingManager = FalsingManagerFake()
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var dataSaverController: DataSaverController
-    @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
     @Mock private lateinit var uiEventLogger: QsEventLogger
+    @Mock private lateinit var systemUIDialogFactory: SystemUIDialog.Factory
+    @Mock private lateinit var systemUIDialog: SystemUIDialog
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: DataSaverTile
@@ -67,7 +68,8 @@ class DataSaverTileTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
 
-        Mockito.`when`(mHost.context).thenReturn(mContext)
+        whenever(mHost.context).thenReturn(mContext)
+        whenever(systemUIDialogFactory.create()).thenReturn(systemUIDialog)
 
         tile =
             DataSaverTile(
@@ -81,7 +83,8 @@ class DataSaverTileTest : SysuiTestCase() {
                 activityStarter,
                 mQsLogger,
                 dataSaverController,
-                dialogLaunchAnimator
+                mDialogTransitionAnimator,
+                systemUIDialogFactory
             )
     }
 

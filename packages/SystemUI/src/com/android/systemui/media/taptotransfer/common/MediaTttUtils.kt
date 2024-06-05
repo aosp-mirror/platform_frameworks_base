@@ -21,7 +21,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import androidx.annotation.AttrRes
 import androidx.annotation.DrawableRes
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.TintedIcon

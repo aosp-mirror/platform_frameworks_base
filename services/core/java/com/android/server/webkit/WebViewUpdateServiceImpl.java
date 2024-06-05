@@ -23,11 +23,14 @@ import android.content.pm.Signature;
 import android.os.AsyncTask;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.util.AndroidRuntimeException;
 import android.util.Slog;
 import android.webkit.UserPackage;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
+
+import com.android.modules.expresslog.Counter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -63,7 +66,7 @@ import java.util.List;
  *
  * @hide
  */
-class WebViewUpdateServiceImpl {
+class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
     private static final String TAG = WebViewUpdateServiceImpl.class.getSimpleName();
 
     private static class WebViewPackageMissingException extends Exception {
@@ -112,7 +115,8 @@ class WebViewUpdateServiceImpl {
         mSystemInterface = systemInterface;
     }
 
-    void packageStateChanged(String packageName, int changedState, int userId) {
+    @Override
+    public void packageStateChanged(String packageName, int changedState, int userId) {
         // We don't early out here in different cases where we could potentially early-out (e.g. if
         // we receive PACKAGE_CHANGED for another user than the system user) since that would
         // complicate this logic further and open up for more edge cases.
@@ -163,7 +167,8 @@ class WebViewUpdateServiceImpl {
         }
     }
 
-    void prepareWebViewInSystemServer() {
+    @Override
+    public void prepareWebViewInSystemServer() {
         mSystemInterface.notifyZygote(isMultiProcessEnabled());
         try {
             synchronized (mLock) {
@@ -181,9 +186,12 @@ class WebViewUpdateServiceImpl {
                 }
                 onWebViewProviderChanged(mCurrentWebViewPackage);
             }
+        } catch (WebViewPackageMissingException e) {
+            Slog.e(TAG, "Could not find valid WebView package to create relro with", e);
         } catch (Throwable t) {
-            // Log and discard errors at this stage as we must not crash the system server.
-            Slog.e(TAG, "error preparing webview provider from system server", t);
+            // We don't know a case when this should happen but we log and discard errors at this
+            // stage as we must not crash the system server.
+            Slog.wtf(TAG, "error preparing webview provider from system server", t);
         }
 
         if (getCurrentWebViewPackage() == null) {
@@ -210,7 +218,8 @@ class WebViewUpdateServiceImpl {
         mSystemInterface.ensureZygoteStarted();
     }
 
-    void handleNewUser(int userId) {
+    @Override
+    public void handleNewUser(int userId) {
         // The system user is always started at boot, and by that point we have already run one
         // round of the package-changing logic (through prepareWebViewInSystemServer()), so early
         // out here.
@@ -218,7 +227,8 @@ class WebViewUpdateServiceImpl {
         handleUserChange();
     }
 
-    void handleUserRemoved(int userId) {
+    @Override
+    public void handleUserRemoved(int userId) {
         handleUserChange();
     }
 
@@ -232,14 +242,16 @@ class WebViewUpdateServiceImpl {
         updateCurrentWebViewPackage(null);
     }
 
-    void notifyRelroCreationCompleted() {
+    @Override
+    public void notifyRelroCreationCompleted() {
         synchronized (mLock) {
             mNumRelroCreationsFinished++;
             checkIfRelrosDoneLocked();
         }
     }
 
-    WebViewProviderResponse waitForAndGetProvider() {
+    @Override
+    public WebViewProviderResponse waitForAndGetProvider() {
         PackageInfo webViewPackage = null;
         final long timeoutTimeMs = System.nanoTime() / NS_PER_MS + WAIT_TIMEOUT_MS;
         boolean webViewReady = false;
@@ -284,7 +296,8 @@ class WebViewUpdateServiceImpl {
      * replacing that provider it will not be in use directly, but will be used when the relros
      * or the replacement are done).
      */
-    String changeProviderAndSetting(String newProviderName) {
+    @Override
+    public String changeProviderAndSetting(String newProviderName) {
         PackageInfo newPackage = updateCurrentWebViewPackage(newProviderName);
         if (newPackage == null) return "";
         return newPackage.packageName;
@@ -340,6 +353,7 @@ class WebViewUpdateServiceImpl {
         synchronized (mLock) {
             mAnyWebViewInstalled = true;
             if (mNumRelroCreationsStarted == mNumRelroCreationsFinished) {
+                mSystemInterface.pinWebviewIfRequired(newPackage.applicationInfo);
                 mCurrentWebViewPackage = newPackage;
 
                 // The relro creations might 'finish' (not start at all) before
@@ -349,6 +363,12 @@ class WebViewUpdateServiceImpl {
                 mNumRelroCreationsFinished = 0;
                 mNumRelroCreationsStarted =
                     mSystemInterface.onWebViewProviderChanged(newPackage);
+                Counter.logIncrement("webview.value_on_webview_provider_changed_counter");
+                if (newPackage.packageName.equals(getDefaultWebViewPackage().packageName)) {
+                    Counter.logIncrement(
+                            "webview.value_on_webview_provider_changed_"
+                            + "with_default_package_counter");
+                }
                 // If the relro creations finish before we know the number of started creations
                 // we will have to do any cleanup/notifying here.
                 checkIfRelrosDoneLocked();
@@ -367,7 +387,8 @@ class WebViewUpdateServiceImpl {
     /**
      * Fetch only the currently valid WebView packages.
      **/
-    WebViewProviderInfo[] getValidWebViewPackages() {
+    @Override
+    public WebViewProviderInfo[] getValidWebViewPackages() {
         ProviderAndPackageInfo[] providersAndPackageInfos = getValidWebViewPackagesAndInfos();
         WebViewProviderInfo[] providers =
             new WebViewProviderInfo[providersAndPackageInfos.length];
@@ -375,6 +396,19 @@ class WebViewUpdateServiceImpl {
             providers[n] = providersAndPackageInfos[n].provider;
         }
         return providers;
+    }
+
+    @Override
+    public WebViewProviderInfo getDefaultWebViewPackage() {
+        for (WebViewProviderInfo provider : getWebViewPackages()) {
+            if (provider.availableByDefault) {
+                return provider;
+            }
+        }
+
+        // This should be unreachable because the config parser enforces that there is at least
+        // one availableByDefault provider.
+        throw new AndroidRuntimeException("No available by default WebView Provider.");
     }
 
     private static class ProviderAndPackageInfo {
@@ -464,11 +498,13 @@ class WebViewUpdateServiceImpl {
         return true;
     }
 
-    WebViewProviderInfo[] getWebViewPackages() {
+    @Override
+    public WebViewProviderInfo[] getWebViewPackages() {
         return mSystemInterface.getWebViewPackages();
     }
 
-    PackageInfo getCurrentWebViewPackage() {
+    @Override
+    public PackageInfo getCurrentWebViewPackage() {
         synchronized (mLock) {
             return mCurrentWebViewPackage;
         }
@@ -620,7 +656,8 @@ class WebViewUpdateServiceImpl {
         return null;
     }
 
-    boolean isMultiProcessEnabled() {
+    @Override
+    public boolean isMultiProcessEnabled() {
         int settingValue = mSystemInterface.getMultiProcessSetting(mContext);
         if (mSystemInterface.isMultiProcessDefaultEnabled()) {
             // Multiprocess should be enabled unless the user has turned it off manually.
@@ -631,7 +668,8 @@ class WebViewUpdateServiceImpl {
         }
     }
 
-    void enableMultiProcess(boolean enable) {
+    @Override
+    public void enableMultiProcess(boolean enable) {
         PackageInfo current = getCurrentWebViewPackage();
         mSystemInterface.setMultiProcessSetting(mContext,
                 enable ? MULTIPROCESS_SETTING_ON_VALUE : MULTIPROCESS_SETTING_OFF_VALUE);
@@ -644,7 +682,8 @@ class WebViewUpdateServiceImpl {
     /**
      * Dump the state of this Service.
      */
-    void dumpState(PrintWriter pw) {
+    @Override
+    public void dumpState(PrintWriter pw) {
         pw.println("Current WebView Update Service state");
         pw.println(String.format("  Multiprocess enabled: %b", isMultiProcessEnabled()));
         synchronized (mLock) {

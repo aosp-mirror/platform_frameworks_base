@@ -19,8 +19,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -61,6 +61,13 @@ public final class CallEndpoint implements Parcelable {
     /** Indicates that the type of endpoint through which call media flows is an external. */
     public static final int TYPE_STREAMING     = 5;
 
+    /**
+     * Error message attached to IllegalArgumentException when the endpoint name or id is null.
+     * @hide
+     */
+    private static final String CALLENDPOINT_NAME_ID_NULL_ERROR =
+            "CallEndpoint name cannot be null.";
+
     private final CharSequence mName;
     private final int mType;
     private final ParcelUuid mIdentifier;
@@ -81,6 +88,11 @@ public final class CallEndpoint implements Parcelable {
      */
     public CallEndpoint(@NonNull CharSequence name, @EndpointType int type,
             @NonNull ParcelUuid id) {
+        // Ensure that endpoint name and id are non-null.
+        if (name == null || id == null) {
+            throw new IllegalArgumentException(CALLENDPOINT_NAME_ID_NULL_ERROR);
+        }
+
         this.mName = name;
         this.mType = type;
         this.mIdentifier = id;
@@ -93,6 +105,11 @@ public final class CallEndpoint implements Parcelable {
 
     /** @hide */
     public CallEndpoint(CallEndpoint endpoint) {
+        // Ensure that endpoint name and id are non-null.
+        if (endpoint.getEndpointName() == null || endpoint.getIdentifier() == null) {
+            throw new IllegalArgumentException(CALLENDPOINT_NAME_ID_NULL_ERROR);
+        }
+
         mName = endpoint.getEndpointName();
         mType = endpoint.getEndpointType();
         mIdentifier = endpoint.getIdentifier();
@@ -110,7 +127,7 @@ public final class CallEndpoint implements Parcelable {
             return false;
         }
         CallEndpoint endpoint = (CallEndpoint) obj;
-        return getEndpointName().toString().contentEquals(endpoint.getEndpointName())
+        return Objects.equals(getEndpointName(), endpoint.getEndpointName())
                 && getEndpointType() == endpoint.getEndpointType()
                 && getIdentifier().equals(endpoint.getIdentifier());
     }

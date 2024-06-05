@@ -25,18 +25,18 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipMenuController;
+import com.android.wm.shell.common.pip.PipPerfHintController;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.PipAnimationController;
-import com.android.wm.shell.pip.PipBoundsAlgorithm;
-import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipDisplayLayoutState;
-import com.android.wm.shell.pip.PipMenuController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
-import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
-import com.android.wm.shell.pip.PipUiEventLogger;
-import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.util.Objects;
@@ -46,6 +46,7 @@ import java.util.Optional;
  * TV specific changes to the PipTaskOrganizer.
  */
 public class TvPipTaskOrganizer extends PipTaskOrganizer {
+    private final TvPipTransition mTvPipTransition;
 
     public TvPipTaskOrganizer(Context context,
             @NonNull SyncTransactionQueue syncTransactionQueue,
@@ -56,18 +57,20 @@ public class TvPipTaskOrganizer extends PipTaskOrganizer {
             @NonNull PipMenuController pipMenuController,
             @NonNull PipAnimationController pipAnimationController,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
-            @NonNull PipTransitionController pipTransitionController,
+            @NonNull TvPipTransition tvPipTransition,
             @NonNull PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<SplitScreenController> splitScreenOptional,
+            Optional<PipPerfHintController> pipPerfHintControllerOptional,
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
             ShellExecutor mainExecutor) {
         super(context, syncTransactionQueue, pipTransitionState, pipBoundsState,
                 pipDisplayLayoutState, boundsHandler, pipMenuController, pipAnimationController,
-                surfaceTransactionHelper, pipTransitionController, pipParamsChangedForwarder,
-                splitScreenOptional, displayController, pipUiEventLogger, shellTaskOrganizer,
-                mainExecutor);
+                surfaceTransactionHelper, tvPipTransition, pipParamsChangedForwarder,
+                splitScreenOptional, pipPerfHintControllerOptional, displayController,
+                pipUiEventLogger, shellTaskOrganizer, mainExecutor);
+        mTvPipTransition = tvPipTransition;
     }
 
     @Override
@@ -104,5 +107,15 @@ public class TvPipTaskOrganizer extends PipTaskOrganizer {
         // We always have a menu visible and want to sync the pip transaction with the menu, even
         // when the menu alpha is 0 (e.g. when a fade-in animation starts).
         return true;
+    }
+
+    @Override
+    protected void cancelAnimationOnTaskVanished() {
+        mTvPipTransition.cancelAnimations();
+        if (mLeash != null) {
+            mSurfaceControlTransactionFactory.getTransaction()
+                    .setAlpha(mLeash, 0f)
+                    .apply();
+        }
     }
 }

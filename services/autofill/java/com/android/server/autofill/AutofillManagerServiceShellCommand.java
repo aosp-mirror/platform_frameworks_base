@@ -18,7 +18,6 @@ package com.android.server.autofill;
 
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.AutofillService.EXTRA_RESULT;
-
 import static com.android.server.autofill.AutofillManagerService.RECEIVER_BUNDLE_EXTRA_SESSIONS;
 
 import android.os.Bundle;
@@ -26,11 +25,14 @@ import android.os.RemoteCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.service.autofill.AutofillFieldClassificationService.Scores;
+import android.service.autofill.Flags;
 import android.view.autofill.AutofillManager;
 
 import com.android.internal.os.IResultReceiver;
 
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +62,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return requestGet(pw);
             case "set":
                 return requestSet(pw);
+            case "flags":
+                return requestFlags(pw);
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -67,7 +71,7 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
 
     @Override
     public void onHelp() {
-        try (final PrintWriter pw = getOutPrintWriter();) {
+        try (final PrintWriter pw = getOutPrintWriter(); ) {
             pw.println("AutoFill Service (autofill) commands:");
             pw.println("  help");
             pw.println("    Prints this help text.");
@@ -109,21 +113,24 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("    Sets whether binding to services provided by instant apps is allowed");
             pw.println("");
             pw.println("  set temporary-augmented-service USER_ID [COMPONENT_NAME DURATION]");
-            pw.println("    Temporarily (for DURATION ms) changes the augmented autofill service "
-                    + "implementation.");
+            pw.println(
+                    "    Temporarily (for DURATION ms) changes the augmented autofill service "
+                            + "implementation.");
             pw.println("    To reset, call with just the USER_ID argument.");
             pw.println("");
             pw.println("  set default-augmented-service-enabled USER_ID [true|false]");
             pw.println("    Enable / disable the default augmented autofill service for the user.");
             pw.println("");
             pw.println("  set temporary-detection-service USER_ID [COMPONENT_NAME DURATION]");
-            pw.println("    Temporarily (for DURATION ms) changes the autofill detection service "
-                    + "implementation.");
+            pw.println(
+                    "    Temporarily (for DURATION ms) changes the autofill detection service "
+                            + "implementation.");
             pw.println("    To reset, call with [COMPONENT_NAME 0].");
             pw.println("");
             pw.println("  get default-augmented-service-enabled USER_ID");
-            pw.println("    Checks whether the default augmented autofill service is enabled for "
-                    + "the user.");
+            pw.println(
+                    "    Checks whether the default augmented autofill service is enabled for "
+                            + "the user.");
             pw.println("");
             pw.println("  list sessions [--user USER_ID]");
             pw.println("    Lists all pending sessions.");
@@ -134,7 +141,45 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("  reset");
             pw.println("    Resets all pending sessions and cached service connections.");
             pw.println("");
+            pw.println("  flags");
+            pw.println("    Prints out all autofill related flags.");
+            pw.println("");
         }
+    }
+
+    private int requestFlags(PrintWriter pw) {
+
+        if (Flags.test()) {
+            pw.println("Hello Flag World!");
+            pw.println("");
+        }
+
+        Method[] flagMethods = {};
+
+        try {
+            flagMethods = Flags.class.getDeclaredMethods();
+        } catch (SecurityException ex) {
+            ex.printStackTrace(pw);
+            return -1;
+        }
+
+        // For some reason, unreferenced flags do not show up here
+        // Maybe compiler optomized them out of bytecode?
+        for (Method method : flagMethods) {
+            if (!Modifier.isPublic(method.getModifiers())) {
+                continue;
+            }
+            try {
+                pw.print(method.getName() + ": ");
+                pw.print(method.invoke(null));
+            } catch (Exception ex) {
+                ex.printStackTrace(pw);
+            } finally {
+                pw.println("");
+            }
+        }
+
+        return 0;
     }
 
     private int requestGet(PrintWriter pw) {

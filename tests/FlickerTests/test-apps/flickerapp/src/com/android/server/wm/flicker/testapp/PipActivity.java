@@ -37,6 +37,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
@@ -45,6 +46,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Rational;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
@@ -82,6 +84,8 @@ public class PipActivity extends Activity {
             "com.android.wm.shell.flicker.testapp.SWITCH_OFF";
     private static final String ACTION_SWITCH_ON = "com.android.wm.shell.flicker.testapp.SWITCH_ON";
     private static final String ACTION_CLEAR = "com.android.wm.shell.flicker.testapp.CLEAR";
+    private static final String ACTION_ASPECT_RATIO =
+            "com.android.wm.shell.flicker.testapp.ASPECT_RATIO";
 
     private final PictureInPictureParams.Builder mPipParamsBuilder =
             new PictureInPictureParams.Builder()
@@ -108,6 +112,9 @@ public class PipActivity extends Activity {
                         break;
                     case ACTION_CLEAR:
                         mPipParamsBuilder.setActions(Collections.emptyList());
+                        break;
+                    case ACTION_ASPECT_RATIO:
+                        mPipParamsBuilder.setAspectRatio(RATIO_TALL);
                         break;
                     case ACTION_NO_OP:
                         return;
@@ -190,7 +197,8 @@ public class PipActivity extends Activity {
         filter.addAction(ACTION_CLEAR);
         filter.addAction(ACTION_SET_REQUESTED_ORIENTATION);
         filter.addAction(ACTION_ENTER_PIP);
-        registerReceiver(mBroadcastReceiver, filter);
+        filter.addAction(ACTION_ASPECT_RATIO);
+        registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED);
 
         handleIntentExtra(getIntent());
     }
@@ -214,8 +222,8 @@ public class PipActivity extends Activity {
 
     private RemoteAction buildRemoteAction(Icon icon, String label, String action) {
         final Intent intent = new Intent(action);
-        final PendingIntent pendingIntent =
-                PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        final PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         return new RemoteAction(icon, label, label, pendingIntent);
     }
 
@@ -239,6 +247,29 @@ public class PipActivity extends Activity {
                 mPipParamsBuilder.setAutoEnterEnabled(true);
                 setPictureInPictureParams(mPipParamsBuilder.build());
                 break;
+        }
+    }
+
+    /**
+     * Adds a temporary view used for testing sourceRectHint.
+     *
+     */
+    public void setSourceRectHint(View v) {
+        View rectView = findViewById(R.id.source_rect);
+        if (rectView != null) {
+            rectView.setVisibility(View.VISIBLE);
+            rectView.getViewTreeObserver().addOnGlobalLayoutListener(
+                    new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            Rect boundingRect = new Rect();
+                            rectView.getGlobalVisibleRect(boundingRect);
+                            mPipParamsBuilder.setSourceRectHint(boundingRect);
+                            setPictureInPictureParams(mPipParamsBuilder.build());
+                            rectView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        }
+                    });
+            rectView.invalidate(); // changing the visibility, invalidating to redraw the view
         }
     }
 

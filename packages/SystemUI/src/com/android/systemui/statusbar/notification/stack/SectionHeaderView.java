@@ -28,7 +28,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 
 /**
@@ -53,7 +53,7 @@ public class SectionHeaderView extends StackScrollerDecorView {
         mContents = requireViewById(R.id.content);
         bindContents();
         super.onFinishInflate();
-        setVisible(true /* nowVisible */, false /* animate */);
+        setVisible(true /* visible */, false /* animate */);
     }
 
     private void bindContents() {
@@ -132,8 +132,8 @@ public class SectionHeaderView extends StackScrollerDecorView {
         mLabelView.setText(resId);
     }
 
-    void setForegroundColor(@ColorInt int color) {
-        mLabelView.setTextColor(color);
-        mClearAllButton.setImageTintList(ColorStateList.valueOf(color));
+    void setForegroundColors(@ColorInt int onSurface, @ColorInt int onSurfaceVariant) {
+        mLabelView.setTextColor(onSurface);
+        mClearAllButton.setImageTintList(ColorStateList.valueOf(onSurfaceVariant));
     }
 }

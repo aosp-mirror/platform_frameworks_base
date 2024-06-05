@@ -23,6 +23,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.UserHandle
 import android.permission.PermissionGroupUsage
 import android.permission.PermissionManager
@@ -62,6 +63,7 @@ private val defaultDialogProvider = object : PrivacyDialogController.DialogProvi
 class PrivacyDialogController(
     private val permissionManager: PermissionManager,
     private val packageManager: PackageManager,
+    private val locationManager: LocationManager,
     private val privacyItemController: PrivacyItemController,
     private val userTracker: UserTracker,
     private val activityStarter: ActivityStarter,
@@ -78,6 +80,7 @@ class PrivacyDialogController(
     constructor(
         permissionManager: PermissionManager,
         packageManager: PackageManager,
+        locationManager: LocationManager,
         privacyItemController: PrivacyItemController,
         userTracker: UserTracker,
         activityStarter: ActivityStarter,
@@ -90,6 +93,7 @@ class PrivacyDialogController(
     ) : this(
             permissionManager,
             packageManager,
+            locationManager,
             privacyItemController,
             userTracker,
             activityStarter,
@@ -147,15 +151,17 @@ class PrivacyDialogController(
 
     @WorkerThread
     private fun getManagePermissionIntent(
+        context: Context,
         packageName: String,
         userId: Int,
         permGroupName: CharSequence,
         attributionTag: CharSequence?,
         isAttributionSupported: Boolean
-    ): Intent
-    {
+    ): Intent {
         lateinit var intent: Intent
-        if (attributionTag != null && isAttributionSupported) {
+        // We should only limit this intent to location provider
+        if (attributionTag != null && isAttributionSupported &&
+            locationManager.isProviderPackage(null, packageName, attributionTag.toString())) {
             intent = Intent(Intent.ACTION_MANAGE_PERMISSION_USAGE)
             intent.setPackage(packageName)
             intent.putExtra(Intent.EXTRA_PERMISSION_GROUP_NAME, permGroupName.toString())
@@ -230,6 +236,7 @@ class PrivacyDialogController(
                                 it.isPhoneCall,
                                 it.permissionGroupName,
                                 getManagePermissionIntent(
+                                        context,
                                         it.packageName,
                                         userId,
                                         it.permissionGroupName,

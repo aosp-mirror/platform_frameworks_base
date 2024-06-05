@@ -16,15 +16,15 @@
 
 package com.android.server;
 
+import static com.android.internal.R.integer.config_defaultMinEmergencyGestureTapDurationMillis;
+
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
@@ -40,8 +40,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.MutableBoolean;
 import android.util.Slog;
@@ -74,12 +72,6 @@ public class GestureLauncherService extends SystemService {
      */
     @VisibleForTesting static final long CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS = 300;
 
-    /**
-     * Min time in milliseconds to complete the emergency gesture for it count. If the gesture is
-     * completed faster than this, we assume it's not performed by human and the
-     * event gets ignored.
-     */
-    @VisibleForTesting static final int EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS = 200;
 
     /**
      * Interval in milliseconds in which the power button must be depressed in succession to be
@@ -112,19 +104,6 @@ public class GestureLauncherService extends SystemService {
      * Number of taps required to launch camera shortcut.
      */
     private static final int CAMERA_POWER_TAP_COUNT_THRESHOLD = 2;
-
-    /** Action for starting emergency alerts on Wear OS. */
-    private static final String WEAR_LAUNCH_EMERGENCY_ACTION =
-            "com.android.systemui.action.LAUNCH_EMERGENCY";
-
-    /** Action for starting emergency alerts in retail mode on Wear OS. */
-    private static final String WEAR_LAUNCH_EMERGENCY_RETAIL_ACTION =
-            "com.android.systemui.action.LAUNCH_EMERGENCY_RETAIL";
-
-    /**
-     * Boolean extra for distinguishing intents coming from power button gesture.
-     */
-    private static final String EXTRA_LAUNCH_EMERGENCY_VIA_GESTURE = "launch_emergency_via_gesture";
 
     /** The listener that receives the gesture event. */
     private final GestureEventListener mGestureListener = new GestureEventListener();
@@ -198,7 +177,6 @@ public class GestureLauncherService extends SystemService {
     private final UiEventLogger mUiEventLogger;
 
     private boolean mHasFeatureWatch;
-    private long mVibrateMilliSecondsForPanicGesture;
 
     @VisibleForTesting
     public enum GestureLauncherEvent implements UiEventLogger.UiEventEnum {
@@ -268,13 +246,6 @@ public class GestureLauncherService extends SystemService {
 
             mHasFeatureWatch =
                     mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
-            mVibrateMilliSecondsForPanicGesture =
-                    resources.getInteger(
-                            com.android
-                                    .internal
-                                    .R
-                                    .integer
-                                    .config_mashPressVibrateTimeOnPowerButton);
         }
     }
 
@@ -595,7 +566,8 @@ public class GestureLauncherService extends SystemService {
                     long emergencyGestureTapDetectionMinTimeMs = Settings.Global.getInt(
                             mContext.getContentResolver(),
                             Settings.Global.EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS,
-                            EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS);
+                            mContext.getResources().getInteger(
+                                    config_defaultMinEmergencyGestureTapDurationMillis));
                     if (emergencyGestureSpentTime <= emergencyGestureTapDetectionMinTimeMs) {
                         Slog.i(TAG, "Emergency gesture detected but it's too fast. Gesture time: "
                                 + emergencyGestureSpentTime + " ms");
@@ -714,11 +686,6 @@ public class GestureLauncherService extends SystemService {
                         userSetupComplete));
             }
 
-            if (mHasFeatureWatch) {
-                onEmergencyGestureDetectedOnWatch();
-                return true;
-            }
-
             StatusBarManagerInternal service = LocalServices.getService(
                     StatusBarManagerInternal.class);
             service.onEmergencyActionLaunchGestureDetected();
@@ -726,37 +693,6 @@ public class GestureLauncherService extends SystemService {
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
-    }
-
-    private void onEmergencyGestureDetectedOnWatch() {
-        Intent emergencyIntent =
-                new Intent(
-                        isInRetailMode()
-                                ? WEAR_LAUNCH_EMERGENCY_RETAIL_ACTION
-                                : WEAR_LAUNCH_EMERGENCY_ACTION);
-        PackageManager pm = mContext.getPackageManager();
-        ResolveInfo resolveInfo = pm.resolveActivity(emergencyIntent, /*flags=*/0);
-        if (resolveInfo == null) {
-            Slog.w(TAG, "Couldn't find an app to process the emergency intent "
-                    + emergencyIntent.getAction());
-            return;
-        }
-
-        Vibrator vibrator = mContext.getSystemService(Vibrator.class);
-        vibrator.vibrate(VibrationEffect.createOneShot(mVibrateMilliSecondsForPanicGesture,
-                VibrationEffect.DEFAULT_AMPLITUDE));
-
-        emergencyIntent.setComponent(
-                new ComponentName(
-                        resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name));
-        emergencyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        emergencyIntent.putExtra(EXTRA_LAUNCH_EMERGENCY_VIA_GESTURE, true);
-        mContext.startActivityAsUser(emergencyIntent, new UserHandle(mUserId));
-    }
-
-    private boolean isInRetailMode() {
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.DEVICE_DEMO_MODE, 0) == 1;
     }
 
     private boolean isUserSetupComplete() {

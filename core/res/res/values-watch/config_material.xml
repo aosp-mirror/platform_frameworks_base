@@ -30,9 +30,6 @@
     <!-- Always overscan by default to ensure onApplyWindowInsets will always be called. -->
     <bool name="config_windowOverscanByDefault">true</bool>
 
-    <!-- Enable windowSwipeToDismiss. -->
-    <bool name="config_windowSwipeToDismiss">true</bool>
-
     <!-- Style the scrollbars accoridngly. -->
     <drawable name="config_scrollbarThumbVertical">@drawable/scrollbar_vertical_thumb</drawable>
     <drawable name="config_scrollbarTrackVertical">@drawable/scrollbar_vertical_track</drawable>

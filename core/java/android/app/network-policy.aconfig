@@ -1,0 +1,12 @@
+package: "android.app"
+container: "system"
+
+flag {
+     namespace: "backstage_power"
+     name: "clear_dns_cache_on_network_rules_update"
+     description: "Clears the DNS cache when the network rules update"
+     bug: "237556596"
+     metadata {
+       purpose: PURPOSE_BUGFIX
+     }
+}

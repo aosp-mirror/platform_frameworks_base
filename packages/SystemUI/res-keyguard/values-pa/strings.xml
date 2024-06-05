@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ਤੇਜ਼ੀ ਨਾਲ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ਹੌਲੀ-ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ਬੈਟਰੀ ਦੀ ਸੁਰੱਖਿਆ ਲਈ ਚਾਰਜਿੰਗ ਨੂੰ ਸੁਯੋਗ ਬਣਾਇਆ ਗਿਆ"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ਚਾਰਜ ਕਰਨ ਵਾਲੀ ਐਕਸੈਸਰੀ ਸੰਬੰਧੀ ਸਮੱਸਿਆ"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ਅਣਲਾਕ ਕਰਨ ਲਈ \"ਮੀਨੂ\" ਦਬਾਓ।"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ਬੈਟਰੀ ਦੀ ਸੁਰੱਖਿਆ ਲਈ ਚਾਰਜਿੰਗ ਨੂੰ ਰੋਕਿਆ ਗਿਆ ਹੈ"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ਚਾਰਜਿੰਗ ਐਕਸੈਸਰੀ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ਨੈੱਟਵਰਕ  ਲਾਕ  ਕੀਤਾ ਗਿਆ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ਕੋਈ ਸਿਮ ਨਹੀਂ ਹੈ"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"ਸਿਮ ਸ਼ਾਮਲ ਕਰੋ।"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"ਸਿਮ ਮੌਜੂਦ ਨਹੀਂ ਹੈ ਜਾਂ ਪੜ੍ਹਨਯੋਗ ਨਹੀਂ ਹੈ। ਸਿਮ ਸ਼ਾਮਲ ਕਰੋ।"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ਬੇਕਾਰ ਸਿਮ।"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"ਤੁਹਾਡੇ ਸਿਮ ਨੂੰ ਪੱਕੇ ਤੌਰ \'ਤੇ ਅਕਿਰਿਆਸ਼ੀਲ ਕੀਤਾ ਗਿਆ ਹੈ।\n ਦੂਜੇ ਸਿਮ ਲਈ ਆਪਣੇ ਵਾਇਰਲੈੱਸ ਸੇਵਾ ਪ੍ਰਦਾਨਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"ਸਿਮ ਲਾਕ ਹੈ।"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"ਸਿਮ PUK-ਲਾਕ ਹੈ।"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"ਸਿਮ ਨੂੰ ਅਣਲਾਕ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"ਲਾਕਡਾਊਨ ਤੋਂ ਬਾਅਦ ਪਿੰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"ਲਾਕਡਾਊਨ ਤੋਂ ਬਾਅਦ ਪਾਸਵਰਡ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"ਲਾਕਡਾਊਨ ਤੋਂ ਬਾਅਦ ਪੈਟਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"ਅੱਪਡੇਟ ਅਕਿਰਿਆਸ਼ੀਲ ਘੰਟਿਆਂ ਦੌਰਾਨ ਸਥਾਪਤ ਹੋਵੇਗਾ"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"ਡੀਵਾਈਸ ਵਰਤੋਂ ਵਿੱਚ ਨਾ ਹੋਣ \'ਤੇ ਅੱਪਡੇਟ ਸਥਾਪਤ ਹੋ ਜਾਵੇਗਾ"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"ਵਾਧੂ ਸੁਰੱਖਿਆ ਦੀ ਲੋੜ ਹੈ। ਪਿੰਨ ਨੂੰ ਕੁਝ ਸਮੇਂ ਲਈ ਵਰਤਿਆ ਨਹੀਂ ਗਿਆ।"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"ਵਾਧੂ ਸੁਰੱਖਿਆ ਦੀ ਲੋੜ ਹੈ। ਪਾਸਵਰਡ ਨੂੰ ਕੁਝ ਸਮੇਂ ਲਈ ਵਰਤਿਆ ਨਹੀਂ ਗਿਆ।"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"ਵਾਧੂ ਸੁਰੱਖਿਆ ਦੀ ਲੋੜ ਹੈ। ਪੈਟਰਨ ਨੂੰ ਕੁਝ ਸਮੇਂ ਲਈ ਵਰਤਿਆ ਨਹੀਂ ਗਿਆ।"</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ਵਧੀਕ ਸੁਰੱਖਿਆ ਲਈ, ਇਸਦੀ ਬਜਾਏ ਪੈਟਰਨ ਵਰਤੋ"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ਵਧੀਕ ਸੁਰੱਖਿਆ ਲਈ, ਇਸਦੀ ਬਜਾਏ ਪਿੰਨ ਵਰਤੋ"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ਵਧੀਕ ਸੁਰੱਖਿਆ ਲਈ, ਇਸਦੀ ਬਜਾਏ ਪਾਸਵਰਡ ਵਰਤੋ"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"ਵਧੀਕ ਸੁਰੱਖਿਆ ਲਈ ਪਿੰਨ ਦੀ ਲੋੜ ਹੈ"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"ਵਧੀਕ ਸੁਰੱਖਿਆ ਲਈ ਪੈਟਰਨ ਦੀ ਲੋੜ ਹੈ"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"ਵਧੀਕ ਸੁਰੱਖਿਆ ਲਈ ਪਾਸਵਰਡ ਦੀ ਲੋੜ ਹੈ"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਡੀਵਾਈਸ ਨੂੰ ਲਾਕ ਕੀਤਾ ਗਿਆ"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ਡੀਵਾਈਸ ਨੂੰ ਹੱਥੀਂ ਲਾਕ ਕੀਤਾ ਗਿਆ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ਪਛਾਣ ਨਹੀਂ ਹੋਈ"</string>

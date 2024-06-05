@@ -17,6 +17,8 @@
 
 package com.android.systemui.wallpapers;
 
+import static com.android.window.flags.Flags.offloadColorExtraction;
+
 import android.app.WallpaperColors;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
@@ -49,7 +51,7 @@ public class WallpaperLocalColorExtractor {
     private Bitmap mMiniBitmap;
 
     @VisibleForTesting
-    static final int SMALL_SIDE = 128;
+    static final int MINI_BITMAP_MAX_AREA = 112 * 112;
 
     private static final String TAG = WallpaperLocalColorExtractor.class.getSimpleName();
     private static final @NonNull RectF LOCAL_COLOR_BOUNDS =
@@ -61,10 +63,16 @@ public class WallpaperLocalColorExtractor {
     private int mBitmapWidth = -1;
     private int mBitmapHeight = -1;
 
-    private final Object mLock = new Object();
+    private final Object mLock;
 
     private final List<RectF> mPendingRegions = new ArrayList<>();
     private final Set<RectF> mProcessedRegions = new ArraySet<>();
+
+    private float mWallpaperDimAmount = 0f;
+    private WallpaperColors mWallpaperColors;
+
+    // By default we assume that colors were loaded from disk and don't need to be recomputed
+    private boolean mRecomputeColors = false;
 
     @LongRunning
     private final Executor mLongExecutor;
@@ -75,6 +83,12 @@ public class WallpaperLocalColorExtractor {
      * Interface to handle the callbacks after the different steps of the color extraction
      */
     public interface WallpaperLocalColorExtractorCallback {
+
+        /**
+         * Callback after the wallpaper colors have been computed
+         */
+        void onColorsProcessed();
+
         /**
          * Callback after the colors of new regions have been extracted
          * @param regions the list of new regions that have been processed
@@ -102,12 +116,15 @@ public class WallpaperLocalColorExtractor {
     /**
      * Creates a new color extractor.
      * @param longExecutor the executor on which the color extraction will be performed
+     * @param lock the lock object to use for computing colors or processing the bitmap
      * @param wallpaperLocalColorExtractorCallback an interface to handle the callbacks from
      *                                        the color extractor.
      */
     public WallpaperLocalColorExtractor(@LongRunning Executor longExecutor,
+            Object lock,
             WallpaperLocalColorExtractorCallback wallpaperLocalColorExtractorCallback) {
         mLongExecutor = longExecutor;
+        mLock = lock;
         mWallpaperLocalColorExtractorCallback = wallpaperLocalColorExtractorCallback;
     }
 
@@ -126,7 +143,7 @@ public class WallpaperLocalColorExtractor {
             if (displayWidth == mDisplayWidth && displayHeight == mDisplayHeight) return;
             mDisplayWidth = displayWidth;
             mDisplayHeight = displayHeight;
-            processColorsInternal();
+            processLocalColorsInternal();
         }
     }
 
@@ -149,6 +166,12 @@ public class WallpaperLocalColorExtractor {
 
     private void onBitmapChangedSynchronized(@NonNull Bitmap bitmap) {
         synchronized (mLock) {
+            if (bitmap.isRecycled()) {
+                // ImageWallpaper loaded a new bitmap before the extraction of the previous one
+                // In that case, ImageWallpaper also scheduled the extraction of the next bitmap
+                Log.i(TAG, "Wallpaper has changed; deferring color extraction");
+                return;
+            }
             if (bitmap.getWidth() <= 0 || bitmap.getHeight() <= 0) {
                 Log.e(TAG, "Attempt to extract colors from an invalid bitmap");
                 return;
@@ -157,7 +180,8 @@ public class WallpaperLocalColorExtractor {
             mBitmapHeight = bitmap.getHeight();
             mMiniBitmap = createMiniBitmap(bitmap);
             mWallpaperLocalColorExtractorCallback.onMiniBitmapUpdated();
-            recomputeColors();
+            if (offloadColorExtraction() && mRecomputeColors) recomputeColorsInternal();
+            recomputeLocalColors();
         }
     }
 
@@ -175,16 +199,66 @@ public class WallpaperLocalColorExtractor {
             if (mPages == pages) return;
             mPages = pages;
             if (mMiniBitmap != null && !mMiniBitmap.isRecycled()) {
-                recomputeColors();
+                recomputeLocalColors();
             }
         }
     }
 
-    // helper to recompute colors, to be called in synchronized methods
-    private void recomputeColors() {
+    /**
+     * Should be called when the dim amount of the wallpaper changes, to recompute the colors
+     */
+    public void onDimAmountChanged(float dimAmount) {
+        mLongExecutor.execute(() -> onDimAmountChangedSynchronized(dimAmount));
+    }
+
+    private void onDimAmountChangedSynchronized(float dimAmount) {
+        synchronized (mLock) {
+            if (mWallpaperDimAmount == dimAmount) return;
+            mWallpaperDimAmount = dimAmount;
+            mRecomputeColors = true;
+            recomputeColorsInternal();
+        }
+    }
+
+    /**
+     * To be called by {@link ImageWallpaper.CanvasEngine#onComputeColors}. This will either
+     * return the current wallpaper colors, or if the bitmap is not yet loaded, return null and call
+     * {@link WallpaperLocalColorExtractorCallback#onColorsProcessed()} when the colors are ready.
+     */
+    public WallpaperColors onComputeColors() {
+        mLongExecutor.execute(this::onComputeColorsSynchronized);
+        return mWallpaperColors;
+    }
+
+    private void onComputeColorsSynchronized() {
+        synchronized (mLock) {
+            if (mRecomputeColors) return;
+            mRecomputeColors = true;
+            recomputeColorsInternal();
+        }
+    }
+
+    /**
+     * helper to recompute main colors, to be called in synchronized methods
+     */
+    private void recomputeColorsInternal() {
+        if (mMiniBitmap == null) return;
+        mWallpaperColors = getWallpaperColors(mMiniBitmap, mWallpaperDimAmount);
+        mWallpaperLocalColorExtractorCallback.onColorsProcessed();
+    }
+
+    @VisibleForTesting
+    WallpaperColors getWallpaperColors(@NonNull Bitmap bitmap, float dimAmount) {
+        return WallpaperColors.fromBitmap(bitmap, dimAmount);
+    }
+
+    /**
+     * helper to recompute local colors, to be called in synchronized methods
+     */
+    private void recomputeLocalColors() {
         mPendingRegions.addAll(mProcessedRegions);
         mProcessedRegions.clear();
-        processColorsInternal();
+        processLocalColorsInternal();
     }
 
     /**
@@ -207,7 +281,7 @@ public class WallpaperLocalColorExtractor {
             if (!wasActive && isActive()) {
                 mWallpaperLocalColorExtractorCallback.onActivated();
             }
-            processColorsInternal();
+            processLocalColorsInternal();
         }
     }
 
@@ -252,12 +326,12 @@ public class WallpaperLocalColorExtractor {
 
     private Bitmap createMiniBitmap(@NonNull Bitmap bitmap) {
         Trace.beginSection("WallpaperLocalColorExtractor#createMiniBitmap");
-        // if both sides of the image are larger than SMALL_SIDE, downscale the bitmap.
-        int smallestSide = Math.min(bitmap.getWidth(), bitmap.getHeight());
-        float scale = Math.min(1.0f, (float) SMALL_SIDE / smallestSide);
+        // if the area of the image is greater than MINI_BITMAP_MAX_AREA, downscale the bitmap.
+        int area = bitmap.getWidth() * bitmap.getHeight();
+        double scale = Math.min(1, Math.sqrt((double) MINI_BITMAP_MAX_AREA / area));
         Bitmap result = createMiniBitmap(bitmap,
-                (int) (scale * bitmap.getWidth()),
-                (int) (scale * bitmap.getHeight()));
+                Math.max(1, (int) (scale * bitmap.getWidth())),
+                Math.max(1, (int) (scale * bitmap.getHeight())));
         Trace.endSection();
         return result;
     }
@@ -344,7 +418,7 @@ public class WallpaperLocalColorExtractor {
      * then notify the callback with the resulting colors for these regions
      * This method should only be called synchronously
      */
-    private void processColorsInternal() {
+    private void processLocalColorsInternal() {
         /*
          * if the miniBitmap is not yet loaded, that means the onBitmapChanged has not yet been
          * called, and thus the wallpaper is not yet loaded. In that case, exit, the function

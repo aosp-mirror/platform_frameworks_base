@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
@@ -278,6 +279,38 @@ public class FalsingDataProviderTest extends ClassifierTest {
         mDataProvider.onMotionEvent(motionEventOrigin);
         mDataProvider.onMotionEvent(appendMoveEvent(-3, 10));
         assertThat(mDataProvider.isUp()).isFalse();
+        mDataProvider.onSessionEnd();
+    }
+
+    @Test
+    public void test_isFromKeyboard_disallowedKey_false() {
+        KeyEvent eventDown = KeyEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, KeyEvent.KEYCODE_A, 0,
+                0, 0, 0, 0, 0, 0, "");
+        KeyEvent eventUp = KeyEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, KeyEvent.KEYCODE_A, 0, 0,
+                0, 0, 0, 0, 0, "");
+
+        //events have not come in yet
+        assertThat(mDataProvider.isFromKeyboard()).isFalse();
+
+        mDataProvider.onKeyEvent(eventDown);
+        mDataProvider.onKeyEvent(eventUp);
+        assertThat(mDataProvider.isFromKeyboard()).isTrue();
+        mDataProvider.onSessionEnd();
+    }
+
+    @Test
+    public void test_IsFromTrackpad() {
+        MotionEvent motionEventOrigin = appendTrackpadDownEvent(0, 0);
+
+        mDataProvider.onMotionEvent(motionEventOrigin);
+        mDataProvider.onMotionEvent(
+                appendTrackpadPointerDownEvent(getPointerAction(MotionEvent.ACTION_POINTER_DOWN, 1),
+                        0, 0, 2));
+        mDataProvider.onMotionEvent(
+                appendTrackpadPointerDownEvent(getPointerAction(MotionEvent.ACTION_POINTER_DOWN, 2),
+                        0, 0, 3));
+        mDataProvider.onMotionEvent(appendTrackpadMoveEvent(1, -1, 3));
+        assertThat(mDataProvider.isFromTrackpad()).isTrue();
         mDataProvider.onSessionEnd();
     }
 

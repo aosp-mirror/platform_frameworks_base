@@ -32,6 +32,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.UserProperties;
 import android.os.Process;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
@@ -421,9 +422,19 @@ public class CrossProfileIntentResolverEngine {
         } else {
             candidates.addAll(resolveInfoFromCrossProfileDomainInfo(crossProfileCandidates));
         }
+        // When we have only a single result belonging to a different user space, we check
+        // if filtering is configured on cross-profile intent resolution for the originating user.
+        // Accordingly, we modify the intent to reflect the content-owner as the originating user,
+        // preventing the resolving user to be assumed the same, when activity is started.
+
+        // In case more than one result is present, the resolver sheet is opened which takes care of
+        // cross user access.
+        if (candidates.size() == 1 && !UserHandle.of(userId).equals(candidates.get(0).userHandle)
+                && isNoFilteringPropertyConfiguredForUser(userId)) {
+            intent.prepareToLeaveUser(userId);
+        }
         return new QueryIntentActivitiesResult(sortResult, addInstant, candidates);
     }
-
     /**
      * It filters and combines results from current and cross profile based on domain priority.
      * @param computer {@link Computer} instance

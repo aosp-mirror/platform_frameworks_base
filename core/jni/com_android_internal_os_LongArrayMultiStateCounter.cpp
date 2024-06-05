@@ -55,6 +55,23 @@ static void native_setState(jlong nativePtr, jint state, jlong timestamp) {
     counter->setState(state, timestamp);
 }
 
+static void native_copyStatesFrom(jlong nativePtrTarget, jlong nativePtrSource) {
+    battery::LongArrayMultiStateCounter *counterTarget =
+            reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtrTarget);
+    battery::LongArrayMultiStateCounter *counterSource =
+            reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtrSource);
+    counterTarget->copyStatesFrom(*counterSource);
+}
+
+static void native_setValues(jlong nativePtr, jint state, jlong longArrayContainerNativePtr) {
+    battery::LongArrayMultiStateCounter *counter =
+            reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
+    std::vector<uint64_t> *vector =
+            reinterpret_cast<std::vector<uint64_t> *>(longArrayContainerNativePtr);
+
+    counter->setValue(state, *vector);
+}
+
 static void native_updateValues(jlong nativePtr, jlong longArrayContainerNativePtr,
                                 jlong timestamp) {
     battery::LongArrayMultiStateCounter *counter =
@@ -63,6 +80,16 @@ static void native_updateValues(jlong nativePtr, jlong longArrayContainerNativeP
             reinterpret_cast<std::vector<uint64_t> *>(longArrayContainerNativePtr);
 
     counter->updateValue(*vector, timestamp);
+}
+
+static void native_incrementValues(jlong nativePtr, jlong longArrayContainerNativePtr,
+                                   jlong timestamp) {
+    battery::LongArrayMultiStateCounter *counter =
+            reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
+    std::vector<uint64_t> *vector =
+            reinterpret_cast<std::vector<uint64_t> *>(longArrayContainerNativePtr);
+
+    counter->incrementValue(*vector, timestamp);
 }
 
 static void native_addCounts(jlong nativePtr, jlong longArrayContainerNativePtr) {
@@ -88,7 +115,7 @@ static void native_getCounts(jlong nativePtr, jlong longArrayContainerNativePtr,
     *vector = counter->getCount(state);
 }
 
-static jobject native_toString(JNIEnv *env, jobject self, jlong nativePtr) {
+static jobject native_toString(JNIEnv *env, jclass, jlong nativePtr) {
     battery::LongArrayMultiStateCounter *counter =
             reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
     return env->NewStringUTF(counter->toString().c_str());
@@ -108,7 +135,7 @@ static void throwWriteRE(JNIEnv *env, binder_status_t status) {
         }                                     \
     }
 
-static void native_writeToParcel(JNIEnv *env, jobject self, jlong nativePtr, jobject jParcel,
+static void native_writeToParcel(JNIEnv *env, jclass, jlong nativePtr, jobject jParcel,
                                  jint flags) {
     battery::LongArrayMultiStateCounter *counter =
             reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
@@ -142,7 +169,7 @@ static void throwReadException(JNIEnv *env, binder_status_t status) {
         }                                    \
     }
 
-static jlong native_initFromParcel(JNIEnv *env, jclass theClass, jobject jParcel) {
+static jlong native_initFromParcel(JNIEnv *env, jclass, jobject jParcel) {
     ndk::ScopedAParcel parcel(AParcel_fromJavaParcel(env, jParcel));
 
     int32_t stateCount;
@@ -200,7 +227,13 @@ static const JNINativeMethod g_LongArrayMultiStateCounter_methods[] = {
         // @CriticalNative
         {"native_setState", "(JIJ)V", (void *)native_setState},
         // @CriticalNative
+        {"native_copyStatesFrom", "(JJ)V", (void *)native_copyStatesFrom},
+        // @CriticalNative
+        {"native_setValues", "(JIJ)V", (void *)native_setValues},
+        // @CriticalNative
         {"native_updateValues", "(JJJ)V", (void *)native_updateValues},
+        // @CriticalNative
+        {"native_incrementValues", "(JJJ)V", (void *)native_incrementValues},
         // @CriticalNative
         {"native_addCounts", "(JJ)V", (void *)native_addCounts},
         // @CriticalNative
@@ -230,7 +263,7 @@ static jlong native_getReleaseFunc_LongArrayContainer() {
     return reinterpret_cast<jlong>(native_dispose_LongArrayContainer);
 }
 
-static void native_setValues_LongArrayContainer(JNIEnv *env, jobject self, jlong nativePtr,
+static void native_setValues_LongArrayContainer(JNIEnv *env, jclass, jlong nativePtr,
                                                 jlongArray jarray) {
     std::vector<uint64_t> *vector = reinterpret_cast<std::vector<uint64_t> *>(nativePtr);
     ScopedLongArrayRO scopedArray(env, jarray);
@@ -241,7 +274,7 @@ static void native_setValues_LongArrayContainer(JNIEnv *env, jobject self, jlong
     std::copy(array, array + size, vector->data());
 }
 
-static void native_getValues_LongArrayContainer(JNIEnv *env, jobject self, jlong nativePtr,
+static void native_getValues_LongArrayContainer(JNIEnv *env, jclass, jlong nativePtr,
                                                 jlongArray jarray) {
     std::vector<uint64_t> *vector = reinterpret_cast<std::vector<uint64_t> *>(nativePtr);
     ScopedLongArrayRW scopedArray(env, jarray);
@@ -250,7 +283,7 @@ static void native_getValues_LongArrayContainer(JNIEnv *env, jobject self, jlong
     std::copy(vector->data(), vector->data() + vector->size(), scopedArray.get());
 }
 
-static jboolean native_combineValues_LongArrayContainer(JNIEnv *env, jobject self, jlong nativePtr,
+static jboolean native_combineValues_LongArrayContainer(JNIEnv *env, jclass, jlong nativePtr,
                                                         jlongArray jarray, jintArray jindexMap) {
     std::vector<uint64_t> *vector = reinterpret_cast<std::vector<uint64_t> *>(nativePtr);
     ScopedLongArrayRW scopedArray(env, jarray);
@@ -265,7 +298,7 @@ static jboolean native_combineValues_LongArrayContainer(JNIEnv *env, jobject sel
     }
 
     bool nonZero = false;
-    for (int i = 0; i < vector->size(); i++) {
+    for (size_t i = 0; i < vector->size(); i++) {
         jint index = scopedIndexMap[i];
         if (index < 0 || index >= size) {
             jniThrowExceptionFmt(env, "java/lang/IndexOutOfBoundsException",

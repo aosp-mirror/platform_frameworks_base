@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static android.view.flags.Flags.viewVelocityApi;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
@@ -53,6 +55,7 @@ import android.view.ActionMode;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.HapticScrollFeedbackProvider;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -79,6 +82,7 @@ import android.view.animation.LinearInterpolator;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
+import android.view.flags.Flags;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -423,12 +427,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     int mMotionViewNewTop;
 
     /**
-     * The X value associated with the the down motion event
+     * The X value associated with the down motion event
      */
     int mMotionX;
 
     /**
-     * The Y value associated with the the down motion event
+     * The Y value associated with the down motion event
      */
     @UnsupportedAppUsage
     int mMotionY;
@@ -915,6 +919,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     sDeviceConfigChangeListener);
         }
     }
+
+    private DifferentialMotionFlingHelper mDifferentialMotionFlingHelper;
+
+    private HapticScrollFeedbackProvider mHapticScrollFeedbackProvider;
 
     public AbsListView(Context context) {
         super(context);
@@ -4488,15 +4496,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public boolean onGenericMotionEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_SCROLL:
-                final float axisValue;
+                final int axis;
                 if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
-                    axisValue = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                    axis = MotionEvent.AXIS_VSCROLL;
                 } else if (event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER)) {
-                    axisValue = event.getAxisValue(MotionEvent.AXIS_SCROLL);
+                    axis = MotionEvent.AXIS_SCROLL;
                 } else {
-                    axisValue = 0;
+                    axis = -1;
                 }
 
+                final float axisValue = (axis == -1) ? 0 : event.getAxisValue(axis);
                 final int delta = Math.round(axisValue * mVerticalScrollFactor);
                 if (delta != 0) {
                     // If we're moving down, we want the top item. If we're moving up, bottom item.
@@ -4511,6 +4520,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     final int overscrollMode = getOverScrollMode();
 
                     if (!trackMotionScroll(delta, delta)) {
+                        if (Flags.scrollFeedbackApi()) {
+                            initHapticScrollFeedbackProviderIfNotExists();
+                            mHapticScrollFeedbackProvider.onScrollProgress(
+                                    event.getDeviceId(), event.getSource(), axis, delta);
+                        }
+                        initDifferentialFlingHelperIfNotExists();
+                        mDifferentialMotionFlingHelper.onMotionEvent(event, axis);
                         return true;
                     } else if (!event.isFromSource(InputDevice.SOURCE_MOUSE) && motionView != null
                             && (overscrollMode == OVER_SCROLL_ALWAYS
@@ -4519,7 +4535,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         int motionViewRealTop = motionView.getTop();
                         float overscroll = (delta - (motionViewRealTop - motionViewPrevTop))
                                 / ((float) getHeight());
-                        if (delta > 0) {
+                        boolean hitTopLimit = delta > 0;
+                        if (Flags.scrollFeedbackApi()) {
+                            initHapticScrollFeedbackProviderIfNotExists();
+                            mHapticScrollFeedbackProvider.onScrollLimit(
+                                    event.getDeviceId(), event.getSource(), axis,
+                                    /* isStart= */ hitTopLimit);
+                        }
+                        if (hitTopLimit) {
                             mEdgeGlowTop.onPullDistance(overscroll, 0.5f);
                             mEdgeGlowTop.onRelease();
                         } else {
@@ -4677,6 +4700,20 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
+    private void initDifferentialFlingHelperIfNotExists() {
+        if (mDifferentialMotionFlingHelper == null) {
+            mDifferentialMotionFlingHelper =
+                    new DifferentialMotionFlingHelper(
+                            mContext, new DifferentialFlingTarget());
+        }
+    }
+
+    private void initHapticScrollFeedbackProviderIfNotExists() {
+        if (mHapticScrollFeedbackProvider == null) {
+            mHapticScrollFeedbackProvider = new HapticScrollFeedbackProvider(this);
+        }
+    }
+
     private void recycleVelocityTracker() {
         if (mVelocityTracker != null) {
             mVelocityTracker.recycle();
@@ -4703,7 +4740,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
-        if (mFastScroll != null) {
+        if (mFastScroll != null && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
             PointerIcon pointerIcon = mFastScroll.onResolvePointerIcon(event, pointerIndex);
             if (pointerIcon != null) {
                 return pointerIcon;
@@ -5063,6 +5100,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 boolean more = scroller.computeScrollOffset();
                 final int y = scroller.getCurrY();
 
+                // For variable refresh rate project to track the current velocity of this View
+                if (viewVelocityApi()) {
+                    setFrameContentVelocity(Math.abs(mScroller.getCurrVelocity()));
+                }
+
                 // Flip sign to convert finger direction to list items direction
                 // (e.g. finger moving down means list is moving towards the top)
                 int delta = consumeFlingInStretch(mLastFlingY - y);
@@ -5156,6 +5198,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     } else {
                         invalidate();
                         postOnAnimation(this);
+                    }
+                    // For variable refresh rate project to track the current velocity of this View
+                    if (viewVelocityApi()) {
+                        setFrameContentVelocity(Math.abs(mScroller.getCurrVelocity()));
                     }
                 } else {
                     endFling();
@@ -7346,7 +7392,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
             scrap.dispatchStartTemporaryDetach();
 
-            // The the accessibility state of the view may change while temporary
+            // the accessibility state of the view may change while temporary
             // detached and we do not allow detached views to fire accessibility
             // events. So we are announcing that the subtree changed giving a chance
             // to clients holding on to a view in this subtree to refresh it.
@@ -7715,7 +7761,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * Abstract positon scroller used to handle smooth scrolling.
+     * Abstract position scroller used to handle smooth scrolling.
      */
     static abstract class AbsPositionScroller {
         public abstract void start(int position);
@@ -8195,6 +8241,28 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             default:
                 break;
             }
+        }
+    }
+
+    private class DifferentialFlingTarget
+            implements DifferentialMotionFlingHelper.DifferentialMotionFlingTarget {
+        @Override
+        public boolean startDifferentialMotionFling(float velocity) {
+            stopDifferentialMotionFling();
+            fling((int) velocity);
+            return true;
+        }
+
+        @Override
+        public void stopDifferentialMotionFling() {
+            if (mFlingRunnable != null) {
+                mFlingRunnable.endFling();
+            }
+        }
+
+        @Override
+        public float getScaledScrollFactor() {
+            return -mVerticalScrollFactor;
         }
     }
 }

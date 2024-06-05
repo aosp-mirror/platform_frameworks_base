@@ -52,6 +52,12 @@ public final class TestDisplayWindowSettingsProvider extends DisplayWindowSettin
         overrideSettings.setTo(overrides);
     }
 
+    @Override
+    public void onDisplayRemoved(@NonNull DisplayInfo info) {
+        final String identifier = getIdentifier(info);
+        mOverrideSettingsMap.remove(identifier);
+    }
+
     @NonNull
     private SettingsEntry getOrCreateOverrideSettingsEntry(DisplayInfo info) {
         final String identifier = getIdentifier(info);

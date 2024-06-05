@@ -33,7 +33,6 @@ import android.view.ContextThemeWrapper;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
 
 class PeopleStoryIconFactory implements AutoCloseable {
 
@@ -59,7 +58,8 @@ class PeopleStoryIconFactory implements AutoCloseable {
         mIconSize = mDensity * iconSizeDp;
         mPackageManager = pm;
         mIconDrawableFactory = iconDrawableFactory;
-        mImportantConversationColor = mContext.getColor(R.color.important_conversation);
+        mImportantConversationColor = mContext.getColor(
+                com.android.launcher3.icons.R.color.important_conversation);
         mAccentColor = Utils.getColorAttr(mContext,
                 com.android.internal.R.attr.colorAccentPrimaryVariant).getDefaultColor();
     }

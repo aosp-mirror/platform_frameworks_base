@@ -22,7 +22,7 @@ package com.android.test.libs.system_ext;
 public class LibsSystemExtTest {
 
     /**
-     * Dummy method for testing.
+     * Placeholder method for testing.
      */
     public static void test() {
     }

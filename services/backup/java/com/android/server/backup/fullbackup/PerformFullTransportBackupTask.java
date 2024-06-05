@@ -40,8 +40,8 @@ import android.util.Slog;
 
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
-import com.android.server.backup.BackupAndRestoreFeatureFlags;
 import com.android.server.backup.BackupRestoreTask;
+import com.android.server.backup.Flags;
 import com.android.server.backup.FullBackupJob;
 import com.android.server.backup.OperationStorage;
 import com.android.server.backup.OperationStorage.OpState;
@@ -54,7 +54,7 @@ import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.utils.BackupEligibilityRules;
-import com.android.server.backup.utils.BackupManagerMonitorUtils;
+import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 import com.android.server.backup.utils.BackupObserverUtils;
 
 import com.google.android.collect.Sets;
@@ -153,7 +153,6 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     CountDownLatch mLatch;
     FullBackupJob mJob;             // if a scheduled job needs to be finished afterwards
     IBackupObserver mBackupObserver;
-    @Nullable private IBackupManagerMonitor mMonitor;
     boolean mUserInitiated;
     SinglePackageBackupRunner mBackupRunner;
     private final int mBackupRunnerOpToken;
@@ -167,6 +166,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     private final int mCurrentOpToken;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final BackupEligibilityRules mBackupEligibilityRules;
+    private BackupManagerMonitorEventSender mBackupManagerMonitorEventSender;
 
     public PerformFullTransportBackupTask(UserBackupManagerService backupManagerService,
             OperationStorage operationStorage,
@@ -185,11 +185,12 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         mJob = runningJob;
         mPackages = new ArrayList<>(whichPackages.length);
         mBackupObserver = backupObserver;
-        mMonitor = monitor;
         mListener = (listener != null) ? listener : OnTaskFinishedListener.NOP;
         mUserInitiated = userInitiated;
         mCurrentOpToken = backupManagerService.generateRandomIntegerToken();
         mBackupRunnerOpToken = backupManagerService.generateRandomIntegerToken();
+        mBackupManagerMonitorEventSender =
+                new BackupManagerMonitorEventSender(monitor);
         mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
@@ -218,7 +219,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     if (MORE_DEBUG) {
                         Slog.d(TAG, "Ignoring ineligible package " + pkg);
                     }
-                    mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
+                    mBackupManagerMonitorEventSender.monitorEvent(
                             BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_INELIGIBLE,
                             mCurrentPackage,
                             BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -233,7 +234,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                         Slog.d(TAG, "Ignoring full-data backup of key/value participant "
                                 + pkg);
                     }
-                    mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
+                    mBackupManagerMonitorEventSender.monitorEvent(
                             BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_KEY_VALUE_PARTICIPANT,
                             mCurrentPackage,
                             BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -248,7 +249,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     if (MORE_DEBUG) {
                         Slog.d(TAG, "Ignoring stopped package " + pkg);
                     }
-                    mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
+                    mBackupManagerMonitorEventSender.monitorEvent(
                             BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_STOPPED,
                             mCurrentPackage,
                             BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -260,7 +261,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 mPackages.add(info);
             } catch (NameNotFoundException e) {
                 Slog.i(TAG, "Requested package " + pkg + " not found; ignoring");
-                mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
+                mBackupManagerMonitorEventSender.monitorEvent(
                         BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_NOT_FOUND,
                         mCurrentPackage,
                         BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
@@ -356,8 +357,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 } else {
                     monitoringEvent = BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
                 }
-                mMonitor = BackupManagerMonitorUtils
-                        .monitorEvent(mMonitor, monitoringEvent, null,
+                mBackupManagerMonitorEventSender
+                        .monitorEvent(monitoringEvent, null,
                                 BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
                                 null);
                 mUpdateSchedule = false;
@@ -369,7 +370,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             if (transport == null) {
                 Slog.w(TAG, "Transport not present; full data backup not performed");
                 backupRunStatus = BackupManager.ERROR_TRANSPORT_ABORTED;
-                mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
+                mBackupManagerMonitorEventSender.monitorEvent(
                         BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_TRANSPORT_NOT_PRESENT,
                         mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT,
                         null);
@@ -378,9 +379,10 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
             // In some cases there may not be a monitor passed in when creating this task. So, if we
             // don't have one already we ask the transport for a monitor.
-            if (mMonitor == null) {
+            if (mBackupManagerMonitorEventSender.getMonitor() == null) {
                 try {
-                    mMonitor = transport.getBackupManagerMonitor();
+                    mBackupManagerMonitorEventSender
+                            .setMonitor(transport.getBackupManagerMonitor());
                 } catch (RemoteException e) {
                     Slog.i(TAG, "Failed to retrieve monitor from transport");
                 }
@@ -388,8 +390,11 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
             // Set up to send data to the transport
             final int N = mPackages.size();
-            final int chunkSizeInBytes =
-                    BackupAndRestoreFeatureFlags.getFullBackupWriteToTransportBufferSizeBytes();
+            int chunkSizeInBytes = 8 * 1024; // 8KB
+            if (Flags.enableMaxSizeWritesToPipes()) {
+                // Linux pipe capacity (buffer size) is 16 pages where each page is 4KB
+                chunkSizeInBytes = 64 * 1024; // 64KB
+            }
             final byte[] buffer = new byte[chunkSizeInBytes];
             for (int i = 0; i < N; i++) {
                 mBackupRunner = null;
@@ -457,11 +462,11 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                                     + packageName + ": " + preflightResult
                                     + ", not running backup.");
                         }
-                        mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
+                        mBackupManagerMonitorEventSender.monitorEvent(
                                 BackupManagerMonitor.LOG_EVENT_ID_ERROR_PREFLIGHT,
                                 mCurrentPackage,
                                 BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                BackupManagerMonitorUtils.putMonitoringExtra(null,
+                                mBackupManagerMonitorEventSender.putMonitoringExtra(null,
                                         BackupManagerMonitor.EXTRA_LOG_PREFLIGHT_ERROR,
                                         preflightResult));
                         backupPackageStatus = (int) preflightResult;
@@ -492,7 +497,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                         if (backupPackageStatus == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
                             Slog.w(TAG, "Package hit quota limit in-flight " + packageName
                                     + ": " + totalRead + " of " + quota);
-                            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
+                            mBackupManagerMonitorEventSender.monitorEvent(
                                     BackupManagerMonitor.LOG_EVENT_ID_QUOTA_HIT_PREFLIGHT,
                                     mCurrentPackage,
                                     BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT,
@@ -647,11 +652,11 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         } catch (Exception e) {
             backupRunStatus = BackupManager.ERROR_TRANSPORT_ABORTED;
             Slog.w(TAG, "Exception trying full transport backup", e);
-            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
+            mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_EXCEPTION_FULL_BACKUP,
                     mCurrentPackage,
                     BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                    BackupManagerMonitorUtils.putMonitoringExtra(null,
+                    mBackupManagerMonitorEventSender.putMonitoringExtra(null,
                             BackupManagerMonitor.EXTRA_LOG_EXCEPTION_FULL_BACKUP,
                             Log.getStackTraceString(e)));
 
@@ -885,7 +890,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                             mCurrentOpToken,
                             mTransportFlags,
                             mBackupEligibilityRules,
-                            mMonitor);
+                            mBackupManagerMonitorEventSender);
             try {
                 try {
                     if (!mIsCancelled) {
@@ -967,7 +972,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 Slog.w(TAG, "Full backup cancel of " + mTarget.packageName);
             }
 
-            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
+            mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_FULL_BACKUP_CANCEL,
                     mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT, null);
             mIsCancelled = true;

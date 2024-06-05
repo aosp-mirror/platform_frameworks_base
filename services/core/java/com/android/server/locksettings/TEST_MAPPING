@@ -7,7 +7,7 @@
                     "include-annotation": "com.android.cts.devicepolicy.annotations.LockSettingsTest"
                 },
                 {
-                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
                 }
             ]
         }
@@ -20,9 +20,15 @@
                     "include-filter": "com.android.server.locksettings."
                 },
                 {
-                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
                 }
             ]
+        }
+    ],
+    "postsubmit": [
+        {
+            // TODO(b/332974906): Promote in presubmit-large.
+            "name": "CtsDevicePolicyManagerTestCases_LockSettings_NoFlakes"
         }
     ]
 }

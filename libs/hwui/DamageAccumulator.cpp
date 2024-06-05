@@ -218,7 +218,7 @@ void DamageAccumulator::applyRenderNodeTransform(DirtyStack* frame) {
     }
 
     // Perform clipping
-    if (props.getClipDamageToBounds() && !frame->pendingDirty.isEmpty()) {
+    if (props.getClipDamageToBounds()) {
         if (!frame->pendingDirty.intersect(SkRect::MakeIWH(props.getWidth(), props.getHeight()))) {
             frame->pendingDirty.setEmpty();
         }
@@ -240,6 +240,47 @@ void DamageAccumulator::applyRenderNodeTransform(DirtyStack* frame) {
 
         frame->pendingDirty.setEmpty();
     }
+}
+
+SkRect DamageAccumulator::computeClipAndTransform(const SkRect& bounds, Matrix4* outMatrix) const {
+    const DirtyStack* frame = mHead;
+    Matrix4 transform;
+    SkRect pretransformResult = bounds;
+    while (true) {
+        SkRect currentBounds = pretransformResult;
+        pretransformResult.setEmpty();
+        switch (frame->type) {
+            case TransformRenderNode: {
+                const RenderProperties& props = frame->renderNode->properties();
+                // Perform clipping
+                if (props.getClipDamageToBounds() && !currentBounds.isEmpty()) {
+                    if (!currentBounds.intersect(
+                                SkRect::MakeIWH(props.getWidth(), props.getHeight()))) {
+                        currentBounds.setEmpty();
+                    }
+                }
+
+                // apply all transforms
+                mapRect(props, currentBounds, &pretransformResult);
+                frame->renderNode->applyViewPropertyTransforms(transform);
+            } break;
+            case TransformMatrix4:
+                mapRect(frame->matrix4, currentBounds, &pretransformResult);
+                transform.multiply(*frame->matrix4);
+                break;
+            default:
+                pretransformResult = currentBounds;
+                break;
+        }
+        if (frame->prev == frame) break;
+        frame = frame->prev;
+    }
+    SkRect result;
+    Matrix4 globalToLocal;
+    globalToLocal.loadInverse(transform);
+    mapRect(&globalToLocal, pretransformResult, &result);
+    *outMatrix = transform;
+    return result;
 }
 
 void DamageAccumulator::dirty(float left, float top, float right, float bottom) {

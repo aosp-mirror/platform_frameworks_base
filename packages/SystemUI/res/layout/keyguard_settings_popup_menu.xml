@@ -25,13 +25,13 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="@drawable/keyguard_settings_popup_menu_background"
-    android:padding="12dp">
+    android:padding="@dimen/keyguard_settings_popup_menu_padding">
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="8dp"
+        android:layout_width="@dimen/keyguard_settings_popup_menu_icon_height"
+        android:layout_height="@dimen/keyguard_settings_popup_menu_icon_width"
+        android:layout_marginEnd="@dimen/keyguard_settings_popup_menu_icon_end_margin"
         android:tint="?androidprv:attr/materialColorOnSecondaryFixed"
         android:importantForAccessibility="no"
         tools:ignore="UseAppTint" />

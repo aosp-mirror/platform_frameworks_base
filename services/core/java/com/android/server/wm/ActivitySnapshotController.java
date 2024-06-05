@@ -16,28 +16,27 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.SnapshotController.ACTIVITY_CLOSE;
-import static com.android.server.wm.SnapshotController.ACTIVITY_OPEN;
-import static com.android.server.wm.SnapshotController.TASK_CLOSE;
-import static com.android.server.wm.SnapshotController.TASK_OPEN;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.graphics.Rect;
 import android.os.Environment;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.LocalServices;
-import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.BaseAppSnapshotPersister.PersistInfoProvider;
-import com.android.server.wm.SnapshotController.TransitionState;
+import com.android.window.flags.Flags;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -62,12 +61,6 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     static final String SNAPSHOTS_DIRNAME = "activity_snapshots";
 
     /**
-     * The pending activities which should capture snapshot when process transition finish.
-     */
-    @VisibleForTesting
-    final ArraySet<ActivityRecord> mPendingCaptureActivity = new ArraySet<>();
-
-    /**
      * The pending activities which should remove snapshot from memory when process transition
      * finish.
      */
@@ -86,6 +79,10 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     @VisibleForTesting
     final ArraySet<ActivityRecord> mPendingLoadActivity = new ArraySet<>();
 
+    private final ArraySet<ActivityRecord> mOnBackPressedActivities = new ArraySet<>();
+
+    private final ArrayList<ActivityRecord> mTmpBelowActivities = new ArrayList<>();
+    private final ArrayList<WindowContainer> mTmpTransitionParticipants = new ArrayList<>();
     private final SnapshotPersistQueue mSnapshotPersistQueue;
     private final PersistInfoProvider mPersistInfoProvider;
     private final AppSnapshotLoader mSnapshotLoader;
@@ -106,7 +103,7 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
                 Environment::getDataSystemCeDirectory);
         mPersister = new TaskSnapshotPersister(persistQueue, mPersistInfoProvider);
         mSnapshotLoader = new AppSnapshotLoader(mPersistInfoProvider);
-        initialize(new ActivitySnapshotCache(service));
+        initialize(new ActivitySnapshotCache());
 
         final boolean snapshotEnabled =
                 !service.mContext
@@ -115,20 +112,6 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
                 && isSnapshotEnabled()
                 && !ActivityManager.isLowRamDeviceStatic(); // Don't support Android Go
         setSnapshotEnabled(snapshotEnabled);
-    }
-
-    void systemReady() {
-        if (shouldDisableSnapshots()) {
-            return;
-        }
-        mService.mSnapshotController.registerTransitionStateConsumer(
-                ACTIVITY_OPEN, this::handleOpenActivityTransition);
-        mService.mSnapshotController.registerTransitionStateConsumer(
-                ACTIVITY_CLOSE, this::handleCloseActivityTransition);
-        mService.mSnapshotController.registerTransitionStateConsumer(
-                TASK_OPEN, this::handleOpenTaskTransition);
-        mService.mSnapshotController.registerTransitionStateConsumer(
-                TASK_CLOSE, this::handleCloseTaskTransition);
     }
 
     @Override
@@ -140,7 +123,8 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
 
     // TODO remove when enabled
     static boolean isSnapshotEnabled() {
-        return SystemProperties.getInt("persist.wm.debug.activity_screenshot", 0) != 0;
+        return SystemProperties.getInt("persist.wm.debug.activity_screenshot", 0) != 0
+                || Flags.activitySnapshotByDefault();
     }
 
     static PersistInfoProvider createPersistInfoProvider(
@@ -153,27 +137,37 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
                 false /* enableLowResSnapshots */, 0 /* lowResScaleFactor */, use16BitFormat);
     }
 
-    /** Retrieves a snapshot for an activity from cache. */
+    /**
+     * Retrieves a snapshot for a set of activities from cache.
+     * This will only return the snapshot IFF input activities exist entirely in the snapshot.
+     * Sample: If the snapshot was captured with activity A and B, here will return null if the
+     * input activity is only [A] or [B], it must be [A, B]
+     */
     @Nullable
-    TaskSnapshot getSnapshot(ActivityRecord ar) {
-        final int code = getSystemHashCode(ar);
-        return mCache.getSnapshot(code);
+    TaskSnapshot getSnapshot(@NonNull ActivityRecord[] activities) {
+        if (activities.length == 0) {
+            return null;
+        }
+        final UserSavedFile tmpUsf = findSavedFile(activities[0]);
+        if (tmpUsf == null || tmpUsf.mActivityIds.size() != activities.length) {
+            return null;
+        }
+        int fileId = 0;
+        for (int i = activities.length - 1; i >= 0; --i) {
+            fileId ^= getSystemHashCode(activities[i]);
+        }
+        return tmpUsf.mFileId == fileId ? mCache.getSnapshot(tmpUsf.mActivityIds.get(0)) : null;
     }
 
     private void cleanUpUserFiles(int userId) {
         synchronized (mSnapshotPersistQueue.getLock()) {
             mSnapshotPersistQueue.sendToQueueLocked(
-                    new SnapshotPersistQueue.WriteQueueItem(mPersistInfoProvider) {
-                        @Override
-                        boolean isReady() {
-                            final UserManagerInternal mUserManagerInternal =
-                                    LocalServices.getService(UserManagerInternal.class);
-                            return mUserManagerInternal.isUserUnlocked(userId);
-                        }
+                    new SnapshotPersistQueue.WriteQueueItem(mPersistInfoProvider, userId) {
 
                         @Override
                         void write() {
-                            final File file = mPersistInfoProvider.getDirectory(userId);
+                            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "cleanUpUserFiles");
+                            final File file = mPersistInfoProvider.getDirectory(mUserId);
                             if (file.exists()) {
                                 final File[] contents = file.listFiles();
                                 if (contents != null) {
@@ -182,15 +176,30 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
                                     }
                                 }
                             }
+                            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                         }
                     });
         }
     }
 
+    void addOnBackPressedActivity(ActivityRecord ar) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
+        mOnBackPressedActivities.add(ar);
+    }
+
+    void clearOnBackPressedActivities() {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
+        mOnBackPressedActivities.clear();
+    }
+
     /**
-     * Prepare to handle on transition start. Clear all temporary fields.
+     * Prepare to collect any change for snapshots processing. Clear all temporary fields.
      */
-    void preTransitionStart() {
+    void beginSnapshotProcess() {
         if (shouldDisableSnapshots()) {
             return;
         }
@@ -198,18 +207,22 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     }
 
     /**
-     * on transition start has notified, start process data.
+     * End collect any change for snapshots processing, start process data.
      */
-    void postTransitionStart() {
+    void endSnapshotProcess() {
         if (shouldDisableSnapshots()) {
             return;
         }
-        onCommitTransition();
+        for (int i = mOnBackPressedActivities.size() - 1; i >= 0; --i) {
+            handleActivityTransition(mOnBackPressedActivities.valueAt(i));
+        }
+        mOnBackPressedActivities.clear();
+        mTmpTransitionParticipants.clear();
+        postProcess();
     }
 
     @VisibleForTesting
     void resetTmpFields() {
-        mPendingCaptureActivity.clear();
         mPendingRemoveActivity.clear();
         mPendingDeleteActivity.clear();
         mPendingLoadActivity.clear();
@@ -218,155 +231,331 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     /**
      * Start process all pending activities for a transition.
      */
-    private void onCommitTransition() {
+    private void postProcess() {
         if (DEBUG) {
-            Slog.d(TAG, "ActivitySnapshotController#onCommitTransition result:"
-                    + " capture " + mPendingCaptureActivity
+            Slog.d(TAG, "ActivitySnapshotController#postProcess result:"
                     + " remove " + mPendingRemoveActivity
                     + " delete " + mPendingDeleteActivity
                     + " load " + mPendingLoadActivity);
         }
-        // task snapshots
-        for (int i = mPendingCaptureActivity.size() - 1; i >= 0; i--) {
-            recordSnapshot(mPendingCaptureActivity.valueAt(i));
-        }
+        // load snapshot to cache
+        loadActivitySnapshot();
         // clear mTmpRemoveActivity from cache
         for (int i = mPendingRemoveActivity.size() - 1; i >= 0; i--) {
             final ActivityRecord ar = mPendingRemoveActivity.valueAt(i);
-            final int code = getSystemHashCode(ar);
-            mCache.onIdRemoved(code);
+            removeCachedFiles(ar);
         }
         // clear snapshot on cache and delete files
         for (int i = mPendingDeleteActivity.size() - 1; i >= 0; i--) {
             final ActivityRecord ar = mPendingDeleteActivity.valueAt(i);
-            final int code = getSystemHashCode(ar);
-            mCache.onIdRemoved(code);
-            removeIfUserSavedFileExist(code, ar.mUserId);
-        }
-        // load snapshot to cache
-        for (int i = mPendingLoadActivity.size() - 1; i >= 0; i--) {
-            final ActivityRecord ar = mPendingLoadActivity.valueAt(i);
-            final int code = getSystemHashCode(ar);
-            final int userId = ar.mUserId;
-            if (mCache.getSnapshot(code) != null) {
-                // already in cache, skip
-                continue;
-            }
-            if (containsFile(code, userId)) {
-                synchronized (mSnapshotPersistQueue.getLock()) {
-                    mSnapshotPersistQueue.sendToQueueLocked(
-                            new SnapshotPersistQueue.WriteQueueItem(mPersistInfoProvider) {
-                                @Override
-                                void write() {
-                                    final TaskSnapshot snapshot = mSnapshotLoader.loadTask(code,
-                                            userId, false /* loadLowResolutionBitmap */);
-                                    synchronized (mService.getWindowManagerLock()) {
-                                        if (snapshot != null && !ar.finishing) {
-                                            mCache.putSnapshot(ar, snapshot);
-                                        }
-                                    }
-                                }
-                            });
-                }
-            }
+            removeIfUserSavedFileExist(ar);
         }
         // don't keep any reference
         resetTmpFields();
     }
 
-    private void recordSnapshot(ActivityRecord activity) {
-        final TaskSnapshot snapshot = recordSnapshotInner(activity, false /* allowSnapshotHome */);
-        if (snapshot != null) {
-            final int code = getSystemHashCode(activity);
-            addUserSavedFile(code, activity.mUserId, snapshot);
+    class LoadActivitySnapshotItem extends SnapshotPersistQueue.WriteQueueItem {
+        private final int mCode;
+        private final ActivityRecord[] mActivities;
+
+        LoadActivitySnapshotItem(@NonNull ActivityRecord[] activities, int code, int userId,
+                @NonNull PersistInfoProvider persistInfoProvider) {
+            super(persistInfoProvider, userId);
+            mActivities = activities;
+            mCode = code;
         }
+
+        @Override
+        void write() {
+            try {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
+                        "load_activity_snapshot");
+                final TaskSnapshot snapshot = mSnapshotLoader.loadTask(mCode,
+                        mUserId, false /* loadLowResolutionBitmap */);
+                if (snapshot == null) {
+                    return;
+                }
+                synchronized (mService.getWindowManagerLock()) {
+                    // Verify the snapshot is still needed, and the activity is not finishing
+                    if (!hasRecord(mActivities[0])) {
+                        return;
+                    }
+                    for (ActivityRecord ar : mActivities) {
+                        mCache.putSnapshot(ar, snapshot);
+                    }
+                }
+            } finally {
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) return false;
+            final LoadActivitySnapshotItem other = (LoadActivitySnapshotItem) o;
+            return mCode == other.mCode && mUserId == other.mUserId
+                    && mPersistInfoProvider == other.mPersistInfoProvider;
+        }
+
+        @Override
+        public String toString() {
+            return "LoadActivitySnapshotItem{code=" + mCode + ", UserId=" + mUserId + "}";
+        }
+    }
+
+    void loadActivitySnapshot() {
+        if (mPendingLoadActivity.isEmpty()) {
+            return;
+        }
+        // Only load if saved file exists.
+        final ArraySet<UserSavedFile> loadingFiles = new ArraySet<>();
+        for (int i = mPendingLoadActivity.size() - 1; i >= 0; i--) {
+            final ActivityRecord ar = mPendingLoadActivity.valueAt(i);
+            final UserSavedFile usf = findSavedFile(ar);
+            if (usf != null) {
+                loadingFiles.add(usf);
+            }
+        }
+        // Filter out the activity if the snapshot was removed.
+        for (int i = loadingFiles.size() - 1; i >= 0; i--) {
+            final UserSavedFile usf = loadingFiles.valueAt(i);
+            final ActivityRecord[] activities = usf.filterExistActivities(mPendingLoadActivity);
+            if (activities == null) {
+                continue;
+            }
+            if (getSnapshot(activities) != null) {
+                // Found the cache in memory, so skip loading from file.
+                continue;
+            }
+            loadSnapshotInner(activities, usf);
+        }
+    }
+
+    @VisibleForTesting
+    void loadSnapshotInner(ActivityRecord[] activities, UserSavedFile usf) {
+        synchronized (mSnapshotPersistQueue.getLock()) {
+            mSnapshotPersistQueue.insertQueueAtFirstLocked(new LoadActivitySnapshotItem(
+                    activities, usf.mFileId, usf.mUserId, mPersistInfoProvider));
+        }
+    }
+
+    /**
+     * Record one or multiple activities within a snapshot where those activities must belong to
+     * the same task.
+     * @param activity If the request activity is more than one, try to record those activities
+     *                 as a single snapshot, so those activities should belong to the same task.
+     */
+    void recordSnapshot(@NonNull ArrayList<ActivityRecord> activity) {
+        if (shouldDisableSnapshots() || activity.isEmpty()) {
+            return;
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "ActivitySnapshotController#recordSnapshot " + activity);
+        }
+        final int size = activity.size();
+        final int[] mixedCode = new int[size];
+        if (size == 1) {
+            final ActivityRecord singleActivity = activity.get(0);
+            final TaskSnapshot snapshot = recordSnapshotInner(singleActivity);
+            if (snapshot != null) {
+                mixedCode[0] = getSystemHashCode(singleActivity);
+                addUserSavedFile(singleActivity.mUserId, snapshot, mixedCode);
+            }
+            return;
+        }
+
+        final Task mainTask = activity.get(0).getTask();
+        // Snapshot by task controller with activity's scale.
+        final TaskSnapshot snapshot = mService.mTaskSnapshotController
+                .snapshot(mainTask, mHighResSnapshotScale);
+        if (snapshot == null) {
+            return;
+        }
+
+        for (int i = 0; i < activity.size(); ++i) {
+            final ActivityRecord next = activity.get(i);
+            mCache.putSnapshot(next, snapshot);
+            mixedCode[i] = getSystemHashCode(next);
+        }
+        addUserSavedFile(mainTask.mUserId, snapshot, mixedCode);
     }
 
     /**
      * Called when the visibility of an app changes outside the regular app transition flow.
      */
-    void notifyAppVisibilityChanged(ActivityRecord appWindowToken, boolean visible) {
+    void notifyAppVisibilityChanged(ActivityRecord ar, boolean visible) {
         if (shouldDisableSnapshots()) {
             return;
         }
+        final Task task = ar.getTask();
+        if (task == null) {
+            return;
+        }
+        // Doesn't need to capture activity snapshot when it converts from translucent.
         if (!visible) {
             resetTmpFields();
-            addBelowTopActivityIfExist(appWindowToken.getTask(), mPendingRemoveActivity,
+            addBelowActivityIfExist(ar, mPendingRemoveActivity, false,
                     "remove-snapshot");
-            onCommitTransition();
+            postProcess();
         }
     }
 
-    private static int getSystemHashCode(ActivityRecord activity) {
+    @VisibleForTesting
+    static int getSystemHashCode(ActivityRecord activity) {
         return System.identityHashCode(activity);
     }
 
-    void handleOpenActivityTransition(TransitionState<ActivityRecord> transitionState) {
-        ArraySet<ActivityRecord> participant = transitionState.getParticipant(false /* open */);
-        for (ActivityRecord ar : participant) {
-            mPendingCaptureActivity.add(ar);
-            // remove the snapshot for the one below close
-            final ActivityRecord below = ar.getTask().getActivityBelow(ar);
-            if (below != null) {
-                mPendingRemoveActivity.add(below);
+    @VisibleForTesting
+    void handleTransitionFinish(@NonNull ArrayList<WindowContainer> windows) {
+        mTmpTransitionParticipants.clear();
+        mTmpTransitionParticipants.addAll(windows);
+        for (int i = mTmpTransitionParticipants.size() - 1; i >= 0; --i) {
+            final WindowContainer next = mTmpTransitionParticipants.get(i);
+            if (next.asTask() != null) {
+                handleTaskTransition(next.asTask());
+            } else if (next.asTaskFragment() != null) {
+                final TaskFragment tf = next.asTaskFragment();
+                final ActivityRecord ar = tf.getTopMostActivity();
+                if (ar != null) {
+                    handleActivityTransition(ar);
+                }
+            } else if (next.asActivityRecord() != null) {
+                handleActivityTransition(next.asActivityRecord());
             }
         }
     }
 
-    void handleCloseActivityTransition(TransitionState<ActivityRecord> transitionState) {
-        ArraySet<ActivityRecord> participant = transitionState.getParticipant(true /* open */);
-        for (ActivityRecord ar : participant) {
+    private void handleActivityTransition(@NonNull ActivityRecord ar) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
+        if (ar.isVisibleRequested()) {
             mPendingDeleteActivity.add(ar);
             // load next one if exists.
-            final ActivityRecord below = ar.getTask().getActivityBelow(ar);
-            if (below != null) {
-                mPendingLoadActivity.add(below);
-            }
+            // Note if this transition is happen between two TaskFragment, the next N - 1 activity
+            // may not participant in this transition.
+            // Sample:
+            //   [TF1] close
+            //   [TF2] open
+            //   Bottom Activity <- Able to load this even it didn't participant the transition.
+            addBelowActivityIfExist(ar, mPendingLoadActivity, false, "load-snapshot");
+        } else {
+            // remove the snapshot for the one below close
+            addBelowActivityIfExist(ar, mPendingRemoveActivity, true, "remove-snapshot");
         }
     }
 
-    void handleCloseTaskTransition(TransitionState<Task> closeTaskTransitionRecord) {
-        ArraySet<Task> participant = closeTaskTransitionRecord.getParticipant(false /* open */);
-        for (Task close : participant) {
-            // this is close task transition
-            // remove the N - 1 from cache
-            addBelowTopActivityIfExist(close, mPendingRemoveActivity, "remove-snapshot");
+    private void handleTaskTransition(Task task) {
+        if (shouldDisableSnapshots()) {
+            return;
         }
-    }
-
-    void handleOpenTaskTransition(TransitionState<Task> openTaskTransitionRecord) {
-        ArraySet<Task> participant = openTaskTransitionRecord.getParticipant(true /* open */);
-        for (Task open : participant) {
-            // this is close task transition
-            // remove the N - 1 from cache
-            addBelowTopActivityIfExist(open, mPendingLoadActivity, "load-snapshot");
+        final ActivityRecord topActivity = task.getTopMostActivity();
+        if (topActivity == null) {
+            return;
+        }
+        if (task.isVisibleRequested()) {
+            // this is open task transition
+            // load the N - 1 to cache
+            addBelowActivityIfExist(topActivity, mPendingLoadActivity, true, "load-snapshot");
             // Move the activities to top of mSavedFilesInOrder, so when purge happen, there
             // will trim the persisted files from the most non-accessed.
-            adjustSavedFileOrder(open);
+            adjustSavedFileOrder(task);
+        } else {
+            // this is close task transition
+            // remove the N - 1 from cache
+            addBelowActivityIfExist(topActivity, mPendingRemoveActivity, true, "remove-snapshot");
         }
     }
 
-    // Add the top -1 activity to a set if it exists.
-    private void addBelowTopActivityIfExist(Task task, ArraySet<ActivityRecord> set,
-            String debugMessage) {
-        final ActivityRecord topActivity = task.getTopMostActivity();
-        if (topActivity != null) {
-            final ActivityRecord below = task.getActivityBelow(topActivity);
-            if (below != null) {
-                set.add(below);
-                if (DEBUG) {
-                    Slog.d(TAG, "ActivitySnapshotController#addBelowTopActivityIfExist "
-                            + below + " from " + debugMessage);
-                }
+    /**
+     * Add the top -1 activity to a set if it exists.
+     * @param inTransition true if the activity must participant in transition.
+     */
+    private void addBelowActivityIfExist(ActivityRecord currentActivity,
+            ArraySet<ActivityRecord> set, boolean inTransition, String debugMessage) {
+        getActivityBelow(currentActivity, inTransition, mTmpBelowActivities);
+        for (int i = mTmpBelowActivities.size() - 1; i >= 0; --i) {
+            set.add(mTmpBelowActivities.get(i));
+            if (DEBUG) {
+                Slog.d(TAG, "ActivitySnapshotController#addBelowTopActivityIfExist "
+                        + mTmpBelowActivities.get(i) + " from " + debugMessage);
             }
         }
+        mTmpBelowActivities.clear();
+    }
+
+    private void getActivityBelow(ActivityRecord currentActivity, boolean inTransition,
+            ArrayList<ActivityRecord> result) {
+        final Task currentTask = currentActivity.getTask();
+        if (currentTask == null) {
+            return;
+        }
+        final ActivityRecord initPrev = currentTask.getActivityBelow(currentActivity);
+        if (initPrev == null) {
+            return;
+        }
+        final TaskFragment currTF = currentActivity.getTaskFragment();
+        final TaskFragment prevTF = initPrev.getTaskFragment();
+        final TaskFragment prevAdjacentTF = prevTF != null
+                ? prevTF.getAdjacentTaskFragment() : null;
+        if (currTF == prevTF && currTF != null || prevAdjacentTF == null) {
+            // Current activity and previous one is in the same task fragment, or
+            // previous activity is not in a task fragment, or
+            // previous activity's task fragment doesn't adjacent to any others.
+            if (!inTransition || isInParticipant(initPrev, mTmpTransitionParticipants)) {
+                result.add(initPrev);
+            }
+            return;
+        }
+
+        if (prevAdjacentTF == currTF) {
+            // previous activity A is adjacent to current activity B.
+            // Try to find anyone below previous activityA, which are C and D if exists.
+            // A | B
+            // C (| D)
+            getActivityBelow(initPrev, inTransition, result);
+        } else {
+            // previous activity C isn't adjacent to current activity A.
+            // A
+            // B | C
+            final Task prevAdjacentTask = prevAdjacentTF.getTask();
+            if (prevAdjacentTask == currentTask) {
+                final int currentIndex = currTF != null
+                        ? currentTask.mChildren.indexOf(currTF)
+                        : currentTask.mChildren.indexOf(currentActivity);
+                final int prevAdjacentIndex =
+                        prevAdjacentTask.mChildren.indexOf(prevAdjacentTF);
+                // prevAdjacentTF already above currentActivity
+                if (prevAdjacentIndex > currentIndex) {
+                    return;
+                }
+            }
+            if (!inTransition || isInParticipant(initPrev, mTmpTransitionParticipants)) {
+                result.add(initPrev);
+            }
+            // prevAdjacentTF is adjacent to another one
+            final ActivityRecord prevAdjacentActivity = prevAdjacentTF.getTopMostActivity();
+            if (prevAdjacentActivity != null && (!inTransition
+                    || isInParticipant(prevAdjacentActivity, mTmpTransitionParticipants))) {
+                result.add(prevAdjacentActivity);
+            }
+        }
+    }
+
+    static boolean isInParticipant(ActivityRecord ar,
+            ArrayList<WindowContainer> transitionParticipants) {
+        for (int i = transitionParticipants.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = transitionParticipants.get(i);
+            if (ar == wc || ar.isDescendantOf(wc)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void adjustSavedFileOrder(Task nextTopTask) {
-        final int userId = nextTopTask.mUserId;
         nextTopTask.forAllActivities(ar -> {
-            final int code = getSystemHashCode(ar);
-            final UserSavedFile usf = getUserFiles(userId).get(code);
+            final UserSavedFile usf = findSavedFile(ar);
             if (usf != null) {
                 mSavedFilesInOrder.remove(usf);
                 mSavedFilesInOrder.add(usf);
@@ -376,9 +565,10 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
 
     @Override
     void onAppRemoved(ActivityRecord activity) {
-        super.onAppRemoved(activity);
-        final int code = getSystemHashCode(activity);
-        removeIfUserSavedFileExist(code, activity.mUserId);
+        if (shouldDisableSnapshots()) {
+            return;
+        }
+        removeIfUserSavedFileExist(activity);
         if (DEBUG) {
             Slog.d(TAG, "ActivitySnapshotController#onAppRemoved delete snapshot " + activity);
         }
@@ -386,9 +576,10 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
 
     @Override
     void onAppDied(ActivityRecord activity) {
-        super.onAppDied(activity);
-        final int code = getSystemHashCode(activity);
-        removeIfUserSavedFileExist(code, activity.mUserId);
+        if (shouldDisableSnapshots()) {
+            return;
+        }
+        removeIfUserSavedFileExist(activity);
         if (DEBUG) {
             Slog.d(TAG, "ActivitySnapshotController#onAppDied delete snapshot " + activity);
         }
@@ -427,6 +618,12 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
         return mPersistInfoProvider.use16BitFormat();
     }
 
+    @Override
+    protected Rect getLetterboxInsets(ActivityRecord topActivity) {
+        // Do not capture letterbox for ActivityRecord
+        return Letterbox.EMPTY_RECT;
+    }
+
     @NonNull
     private SparseArray<UserSavedFile> getUserFiles(int userId) {
         if (mUserSavedFiles.get(userId) == null) {
@@ -437,75 +634,173 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
         return mUserSavedFiles.get(userId);
     }
 
-    private void removeIfUserSavedFileExist(int code, int userId) {
-        final UserSavedFile usf = getUserFiles(userId).get(code);
+    UserSavedFile findSavedFile(@NonNull ActivityRecord ar) {
+        final int code = getSystemHashCode(ar);
+        return findSavedFile(ar.mUserId, code);
+    }
+
+    UserSavedFile findSavedFile(int userId, int code) {
+        final SparseArray<UserSavedFile> usfs = getUserFiles(userId);
+        return usfs.get(code);
+    }
+
+    private void removeCachedFiles(ActivityRecord ar) {
+        final UserSavedFile usf = findSavedFile(ar);
         if (usf != null) {
-            mUserSavedFiles.remove(code);
-            mSavedFilesInOrder.remove(usf);
-            mPersister.removeSnap(code, userId);
+            for (int i = usf.mActivityIds.size() - 1; i >= 0; --i) {
+                final int activityId = usf.mActivityIds.get(i);
+                mCache.onIdRemoved(activityId);
+            }
         }
     }
 
-    private boolean containsFile(int code, int userId) {
-        return getUserFiles(userId).get(code) != null;
+    private void removeIfUserSavedFileExist(ActivityRecord ar) {
+        final UserSavedFile usf = findSavedFile(ar);
+        if (usf != null) {
+            final SparseArray<UserSavedFile> usfs = getUserFiles(ar.mUserId);
+            for (int i = usf.mActivityIds.size() - 1; i >= 0; --i) {
+                final int activityId = usf.mActivityIds.get(i);
+                usf.remove(activityId);
+                mCache.onIdRemoved(activityId);
+                usfs.remove(activityId);
+            }
+            mSavedFilesInOrder.remove(usf);
+            mPersister.removeSnapshot(usf.mFileId, ar.mUserId);
+        }
     }
 
-    private void addUserSavedFile(int code, int userId, TaskSnapshot snapshot) {
-        final SparseArray<UserSavedFile> savedFiles = getUserFiles(userId);
-        final UserSavedFile savedFile = savedFiles.get(code);
-        if (savedFile == null) {
-            final UserSavedFile usf = new UserSavedFile(code, userId);
-            savedFiles.put(code, usf);
-            mSavedFilesInOrder.add(usf);
-            mPersister.persistSnapshot(code, userId, snapshot);
+    @VisibleForTesting
+    boolean hasRecord(@NonNull ActivityRecord ar) {
+        return findSavedFile(ar) != null;
+    }
 
-            if (mSavedFilesInOrder.size() > MAX_PERSIST_SNAPSHOT_COUNT * 2) {
-                purgeSavedFile();
-            }
+    @VisibleForTesting
+    void addUserSavedFile(int userId, TaskSnapshot snapshot, @NonNull int[] code) {
+        final UserSavedFile savedFile = findSavedFile(userId, code[0]);
+        if (savedFile != null) {
+            Slog.w(TAG, "Duplicate request for recording activity snapshot " + savedFile);
+            return;
+        }
+        int fileId = 0;
+        for (int i = code.length - 1; i >= 0; --i) {
+            fileId ^= code[i];
+        }
+        final UserSavedFile usf = new UserSavedFile(fileId, userId);
+        SparseArray<UserSavedFile> usfs = getUserFiles(userId);
+        for (int i = code.length - 1; i >= 0; --i) {
+            usfs.put(code[i], usf);
+        }
+        usf.mActivityIds.addAll(code);
+        mSavedFilesInOrder.add(usf);
+        mPersister.persistSnapshot(fileId, userId, snapshot);
+
+        if (mSavedFilesInOrder.size() > MAX_PERSIST_SNAPSHOT_COUNT * 2) {
+            purgeSavedFile();
         }
     }
 
     private void purgeSavedFile() {
         final int savedFileCount = mSavedFilesInOrder.size();
         final int removeCount = savedFileCount - MAX_PERSIST_SNAPSHOT_COUNT;
-        final ArrayList<UserSavedFile> usfs = new ArrayList<>();
-        if (removeCount > 0) {
-            final int removeTillIndex = savedFileCount - removeCount;
-            for (int i = savedFileCount - 1; i > removeTillIndex; --i) {
-                final UserSavedFile usf = mSavedFilesInOrder.remove(i);
-                if (usf != null) {
-                    mUserSavedFiles.remove(usf.mFileId);
-                    usfs.add(usf);
-                }
-            }
+        if (removeCount < 1) {
+            return;
         }
-        if (usfs.size() > 0) {
-            removeSnapshotFiles(usfs);
+
+        final ArrayList<UserSavedFile> removeTargets = new ArrayList<>();
+        for (int i = removeCount - 1; i >= 0; --i) {
+            final UserSavedFile usf = mSavedFilesInOrder.remove(i);
+            final SparseArray<UserSavedFile> files = mUserSavedFiles.get(usf.mUserId);
+            for (int j = usf.mActivityIds.size() - 1; j >= 0; --j) {
+                mCache.removeRunningEntry(usf.mActivityIds.get(j));
+                files.remove(usf.mActivityIds.get(j));
+            }
+            removeTargets.add(usf);
+        }
+        for (int i = removeTargets.size() - 1; i >= 0; --i) {
+            final UserSavedFile usf = removeTargets.get(i);
+            mPersister.removeSnapshot(usf.mFileId, usf.mUserId);
         }
     }
 
-    private void removeSnapshotFiles(ArrayList<UserSavedFile> files) {
-        synchronized (mSnapshotPersistQueue.getLock()) {
-            mSnapshotPersistQueue.sendToQueueLocked(
-                    new SnapshotPersistQueue.WriteQueueItem(mPersistInfoProvider) {
-                        @Override
-                        void write() {
-                            for (int i = files.size() - 1; i >= 0; --i) {
-                                final UserSavedFile usf = files.get(i);
-                                mSnapshotPersistQueue.deleteSnapshot(
-                                        usf.mFileId, usf.mUserId, mPersistInfoProvider);
-                            }
-                        }
-                    });
+    @Override
+    void dump(PrintWriter pw, String prefix) {
+        super.dump(pw, prefix);
+        final String doublePrefix = prefix + "  ";
+        final String triplePrefix = doublePrefix + "  ";
+        for (int i = mUserSavedFiles.size() - 1; i >= 0; --i) {
+            final SparseArray<UserSavedFile> usfs = mUserSavedFiles.valueAt(i);
+            pw.println(doublePrefix + "UserSavedFile userId=" + mUserSavedFiles.keyAt(i));
+            final ArraySet<UserSavedFile> sets = new ArraySet<>();
+            for (int j = usfs.size() - 1; j >= 0; --j) {
+                sets.add(usfs.valueAt(j));
+            }
+            for (int j = sets.size() - 1; j >= 0; --j) {
+                pw.println(triplePrefix + "SavedFile=" + sets.valueAt(j));
+            }
         }
     }
 
     static class UserSavedFile {
-        int mFileId;
-        int mUserId;
+        // The unique id as filename.
+        final int mFileId;
+        final int mUserId;
+
+        /**
+         * The Id of all activities which are includes in the snapshot.
+         */
+        final IntArray mActivityIds = new IntArray();
+
         UserSavedFile(int fileId, int userId) {
             mFileId = fileId;
             mUserId = userId;
+        }
+
+        boolean contains(int code) {
+            return mActivityIds.contains(code);
+        }
+
+        void remove(int code) {
+            final int index = mActivityIds.indexOf(code);
+            if (index >= 0) {
+                mActivityIds.remove(index);
+            }
+        }
+
+        ActivityRecord[] filterExistActivities(
+                @NonNull ArraySet<ActivityRecord> pendingLoadActivity) {
+            ArrayList<ActivityRecord> matchedActivities = null;
+            for (int i = pendingLoadActivity.size() - 1; i >= 0; --i) {
+                final ActivityRecord ar = pendingLoadActivity.valueAt(i);
+                if (contains(getSystemHashCode(ar))) {
+                    if (matchedActivities == null) {
+                        matchedActivities = new ArrayList<>();
+                    }
+                    matchedActivities.add(ar);
+                }
+            }
+            if (matchedActivities == null || matchedActivities.size() != mActivityIds.size()) {
+                return null;
+            }
+            return matchedActivities.toArray(new ActivityRecord[0]);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("UserSavedFile{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(" fileId=");
+            sb.append(Integer.toHexString(mFileId));
+            sb.append(", activityIds=[");
+            for (int i = mActivityIds.size() - 1; i >= 0; --i) {
+                sb.append(Integer.toHexString(mActivityIds.get(i)));
+                if (i > 0) {
+                    sb.append(',');
+                }
+            }
+            sb.append("]");
+            sb.append("}");
+            return sb.toString();
         }
     }
 }

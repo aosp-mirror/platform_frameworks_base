@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • சார்ஜாகிறது"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • வேகமாகச் சார்ஜாகிறது"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • மெதுவாகச் சார்ஜாகிறது"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • பேட்டரியைப் பாதுகாக்க சார்ஜிங் மேம்படுத்தப்பட்டுள்ளது"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • சார்ஜரில் சிக்கல் உள்ளது"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"அன்லாக் செய்ய மெனுவை அழுத்தவும்."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • பேட்டரியைப் பாதுகாப்பதற்காகச் சார்ஜிங் ஹோல்டு செய்யப்பட்டுள்ளது"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • சார்ஜிங் துணைக்கருவியைச் சரிபார்க்கவும்"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"நெட்வொர்க் பூட்டப்பட்டது"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"சிம் இல்லை"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"சிம்மைச் சேருங்கள்."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"சிம் இல்லை அல்லது படிக்கக்கூடியதாக இல்லை. சிம்மைச் சேருங்கள்."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"பயன்படுத்த முடியாத சிம்."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"உங்கள் சிம் நிரந்தரமாக முடக்கப்பட்டுள்ளது.\n மற்றொரு சிம்மிற்கான உங்கள் வயர்லெஸ் சேவை வழங்குநரைத் தொடர்புகொள்ளுங்கள்."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"சிம் லாக் செய்யப்பட்டுள்ளது."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"சிம் PUK-லாக் செய்யப்பட்டுள்ளது."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"சிம்மை அன்லாக் செய்கிறது…"</string>
@@ -61,7 +57,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"தவறான பின்"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"தவறு. மீண்டும் முயலவும்."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"இல்லையெனில் கைரேகை மூலம் அன்லாக் செய்யவும்"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"கைரேகை அடையாளம் இல்லை"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"கைரேகையை அடையாளம் காண முடியவில்லை"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"முகம் கண்டறிய முடியவில்லை"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"மீண்டும் முயலவும் அல்லது பின்னை உள்ளிடவும்"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"மீண்டும் முயலவும் அல்லது கடவுச்சொல்லை உள்ளிடவும்"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"முழுப் பூட்டு காரணமாகப் பின் தேவை"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"முழுப் பூட்டு காரணமாகக் கடவுச்சொல் தேவை"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"முழுப் பூட்டு காரணமாகப் பேட்டர்ன் தேவை"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"செயல்பாடில்லாத நேரத்தில் புதுப்பிப்பு நிறுவப்படும்"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"சாதனம் உபயோகத்தில் இல்லாதபோது புதுப்பிப்பு நிறுவப்படும்"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"சேர்த்த பாதுகாப்பு தேவை. பின் உபயோகிக்கவில்லை."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"சேர்த்த பாதுகாப்பு தேவை. கடவுச்சொல் உபயோகிக்கவில்லை."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"சேர்த்த பாதுகாப்பு தேவை. பேட்டர்ன் உபயோகிக்கவில்லை."</string>
@@ -115,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"கூடுதல் பாதுகாப்பிற்குப் பேட்டர்னைப் பயன்படுத்தவும்"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"கூடுதல் பாதுகாப்பிற்குப் பின்னை (PIN) பயன்படுத்தவும்"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"கூடுதல் பாதுகாப்பிற்குக் கடவுச்சொல்லைப் பயன்படுத்தவும்"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"கூடுதல் பாதுகாப்பிற்குப் பின் தேவை"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"கூடுதல் பாதுகாப்பிற்குப் பேட்டர்ன் தேவை"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"கூடுதல் பாதுகாப்பிற்குக் கடவுச்சொல் தேவை"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"நிர்வாகி சாதனத்தைப் பூட்டியுள்ளார்"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"பயனர் சாதனத்தைப் பூட்டியுள்ளார்"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"அடையாளங்காணபடவில்லை"</string>

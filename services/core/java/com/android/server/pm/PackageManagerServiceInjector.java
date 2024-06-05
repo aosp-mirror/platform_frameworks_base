@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.backup.IBackupManager;
 import android.content.ComponentName;
@@ -27,13 +26,12 @@ import android.os.incremental.IncrementalManager;
 import android.util.DisplayMetrics;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.PackageParser2;
 import com.android.server.SystemConfig;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DynamicCodeLogger;
-import com.android.server.pm.dex.ViewCompiler;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.resolution.ComponentResolver;
@@ -88,7 +86,7 @@ public class PackageManagerServiceInjector {
     private final Context mContext;
     private final PackageManagerTracedLock mLock;
     private final Installer mInstaller;
-    private final Object mInstallLock;
+    private final PackageManagerTracedLock mInstallLock;
     private final Handler mBackgroundHandler;
     private final Executor mBackgroundExecutor;
     private final List<ScanPartition> mSystemPartitions;
@@ -112,7 +110,6 @@ public class PackageManagerServiceInjector {
     private final Singleton<ArtManagerService>
             mArtManagerServiceProducer;
     private final Singleton<ApexManager> mApexManagerProducer;
-    private final Singleton<ViewCompiler> mViewCompilerProducer;
     private final Singleton<IncrementalManager>
             mIncrementalManagerProducer;
     private final Singleton<DefaultAppProvider>
@@ -127,6 +124,7 @@ public class PackageManagerServiceInjector {
             mPreparingPackageParserProducer;
     private final Singleton<PackageInstallerService>
             mPackageInstallerServiceProducer;
+
     private final ProducerWithArgument<InstantAppResolverConnection, ComponentName>
             mInstantAppResolverConnectionProducer;
     private final Singleton<LegacyPermissionManagerInternal>
@@ -139,15 +137,14 @@ public class PackageManagerServiceInjector {
     private final Singleton<DomainVerificationManagerInternal>
             mDomainVerificationManagerInternalProducer;
     private final Singleton<Handler> mHandlerProducer;
-    private final Singleton<BackgroundDexOptService>
-            mBackgroundDexOptService; // TODO(b/260124949): Remove this.
     private final Singleton<IBackupManager> mIBackupManager;
     private final Singleton<SharedLibrariesImpl> mSharedLibrariesProducer;
     private final Singleton<CrossProfileIntentFilterHelper> mCrossProfileIntentFilterHelperProducer;
     private final Singleton<UpdateOwnershipHelper> mUpdateOwnershipHelperProducer;
+    private final Singleton<PackageMonitorCallbackHelper> mPackageMonitorCallbackHelper;
 
     PackageManagerServiceInjector(Context context, PackageManagerTracedLock lock,
-            Installer installer, Object installLock, PackageAbiHelper abiHelper,
+            Installer installer, PackageManagerTracedLock installLock, PackageAbiHelper abiHelper,
             Handler backgroundHandler,
             List<ScanPartition> systemPartitions,
             Producer<ComponentResolver> componentResolverProducer,
@@ -162,7 +159,6 @@ public class PackageManagerServiceInjector {
             Producer<DynamicCodeLogger> dynamicCodeLoggerProducer,
             Producer<ArtManagerService> artManagerServiceProducer,
             Producer<ApexManager> apexManagerProducer,
-            Producer<ViewCompiler> viewCompilerProducer,
             Producer<IncrementalManager> incrementalManagerProducer,
             Producer<DefaultAppProvider> defaultAppProviderProducer,
             Producer<DisplayMetrics> displayMetricsProducer,
@@ -181,11 +177,11 @@ public class PackageManagerServiceInjector {
             SystemWrapper systemWrapper,
             ServiceProducer getLocalServiceProducer,
             ServiceProducer getSystemServiceProducer,
-            Producer<BackgroundDexOptService> backgroundDexOptService,
             Producer<IBackupManager> iBackupManager,
             Producer<SharedLibrariesImpl> sharedLibrariesProducer,
             Producer<CrossProfileIntentFilterHelper> crossProfileIntentFilterHelperProducer,
-            Producer<UpdateOwnershipHelper> updateOwnershipHelperProducer) {
+            Producer<UpdateOwnershipHelper> updateOwnershipHelperProducer,
+            Producer<PackageMonitorCallbackHelper> packageMonitorCallbackHelper) {
         mContext = context;
         mLock = lock;
         mInstaller = installer;
@@ -211,7 +207,6 @@ public class PackageManagerServiceInjector {
         mArtManagerServiceProducer = new Singleton<>(
                 artManagerServiceProducer);
         mApexManagerProducer = new Singleton<>(apexManagerProducer);
-        mViewCompilerProducer = new Singleton<>(viewCompilerProducer);
         mIncrementalManagerProducer = new Singleton<>(
                 incrementalManagerProducer);
         mDefaultAppProviderProducer = new Singleton<>(
@@ -235,12 +230,12 @@ public class PackageManagerServiceInjector {
                 new Singleton<>(
                         domainVerificationManagerInternalProducer);
         mHandlerProducer = new Singleton<>(handlerProducer);
-        mBackgroundDexOptService = new Singleton<>(backgroundDexOptService);
         mIBackupManager = new Singleton<>(iBackupManager);
         mSharedLibrariesProducer = new Singleton<>(sharedLibrariesProducer);
         mCrossProfileIntentFilterHelperProducer = new Singleton<>(
                 crossProfileIntentFilterHelperProducer);
         mUpdateOwnershipHelperProducer = new Singleton<>(updateOwnershipHelperProducer);
+        mPackageMonitorCallbackHelper = new Singleton<>(packageMonitorCallbackHelper);
     }
 
     /**
@@ -259,7 +254,7 @@ public class PackageManagerServiceInjector {
         return mAbiHelper;
     }
 
-    public Object getInstallLock() {
+    public PackageManagerTracedLock getInstallLock() {
         return mInstallLock;
     }
 
@@ -333,10 +328,6 @@ public class PackageManagerServiceInjector {
 
     public ApexManager getApexManager() {
         return mApexManagerProducer.get(this, mPackageManager);
-    }
-
-    public ViewCompiler getViewCompiler() {
-        return mViewCompilerProducer.get(this, mPackageManager);
     }
 
     public Handler getBackgroundHandler() {
@@ -413,11 +404,6 @@ public class PackageManagerServiceInjector {
         return getLocalService(ActivityManagerInternal.class);
     }
 
-    @Nullable
-    public BackgroundDexOptService getBackgroundDexOptService() {
-        return mBackgroundDexOptService.get(this, mPackageManager);
-    }
-
     public IBackupManager getIBackupManager() {
         return mIBackupManager.get(this, mPackageManager);
     }
@@ -428,6 +414,10 @@ public class PackageManagerServiceInjector {
 
     public UpdateOwnershipHelper getUpdateOwnershipHelper() {
         return mUpdateOwnershipHelperProducer.get(this, mPackageManager);
+    }
+
+    public PackageMonitorCallbackHelper getPackageMonitorCallbackHelper() {
+        return mPackageMonitorCallbackHelper.get(this, mPackageManager);
     }
 
 

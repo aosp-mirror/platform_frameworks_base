@@ -65,6 +65,12 @@ public final class Light implements Parcelable {
     public static final int LIGHT_TYPE_KEYBOARD_BACKLIGHT = 10003;
 
     /**
+     * Type for keyboard microphone mute light.
+     * @hide
+     */
+    public static final int LIGHT_TYPE_KEYBOARD_MIC_MUTE = 10004;
+
+    /**
      * Capability for lights that could adjust its LED brightness. If the capability is not present
      * the LED can only be turned either on or off.
      */
@@ -92,6 +98,7 @@ public final class Light implements Parcelable {
             LIGHT_TYPE_INPUT,
             LIGHT_TYPE_PLAYER_ID,
             LIGHT_TYPE_KEYBOARD_BACKLIGHT,
+            LIGHT_TYPE_KEYBOARD_MIC_MUTE,
         })
     public @interface LightType {}
 
@@ -110,6 +117,8 @@ public final class Light implements Parcelable {
     private final int mOrdinal;
     private final int mType;
     private final int mCapabilities;
+    @Nullable
+    private final int[] mPreferredBrightnessLevels;
 
     /**
      * Creates a new light with the given data.
@@ -117,7 +126,7 @@ public final class Light implements Parcelable {
      * @hide
      */
     public Light(int id, int ordinal, int type) {
-        this(id, "Light", ordinal, type, 0);
+        this(id, "Light", ordinal, type, 0, null);
     }
 
     /**
@@ -126,11 +135,22 @@ public final class Light implements Parcelable {
      * @hide
      */
     public Light(int id, String name, int ordinal, int type, int capabilities) {
+        this(id, name, ordinal, type, capabilities, null);
+    }
+
+    /**
+     * Creates a new light with the given data.
+     *
+     * @hide
+     */
+    public Light(int id, String name, int ordinal, int type, int capabilities,
+            @Nullable int[] preferredBrightnessLevels) {
         mId = id;
         mName = name;
         mOrdinal = ordinal;
         mType = type;
         mCapabilities = capabilities;
+        mPreferredBrightnessLevels = preferredBrightnessLevels;
     }
 
     private Light(@NonNull Parcel in) {
@@ -139,6 +159,7 @@ public final class Light implements Parcelable {
         mOrdinal = in.readInt();
         mType = in.readInt();
         mCapabilities = in.readInt();
+        mPreferredBrightnessLevels = in.createIntArray();
     }
 
     /** Implement the Parcelable interface */
@@ -149,6 +170,7 @@ public final class Light implements Parcelable {
         dest.writeInt(mOrdinal);
         dest.writeInt(mType);
         dest.writeInt(mCapabilities);
+        dest.writeIntArray(mPreferredBrightnessLevels);
     }
 
     /** Implement the Parcelable interface */
@@ -252,4 +274,17 @@ public final class Light implements Parcelable {
         return (mCapabilities & LIGHT_CAPABILITY_COLOR_RGB) == LIGHT_CAPABILITY_COLOR_RGB;
     }
 
+    /**
+     * Returns preferred brightness levels for the light which will be used when user
+     * increase/decrease brightness levels for the light (currently only used for Keyboard
+     * backlight control using backlight up/down keys).
+     *
+     * The values in the preferred brightness level array are in the range [0, 255].
+     *
+     * @hide
+     */
+    @Nullable
+    public int[] getPreferredBrightnessLevels() {
+        return mPreferredBrightnessLevels;
+    }
 }

@@ -109,58 +109,66 @@
     =============================================================== -->
   <eat-comment/>
 
-  <staging-public-group type="attr" first-id="0x01bd0000">
+  <staging-public-group type="attr" first-id="0x01b70000">
+      <!-- @FlaggedApi("android.content.pm.sdk_lib_independence") -->
+    <public name="optional"/>
+    <!-- @FlaggedApi("android.media.tv.flags.enable_ad_service_fw") -->
+    <public name="adServiceTypes" />
+    <!-- @FlaggedApi("android.view.inputmethod.ime_switcher_revamp") -->
+    <public name="languageSettingsActivity"/>
+    <!-- @FlaggedApi("android.service.controls.flags.Flags.FLAG_HOME_PANEL_DREAM") -->
+    <public name="dreamCategory"/>
   </staging-public-group>
 
-  <staging-public-group type="id" first-id="0x01bc0000">
+  <staging-public-group type="id" first-id="0x01b60000">
   </staging-public-group>
 
-  <staging-public-group type="style" first-id="0x01bb0000">
+  <staging-public-group type="style" first-id="0x01b50000">
   </staging-public-group>
 
-  <staging-public-group type="string" first-id="0x01ba0000">
+  <staging-public-group type="string" first-id="0x01b40000">
   </staging-public-group>
 
-  <staging-public-group type="dimen" first-id="0x01b90000">
+  <staging-public-group type="dimen" first-id="0x01b30000">
   </staging-public-group>
 
-  <staging-public-group type="color" first-id="0x01b80000">
+  <staging-public-group type="color" first-id="0x01b20000">
   </staging-public-group>
 
-  <staging-public-group type="array" first-id="0x01b70000">
+  <staging-public-group type="array" first-id="0x01b10000">
   </staging-public-group>
 
-  <staging-public-group type="drawable" first-id="0x01b60000">
+  <staging-public-group type="drawable" first-id="0x01b00000">
   </staging-public-group>
 
-  <staging-public-group type="layout" first-id="0x01b50000">
+  <staging-public-group type="layout" first-id="0x01af0000">
   </staging-public-group>
 
-  <staging-public-group type="anim" first-id="0x01b40000">
+  <staging-public-group type="anim" first-id="0x01ae0000">
   </staging-public-group>
 
-  <staging-public-group type="animator" first-id="0x01b30000">
+  <staging-public-group type="animator" first-id="0x01ad0000">
   </staging-public-group>
 
-  <staging-public-group type="interpolator" first-id="0x01b20000">
+  <staging-public-group type="interpolator" first-id="0x01ac0000">
   </staging-public-group>
 
-  <staging-public-group type="mipmap" first-id="0x01b10000">
+  <staging-public-group type="mipmap" first-id="0x01ab0000">
   </staging-public-group>
 
-  <staging-public-group type="integer" first-id="0x01b00000">
+  <staging-public-group type="integer" first-id="0x01aa0000">
   </staging-public-group>
 
-  <staging-public-group type="transition" first-id="0x01af0000">
+  <staging-public-group type="transition" first-id="0x01a90000">
   </staging-public-group>
 
-  <staging-public-group type="raw" first-id="0x01ae0000">
+  <staging-public-group type="raw" first-id="0x01a80000">
   </staging-public-group>
 
-  <staging-public-group type="bool" first-id="0x01ad0000">
+  <staging-public-group type="bool" first-id="0x01a70000">
   </staging-public-group>
 
-  <staging-public-group type="fraction" first-id="0x01ac0000">
+  <staging-public-group type="fraction" first-id="0x01a60000">
   </staging-public-group>
 
 </resources>

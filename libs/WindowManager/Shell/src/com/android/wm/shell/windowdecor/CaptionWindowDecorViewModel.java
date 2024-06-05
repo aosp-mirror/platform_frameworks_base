@@ -19,25 +19,35 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.pm.PackageManager.FEATURE_PC;
+import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Handler;
-import android.os.IBinder;
+import android.provider.Settings;
 import android.util.SparseArray;
 import android.view.Choreographer;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
-import android.window.TransitionInfo;
+import android.window.DisplayAreaInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.Nullable;
+
 import com.android.wm.shell.R;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
 /**
@@ -50,7 +60,9 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private final Handler mMainHandler;
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
+    private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final SyncTransactionQueue mSyncQueue;
+    private final Transitions mTransitions;
     private TaskOperations mTaskOperations;
 
     private final SparseArray<CaptionWindowDecoration> mWindowDecorByTaskId = new SparseArray<>();
@@ -61,32 +73,29 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             Choreographer mainChoreographer,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
-            SyncTransactionQueue syncQueue) {
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            SyncTransactionQueue syncQueue,
+            Transitions transitions) {
         mContext = context;
         mMainHandler = mainHandler;
         mMainChoreographer = mainChoreographer;
         mTaskOrganizer = taskOrganizer;
         mDisplayController = displayController;
+        mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mSyncQueue = syncQueue;
+        mTransitions = transitions;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTaskOperations = new TaskOperations(null, mContext, mSyncQueue);
         }
     }
 
     @Override
-    public void onTransitionReady(IBinder transition, TransitionInfo info,
-            TransitionInfo.Change change) {}
-
-    @Override
-    public void onTransitionMerged(IBinder merged, IBinder playing) {}
-
-    @Override
-    public void onTransitionFinished(IBinder transition) {}
-
-    @Override
     public void setFreeformTaskTransitionStarter(FreeformTaskTransitionStarter transitionStarter) {
         mTaskOperations = new TaskOperations(transitionStarter, mContext, mSyncQueue);
     }
+
+    @Override
+    public void setSplitScreenController(SplitScreenController splitScreenController) {}
 
     @Override
     public boolean onTaskOpening(
@@ -110,6 +119,21 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     @Override
+    public void onTaskVanished(RunningTaskInfo taskInfo) {
+        // A task vanishing doesn't necessarily mean the task was closed, it could also mean its
+        // windowing mode changed. We're only interested in closing tasks so checking whether
+        // its info still exists in the task organizer is one way to disambiguate.
+        final boolean closed = mTaskOrganizer.getRunningTaskInfo(taskInfo.taskId) == null;
+        if (closed) {
+            // Destroying the window decoration is usually handled when a TRANSIT_CLOSE transition
+            // changes happen, but there are certain cases in which closing tasks aren't included
+            // in transitions, such as when a non-visible task is closed. See b/296921167.
+            // Destroy the decoration here in case the lack of transition missed it.
+            destroyWindowDecoration(taskInfo);
+        }
+    }
+
+    @Override
     public void onTaskChanging(
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -127,7 +151,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) {
             createWindowDecoration(taskInfo, taskSurface, startT, finishT);
         } else {
-            decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */);
+            decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */,
+                    false /* setTaskCropAndPosition */);
         }
     }
 
@@ -139,7 +164,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         final CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
         if (decoration == null) return;
 
-        decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */);
+        decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */,
+                false /* setTaskCropAndPosition */);
     }
 
     @Override
@@ -157,10 +183,33 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
-        return taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
-                || (taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
-                && taskInfo.configuration.windowConfiguration.getDisplayWindowingMode()
-                == WINDOWING_MODE_FREEFORM);
+        if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+            return true;
+        }
+        if (taskInfo.getActivityType() != ACTIVITY_TYPE_STANDARD) {
+            return false;
+        }
+        final DisplayAreaInfo rootDisplayAreaInfo =
+                mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(taskInfo.displayId);
+        if (rootDisplayAreaInfo != null) {
+            return rootDisplayAreaInfo.configuration.windowConfiguration.getWindowingMode()
+                    == WINDOWING_MODE_FREEFORM;
+        }
+
+        // It is possible that the rootDisplayAreaInfo is null when a task appears soon enough after
+        // a new display shows up, because TDA may appear after task appears in WM shell. Instead of
+        // fixing the synchronization issues, let's use other signals to "guess" the answer. It is
+        // OK in this context because no other captions other than the legacy developer option
+        // freeform and Kingyo/CF PC may use this class. WM shell should have full control over the
+        // condition where captions should show up in all new cases such as desktop mode, for which
+        // we should use different window decor view models. Ultimately Kingyo/CF PC may need to
+        // spin up their own window decor view model when they start to care about multiple
+        // displays.
+        if (isPc()) {
+            return true;
+        }
+        return taskInfo.displayId != Display.DEFAULT_DISPLAY
+                && forcesDesktopModeOnExternalDisplays();
     }
 
     private void createWindowDecoration(
@@ -185,16 +234,17 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        final DragPositioningCallback dragPositioningCallback =
-                new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration, mDisplayController,
-                        null /* disallowedAreaForEndBounds */);
+        final FluidResizeTaskPositioner taskPositioner =
+                new FluidResizeTaskPositioner(mTaskOrganizer, mTransitions, windowDecoration,
+                        mDisplayController);
         final CaptionTouchEventListener touchEventListener =
-                new CaptionTouchEventListener(taskInfo, dragPositioningCallback);
+                new CaptionTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
-        windowDecoration.setDragPositioningCallback(dragPositioningCallback);
+        windowDecoration.setDragPositioningCallback(taskPositioner);
         windowDecoration.setDragDetector(touchEventListener.mDragDetector);
+        windowDecoration.setTaskDragResizer(taskPositioner);
         windowDecoration.relayout(taskInfo, startT, finishT,
-                false /* applyStartTransactionOnDraw */);
+                false /* applyStartTransactionOnDraw */, false /* setTaskCropAndPosition */);
         setupCaptionColor(taskInfo, windowDecoration);
     }
 
@@ -205,6 +255,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         private final WindowContainerToken mTaskToken;
         private final DragPositioningCallback mDragPositioningCallback;
         private final DragDetector mDragDetector;
+        private final int mDisplayId;
 
         private int mDragPointerId = -1;
         private boolean mIsDragging;
@@ -216,6 +267,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             mTaskToken = taskInfo.token;
             mDragPositioningCallback = dragPositioningCallback;
             mDragDetector = new DragDetector(this);
+            mDisplayId = taskInfo.displayId;
         }
 
         @Override
@@ -224,12 +276,15 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             if (id == R.id.close_window) {
                 mTaskOperations.closeTask(mTaskToken);
             } else if (id == R.id.back_button) {
-                mTaskOperations.injectBackKey();
+                mTaskOperations.injectBackKey(mDisplayId);
             } else if (id == R.id.minimize_window) {
                 mTaskOperations.minimizeTask(mTaskToken);
             } else if (id == R.id.maximize_window) {
                 RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
-                mTaskOperations.maximizeTask(taskInfo);
+                final DisplayAreaInfo rootDisplayAreaInfo =
+                        mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(taskInfo.displayId);
+                mTaskOperations.maximizeTask(taskInfo,
+                        rootDisplayAreaInfo.configuration.windowConfiguration.getWindowingMode());
             }
         }
 
@@ -254,7 +309,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
          * @return {@code true} if a drag is happening; or {@code false} if it is not
          */
         @Override
-        public boolean handleMotionEvent(MotionEvent e) {
+        public boolean handleMotionEvent(@Nullable View v, MotionEvent e) {
             final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
             if (taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
                 return false;
@@ -268,7 +323,13 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                     return false;
                 }
                 case MotionEvent.ACTION_MOVE: {
-                    int dragPointerIdx = e.findPointerIndex(mDragPointerId);
+                    if (e.findPointerIndex(mDragPointerId) == -1) {
+                        mDragPointerId = e.getPointerId(0);
+                    }
+                    final CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+                    // If a decor's resize drag zone is active, don't also try to reposition it.
+                    if (decoration.isHandlingDragResize()) break;
+                    final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     mDragPositioningCallback.onDragPositioningMove(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mIsDragging = true;
@@ -276,9 +337,19 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 }
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
-                    int dragPointerIdx = e.findPointerIndex(mDragPointerId);
-                    mDragPositioningCallback.onDragPositioningEnd(
+                    if (e.findPointerIndex(mDragPointerId) == -1) {
+                        mDragPointerId = e.getPointerId(0);
+                    }
+                    final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
+                    final Rect newTaskBounds = mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
+                    DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(newTaskBounds,
+                            mWindowDecorByTaskId.get(mTaskId).calculateValidDragArea());
+                    if (newTaskBounds != taskInfo.configuration.windowConfiguration.getBounds()) {
+                        final WindowContainerTransaction wct = new WindowContainerTransaction();
+                        wct.setBounds(taskInfo.token, newTaskBounds);
+                        mTransitions.startTransition(TRANSIT_CHANGE, wct, null);
+                    }
                     final boolean wasDragging = mIsDragging;
                     mIsDragging = false;
                     return wasDragging;
@@ -286,5 +357,18 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             }
             return true;
         }
+    }
+
+    /**
+     * Returns if this device is a PC.
+     */
+    private boolean isPc() {
+        return mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
+    }
+
+    private boolean forcesDesktopModeOnExternalDisplays() {
+        final ContentResolver resolver = mContext.getContentResolver();
+        return Settings.Global.getInt(resolver,
+                DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 0) != 0;
     }
 }

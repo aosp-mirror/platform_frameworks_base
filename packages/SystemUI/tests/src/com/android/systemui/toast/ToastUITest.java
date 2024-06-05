@@ -18,6 +18,8 @@ package com.android.systemui.toast;
 
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
 
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Application;
@@ -36,13 +39,13 @@ import android.app.ITransientNotificationCallback;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -55,14 +58,14 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.IntPair;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;
@@ -74,8 +77,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
+import java.util.Arrays;
+
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class ToastUITest extends SysuiTestCase {
     private static final int ANDROID_UID = 1000;
@@ -106,8 +111,7 @@ public class ToastUITest extends SysuiTestCase {
     @Mock private IAccessibilityManager mAccessibilityManager;
     @Mock private PluginManager mPluginManager;
     @Mock private DumpManager mDumpManager;
-    @Mock private ToastLogger mToastLogger;
-    @Mock private FeatureFlags mFeatureFlags;
+    private final ToastLogger mToastLogger = spy(new ToastLogger(logcatLogBuffer()));
     @Mock private PackageManager mPackageManager;
 
     @Mock private ITransientNotificationCallback mCallback;
@@ -338,6 +342,31 @@ public class ToastUITest extends SysuiTestCase {
     }
 
     @Test
+    public void testShowToast_afterShowToast_animationListenerCleanup() throws RemoteException {
+        mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
+                mCallback, Display.DEFAULT_DISPLAY);
+        final SystemUIToast toast = mToastUI.mToast;
+
+        View view = verifyWmAddViewAndAttachToParent();
+        mToastUI.showToast(UID_2, PACKAGE_NAME_2, TOKEN_2, TEXT, WINDOW_TOKEN_2, Toast.LENGTH_LONG,
+                null, Display.DEFAULT_DISPLAY);
+
+        if (toast.getOutAnimation() != null) {
+            assertThat(mToastUI.mToastOutAnimatorListener).isNotNull();
+            assertThat(toast.getOutAnimation().getListeners()
+                .contains(mToastUI.mToastOutAnimatorListener)).isTrue();
+            assertThat(toast.getOutAnimation().isRunning()).isTrue();
+            toast.getOutAnimation().cancel(); // end early if applicable
+            assertThat(toast.getOutAnimation().getListeners()).isNull();
+        }
+
+        verify(mWindowManager).removeViewImmediate(view);
+        verify(mNotificationManager).finishToken(PACKAGE_NAME_1, TOKEN_1);
+        verify(mCallback).onToastHidden();
+        assertThat(mToastUI.mToastOutAnimatorListener).isNull();
+    }
+
+    @Test
     public void testShowToast_logs() {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
                 mCallback, Display.DEFAULT_DISPLAY);
@@ -360,7 +389,7 @@ public class ToastUITest extends SysuiTestCase {
 
         // THEN the view can have unlimited lines
         assertThat(((TextView) mToastUI.mToast.getView()
-                .findViewById(com.android.systemui.R.id.text))
+                .findViewById(com.android.systemui.res.R.id.text))
                 .getMaxLines()).isEqualTo(Integer.MAX_VALUE);
     }
 
@@ -379,7 +408,7 @@ public class ToastUITest extends SysuiTestCase {
 
         // THEN the view is limited to 2 lines
         assertThat(((TextView) mToastUI.mToast.getView()
-                .findViewById(com.android.systemui.R.id.text))
+                .findViewById(com.android.systemui.res.R.id.text))
                 .getMaxLines()).isEqualTo(2);
     }
 
@@ -400,6 +429,18 @@ public class ToastUITest extends SysuiTestCase {
         verify(mToastLogger, never()).logOnHideToast(PACKAGE_NAME_1, TOKEN_1.toString());
     }
 
+    @Test
+    public void testShowToast_invalidDisplayId_logsAndSkipsToast() {
+        int invalidDisplayId = getInvalidDisplayId();
+
+        mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
+                mCallback, invalidDisplayId);
+
+        verify(mToastLogger).logOnSkipToastForInvalidDisplay(PACKAGE_NAME_1, TOKEN_1.toString(),
+                invalidDisplayId);
+        verifyZeroInteractions(mWindowManager);
+    }
+
     private View verifyWmAddViewAndAttachToParent() {
         ArgumentCaptor<View> viewCaptor = ArgumentCaptor.forClass(View.class);
         verify(mWindowManager).addView(viewCaptor.capture(), any());
@@ -415,5 +456,11 @@ public class ToastUITest extends SysuiTestCase {
             inv.<Parcelable>getArgument(i).writeToParcel(dest, 0);
             return null;
         };
+    }
+
+    private int getInvalidDisplayId() {
+        return Arrays.stream(
+                mContext.getSystemService(DisplayManager.class).getDisplays())
+                .map(Display::getDisplayId).max(Integer::compare).get() + 1;
     }
 }

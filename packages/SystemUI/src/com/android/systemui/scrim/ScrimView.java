@@ -30,6 +30,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -38,10 +39,10 @@ import androidx.core.graphics.ColorUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.util.LargeScreenUtils;
 
 import java.util.concurrent.Executor;
-
 
 /**
  * A view which can draw a scrim.  This view maybe be used in multiple windows running on different
@@ -59,10 +60,9 @@ public class ScrimView extends View {
     private float mViewAlpha = 1.0f;
     private Drawable mDrawable;
     private PorterDuffColorFilter mColorFilter;
+    private String mScrimName;
     private int mTintColor;
     private boolean mBlendWithMainColor = true;
-    private Runnable mChangeRunnable;
-    private Executor mChangeRunnableExecutor;
     private Executor mExecutor;
     private Looper mExecutorLooper;
     @Nullable
@@ -83,6 +83,8 @@ public class ScrimView extends View {
     public ScrimView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        setFocusable(false);
+        setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         mDrawable = new ScrimDrawable();
         mDrawable.setCallback(this);
         mColors = new ColorExtractor.GradientColors();
@@ -265,9 +267,6 @@ public class ScrimView extends View {
             mDrawable.invalidateSelf();
         }
 
-        if (mChangeRunnable != null) {
-            mChangeRunnableExecutor.execute(mChangeRunnable);
-        }
     }
 
     public int getTint() {
@@ -295,23 +294,12 @@ public class ScrimView extends View {
                 mViewAlpha = alpha;
 
                 mDrawable.setAlpha((int) (255 * alpha));
-                if (mChangeRunnable != null) {
-                    mChangeRunnableExecutor.execute(mChangeRunnable);
-                }
             }
         });
     }
 
     public float getViewAlpha() {
         return mViewAlpha;
-    }
-
-    /**
-     * Sets a callback that is invoked whenever the alpha, color, or tint change.
-     */
-    public void setChangeRunnable(Runnable changeRunnable, Executor changeRunnableExecutor) {
-        mChangeRunnable = changeRunnable;
-        mChangeRunnableExecutor = changeRunnableExecutor;
     }
 
     @Override
@@ -334,6 +322,15 @@ public class ScrimView extends View {
         if (mDrawable instanceof ScrimDrawable) {
             ((ScrimDrawable) mDrawable).setBottomEdgeConcave(clipScrim);
         }
+    }
+
+    public void setScrimName(String scrimName) {
+        mScrimName = scrimName;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return TouchLogger.logDispatchTouch(mScrimName, ev, super.dispatchTouchEvent(ev));
     }
 
     /**

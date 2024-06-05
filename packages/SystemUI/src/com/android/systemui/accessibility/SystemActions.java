@@ -54,10 +54,12 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Assert;
 
 import dagger.Lazy;
@@ -71,7 +73,7 @@ import javax.inject.Inject;
  * Class to register system actions with accessibility framework.
  */
 @SysUISingleton
-public class SystemActions implements CoreStartable {
+public class SystemActions implements CoreStartable, ConfigurationController.ConfigurationListener {
     private static final String TAG = "SystemActions";
 
     /**
@@ -185,23 +187,28 @@ public class SystemActions implements CoreStartable {
     private final DisplayTracker mDisplayTracker;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final NotificationShadeWindowController mNotificationShadeController;
+    private final KeyguardStateController mKeyguardStateController;
     private final ShadeController mShadeController;
+    private final Lazy<PanelExpansionInteractor> mPanelExpansionInteractor;
     private final StatusBarWindowCallback mNotificationShadeCallback;
+    private final ScreenshotHelper mScreenshotHelper;
     private boolean mDismissNotificationShadeActionRegistered;
 
     @Inject
     public SystemActions(Context context,
             UserTracker userTracker,
             NotificationShadeWindowController notificationShadeController,
+            KeyguardStateController keyguardStateController,
             ShadeController shadeController,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            Lazy<PanelExpansionInteractor> panelExpansionInteractor,
             Optional<Recents> recentsOptional,
             DisplayTracker displayTracker) {
         mContext = context;
         mUserTracker = userTracker;
+        mKeyguardStateController = keyguardStateController;
         mShadeController = shadeController;
+        mPanelExpansionInteractor = panelExpansionInteractor;
         mRecentsOptional = recentsOptional;
         mDisplayTracker = displayTracker;
         mReceiver = new SystemActionsBroadcastReceiver();
@@ -215,7 +222,7 @@ public class SystemActions implements CoreStartable {
                 (keyguardShowing, keyguardOccluded, keyguardGoingAway, bouncerShowing, mDozing,
                         panelExpanded, isDreaming) ->
                         registerOrUnregisterDismissNotificationShadeAction();
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mScreenshotHelper = new ScreenshotHelper(mContext);
     }
 
     @Override
@@ -231,7 +238,7 @@ public class SystemActions implements CoreStartable {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigChanged(Configuration newConfig) {
         final Locale locale = mContext.getResources().getConfiguration().getLocales().get(0);
         if (!locale.equals(mLocale)) {
             mLocale = locale;
@@ -303,8 +310,8 @@ public class SystemActions implements CoreStartable {
         mA11yManager.registerSystemAction(actionBack, SYSTEM_ACTION_ID_BACK);
         mA11yManager.registerSystemAction(actionHome, SYSTEM_ACTION_ID_HOME);
         mA11yManager.registerSystemAction(actionRecents, SYSTEM_ACTION_ID_RECENTS);
-        if (mCentralSurfacesOptionalLazy.get().isPresent()) {
-            // These two actions require the CentralSurfaces instance.
+        if (mShadeController.isShadeEnabled()) {
+            // These two actions require the shade to be enabled.
             mA11yManager.registerSystemAction(actionNotifications, SYSTEM_ACTION_ID_NOTIFICATIONS);
             mA11yManager.registerSystemAction(actionQuickSettings, SYSTEM_ACTION_ID_QUICK_SETTINGS);
         }
@@ -325,12 +332,8 @@ public class SystemActions implements CoreStartable {
     private void registerOrUnregisterDismissNotificationShadeAction() {
         Assert.isMainThread();
 
-        // Saving state in instance variable since this callback is called quite often to avoid
-        // binder calls
-        final Optional<CentralSurfaces> centralSurfacesOptional =
-                mCentralSurfacesOptionalLazy.get();
-        if (centralSurfacesOptional.map(CentralSurfaces::isPanelExpanded).orElse(false)
-                && !centralSurfacesOptional.get().isKeyguardShowing()) {
+        if (mPanelExpansionInteractor.get().isPanelExpanded()
+                && !mKeyguardStateController.isShowing()) {
             if (!mDismissNotificationShadeActionRegistered) {
                 mA11yManager.registerSystemAction(
                         createRemoteAction(
@@ -485,13 +488,11 @@ public class SystemActions implements CoreStartable {
     }
 
     private void handleNotifications() {
-        mCentralSurfacesOptionalLazy.get().ifPresent(
-                CentralSurfaces::animateExpandNotificationsPanel);
+        mShadeController.animateExpandShade();
     }
 
     private void handleQuickSettings() {
-        mCentralSurfacesOptionalLazy.get().ifPresent(
-                centralSurfaces -> centralSurfaces.animateExpandSettingsPanel(null));
+        mShadeController.animateExpandQs();
     }
 
     private void handlePowerDialog() {
@@ -517,8 +518,7 @@ public class SystemActions implements CoreStartable {
     }
 
     private void handleTakeScreenshot() {
-        ScreenshotHelper screenshotHelper = new ScreenshotHelper(mContext);
-        screenshotHelper.takeScreenshot(
+        mScreenshotHelper.takeScreenshot(
                 SCREENSHOT_ACCESSIBILITY_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 

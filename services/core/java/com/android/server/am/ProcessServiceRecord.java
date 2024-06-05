@@ -19,6 +19,9 @@ package com.android.server.am;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BOUND_SERVICE;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE;
 
+import static com.android.server.am.Flags.serviceBindingOomAdjPolicy;
+
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
@@ -134,9 +137,19 @@ final class ProcessServiceRecord {
     private final ArraySet<ConnectionRecord> mConnections = new ArraySet<>();
 
     /**
+     * All ConnectionRecord this process holds indirectly to SDK sandbox processes.
+     */
+    private @Nullable ArraySet<ConnectionRecord> mSdkSandboxConnections;
+
+    /**
      * A set of UIDs of all bound clients.
      */
     private ArraySet<Integer> mBoundClientUids = new ArraySet<>();
+
+    /**
+     * The process should schedule a service timeout timer but haven't done so.
+     */
+    private boolean mScheduleServiceTimeoutPending;
 
     final ProcessRecord mApp;
 
@@ -192,10 +205,10 @@ final class ProcessServiceRecord {
     }
 
     /**
-     * Returns the FGS typps, but it doesn't tell if the types include "NONE" or not, so
-     * do not use it outside of this class.
+     * Returns the FGS types, but it doesn't tell if the types include "NONE" or not, use
+     * {@link #hasForegroundServices()}
      */
-    private int getForegroundServiceTypes() {
+    int getForegroundServiceTypes() {
         return mHasForegroundServices ? mFgServiceTypes : 0;
     }
 
@@ -341,7 +354,10 @@ final class ProcessServiceRecord {
         mHasAboveClient = false;
         for (int i = mConnections.size() - 1; i >= 0; i--) {
             ConnectionRecord cr = mConnections.valueAt(i);
-            if (cr.hasFlag(Context.BIND_ABOVE_CLIENT)) {
+
+            final boolean isSameProcess = cr.binding.service.app != null
+                    && cr.binding.service.app.mServices == this;
+            if (!isSameProcess && cr.hasFlag(Context.BIND_ABOVE_CLIENT)) {
                 mHasAboveClient = true;
                 break;
             }
@@ -489,13 +505,18 @@ final class ProcessServiceRecord {
 
     void addConnection(ConnectionRecord connection) {
         mConnections.add(connection);
+        addSdkSandboxConnectionIfNecessary(connection);
     }
 
     void removeConnection(ConnectionRecord connection) {
         mConnections.remove(connection);
+        removeSdkSandboxConnectionIfNecessary(connection);
     }
 
     void removeAllConnections() {
+        for (int i = 0, size = mConnections.size(); i < size; i++) {
+            removeSdkSandboxConnectionIfNecessary(mConnections.valueAt(i));
+        }
         mConnections.clear();
     }
 
@@ -505,6 +526,39 @@ final class ProcessServiceRecord {
 
     int numberOfConnections() {
         return mConnections.size();
+    }
+
+    private void addSdkSandboxConnectionIfNecessary(ConnectionRecord connection) {
+        final ProcessRecord attributedClient = connection.binding.attributedClient;
+        if (attributedClient != null && connection.binding.service.isSdkSandbox) {
+            if (attributedClient.mServices.mSdkSandboxConnections == null) {
+                attributedClient.mServices.mSdkSandboxConnections = new ArraySet<>();
+            }
+            attributedClient.mServices.mSdkSandboxConnections.add(connection);
+        }
+    }
+
+    private void removeSdkSandboxConnectionIfNecessary(ConnectionRecord connection) {
+        final ProcessRecord attributedClient = connection.binding.attributedClient;
+        if (attributedClient != null && connection.binding.service.isSdkSandbox) {
+            if (attributedClient.mServices.mSdkSandboxConnections != null) {
+                attributedClient.mServices.mSdkSandboxConnections.remove(connection);
+            }
+        }
+    }
+
+    void removeAllSdkSandboxConnections() {
+        if (mSdkSandboxConnections != null) {
+            mSdkSandboxConnections.clear();
+        }
+    }
+
+    ConnectionRecord getSdkSandboxConnectionAt(int index) {
+        return mSdkSandboxConnections != null ? mSdkSandboxConnections.valueAt(index) : null;
+    }
+
+    int numberOfSdkSandboxConnections() {
+        return mSdkSandboxConnections != null ? mSdkSandboxConnections.size() : 0;
     }
 
     void addBoundClientUid(int clientUid, String clientPackageName, long bindFlags) {
@@ -610,6 +664,43 @@ final class ProcessServiceRecord {
         setHasClientActivities(false);
     }
 
+    @GuardedBy("mService")
+    void noteScheduleServiceTimeoutPending(boolean pending) {
+        mScheduleServiceTimeoutPending = pending;
+    }
+
+    @GuardedBy("mService")
+    boolean isScheduleServiceTimeoutPending() {
+        return mScheduleServiceTimeoutPending;
+    }
+
+    void onProcessUnfrozen() {
+        synchronized (mService) {
+            scheduleServiceTimeoutIfNeededLocked();
+        }
+    }
+
+    void onProcessFrozenCancelled() {
+        synchronized (mService) {
+            scheduleServiceTimeoutIfNeededLocked();
+        }
+    }
+
+    @GuardedBy("mService")
+    private void scheduleServiceTimeoutIfNeededLocked() {
+        if (!serviceBindingOomAdjPolicy()) {
+            return;
+        }
+        if (mScheduleServiceTimeoutPending && mExecutingServices.size() > 0) {
+            mService.mServices.scheduleServiceTimeoutLocked(mApp);
+            // We'll need to reset the executingStart since the app was frozen.
+            final long now = SystemClock.uptimeMillis();
+            for (int i = 0, size = mExecutingServices.size(); i < size; i++) {
+                mExecutingServices.valueAt(i).executingStart = now;
+            }
+        }
+    }
+
     void dump(PrintWriter pw, String prefix, long nowUptime) {
         if (mHasForegroundServices || mApp.mState.getForcingToImportant() != null) {
             pw.print(prefix); pw.print("mHasForegroundServices="); pw.print(mHasForegroundServices);
@@ -653,6 +744,11 @@ final class ProcessServiceRecord {
             for (int i = 0, size = mConnections.size(); i < size; i++) {
                 pw.print(prefix); pw.print("  - "); pw.println(mConnections.valueAt(i));
             }
+        }
+        if (serviceBindingOomAdjPolicy()) {
+            pw.print(prefix);
+            pw.print("scheduleServiceTimeoutPending=");
+            pw.println(mScheduleServiceTimeoutPending);
         }
     }
 }

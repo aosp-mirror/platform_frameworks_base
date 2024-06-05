@@ -32,6 +32,8 @@ import android.os.UserHandle;
 import android.view.View;
 import android.view.ViewParent;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -194,7 +196,22 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
                 // The group isn't expanded, let's make sure it's visible!
                 mGroupExpansionManager.toggleGroupExpansion(row.getEntry());
             }
-            row.setUserExpanded(true);
+
+            if (android.app.Flags.compactHeadsUpNotificationReply()
+                    && row.isCompactConversationHeadsUpOnScreen()) {
+                // Notification can be system expanded true and it is set user expanded in
+                // activateRemoteInput. notifyHeightChanged also doesn't work as visibleType doesn't
+                // change. To expand huning notification properly, we need set userExpanded false.
+                if (!row.isPinned() && row.isExpanded()) {
+                    row.setUserExpanded(false);
+                }
+                // expand notification emits expanded information to HUN listener.
+                row.expandNotification();
+            } else {
+                // Note: Since Normal HUN has remote input view in it, we don't expect to hit
+                // onMakeExpandedVisibleForRemoteInput from activateRemoteInput for Normal HUN.
+                row.setUserExpanded(true);
+            }
             row.getPrivateLayout().setOnExpandedVisibleListener(runnable);
         }
     }
@@ -254,16 +271,16 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
 
     @Override
     public boolean handleRemoteViewClick(View view, PendingIntent pendingIntent,
-            boolean appRequestedAuth,
+            boolean appRequestedAuth, @Nullable Integer actionIndex,
             NotificationRemoteInputManager.ClickHandler defaultHandler) {
         final boolean isActivity = pendingIntent.isActivity();
         if (isActivity || appRequestedAuth) {
-            mActionClickLogger.logWaitingToCloseKeyguard(pendingIntent);
+            mActionClickLogger.logWaitingToCloseKeyguard(pendingIntent, actionIndex);
             final boolean afterKeyguardGone = mActivityIntentHelper
                     .wouldPendingLaunchResolverActivity(pendingIntent,
                             mLockscreenUserManager.getCurrentUserId());
             mActivityStarter.dismissKeyguardThenExecute(() -> {
-                mActionClickLogger.logKeyguardGone(pendingIntent);
+                mActionClickLogger.logKeyguardGone(pendingIntent, actionIndex);
 
                 try {
                     ActivityManager.getService().resumeAppSwitches();

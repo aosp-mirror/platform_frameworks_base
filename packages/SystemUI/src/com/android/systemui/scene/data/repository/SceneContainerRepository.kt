@@ -14,123 +14,100 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.scene.data.repository
 
-import com.android.systemui.scene.data.model.SceneContainerConfig
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.TransitionKey
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.scene.shared.model.SceneContainerConfig
+import com.android.systemui.scene.shared.model.SceneDataSource
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 
+@SysUISingleton
 /** Source of truth for scene framework application state. */
 class SceneContainerRepository
 @Inject
 constructor(
-    containerConfigurations: Set<SceneContainerConfig>,
+    @Application applicationScope: CoroutineScope,
+    private val config: SceneContainerConfig,
+    private val dataSource: SceneDataSource,
 ) {
+    val currentScene: StateFlow<SceneKey> = dataSource.currentScene
 
-    private val containerConfigByName: Map<String, SceneContainerConfig> =
-        containerConfigurations.associateBy { config -> config.name }
-    private val containerVisibilityByName: Map<String, MutableStateFlow<Boolean>> =
-        containerConfigByName
-            .map { (containerName, _) -> containerName to MutableStateFlow(true) }
-            .toMap()
-    private val currentSceneByContainerName: Map<String, MutableStateFlow<SceneModel>> =
-        containerConfigByName
-            .map { (containerName, config) ->
-                containerName to MutableStateFlow(SceneModel(config.initialSceneKey))
-            }
-            .toMap()
-    private val sceneTransitionProgressByContainerName: Map<String, MutableStateFlow<Float>> =
-        containerConfigByName
-            .map { (containerName, _) -> containerName to MutableStateFlow(1f) }
-            .toMap()
-
-    init {
-        val repeatedContainerNames =
-            containerConfigurations
-                .groupingBy { config -> config.name }
-                .eachCount()
-                .filter { (_, count) -> count > 1 }
-        check(repeatedContainerNames.isEmpty()) {
-            "Container names must be unique. The following container names appear more than once: ${
-                repeatedContainerNames
-                        .map { (name, count) -> "\"$name\" appears $count times" }
-                        .joinToString(", ")
-            }"
-        }
-    }
+    private val _isVisible = MutableStateFlow(true)
+    val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
 
     /**
-     * Returns the keys to all scenes in the container with the given name.
+     * Whether there's an ongoing remotely-initiated user interaction.
+     *
+     * For more information see the logic in `SceneInteractor` that mutates this.
+     */
+    val isRemoteUserInteractionOngoing = MutableStateFlow(false)
+
+    private val defaultTransitionState = ObservableTransitionState.Idle(config.initialSceneKey)
+    private val _transitionState = MutableStateFlow<Flow<ObservableTransitionState>?>(null)
+    val transitionState: StateFlow<ObservableTransitionState> =
+        _transitionState
+            .flatMapLatest { innerFlowOrNull -> innerFlowOrNull ?: flowOf(defaultTransitionState) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = defaultTransitionState,
+            )
+
+    /**
+     * Returns the keys to all scenes in the container.
      *
      * The scenes will be sorted in z-order such that the last one is the one that should be
      * rendered on top of all previous ones.
      */
-    fun allSceneKeys(containerName: String): List<SceneKey> {
-        return containerConfigByName[containerName]?.sceneKeys
-            ?: error(noSuchContainerErrorMessage(containerName))
+    fun allSceneKeys(): List<SceneKey> {
+        return config.sceneKeys
     }
 
-    /** Sets the current scene in the container with the given name. */
-    fun setCurrentScene(containerName: String, scene: SceneModel) {
-        check(allSceneKeys(containerName).contains(scene.key)) {
-            """
-                Cannot set current scene key to "${scene.key}". The container "$containerName" does
-                not contain a scene with that key.
-            """
-                .trimIndent()
-        }
-
-        currentSceneByContainerName.setValue(containerName, scene)
-    }
-
-    /** The current scene in the container with the given name. */
-    fun currentScene(containerName: String): StateFlow<SceneModel> {
-        return currentSceneByContainerName.mutableOrError(containerName).asStateFlow()
-    }
-
-    /** Sets whether the container with the given name is visible. */
-    fun setVisible(containerName: String, isVisible: Boolean) {
-        containerVisibilityByName.setValue(containerName, isVisible)
-    }
-
-    /** Whether the container with the given name should be visible. */
-    fun isVisible(containerName: String): StateFlow<Boolean> {
-        return containerVisibilityByName.mutableOrError(containerName).asStateFlow()
-    }
-
-    /** Sets scene transition progress to the current scene in the container with the given name. */
-    fun setSceneTransitionProgress(containerName: String, progress: Float) {
-        sceneTransitionProgressByContainerName.setValue(containerName, progress)
-    }
-
-    /** Progress of the transition into the current scene in the container with the given name. */
-    fun sceneTransitionProgress(containerName: String): StateFlow<Float> {
-        return sceneTransitionProgressByContainerName.mutableOrError(containerName).asStateFlow()
-    }
-
-    private fun <T> Map<String, MutableStateFlow<T>>.mutableOrError(
-        containerName: String,
-    ): MutableStateFlow<T> {
-        return this[containerName] ?: error(noSuchContainerErrorMessage(containerName))
-    }
-
-    private fun <T> Map<String, MutableStateFlow<T>>.setValue(
-        containerName: String,
-        value: T,
+    fun changeScene(
+        toScene: SceneKey,
+        transitionKey: TransitionKey? = null,
     ) {
-        val mutable = mutableOrError(containerName)
-        mutable.value = value
+        dataSource.changeScene(
+            toScene = toScene,
+            transitionKey = transitionKey,
+        )
     }
 
-    private fun noSuchContainerErrorMessage(containerName: String): String {
-        return """
-            No container named "$containerName". Existing containers:
-            ${containerConfigByName.values.joinToString(", ") { it.name }}
-        """
-            .trimIndent()
+    fun snapToScene(
+        toScene: SceneKey,
+    ) {
+        dataSource.snapToScene(
+            toScene = toScene,
+        )
+    }
+
+    /** Sets whether the container is visible. */
+    fun setVisible(isVisible: Boolean) {
+        _isVisible.value = isVisible
+    }
+
+    /**
+     * Binds the given flow so the system remembers it.
+     *
+     * Note that you must call is with `null` when the UI is done or risk a memory leak.
+     */
+    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
+        _transitionState.value = transitionState
     }
 }

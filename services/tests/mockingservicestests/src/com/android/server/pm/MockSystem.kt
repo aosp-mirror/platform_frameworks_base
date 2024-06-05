@@ -15,6 +15,7 @@
  */
 package com.android.server.pm
 
+import android.app.AppOpsManager
 import android.app.PropertyInvalidatedCache
 import android.content.Context
 import android.content.Intent
@@ -55,6 +56,11 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.spy
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder
 import com.android.internal.R
+import com.android.internal.pm.parsing.PackageParser2
+import com.android.internal.pm.parsing.pkg.PackageImpl
+import com.android.internal.pm.parsing.pkg.ParsedPackage
+import com.android.internal.pm.pkg.parsing.ParsingPackage
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.LocalManagerRegistry
 import com.android.server.LocalServices
 import com.android.server.LockGuard
@@ -64,13 +70,8 @@ import com.android.server.compat.PlatformCompat
 import com.android.server.extendedtestutils.wheneverStatic
 import com.android.server.pm.dex.DexManager
 import com.android.server.pm.dex.DynamicCodeLogger
-import com.android.server.pm.parsing.PackageParser2
-import com.android.server.pm.parsing.pkg.PackageImpl
-import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.pkg.AndroidPackage
-import com.android.server.pm.pkg.parsing.ParsingPackage
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.pm.resolution.ComponentResolver
 import com.android.server.pm.snapshot.PackageDataSnapshot
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
@@ -80,14 +81,6 @@ import com.android.server.testutils.mock
 import com.android.server.testutils.nullable
 import com.android.server.testutils.whenever
 import com.android.server.utils.WatchedArrayMap
-import libcore.util.HexEncoding
-import org.junit.Assert
-import org.junit.rules.TestRule
-import org.junit.runner.Description
-import org.junit.runners.model.Statement
-import org.mockito.AdditionalMatchers.or
-import org.mockito.Mockito
-import org.mockito.quality.Strictness
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -96,6 +89,14 @@ import java.security.cert.CertificateException
 import java.util.Arrays
 import java.util.Random
 import java.util.concurrent.FutureTask
+import libcore.util.HexEncoding
+import org.junit.Assert
+import org.junit.rules.TestRule
+import org.junit.runner.Description
+import org.junit.runners.model.Statement
+import org.mockito.AdditionalMatchers.or
+import org.mockito.Mockito
+import org.mockito.quality.Strictness
 
 /**
  * A utility for mocking behavior of the system and dependencies when testing PackageManagerService
@@ -139,6 +140,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         PropertyInvalidatedCache.disableForTestMode()
         val apply = ExtendedMockito.mockitoSession()
                 .strictness(Strictness.LENIENT)
+                .mockStatic(SaferIntentUtils::class.java)
                 .mockStatic(SystemProperties::class.java)
                 .mockStatic(SystemConfig::class.java)
                 .mockStatic(SELinuxMMAC::class.java, Mockito.CALLS_REAL_METHODS)
@@ -151,7 +153,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                 .mockStatic(EventLog::class.java)
                 .mockStatic(LocalServices::class.java)
                 .mockStatic(LocalManagerRegistry::class.java)
-                .mockStatic(DeviceConfig::class.java)
+                .mockStatic(DeviceConfig::class.java, Mockito.CALLS_REAL_METHODS)
                 .mockStatic(HexEncoding::class.java)
                 .apply(withSession)
         session = apply.startMocking()
@@ -165,8 +167,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
             null
         }
         whenever(mocks.settings.addPackageLPw(nullable(), nullable(), nullable(), nullable(),
-                nullable(), nullable(), nullable(), nullable(), nullable(), nullable(), nullable(),
-                nullable(), nullable(), nullable(), nullable(), nullable(), nullable())) {
+                nullable(), nullable(), nullable(), nullable())) {
             val name: String = getArgument(0)
             val pendingAdd = mPendingPackageAdds.firstOrNull { it.first == name }
                     ?: return@whenever null
@@ -186,13 +187,14 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
 
     class Mocks {
         val lock = PackageManagerTracedLock()
-        val installLock = Any()
+        val installLock = PackageManagerTracedLock()
         val injector: PackageManagerServiceInjector = mock()
         val systemWrapper: PackageManagerServiceInjector.SystemWrapper = mock()
         val context: Context = mock()
         val userManagerService: UserManagerService = mock()
         val componentResolver: ComponentResolver = mock()
         val permissionManagerInternal: PermissionManagerServiceInternal = mock()
+        val appOpsManager: AppOpsManager = mock()
         val incrementalManager: IncrementalManager = mock()
         val platformCompat: PlatformCompat = mock()
         val settings: Settings = mock()
@@ -305,6 +307,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.injector.defaultAppProvider) { mocks.defaultAppProvider }
         whenever(mocks.injector.backgroundHandler) { mocks.backgroundHandler }
         whenever(mocks.injector.updateOwnershipHelper) { mocks.updateOwnershipHelper }
+        whenever(mocks.injector.getSystemService(AppOpsManager::class.java)) { mocks.appOpsManager }
         wheneverStatic { SystemConfig.getInstance() }.thenReturn(mocks.systemConfig)
         whenever(mocks.systemConfig.availableFeatures).thenReturn(DEFAULT_AVAILABLE_FEATURES_MAP)
         whenever(mocks.systemConfig.sharedLibraries).thenReturn(DEFAULT_SHARED_LIBRARIES_LIST)
@@ -505,8 +508,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         pkg: ParsingPackage,
         applicationInfo: ApplicationInfo?,
         className: String?
-    ):
-            ActivityInfo {
+    ): ActivityInfo {
         val activityInfo = ActivityInfo()
         activityInfo.applicationInfo = applicationInfo
         activityInfo.packageName = pkg.packageName
@@ -518,8 +520,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         pkg: ParsingPackage,
         applicationInfo: ApplicationInfo?,
         className: String?
-    ):
-            ServiceInfo {
+    ): ServiceInfo {
         val serviceInfo = ServiceInfo()
         serviceInfo.applicationInfo = applicationInfo
         serviceInfo.packageName = pkg.packageName
@@ -567,9 +568,8 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
 
     @Throws(Exception::class)
     private fun stageInstantAppResolverScan() {
-        whenever(mocks.resources.getStringArray(R.array.config_ephemeralResolverPackage)) {
-            arrayOf("com.android.test.ephemeral.resolver")
-        }
+        doReturn(arrayOf("com.android.test.ephemeral.resolver"))
+            .whenever(mocks.resources).getStringArray(R.array.config_ephemeralResolverPackage)
         stageScanNewPackage("com.android.test.ephemeral.resolver",
                 1L, getPartitionFromFlag(PackageManagerService.SCAN_AS_PRODUCT).privAppFolder,
                 withPackage = { pkg: PackageImpl ->
@@ -700,8 +700,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     /** Override get*Folder methods to point to temporary local directories  */
 
     @Throws(IOException::class)
-    private fun redirectScanPartitions(partitions: List<ScanPartition>):
-            List<ScanPartition> {
+    private fun redirectScanPartitions(partitions: List<ScanPartition>): List<ScanPartition> {
         val spiedPartitions: MutableList<ScanPartition> =
                 ArrayList(partitions.size)
         for (partition: ScanPartition in partitions) {
@@ -733,6 +732,7 @@ class MockSystemRule : TestRule {
             } finally {
                 mockSystem?.cleanup()
                 mockSystem = null
+                Mockito.framework().clearInlineMocks()
             }
         }
     }

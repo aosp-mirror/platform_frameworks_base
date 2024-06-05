@@ -16,12 +16,18 @@
 
 package com.android.internal.policy;
 
+import android.annotation.RequiresPermission;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.LruCache;
@@ -45,6 +51,8 @@ public final class AttributeCache {
 
     @GuardedBy("this")
     private final Configuration mConfiguration = new Configuration();
+
+    private PackageMonitor mPackageMonitor;
 
     public final static class Package {
         public final Context context;
@@ -74,6 +82,34 @@ public final class AttributeCache {
     public static void init(Context context) {
         if (sInstance == null) {
             sInstance = new AttributeCache(context);
+        }
+    }
+
+    /**
+     * Start monitor package change, so the resources can be loaded correctly.
+     */
+    void monitorPackageRemove(Handler handler) {
+        if (mPackageMonitor == null) {
+            mPackageMonitor = new PackageMonitor(mContext, handler);
+        }
+    }
+
+    static class PackageMonitor extends BroadcastReceiver {
+        @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+        PackageMonitor(Context context, Handler handler) {
+            final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_REMOVED);
+            filter.addDataScheme(IntentFilter.SCHEME_PACKAGE);
+            context.registerReceiverAsUser(this, UserHandle.ALL, filter,
+                    null /* broadcastPermission */, handler);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final Uri packageUri = intent.getData();
+            if (packageUri != null) {
+                final String packageName = packageUri.getEncodedSchemeSpecificPart();
+                AttributeCache.instance().removePackage(packageName);
+            }
         }
     }
 

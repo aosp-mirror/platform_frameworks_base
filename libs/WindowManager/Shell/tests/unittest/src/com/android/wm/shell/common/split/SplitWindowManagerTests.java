@@ -59,7 +59,7 @@ public class SplitWindowManagerTests extends ShellTestCase {
     @Test
     @UiThreadTest
     public void testInitRelease() {
-        mSplitWindowManager.init(mSplitLayout, new InsetsState());
+        mSplitWindowManager.init(mSplitLayout, new InsetsState(), false /* isRestoring */);
         assertThat(mSplitWindowManager.getSurfaceControl()).isNotNull();
         mSplitWindowManager.release(null /* t */);
         assertThat(mSplitWindowManager.getSurfaceControl()).isNull();

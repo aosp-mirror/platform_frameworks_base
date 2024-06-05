@@ -16,15 +16,35 @@
 
 package com.android.systemui.scene.ui.viewmodel
 
+import android.view.MotionEvent
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
+import com.android.systemui.classifier.Classifier
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 
-/** Models UI state for a single scene container. */
-class SceneContainerViewModel(
-    private val interactor: SceneInteractor,
-    val containerName: String,
+/** Models UI state for the scene container. */
+@SysUISingleton
+class SceneContainerViewModel
+@Inject
+constructor(
+    private val sceneInteractor: SceneInteractor,
+    private val falsingInteractor: FalsingInteractor,
+    private val powerInteractor: PowerInteractor,
+    scenes: Set<@JvmSuppressWildcards Scene>,
 ) {
     /**
      * Keys of all scenes in the container.
@@ -32,21 +52,95 @@ class SceneContainerViewModel(
      * The scenes will be sorted in z-order such that the last one is the one that should be
      * rendered on top of all previous ones.
      */
-    val allSceneKeys: List<SceneKey> = interactor.allSceneKeys(containerName)
+    val allSceneKeys: List<SceneKey> = sceneInteractor.allSceneKeys()
 
-    /** The current scene. */
-    val currentScene: StateFlow<SceneModel> = interactor.currentScene(containerName)
+    /** The scene that should be rendered. */
+    val currentScene: StateFlow<SceneKey> = sceneInteractor.currentScene
 
     /** Whether the container is visible. */
-    val isVisible: StateFlow<Boolean> = interactor.isVisible(containerName)
+    val isVisible: StateFlow<Boolean> = sceneInteractor.isVisible
 
-    /** Requests a transition to the scene with the given key. */
-    fun setCurrentScene(scene: SceneModel) {
-        interactor.setCurrentScene(containerName, scene)
+    private val destinationScenesBySceneKey =
+        scenes.associate { scene -> scene.key to scene.destinationScenes }
+
+    fun currentDestinationScenes(
+        scope: CoroutineScope,
+    ): StateFlow<Map<UserAction, UserActionResult>> {
+        return currentScene
+            .flatMapLatestConflated { currentSceneKey ->
+                checkNotNull(destinationScenesBySceneKey[currentSceneKey])
+            }
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = emptyMap(),
+            )
     }
 
-    /** Notifies of the progress of a scene transition. */
-    fun setSceneTransitionProgress(progress: Float) {
-        interactor.setSceneTransitionProgress(containerName, progress)
+    /**
+     * Binds the given flow so the system remembers it.
+     *
+     * Note that you must call is with `null` when the UI is done or risk a memory leak.
+     */
+    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
+        sceneInteractor.setTransitionState(transitionState)
+    }
+
+    /**
+     * Notifies that a [MotionEvent] is first seen at the top of the scene container UI.
+     *
+     * Call this before the [MotionEvent] starts to propagate through the UI hierarchy.
+     */
+    fun onMotionEvent(event: MotionEvent) {
+        powerInteractor.onUserTouch()
+        falsingInteractor.onTouchEvent(event)
+        if (
+            event.actionMasked == MotionEvent.ACTION_UP ||
+                event.actionMasked == MotionEvent.ACTION_CANCEL
+        ) {
+            sceneInteractor.onUserInteractionFinished()
+        }
+    }
+
+    /**
+     * Notifies that a [MotionEvent] that was previously sent to [onMotionEvent] has passed through
+     * the scene container UI.
+     *
+     * Call this after the [MotionEvent] propagates completely through the UI hierarchy.
+     */
+    fun onMotionEventComplete() {
+        falsingInteractor.onMotionEventComplete()
+    }
+
+    /**
+     * Returns `true` if a change to [toScene] is currently allowed; `false` otherwise.
+     *
+     * This is invoked only for user-initiated transitions. The goal is to check with the falsing
+     * system whether the change from the current scene to the given scene should be rejected due to
+     * it being a false touch.
+     */
+    fun canChangeScene(toScene: SceneKey): Boolean {
+        val interactionTypeOrNull =
+            when (toScene) {
+                Scenes.Bouncer -> Classifier.BOUNCER_UNLOCK
+                Scenes.Gone -> Classifier.UNLOCK
+                Scenes.NotificationsShade -> Classifier.NOTIFICATION_DRAG_DOWN
+                Scenes.Shade -> Classifier.NOTIFICATION_DRAG_DOWN
+                Scenes.QuickSettings -> Classifier.QUICK_SETTINGS
+                Scenes.QuickSettingsShade -> Classifier.QUICK_SETTINGS
+                else -> null
+            }
+
+        return interactionTypeOrNull?.let { interactionType ->
+            // It's important that the falsing system is always queried, even if no enforcement will
+            // occur. This helps build up the right signal in the system.
+            val isFalseTouch = falsingInteractor.isFalseTouch(interactionType)
+
+            // Only enforce falsing if moving from the lockscreen scene to a new scene.
+            val fromLockscreenScene = currentScene.value == Scenes.Lockscreen
+
+            !fromLockscreenScene || !isFalseTouch
+        }
+            ?: true
     }
 }

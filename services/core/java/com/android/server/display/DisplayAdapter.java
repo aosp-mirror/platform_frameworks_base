@@ -20,6 +20,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.Display;
 
+import com.android.server.display.feature.DisplayManagerFlags;
+
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,6 +41,7 @@ abstract class DisplayAdapter {
     private final Handler mHandler;
     private final Listener mListener;
     private final String mName;
+    private final DisplayManagerFlags mFeatureFlags;
 
     public static final int DISPLAY_DEVICE_EVENT_ADDED = 1;
     public static final int DISPLAY_DEVICE_EVENT_CHANGED = 2;
@@ -50,13 +53,14 @@ abstract class DisplayAdapter {
     private static final AtomicInteger NEXT_DISPLAY_MODE_ID = new AtomicInteger(1);  // 0 = no mode.
 
     // Called with SyncRoot lock held.
-    public DisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
-            Context context, Handler handler, Listener listener, String name) {
+    DisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context, Handler handler,
+            Listener listener, String name, DisplayManagerFlags featureFlags) {
         mSyncRoot = syncRoot;
         mContext = context;
         mHandler = handler;
         mListener = listener;
         mName = name;
+        mFeatureFlags = featureFlags;
     }
 
     /**
@@ -86,6 +90,10 @@ abstract class DisplayAdapter {
      */
     public final String getName() {
         return mName;
+    }
+
+    public final DisplayManagerFlags getFeatureFlags() {
+        return mFeatureFlags;
     }
 
     /**
@@ -120,14 +128,14 @@ abstract class DisplayAdapter {
     }
 
     public static Display.Mode createMode(int width, int height, float refreshRate) {
-        return createMode(width, height, refreshRate, new float[0], new int[0]);
+        return createMode(width, height, refreshRate, refreshRate, new float[0], new int[0]);
     }
 
-    public static Display.Mode createMode(int width, int height, float refreshRate,
+    public static Display.Mode createMode(int width, int height, float refreshRate, float vsyncRate,
             float[] alternativeRefreshRates,
             @Display.HdrCapabilities.HdrType int[] supportedHdrTypes) {
         return new Display.Mode(NEXT_DISPLAY_MODE_ID.getAndIncrement(), width, height, refreshRate,
-                alternativeRefreshRates, supportedHdrTypes);
+                vsyncRate, /* isSynthetic= */ false, alternativeRefreshRates, supportedHdrTypes);
     }
 
     public interface Listener {

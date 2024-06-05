@@ -1,0 +1,9 @@
+package: "android.app.contextualsearch.flags"
+container: "system"
+
+flag {
+  name: "enable_service"
+  namespace: "machine_learning"
+  description: "Flag to enable the service"
+  bug: "309689654"
+}

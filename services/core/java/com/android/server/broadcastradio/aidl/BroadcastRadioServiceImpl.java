@@ -29,7 +29,6 @@ import android.os.IServiceCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
-import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -80,13 +79,6 @@ public final class BroadcastRadioServiceImpl {
                         RadioModule.tryLoadingModule(moduleId, name, newBinder);
                 if (radioModule == null) {
                     Slogf.w(TAG, "No module %s with id %d (HAL AIDL)", name, moduleId);
-                    return;
-                }
-                try {
-                    radioModule.setInternalHalCallback();
-                } catch (RemoteException ex) {
-                    Slogf.wtf(TAG, ex, "Broadcast radio module %s with id %d (HAL AIDL) "
-                            + "cannot register HAL callback", name, moduleId);
                     return;
                 }
                 if (DEBUG) {
@@ -145,7 +137,9 @@ public final class BroadcastRadioServiceImpl {
 
     /**
      * Constructs BroadcastRadioServiceImpl using AIDL HAL using the list of names of AIDL
-     * BroadcastRadio HAL services {@code serviceNameList}
+     * BroadcastRadio HAL services
+     *
+     * @param serviceNameList list of names of AIDL BroadcastRadio HAL services
      */
     public BroadcastRadioServiceImpl(ArrayList<String> serviceNameList) {
         mNextModuleId = 0;
@@ -176,7 +170,11 @@ public final class BroadcastRadioServiceImpl {
     }
 
     /**
-     * Gets the AIDL RadioModule for the given {@code moduleId}. Null will be returned if not found.
+     * Gets the AIDL RadioModule for the given module Id.
+     *
+     * @param id Id of {@link RadioModule}  of AIDL BroadcastRadio HAL service
+     * @return {@code true} if {@link RadioModule} of AIDL BroadcastRadio HAL service is found,
+     *         {@code false} otherwise
      */
     public boolean hasModule(int id) {
         synchronized (mLock) {
@@ -262,7 +260,7 @@ public final class BroadcastRadioServiceImpl {
      *
      * @param pw The file to which {@link BroadcastRadioServiceImpl} state is dumped.
      */
-    public void dumpInfo(IndentingPrintWriter pw) {
+    public void dumpInfo(android.util.IndentingPrintWriter pw) {
         synchronized (mLock) {
             pw.printf("Next module id available: %d\n", mNextModuleId);
             pw.printf("ServiceName to module id map:\n");

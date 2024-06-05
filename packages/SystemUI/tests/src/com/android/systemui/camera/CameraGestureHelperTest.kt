@@ -28,10 +28,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
@@ -45,8 +46,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(JUnit4::class)
@@ -54,6 +55,8 @@ class CameraGestureHelperTest : SysuiTestCase() {
 
     @Mock
     lateinit var centralSurfaces: CentralSurfaces
+    @Mock
+    lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock
     lateinit var keyguardStateController: KeyguardStateController
     @Mock
@@ -71,17 +74,17 @@ class CameraGestureHelperTest : SysuiTestCase() {
     @Mock
     lateinit var contentResolver: ContentResolver
     @Mock
-    lateinit var userTracker: UserTracker
+    lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
     private lateinit var underTest: CameraGestureHelper
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(cameraIntents.getSecureCameraIntent()).thenReturn(
+        whenever(cameraIntents.getSecureCameraIntent(anyInt())).thenReturn(
             Intent(CameraIntents.DEFAULT_SECURE_CAMERA_INTENT_ACTION)
         )
-        whenever(cameraIntents.getInsecureCameraIntent()).thenReturn(
+        whenever(cameraIntents.getInsecureCameraIntent(anyInt())).thenReturn(
             Intent(CameraIntents.DEFAULT_INSECURE_CAMERA_INTENT_ACTION)
         )
 
@@ -91,6 +94,7 @@ class CameraGestureHelperTest : SysuiTestCase() {
             context = mock(),
             centralSurfaces = centralSurfaces,
             keyguardStateController = keyguardStateController,
+            statusBarKeyguardViewManager = statusBarKeyguardViewManager,
             packageManager = packageManager,
             activityManager = activityManager,
             activityStarter = activityStarter,
@@ -99,7 +103,7 @@ class CameraGestureHelperTest : SysuiTestCase() {
             cameraIntents = cameraIntents,
             contentResolver = contentResolver,
             uiExecutor = MoreExecutors.directExecutor(),
-            userTracker = userTracker,
+            selectedUserInteractor = mSelectedUserInteractor,
         )
     }
 

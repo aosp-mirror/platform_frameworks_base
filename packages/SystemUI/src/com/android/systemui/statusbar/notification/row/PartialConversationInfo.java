@@ -34,10 +34,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-
-import java.util.Set;
 
 /**
  * The guts of a conversation notification that doesn't use valid shortcuts that is revealed when
@@ -57,7 +55,6 @@ public class PartialConversationInfo extends LinearLayout implements
     private StatusBarNotification mSbn;
     private boolean mIsDeviceProvisioned;
     private boolean mIsNonBlockable;
-    private Set<NotificationChannel> mUniqueChannelsInRow;
     private Drawable mPkgIcon;
 
     private boolean mPresentingChannelEditorDialog = false;
@@ -83,7 +80,6 @@ public class PartialConversationInfo extends LinearLayout implements
             ChannelEditorDialogController channelEditorDialogController,
             String pkg,
             NotificationChannel notificationChannel,
-            Set<NotificationChannel> uniqueChannelsInRow,
             NotificationEntry entry,
             NotificationInfo.OnSettingsClickListener onSettingsClick,
             boolean isDeviceProvisioned,
@@ -100,7 +96,6 @@ public class PartialConversationInfo extends LinearLayout implements
         mIsDeviceProvisioned = isDeviceProvisioned;
         mIsNonBlockable = isNonBlockable;
         mChannelEditorDialogController = channelEditorDialogController;
-        mUniqueChannelsInRow = uniqueChannelsInRow;
 
         bindHeader();
         bindActions();
@@ -149,7 +144,7 @@ public class PartialConversationInfo extends LinearLayout implements
                 mPresentingChannelEditorDialog = true;
 
                 mChannelEditorDialogController.prepareDialogForApp(mAppName, mPackageName, mAppUid,
-                        mUniqueChannelsInRow, mPkgIcon, mOnSettingsClickListener);
+                        mNotificationChannel, mPkgIcon, mOnSettingsClickListener);
                 mChannelEditorDialogController.setOnFinishListener(() -> {
                     mPresentingChannelEditorDialog = false;
                     mGutsContainer.closeControls(this, false);

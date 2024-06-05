@@ -24,7 +24,7 @@ import android.os.ServiceManager;
 import com.android.internal.compat.IPlatformCompat;
 
 /**
- * This is a dummy API to test gating
+ * This is a placeholder API to test gating
  *
  * @hide
  */
@@ -36,7 +36,7 @@ public class DummyApi {
     public static final long CHANGE_SYSTEM_SERVER = 666016;
 
     /**
-     * Dummy method
+     * Placeholder method
      * @return "A" if change is enabled, "B" otherwise.
      */
     public static String dummyFunc() {
@@ -47,7 +47,7 @@ public class DummyApi {
     }
 
     /**
-     * Dummy combined method
+     * Placeholder combined method
      * @return "0" if {@link CHANGE_ID_1} is disabled and {@link CHANGE_ID_2} is disabled,
                "1" if {@link CHANGE_ID_1} is disabled and {@link CHANGE_ID_2} is enabled,
                "2" if {@link CHANGE_ID_1} is enabled and {@link CHANGE_ID_2} is disabled,
@@ -68,7 +68,7 @@ public class DummyApi {
     }
 
     /**
-     * Dummy api using system server API.
+     * Placeholder api using system server API.
      */
     public static boolean dummySystemServer(Context context) {
         IPlatformCompat platformCompat = IPlatformCompat.Stub

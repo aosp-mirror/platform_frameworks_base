@@ -175,8 +175,16 @@ public final class WebViewDelegate {
 
     /**
      * Adds the WebView asset path to {@link android.content.res.AssetManager}.
+     * If {@link android.content.res.Flags#FLAG_REGISTER_RESOURCE_PATHS} is enabled, this function
+     * will be a no-op because the asset paths appending work will only be handled by
+     * {@link android.content.res.Resources#registerResourcePaths(String, ApplicationInfo)},
+     * otherwise it behaves the old way.
      */
     public void addWebViewAssetPath(Context context) {
+        if (android.content.res.Flags.registerResourcePaths()) {
+            return;
+        }
+
         final String[] newAssetPaths =
                 WebViewFactory.getLoadedPackageInfo().applicationInfo.getAllApkPaths();
         final ApplicationInfo appInfo = context.getApplicationInfo();
@@ -205,6 +213,14 @@ public final class WebViewDelegate {
      * Returns whether WebView should run in multiprocess mode.
      */
     public boolean isMultiProcessEnabled() {
+        if (Flags.updateServiceV2()) {
+            return true;
+        } else if (Flags.updateServiceIpcWrapper()) {
+            // We don't want to support this method in the new wrapper because updateServiceV2 is
+            // intended to ship in the same release (or sooner). It's only possible to disable it
+            // with an obscure adb command, so just return true here too.
+            return true;
+        }
         try {
             return WebViewFactory.getUpdateService().isMultiProcessEnabled();
         } catch (RemoteException e) {

@@ -94,29 +94,49 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Qoşuludur (telefon yoxdur), batareya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Qoşuludur (media yoxdur), batareya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Qoşuludur (telefon və ya media yoxdur), batareya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktiv, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktiv, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batareya, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batareya"</string>
+    <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Aktiv. <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya."</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Aktiv. Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batareya."</string>
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Aktiv. Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya."</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Aktiv. Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya."</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batareya, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batareya"</string>
+    <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Batareya: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batareya."</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya"</string>
+    <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"Sol <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level_untethered_right" msgid="8610019317279155595">"Sağ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktiv"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktiv, yalnız sol"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktiv, yalnız sağ"</string>
-    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktiv, sol və sağ"</string>
+    <string name="bluetooth_saved_device" msgid="4895871321722311428">"Yadda saxlandı"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktiv (yalnız sol)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktiv (yalnız sağ)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktiv (sol və sağ)"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktiv (yalnız media). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya."</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktiv (yalnız media). Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batareya."</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Qoşulub (audio paylaşma dəstəklənir). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya."</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"Qoşulub (audio paylaşma dəstəklənir). Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batareya."</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"Qoşulub (audio paylaşma dəstəklənir). Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya."</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"Qoşulub (audio paylaşma dəstəklənir). Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya."</string>
+    <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"Qoşulub (audio paylaşma dəstəklənir)"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Aktiv (yalnız media)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Audio paylaşma dəstəklənir"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktiv (yalnız media), yalnız sol"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Aktiv (yalnız media), yalnız sağ"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Aktiv (yalnız media), sol və sağ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Media audio"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefon zəngləri"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Fayl transferi"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Daxiletmə cihazı"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"İnternetə giriş"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Kontaktlar və zəng tarixçəsi paylaşımı"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Kontaktlar və zəng tarixçəsi paylaşımı üçün istifadə edin"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Kontakt və zəng tarixçəsinə giriş verin"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Məlumat zəng elanı və s. üçün istifadə ediləcək"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"internet bağlantı paylaşımı"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mətn Mesajları"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM-karta giriş"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Eşitmə cihazları"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Eşitmə aparatları"</string>
     <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Eşitmə Aparatlarına qoşuldu"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"Eşitmə aparatlarına qoşuldu"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE audiosuna qoşulub"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Media audioya birləşdirilib"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Telefon audiosuna qoşulu"</string>
@@ -134,7 +154,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Telefon audiosu istifadə edin"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Fayl transferi üçün istifadə edin"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Daxiletmə üçün istifadə edin"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Eşitmə Aparatları üçün istifadə edin"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Eşitmə aparatları üçün istifadə edin"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO üçün istifadə edin"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Qoşulsun"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"QOŞULSUN"</string>
@@ -150,6 +170,7 @@
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"Şəkilləndirmə"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Qulaqlıq"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Daxiletmə periferiki"</string>
+    <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"Eşitmə aparatları"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wifi sönülüdür."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wifi bağlantı kəsildi."</string>
@@ -157,6 +178,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wifi iki xətdir."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wifi üç xətdir."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Wifi siqnalı tamdır."</string>
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"Cihaza qoşuldu."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Açıq şəbəkə"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Təhlükəsiz şəbəkə"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
@@ -215,6 +237,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Profil seçin"</string>
     <string name="category_personal" msgid="6236798763159385225">"Şəxsi"</string>
     <string name="category_work" msgid="4014193632325996115">"İş"</string>
+    <string name="category_private" msgid="4244892185452788977">"Məxfi"</string>
     <string name="category_clone" msgid="1554511758987195974">"Klonlayın"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Developer seçimləri"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Developer variantlarını aktiv edin"</string>
@@ -355,6 +378,8 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"Toxunuş və jest datası göstərilsin"</string>
     <string name="show_touches" msgid="8437666942161289025">"Vizual reaksiya"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Toxunuşa vizual reaksiya verilsin"</string>
+    <string name="show_key_presses" msgid="6360141722735900214">"Düyməyə basma göstərilsin"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"Fiziki düymə basılmaları üçün vizual rəy göstərin"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Səth yenilənməsi göstərilsin"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Pəncərə səthi təzələnəndə işıqlansın"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Baxış yenilənməsi göstərilsin"</string>
@@ -401,7 +426,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Manifest dəyərindən asılı olmayaraq çoxpəncərəli rejimdə pəncərə ölçüsünün dəyişdirilməsinə icazə verilsin"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"İxtiyari formada pəncərə yaradılsın"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Eksperimental olaraq ixtiyari formada pəncərə yaradılsın"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Masaüstü rejimi"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Masaüstü rezerv parolu"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Masaüstü tam rezervlər hazırda qorunmayıblar."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Masaüstünün tam rezerv kopyalanması üçün parolu dəyişmək və ya silmək üçün basın"</string>
@@ -445,6 +469,8 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Rəng korreksiyası bunları etmək istədikdə faydalı ola bilər:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Rəngləri daha dəqiq görmək&lt;/li&gt; &lt;li&gt;&amp;nbsp;Fokuslanmaq üçün rəngləri ləğv etmək&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> tərəfindən qəbul edilmir"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - Batareyanı qorumaq üçün şarj gözlədilir"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> - Şarj aksesuarını yoxlayın"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Təxminən <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qalıb"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Təxminən <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qalıb (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"İstifadəyə əsasən təxminən <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qalıb"</string>
@@ -461,17 +487,15 @@
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Maksimum <xliff:g id="THRESHOLD">%1$s</xliff:g> qalıb (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Minimum <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qalıb (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Minimum <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qalıb"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefon tezliklə sönə bilər"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Planşet tezliklə sönə bilər"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Cihaz tezliklə sönə bilər"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Telefon tezliklə sönə bilər (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Planşet tezliklə sönə bilər (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Cihaz tezliklə sönə bilər (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Tam şarj edilənədək <xliff:g id="TIME">%1$s</xliff:g> qalıb"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - tam şarj edilənədək <xliff:g id="TIME">%2$s</xliff:g> qalıb"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Şarj optimallaşdırılıb"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Şarj optimallaşdırılıb"</string>
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - Şarj edilir"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g> radələrinə qədər tam dolacaq"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> radələrinə qədər tam dolacaq"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"<xliff:g id="TIME">%1$s</xliff:g> radələrinə qədər tam dolacaq"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"<xliff:g id="TIME">%1$s</xliff:g> radələrinə qədər tam dolacaq"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Naməlum"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Enerji doldurma"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Sürətlə doldurulur"</string>
@@ -479,9 +503,12 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Simsiz şarj edilir"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Şarj edilir"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Doldurulmur"</string>
-    <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Qoşulub, şarj edilmir"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Qoşulub, amma şarj edilmir"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Şarj edilib"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Tam şarj edilib"</string>
+    <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Şarj gözlədilir"</string>
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"Şarj"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Sürətli şarj"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Admin tərəfindən nəzarət olunur"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Məhdudlaşdırılmış Ayar ilə nəzarət edilir"</string>
     <string name="disabled" msgid="8017887509554714950">"Deaktiv"</string>
@@ -516,7 +543,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Qeydiyyatsız"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Əlçatmazdır"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC ixtiyari olaraq seçildi"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 cihaz qoşulub}=1{1 cihaz qoşulub}other{# cihaz qoşulub}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 cihaz qoşulub}other{# cihaz qoşulub}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Daha çox vaxt."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Daha az vaxt."</string>
     <string name="cancel" msgid="5665114069455378395">"Ləğv edin"</string>
@@ -543,8 +570,10 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Həmişə soruşulsun"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Deaktiv edilənə qədər"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"İndicə"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Bu telefon"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Bu planşet"</string>
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Bu telefon"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Bu planşet"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
+    <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dok dinamiki"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Xarici cihaz"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Qoşulmuş cihaz"</string>
@@ -556,6 +585,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Burada oxutmaqçün cihazı oyat"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Cihaz oxutmaq üçün təsdiqlənməyib"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Bu medianı burada oxutmaq olmur"</string>
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"Qoşulub"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI Chrome-da Tətbiqin İşləmə Müddəti"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Chrome-da Tətbiqin İşləmə Müddəti vasitəsilə qoşulub"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC vasitəsilə qoşulub"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV defoltu"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI çıxışı"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Daxili dinamiklər"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Qoşulmaqla bağlı problem. Cihazı deaktiv edin, sonra yenidən aktiv edin"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Simli audio cihaz"</string>
     <string name="help_label" msgid="3528360748637781274">"Yardım və rəy"</string>
@@ -601,6 +638,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Yeni istifadəçi yaratmaq alınmadı"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Yeni qonaq yaratmaq alınmadı"</string>
     <string name="user_nickname" msgid="262624187455825083">"Ləqəb"</string>
+    <string name="edit_user_info_message" msgid="6677556031419002895">"Seçdiyiniz ad və şəkil bu cihazı istifadə edən hər kəsə görünəcək."</string>
     <string name="user_add_user" msgid="7876449291500212468">"İstifadəçi əlavə edin"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Qonaq əlavə edin"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Qonağı silin"</string>
@@ -627,8 +665,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Çıxış zamanı bütün fəaliyyətlər silinəcək"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Çıxışda fəaliyyətinizi saxlaya və ya silə bilərsiniz"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Sessiya fəaliyyətini indi silmək üçün sıfırlayın və ya çıxışda fəaliyyəti saxlaya və ya silə bilərsiniz"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Foto çəkin"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Şəkil seçin"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Foto seçin"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Həddindən artıq yanlış cəhd. Bu cihazın datası silinəcək."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Həddindən artıq yanlış cəhd. Bu istifadəçi silinəcək."</string>
@@ -659,6 +695,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Şəbəkə bir xətdir."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Şəbəkə iki xətdir."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Şəbəkə üç xətdir."</string>
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"Telefonda dörd zolaq."</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Tam şəbəkə."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Məlumat yoxdur."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Data bir xətdir."</string>
@@ -668,12 +705,10 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet bağlantısı kəsilib."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Zəng yoxdur."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Profil şəkli seçin"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Defolt istifadəçi ikonası"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fiziki klaviatura"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Klaviatura düzənini seçin"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Defolt"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekranı aktiv etmək"</string>
+    <string name="turn_screen_on_title" msgid="2662312432042116026">"Ekran yandırma nizamlayıcısı"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Ekranı aktiv etməyə icazə verin"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Tətbiqin ekranı aktiv etməsinə icazə verin. İcazə verilərsə, tətbiq istənilən vaxt sizdən soruşmadan ekranı aktiv edə bilər."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqinin yayımlanması dayandırılsın?"</string>
@@ -683,11 +718,10 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Proqnozlaşdırılan geri animasiyalar"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Proqnozlaşdırıcı geri jest üçün sistem animasiyalarını aktiv edin."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Bu ayar proqnozlaşdırıcı jest animasiyası üçün sistem animasiyalarını aktiv edir. Bu, manifest faylında hər bir tətbiq üçün enableOnBackInvokedCallback-in doğru kimi ayarlanmasını tələb edir."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Sola köçürün"</item>
-    <item msgid="5425394847942513942">"Aşağı köçürün"</item>
-    <item msgid="7728484337962740316">"Sağa köçürün"</item>
-    <item msgid="324200556467459329">"Yuxarı köçürün"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
+    <string name="not_specified" msgid="5423502443185110328">"Göstərilməyib"</string>
+    <string name="neuter" msgid="2075249330106127310">"Neytral"</string>
+    <string name="feminine" msgid="1529155595310784757">"Qadın"</string>
+    <string name="masculine" msgid="4653978041013996303">"Kişi"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"Sistem güncəllənmələri"</string>
 </resources>

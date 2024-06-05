@@ -35,8 +35,6 @@ import android.os.UserHandle;
 import android.os.storage.CrateInfo;
 import android.os.storage.StorageManager;
 
-import com.android.internal.util.Preconditions;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -77,7 +75,7 @@ public class StorageStatsManager {
         }
     }
 
-    /** @removed */
+    /** {@hide} */
     @Deprecated
     public boolean isQuotaSupported(String uuid) {
         return isQuotaSupported(convert(uuid));
@@ -120,7 +118,7 @@ public class StorageStatsManager {
         }
     }
 
-    /** @removed */
+    /** {@hide} */
     @Deprecated
     public long getTotalBytes(String uuid) throws IOException {
         return getTotalBytes(convert(uuid));
@@ -152,7 +150,7 @@ public class StorageStatsManager {
         }
     }
 
-    /** @removed */
+    /** {@hide} */
     @Deprecated
     public long getFreeBytes(String uuid) throws IOException {
         return getFreeBytes(convert(uuid));
@@ -221,7 +219,7 @@ public class StorageStatsManager {
         }
     }
 
-    /** @removed */
+    /** {@hide} */
     @Deprecated
     public StorageStats queryStatsForPackage(String uuid, String packageName,
             UserHandle user) throws PackageManager.NameNotFoundException, IOException {
@@ -262,7 +260,7 @@ public class StorageStatsManager {
         }
     }
 
-    /** @removed */
+    /** {@hide} */
     @Deprecated
     public StorageStats queryStatsForUid(String uuid, int uid) throws IOException {
         return queryStatsForUid(convert(uuid), uid);
@@ -300,7 +298,7 @@ public class StorageStatsManager {
         }
     }
 
-    /** @removed */
+    /** {@hide} */
     @Deprecated
     public StorageStats queryStatsForUser(String uuid, UserHandle user) throws IOException {
         return queryStatsForUser(convert(uuid), user);
@@ -337,7 +335,7 @@ public class StorageStatsManager {
         }
     }
 
-    /** @removed */
+    /** {@hide} */
     @Deprecated
     public ExternalStorageStats queryExternalStatsForUser(String uuid, UserHandle user)
             throws IOException {

@@ -28,19 +28,23 @@ class TaskSnapshotCache extends SnapshotCache<Task> {
 
     private final AppSnapshotLoader mLoader;
 
-    TaskSnapshotCache(WindowManagerService service, AppSnapshotLoader loader) {
-        super(service, "Task");
+    TaskSnapshotCache(AppSnapshotLoader loader) {
+        super("Task");
         mLoader = loader;
     }
 
     void putSnapshot(Task task, TaskSnapshot snapshot) {
-        final CacheEntry entry = mRunningCache.get(task.mTaskId);
-        if (entry != null) {
-            mAppIdMap.remove(entry.topApp);
+        synchronized (mLock) {
+            snapshot.addReference(TaskSnapshot.REFERENCE_CACHE);
+            final CacheEntry entry = mRunningCache.get(task.mTaskId);
+            if (entry != null) {
+                mAppIdMap.remove(entry.topApp);
+                entry.snapshot.removeReference(TaskSnapshot.REFERENCE_CACHE);
+            }
+            final ActivityRecord top = task.getTopMostActivity();
+            mAppIdMap.put(top, task.mTaskId);
+            mRunningCache.put(task.mTaskId, new CacheEntry(snapshot, top));
         }
-        final ActivityRecord top = task.getTopMostActivity();
-        mAppIdMap.put(top, task.mTaskId);
-        mRunningCache.put(task.mTaskId, new CacheEntry(snapshot, top));
     }
 
     /**

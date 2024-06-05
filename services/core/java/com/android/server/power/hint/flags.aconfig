@@ -1,0 +1,9 @@
+package: "com.android.server.power.hint"
+container: "system"
+
+flag {
+    name: "powerhint_thread_cleanup"
+    namespace: "game"
+    description: "Feature flag for auto PowerHintSession dead thread cleanup"
+    bug: "296160319"
+}

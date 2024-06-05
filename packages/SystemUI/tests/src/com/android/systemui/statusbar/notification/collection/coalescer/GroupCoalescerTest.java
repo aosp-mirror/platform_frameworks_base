@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.coalescer;
 
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.clearInvocations;
@@ -28,8 +30,8 @@ import static java.util.Objects.requireNonNull;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -55,15 +57,14 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class GroupCoalescerTest extends SysuiTestCase {
 
     private GroupCoalescer mCoalescer;
 
     @Mock private NotificationListener mListenerService;
     @Mock private GroupCoalescer.BatchableNotificationHandler mListener;
-    @Mock private GroupCoalescerLogger mLogger;
-
+    private final GroupCoalescerLogger mLogger = new GroupCoalescerLogger(logcatLogBuffer());
     @Captor private ArgumentCaptor<NotificationHandler> mListenerCaptor;
 
     private final NoManSimulator mNoMan = new NoManSimulator();

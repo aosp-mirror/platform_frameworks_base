@@ -22,8 +22,8 @@ import static com.android.server.inputmethod.SubtypeUtils.SUBTYPE_MODE_KEYBOARD;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.os.Parcel;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
@@ -46,7 +46,7 @@ final class InputMethodInfoUtils {
     private static final String TAG = "InputMethodInfoUtils";
 
     /**
-     * Used in {@link #getFallbackLocaleForDefaultIme(ArrayList, Context)} to find the fallback IMEs
+     * Used in {@link #getFallbackLocaleForDefaultIme(List, Context)} to find the fallback IMEs
      * that are mainly used until the system becomes ready. Note that {@link Locale} in this array
      * is checked with {@link Locale#equals(Object)}, which means that {@code Locale.ENGLISH}
      * doesn't automatically match {@code Locale("en", "IN")}.
@@ -64,7 +64,7 @@ final class InputMethodInfoUtils {
         @NonNull
         private final LinkedHashSet<InputMethodInfo> mInputMethodSet = new LinkedHashSet<>();
 
-        InputMethodListBuilder fillImes(ArrayList<InputMethodInfo> imis, Context context,
+        InputMethodListBuilder fillImes(List<InputMethodInfo> imis, Context context,
                 boolean checkDefaultAttribute, @Nullable Locale locale, boolean checkCountry,
                 String requiredSubtypeMode) {
             for (int i = 0; i < imis.size(); ++i) {
@@ -77,9 +77,7 @@ final class InputMethodInfoUtils {
             return this;
         }
 
-        // TODO: The behavior of InputMethodSubtype#overridesImplicitlyEnabledSubtype() should be
-        // documented more clearly.
-        InputMethodListBuilder fillAuxiliaryImes(ArrayList<InputMethodInfo> imis, Context context) {
+        InputMethodListBuilder fillAuxiliaryImes(List<InputMethodInfo> imis, Context context) {
             // If one or more auxiliary input methods are available, OK to stop populating the list.
             for (final InputMethodInfo imi : mInputMethodSet) {
                 if (imi.isAuxiliaryIme()) {
@@ -120,7 +118,7 @@ final class InputMethodInfoUtils {
     }
 
     private static InputMethodListBuilder getMinimumKeyboardSetWithSystemLocale(
-            ArrayList<InputMethodInfo> imis, Context context, @Nullable Locale systemLocale,
+            List<InputMethodInfo> imis, Context context, @Nullable Locale systemLocale,
             @Nullable Locale fallbackLocale) {
         // Once the system becomes ready, we pick up at least one keyboard in the following order.
         // Secondary users fall into this category in general.
@@ -169,7 +167,7 @@ final class InputMethodInfoUtils {
     }
 
     static ArrayList<InputMethodInfo> getDefaultEnabledImes(
-            Context context, ArrayList<InputMethodInfo> imis, boolean onlyMinimum) {
+            Context context, List<InputMethodInfo> imis, boolean onlyMinimum) {
         final Locale fallbackLocale = getFallbackLocaleForDefaultIme(imis, context);
         // We will primarily rely on the system locale, but also keep relying on the fallback locale
         // as a last resort.
@@ -188,7 +186,7 @@ final class InputMethodInfoUtils {
     }
 
     static ArrayList<InputMethodInfo> getDefaultEnabledImes(
-            Context context, ArrayList<InputMethodInfo> imis) {
+            Context context, List<InputMethodInfo> imis) {
         return getDefaultEnabledImes(context, imis, false /* onlyMinimum */);
     }
 
@@ -206,7 +204,7 @@ final class InputMethodInfoUtils {
      */
     @Nullable
     static InputMethodInfo chooseSystemVoiceIme(
-            @NonNull ArrayMap<String, InputMethodInfo> methodMap,
+            @NonNull InputMethodMap methodMap,
             @Nullable String systemSpeechRecognizerPackageName,
             @Nullable String currentDefaultVoiceImeId) {
         if (TextUtils.isEmpty(systemSpeechRecognizerPackageName)) {
@@ -285,7 +283,7 @@ final class InputMethodInfoUtils {
     }
 
     @Nullable
-    private static Locale getFallbackLocaleForDefaultIme(ArrayList<InputMethodInfo> imis,
+    private static Locale getFallbackLocaleForDefaultIme(List<InputMethodInfo> imis,
             Context context) {
         // At first, find the fallback locale from the IMEs that are declared as "default" in the
         // current locale.  Note that IME developers can declare an IME as "default" only for
@@ -325,5 +323,25 @@ final class InputMethodInfoUtils {
         }
         return SubtypeUtils.containsSubtypeOf(imi, requiredLocale, checkCountry,
                 requiredSubtypeMode);
+    }
+
+    /**
+     * Marshals the given {@link InputMethodInfo} into a byte array.
+     *
+     * @param imi {@link InputMethodInfo} to be marshalled
+     * @return a byte array where the given {@link InputMethodInfo} is marshalled
+     */
+    @NonNull
+    static byte[] marshal(@NonNull InputMethodInfo imi) {
+        Parcel parcel = null;
+        try {
+            parcel = Parcel.obtain();
+            parcel.writeTypedObject(imi, 0);
+            return parcel.marshall();
+        } finally {
+            if (parcel != null) {
+                parcel.recycle();
+            }
+        }
     }
 }

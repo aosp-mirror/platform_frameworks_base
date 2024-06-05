@@ -17,16 +17,16 @@
 package com.android.wm.shell.flicker
 
 import android.app.Instrumentation
-import android.tools.device.flicker.junit.FlickerBuilderProvider
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.flicker.junit.FlickerBuilderProvider
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
 
 abstract class BaseBenchmarkTest
 @JvmOverloads
 constructor(
-    protected open val flicker: FlickerTest,
+    protected open val flicker: LegacyFlickerTest,
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation(),
     protected val tapl: LauncherInstrumentation = LauncherInstrumentation()
 ) {
@@ -38,7 +38,7 @@ constructor(
      * executions
      */
     @FlickerBuilderProvider
-    fun buildFlicker(): FlickerBuilder {
+    open fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
             setup { flicker.scenario.setIsTablet(tapl.isTablet) }
             transition()

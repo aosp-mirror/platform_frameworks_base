@@ -29,7 +29,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 
@@ -39,6 +41,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.os.BinderInternal.CallSession;
 
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -55,13 +59,22 @@ import java.util.Set;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 @Presubmit
+@IgnoreUnderRavenwood(blockedBy = BinderCallsStats.class)
 public class BinderCallsStatsTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private static final int WORKSOURCE_UID = Process.FIRST_APPLICATION_UID;
     private static final int CALLING_UID = 2;
     private static final int REQUEST_SIZE = 2;
     private static final int REPLY_SIZE = 3;
     private final CachedDeviceState mDeviceState = new CachedDeviceState(false, true);
-    private final TestHandler mHandler = new TestHandler();
+    private TestHandler mHandler;
+
+    @Before
+    public void setUp() {
+        mHandler = new TestHandler();
+    }
 
     @Test
     public void testDetailedOff() {

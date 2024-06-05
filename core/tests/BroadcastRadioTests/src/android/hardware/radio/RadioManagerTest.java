@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,8 +33,10 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -42,6 +45,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -90,10 +94,26 @@ public final class RadioManagerTest {
     private static final RadioManager.ModuleProperties AMFM_PROPERTIES =
             createAmFmProperties(/* dabFrequencyTable= */ null);
 
+    private static final int DAB_INFO_FLAG_LIVE_VALUE = 1;
+    private static final int DAB_INFO_FLAG_TUNED_VALUE = 1 << 4;
+    private static final int DAB_INFO_FLAG_STEREO_VALUE = 1 << 5;
+    private static final int HD_INFO_FLAG_LIVE_VALUE = 1;
+    private static final int HD_INFO_FLAG_TUNED_VALUE = 1 << 4;
+    private static final int HD_INFO_FLAG_STEREO_VALUE = 1 << 5;
+    private static final int HD_INFO_FLAG_SIGNAL_ACQUISITION_VALUE = 1 << 6;
+    private static final int HD_INFO_FLAG_SIS_ACQUISITION_VALUE = 1 << 7;
     /**
-     * Info flags with live, tuned and stereo enabled
+     * Info flags with live, tuned, and stereo enabled for DAB program
      */
-    private static final int INFO_FLAGS = 0b110001;
+    private static final int INFO_FLAGS_DAB = DAB_INFO_FLAG_LIVE_VALUE | DAB_INFO_FLAG_TUNED_VALUE
+            | DAB_INFO_FLAG_STEREO_VALUE;
+    /**
+     * HD program info flags with live, tuned, stereo enabled, signal acquired, SIS information
+     * available but audio unavailable
+     */
+    private static final int INFO_FLAGS_HD = HD_INFO_FLAG_LIVE_VALUE | HD_INFO_FLAG_TUNED_VALUE
+            | HD_INFO_FLAG_STEREO_VALUE | HD_INFO_FLAG_SIGNAL_ACQUISITION_VALUE
+            | HD_INFO_FLAG_SIS_ACQUISITION_VALUE;
     private static final int SIGNAL_QUALITY = 2;
     private static final ProgramSelector.Identifier DAB_SID_EXT_IDENTIFIER =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT,
@@ -112,9 +132,20 @@ public final class RadioManagerTest {
                     new ProgramSelector.Identifier[]{
                             DAB_ENSEMBLE_IDENTIFIER, DAB_FREQUENCY_IDENTIFIER},
                     /* vendorIds= */ null);
+
+    private static final long HD_FREQUENCY = 97_100;
+    private static final ProgramSelector.Identifier HD_STATION_EXT_IDENTIFIER =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT,
+                    /* value= */ (HD_FREQUENCY << 36) | 0x1L);
+    private static final ProgramSelector HD_SELECTOR = new ProgramSelector(
+            ProgramSelector.PROGRAM_TYPE_FM_HD, HD_STATION_EXT_IDENTIFIER,
+            new ProgramSelector.Identifier[]{}, /* vendorIds= */ null);
+
     private static final RadioMetadata METADATA = createMetadata();
     private static final RadioManager.ProgramInfo DAB_PROGRAM_INFO =
             createDabProgramInfo(DAB_SELECTOR);
+    private static final RadioManager.ProgramInfo HD_PROGRAM_INFO = createHdProgramInfo(
+            HD_SELECTOR);
 
     private static final int EVENT_ANNOUNCEMENT_TYPE = Announcement.TYPE_EVENT;
     private static final List<Announcement> TEST_ANNOUNCEMENT_LIST = Arrays.asList(
@@ -134,6 +165,19 @@ public final class RadioManagerTest {
     private Announcement.OnListUpdatedListener mEventListener;
     @Mock
     private ICloseHandle mCloseHandleMock;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Test
+    public void constructor_withUnsupportedTypeForBandDescriptor_throwsException() {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> new RadioManager.AmBandDescriptor(REGION, /* type= */ 100, AM_LOWER_LIMIT,
+                        AM_UPPER_LIMIT, AM_SPACING, STEREO_SUPPORTED));
+
+        assertWithMessage("Unsupported band type exception")
+                .that(thrown).hasMessageThat().contains("Unsupported band");
+    }
 
     @Test
     public void getType_forBandDescriptor() {
@@ -330,6 +374,18 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void equals_withAmBandDescriptorsAndOtherTypeObject() {
+        assertWithMessage("AM Band Descriptor")
+                .that(AM_BAND_DESCRIPTOR).isNotEqualTo(FM_BAND_DESCRIPTOR);
+    }
+
+    @Test
+    public void equals_withFmBandDescriptorsAndOtherTypeObject() {
+        assertWithMessage("FM Band Descriptor")
+                .that(FM_BAND_DESCRIPTOR).isNotEqualTo(AM_BAND_DESCRIPTOR);
+    }
+
+    @Test
     public void equals_withAmBandDescriptorsOfDifferentUpperLimits_returnsFalse() {
         RadioManager.AmBandDescriptor amBandDescriptorCompared =
                 new RadioManager.AmBandDescriptor(REGION, RadioManager.BAND_AM, AM_LOWER_LIMIT,
@@ -340,9 +396,83 @@ public final class RadioManagerTest {
     }
 
     @Test
-    public void equals_withAmAndFmBandDescriptors_returnsFalse() {
-        assertWithMessage("AM Band Descriptor")
-                .that(AM_BAND_DESCRIPTOR).isNotEqualTo(FM_BAND_DESCRIPTOR);
+    public void equals_withAmBandDescriptorsOfDifferentStereoSupportValues() {
+        RadioManager.AmBandDescriptor amBandDescriptorCompared =
+                new RadioManager.AmBandDescriptor(REGION, RadioManager.BAND_AM, AM_LOWER_LIMIT,
+                        AM_UPPER_LIMIT, AM_SPACING, !STEREO_SUPPORTED);
+
+        assertWithMessage("AM Band Descriptor of different stereo support values")
+                .that(AM_BAND_DESCRIPTOR).isNotEqualTo(amBandDescriptorCompared);
+    }
+
+    @Test
+    public void equals_withFmBandDescriptorsOfDifferentSpacingValues() {
+        RadioManager.FmBandDescriptor fmBandDescriptorCompared = new RadioManager.FmBandDescriptor(
+                REGION, RadioManager.BAND_FM, FM_LOWER_LIMIT, FM_UPPER_LIMIT, FM_SPACING * 2,
+                STEREO_SUPPORTED, RDS_SUPPORTED, TA_SUPPORTED, AF_SUPPORTED, EA_SUPPORTED);
+
+        assertWithMessage("FM Band Descriptors of different support limit values")
+                .that(FM_BAND_DESCRIPTOR).isNotEqualTo(fmBandDescriptorCompared);
+    }
+
+    @Test
+    public void equals_withFmBandConfigsOfDifferentLowerLimitValues() {
+        RadioManager.FmBandDescriptor fmBandDescriptorCompared = new RadioManager.FmBandDescriptor(
+                REGION + 1, RadioManager.BAND_AM_HD, AM_LOWER_LIMIT, AM_UPPER_LIMIT, AM_SPACING,
+                STEREO_SUPPORTED, RDS_SUPPORTED, TA_SUPPORTED, AF_SUPPORTED, EA_SUPPORTED);
+
+        assertWithMessage("FM Band Descriptors of different region values")
+                .that(FM_BAND_DESCRIPTOR).isNotEqualTo(fmBandDescriptorCompared);
+    }
+
+    @Test
+    public void equals_withFmBandDescriptorsOfDifferentStereoSupportValues() {
+        RadioManager.FmBandDescriptor fmBandDescriptorCompared = new RadioManager.FmBandDescriptor(
+                REGION, RadioManager.BAND_FM, FM_LOWER_LIMIT, FM_UPPER_LIMIT, FM_SPACING,
+                !STEREO_SUPPORTED, RDS_SUPPORTED, TA_SUPPORTED, AF_SUPPORTED, EA_SUPPORTED);
+
+        assertWithMessage("FM Band Descriptors of different stereo support values")
+                .that(fmBandDescriptorCompared).isNotEqualTo(FM_BAND_DESCRIPTOR);
+    }
+
+    @Test
+    public void equals_withFmBandDescriptorsOfDifferentRdsSupportValues() {
+        RadioManager.FmBandDescriptor fmBandDescriptorCompared = new RadioManager.FmBandDescriptor(
+                REGION, RadioManager.BAND_FM, FM_LOWER_LIMIT, FM_UPPER_LIMIT, FM_SPACING,
+                STEREO_SUPPORTED, !RDS_SUPPORTED, TA_SUPPORTED, AF_SUPPORTED, EA_SUPPORTED);
+
+        assertWithMessage("FM Band Descriptors of different rds support values")
+                .that(fmBandDescriptorCompared).isNotEqualTo(FM_BAND_DESCRIPTOR);
+    }
+
+    @Test
+    public void equals_withFmBandDescriptorsOfDifferentTaSupportValues() {
+        RadioManager.FmBandDescriptor fmBandDescriptorCompared = new RadioManager.FmBandDescriptor(
+                REGION, RadioManager.BAND_FM, FM_LOWER_LIMIT, FM_UPPER_LIMIT, FM_SPACING,
+                STEREO_SUPPORTED, RDS_SUPPORTED, !TA_SUPPORTED, AF_SUPPORTED, EA_SUPPORTED);
+
+        assertWithMessage("FM Band Descriptors of different ta support values")
+                .that(fmBandDescriptorCompared).isNotEqualTo(FM_BAND_DESCRIPTOR);
+    }
+
+    @Test
+    public void equals_withFmBandDescriptorsOfDifferentAfSupportValues() {
+        RadioManager.FmBandDescriptor fmBandDescriptorCompared = new RadioManager.FmBandDescriptor(
+                REGION, RadioManager.BAND_FM, FM_LOWER_LIMIT, FM_UPPER_LIMIT, FM_SPACING,
+                STEREO_SUPPORTED, RDS_SUPPORTED, TA_SUPPORTED, !AF_SUPPORTED, EA_SUPPORTED);
+
+        assertWithMessage("FM Band Descriptors of different af support values")
+                .that(fmBandDescriptorCompared).isNotEqualTo(FM_BAND_DESCRIPTOR);
+    }
+
+    @Test
+    public void equals_withFmBandDescriptorsOfDifferentEaSupportValues() {
+        RadioManager.FmBandDescriptor fmBandDescriptorCompared = new RadioManager.FmBandDescriptor(
+                REGION, RadioManager.BAND_FM, FM_LOWER_LIMIT, FM_UPPER_LIMIT, FM_SPACING,
+                STEREO_SUPPORTED, RDS_SUPPORTED, TA_SUPPORTED, AF_SUPPORTED, !EA_SUPPORTED);
+
+        assertWithMessage("FM Band Descriptors of different ea support values")
+                .that(fmBandDescriptorCompared).isNotEqualTo(FM_BAND_DESCRIPTOR);
     }
 
     @Test
@@ -554,18 +684,79 @@ public final class RadioManagerTest {
     }
 
     @Test
-    public void equals_withFmBandConfigsOfDifferentAfs_returnsFalse() {
-        RadioManager.FmBandConfig.Builder builder = new RadioManager.FmBandConfig.Builder(
-                createFmBandDescriptor()).setStereo(STEREO_SUPPORTED).setRds(RDS_SUPPORTED)
-                .setTa(TA_SUPPORTED).setAf(!AF_SUPPORTED).setEa(EA_SUPPORTED);
-        RadioManager.FmBandConfig fmBandConfigFromBuilder = builder.build();
+    public void equals_withFmBandConfigsOfDifferentRegionValues() {
+        RadioManager.FmBandConfig fmBandConfigCompared = new RadioManager.FmBandConfig(
+                new RadioManager.FmBandDescriptor(REGION + 1, RadioManager.BAND_AM_HD,
+                        AM_LOWER_LIMIT, AM_UPPER_LIMIT, AM_SPACING, STEREO_SUPPORTED, RDS_SUPPORTED,
+                        TA_SUPPORTED, AF_SUPPORTED, EA_SUPPORTED));
 
-        assertWithMessage("FM Band Config of different af value")
-                .that(FM_BAND_CONFIG).isNotEqualTo(fmBandConfigFromBuilder);
+        assertWithMessage("FM Band Config of different regions")
+                .that(FM_BAND_CONFIG).isNotEqualTo(fmBandConfigCompared);
     }
 
     @Test
-    public void equals_withFmAndAmBandConfigs_returnsFalse() {
+    public void equals_withFmBandConfigsOfDifferentStereoSupportValues() {
+        RadioManager.FmBandConfig fmBandConfigCompared = new RadioManager.FmBandConfig(
+                new RadioManager.FmBandDescriptor(REGION, RadioManager.BAND_FM, FM_LOWER_LIMIT,
+                        FM_UPPER_LIMIT, FM_SPACING, !STEREO_SUPPORTED, RDS_SUPPORTED, TA_SUPPORTED,
+                        AF_SUPPORTED, EA_SUPPORTED));
+
+        assertWithMessage("FM Band Config with different stereo support values")
+                .that(fmBandConfigCompared).isNotEqualTo(FM_BAND_CONFIG);
+    }
+
+    @Test
+    public void equals_withFmBandConfigsOfDifferentRdsSupportValues() {
+        RadioManager.FmBandConfig fmBandConfigCompared = new RadioManager.FmBandConfig(
+                new RadioManager.FmBandDescriptor(REGION, RadioManager.BAND_FM, FM_LOWER_LIMIT,
+                        FM_UPPER_LIMIT, FM_SPACING, STEREO_SUPPORTED, !RDS_SUPPORTED, TA_SUPPORTED,
+                        AF_SUPPORTED, EA_SUPPORTED));
+
+        assertWithMessage("FM Band Config with different RDS support values")
+                .that(fmBandConfigCompared).isNotEqualTo(FM_BAND_CONFIG);
+    }
+
+    @Test
+    public void equals_withFmBandConfigsOfDifferentTaSupportValues() {
+        RadioManager.FmBandConfig fmBandConfigCompared = new RadioManager.FmBandConfig(
+                new RadioManager.FmBandDescriptor(REGION, RadioManager.BAND_FM, FM_LOWER_LIMIT,
+                        FM_UPPER_LIMIT, FM_SPACING, STEREO_SUPPORTED, RDS_SUPPORTED, !TA_SUPPORTED,
+                        AF_SUPPORTED, EA_SUPPORTED));
+
+        assertWithMessage("FM Band Configs with different ta values")
+                .that(fmBandConfigCompared).isNotEqualTo(FM_BAND_CONFIG);
+    }
+
+    @Test
+    public void equals_withFmBandConfigsOfDifferentAfSupportValues() {
+        RadioManager.FmBandConfig.Builder builder = new RadioManager.FmBandConfig.Builder(
+                createFmBandDescriptor()).setStereo(STEREO_SUPPORTED).setRds(RDS_SUPPORTED)
+                .setTa(TA_SUPPORTED).setAf(!AF_SUPPORTED).setEa(EA_SUPPORTED);
+        RadioManager.FmBandConfig fmBandConfigCompared = builder.build();
+
+        assertWithMessage("FM Band Config of different af support value")
+                .that(FM_BAND_CONFIG).isNotEqualTo(fmBandConfigCompared);
+    }
+
+    @Test
+    public void equals_withFmBandConfigsOfDifferentEaSupportValues() {
+        RadioManager.FmBandConfig fmBandConfigCompared = new RadioManager.FmBandConfig(
+                new RadioManager.FmBandDescriptor(REGION, RadioManager.BAND_FM, FM_LOWER_LIMIT,
+                        FM_UPPER_LIMIT, FM_SPACING, STEREO_SUPPORTED, RDS_SUPPORTED, TA_SUPPORTED,
+                        AF_SUPPORTED, !EA_SUPPORTED));
+
+        assertWithMessage("FM Band Configs with different ea support values")
+                .that(fmBandConfigCompared).isNotEqualTo(FM_BAND_CONFIG);
+    }
+
+    @Test
+    public void equals_withAmBandConfigsAndOtherTypeObject() {
+        assertWithMessage("AM Band Config")
+                .that(AM_BAND_CONFIG).isNotEqualTo(FM_BAND_CONFIG);
+    }
+
+    @Test
+    public void equals_withFmBandConfigsAndOtherTypeObject() {
         assertWithMessage("FM Band Config")
                 .that(FM_BAND_CONFIG).isNotEqualTo(AM_BAND_CONFIG);
     }
@@ -927,6 +1118,30 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void isSignalAcquired_forProgramInfo() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
+        assertWithMessage("Signal acquisition status for HD program info")
+                .that(HD_PROGRAM_INFO.isSignalAcquired()).isTrue();
+    }
+
+    @Test
+    public void isHdSisAvailable_forProgramInfo() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
+        assertWithMessage("SIS information acquisition status for HD program")
+                .that(HD_PROGRAM_INFO.isHdSisAvailable()).isTrue();
+    }
+
+    @Test
+    public void isHdAudioAvailable_forProgramInfo() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
+        assertWithMessage("Audio acquisition status for HD program")
+                .that(HD_PROGRAM_INFO.isHdAudioAvailable()).isFalse();
+    }
+
+    @Test
     public void getSignalStrength_forProgramInfo() {
         assertWithMessage("Signal strength of DAB program info")
                 .that(DAB_PROGRAM_INFO.getSignalStrength()).isEqualTo(SIGNAL_QUALITY);
@@ -1086,6 +1301,18 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void addAnnouncementListener_withListenerAddedBeforeAndCloseException_throws()
+            throws Exception {
+        createRadioManager();
+        Set<Integer> enableTypeSet = createAnnouncementTypeSet(EVENT_ANNOUNCEMENT_TYPE);
+        mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener);
+        doThrow(new RemoteException()).when(mCloseHandleMock).close();
+
+        assertThrows(RuntimeException.class,
+                () -> mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener));
+    }
+
+    @Test
     public void addAnnouncementListener_whenServiceDied_throwException() throws Exception {
         createRadioManager();
         String exceptionMessage = "service is dead";
@@ -1156,9 +1383,18 @@ public final class RadioManagerTest {
     }
 
     private static RadioManager.ProgramInfo createDabProgramInfo(ProgramSelector selector) {
-        return new RadioManager.ProgramInfo(selector, DAB_SID_EXT_IDENTIFIER,
-                DAB_FREQUENCY_IDENTIFIER, Arrays.asList(DAB_SID_EXT_IDENTIFIER_RELATED), INFO_FLAGS,
-                SIGNAL_QUALITY, METADATA, /* vendorInfo= */ null);
+        return new RadioManager.ProgramInfo(selector, selector.getPrimaryId(),
+                DAB_FREQUENCY_IDENTIFIER, Arrays.asList(DAB_SID_EXT_IDENTIFIER_RELATED),
+                INFO_FLAGS_DAB, SIGNAL_QUALITY, METADATA, /* vendorInfo= */ null);
+    }
+
+    private static RadioManager.ProgramInfo createHdProgramInfo(ProgramSelector selector) {
+        long frequency = (selector.getPrimaryId().getValue() >> 32);
+        ProgramSelector.Identifier physicallyTunedToId = new ProgramSelector.Identifier(
+                ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, frequency);
+        return new RadioManager.ProgramInfo(selector, selector.getPrimaryId(), physicallyTunedToId,
+                Collections.emptyList(), INFO_FLAGS_HD, SIGNAL_QUALITY, METADATA,
+                /* vendorInfo= */ null);
     }
 
     private void createRadioManager() throws RemoteException {

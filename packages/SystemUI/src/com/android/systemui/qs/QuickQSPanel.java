@@ -25,10 +25,8 @@ import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.FontSizeUtils;
-import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.plugins.qs.QSTile.SignalState;
-import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.res.R;
 
 /**
  * Version of QSPanel that only shows N Quick Tiles in the QS Header.
@@ -89,19 +87,6 @@ public class QuickQSPanel extends QSPanel {
     @Override
     protected boolean shouldShowDetail() {
         return !mExpanded;
-    }
-
-    @Override
-    protected void drawTile(QSPanelControllerBase.TileRecord r, State state) {
-        if (state instanceof SignalState) {
-            SignalState copy = new SignalState();
-            state.copyTo(copy);
-            // No activity shown in the quick panel.
-            copy.activityIn = false;
-            copy.activityOut = false;
-            state = copy;
-        }
-        super.drawTile(r, state);
     }
 
     public void setMaxTiles(int maxTiles) {

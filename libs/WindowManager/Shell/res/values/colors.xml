@@ -30,6 +30,9 @@
     <color name="bubbles_light">#FFFFFF</color>
     <color name="bubbles_dark">@color/GM2_grey_800</color>
     <color name="bubbles_icon_tint">@color/GM2_grey_700</color>
+    <color name="bubble_bar_expanded_view_handle_light">#EBffffff</color>
+    <color name="bubble_bar_expanded_view_handle_dark">#99000000</color>
+    <color name="bubble_bar_expanded_view_menu_close">#DC362E</color>
 
     <!-- PiP -->
     <color name="pip_custom_close_bg">#D93025</color>
@@ -57,15 +60,11 @@
     <!-- Desktop Mode -->
     <color name="desktop_mode_caption_handle_bar_light">#EFF1F2</color>
     <color name="desktop_mode_caption_handle_bar_dark">#1C1C17</color>
-    <color name="desktop_mode_caption_expand_button_light">#EFF1F2</color>
-    <color name="desktop_mode_caption_expand_button_dark">#48473A</color>
-    <color name="desktop_mode_caption_close_button_light">#EFF1F2</color>
-    <color name="desktop_mode_caption_close_button_dark">#1C1C17</color>
-    <color name="desktop_mode_caption_app_name_light">#EFF1F2</color>
-    <color name="desktop_mode_caption_app_name_dark">#1C1C17</color>
-    <color name="desktop_mode_caption_menu_text_color">#191C1D</color>
-    <color name="desktop_mode_caption_menu_buttons_color_inactive">#191C1D</color>
-    <color name="desktop_mode_caption_menu_buttons_color_active">#00677E</color>
     <color name="desktop_mode_resize_veil_light">#EFF1F2</color>
     <color name="desktop_mode_resize_veil_dark">#1C1C17</color>
+    <color name="desktop_mode_maximize_menu_progress_light">#33000000</color>
+    <color name="desktop_mode_maximize_menu_progress_dark">#33FFFFFF</color>
+    <color name="desktop_mode_caption_button_on_hover_light">#11000000</color>
+    <color name="desktop_mode_caption_button_on_hover_dark">#11FFFFFF</color>
+    <color name="desktop_mode_caption_button">#00000000</color>
 </resources>

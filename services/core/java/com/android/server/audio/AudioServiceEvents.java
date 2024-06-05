@@ -120,6 +120,8 @@ public class AudioServiceEvents {
             return new StringBuilder("setWiredDeviceConnectionState(")
                     .append(" type:").append(
                             Integer.toHexString(mState.mAttributes.getInternalType()))
+                    .append(" (").append(AudioSystem.isInputDevice(
+                            mState.mAttributes.getInternalType()) ? "source" : "sink").append(") ")
                     .append(" state:").append(AudioSystem.deviceStateToString(mState.mState))
                     .append(" addr:").append(mState.mAttributes.getAddress())
                     .append(" name:").append(mState.mAttributes.getName())
@@ -149,13 +151,15 @@ public class AudioServiceEvents {
 
     static final class VolChangedBroadcastEvent extends EventLogger.Event {
         final int mStreamType;
-        final int mAliasStreamType;
+        final String mAliasStreamIndexes;
         final int mIndex;
+        final int mOldIndex;
 
-        VolChangedBroadcastEvent(int stream, int alias, int index) {
+        VolChangedBroadcastEvent(int stream, String aliasIndexes, int index, int oldIndex) {
             mStreamType = stream;
-            mAliasStreamType = alias;
+            mAliasStreamIndexes = aliasIndexes;
             mIndex = index;
+            mOldIndex = oldIndex;
         }
 
         @Override
@@ -163,7 +167,8 @@ public class AudioServiceEvents {
             return new StringBuilder("sending VOLUME_CHANGED stream:")
                     .append(AudioSystem.streamToString(mStreamType))
                     .append(" index:").append(mIndex)
-                    .append(" alias:").append(AudioSystem.streamToString(mAliasStreamType))
+                    .append(" (was:").append(mOldIndex).append(")")
+                    .append(mAliasStreamIndexes)
                     .toString();
         }
     }
@@ -228,24 +233,42 @@ public class AudioServiceEvents {
         static final int VOL_MUTE_STREAM_INT = 9;
         static final int VOL_SET_LE_AUDIO_VOL = 10;
         static final int VOL_ADJUST_GROUP_VOL = 11;
+        static final int VOL_MASTER_MUTE = 12;
 
         final int mOp;
         final int mStream;
         final int mVal1;
         final int mVal2;
+        final int mVal3;
         final String mCaller;
         final String mGroupName;
+
+        /** used for VOL_SET_STREAM_VOL */
+        VolumeEvent(int op, int stream, int val1, int val2, int val3, String caller) {
+            mOp = op;
+            mStream = stream;
+            mVal1 = val1;
+            mVal2 = val2;
+            mVal3 = val3;
+            mCaller = caller;
+            // unused
+            mGroupName = null;
+            logMetricEvent();
+        }
 
         /** used for VOL_ADJUST_VOL_UID,
          *           VOL_ADJUST_SUGG_VOL,
          *           VOL_ADJUST_STREAM_VOL,
-         *           VOL_SET_STREAM_VOL */
+         *           VOL_SET_LE_AUDIO_VOL
+         */
         VolumeEvent(int op, int stream, int val1, int val2, String caller) {
             mOp = op;
             mStream = stream;
             mVal1 = val1;
             mVal2 = val2;
             mCaller = caller;
+            // unused
+            mVal3 = -1;
             mGroupName = null;
             logMetricEvent();
         }
@@ -256,6 +279,7 @@ public class AudioServiceEvents {
             mVal1 = index;
             mVal2 = gainDb;
             // unused
+            mVal3 = -1;
             mStream = -1;
             mCaller = null;
             mGroupName = null;
@@ -268,6 +292,7 @@ public class AudioServiceEvents {
             mVal1 = index;
             // unused
             mVal2 = 0;
+            mVal3 = -1;
             mStream = -1;
             mCaller = null;
             mGroupName = null;
@@ -281,6 +306,7 @@ public class AudioServiceEvents {
             mVal1 = index;
             mVal2 = voiceActive ? 1 : 0;
             // unused
+            mVal3 = -1;
             mCaller = null;
             mGroupName = null;
             logMetricEvent();
@@ -293,6 +319,7 @@ public class AudioServiceEvents {
             mVal1 = index;
             mVal2 = mode;
             // unused
+            mVal3 = -1;
             mCaller = null;
             mGroupName = null;
             logMetricEvent();
@@ -307,6 +334,8 @@ public class AudioServiceEvents {
             mVal2 = flags;
             mCaller = caller;
             mGroupName = group;
+            // unused
+            mVal3 = -1;
             logMetricEvent();
         }
 
@@ -316,6 +345,21 @@ public class AudioServiceEvents {
             mStream = stream;
             mVal1 = state ? 1 : 0;
             mVal2 = 0;
+            // unused
+            mCaller = null;
+            mGroupName = null;
+            mVal3 = -1;
+            logMetricEvent();
+        }
+
+        /** used for VOL_MASTER_MUTE */
+        VolumeEvent(int op, boolean state) {
+            mOp = op;
+            mStream = -1;
+            mVal1 = state ? 1 : 0;
+            mVal2 = 0;
+            // unused
+            mVal3 = -1;
             mCaller = null;
             mGroupName = null;
             logMetricEvent();
@@ -374,6 +418,7 @@ public class AudioServiceEvents {
                             .set(MediaMetrics.Property.EVENT, "setStreamVolume")
                             .set(MediaMetrics.Property.FLAGS, mVal2)
                             .set(MediaMetrics.Property.INDEX, mVal1)
+                            .set(MediaMetrics.Property.OLD_INDEX, mVal3)
                             .set(MediaMetrics.Property.STREAM_TYPE,
                                     AudioSystem.streamToString(mStream))
                             .record();
@@ -390,6 +435,8 @@ public class AudioServiceEvents {
                             .set(MediaMetrics.Property.EVENT, "setLeAudioVolume")
                             .set(MediaMetrics.Property.INDEX, mVal1)
                             .set(MediaMetrics.Property.MAX_INDEX, mVal2)
+                            .set(MediaMetrics.Property.STREAM_TYPE,
+                                    AudioSystem.streamToString(mStream))
                             .record();
                     return;
                 case VOL_SET_AVRCP_VOL:
@@ -429,6 +476,9 @@ public class AudioServiceEvents {
                 case VOL_MUTE_STREAM_INT:
                     // No value in logging metrics for this internal event
                     return;
+                case VOL_MASTER_MUTE:
+                    // No value in logging metrics for this internal event
+                    return;
                 default:
                     return;
             }
@@ -463,6 +513,7 @@ public class AudioServiceEvents {
                             .append(AudioSystem.streamToString(mStream))
                             .append(" index:").append(mVal1)
                             .append(" flags:0x").append(Integer.toHexString(mVal2))
+                            .append(" oldIndex:").append(mVal3)
                             .append(") from ").append(mCaller)
                             .toString();
                 case VOL_SET_HEARING_AID_VOL:
@@ -471,7 +522,8 @@ public class AudioServiceEvents {
                             .append(" gain dB:").append(mVal2)
                             .toString();
                 case VOL_SET_LE_AUDIO_VOL:
-                    return new StringBuilder("setLeAudioVolume:")
+                    return new StringBuilder("setLeAudioVolume(stream:")
+                            .append(AudioSystem.streamToString(mStream))
                             .append(" index:").append(mVal1)
                             .append(" maxIndex:").append(mVal2)
                             .toString();
@@ -510,6 +562,10 @@ public class AudioServiceEvents {
                             .append(AudioSystem.streamToString(mStream))
                             .append(mVal1 == 1 ? ", muted)" : ", unmuted)")
                             .toString();
+                case VOL_MASTER_MUTE:
+                    return new StringBuilder("Master mute:")
+                            .append(mVal1 == 1 ? " muted)" : " unmuted)")
+                            .toString();
                 default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
             }
         }
@@ -520,6 +576,8 @@ public class AudioServiceEvents {
         static final int DOSE_UPDATE = 1;
         static final int DOSE_REPEAT_5X = 2;
         static final int DOSE_ACCUMULATION_START = 3;
+        static final int LOWER_VOLUME_TO_RS1 = 4;
+
         final int mEventType;
         final float mFloatValue;
         final long mLongValue;
@@ -546,6 +604,10 @@ public class AudioServiceEvents {
             return new SoundDoseEvent(DOSE_ACCUMULATION_START, 0 /*ignored*/, 0 /*ignored*/);
         }
 
+        static SoundDoseEvent getLowerVolumeToRs1Event() {
+            return new SoundDoseEvent(LOWER_VOLUME_TO_RS1, 0 /*ignored*/, 0 /*ignored*/);
+        }
+
         @Override
         public String eventToString() {
             switch (mEventType) {
@@ -559,6 +621,57 @@ public class AudioServiceEvents {
                     return "CSD reached 500%";
                 case DOSE_ACCUMULATION_START:
                     return "CSD accumulating: RS2 entered";
+                case LOWER_VOLUME_TO_RS1:
+                    return "CSD lowering volume to RS1";
+            }
+            return new StringBuilder("FIXME invalid event type:").append(mEventType).toString();
+        }
+    }
+
+    static final class LoudnessEvent extends EventLogger.Event {
+        static final int START_PIID = 0;
+
+        static final int STOP_PIID = 1;
+
+        static final int CLIENT_DIED = 2;
+
+        final int mEventType;
+        final int mIntValue1;
+        final int mIntValue2;
+
+        private LoudnessEvent(int event, int i1, int i2) {
+            mEventType = event;
+            mIntValue1 = i1;
+            mIntValue2 = i2;
+        }
+
+        static LoudnessEvent getStartPiid(int piid, int pid) {
+            return new LoudnessEvent(START_PIID, piid, pid);
+        }
+
+        static LoudnessEvent getStopPiid(int piid, int pid) {
+            return new LoudnessEvent(STOP_PIID, piid, pid);
+        }
+
+        static LoudnessEvent getClientDied(int pid) {
+            return new LoudnessEvent(CLIENT_DIED, 0 /* ignored */, pid);
+        }
+
+
+        @Override
+        public String eventToString() {
+            switch (mEventType) {
+                case START_PIID:
+                    return String.format(
+                            "Start loudness updates for piid %d for client pid %d",
+                            mIntValue1, mIntValue2);
+                case STOP_PIID:
+                    return String.format(
+                            "Stop loudness updates for piid %d for client pid %d",
+                            mIntValue1, mIntValue2);
+                case CLIENT_DIED:
+                    return String.format("Loudness client with pid %d died", mIntValue2);
+
             }
             return new StringBuilder("FIXME invalid event type:").append(mEventType).toString();
         }

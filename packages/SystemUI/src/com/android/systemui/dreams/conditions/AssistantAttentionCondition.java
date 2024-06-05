@@ -16,26 +16,23 @@
 
 package com.android.systemui.dreams.conditions;
 
-import com.android.internal.app.AssistUtils;
-import com.android.internal.app.IVisualQueryDetectionAttentionListener;
+import com.android.systemui.assist.AssistManager;
+import com.android.systemui.assist.AssistManager.VisualQueryAttentionListener;
 import com.android.systemui.dagger.qualifiers.Application;
-import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.shared.condition.Condition;
 
-import javax.inject.Inject;
-
 import kotlinx.coroutines.CoroutineScope;
+
+import javax.inject.Inject;
 
 /**
  * {@link AssistantAttentionCondition} provides a signal when assistant has the user's attention.
  */
 public class AssistantAttentionCondition extends Condition {
-    private final DreamOverlayStateController mDreamOverlayStateController;
-    private final AssistUtils mAssistUtils;
-    private boolean mEnabled;
+    private final AssistManager mAssistManager;
 
-    private final IVisualQueryDetectionAttentionListener mVisualQueryDetectionAttentionListener =
-            new IVisualQueryDetectionAttentionListener.Stub() {
+    private final VisualQueryAttentionListener mVisualQueryAttentionListener =
+            new VisualQueryAttentionListener() {
         @Override
         public void onAttentionGained() {
             updateCondition(true);
@@ -47,59 +44,26 @@ public class AssistantAttentionCondition extends Condition {
         }
     };
 
-    private final DreamOverlayStateController.Callback mCallback =
-            new DreamOverlayStateController.Callback() {
-        @Override
-        public void onStateChanged() {
-            if (mDreamOverlayStateController.isDreamOverlayStatusBarVisible()) {
-                enableVisualQueryDetection();
-            } else {
-                disableVisualQueryDetection();
-            }
-        }
-    };
-
     @Inject
     public AssistantAttentionCondition(
             @Application CoroutineScope scope,
-            DreamOverlayStateController dreamOverlayStateController,
-            AssistUtils assistUtils) {
+            AssistManager assistManager) {
         super(scope);
-        mDreamOverlayStateController = dreamOverlayStateController;
-        mAssistUtils = assistUtils;
+        mAssistManager = assistManager;
     }
 
     @Override
     protected void start() {
-        mDreamOverlayStateController.addCallback(mCallback);
+        mAssistManager.addVisualQueryAttentionListener(mVisualQueryAttentionListener);
     }
 
     @Override
     protected void stop() {
-        disableVisualQueryDetection();
-        mDreamOverlayStateController.removeCallback(mCallback);
+        mAssistManager.removeVisualQueryAttentionListener(mVisualQueryAttentionListener);
     }
 
     @Override
     protected int getStartStrategy() {
         return START_EAGERLY;
-    }
-
-    private void enableVisualQueryDetection() {
-        if (mEnabled) {
-            return;
-        }
-        mEnabled = true;
-        mAssistUtils.enableVisualQueryDetection(mVisualQueryDetectionAttentionListener);
-    }
-
-    private void disableVisualQueryDetection() {
-        if (!mEnabled) {
-            return;
-        }
-        mEnabled = false;
-        mAssistUtils.disableVisualQueryDetection();
-        // Make sure the condition is set to false as well.
-        updateCondition(false);
     }
 }

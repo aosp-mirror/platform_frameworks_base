@@ -89,9 +89,9 @@ public class ToastPresenter {
         return view;
     }
 
+    private final WeakReference<Context> mContext;
     private final Resources mResources;
-    private final WeakReference<WindowManager> mWindowManager;
-    private final WeakReference<AccessibilityManager> mAccessibilityManager;
+    private final IAccessibilityManager mAccessibilityManagerService;
     private final INotificationManager mNotificationManager;
     private final String mPackageName;
     private final String mContextPackageName;
@@ -101,21 +101,13 @@ public class ToastPresenter {
 
     public ToastPresenter(Context context, IAccessibilityManager accessibilityManager,
             INotificationManager notificationManager, String packageName) {
+        mContext = new WeakReference<>(context);
         mResources = context.getResources();
-        mWindowManager = new WeakReference<>(context.getSystemService(WindowManager.class));
         mNotificationManager = notificationManager;
         mPackageName = packageName;
         mContextPackageName = context.getPackageName();
         mParams = createLayoutParams();
-
-        // We obtain AccessibilityManager manually via its constructor instead of using method
-        // AccessibilityManager.getInstance() for 2 reasons:
-        //   1. We want to be able to inject IAccessibilityManager in tests to verify behavior.
-        //   2. getInstance() caches the instance for the process even if we pass a different
-        //      context to it. This is problematic for multi-user because callers can pass a context
-        //      created via Context.createContextAsUser().
-        mAccessibilityManager = new WeakReference<>(
-                new AccessibilityManager(context, accessibilityManager, context.getUserId()));
+        mAccessibilityManagerService = accessibilityManager;
     }
 
     public String getPackageName() {
@@ -280,7 +272,7 @@ public class ToastPresenter {
     public void hide(@Nullable ITransientNotificationCallback callback) {
         checkState(mView != null, "No toast to hide.");
 
-        final WindowManager windowManager = mWindowManager.get();
+        final WindowManager windowManager = getWindowManager(mView);
         if (mView.getParent() != null && windowManager != null) {
             windowManager.removeViewImmediate(mView);
         }
@@ -301,15 +293,35 @@ public class ToastPresenter {
         mToken = null;
     }
 
+    private WindowManager getWindowManager(View view) {
+        Context context = mContext.get();
+        if (context == null && view != null) {
+            context = view.getContext();
+        }
+        if (context != null) {
+            return context.getSystemService(WindowManager.class);
+        }
+        return null;
+    }
+
     /**
      * Sends {@link AccessibilityEvent#TYPE_NOTIFICATION_STATE_CHANGED} event if accessibility is
      * enabled.
      */
     public void trySendAccessibilityEvent(View view, String packageName) {
-        final AccessibilityManager accessibilityManager = mAccessibilityManager.get();
-        if (accessibilityManager == null) {
+        final Context context = mContext.get();
+        if (context == null) {
             return;
         }
+
+        // We obtain AccessibilityManager manually via its constructor instead of using method
+        // AccessibilityManager.getInstance() for 2 reasons:
+        //   1. We want to be able to inject IAccessibilityManager in tests to verify behavior.
+        //   2. getInstance() caches the instance for the process even if we pass a different
+        //      context to it. This is problematic for multi-user because callers can pass a context
+        //      created via Context.createContextAsUser().
+        final AccessibilityManager accessibilityManager = new AccessibilityManager(context,
+                    mAccessibilityManagerService, context.getUserId());
 
         if (!accessibilityManager.isEnabled()) {
             accessibilityManager.removeClient();
@@ -328,7 +340,7 @@ public class ToastPresenter {
     }
 
     private void addToastView() {
-        final WindowManager windowManager = mWindowManager.get();
+        final WindowManager windowManager = getWindowManager(mView);
         if (windowManager == null) {
             return;
         }
@@ -342,7 +354,10 @@ public class ToastPresenter {
             // to cancel the toast there is an inherent race and we may attempt to add a window
             // after the token has been invalidated. Let us hedge against that.
             Log.w(TAG, "Error while attempting to show toast from " + mPackageName, e);
-            return;
+        } catch (WindowManager.InvalidDisplayException e) {
+            // Display the toast was scheduled on might have been meanwhile removed.
+            Log.w(TAG, "Cannot show toast from " + mPackageName
+                    + " on display it was scheduled on.", e);
         }
     }
 }

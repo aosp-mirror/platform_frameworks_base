@@ -16,6 +16,9 @@
 
 package android.graphics.text;
 
+import static com.android.text.flags.Flags.FLAG_NEW_FONTS_FALLBACK_XML;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.graphics.Paint;
@@ -43,9 +46,11 @@ import java.util.Objects;
  * @see TextRunShaper#shapeTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)
  */
 public final class PositionedGlyphs {
-    private static final NativeAllocationRegistry REGISTRY =
-            NativeAllocationRegistry.createMalloced(
-                    Typeface.class.getClassLoader(), nReleaseFunc());
+    private static class NoImagePreloadHolder {
+        private static final NativeAllocationRegistry REGISTRY =
+                NativeAllocationRegistry.createMalloced(
+                        Typeface.class.getClassLoader(), nReleaseFunc());
+    }
 
     private final long mLayoutPtr;
     private final float mXOffset;
@@ -134,7 +139,7 @@ public final class PositionedGlyphs {
      * Returns the glyph ID used for drawing the glyph at the given index.
      *
      * @param index the glyph index
-     * @return An glyph ID of the font.
+     * @return A glyph ID of the font.
      */
     @IntRange(from = 0)
     public int getGlyphId(@IntRange(from = 0) int index) {
@@ -165,6 +170,73 @@ public final class PositionedGlyphs {
     }
 
     /**
+     * Returns true if the fake bold option used for drawing, otherwise false.
+     *
+     * @param index the glyph index
+     * @return true if the fake bold option is on, otherwise off.
+     */
+    @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
+    public boolean getFakeBold(@IntRange(from = 0) int index) {
+        Preconditions.checkArgumentInRange(index, 0, glyphCount() - 1, "index");
+        return nGetFakeBold(mLayoutPtr, index);
+    }
+
+    /**
+     * Returns true if the fake italic option used for drawing, otherwise false.
+     *
+     * @param index the glyph index
+     * @return true if the fake italic option is on, otherwise off.
+     */
+    @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
+    public boolean getFakeItalic(@IntRange(from = 0) int index) {
+        Preconditions.checkArgumentInRange(index, 0, glyphCount() - 1, "index");
+        return nGetFakeItalic(mLayoutPtr, index);
+    }
+
+    /**
+     * A special value returned by {@link #getWeightOverride(int)} and
+     * {@link #getItalicOverride(int)} that indicates no font variation setting is overridden.
+     */
+    @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
+    public static final float NO_OVERRIDE = Float.MIN_VALUE;
+
+    /**
+     * Returns overridden weight value if the font is variable font and `wght` value is overridden
+     * for drawing. Otherwise returns {@link #NO_OVERRIDE}.
+     *
+     * @param index the glyph index
+     * @return overridden weight value or {@link #NO_OVERRIDE}.
+     */
+    @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
+    public float getWeightOverride(@IntRange(from = 0) int index) {
+        Preconditions.checkArgumentInRange(index, 0, glyphCount() - 1, "index");
+        float value = nGetWeightOverride(mLayoutPtr, index);
+        if (value == -1) {
+            return NO_OVERRIDE;
+        } else {
+            return value;
+        }
+    }
+
+    /**
+     * Returns overridden italic value if the font is variable font and `ital` value is overridden
+     * for drawing. Otherwise returns {@link #NO_OVERRIDE}.
+     *
+     * @param index the glyph index
+     * @return overridden weight value or {@link #NO_OVERRIDE}.
+     */
+    @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
+    public float getItalicOverride(@IntRange(from = 0) int index) {
+        Preconditions.checkArgumentInRange(index, 0, glyphCount() - 1, "index");
+        float value = nGetItalicOverride(mLayoutPtr, index);
+        if (value == -1) {
+            return NO_OVERRIDE;
+        } else {
+            return value;
+        }
+    }
+
+    /**
      * Create single style layout from native result.
      *
      * @hide
@@ -189,7 +261,7 @@ public final class PositionedGlyphs {
             mFonts.add(prevFont);
         }
 
-        REGISTRY.registerNativeAllocation(this, layoutPtr);
+        NoImagePreloadHolder.REGISTRY.registerNativeAllocation(this, layoutPtr);
     }
 
     @CriticalNative
@@ -210,6 +282,14 @@ public final class PositionedGlyphs {
     private static native long nGetFont(long minikinLayout, int i);
     @CriticalNative
     private static native long nReleaseFunc();
+    @CriticalNative
+    private static native boolean nGetFakeBold(long minikinLayout, int i);
+    @CriticalNative
+    private static native boolean nGetFakeItalic(long minikinLayout, int i);
+    @CriticalNative
+    private static native float nGetWeightOverride(long minikinLayout, int i);
+    @CriticalNative
+    private static native float nGetItalicOverride(long minikinLayout, int i);
 
     @Override
     public boolean equals(Object o) {

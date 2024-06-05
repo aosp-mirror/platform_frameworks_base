@@ -192,7 +192,7 @@ public class Bmgr {
         }
 
         if ("whitelist".equals(op)) {
-            doPrintWhitelist();
+            doPrintAllowlist();
             return;
         }
 
@@ -911,7 +911,7 @@ public class Bmgr {
         }
     }
 
-    private void doPrintWhitelist() {
+    private void doPrintAllowlist() {
         try {
             final String[] whitelist = mBmgr.getTransportWhitelist();
             if (whitelist != null) {
@@ -1246,6 +1246,58 @@ public class Bmgr {
                 return "TRANSPORT_IS_NULL";
             case BackupManagerMonitor.LOG_EVENT_ID_AGENT_LOGGING_RESULTS:
                 return "AGENT_LOGGING_RESULTS";
+            case BackupManagerMonitor.LOG_EVENT_ID_START_SYSTEM_RESTORE:
+                return "START_SYSTEM_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_START_RESTORE_AT_INSTALL:
+                return "START_RESTORE_AT_INSTALL";
+            case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_ERROR_DURING_START_RESTORE:
+                return "TRANSPORT_ERROR_DURING_START_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_CANNOT_GET_NEXT_PKG_NAME:
+                return "CANNOT_GET_NEXT_PKG_NAME";
+            case BackupManagerMonitor.LOG_EVENT_ID_UNKNOWN_RESTORE_TYPE:
+                return "UNKNOWN_RESTORE_TYPE";
+            case BackupManagerMonitor.LOG_EVENT_ID_KV_RESTORE:
+                return "KV_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE:
+                return "FULL_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_NO_NEXT_RESTORE_TARGET:
+                return "NO_NEXT_RESTORE_TARGET";
+            case BackupManagerMonitor.LOG_EVENT_ID_KV_AGENT_ERROR:
+                return "KV_AGENT_ERROR";
+            case BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_RESTORE_FINISHED:
+                return "PACKAGE_RESTORE_FINISHED";
+            case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_ERROR_KV_RESTORE:
+                return "TRANSPORT_ERROR_KV_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_NO_FEEDER_THREAD:
+                return "NO_FEEDER_THREAD";
+            case BackupManagerMonitor.LOG_EVENT_ID_FULL_AGENT_ERROR:
+                return "FULL_AGENT_ERROR";
+            case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_ERROR_FULL_RESTORE:
+                return "TRANSPORT_ERROR_FULL_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_RESTORE_COMPLETE:
+                return "RESTORE_COMPLETE";
+            case BackupManagerMonitor.LOG_EVENT_ID_START_PACKAGE_RESTORE:
+                return "START_PACKAGE_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_AGENT_FAILURE:
+                return "AGENT_FAILURE";
+            case BackupManagerMonitor.LOG_EVENT_ID_RESTORE_AT_INSTALL_INVOKED:
+                return "RESTORE_AT_INSTALL_INVOKED";
+            case BackupManagerMonitor.LOG_EVENT_ID_SKIP_RESTORE_AT_INSTALL:
+                return "SKIP_RESTORE_AT_INSTALL";
+            case BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_ACCEPTED_FOR_RESTORE:
+                return "PACKAGE_ACCEPTED_FOR_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_RESTORE_DATA_DOES_NOT_BELONG_TO_PACKAGE:
+                return "RESTORE_DATA_DOES_NOT_BELONG_TO_PACKAGE";
+            case BackupManagerMonitor.LOG_EVENT_ID_UNABLE_TO_CREATE_AGENT_FOR_RESTORE:
+                return "UNABLE_TO_CREATE_AGENT_FOR_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_AGENT_CRASHED_BEFORE_RESTORE_DATA_IS_SENT:
+                return "AGENT_CRASHED_BEFORE_RESTORE_DATA_IS_SEN";
+            case BackupManagerMonitor.LOG_EVENT_ID_FAILED_TO_SEND_DATA_TO_AGENT_DURING_RESTORE:
+                return "FAILED_TO_SEND_DATA_TO_AGENT_DURING_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_AGENT_FAILURE_DURING_RESTORE:
+                return "AGENT_FAILURE_DURING_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_FAILED_TO_READ_DATA_FROM_TRANSPORT:
+                return "FAILED_TO_READ_DATA_FROM_TRANSPORT";
             default:
                 return "UNKNOWN_ID";
         }

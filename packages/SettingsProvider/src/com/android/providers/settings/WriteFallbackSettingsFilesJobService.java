@@ -16,6 +16,7 @@
 
 package com.android.providers.settings;
 
+import static com.android.providers.settings.SettingsProvider.SETTINGS_PROVIDER_JOBS_NS;
 import static com.android.providers.settings.SettingsProvider.TABLE_CONFIG;
 import static com.android.providers.settings.SettingsProvider.TABLE_GLOBAL;
 import static com.android.providers.settings.SettingsProvider.TABLE_SECURE;
@@ -35,7 +36,8 @@ import java.util.List;
 public class WriteFallbackSettingsFilesJobService extends JobService {
     @Override
     public boolean onStartJob(final JobParameters params) {
-        if (params.getJobId() != WRITE_FALLBACK_SETTINGS_FILES_JOB_ID) {
+        if (!SETTINGS_PROVIDER_JOBS_NS.equals(params.getJobNamespace())
+                || params.getJobId() != WRITE_FALLBACK_SETTINGS_FILES_JOB_ID) {
             return false;
         }
         final List<String> settingsFiles = new ArrayList<>();

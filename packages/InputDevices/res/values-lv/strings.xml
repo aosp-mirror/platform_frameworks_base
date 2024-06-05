@@ -50,4 +50,8 @@
     <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"Baltkrievu"</string>
     <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"Mongoļu"</string>
     <string name="keyboard_layout_georgian" msgid="4596185456863747454">"Gruzīnu"</string>
+    <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"Taju valoda (Kedmanee)"</string>
+    <string name="keyboard_layout_thai_pattachote" msgid="2547992342794252205">"Taju (Pattachote)"</string>
+    <string name="keyboard_layout_serbian_latin" msgid="3128791759390046571">"Serbu (latīņu)"</string>
+    <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"Melnkalniešu (latīņu)"</string>
 </resources>

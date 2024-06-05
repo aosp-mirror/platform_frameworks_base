@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.content.Context
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.util.Log
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
@@ -26,6 +27,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ServiceStateModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
@@ -92,9 +94,13 @@ constructor(
 
     private fun maybeCreateSubscription(subId: Int) {
         if (!subscriptionInfoCache.containsKey(subId)) {
-            SubscriptionModel(subscriptionId = subId, isOpportunistic = false).also {
-                subscriptionInfoCache[subId] = it
-            }
+            SubscriptionModel(
+                    subscriptionId = subId,
+                    isOpportunistic = false,
+                    carrierName = DEFAULT_CARRIER_NAME,
+                    profileClass = PROFILE_CLASS_UNSET,
+                )
+                .also { subscriptionInfoCache[subId] = it }
 
             _subscriptions.value = subscriptionInfoCache.values.toList()
         }
@@ -130,6 +136,12 @@ constructor(
         MutableStateFlow(MobileMappings.Config.readConfig(context))
 
     override val defaultMobileIconGroup = flowOf(TelephonyIcons.THREE_G)
+
+    // TODO(b/339023069): demo command for device-based connectivity state
+    override val deviceServiceState: StateFlow<ServiceStateModel?> = MutableStateFlow(null)
+
+    override val isAnySimSecure: Flow<Boolean> = flowOf(getIsAnySimSecure())
+    override fun getIsAnySimSecure(): Boolean = false
 
     override val defaultMobileIconMapping = MutableStateFlow(TelephonyIcons.ICON_NAME_TO_ICON)
 
@@ -214,6 +226,8 @@ constructor(
         connectionRepoCache.clear()
         subscriptionInfoCache.clear()
     }
+
+    override suspend fun isInEcmMode(): Boolean = false
 
     private fun processMobileEvent(event: FakeNetworkEventModel) {
         when (event) {
@@ -327,6 +341,7 @@ constructor(
         private const val TAG = "DemoMobileConnectionsRepo"
 
         private const val DEFAULT_SUB_ID = 1
+        private const val DEFAULT_CARRIER_NAME = "demo carrier"
     }
 }
 

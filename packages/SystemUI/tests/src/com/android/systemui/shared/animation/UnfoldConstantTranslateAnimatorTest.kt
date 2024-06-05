@@ -21,7 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.ViewIdToTranslate
-import com.android.systemui.unfold.TestUnfoldTransitionProvider
+import com.android.systemui.unfold.FakeUnfoldTransitionProvider
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -34,21 +34,19 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 class UnfoldConstantTranslateAnimatorTest : SysuiTestCase() {
 
-    private val progressProvider = TestUnfoldTransitionProvider()
+    private val progressProvider = FakeUnfoldTransitionProvider()
 
-    @Mock
-    private lateinit var parent: ViewGroup
+    @Mock private lateinit var parent: ViewGroup
 
-    @Mock
-    private lateinit var shouldBeAnimated: () -> Boolean
+    @Mock private lateinit var shouldBeAnimated: () -> Boolean
 
     private lateinit var animator: UnfoldConstantTranslateAnimator
 
     private val viewsIdToRegister
         get() =
             setOf(
-                    ViewIdToTranslate(START_VIEW_ID, Direction.START, shouldBeAnimated),
-                    ViewIdToTranslate(END_VIEW_ID, Direction.END, shouldBeAnimated)
+                ViewIdToTranslate(START_VIEW_ID, Direction.START, shouldBeAnimated),
+                ViewIdToTranslate(END_VIEW_ID, Direction.END, shouldBeAnimated)
             )
 
     @Before
@@ -122,11 +120,12 @@ class UnfoldConstantTranslateAnimatorTest : SysuiTestCase() {
         progressProvider.onTransitionStarted()
         progressProvider.onTransitionProgress(0f)
 
-        val rtlMultiplier = if (layoutDirection == View.LAYOUT_DIRECTION_LTR) {
-            1
-        } else {
-            -1
-        }
+        val rtlMultiplier =
+            if (layoutDirection == View.LAYOUT_DIRECTION_LTR) {
+                1
+            } else {
+                -1
+            }
         list.forEach { (view, direction) ->
             assertEquals(
                 (-MAX_TRANSLATION * direction * rtlMultiplier).toInt(),

@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Zapri"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Razširi"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Nastavitve"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Vklopi razdeljen zaslon"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Meni"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Meni za sliko v sliki"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> je v načinu slika v sliki"</string>
@@ -32,13 +31,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Spremeni velikost"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Zakrij"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Razkrij"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Aplikacija morda ne deluje v načinu razdeljenega zaslona."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Aplikacija ne podpira načina razdeljenega zaslona."</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"To aplikacijo je mogoče odpreti samo v enem oknu."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Aplikacija morda ne deluje v načinu razdeljenega zaslona."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Aplikacija ne podpira načina razdeljenega zaslona."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"To aplikacijo je mogoče odpreti samo v enem oknu"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikacija morda ne bo delovala na sekundarnem zaslonu."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikacija ne podpira zagona na sekundarnih zaslonih."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Razdelilnik zaslonov"</string>
-    <string name="divider_title" msgid="5482989479865361192">"Razdelilnik zaslonov"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Razdelilnik zaslonov"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Razdelilnik zaslonov"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Levi v celozaslonski način"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Levi 70 %"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Levi 50 %"</string>
@@ -49,14 +48,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Zgornji 50 %"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Zgornji 30 %"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Spodnji v celozaslonski način"</string>
-    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
-    <skip />
-    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
-    <skip />
-    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
-    <skip />
-    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
-    <skip />
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Delitev levo"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Delitev desno"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Delitev zgoraj"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Delitev spodaj"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Uporaba enoročnega načina"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Za izhod povlecite z dna zaslona navzgor ali se dotaknite na poljubnem mestu nad aplikacijo"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Zagon enoročnega načina"</string>
@@ -70,6 +65,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Premakni zgoraj desno"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Premakni spodaj levo"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Premakni spodaj desno"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"razširitev oblačka <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"strnitev oblačka <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Nastavitve za <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Opusti oblaček"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Pogovora ne prikaži v oblačku"</string>
@@ -80,15 +77,21 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"V redu"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Ni nedavnih oblačkov"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Tukaj bodo prikazani tako nedavni kot tudi opuščeni oblački"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Klepet z oblački"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Novi pogovori so prikazani kot ikone v enem od spodnjih kotov zaslona. Z dotikom pogovore razširite, z vlečenjem jih opustite."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Upravljanje oblačkov"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Dotaknite se tukaj za upravljanje aplikacij in pogovorov, ki so lahko prikazani v oblačkih"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Mehurček"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Upravljanje"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Oblaček je bil opuščen."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Če želite boljši prikaz, se dotaknite za vnovični zagon te aplikacije."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Če želite boljši prikaz, se dotaknite za vnovični zagon te aplikacije."</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Razmerje stranic te aplikacije spremenite v nastavitvah."</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Sprememba razmerja stranic"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Težave s fotoaparatom?\nDotaknite se za vnovično prilagoditev"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"To ni odpravilo težave?\nDotaknite se za povrnitev"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nimate težav s fotoaparatom? Dotaknite se za opustitev."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Oglejte si in naredite več"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Za razdeljeni zaslon povlecite sem še eno aplikacijo."</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Za razdeljeni zaslon povlecite sem še eno aplikacijo."</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dvakrat se dotaknite zunaj aplikacije, če jo želite prestaviti."</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"V redu"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Razširitev za več informacij"</string>
@@ -97,14 +100,23 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Prekliči"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Znova zaženi"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Ne prikaži več"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"Dvakrat se dotaknite\nza premik te aplikacije"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksimiraj"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimiraj"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Zapri"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Nazaj"</string>
     <string name="handle_text" msgid="1766582106752184456">"Ročica"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"Ikona aplikacije"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Celozaslonsko"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Namizni način"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Razdeljen zaslon"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Več"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Lebdeče"</string>
+    <string name="select_text" msgid="5139083974039906583">"Izberi"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Posnetek zaslona"</string>
+    <string name="close_text" msgid="4986518933445178928">"Zapri"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Zapri meni"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Odpri meni"</string>
+    <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maksimiraj zaslon"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Pripni zaslon"</string>
 </resources>

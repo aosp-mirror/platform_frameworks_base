@@ -31,10 +31,10 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -47,9 +47,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
 
@@ -108,7 +107,7 @@ public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
 
         mRow.doDragCallback(0, 0);
         verify(controller).startDragAndDrop(mRow);
-        verify(mShadeController).animateCollapsePanels(eq(0), eq(true),
+        verify(mShadeController).animateCollapseShade(eq(0), eq(true),
                 eq(false), anyFloat());
         verify(mNotificationPanelLogger, times(1)).logNotificationDrag(any());
     }

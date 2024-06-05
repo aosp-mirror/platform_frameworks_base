@@ -20,6 +20,7 @@ import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
+import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.NotificationManager.IMPORTANCE_UNSPECIFIED
 import android.content.Context
@@ -37,7 +38,7 @@ import android.widget.Switch
 import android.widget.TextView
 import com.android.settingslib.Utils
 
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.util.Assert
 
 /**
@@ -55,12 +56,14 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
 
     // The first row is for the entire app
     private lateinit var appControlRow: AppControlView
+    private lateinit var channelListView: LinearLayout
     private val channelRows = mutableListOf<ChannelRow>()
 
     override fun onFinishInflate() {
         super.onFinishInflate()
 
         appControlRow = requireViewById(R.id.app_control)
+        channelListView = requireViewById(R.id.scrollView)
     }
 
     /**
@@ -102,7 +105,7 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
 
         // Remove any rows
         for (row in channelRows) {
-            removeView(row)
+            channelListView.removeView(row)
         }
         channelRows.clear()
 
@@ -122,7 +125,7 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
         row.channel = channel
 
         channelRows.add(row)
-        addView(row)
+        channelListView.addView(row)
     }
 
     private fun updateAppControlRow(enabled: Boolean) {
@@ -179,7 +182,9 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
         switch = requireViewById(R.id.toggle)
         switch.setOnCheckedChangeListener { _, b ->
             channel?.let {
-                controller.proposeEditForChannel(it, if (b) it.importance else IMPORTANCE_NONE)
+                controller.proposeEditForChannel(it,
+                        if (b) it.originalImportance.coerceAtLeast(IMPORTANCE_LOW)
+                        else IMPORTANCE_NONE)
             }
         }
         setOnClickListener { switch.toggle() }

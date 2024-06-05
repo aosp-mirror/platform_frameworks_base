@@ -17,9 +17,9 @@
 package com.android.systemui.shade
 
 import android.view.MotionEvent
-import com.android.systemui.log.dagger.ShadeLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.dagger.ShadeLog
 import com.android.systemui.shade.ShadeViewController.Companion.FLING_COLLAPSE
 import com.android.systemui.shade.ShadeViewController.Companion.FLING_EXPAND
 import com.android.systemui.shade.ShadeViewController.Companion.FLING_HIDE
@@ -79,19 +79,39 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
 
     fun logMotionEvent(event: MotionEvent, message: String) {
         buffer.log(
-            TAG,
-            LogLevel.VERBOSE,
-            {
-                str1 = message
-                long1 = event.eventTime
-                long2 = event.downTime
-                int1 = event.action
-                int2 = event.classification
-                double1 = event.y.toDouble()
-            },
-            {
-                "$str1: eventTime=$long1,downTime=$long2,y=$double1,action=$int1,class=$int2"
-            }
+                TAG,
+                LogLevel.VERBOSE,
+                {
+                    str1 = message
+                    long1 = event.eventTime
+                    long2 = event.downTime
+                    int1 = event.action
+                    int2 = event.classification
+                },
+                {
+                    "$str1: eventTime=$long1,downTime=$long2,action=$int1,class=$int2"
+                }
+        )
+    }
+
+    /** Logs motion event dispatch results from NotificationShadeWindowViewController. */
+    fun logShadeWindowDispatch(event: MotionEvent, message: String, result: Boolean?) {
+        buffer.log(
+                TAG,
+                LogLevel.VERBOSE,
+                {
+                    str1 = message
+                    long1 = event.eventTime
+                    long2 = event.downTime
+                },
+                {
+                    val prefix = when (result) {
+                        true -> "SHADE TOUCH REROUTED"
+                        false -> "SHADE TOUCH BLOCKED"
+                        null -> "SHADE TOUCH DISPATCHED"
+                    }
+                    "$prefix: eventTime=$long1,downTime=$long2, reason=$str1"
+                }
         )
     }
 
@@ -284,8 +304,7 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         msg: String,
         forceCancel: Boolean,
         expand: Boolean,
-    )
-    {
+    ) {
         buffer.log(
             TAG,
             LogLevel.VERBOSE,
@@ -302,8 +321,7 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         msg: String,
         panelClosedOnDown: Boolean,
         expandFraction: Float,
-    )
-    {
+    ) {
         buffer.log(
             TAG,
             LogLevel.VERBOSE,
@@ -313,6 +331,17 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 double1 = expandFraction.toDouble()
             },
             { "$str1; mPanelClosedOnDown=$bool1; mExpandedFraction=$double1" }
+        )
+    }
+
+    fun logPanelStateChanged(@PanelState panelState: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = panelState.panelStateToString()
+            },
+            { "New panel State: $str1" }
         )
     }
 
@@ -350,7 +379,6 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         shouldControlScreenOff: Boolean,
         deviceInteractive: Boolean,
         isPulsing: Boolean,
-        isFrpActive: Boolean,
     ) {
         buffer.log(
             TAG,
@@ -361,12 +389,11 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 bool3 = shouldControlScreenOff
                 bool4 = deviceInteractive
                 str1 = isPulsing.toString()
-                str2 = isFrpActive.toString()
             },
             {
                 "CentralSurfaces updateNotificationPanelTouchState set disabled to: $bool1\n" +
                         "isGoingToSleep: $bool2, !shouldControlScreenOff: $bool3," +
-                        "!mDeviceInteractive: $bool4, !isPulsing: $str1, isFrpActive: $str2"
+                        "!mDeviceInteractive: $bool4, !isPulsing: $str1"
             }
         )
     }

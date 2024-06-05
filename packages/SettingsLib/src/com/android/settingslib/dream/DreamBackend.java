@@ -28,6 +28,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
@@ -35,6 +36,7 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -58,6 +60,7 @@ public class DreamBackend {
         public CharSequence description;
         public Drawable previewImage;
         public boolean supportsComplications = false;
+        public int dreamCategory;
 
         @Override
         public String toString() {
@@ -114,6 +117,26 @@ public class DreamBackend {
     private static final int SCREENSAVER_HOME_CONTROLS_ENABLED_DEFAULT = 1;
     private static final int LOCKSCREEN_SHOW_CONTROLS_DEFAULT = 0;
 
+    private static final int DS_TYPE_ENABLED = FrameworkStatsLog
+            .DREAM_SETTING_CHANGED__DREAM_SETTING_TYPE__DREAM_SETTING_TYPE_ENABLED;
+    private static final int DS_TYPE_WHEN_TO_DREAM = FrameworkStatsLog
+            .DREAM_SETTING_CHANGED__DREAM_SETTING_TYPE__DREAM_SETTING_TYPE_WHEN_TO_DREAM;
+    private static final int DS_TYPE_DREAM_COMPONENT = FrameworkStatsLog
+            .DREAM_SETTING_CHANGED__DREAM_SETTING_TYPE__DREAM_SETTING_TYPE_DREAM_COMPONENT;
+    private static final int DS_TYPE_SHOW_ADDITIONAL_INFO = FrameworkStatsLog
+            .DREAM_SETTING_CHANGED__DREAM_SETTING_TYPE__DREAM_SETTING_TYPE_SHOW_ADDITIONAL_INFO;
+    private static final int DS_TYPE_SHOW_HOME_CONTROLS = FrameworkStatsLog
+            .DREAM_SETTING_CHANGED__DREAM_SETTING_TYPE__DREAM_SETTING_TYPE_SHOW_HOME_CONTROLS;
+
+    private static final int WHEN_TO_DREAM_UNSPECIFIED = FrameworkStatsLog
+            .DREAM_SETTING_CHANGED__WHEN_TO_DREAM__WHEN_TO_DREAM_UNSPECIFIED;
+    private static final int WHEN_TO_DREAM_CHARGING = FrameworkStatsLog
+            .DREAM_SETTING_CHANGED__WHEN_TO_DREAM__WHEN_TO_DREAM_WHILE_CHARGING_ONLY;
+    private static final int WHEN_TO_DREAM_DOCKED = FrameworkStatsLog
+            .DREAM_SETTING_CHANGED__WHEN_TO_DREAM__WHEN_TO_DREAM_WHILE_DOCKED_ONLY;
+    private static final int WHEN_TO_DREAM_CHARGING_OR_DOCKED = FrameworkStatsLog
+            .DREAM_SETTING_CHANGED__WHEN_TO_DREAM__WHEN_TO_DREAM_EITHER_CHARGING_OR_DOCKED;
+
     private final Context mContext;
     private final IDreamManager mDreamManager;
     private final DreamInfoComparator mComparator;
@@ -121,6 +144,7 @@ public class DreamBackend {
     private final boolean mDreamsActivatedOnSleepByDefault;
     private final boolean mDreamsActivatedOnDockByDefault;
     private final Set<ComponentName> mDisabledDreams;
+    private final List<String> mLoggableDreamPrefixes;
     private Set<Integer> mSupportedComplications;
     private static DreamBackend sInstance;
 
@@ -148,6 +172,8 @@ public class DreamBackend {
                         com.android.internal.R.array.config_disabledDreamComponents))
                 .map(ComponentName::unflattenFromString)
                 .collect(Collectors.toSet());
+        mLoggableDreamPrefixes = Arrays.stream(resources.getStringArray(
+                com.android.internal.R.array.config_loggable_dream_prefixes)).toList();
 
         mSupportedComplications = Arrays.stream(resources.getIntArray(
                         com.android.internal.R.array.config_supportedDreamComplications))
@@ -176,12 +202,13 @@ public class DreamBackend {
             dreamInfo.componentName = componentName;
             dreamInfo.isActive = dreamInfo.componentName.equals(activeDream);
 
-            final DreamService.DreamMetadata dreamMetadata = DreamService.getDreamMetadata(mContext,
-                    resolveInfo.serviceInfo);
+            final DreamService.DreamMetadata dreamMetadata = DreamService.getDreamMetadata(
+                    mContext.getPackageManager(), resolveInfo.serviceInfo);
             if (dreamMetadata != null) {
                 dreamInfo.settingsComponentName = dreamMetadata.settingsActivity;
                 dreamInfo.previewImage = dreamMetadata.previewImage;
                 dreamInfo.supportsComplications = dreamMetadata.showComplications;
+                dreamInfo.dreamCategory = dreamMetadata.dreamCategory;
             }
             dreamInfos.add(dreamInfo);
         }
@@ -282,6 +309,8 @@ public class DreamBackend {
             default:
                 break;
         }
+
+        logDreamSettingChangeToStatsd(DS_TYPE_WHEN_TO_DREAM);
     }
 
     /** Gets all complications which have been enabled by the user. */
@@ -304,12 +333,14 @@ public class DreamBackend {
     public void setComplicationsEnabled(boolean enabled) {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.SCREENSAVER_COMPLICATIONS_ENABLED, enabled ? 1 : 0);
+        logDreamSettingChangeToStatsd(DS_TYPE_SHOW_ADDITIONAL_INFO);
     }
 
     /** Sets whether home controls are enabled by the user on the dream */
     public void setHomeControlsEnabled(boolean enabled) {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.SCREENSAVER_HOME_CONTROLS_ENABLED, enabled ? 1 : 0);
+        logDreamSettingChangeToStatsd(DS_TYPE_SHOW_HOME_CONTROLS);
     }
 
     /** Gets whether home controls button is enabled on the dream */
@@ -353,6 +384,7 @@ public class DreamBackend {
     public void setEnabled(boolean value) {
         logd("setEnabled(%s)", value);
         setBoolean(Settings.Secure.SCREENSAVER_ENABLED, value);
+        logDreamSettingChangeToStatsd(DS_TYPE_ENABLED);
     }
 
     public boolean isActivatedOnDock() {
@@ -391,6 +423,7 @@ public class DreamBackend {
         try {
             ComponentName[] dreams = {dream};
             mDreamManager.setDreamComponents(dream == null ? null : dreams);
+            logDreamSettingChangeToStatsd(DS_TYPE_DREAM_COMPONENT);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to set active dream to " + dream, e);
         }
@@ -458,6 +491,68 @@ public class DreamBackend {
     private static void logd(String msg, Object... args) {
         if (DEBUG) {
             Log.d(TAG, args == null || args.length == 0 ? msg : String.format(msg, args));
+        }
+    }
+
+    private void logDreamSettingChangeToStatsd(int dreamSettingType) {
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.DREAM_SETTING_CHANGED, /*atom_tag*/
+                UserHandle.myUserId(), /*uid*/
+                isEnabled(), /*enabled*/
+                getActiveDreamComponentForStatsd(), /*dream_component*/
+                getWhenToDreamForStatsd(), /*when_to_dream*/
+                getComplicationsEnabled(), /*show_additional_info*/
+                getHomeControlsEnabled(), /*show_home_controls*/
+                dreamSettingType /*dream_setting_type*/
+        );
+    }
+
+    /**
+     * Returns the user selected dream component in string format for stats logging. If the dream
+     * component is not loggable, returns "other".
+     */
+    private String getActiveDreamComponentForStatsd() {
+        final ComponentName activeDream = getActiveDream();
+        if (activeDream == null) {
+            return "";
+        }
+
+        final String component = activeDream.flattenToShortString();
+        if (isLoggableDreamComponentForStatsd(component)) {
+            return component;
+        } else {
+            return "other";
+        }
+    }
+
+    /**
+     * Whether the dream component is loggable. Only components from the predefined packages are
+     * allowed to be logged for privacy.
+     */
+    private boolean isLoggableDreamComponentForStatsd(String component) {
+        for (int i = 0; i < mLoggableDreamPrefixes.size(); i++) {
+            if (component.startsWith(mLoggableDreamPrefixes.get(i))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the enum of "when to dream" setting for statsd logging.
+     */
+    private int getWhenToDreamForStatsd() {
+        switch (getWhenToDreamSetting()) {
+            case WHILE_CHARGING:
+                return WHEN_TO_DREAM_CHARGING;
+            case WHILE_DOCKED:
+                return WHEN_TO_DREAM_DOCKED;
+            case EITHER:
+                return WHEN_TO_DREAM_CHARGING_OR_DOCKED;
+            case NEVER:
+            default:
+                return WHEN_TO_DREAM_UNSPECIFIED;
         }
     }
 

@@ -97,9 +97,10 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
+import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.BaseUserSwitcherAdapter;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -132,7 +133,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     static final int BOUNCER_DISMISS_EXTENDED_ACCESS = 3;
     // Bouncer is dismissed due to sim card unlock code entered.
     static final int BOUNCER_DISMISS_SIM = 4;
-
+    // Bouncer dismissed after being allowed to dismiss by forceDismissiblekeyguard
+    static final int BOUNCER_DISMISSIBLE_KEYGUARD = 5;
     private static final String TAG = "KeyguardSecurityView";
 
     // Make the view move slower than the finger, as if the spring were applying force.
@@ -341,6 +343,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         setPadding(getPaddingLeft(), getPaddingTop() + getResources().getDimensionPixelSize(
                         R.dimen.keyguard_security_container_padding_top), getPaddingRight(),
                 getPaddingBottom());
+        setBackgroundColor(Utils.getColorAttrDefaultColor(getContext(),
+                com.android.internal.R.attr.materialColorSurface));
     }
 
     void onResume(SecurityMode securityMode, boolean faceAuthEnabled) {
@@ -666,6 +670,11 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     }
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return TouchLogger.logDispatchTouch(TAG, ev, super.dispatchTouchEvent(ev));
+    }
+
+    @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
         if (mViewMediatorCallback != null) {
@@ -793,6 +802,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
     void reloadColors() {
         mViewMode.reloadColors();
+        setBackgroundColor(Utils.getColorAttrDefaultColor(getContext(),
+                com.android.internal.R.attr.materialColorSurface));
     }
 
     /** Handles density or font scale changes. */
@@ -1167,7 +1178,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                     }
                     drawable.setTint(iconColor);
 
-                    Drawable bg = context.getDrawable(R.drawable.user_avatar_bg);
+                    Drawable bg = context.getDrawable(
+                            com.android.settingslib.R.drawable.user_avatar_bg);
                     bg.setTintBlendMode(BlendMode.DST);
                     bg.setTint(Utils.getColorAttrDefaultColor(context,
                                 com.android.internal.R.attr.colorSurfaceVariant));
@@ -1184,6 +1196,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 mPopup.setOnItemClickListener((parent, view, pos, id) -> {
                     if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
                     if (!view.isEnabled()) return;
+                    if (mPopup == null) return;
                     // Subtract one for the header
                     UserRecord user = adapter.getItem(pos - 1);
                     if (user.isManageUsers || user.isAddSupervisedUser) {

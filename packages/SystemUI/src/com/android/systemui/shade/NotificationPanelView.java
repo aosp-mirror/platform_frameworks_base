@@ -27,6 +27,8 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+
 /** The shade view. */
 public final class NotificationPanelView extends FrameLayout {
     static final boolean DEBUG = false;
@@ -41,14 +43,20 @@ public final class NotificationPanelView extends FrameLayout {
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setWillNotDraw(!DEBUG);
-        mAlphaPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.MULTIPLY));
+        if (!SceneContainerFlag.isEnabled()) {
+            setWillNotDraw(!DEBUG);
+            mAlphaPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.MULTIPLY));
 
-        setBackgroundColor(Color.TRANSPARENT);
+            setBackgroundColor(Color.TRANSPARENT);
+        }
     }
 
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
+        if (SceneContainerFlag.isEnabled()) {
+            super.onRtlPropertiesChanged(layoutDirection);
+            return;
+        }
         if (mRtlChangeListener != null) {
             mRtlChangeListener.onRtlPropertielsChanged(layoutDirection);
         }
@@ -56,14 +64,19 @@ public final class NotificationPanelView extends FrameLayout {
 
     @Override
     public boolean shouldDelayChildPressedState() {
+        if (SceneContainerFlag.isEnabled()) {
+            return super.shouldDelayChildPressedState();
+        }
         return true;
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        if (mCurrentPanelAlpha != 255) {
-            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mAlphaPaint);
+        if (!SceneContainerFlag.isEnabled()) {
+            if (mCurrentPanelAlpha != 255) {
+                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mAlphaPaint);
+            }
         }
     }
 
@@ -83,6 +96,9 @@ public final class NotificationPanelView extends FrameLayout {
 
     @Override
     public boolean hasOverlappingRendering() {
+        if (SceneContainerFlag.isEnabled()) {
+            return super.hasOverlappingRendering();
+        }
         return !mDozing;
     }
 
@@ -102,13 +118,23 @@ public final class NotificationPanelView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (SceneContainerFlag.isEnabled()) {
+            return super.onInterceptTouchEvent(event);
+        }
         return mTouchHandler.onInterceptTouchEvent(event);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return TouchLogger.logDispatchTouch("NPV", ev, super.dispatchTouchEvent(ev));
     }
 
     @Override
     public void dispatchConfigurationChanged(Configuration newConfig) {
         super.dispatchConfigurationChanged(newConfig);
-        mOnConfigurationChangedListener.onConfigurationChanged(newConfig);
+        if (!SceneContainerFlag.isEnabled()) {
+            mOnConfigurationChangedListener.onConfigurationChanged(newConfig);
+        }
     }
 
     /** Callback for right-to-left setting changes. */

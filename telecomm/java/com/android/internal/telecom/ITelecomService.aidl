@@ -61,7 +61,8 @@ interface ITelecomService {
      * @see TelecomServiceImpl#getCallCapablePhoneAccounts
      */
     ParceledListSlice<PhoneAccountHandle> getCallCapablePhoneAccounts(
-            boolean includeDisabledAccounts, String callingPackage, String callingFeatureId);
+            boolean includeDisabledAccounts, String callingPackage,
+            String callingFeatureId, boolean acrossProfiles);
 
     /**
      * @see TelecomServiceImpl#getSelfManagedPhoneAccounts
@@ -90,6 +91,12 @@ interface ITelecomService {
      * @see TelecomManager#getPhoneAccount
      */
     PhoneAccount getPhoneAccount(in PhoneAccountHandle account, String callingPackage);
+
+    /**
+     * @see TelecomManager#getPhoneAccount
+     */
+    ParceledListSlice<PhoneAccount> getRegisteredPhoneAccounts(String callingPackage,
+            String callingFeatureId);
 
     /**
      * @see TelecomManager#getAllPhoneAccountsCount
@@ -357,6 +364,8 @@ interface ITelecomService {
     void cleanupStuckCalls();
 
     int cleanupOrphanPhoneAccounts();
+
+    boolean isNonUiInCallServiceBound(in String packageName);
 
     void resetCarMode();
 

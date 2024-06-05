@@ -169,7 +169,8 @@ public class KeyValueBackupJob extends JobService {
         sNextScheduledForUserId.delete(userId);
     }
 
-    private static int getJobIdForUserId(int userId) {
+    @VisibleForTesting
+    static int getJobIdForUserId(int userId) {
         return JobIdManager.getJobIdForUserId(MIN_JOB_ID, MAX_JOB_ID, userId);
     }
 }

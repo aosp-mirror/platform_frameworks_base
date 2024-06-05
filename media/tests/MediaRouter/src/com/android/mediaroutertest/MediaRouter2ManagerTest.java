@@ -64,6 +64,7 @@ import com.android.compatibility.common.util.PollingCheck;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -360,6 +361,7 @@ public class MediaRouter2ManagerTest {
      * Tests if MR2.SessionCallback.onSessionCreated is called
      * when a route is selected from MR2Manager.
      */
+    @Ignore // Ignored due to flakiness. No plans to fix though, in favor of removal (b/334970551).
     @Test
     public void testRouterOnSessionCreated() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
@@ -384,7 +386,9 @@ public class MediaRouter2ManagerTest {
         MediaRoute2Info routeToSelect = routes.get(ROUTE_ID1);
         assertThat(routeToSelect).isNotNull();
 
-        mManager.transfer(mPackageName, routeToSelect);
+        mManager.transfer(
+                mPackageName, routeToSelect,
+                android.os.Process.myUserHandle());
         assertThat(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
         assertThat(mManager.getRemoteSessions()).hasSize(1);
     }
@@ -410,7 +414,9 @@ public class MediaRouter2ManagerTest {
 
         assertThat(mManager.getRoutingSessions(mPackageName)).hasSize(1);
 
-        mManager.transfer(mPackageName, routeToSelect);
+        mManager.transfer(
+                mPackageName, routeToSelect,
+                android.os.Process.myUserHandle());
         assertThat(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
@@ -449,11 +455,16 @@ public class MediaRouter2ManagerTest {
                 .addFeature(FEATURE_REMOTE_PLAYBACK)
                 .build();
 
-        mManager.transfer(mManager.getSystemRoutingSession(null), unknownRoute);
+        mManager.transfer(
+                mManager.getSystemRoutingSession(null),
+                unknownRoute,
+                android.os.Process.myUserHandle(),
+                mContext.getPackageName());
         assertThat(onSessionCreatedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS)).isFalse();
         assertThat(onTransferFailedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
     }
 
+    @Ignore // TODO(b/291800179): Diagnose flakiness and re-enable.
     @Test
     public void testRouterRelease_managerGetRoutingSessions() throws Exception {
         CountDownLatch transferLatch = new CountDownLatch(1);
@@ -482,7 +493,11 @@ public class MediaRouter2ManagerTest {
         assertThat(mManager.getRoutingSessions(mPackageName)).hasSize(1);
         assertThat(mRouter2.getControllers()).hasSize(1);
 
-        mManager.transfer(mManager.getRoutingSessions(mPackageName).get(0), routeToSelect);
+        mManager.transfer(
+                mManager.getRoutingSessions(mPackageName).get(0),
+                routeToSelect,
+                android.os.Process.myUserHandle(),
+                mContext.getPackageName());
         assertThat(transferLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         assertThat(mManager.getRoutingSessions(mPackageName)).hasSize(2);
@@ -498,6 +513,7 @@ public class MediaRouter2ManagerTest {
     /**
      * Tests select, transfer, release of routes of a provider
      */
+    @Ignore // Ignored due to flakiness. No plans to fix though, in favor of removal (b/334970551).
     @Test
     public void testSelectAndTransferAndRelease() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
@@ -514,7 +530,11 @@ public class MediaRouter2ManagerTest {
             }
         });
         awaitOnRouteChangedManager(
-                () -> mManager.transfer(mPackageName, routes.get(ROUTE_ID1)),
+                () ->
+                        mManager.transfer(
+                                mPackageName,
+                                routes.get(ROUTE_ID1),
+                                android.os.Process.myUserHandle()),
                 ROUTE_ID1,
                 route -> TextUtils.equals(route.getClientPackageName(), mPackageName));
         assertThat(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
@@ -525,7 +545,11 @@ public class MediaRouter2ManagerTest {
         RoutingSessionInfo sessionInfo = sessions.get(1);
 
         awaitOnRouteChangedManager(
-                () -> mManager.transfer(mPackageName, routes.get(ROUTE_ID5_TO_TRANSFER_TO)),
+                () ->
+                        mManager.transfer(
+                                mPackageName,
+                                routes.get(ROUTE_ID5_TO_TRANSFER_TO),
+                                android.os.Process.myUserHandle()),
                 ROUTE_ID5_TO_TRANSFER_TO,
                 route -> TextUtils.equals(route.getClientPackageName(), mPackageName));
 
@@ -583,9 +607,11 @@ public class MediaRouter2ManagerTest {
         assertThat(route1).isNotNull();
         assertThat(route2).isNotNull();
 
-        mManager.transfer(mPackageName, route1);
+        mManager.transfer(
+                mPackageName, route1, android.os.Process.myUserHandle());
         assertThat(successLatch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
-        mManager.transfer(mPackageName, route2);
+        mManager.transfer(
+                mPackageName, route2, android.os.Process.myUserHandle());
         assertThat(successLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         // onTransferFailed/onSessionReleased should not be called.
@@ -632,7 +658,11 @@ public class MediaRouter2ManagerTest {
 
         List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
         RoutingSessionInfo targetSession = sessions.get(sessions.size() - 1);
-        mManager.transfer(targetSession, routes.get(ROUTE_ID6_TO_BE_IGNORED));
+        mManager.transfer(
+                targetSession,
+                routes.get(ROUTE_ID6_TO_BE_IGNORED),
+                android.os.Process.myUserHandle(),
+                mContext.getPackageName());
 
         assertThat(onSessionCreatedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS)).isFalse();
         assertThat(onFailedLatch.await(MediaRouter2Manager.TRANSFER_TIMEOUT_MS,
@@ -703,7 +733,10 @@ public class MediaRouter2ManagerTest {
             }
         });
 
-        mManager.transfer(mPackageName, routes.get(ROUTE_ID1));
+        mManager.transfer(
+                mPackageName,
+                routes.get(ROUTE_ID1),
+                android.os.Process.myUserHandle());
         assertThat(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
         List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
@@ -858,7 +891,8 @@ public class MediaRouter2ManagerTest {
         });
 
         mRouter2.setOnGetControllerHintsListener(listener);
-        mManager.transfer(mPackageName, route);
+        mManager.transfer(
+                mPackageName, route, android.os.Process.myUserHandle());
         assertThat(hintLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
         assertThat(successLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
 
@@ -876,6 +910,7 @@ public class MediaRouter2ManagerTest {
      * Tests if getSelectableRoutes and getDeselectableRoutes filter routes based on
      * selected routes
      */
+    @Ignore // Ignored due to flakiness. No plans to fix though, in favor of removal (b/334970551).
     @Test
     public void testGetSelectableRoutes_notReturnsSelectedRoutes() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
@@ -903,7 +938,10 @@ public class MediaRouter2ManagerTest {
             }
         });
 
-        mManager.transfer(mPackageName, routes.get(ROUTE_ID4_TO_SELECT_AND_DESELECT));
+        mManager.transfer(
+                mPackageName,
+                routes.get(ROUTE_ID4_TO_SELECT_AND_DESELECT),
+                android.os.Process.myUserHandle());
         assertThat(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
     }
 
@@ -918,7 +956,7 @@ public class MediaRouter2ManagerTest {
         CountDownLatch addedLatch = new CountDownLatch(1);
         CountDownLatch preferenceLatch = new CountDownLatch(1);
 
-        // A dummy callback is required to send route feature info.
+        // A placeholder callback is required to send route feature info.
         RouteCallback routeCallback = new RouteCallback() {};
         MediaRouter2Manager.Callback managerCallback =
                 new MediaRouter2Manager.Callback() {

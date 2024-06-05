@@ -192,17 +192,16 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // This can be the IME z-order target while app cannot be the IME z-order target.
         // This is also the only IME control target in this test, so IME won't be invisible caused
         // by the control-target change.
-        mDisplayContent.updateImeInputAndControlTarget(
-                createWindow(null, TYPE_APPLICATION, "base"));
+        final WindowState base = createWindow(null, TYPE_APPLICATION, "base");
+        mDisplayContent.updateImeInputAndControlTarget(base);
 
         // Make IME and stay visible during the test.
         mImeWindow.setHasSurface(true);
         getController().getOrCreateSourceProvider(ID_IME, ime())
                 .setWindowContainer(mImeWindow, null, null);
-        getController().onImeControlTargetChanged(
-                mDisplayContent.getImeInputTarget().getWindowState());
-        mDisplayContent.getImeInputTarget().getWindowState().setRequestedVisibleTypes(ime(), ime());
-        getController().onInsetsModified(mDisplayContent.getImeInputTarget().getWindowState());
+        getController().onImeControlTargetChanged(base);
+        base.setRequestedVisibleTypes(ime(), ime());
+        getController().onRequestedVisibleTypesChanged(base);
 
         // Send our spy window (app) into the system so that we can detect the invocation.
         final WindowState win = createWindow(null, TYPE_APPLICATION, "app");
@@ -354,6 +353,17 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testControlTargetChangedWhileProviderHasNoWindow() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final InsetsSourceProvider provider = getController().getOrCreateSourceProvider(
+                ID_STATUS_BAR, statusBars());
+        getController().onBarControlTargetChanged(app, null, null, null);
+        assertNull(getController().getControlsForDispatch(app));
+        provider.setWindowContainer(createWindow(null, TYPE_APPLICATION, "statusBar"), null, null);
+        assertNotNull(getController().getControlsForDispatch(app));
+    }
+
+    @Test
     public void testTransientVisibilityOfFixedRotationState() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
@@ -368,9 +378,11 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         doReturn(rotatedState).when(app.mToken).getFixedRotationTransformInsetsState();
         assertTrue(rotatedState.isSourceOrDefaultVisible(ID_STATUS_BAR, statusBars()));
 
-        provider.getSource().setVisible(false);
+        app.setRequestedVisibleTypes(0, statusBars());
+        mDisplayContent.getInsetsPolicy().updateBarControlTarget(app);
         mDisplayContent.getInsetsPolicy().showTransient(statusBars(),
                 true /* isGestureOnSystemBar */);
+        waitUntilWindowAnimatorIdle();
 
         assertTrue(mDisplayContent.getInsetsPolicy().isTransient(statusBars()));
         assertFalse(app.getInsetsState().isSourceOrDefaultVisible(ID_STATUS_BAR, statusBars()));
@@ -485,7 +497,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         mDisplayContent.updateImeInputAndControlTarget(app);
 
         app.setRequestedVisibleTypes(ime(), ime());
-        getController().onInsetsModified(app);
+        getController().onRequestedVisibleTypesChanged(app);
         assertTrue(ime.getControllableInsetProvider().getSource().isVisible());
 
         getController().updateAboveInsetsState(true /* notifyInsetsChange */);
@@ -549,6 +561,24 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNotNull(control2);
         assertEquals(imeInsetsProvider.getSource().getFrame().height(),
                 control2.getInsetsHint().bottom);
+    }
+
+    @Test
+    public void testHasPendingControls() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        getController().getOrCreateSourceProvider(ID_STATUS_BAR, statusBars())
+                .setWindowContainer(statusBar, null, null);
+        // No controls dispatched yet.
+        assertFalse(getController().hasPendingControls(app));
+
+        getController().onBarControlTargetChanged(app, null, null, null);
+        // Controls pending to be dispatched.
+        assertTrue(getController().hasPendingControls(app));
+
+        performSurfacePlacementAndWaitForWindowAnimator();
+        // Pending controls were dispatched.
+        assertFalse(getController().hasPendingControls(app));
     }
 
     /** Creates a window which is associated with ActivityRecord. */

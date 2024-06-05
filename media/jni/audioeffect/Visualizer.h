@@ -20,6 +20,8 @@
 #include <media/AudioEffect.h>
 #include <system/audio_effects/effect_visualizer.h>
 #include <utils/Thread.h>
+#include <cstdint>
+#include <cutils/bitops.h>
 #include "android/content/AttributionSourceState.h"
 
 /**
@@ -170,8 +172,12 @@ private:
 
     status_t doFft(uint8_t *fft, uint8_t *waveform);
     void periodicCapture();
-    uint32_t initCaptureSize();
+    status_t initCaptureSize();
     void initSampleRate();
+    static constexpr bool isCaptureSizeValid(uint32_t size) {
+        return size <= VISUALIZER_CAPTURE_SIZE_MAX && size >= VISUALIZER_CAPTURE_SIZE_MIN &&
+                popcount(size) == 1;
+    }
 
     Mutex mCaptureLock;
     uint32_t mCaptureRate = CAPTURE_RATE_DEF;

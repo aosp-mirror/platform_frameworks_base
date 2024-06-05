@@ -27,15 +27,12 @@ import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
+import com.android.server.input.InputManagerService;
+
 final class HandwritingEventReceiverSurface {
 
     public static final String TAG = HandwritingEventReceiverSurface.class.getSimpleName();
     static final boolean DEBUG = HandwritingModeController.DEBUG;
-
-    // Place the layer at the highest layer so stylus cannot trigger gesture monitors
-    // (e.g. navigation bar, edge-back, etc) while handwriting is ongoing.
-    // TODO(b/217538817): Specify the ordering in WM by usage.
-    private static final int HANDWRITING_SURFACE_LAYER = Integer.MAX_VALUE;
 
     private final InputWindowHandle mWindowHandle;
     private final InputChannel mClientChannel;
@@ -60,15 +57,15 @@ final class HandwritingEventReceiverSurface {
                 InputConfig.NOT_FOCUSABLE
                         | InputConfig.NOT_TOUCHABLE
                         | InputConfig.SPY
-                        | InputConfig.INTERCEPTS_STYLUS
-                        | InputConfig.TRUSTED_OVERLAY;
+                        | InputConfig.INTERCEPTS_STYLUS;
 
         // Configure the surface to receive stylus events across the entire display.
         mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
 
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        mWindowHandle.setTrustedOverlay(t, mInputSurface, true);
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
-        t.setLayer(mInputSurface, HANDWRITING_SURFACE_LAYER);
+        t.setLayer(mInputSurface, InputManagerService.INPUT_OVERLAY_LAYER_HANDWRITING_SURFACE);
         t.setPosition(mInputSurface, 0, 0);
         t.setCrop(mInputSurface, null /* crop to parent surface */);
         t.show(mInputSurface);
@@ -86,6 +83,17 @@ final class HandwritingEventReceiverSurface {
                 .setInputWindowInfo(mInputSurface, mWindowHandle)
                 .apply();
         mIsIntercepting = true;
+    }
+
+    void setNotTouchable(boolean notTouchable) {
+        if (notTouchable) {
+            mWindowHandle.inputConfig |= InputConfig.NOT_TOUCHABLE;
+        } else {
+            mWindowHandle.inputConfig &=  ~InputConfig.NOT_TOUCHABLE;
+        }
+        new SurfaceControl.Transaction()
+                .setInputWindowInfo(mInputSurface, mWindowHandle)
+                .apply();
     }
 
     boolean isIntercepting() {

@@ -33,10 +33,12 @@ import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Build;
 import android.os.Handler;
@@ -71,6 +73,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.inputmethod.EditorInfo;
+import android.window.ScreenCapture;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -553,6 +557,21 @@ public final class UiAutomation {
     }
 
     /**
+     * Provides reference to the cache through a locked connection.
+     *
+     * @return the accessibility cache.
+     * @hide
+     */
+    public @Nullable AccessibilityCache getCache() {
+        final int connectionId;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connectionId = mConnectionId;
+        }
+        return AccessibilityInteractionClient.getCache(connectionId);
+    }
+
+    /**
      * Adopt the permission identity of the shell UID for all permissions. This allows
      * you to call APIs protected permissions which normal apps cannot hold but are
      * granted to the shell UID. If you already adopted all shell permissions by calling
@@ -631,6 +650,81 @@ public final class UiAutomation {
             return permissions == null ? ALL_PERMISSIONS : new ArraySet<>(permissions);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Adds permission to be overridden to the given state. UiAutomation must be connected to
+     * root user.
+     *
+     * @param uid The UID of the app whose permission will be overridden
+     * @param permission The permission whose state will be overridden
+     * @param result The state to override the permission to
+     *
+     * @see PackageManager#PERMISSION_GRANTED
+     * @see PackageManager#PERMISSION_DENIED
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public void addOverridePermissionState(int uid, @NonNull String permission,
+            @PackageManager.PermissionResult int result) {
+        try {
+            mUiAutomationConnection.addOverridePermissionState(uid, permission, result);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes overridden permission. UiAutomation must be connected to root user.
+     *
+     * @param uid The UID of the app whose permission is overridden
+     * @param permission The permission whose state will no longer be overridden
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public void removeOverridePermissionState(int uid, @NonNull String permission) {
+        try {
+            mUiAutomationConnection.removeOverridePermissionState(uid, permission);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears all overridden permissions for the given UID. UiAutomation must be connected to
+     * root user.
+     *
+     * @param uid The UID of the app whose permissions will no longer be overridden
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public void clearOverridePermissionStates(int uid) {
+        try {
+            mUiAutomationConnection.clearOverridePermissionStates(uid);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears all overridden permissions on the device. UiAutomation must be connected to root user.
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public void clearAllOverridePermissionStates() {
+        try {
+            mUiAutomationConnection.clearAllOverridePermissionStates();
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
         }
     }
 
@@ -827,6 +921,22 @@ public final class UiAutomation {
      *            established.
      */
     public AccessibilityNodeInfo getRootInActiveWindow() {
+        return getRootInActiveWindow(AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID);
+    }
+
+    /**
+     * Gets the root {@link AccessibilityNodeInfo} in the active window.
+     *
+     * @param prefetchingStrategy the prefetching strategy.
+     * @return The root info.
+     * @throws IllegalStateException If the connection to the accessibility subsystem is not
+     * established.
+     *
+     * @hide
+     */
+    @Nullable
+    public AccessibilityNodeInfo getRootInActiveWindow(
+            @AccessibilityNodeInfo.PrefetchingStrategy int prefetchingStrategy) {
         final int connectionId;
         synchronized (mLock) {
             throwIfNotConnectedLocked();
@@ -834,8 +944,7 @@ public final class UiAutomation {
         }
         // Calling out without a lock held.
         return AccessibilityInteractionClient.getInstance()
-                .getRootInActiveWindow(connectionId,
-                        AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID);
+                .getRootInActiveWindow(connectionId, prefetchingStrategy);
     }
 
     /**
@@ -1160,17 +1269,12 @@ public final class UiAutomation {
         Point displaySize = new Point();
         display.getRealSize(displaySize);
 
-        int rotation = display.getRotation();
-
         // Take the screenshot
-        Bitmap screenShot = null;
+        ScreenCapture.SynchronousScreenCaptureListener syncScreenCapture =
+                ScreenCapture.createSyncCaptureListener();
         try {
-            // Calling out without a lock held.
-            screenShot = mUiAutomationConnection.takeScreenshot(
-                    new Rect(0, 0, displaySize.x, displaySize.y));
-            if (screenShot == null) {
-                Log.e(LOG_TAG, "mUiAutomationConnection.takeScreenshot() returned null for display "
-                        + mDisplayId);
+            if (!mUiAutomationConnection.takeScreenshot(
+                    new Rect(0, 0, displaySize.x, displaySize.y), syncScreenCapture)) {
                 return null;
             }
         } catch (RemoteException re) {
@@ -1178,10 +1282,25 @@ public final class UiAutomation {
             return null;
         }
 
-        // Optimization
-        screenShot.setHasAlpha(false);
+        final ScreenshotHardwareBuffer screenshotBuffer = syncScreenCapture.getBuffer();
+        if (screenshotBuffer == null) {
+            Log.e(LOG_TAG, "Failed to take screenshot for display=" + mDisplayId);
+            return null;
+        }
+        Bitmap screenShot = screenshotBuffer.asBitmap();
+        if (screenShot == null) {
+            Log.e(LOG_TAG, "Failed to take screenshot for display=" + mDisplayId);
+            return null;
+        }
+        Bitmap swBitmap;
+        try (HardwareBuffer buffer = screenshotBuffer.getHardwareBuffer()) {
+            swBitmap = screenShot.copy(Bitmap.Config.ARGB_8888, false);
+        }
+        screenShot.recycle();
 
-        return screenShot;
+        // Optimization
+        swBitmap.setHasAlpha(false);
+        return swBitmap;
     }
 
     /**
@@ -1218,12 +1337,34 @@ public final class UiAutomation {
         // Apply a sync transaction to ensure SurfaceFlinger is flushed before capturing a
         // screenshot.
         new SurfaceControl.Transaction().apply(true);
+        ScreenCapture.SynchronousScreenCaptureListener syncScreenCapture =
+                ScreenCapture.createSyncCaptureListener();
         try {
-            return mUiAutomationConnection.takeSurfaceControlScreenshot(sc);
+            if (!mUiAutomationConnection.takeSurfaceControlScreenshot(sc, syncScreenCapture)) {
+                Log.e(LOG_TAG, "Failed to take screenshot for window=" + window);
+                return null;
+            }
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while taking screenshot!", re);
             return null;
         }
+        ScreenCapture.ScreenshotHardwareBuffer captureBuffer = syncScreenCapture.getBuffer();
+        if (captureBuffer == null) {
+            Log.e(LOG_TAG, "Failed to take screenshot for window=" + window);
+            return null;
+        }
+        Bitmap screenShot = captureBuffer.asBitmap();
+        if (screenShot == null) {
+            Log.e(LOG_TAG, "Failed to take screenshot for window=" + window);
+            return null;
+        }
+        Bitmap swBitmap;
+        try (HardwareBuffer buffer = captureBuffer.getHardwareBuffer()) {
+            swBitmap = screenShot.copy(Bitmap.Config.ARGB_8888, false);
+        }
+
+        screenShot.recycle();
+        return swBitmap;
     }
 
     /**
@@ -1825,6 +1966,11 @@ public final class UiAutomation {
                 @Override
                 public boolean onKeyEvent(KeyEvent event) {
                     return false;
+                }
+
+                @Override
+                public void onMagnificationSystemUIConnectionChanged(boolean connected) {
+                    /* do nothing */
                 }
 
                 @Override

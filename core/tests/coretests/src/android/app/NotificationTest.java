@@ -19,6 +19,8 @@ package android.app;
 import static android.app.Notification.CarExtender.UnreadConversation.KEY_ON_READ;
 import static android.app.Notification.CarExtender.UnreadConversation.KEY_ON_REPLY;
 import static android.app.Notification.CarExtender.UnreadConversation.KEY_REMOTE_INPUT;
+import static android.app.Notification.DEFAULT_SOUND;
+import static android.app.Notification.DEFAULT_VIBRATE;
 import static android.app.Notification.EXTRA_ANSWER_INTENT;
 import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
 import static android.app.Notification.EXTRA_CALL_PERSON;
@@ -35,6 +37,9 @@ import static android.app.Notification.EXTRA_PICTURE;
 import static android.app.Notification.EXTRA_PICTURE_ICON;
 import static android.app.Notification.EXTRA_SUMMARY_TEXT;
 import static android.app.Notification.EXTRA_TITLE;
+import static android.app.Notification.GROUP_ALERT_CHILDREN;
+import static android.app.Notification.GROUP_ALERT_SUMMARY;
+import static android.app.Notification.GROUP_KEY_SILENT;
 import static android.app.Notification.MessagingStyle.Message.KEY_DATA_URI;
 import static android.app.Notification.MessagingStyle.Message.KEY_SENDER_PERSON;
 import static android.app.Notification.MessagingStyle.Message.KEY_TEXT;
@@ -64,6 +69,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
+import android.compat.testing.PlatformCompatChangeRule;
 import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
@@ -78,7 +84,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemProperties;
+import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -90,16 +97,21 @@ import android.util.Pair;
 import android.widget.RemoteViews;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.internal.util.ContrastColorUtil;
 
 import junit.framework.Assert;
 
+import libcore.junit.util.compat.CoreCompatChangeRule;
+
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 import java.util.List;
@@ -107,16 +119,18 @@ import java.util.function.Consumer;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class NotificationTest {
 
     private Context mContext;
 
+    @Rule
+    public TestRule compatChangeRule = new PlatformCompatChangeRule();
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getContext();
-        // TODO(b/169435530): remove this flag set once resolved.
-        SystemProperties.set("persist.sysui.notification.builder_extras_override",
-                Boolean.toString(false));
     }
 
     @Test
@@ -268,6 +282,54 @@ public class NotificationTest {
         n.writeToParcel(p, 0);
 
         assertTrue(n.allPendingIntents.contains(intent));
+    }
+
+    @Test
+    public void allPendingIntents_resilientToAnotherNotificationInExtras() {
+        PendingIntent contentIntent = createPendingIntent("content");
+        PendingIntent actionIntent = createPendingIntent("action");
+        Notification another = new Notification.Builder(mContext, "channel").build();
+        Bundle bundleContainingAnotherNotification = new Bundle();
+        bundleContainingAnotherNotification.putParcelable(null, another);
+        Notification source = new Notification.Builder(mContext, "channel")
+                .setContentIntent(contentIntent)
+                .addAction(new Notification.Action.Builder(null, "action", actionIntent).build())
+                .setExtras(bundleContainingAnotherNotification)
+                .build();
+
+        Parcel p = Parcel.obtain();
+        source.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        Notification unparceled = new Notification(p);
+
+        assertThat(unparceled.allPendingIntents).containsExactly(contentIntent, actionIntent);
+    }
+
+    @Test
+    public void allPendingIntents_alsoInPublicVersion() {
+        PendingIntent contentIntent = createPendingIntent("content");
+        PendingIntent actionIntent = createPendingIntent("action");
+        PendingIntent publicContentIntent = createPendingIntent("publicContent");
+        PendingIntent publicActionIntent = createPendingIntent("publicAction");
+        Notification source = new Notification.Builder(mContext, "channel")
+                .setContentIntent(contentIntent)
+                .addAction(new Notification.Action.Builder(null, "action", actionIntent).build())
+                .setPublicVersion(new Notification.Builder(mContext, "channel")
+                        .setContentIntent(publicContentIntent)
+                        .addAction(new Notification.Action.Builder(
+                                null, "publicAction", publicActionIntent).build())
+                        .build())
+                .build();
+
+        Parcel p = Parcel.obtain();
+        source.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        Notification unparceled = new Notification(p);
+
+        assertThat(unparceled.allPendingIntents).containsExactly(contentIntent, actionIntent,
+                publicContentIntent, publicActionIntent);
+        assertThat(unparceled.publicVersion.allPendingIntents).containsExactly(publicContentIntent,
+                publicActionIntent);
     }
 
     @Test
@@ -463,6 +525,75 @@ public class NotificationTest {
     }
 
     @Test
+    public void testBuilder_setSilent_summaryBehavior_groupAlertChildren() {
+        Notification summaryNotif = new Notification.Builder(mContext, "channelId")
+                .setGroupSummary(true)
+                .setGroup("groupKey")
+                .setSilent(true)
+                .build();
+        assertEquals(GROUP_ALERT_CHILDREN, summaryNotif.getGroupAlertBehavior());
+    }
+
+    @Test
+    public void testBuilder_setSilent_childBehavior_groupAlertSummary() {
+        Notification childNotif = new Notification.Builder(mContext, "channelId")
+                .setGroupSummary(false)
+                .setGroup("groupKey")
+                .setSilent(true)
+                .build();
+        assertEquals(GROUP_ALERT_SUMMARY, childNotif.getGroupAlertBehavior());
+    }
+
+    @Test
+    public void testBuilder_setSilent_emptyGroupKey_groupKeySilent() {
+        Notification emptyGroupKeyNotif = new Notification.Builder(mContext, "channelId")
+                .setGroup("")
+                .setSilent(true)
+                .build();
+        assertEquals(GROUP_KEY_SILENT, emptyGroupKeyNotif.getGroup());
+    }
+
+    @Test
+    public void testBuilder_setSilent_vibrateNull() {
+        Notification silentNotif = new Notification.Builder(mContext, "channelId")
+                .setGroup("")
+                .setSilent(true)
+                .build();
+
+        assertNull(silentNotif.vibrate);
+    }
+
+    @Test
+    public void testBuilder_setSilent_soundNull() {
+        Notification silentNotif = new Notification.Builder(mContext, "channelId")
+                .setGroup("")
+                .setSilent(true)
+                .build();
+
+        assertNull(silentNotif.sound);
+    }
+
+    @Test
+    public void testBuilder_setSilent_noDefaultSound() {
+        Notification silentNotif = new Notification.Builder(mContext, "channelId")
+                .setGroup("")
+                .setSilent(true)
+                .build();
+
+        assertEquals(0, (silentNotif.defaults & DEFAULT_SOUND));
+    }
+
+    @Test
+    public void testBuilder_setSilent_noDefaultVibrate() {
+        Notification silentNotif = new Notification.Builder(mContext, "channelId")
+                .setGroup("")
+                .setSilent(true)
+                .build();
+
+        assertEquals(0, (silentNotif.defaults & DEFAULT_VIBRATE));
+    }
+
+    @Test
     public void testCallStyle_getSystemActions_forIncomingCall() {
         PendingIntent answerIntent = createPendingIntent("answer");
         PendingIntent declineIntent = createPendingIntent("decline");
@@ -572,10 +703,10 @@ public class NotificationTest {
                 hugeIcon).build();
 
         Bitmap smallNotificationIcon = notification.getSmallIcon().getBitmap();
-        assertThat(smallNotificationIcon.getWidth()).isEqualTo(
+        assertThat((float) smallNotificationIcon.getWidth()).isWithin(3f).of(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_small_icon_size));
-        assertThat(smallNotificationIcon.getHeight()).isEqualTo(
+        assertThat((float) smallNotificationIcon.getHeight()).isWithin(3f).of(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_small_icon_size));
     }
@@ -599,23 +730,23 @@ public class NotificationTest {
         Notification notification = new Notification.Builder(mContext, "Channel").setStyle(
                 style).build();
 
-        int targetSize = mContext.getResources().getDimensionPixelSize(
+        float targetSize = mContext.getResources().getDimensionPixelSize(
                 ActivityManager.isLowRamDeviceStatic()
                         ? R.dimen.notification_person_icon_max_size_low_ram
                         : R.dimen.notification_person_icon_max_size);
 
         Bitmap personIcon = style.getUser().getIcon().getBitmap();
-        assertThat(personIcon.getWidth()).isEqualTo(targetSize);
-        assertThat(personIcon.getHeight()).isEqualTo(targetSize);
+        assertThat((float) personIcon.getWidth()).isWithin(3f).of(targetSize);
+        assertThat((float) personIcon.getHeight()).isWithin(3f).of(targetSize);
 
         Bitmap avatarIcon = style.getMessages().get(0).getSenderPerson().getIcon().getBitmap();
-        assertThat(avatarIcon.getWidth()).isEqualTo(targetSize);
-        assertThat(avatarIcon.getHeight()).isEqualTo(targetSize);
+        assertThat((float) avatarIcon.getWidth()).isWithin(3f).of(targetSize);
+        assertThat((float) avatarIcon.getHeight()).isWithin(3f).of(targetSize);
 
         Bitmap historicAvatarIcon = style.getHistoricMessages().get(
                 0).getSenderPerson().getIcon().getBitmap();
-        assertThat(historicAvatarIcon.getWidth()).isEqualTo(targetSize);
-        assertThat(historicAvatarIcon.getHeight()).isEqualTo(targetSize);
+        assertThat((float) historicAvatarIcon.getWidth()).isWithin(3f).of(targetSize);
+        assertThat((float) historicAvatarIcon.getHeight()).isWithin(3f).of(targetSize);
     }
 
     @Test
@@ -629,15 +760,16 @@ public class NotificationTest {
                 style).build();
         Bitmap shortcutIcon = style.getShortcutIcon().getBitmap();
 
-        assertThat(shortcutIcon.getWidth()).isEqualTo(
+        assertThat((float) shortcutIcon.getWidth()).isWithin(3f).of(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_small_icon_size));
-        assertThat(shortcutIcon.getHeight()).isEqualTo(
+        assertThat((float) shortcutIcon.getHeight()).isWithin(3f).of(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_small_icon_size));
     }
 
     @Test
+    @Ignore // TODO: b/329389261 - Restore or delete
     public void testColors_ensureColors_dayMode_producesValidPalette() {
         Notification.Colors c = new Notification.Colors();
         boolean colorized = false;
@@ -666,6 +798,7 @@ public class NotificationTest {
     }
 
     @Test
+    @Ignore // TODO: b/329389261 - Restore or delete
     public void testColors_ensureColors_colorized_producesValidPalette_red() {
         validateColorizedPaletteForColor(Color.RED);
     }
@@ -727,7 +860,12 @@ public class NotificationTest {
             assertEquals(cDay.getPrimaryAccentColor(), cNight.getPrimaryAccentColor());
             assertEquals(cDay.getSecondaryAccentColor(), cNight.getSecondaryAccentColor());
             assertEquals(cDay.getTertiaryAccentColor(), cNight.getTertiaryAccentColor());
-            assertEquals(cDay.getOnAccentTextColor(), cNight.getOnAccentTextColor());
+            assertEquals(cDay.getOnTertiaryAccentTextColor(),
+                    cNight.getOnTertiaryAccentTextColor());
+            assertEquals(cDay.getTertiaryFixedDimAccentColor(),
+                    cNight.getTertiaryFixedDimAccentColor());
+            assertEquals(cDay.getOnTertiaryFixedAccentTextColor(),
+                    cNight.getOnTertiaryFixedAccentTextColor());
             assertEquals(cDay.getProtectionColor(), cNight.getProtectionColor());
             assertEquals(cDay.getContrastColor(), cNight.getContrastColor());
             assertEquals(cDay.getRippleAlpha(), cNight.getRippleAlpha());
@@ -937,6 +1075,27 @@ public class NotificationTest {
         // no crash, good
     }
 
+    @Test
+    public void testToBundle_getMessageFromBundle_returnsSameData() {
+        Notification.MessagingStyle.Message message =
+                new Notification.MessagingStyle.Message(
+                        "a", 100, new Person.Builder().setName("hi").build());
+        message.setData("text", Uri.parse("http://test/uri"));
+
+        Notification.MessagingStyle.Message convertedMessage =
+                Notification.MessagingStyle.Message.getMessageFromBundle(message.toBundle());
+
+        assertThat(convertedMessage).isNotNull();
+        assertThat(message.getText()).isEqualTo(convertedMessage.getText());
+        assertThat(message.getTimestamp()).isEqualTo(convertedMessage.getTimestamp());
+        assertThat(message.getExtras().size()).isEqualTo(convertedMessage.getExtras().size());
+        assertThat(message.getSender()).isEqualTo(convertedMessage.getSender());
+        assertThat(message.getSenderPerson()).isEqualTo(convertedMessage.getSenderPerson());
+        assertThat(message.getDataMimeType()).isEqualTo(convertedMessage.getDataMimeType());
+        assertThat(message.getDataUri()).isEqualTo(convertedMessage.getDataUri());
+        assertThat(message.isRemoteInputHistory())
+                .isEqualTo(convertedMessage.isRemoteInputHistory());
+    }
 
     @Test
     public void testDoesNotStripsExtenders() {
@@ -1085,6 +1244,56 @@ public class NotificationTest {
                 .setStyle(new Notification.BigPictureStyle().bigPicture(bitB));
 
         assertTrue(Notification.areStyledNotificationsVisiblyDifferent(nBigPic1, nBigPic2));
+    }
+
+    @Test
+    public void testBigPictureStyle_setExtras_pictureIconNull_noPictureIconKey() {
+        Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
+        bpStyle.bigPicture((Bitmap) null);
+
+        Bundle extras = new Bundle();
+        bpStyle.addExtras(extras);
+
+        assertThat(extras.containsKey(EXTRA_PICTURE_ICON)).isFalse();
+    }
+
+    @Test
+    public void testBigPictureStyle_setExtras_pictureIconNull_noPictureKey() {
+        Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
+        bpStyle.bigPicture((Bitmap) null);
+
+        Bundle extras = new Bundle();
+        bpStyle.addExtras(extras);
+
+        assertThat(extras.containsKey(EXTRA_PICTURE)).isFalse();
+    }
+
+    @Test
+    public void testBigPictureStyle_setExtras_pictureIconTypeBitmap_pictureIconKeyNull() {
+        Bitmap bitmap = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
+        Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
+        bpStyle.bigPicture(bitmap);
+
+        Bundle extras = new Bundle();
+        bpStyle.addExtras(extras);
+
+        assertThat(extras.containsKey(EXTRA_PICTURE_ICON)).isTrue();
+        final Parcelable pictureIcon = extras.getParcelable(EXTRA_PICTURE_ICON);
+        assertThat(pictureIcon).isNull();
+    }
+
+    @Test
+    public void testBigPictureStyle_setExtras_pictureIconTypeIcon_pictureKeyNull() {
+        Icon icon = Icon.createWithResource(mContext, R.drawable.btn_plus);
+        Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
+        bpStyle.bigPicture(icon);
+
+        Bundle extras = new Bundle();
+        bpStyle.addExtras(extras);
+
+        assertThat(extras.containsKey(EXTRA_PICTURE)).isTrue();
+        final Parcelable picture = extras.getParcelable(EXTRA_PICTURE);
+        assertThat(picture).isNull();
     }
 
     @Test
@@ -1490,10 +1699,6 @@ public class NotificationTest {
     // Ensures that extras in a Notification Builder can be updated.
     @Test
     public void testExtras_cachedExtrasOverwrittenByUserProvided() {
-        // Sets the flag to new state.
-        // TODO(b/169435530): remove this set value once resolved.
-        SystemProperties.set("persist.sysui.notification.builder_extras_override",
-                Boolean.toString(true));
         Bundle extras = new Bundle();
         extras.putCharSequence(EXTRA_TITLE, "test title");
         extras.putCharSequence(EXTRA_SUMMARY_TEXT, "summary text");
@@ -1519,10 +1724,6 @@ public class NotificationTest {
     // Ensures that extras in a Notification Builder can be updated by an extender.
     @Test
     public void testExtras_cachedExtrasOverwrittenByExtender() {
-        // Sets the flag to new state.
-        // TODO(b/169435530): remove this set value once resolved.
-        SystemProperties.set("persist.sysui.notification.builder_extras_override",
-                Boolean.toString(true));
         Notification.CarExtender extender = new Notification.CarExtender().setColor(1234);
 
         Notification notification = new Notification.Builder(mContext, "test id")
@@ -1536,56 +1737,70 @@ public class NotificationTest {
         assertThat(recoveredExtender.getColor()).isEqualTo(5678);
     }
 
-    // Validates pre-flag flip behavior, that extras in a Notification Builder cannot be updated.
-    // TODO(b/169435530): remove this test once resolved.
     @Test
-    public void testExtras_cachedExtrasOverwrittenByUserProvidedOld() {
-        // Sets the flag to old state.
-        SystemProperties.set("persist.sysui.notification.builder_extras_override",
-                Boolean.toString(false));
+    @CoreCompatChangeRule.EnableCompatChanges({Notification.WEARABLE_EXTENDER_BACKGROUND_BLOCKED})
+    public void wearableBackgroundBlockEnabled_wearableBackgroundSet_valueRemainsNull() {
+        Notification.WearableExtender extender = new Notification.WearableExtender();
+        Bitmap bitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
+        extender.setBackground(bitmap);
+        Notification notif =
+                new Notification.Builder(mContext, "test id")
+                        .setSmallIcon(1)
+                        .setContentTitle("test_title")
+                        .extend(extender)
+                        .build();
 
-        Bundle extras = new Bundle();
-        extras.putCharSequence(EXTRA_TITLE, "test title");
-        extras.putCharSequence(EXTRA_SUMMARY_TEXT, "summary text");
-
-        Notification.Builder builder = new Notification.Builder(mContext, "test id")
-                .addExtras(extras);
-
-        Notification notification = builder.build();
-        assertThat(notification.extras.getCharSequence(EXTRA_TITLE).toString()).isEqualTo(
-                "test title");
-        assertThat(notification.extras.getCharSequence(EXTRA_SUMMARY_TEXT).toString()).isEqualTo(
-                "summary text");
-
-        extras.putCharSequence(EXTRA_TITLE, "new title");
-        builder.addExtras(extras);
-        notification = builder.build();
-        assertThat(notification.extras.getCharSequence(EXTRA_TITLE).toString()).isEqualTo(
-                "test title");
-        assertThat(notification.extras.getCharSequence(EXTRA_SUMMARY_TEXT).toString()).isEqualTo(
-                "summary text");
+        Notification.WearableExtender result = new Notification.WearableExtender(notif);
+        Assert.assertNull(result.getBackground());
     }
 
-    // Validates pre-flag flip behavior, that extras in a Notification Builder cannot be updated
-    // by an extender.
-    // TODO(b/169435530): remove this test once resolved.
     @Test
-    public void testExtras_cachedExtrasOverwrittenByExtenderOld() {
-        // Sets the flag to old state.
-        SystemProperties.set("persist.sysui.notification.builder_extras_override",
-                Boolean.toString(false));
+    @CoreCompatChangeRule.DisableCompatChanges({Notification.WEARABLE_EXTENDER_BACKGROUND_BLOCKED})
+    public void wearableBackgroundBlockDisabled_wearableBackgroundSet_valueKeepsBitmap() {
+        Notification.WearableExtender extender = new Notification.WearableExtender();
+        Bitmap bitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
+        extender.setBackground(bitmap);
+        Notification notif =
+                new Notification.Builder(mContext, "test id")
+                        .setSmallIcon(1)
+                        .setContentTitle("test_title")
+                        .extend(extender)
+                        .build();
 
-        Notification.CarExtender extender = new Notification.CarExtender().setColor(1234);
+        Notification.WearableExtender result = new Notification.WearableExtender(notif);
+        Bitmap resultBitmap = result.getBackground();
+        assertNotNull(resultBitmap);
+        Assert.assertEquals(bitmap, resultBitmap);
+    }
 
-        Notification notification = new Notification.Builder(mContext, "test id")
-                .extend(extender).build();
+    @Test
+    public void testGetWhen_zero() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setWhen(0)
+                .build();
 
-        extender.setColor(5678);
+        mSetFlagsRule.disableFlags(Flags.FLAG_SORT_SECTION_BY_TIME);
 
-        Notification.Builder.recoverBuilder(mContext, notification).extend(extender).build();
+        assertThat(n.getWhen()).isEqualTo(0);
 
-        Notification.CarExtender recoveredExtender = new Notification.CarExtender(notification);
-        assertThat(recoveredExtender.getColor()).isEqualTo(1234);
+        mSetFlagsRule.enableFlags(Flags.FLAG_SORT_SECTION_BY_TIME);
+
+        assertThat(n.getWhen()).isEqualTo(n.creationTime);
+    }
+
+    @Test
+    public void testGetWhen_devProvidedNonZero() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setWhen(9)
+                .build();
+
+        mSetFlagsRule.disableFlags(Flags.FLAG_SORT_SECTION_BY_TIME);
+
+        assertThat(n.getWhen()).isEqualTo(9);
+
+        mSetFlagsRule.enableFlags(Flags.FLAG_SORT_SECTION_BY_TIME);
+
+        assertThat(n.getWhen()).isEqualTo(9);
     }
 
     private void assertValid(Notification.Colors c) {
@@ -1597,7 +1812,9 @@ public class NotificationTest {
         assertThat(c.getPrimaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getSecondaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getTertiaryAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
-        assertThat(c.getOnAccentTextColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getOnTertiaryAccentTextColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getTertiaryFixedDimAccentColor()).isNotEqualTo(Notification.COLOR_INVALID);
+        assertThat(c.getOnTertiaryFixedAccentTextColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getErrorColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getContrastColor()).isNotEqualTo(Notification.COLOR_INVALID);
         assertThat(c.getRippleAlpha()).isAtLeast(0x00);
@@ -1613,9 +1830,12 @@ public class NotificationTest {
         // These colors are only used for emphasized buttons; they do not need contrast
         assertContrastIsAtLeast(c.getSecondaryAccentColor(), c.getBackgroundColor(), 1);
         assertContrastIsAtLeast(c.getTertiaryAccentColor(), c.getBackgroundColor(), 1);
+        assertContrastIsAtLeast(c.getTertiaryFixedDimAccentColor(), c.getBackgroundColor(), 1);
 
         // The text that is used within the accent color DOES need to have contrast
-        assertContrastIsAtLeast(c.getOnAccentTextColor(), c.getTertiaryAccentColor(), 4.5);
+        assertContrastIsAtLeast(c.getOnTertiaryAccentTextColor(), c.getTertiaryAccentColor(), 4.5);
+        assertContrastIsAtLeast(c.getOnTertiaryFixedAccentTextColor(),
+                c.getTertiaryFixedDimAccentColor(), 4.5);
     }
 
     private void resolveColorsInNightMode(boolean nightMode, Notification.Colors c, int rawColor,

@@ -29,9 +29,6 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Parcel;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +36,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
 public class CsipDeviceManagerTest {
@@ -84,7 +84,6 @@ public class CsipDeviceManagerTest {
     private Context mContext;
     private List<CachedBluetoothDevice> mCachedDevices = new ArrayList<CachedBluetoothDevice>();
 
-
     private BluetoothClass createBtClass(int deviceClass) {
         Parcel p = Parcel.obtain();
         p.writeInt(deviceClass);
@@ -112,6 +111,12 @@ public class CsipDeviceManagerTest {
         when(mDevice1.getBluetoothClass()).thenReturn(DEVICE_CLASS_1);
         when(mDevice2.getBluetoothClass()).thenReturn(DEVICE_CLASS_2);
         when(mDevice3.getBluetoothClass()).thenReturn(DEVICE_CLASS_2);
+        when(mDevice1.isConnected()).thenReturn(true);
+        when(mDevice2.isConnected()).thenReturn(true);
+        when(mDevice3.isConnected()).thenReturn(true);
+        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice2.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice3.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         when(mLocalBluetoothManager.getEventManager()).thenReturn(mBluetoothEventManager);
         when(mLocalBluetoothManager.getProfileManager()).thenReturn(mLocalProfileManager);
         when(mLocalProfileManager.getLeAudioProfile()).thenReturn(mLeAudioProfile);
@@ -153,7 +158,6 @@ public class CsipDeviceManagerTest {
         profiles.add(mA2dpProfile);
         when(mCachedDevice3.getConnectableProfiles()).thenReturn(profiles);
         when(mCachedDevice3.isConnected()).thenReturn(true);
-
     }
 
     @Test
@@ -203,6 +207,7 @@ public class CsipDeviceManagerTest {
     @Test
     public void getPreferredMainDevice_noConnectedDualModeDevice_returnLeadDevice() {
         when(mCachedDevice1.isConnected()).thenReturn(false);
+        when(mDevice1.isConnected()).thenReturn(false);
         when(mLeAudioProfile.getConnectedGroupLeadDevice(anyInt())).thenReturn(mDevice2);
         CachedBluetoothDevice expectedDevice = mCachedDevice2;
 
@@ -216,6 +221,8 @@ public class CsipDeviceManagerTest {
     public void getPreferredMainDevice_noConnectedDualModeDeviceNoLeadDevice_returnConnectedOne() {
         when(mCachedDevice1.isConnected()).thenReturn(false);
         when(mCachedDevice2.isConnected()).thenReturn(true);
+        when(mDevice1.isConnected()).thenReturn(false);
+        when(mDevice2.isConnected()).thenReturn(true);
         CachedBluetoothDevice expectedDevice = mCachedDevice2;
 
         assertThat(
@@ -228,6 +235,8 @@ public class CsipDeviceManagerTest {
     public void getPreferredMainDevice_noConnectedDevice_returnDualModeDevice() {
         when(mCachedDevice1.isConnected()).thenReturn(false);
         when(mCachedDevice2.isConnected()).thenReturn(false);
+        when(mDevice1.isConnected()).thenReturn(false);
+        when(mDevice2.isConnected()).thenReturn(false);
         CachedBluetoothDevice expectedDevice = mCachedDevice1;
 
         assertThat(
@@ -240,6 +249,8 @@ public class CsipDeviceManagerTest {
     public void getPreferredMainDevice_noConnectedDeviceNoDualMode_returnFirstOneDevice() {
         when(mCachedDevice1.isConnected()).thenReturn(false);
         when(mCachedDevice2.isConnected()).thenReturn(false);
+        when(mDevice1.isConnected()).thenReturn(false);
+        when(mDevice2.isConnected()).thenReturn(false);
         List<LocalBluetoothProfile> profiles = new ArrayList<LocalBluetoothProfile>();
         profiles.add(mLeAudioProfile);
         when(mCachedDevice1.getConnectableProfiles()).thenReturn(profiles);
@@ -267,8 +278,8 @@ public class CsipDeviceManagerTest {
     }
 
     @Test
-    public void addMemberDevicesIntoMainDevice_preferredDeviceIsMainAndNoOtherInList_noChangeList()
-    {
+    public void
+            addMemberDevicesIntoMainDevice_preferredDeviceIsMainAndNoOtherInList_noChangeList() {
         // Condition: The preferredDevice is main and no other main device in top list
         // Expected Result: return false and the list is no changed
         CachedBluetoothDevice preferredDevice = mCachedDevice1;
@@ -294,7 +305,6 @@ public class CsipDeviceManagerTest {
         mCachedDevices.add(preferredDevice);
         mCachedDevices.add(mCachedDevice2);
         mCachedDevices.add(mCachedDevice3);
-
 
         assertThat(mCsipDeviceManager.addMemberDevicesIntoMainDevice(GROUP1, preferredDevice))
                 .isTrue();

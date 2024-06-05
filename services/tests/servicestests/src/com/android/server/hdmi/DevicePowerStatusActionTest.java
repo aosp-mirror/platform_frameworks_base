@@ -25,8 +25,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -90,6 +92,11 @@ public class DevicePowerStatusActionTest {
             protected void writeStringSystemProperty(String key, String value) {
                 // do nothing
             }
+
+            @Override
+            protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                // do nothing
+            }
         };
 
         Looper looper = mTestLooper.getLooper();
@@ -97,6 +104,8 @@ public class DevicePowerStatusActionTest {
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(mContextSpy));
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
+        mPhysicalAddress = 0x2000;
+        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(hdmiCecController);
@@ -105,8 +114,6 @@ public class DevicePowerStatusActionTest {
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mPhysicalAddress = 0x2000;
-        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
         mPlaybackDevice = mHdmiControlService.playback();
         mDevicePowerStatusAction = DevicePowerStatusAction.create(mPlaybackDevice, ADDR_TV,
@@ -277,6 +284,10 @@ public class DevicePowerStatusActionTest {
 
     @Test
     public void pendingActionDoesNotBlockSendingStandby() throws Exception {
+        mPlaybackDevice.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
+
         HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(
                 mPlaybackDevice.getDeviceInfo().getLogicalAddress(),
                 mPhysicalAddress);
@@ -291,7 +302,7 @@ public class DevicePowerStatusActionTest {
         mTestLooper.dispatchAll();
         HdmiCecMessage standbyMessage =
                 HdmiCecMessageBuilder.buildStandby(
-                        mPlaybackDevice.getDeviceInfo().getLogicalAddress(), ADDR_TV);
+                        mPlaybackDevice.getDeviceInfo().getLogicalAddress(), ADDR_BROADCAST);
         assertThat(mNativeWrapper.getResultMessages()).contains(standbyMessage);
     }
 }

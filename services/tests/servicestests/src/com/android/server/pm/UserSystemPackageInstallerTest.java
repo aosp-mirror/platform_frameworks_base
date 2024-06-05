@@ -44,7 +44,6 @@ import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
-import android.support.test.uiautomator.UiDevice;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -52,11 +51,12 @@ import android.util.Log;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
 
+import com.android.internal.pm.parsing.pkg.PackageImpl;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
-import com.android.server.pm.parsing.pkg.PackageImpl;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
 
 import org.junit.After;
@@ -117,7 +117,7 @@ public class UserSystemPackageInstallerTest {
         for (int userId : mRemoveUsers) {
             um.removeUser(userId);
         }
-        setUserTypePackageWhitelistMode(mOriginalWhitelistMode);
+        setUserTypePackageAllowlistMode(mOriginalWhitelistMode);
     }
 
     /**
@@ -184,7 +184,7 @@ public class UserSystemPackageInstallerTest {
             }
         }
 
-        final ArrayMap<String, Long> expectedOutput = getNewPackageToWhitelistedBitSetMap();
+        final ArrayMap<String, Long> expectedOutput = getNewPackageToAllowlistedBitSetMap();
         expectedOutput.put("com.android.package1", expectedUserTypeBitSet1);
         expectedOutput.put("com.android.package2", expectedUserTypeBitSet2);
         expectedOutput.put("com.android.package3", expectedUserTypeBitSet3);
@@ -227,7 +227,7 @@ public class UserSystemPackageInstallerTest {
             }
         };
 
-        final ArrayMap<String, Long> expectedOutput = getNewPackageToWhitelistedBitSetMap();
+        final ArrayMap<String, Long> expectedOutput = getNewPackageToAllowlistedBitSetMap();
         expectedOutput.put("com.android.package2", 0L);
         expectedOutput.put("com.android.package3", 0L);
         expectedOutput.put("com.android.package4", 0L);
@@ -340,7 +340,7 @@ public class UserSystemPackageInstallerTest {
     public void testPackagesForCreateUser_full() {
         final String userTypeToCreate = USER_TYPE_FULL_SECONDARY;
         final long userTypeMask = mUserSystemPackageInstaller.getUserTypeMask(userTypeToCreate);
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
         PackageManager pm = mContext.getPackageManager();
 
         final SystemConfig sysConfig = new SystemConfigTestClass(true);
@@ -384,7 +384,7 @@ public class UserSystemPackageInstallerTest {
      */
     @Test
     public void testInstallOverlayPackagesExplicitMode() {
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
 
         final String[] userTypes = new String[]{"type"};
         final long maskOfType = 0b0001L;
@@ -453,49 +453,49 @@ public class UserSystemPackageInstallerTest {
      */
     @Test
     public void testSetWhitelistEnabledMode() {
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE);
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE);
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertFalse(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_LOG);
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_LOG);
         assertTrue(mUserSystemPackageInstaller.isLogMode());
         assertFalse(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertTrue(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST);
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST);
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertFalse(mUserSystemPackageInstaller.isEnforceMode());
         assertTrue(mUserSystemPackageInstaller.isImplicitWhitelistMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST_SYSTEM);
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST_SYSTEM);
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertFalse(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
         assertTrue(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IGNORE_OTA);
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IGNORE_OTA);
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertFalse(mUserSystemPackageInstaller.isEnforceMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistMode());
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertTrue(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
-        setUserTypePackageWhitelistMode(
+        setUserTypePackageAllowlistMode(
                 USER_TYPE_PACKAGE_WHITELIST_MODE_LOG | USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
         assertTrue(mUserSystemPackageInstaller.isLogMode());
         assertTrue(mUserSystemPackageInstaller.isEnforceMode());
@@ -503,7 +503,7 @@ public class UserSystemPackageInstallerTest {
         assertFalse(mUserSystemPackageInstaller.isImplicitWhitelistSystemMode());
         assertFalse(mUserSystemPackageInstaller.isIgnoreOtaMode());
 
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST
                 | USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
         assertFalse(mUserSystemPackageInstaller.isLogMode());
         assertTrue(mUserSystemPackageInstaller.isEnforceMode());
@@ -513,7 +513,7 @@ public class UserSystemPackageInstallerTest {
     }
 
     /** Sets the allowlist mode to the desired value via adb's setprop. */
-    private void setUserTypePackageWhitelistMode(int mode) {
+    private void setUserTypePackageAllowlistMode(int mode) {
         UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         try {
             String result = uiDevice.executeShellCommand(String.format("setprop %s %d",
@@ -526,7 +526,7 @@ public class UserSystemPackageInstallerTest {
     }
 
     /** @see UserSystemPackageInstaller#mWhitelistedPackagesForUserTypes */
-    private ArrayMap<String, Long> getNewPackageToWhitelistedBitSetMap() {
+    private ArrayMap<String, Long> getNewPackageToAllowlistedBitSetMap() {
         final ArrayMap<String, Long> pkgBitSetMap = new ArrayMap<>();
         // "android" is always treated as allowlisted for all types, regardless of the xml file.
         pkgBitSetMap.put("android", ~0L);

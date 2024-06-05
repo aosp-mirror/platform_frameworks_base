@@ -19,12 +19,12 @@ package com.android.systemui.qs.user
 import android.content.DialogInterface
 import android.content.Intent
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import android.widget.Button
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -36,6 +36,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,9 +53,11 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class UserSwitchDialogControllerTest : SysuiTestCase() {
 
+    @Mock
+    private lateinit var dialogFactory: SystemUIDialog.Factory
     @Mock
     private lateinit var dialog: SystemUIDialog
     @Mock
@@ -68,7 +71,7 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var neutralButton: Button
     @Mock
-    private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
     @Mock
     private lateinit var uiEventLogger: UiEventLogger
     @Captor
@@ -80,24 +83,25 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(dialog.context).thenReturn(mContext)
+        whenever(dialog.context).thenReturn(mContext)
+        whenever(dialogFactory.create()).thenReturn(dialog)
 
         controller = UserSwitchDialogController(
             { userDetailViewAdapter },
             activityStarter,
             falsingManager,
-            dialogLaunchAnimator,
+            mDialogTransitionAnimator,
             uiEventLogger,
-            { dialog }
+            dialogFactory
         )
     }
 
     @Test
     fun showDialog_callsDialogShow() {
-        val launchController = mock<DialogLaunchAnimator.Controller>()
-        `when`(launchExpandable.dialogLaunchController(any())).thenReturn(launchController)
+        val launchController = mock<DialogTransitionAnimator.Controller>()
+        `when`(launchExpandable.dialogTransitionController(any())).thenReturn(launchController)
         controller.showDialog(context, launchExpandable)
-        verify(dialogLaunchAnimator).show(eq(dialog), eq(launchController), anyBoolean())
+        verify(mDialogTransitionAnimator).show(eq(dialog), eq(launchController), anyBoolean())
         verify(uiEventLogger).log(QSUserSwitcherEvent.QS_USER_DETAIL_OPEN)
     }
 

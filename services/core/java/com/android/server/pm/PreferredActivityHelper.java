@@ -69,10 +69,12 @@ final class PreferredActivityHelper {
     private static final String TAG_DEFAULT_APPS = "da";
 
     private final PackageManagerService mPm;
+    private final BroadcastHelper mBroadcastHelper;
 
     // TODO(b/198166813): remove PMS dependency
-    PreferredActivityHelper(PackageManagerService pm) {
+    PreferredActivityHelper(PackageManagerService pm, BroadcastHelper broadcastHelper) {
         mPm = pm;
+        mBroadcastHelper = broadcastHelper;
     }
 
     private ResolveInfo findPreferredActivityNotLocked(@NonNull Computer snapshot, Intent intent,
@@ -120,7 +122,7 @@ final class PreferredActivityHelper {
         }
         if (changedUsers.size() > 0) {
             updateDefaultHomeNotLocked(mPm.snapshotComputer(), changedUsers);
-            mPm.postPreferredActivityChangedBroadcast(userId);
+            mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
             mPm.scheduleWritePackageRestrictions(userId);
         }
     }
@@ -167,7 +169,7 @@ final class PreferredActivityHelper {
         return mPm.setActiveLauncherPackage(packageName, userId,
                 successful -> {
                     if (successful) {
-                        mPm.postPreferredActivityChangedBroadcast(userId);
+                        mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
                     }
                 });
     }
@@ -215,7 +217,7 @@ final class PreferredActivityHelper {
         }
         // Re-snapshot after mLock
         if (!(isHomeFilter(filter) && updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId))) {
-            mPm.postPreferredActivityChangedBroadcast(userId);
+            mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
         }
     }
 
@@ -411,7 +413,7 @@ final class PreferredActivityHelper {
         if (isHomeFilter(filter)) {
             updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
         }
-        mPm.postPreferredActivityChangedBroadcast(userId);
+        mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
     }
 
     public void clearPackagePersistentPreferredActivities(String packageName, int userId) {
@@ -426,7 +428,7 @@ final class PreferredActivityHelper {
         }
         if (changed) {
             updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
-            mPm.postPreferredActivityChangedBroadcast(userId);
+            mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
             mPm.scheduleWritePackageRestrictions(userId);
         }
     }
@@ -443,7 +445,7 @@ final class PreferredActivityHelper {
         }
         if (changed) {
             updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
-            mPm.postPreferredActivityChangedBroadcast(userId);
+            mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
             mPm.scheduleWritePackageRestrictions(userId);
         }
     }
@@ -557,9 +559,8 @@ final class PreferredActivityHelper {
             serializer.startDocument(null, true);
             serializer.startTag(null, TAG_DEFAULT_APPS);
 
-            synchronized (mPm.mLock) {
-                mPm.mSettings.writeDefaultAppsLPr(serializer, userId);
-            }
+            final String defaultBrowser = mPm.getDefaultBrowser(userId);
+            Settings.writeDefaultApps(serializer, defaultBrowser);
 
             serializer.endTag(null, TAG_DEFAULT_APPS);
             serializer.endDocument();
@@ -584,14 +585,19 @@ final class PreferredActivityHelper {
             parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
             restoreFromXml(parser, userId, TAG_DEFAULT_APPS,
                     (parser1, userId1) -> {
-                        final String defaultBrowser;
-                        synchronized (mPm.mLock) {
-                            mPm.mSettings.readDefaultAppsLPw(parser1, userId1);
-                            defaultBrowser = mPm.mSettings.removeDefaultBrowserPackageNameLPw(
-                                    userId1);
-                        }
+                        final String defaultBrowser = Settings.readDefaultApps(parser1);
                         if (defaultBrowser != null) {
-                            mPm.setDefaultBrowser(defaultBrowser, false, userId1);
+                            final PackageStateInternal packageState = mPm.snapshotComputer()
+                                    .getPackageStateInternal(defaultBrowser);
+                            if (packageState != null
+                                    && packageState.getUserStateOrDefault(userId1).isInstalled()) {
+                                mPm.setDefaultBrowser(defaultBrowser, userId1);
+                            } else {
+                                synchronized (mPm.mLock) {
+                                    mPm.mSettings.setPendingDefaultBrowserLPw(defaultBrowser,
+                                            userId1);
+                                }
+                            }
                         }
                     });
         } catch (Exception e) {
@@ -612,7 +618,7 @@ final class PreferredActivityHelper {
                 mPm.clearPackagePreferredActivitiesLPw(null, changedUsers, userId);
             }
             if (changedUsers.size() > 0) {
-                mPm.postPreferredActivityChangedBroadcast(userId);
+                mBroadcastHelper.sendPreferredActivityChangedBroadcast(userId);
             }
             synchronized (mPm.mLock) {
                 mPm.mSettings.applyDefaultPreferredAppsLPw(userId);
@@ -661,6 +667,7 @@ final class PreferredActivityHelper {
             final Iterator<PreferredActivity> it = pir.filterIterator();
             while (it.hasNext()) {
                 final PreferredActivity pa = it.next();
+                if (pa == null) continue;
                 final String prefPackageName = pa.mPref.mComponent.getPackageName();
                 if (packageName == null
                         || (prefPackageName.equals(packageName) && pa.mPref.mAlways)) {

@@ -28,9 +28,9 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityTargetAdapter.ViewHolder;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;

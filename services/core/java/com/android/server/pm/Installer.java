@@ -16,27 +16,29 @@
 
 package com.android.server.pm;
 
-import static com.android.server.pm.DexOptHelper.useArtService;
-
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.PackageStats;
+import android.os.Binder;
 import android.os.Build;
 import android.os.CreateAppDataArgs;
 import android.os.CreateAppDataResult;
 import android.os.IBinder;
 import android.os.IInstalld;
+import android.os.ParcelFileDescriptor;
 import android.os.ReconcileSdkDataArgs;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.storage.CrateMetadata;
 import android.text.format.DateUtils;
+import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.server.EventLogTags;
 import com.android.server.SystemService;
 
 import dalvik.system.BlockGuard;
@@ -92,15 +94,6 @@ public class Installer extends SystemService {
      * the profiles are empty.
      */
     public static final int PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES = 3;
-
-    /**
-     * The results of {@code getOdexVisibility}. See
-     * {@link #getOdexVisibility(String, String, String)} for details.
-     */
-    public static final int ODEX_NOT_FOUND = 0;
-    public static final int ODEX_IS_PUBLIC = 1;
-    public static final int ODEX_IS_PRIVATE = 2;
-
 
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
     public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
@@ -256,6 +249,7 @@ public class Installer extends SystemService {
     private static CreateAppDataResult buildPlaceholderCreateAppDataResult() {
         final CreateAppDataResult result = new CreateAppDataResult();
         result.ceDataInode = -1;
+        result.deDataInode = -1;
         result.exceptionCode = 0;
         result.exceptionMessage = null;
         return result;
@@ -360,7 +354,7 @@ public class Installer extends SystemService {
         private boolean mExecuted;
 
         private final List<CreateAppDataArgs> mArgs = new ArrayList<>();
-        private final List<CompletableFuture<Long>> mFutures = new ArrayList<>();
+        private final List<CompletableFuture<CreateAppDataResult>> mFutures = new ArrayList<>();
 
         /**
          * Enqueue the given {@code installd} operation to be executed in the
@@ -370,11 +364,12 @@ public class Installer extends SystemService {
          * {@link Installer} object.
          */
         @NonNull
-        public synchronized CompletableFuture<Long> createAppData(CreateAppDataArgs args) {
+        public synchronized CompletableFuture<CreateAppDataResult> createAppData(
+                CreateAppDataArgs args) {
             if (mExecuted) {
                 throw new IllegalStateException();
             }
-            final CompletableFuture<Long> future = new CompletableFuture<>();
+            final CompletableFuture<CreateAppDataResult> future = new CompletableFuture<>();
             mArgs.add(args);
             mFutures.add(future);
             return future;
@@ -399,11 +394,11 @@ public class Installer extends SystemService {
                     args[j] = mArgs.get(i + j);
                 }
                 final CreateAppDataResult[] results = installer.createAppDataBatched(args);
-                for (int j = 0; j < args.length; j++) {
+                for (int j = 0; j < results.length; j++) {
                     final CreateAppDataResult result = results[j];
-                    final CompletableFuture<Long> future = mFutures.get(i + j);
+                    final CompletableFuture<CreateAppDataResult> future = mFutures.get(i + j);
                     if (result.exceptionCode == 0) {
-                        future.complete(result.ceDataInode);
+                        future.complete(result);
                     } else {
                         future.completeExceptionally(
                                 new InstallerException(result.exceptionMessage));
@@ -438,6 +433,26 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.clearAppData(uuid, packageName, userId, flags, ceDataInode);
+
+            final StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+            String className;
+            String methodName;
+            String fileName;
+            int lineNumber;
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            EventLog.writeEvent(EventLogTags.INSTALLER_CLEAR_APP_DATA_CALLER, pid, uid, packageName,
+                    flags);
+            // Skip the first two elements since they are always the same, ie
+            // Thread#getStackTrace() and VMStack#getThreadStackTrace()
+            for (int i = 2; i < elements.length; i++) {
+                className = elements[i].getClassName();
+                methodName = elements[i].getMethodName();
+                fileName = elements[i].getFileName();
+                lineNumber = elements[i].getLineNumber();
+                EventLog.writeEvent(EventLogTags.INSTALLER_CLEAR_APP_DATA_CALL_STACK, methodName,
+                        className, fileName, lineNumber);
+            }
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -585,37 +600,7 @@ public class Installer extends SystemService {
     }
 
     /**
-     * Runs dex optimization.
-     *
-     * @param apkPath Path of target APK
-     * @param uid UID of the package
-     * @param pkgName Name of the package
-     * @param instructionSet Target instruction set to run dex optimization.
-     * @param dexoptNeeded Necessary dex optimization for this request. Check
-     *        {@link dalvik.system.DexFile#NO_DEXOPT_NEEDED},
-     *        {@link dalvik.system.DexFile#DEX2OAT_FROM_SCRATCH},
-     *        {@link dalvik.system.DexFile#DEX2OAT_FOR_BOOT_IMAGE}, and
-     *        {@link dalvik.system.DexFile#DEX2OAT_FOR_FILTER}.
-     * @param outputPath Output path of generated dex optimization.
-     * @param dexFlags Check {@code DEXOPT_*} for allowed flags.
-     * @param compilerFilter Compiler filter like "verify", "speed-profile". Check
-     *                       {@code art/libartbase/base/compiler_filter.cc} for full list.
-     * @param volumeUuid UUID of the volume where the package data is stored. {@code null}
-     *                   represents internal storage.
-     * @param classLoaderContext This encodes the class loader chain (class loader type + class
-     *                           path) in a format compatible to dex2oat. Check
-     *                           {@code DexoptUtils.processContextForDexLoad} for further details.
-     * @param seInfo Selinux context to set for generated outputs.
-     * @param downgrade If set, allows downgrading {@code compilerFilter}. If downgrading is not
-     *                  allowed and requested {@code compilerFilter} is considered as downgrade,
-     *                  the request will be ignored.
-     * @param targetSdkVersion Target SDK version of the package.
-     * @param profileName Name of reference profile file.
-     * @param dexMetadataPath Specifies the location of dex metadata file.
-     * @param compilationReason Specifies the reason for the compilation like "install".
-     * @return {@code true} if {@code dexopt} is completed. {@code false} if it was cancelled.
-     *
-     * @throws InstallerException if {@code dexopt} fails.
+     * This function only remains to allow overriding in OtaDexoptService.
      */
     public boolean dexopt(String apkPath, int uid, String pkgName, String instructionSet,
             int dexoptNeeded, @Nullable String outputPath, int dexFlags, String compilerFilter,
@@ -624,98 +609,7 @@ public class Installer extends SystemService {
             @Nullable String profileName, @Nullable String dexMetadataPath,
             @Nullable String compilationReason)
             throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        assertValidInstructionSet(instructionSet);
-        BlockGuard.getVmPolicy().onPathAccess(apkPath);
-        BlockGuard.getVmPolicy().onPathAccess(outputPath);
-        BlockGuard.getVmPolicy().onPathAccess(dexMetadataPath);
-        if (!checkBeforeRemote()) return false;
-        try {
-            return mInstalld.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
-                    dexFlags, compilerFilter, volumeUuid, classLoaderContext, seInfo, downgrade,
-                    targetSdkVersion, profileName, dexMetadataPath, compilationReason);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    /**
-     * Enables or disables dex optimization blocking.
-     *
-     * <p> Enabling blocking will also involve cancelling pending dexopt call and killing child
-     * processes forked from installd to run dexopt. The pending dexopt call will return false
-     * when it is cancelled.
-     *
-     * @param block set to true to enable blocking / false to disable blocking.
-     */
-    public void controlDexOptBlocking(boolean block) throws LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        try {
-            mInstalld.controlDexOptBlocking(block);
-        } catch (Exception e) {
-            Slog.w(TAG, "blockDexOpt failed", e);
-        }
-    }
-
-    /**
-     * Analyzes the ART profiles of the given package, possibly merging the information
-     * into the reference profile. Returns whether or not we should optimize the package
-     * based on how much information is in the profile.
-     *
-     * @return one of {@link #PROFILE_ANALYSIS_OPTIMIZE},
-     *         {@link #PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA},
-     *         {@link #PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES}
-     */
-    public int mergeProfiles(int uid, String packageName, String profileName)
-            throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        if (!checkBeforeRemote()) return PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
-        try {
-            return mInstalld.mergeProfiles(uid, packageName, profileName);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    /**
-     * Dumps profiles associated with a package in a human readable format.
-     */
-    public boolean dumpProfiles(int uid, String packageName, String profileName, String codePath,
-            boolean dumpClassesAndMethods)
-            throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        if (!checkBeforeRemote()) return false;
-        BlockGuard.getVmPolicy().onPathAccess(codePath);
-        try {
-            return mInstalld.dumpProfiles(uid, packageName, profileName, codePath,
-                    dumpClassesAndMethods);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public boolean copySystemProfile(String systemProfile, int uid, String packageName,
-            String profileName) throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        if (!checkBeforeRemote()) return false;
-        try {
-            return mInstalld.copySystemProfile(systemProfile, uid, packageName, profileName);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public void rmdex(String codePath, String instructionSet)
-            throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        assertValidInstructionSet(instructionSet);
-        if (!checkBeforeRemote()) return;
-        BlockGuard.getVmPolicy().onPathAccess(codePath);
-        try {
-            mInstalld.rmdex(codePath, instructionSet);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
+        throw new LegacyDexoptDisabledException();
     }
 
     /**
@@ -726,43 +620,6 @@ public class Installer extends SystemService {
         BlockGuard.getVmPolicy().onPathAccess(packageDir);
         try {
             mInstalld.rmPackageDir(packageName, packageDir);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public void clearAppProfiles(String packageName, String profileName)
-            throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        if (!checkBeforeRemote()) return;
-        try {
-            mInstalld.clearAppProfiles(packageName, profileName);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public void destroyAppProfiles(String packageName)
-            throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        if (!checkBeforeRemote()) return;
-        try {
-            mInstalld.destroyAppProfiles(packageName);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    /**
-     * Deletes the reference profile with the given name of the given package.
-     * @throws InstallerException if the deletion fails.
-     */
-    public void deleteReferenceProfile(String packageName, String profileName)
-            throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        if (!checkBeforeRemote()) return;
-        try {
-            mInstalld.deleteReferenceProfile(packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -863,68 +720,12 @@ public class Installer extends SystemService {
         }
     }
 
-    /**
-     * Deletes the optimized artifacts generated by ART and returns the number
-     * of freed bytes.
-     */
-    public long deleteOdex(String packageName, String apkPath, String instructionSet,
-            String outputPath) throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        if (!checkBeforeRemote()) return -1;
-        BlockGuard.getVmPolicy().onPathAccess(apkPath);
-        BlockGuard.getVmPolicy().onPathAccess(outputPath);
-        try {
-            return mInstalld.deleteOdex(packageName, apkPath, instructionSet, outputPath);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public boolean reconcileSecondaryDexFile(String apkPath, String packageName, int uid,
-            String[] isas, @Nullable String volumeUuid, int flags)
-            throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        for (int i = 0; i < isas.length; i++) {
-            assertValidInstructionSet(isas[i]);
-        }
-        if (!checkBeforeRemote()) return false;
-        BlockGuard.getVmPolicy().onPathAccess(apkPath);
-        try {
-            return mInstalld.reconcileSecondaryDexFile(apkPath, packageName, uid, isas,
-                    volumeUuid, flags);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
     public byte[] hashSecondaryDexFile(String dexPath, String packageName, int uid,
             @Nullable String volumeUuid, int flags) throws InstallerException {
         if (!checkBeforeRemote()) return new byte[0];
         BlockGuard.getVmPolicy().onPathAccess(dexPath);
         try {
             return mInstalld.hashSecondaryDexFile(dexPath, packageName, uid, volumeUuid, flags);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public boolean createProfileSnapshot(int appId, String packageName, String profileName,
-            String classpath) throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        if (!checkBeforeRemote()) return false;
-        try {
-            return mInstalld.createProfileSnapshot(appId, packageName, profileName, classpath);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public void destroyProfileSnapshot(String packageName, String profileName)
-            throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        if (!checkBeforeRemote()) return;
-        try {
-            mInstalld.destroyProfileSnapshot(packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -967,30 +768,6 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.onPrivateVolumeRemoved(volumeUuid);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    /**
-     * Prepares the app profile for the package at the given path:
-     * <ul>
-     *   <li>Creates the current profile for the given user ID, unless the user ID is
-     *     {@code UserHandle.USER_NULL}.</li>
-     *   <li>Merges the profile from the dex metadata file (if present) into the reference
-     *     profile.</li>
-     * </ul>
-     */
-    public boolean prepareAppProfile(String pkg, @UserIdInt int userId, @AppIdInt int appId,
-            String profileName, String codePath, String dexMetadataPath)
-            throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        if (!checkBeforeRemote()) return false;
-        BlockGuard.getVmPolicy().onPathAccess(codePath);
-        BlockGuard.getVmPolicy().onPathAccess(dexMetadataPath);
-        try {
-            return mInstalld.prepareAppProfile(pkg, userId, appId, profileName, codePath,
-                    dexMetadataPath);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -1125,37 +902,48 @@ public class Installer extends SystemService {
         throw new InstallerException("Invalid instruction set: " + instructionSet);
     }
 
-    public boolean compileLayouts(String apkPath, String packageName, String outDexFile, int uid) {
+    /**
+     * Returns an auth token for the provided writable FD.
+     *
+     * @param authFd a file descriptor to proof that the caller can write to the file.
+     * @param uid uid of the calling app.
+     *
+     * @return authToken, or null if a remote call shouldn't be continued. See {@link
+     * #checkBeforeRemote}.
+     *
+     * @throws InstallerException if the remote call failed.
+     */
+    public IInstalld.IFsveritySetupAuthToken createFsveritySetupAuthToken(
+            ParcelFileDescriptor authFd, int uid) throws InstallerException {
+        if (!checkBeforeRemote()) {
+            return null;
+        }
         try {
-            return mInstalld.compileLayouts(apkPath, packageName, outDexFile, uid);
-        } catch (RemoteException e) {
-            return false;
+            return mInstalld.createFsveritySetupAuthToken(authFd, uid);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
         }
     }
 
     /**
-     * Returns the visibility of the optimized artifacts.
+     * Enables fs-verity to the given app file.
      *
+     * @param authToken a token previously returned from {@link #createFsveritySetupAuthToken}.
+     * @param filePath file path of the package to enable fs-verity.
      * @param packageName name of the package.
-     * @param apkPath path to the APK.
-     * @param instructionSet instruction set of the optimized artifacts.
-     * @param outputPath path to the directory that contains the optimized artifacts (i.e., the
-     *   directory that {@link #dexopt} outputs to).
      *
-     * @return {@link #ODEX_NOT_FOUND} if the optimized artifacts are not found, or
-     *   {@link #ODEX_IS_PUBLIC} if the optimized artifacts are accessible by all apps, or
-     *   {@link #ODEX_IS_PRIVATE} if the optimized artifacts are only accessible by this app.
+     * @return 0 if the operation was successful, otherwise {@code errno}.
      *
-     * @throws InstallerException if failed to get the visibility of the optimized artifacts.
+     * @throws InstallerException if the remote call failed (e.g. see {@link #checkBeforeRemote}).
      */
-    public int getOdexVisibility(String packageName, String apkPath, String instructionSet,
-            String outputPath) throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
-        if (!checkBeforeRemote()) return -1;
-        BlockGuard.getVmPolicy().onPathAccess(apkPath);
-        BlockGuard.getVmPolicy().onPathAccess(outputPath);
+    public int enableFsverity(IInstalld.IFsveritySetupAuthToken authToken, String filePath,
+            String packageName) throws InstallerException {
+        if (!checkBeforeRemote()) {
+            throw new InstallerException("fs-verity wasn't enabled with an isolated installer");
+        }
+        BlockGuard.getVmPolicy().onPathAccess(filePath);
         try {
-            return mInstalld.getOdexVisibility(packageName, apkPath, instructionSet, outputPath);
+            return mInstalld.enableFsverity(authToken, filePath, packageName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -1180,16 +968,6 @@ public class Installer extends SystemService {
         // that may throw it.
         public LegacyDexoptDisabledException() {
             super("Invalid call to legacy dexopt method while ART Service is in use.");
-        }
-    }
-
-    /**
-     * Throws LegacyDexoptDisabledException if ART Service should be used instead of the
-     * {@link android.os.IInstalld} method that follows this method call.
-     */
-    public static void checkLegacyDexoptDisabled() throws LegacyDexoptDisabledException {
-        if (useArtService()) {
-            throw new LegacyDexoptDisabledException();
         }
     }
 }

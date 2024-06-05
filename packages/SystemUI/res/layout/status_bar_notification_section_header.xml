@@ -40,7 +40,7 @@
             android:layout_weight="1">
 
             <TextView
-                style="@style/TextAppearance.NotificationSectionHeaderButton"
+                style="@style/TextAppearance.NotificationSectionHeaderLabel"
                 android:id="@+id/header_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

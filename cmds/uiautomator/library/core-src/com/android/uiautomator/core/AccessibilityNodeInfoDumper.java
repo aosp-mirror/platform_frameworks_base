@@ -292,13 +292,17 @@ public class AccessibilityNodeInfoDumper {
         int childCount = node.getChildCount();
         for (int x = 0; x < childCount; x++) {
             AccessibilityNodeInfo childNode = node.getChild(x);
-
+            if (childNode == null) {
+                continue;
+            }
             if (!safeCharSeqToString(childNode.getContentDescription()).isEmpty()
-                    || !safeCharSeqToString(childNode.getText()).isEmpty())
+                    || !safeCharSeqToString(childNode.getText()).isEmpty()) {
                 return true;
+            }
 
-            if (childNafCheck(childNode))
+            if (childNafCheck(childNode)) {
                 return true;
+            }
         }
         return false;
     }

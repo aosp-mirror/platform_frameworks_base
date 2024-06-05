@@ -62,7 +62,8 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     @Override
     public void prepareForAuthentication(boolean requireConfirmation, IBinder token,
             long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
-            String opPackageName, long requestId, int cookie, boolean allowBackgroundAuthentication)
+            String opPackageName, long requestId, int cookie, boolean allowBackgroundAuthentication,
+            boolean isForLegacyFingerprintManager)
             throws RemoteException {
         mFaceService.prepareForAuthentication(requireConfirmation, token, operationId,
                 sensorReceiver, new FaceAuthenticateOptions.Builder()

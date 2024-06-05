@@ -49,6 +49,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserProperties;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -78,8 +79,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
     private final LocalService mLocalService = new LocalService();
 
-    private Context mContext;
-    private Injector mInjector;
+    private final Context mContext;
+    private final Injector mInjector;
 
     public CrossProfileAppsServiceImpl(Context context) {
         this(context, new InjectorImpl(context));
@@ -268,7 +269,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     private boolean canRequestInteractAcrossProfilesUnchecked(String packageName) {
         final int callingUserId = mInjector.getCallingUserId();
         final int[] enabledProfileIds =
-                mInjector.getUserManager().getEnabledProfileIds(callingUserId);
+                mInjector.getUserManager().getProfileIdsExcludingHidden(
+                        callingUserId, /* enabled= */ true);
         if (enabledProfileIds.length < 2) {
             return false;
         }
@@ -350,7 +352,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             String packageName, @UserIdInt int userId) {
         return mInjector.withCleanCallingIdentity(() -> {
             final int[] enabledProfileIds =
-                    mInjector.getUserManager().getEnabledProfileIds(userId);
+                    mInjector.getUserManager().getProfileIdsExcludingHidden(userId, /* enabled= */
+                            true);
 
             List<UserHandle> targetProfiles = new ArrayList<>();
             for (final int profileId : enabledProfileIds) {
@@ -466,7 +469,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             return;
         }
         final int[] profileIds =
-                mInjector.getUserManager().getProfileIds(userId, /* enabledOnly= */ false);
+                mInjector.getUserManager().getProfileIdsExcludingHidden(userId, /* enabled= */
+                        false);
         for (int profileId : profileIds) {
             if (!isPackageInstalled(packageName, profileId)) {
                 continue;
@@ -632,7 +636,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     private boolean canUserAttemptToConfigureInteractAcrossProfiles(
             String packageName, @UserIdInt int userId) {
         final int[] profileIds =
-                mInjector.getUserManager().getProfileIds(userId, /* enabledOnly= */ false);
+                mInjector.getUserManager().getProfileIdsExcludingHidden(userId, /* enabled= */
+                        false);
         if (profileIds.length < 2) {
             return false;
         }
@@ -676,7 +681,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     private boolean hasOtherProfileWithPackageInstalled(String packageName, @UserIdInt int userId) {
         return mInjector.withCleanCallingIdentity(() -> {
             final int[] profileIds =
-                    mInjector.getUserManager().getProfileIds(userId, /* enabledOnly= */ false);
+                    mInjector.getUserManager().getProfileIdsExcludingHidden(userId, /* enabled= */
+                            false);
             for (int profileId : profileIds) {
                 if (profileId != userId && isPackageInstalled(packageName, profileId)) {
                     return true;
@@ -783,7 +789,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     }
 
     private static class InjectorImpl implements Injector {
-        private Context mContext;
+        private final Context mContext;
 
         public InjectorImpl(Context context) {
             mContext = context;

@@ -17,13 +17,15 @@
 
 package com.android.systemui.statusbar
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.ExpandHelper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.util.mockito.mock
 import org.junit.Before
@@ -37,7 +39,7 @@ import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @TestableLooper.RunWithLooper
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class DragDownHelperTest : SysuiTestCase() {
 
     private lateinit var dragDownHelper: DragDownHelper
@@ -48,16 +50,19 @@ class DragDownHelperTest : SysuiTestCase() {
     private val dragDownloadCallback: LockscreenShadeTransitionController = mock()
     private val expandableView: ExpandableView = mock()
     private val expandCallback: ExpandHelper.Callback = mock()
+    private val naturalScrollingSettingObserver: NaturalScrollingSettingObserver = mock()
 
     @Before
     fun setUp() {
         whenever(expandableView.collapsedHeight).thenReturn(collapsedHeight)
+        whenever(naturalScrollingSettingObserver.isNaturalScrollingEnabled).thenReturn(true)
 
         dragDownHelper = DragDownHelper(
-                falsingManager,
-                falsingCollector,
-                dragDownloadCallback,
-                mContext
+            falsingManager,
+            dragDownloadCallback,
+            naturalScrollingSettingObserver,
+            FakeShadeRepository(),
+            mContext,
         ).also {
             it.expandCallback = expandCallback
         }

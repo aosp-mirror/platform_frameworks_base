@@ -58,6 +58,7 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.autofill.FillEventHistory;
+import android.service.autofill.Flags;
 import android.service.autofill.UserData;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
@@ -78,6 +79,7 @@ import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManager;
 import android.view.autofill.IAutoFillManagerClient;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AbstractRemoteService;
@@ -158,6 +160,7 @@ public final class AutofillManagerService
     final FrameworkResourcesServiceNameResolver mFieldClassificationResolver;
 
     private final AutoFillUI mUi;
+    final ComponentName mCredentialAutofillService;
 
     private final LocalLog mRequestsHistory = new LocalLog(20);
     private final LocalLog mUiLatencyHistory = new LocalLog(20);
@@ -223,6 +226,15 @@ public final class AutofillManagerService
     @GuardedBy("mFlagLock")
     private String mPccProviderHints;
 
+    @GuardedBy("mFlagLock")
+    private int mMaxInputLengthForAutofill;
+
+    @GuardedBy("mFlagLock")
+    private boolean mAutofillCredmanIntegrationEnabled;
+
+    @GuardedBy("mFlagLock")
+    private boolean mIsFillFieldsFromCurrentSessionOnly;
+
     // Default flag values for Autofill PCC
 
     private static final String DEFAULT_PCC_FEATURE_PROVIDER_HINTS = "";
@@ -277,6 +289,16 @@ public final class AutofillManagerService
                         mAugmentedAutofillResolver.getServiceName(userId),
                         mAugmentedAutofillResolver.isTemporary(userId));
             }
+        }
+        String credentialManagerAutofillCompName = context.getResources().getString(
+                R.string.config_defaultCredentialManagerAutofillService);
+        if (credentialManagerAutofillCompName != null
+                && !credentialManagerAutofillCompName.isEmpty()) {
+            mCredentialAutofillService = ComponentName.unflattenFromString(
+                    credentialManagerAutofillCompName);
+        } else {
+            mCredentialAutofillService = null;
+            Slog.w(TAG, "Invalid CredentialAutofillService");
         }
     }
 
@@ -353,6 +375,8 @@ public final class AutofillManagerService
                 case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS:
                 case AutofillFeatureFlags.DEVICE_CONFIG_PREFER_PROVIDER_OVER_PCC:
                 case AutofillFeatureFlags.DEVICE_CONFIG_PCC_USE_FALLBACK:
+                case AutofillFeatureFlags.DEVICE_CONFIG_FILL_FIELDS_FROM_CURRENT_SESSION_ONLY:
+                case Flags.FLAG_AUTOFILL_CREDMAN_INTEGRATION:
                     setDeviceConfigProperties();
                     break;
                 case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES:
@@ -405,7 +429,6 @@ public final class AutofillManagerService
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-
         return managerService;
     }
 
@@ -594,8 +617,6 @@ public final class AutofillManagerService
 
     // Called by Shell command.
     int getMaxPartitions() {
-        enforceCallingPermissionForManagement();
-
         synchronized (mLock) {
             return sPartitionMaxCount;
         }
@@ -628,8 +649,6 @@ public final class AutofillManagerService
 
     // Called by Shell command.
     int getMaxVisibleDatasets() {
-        enforceCallingPermissionForManagement();
-
         synchronized (sLock) {
             return sVisibleDatasetsMaxCount;
         }
@@ -698,12 +717,23 @@ public final class AutofillManagerService
                     DeviceConfig.NAMESPACE_AUTOFILL,
                     AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS,
                     DEFAULT_PCC_FEATURE_PROVIDER_HINTS);
+            mMaxInputLengthForAutofill = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_AUTOFILL,
+                    AutofillFeatureFlags.DEVICE_CONFIG_MAX_INPUT_LENGTH_FOR_AUTOFILL,
+                    AutofillFeatureFlags.DEFAULT_MAX_INPUT_LENGTH_FOR_AUTOFILL);
+            mAutofillCredmanIntegrationEnabled = Flags.autofillCredmanIntegration();
+            mIsFillFieldsFromCurrentSessionOnly = AutofillFeatureFlags
+                    .shouldFillFieldsFromCurrentSessionOnly();
             if (verbose) {
                 Slog.v(mTag, "setDeviceConfigProperties() for PCC: "
                         + "mPccClassificationEnabled=" + mPccClassificationEnabled
                         + ", mPccPreferProviderOverPcc=" + mPccPreferProviderOverPcc
                         + ", mPccUseFallbackDetection=" + mPccUseFallbackDetection
-                        + ", mPccProviderHints=" + mPccProviderHints);
+                        + ", mPccProviderHints=" + mPccProviderHints
+                        + ", mAutofillCredmanIntegrationEnabled="
+                        + mAutofillCredmanIntegrationEnabled
+                        + ", mIsFillFieldsFromCurrentSessionOnly="
+                        + mIsFillFieldsFromCurrentSessionOnly);
             }
         }
     }
@@ -962,6 +992,15 @@ public final class AutofillManagerService
     }
 
     /**
+     * Whether the Autofill-Credman integration feature flag is enabled.
+     */
+    public boolean isAutofillCredmanIntegrationEnabled() {
+        synchronized (mFlagLock) {
+            return mAutofillCredmanIntegrationEnabled;
+        }
+    }
+
+    /**
      * Whether the Autofill Provider shouldbe preferred over PCC results for selecting datasets.
      */
     public boolean preferProviderOverPcc() {
@@ -989,6 +1028,24 @@ public final class AutofillManagerService
     public String getPccProviderHints() {
         synchronized (mFlagLock) {
             return mPccProviderHints;
+        }
+    }
+
+    /**
+     * Return the max suggestion length
+     */
+    public int getMaxInputLengthForAutofill() {
+        synchronized (mFlagLock) {
+            return mMaxInputLengthForAutofill;
+        }
+    }
+
+    /**
+     * Return if autofill should only fill in fields from current session.
+     */
+    public boolean getIsFillFieldsFromCurrentSessionOnly() {
+        synchronized (mFlagLock) {
+            return mIsFillFieldsFromCurrentSessionOnly;
         }
     }
 
@@ -1568,13 +1625,13 @@ public final class AutofillManagerService
     final class AutoFillManagerServiceStub extends IAutoFillManager.Stub {
         @Override
         public void addClient(IAutoFillManagerClient client, ComponentName componentName,
-                int userId, IResultReceiver receiver) {
+                int userId, IResultReceiver receiver, boolean credmanRequested) {
             int flags = 0;
             try {
                 synchronized (mLock) {
                     final int enabledFlags =
                             getServiceForUserWithLocalBinderIdentityLocked(userId)
-                            .addClientLocked(client, componentName);
+                            .addClientLocked(client, componentName, credmanRequested);
                     if (enabledFlags != 0) {
                         flags |= enabledFlags;
                     }
@@ -1587,7 +1644,7 @@ public final class AutofillManagerService
                 }
             } catch (Exception ex) {
                 // Don't do anything, send back default flags
-                Log.wtf(TAG, "addClient(): failed " + ex.toString());
+                Log.wtf(TAG, "addClient(): failed " + ex.toString(), ex);
             } finally {
                 send(receiver, flags);
             }
@@ -1941,6 +1998,19 @@ public final class AutofillManagerService
         }
 
         @Override
+        public void setViewAutofilled(int sessionId, @NonNull AutofillId id, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
+                if (service != null) {
+                    service.setViewAutofilled(sessionId, getCallingUid(), id);
+                } else if (sVerbose) {
+                    Slog.v(TAG, "setAutofillFailure(): no service for " + userId);
+                }
+            }
+        }
+
+        @Override
         public void finishSession(int sessionId, int userId,
                 @AutofillCommitReason int commitReason) {
             synchronized (mLock) {
@@ -2084,6 +2154,9 @@ public final class AutofillManagerService
                         pw.print(";");
                         pw.print("mPccProviderHints=");
                         pw.println(mPccProviderHints);
+                        pw.print(";");
+                        pw.print("mAutofillCredmanIntegrationEnabled=");
+                        pw.println(mAutofillCredmanIntegrationEnabled);
                     }
                     // Dump per-user services
                     dumpLocked("", pw);

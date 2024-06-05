@@ -26,6 +26,8 @@ parcelable CameraOutputConfig
     Surface surface;
     int imageFormat;
     int capacity;
+    long usage;
+    long dynamicRangeProfile;
 
     const int TYPE_SURFACE = 0;
     const int TYPE_IMAGEREADER = 1;

@@ -39,6 +39,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
@@ -66,16 +67,21 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 
 import java.io.PrintWriter;
 import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Supplier;
 
 /**
  * Contains logic that deals with showing a rotate suggestion button with animation.
  */
 public class RotationButtonController {
+    public static final boolean DEBUG_ROTATION = false;
 
     private static final String TAG = "RotationButtonController";
     private static final int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
     private static final int NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS = 20000;
+    private static final boolean OEM_DISALLOW_ROTATION_IN_SUW =
+            SystemProperties.getBoolean("ro.setupwizard.rotation_locked", false);
     private static final Interpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
 
     private static final int NUM_ACCEPTED_ROTATION_SUGGESTIONS_FOR_INTRODUCTION = 3;
@@ -116,6 +122,8 @@ public class RotationButtonController {
     private final int mIconCwStart0ResId;
     @DrawableRes
     private final int mIconCwStart90ResId;
+    /** Defaults to mainExecutor if not set via {@link #setBgExecutor(Executor)}. */
+    private Executor mBgExecutor;
 
     @DrawableRes
     private int mIconResId;
@@ -175,6 +183,8 @@ public class RotationButtonController {
         mAccessibilityManager = AccessibilityManager.getInstance(context);
         mTaskStackListener = new TaskStackListenerImpl();
         mWindowRotationProvider = windowRotationProvider;
+
+        mBgExecutor = context.getMainExecutor();
     }
 
     public void setRotationButton(RotationButton rotationButton,
@@ -188,6 +198,14 @@ public class RotationButtonController {
 
     public Context getContext() {
         return mContext;
+    }
+
+    /**
+     * We should pass single threaded executor (rather than {@link ThreadPoolExecutor}) as we will
+     * make binder calls on that executor and ordering is vital.
+     */
+    public void setBgExecutor(Executor bgExecutor) {
+        mBgExecutor = bgExecutor;
     }
 
     /**
@@ -216,22 +234,22 @@ public class RotationButtonController {
 
         mListenersRegistered = true;
 
-        updateDockedState(mContext.registerReceiver(mDockedReceiver,
-                new IntentFilter(Intent.ACTION_DOCK_EVENT)));
-
-        if (registerRotationWatcher) {
-            try {
-                WindowManagerGlobal.getWindowManagerService()
-                        .watchRotation(mRotationWatcher, DEFAULT_DISPLAY);
-                mRotationWatcherRegistered = true;
-            } catch (IllegalArgumentException e) {
-                mListenersRegistered = false;
-                Log.w(TAG, "RegisterListeners for the display failed", e);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RegisterListeners caught a RemoteException", e);
-                return;
+        mBgExecutor.execute(() -> {
+            if (registerRotationWatcher) {
+                try {
+                    WindowManagerGlobal.getWindowManagerService()
+                            .watchRotation(mRotationWatcher, DEFAULT_DISPLAY);
+                    mRotationWatcherRegistered = true;
+                } catch (IllegalArgumentException e) {
+                    Log.w(TAG, "RegisterListeners for the display failed", e);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RegisterListeners caught a RemoteException", e);
+                }
             }
-        }
+            final Intent intent = mContext.registerReceiver(mDockedReceiver,
+                    new IntentFilter(Intent.ACTION_DOCK_EVENT));
+            mContext.getMainExecutor().execute(() -> updateDockedState(intent));
+        });
 
         TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
     }
@@ -243,32 +261,49 @@ public class RotationButtonController {
 
         mListenersRegistered = false;
 
-        try {
-            mContext.unregisterReceiver(mDockedReceiver);
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Docked receiver already unregistered", e);
-        }
-
-        if (mRotationWatcherRegistered) {
+        mBgExecutor.execute(() -> {
             try {
-                WindowManagerGlobal.getWindowManagerService().removeRotationWatcher(
-                        mRotationWatcher);
-            } catch (RemoteException e) {
-                Log.e(TAG, "UnregisterListeners caught a RemoteException", e);
-                return;
+                mContext.unregisterReceiver(mDockedReceiver);
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Docked receiver already unregistered", e);
             }
-        }
+
+            if (mRotationWatcherRegistered) {
+                try {
+                    WindowManagerGlobal.getWindowManagerService().removeRotationWatcher(
+                            mRotationWatcher);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "UnregisterListeners caught a RemoteException", e);
+                }
+            }
+        });
 
         TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
     }
 
-    public void setRotationLockedAtAngle(int rotationSuggestion) {
-        RotationPolicy.setRotationLockAtAngle(mContext, /* enabled= */ isRotationLocked(),
-                /* rotation= */ rotationSuggestion);
+    public void setRotationLockedAtAngle(int rotationSuggestion, String caller) {
+        final Boolean isLocked = isRotationLocked();
+        if (isLocked == null) {
+            // Ignore if we can't read the setting for the current user
+            return;
+        }
+        RotationPolicy.setRotationLockAtAngle(mContext, /* enabled= */ isLocked,
+                /* rotation= */ rotationSuggestion, caller);
     }
 
-    public boolean isRotationLocked() {
-        return RotationPolicy.isRotationLocked(mContext);
+    /**
+     * @return whether rotation is currently locked, or <code>null</code> if the setting couldn't
+     *         be read
+     */
+    public Boolean isRotationLocked() {
+        try {
+            return RotationPolicy.isRotationLocked(mContext);
+        } catch (SecurityException e) {
+            // TODO(b/279561841): RotationPolicy uses the current user to resolve the setting which
+            //                    may change before the rotation watcher can be unregistered
+            Log.e(TAG, "Failed to get isRotationLocked", e);
+            return null;
+        }
     }
 
     public void setRotateSuggestionButtonState(boolean visible) {
@@ -375,6 +410,12 @@ public class RotationButtonController {
     }
 
     public void onRotationProposal(int rotation, boolean isValid) {
+        boolean isUserSetupComplete = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, 0) != 0;
+        if (!isUserSetupComplete && OEM_DISALLOW_ROTATION_IN_SUW) {
+            return;
+        }
+
         int windowRotation = mWindowRotationProvider.get();
 
         if (!mRotationButton.acceptRotationProposal()) {
@@ -436,13 +477,18 @@ public class RotationButtonController {
 
         // If the screen rotation changes while locked, potentially update lock to flow with
         // new screen rotation and hide any showing suggestions.
-        boolean rotationLocked = isRotationLocked();
+        Boolean rotationLocked = isRotationLocked();
+        if (rotationLocked == null) {
+            // Ignore if we can't read the setting for the current user
+            return;
+        }
         // The isVisible check makes the rotation button disappear when we are not locked
         // (e.g. for tabletop auto-rotate).
         if (rotationLocked || mRotationButton.isVisible()) {
             // Do not allow a change in rotation to set user rotation when docked.
             if (shouldOverrideUserLockPrefs(rotation) && rotationLocked && !mDocked) {
-                setRotationLockedAtAngle(rotation);
+                setRotationLockedAtAngle(rotation, /* caller= */
+                        "RotationButtonController#onRotationWatcherChanged");
             }
             setRotateSuggestionButtonState(false /* visible */, true /* forced */);
         }
@@ -497,8 +543,7 @@ public class RotationButtonController {
     boolean canShowRotationButton() {
         return mIsNavigationBarShowing
             || mBehavior == WindowInsetsController.BEHAVIOR_DEFAULT
-            || isGesturalMode(mNavBarMode)
-            || mTaskBarVisible;
+            || isGesturalMode(mNavBarMode);
     }
 
     @DrawableRes
@@ -547,7 +592,8 @@ public class RotationButtonController {
     private void onRotateSuggestionClick(View v) {
         mUiEventLogger.log(RotationButtonEvent.ROTATION_SUGGESTION_ACCEPTED);
         incrementNumAcceptedRotationSuggestionsIfNeeded();
-        setRotationLockedAtAngle(mLastRotationSuggestion);
+        setRotationLockedAtAngle(mLastRotationSuggestion,
+                /* caller= */ "RotationButtonController#onRotateSuggestionClick");
         Log.i(TAG, "onRotateSuggestionClick() mLastRotationSuggestion=" + mLastRotationSuggestion);
         v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
@@ -655,13 +701,18 @@ public class RotationButtonController {
 
         @Override
         public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) {
-            // Only hide the icon if the top task changes its requestedOrientation
-            // Launcher can alter its requestedOrientation while it's not on top, don't hide on this
-            Optional.ofNullable(ActivityManagerWrapper.getInstance())
-                    .map(ActivityManagerWrapper::getRunningTask)
-                    .ifPresent(a -> {
-                        if (a.id == taskId) setRotateSuggestionButtonState(false /* visible */);
-                    });
+            mBgExecutor.execute(() -> {
+                // Only hide the icon if the top task changes its requestedOrientation Launcher can
+                // alter its requestedOrientation while it's not on top, don't hide on this
+                Optional.ofNullable(ActivityManagerWrapper.getInstance())
+                        .map(ActivityManagerWrapper::getRunningTask)
+                        .ifPresent(a -> {
+                            if (a.id == taskId) {
+                                mMainThreadHandler.post(() ->
+                                        setRotateSuggestionButtonState(false /* visible */));
+                            }
+                        });
+            });
         }
     }
 

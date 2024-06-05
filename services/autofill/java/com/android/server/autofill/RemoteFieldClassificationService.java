@@ -69,6 +69,9 @@ final class RemoteFieldClassificationService
         void onClassificationRequestFailure(int requestId, @Nullable CharSequence message);
         void onClassificationRequestTimeout(int requestId);
         void onServiceDied(@NonNull RemoteFieldClassificationService service);
+        void logFieldClassificationEvent(
+                long startTime, @NonNull FieldClassificationResponse response,
+                @FieldClassificationEventLogger.FieldClassificationStatus int status);
     }
 
     RemoteFieldClassificationService(Context context, ComponentName serviceName,
@@ -149,15 +152,24 @@ final class RemoteFieldClassificationService
                                 new IFieldClassificationCallback.Stub() {
                                     @Override
                                     public void onCancellable(ICancellationSignal cancellation) {
-                                        logLatency(startTime);
                                         if (sDebug) {
                                             Log.d(TAG, "onCancellable");
                                         }
+                                        FieldClassificationServiceCallbacks
+                                                fieldClassificationServiceCallbacks =
+                                                Helper.weakDeref(
+                                                        fieldClassificationServiceCallbacksWeakRef,
+                                                        TAG, "onCancellable "
+                                                );
+                                        logFieldClassificationEvent(
+                                                startTime,
+                                                fieldClassificationServiceCallbacks,
+                                                FieldClassificationEventLogger.STATUS_CANCELLED,
+                                                null);
                                     }
 
                                     @Override
                                     public void onSuccess(FieldClassificationResponse response) {
-                                        logLatency(startTime);
                                         if (sDebug) {
                                             if (Build.IS_DEBUGGABLE) {
                                                 Slog.d(TAG, "onSuccess Response: " + response);
@@ -179,6 +191,11 @@ final class RemoteFieldClassificationService
                                                                 fieldClassificationServiceCallbacksWeakRef,
                                                                 TAG, "onSuccess "
                                                         );
+                                        logFieldClassificationEvent(
+                                                startTime,
+                                                fieldClassificationServiceCallbacks,
+                                                FieldClassificationEventLogger.STATUS_SUCCESS,
+                                                response);
                                         if (fieldClassificationServiceCallbacks == null) {
                                             return;
                                         }
@@ -188,7 +205,6 @@ final class RemoteFieldClassificationService
 
                                     @Override
                                     public void onFailure() {
-                                        logLatency(startTime);
                                         if (sDebug) {
                                             Slog.d(TAG, "onFailure");
                                         }
@@ -198,6 +214,11 @@ final class RemoteFieldClassificationService
                                                                 fieldClassificationServiceCallbacksWeakRef,
                                                                 TAG, "onFailure "
                                                         );
+                                        logFieldClassificationEvent(
+                                                startTime,
+                                                fieldClassificationServiceCallbacks,
+                                                FieldClassificationEventLogger.STATUS_FAIL,
+                                                null);
                                         if (fieldClassificationServiceCallbacks == null) {
                                             return;
                                         }
@@ -215,11 +236,24 @@ final class RemoteFieldClassificationService
                                 }));
     }
 
-    private void logLatency(long startTime) {
-        final FieldClassificationEventLogger logger = FieldClassificationEventLogger.createLogger();
-        logger.startNewLogForRequest();
-        logger.maybeSetLatencyMillis(
-                SystemClock.elapsedRealtime() - startTime);
-        logger.logAndEndEvent();
+    private void logFieldClassificationEvent(
+            long startTime,
+            @Nullable FieldClassificationServiceCallbacks fieldClassificationServiceCallbacks,
+            @FieldClassificationEventLogger.FieldClassificationStatus int status,
+            FieldClassificationResponse response) {
+        if (fieldClassificationServiceCallbacks == null) {
+            final FieldClassificationEventLogger logger =
+                    FieldClassificationEventLogger.createLogger();
+            logger.startNewLogForRequest();
+            logger.maybeSetLatencyMillis(
+                    SystemClock.elapsedRealtime() - startTime);
+            logger.maybeSetSessionGc(true);
+            logger.maybeSetRequestStatus(status);
+            logger.logAndEndEvent();
+        } else {
+            fieldClassificationServiceCallbacks.logFieldClassificationEvent(
+                    startTime, response, status);
+        }
+
     }
 }

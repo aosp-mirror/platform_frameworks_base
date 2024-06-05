@@ -20,6 +20,7 @@ import static android.app.ActivityManager.INSTR_FLAG_ALWAYS_CHECK_SIGNATURE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_ISOLATED_STORAGE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
+import static android.app.ActivityManager.INSTR_FLAG_INSTRUMENT_SDK_IN_SANDBOX;
 import static android.app.ActivityManager.INSTR_FLAG_INSTRUMENT_SDK_SANDBOX;
 import static android.app.ActivityManager.INSTR_FLAG_NO_RESTART;
 
@@ -84,6 +85,7 @@ public class Instrument {
     public String profileFile = null;
     public boolean wait = false;
     public boolean rawMode = false;
+    public boolean captureLogcat = true;
     boolean protoStd = false;  // write proto to stdout
     boolean protoFile = false;  // write proto to a file
     String logPath = null;
@@ -99,6 +101,7 @@ public class Instrument {
     public String componentNameArg;
     public boolean alwaysCheckSignature = false;
     public boolean instrumentSdkSandbox = false;
+    public boolean instrumentSdkInSandbox = false;
 
     /**
      * Construct the instrument command runner.
@@ -264,16 +267,18 @@ public class Instrument {
             proto.write(InstrumentationData.TestStatus.RESULT_CODE, resultCode);
             writeBundle(proto, InstrumentationData.TestStatus.RESULTS, results);
 
-            if (resultCode == STATUS_TEST_STARTED) {
-                // Logcat -T takes wall clock time (!?)
-                mTestStartMs = System.currentTimeMillis();
-            } else {
-                if (mTestStartMs > 0) {
-                    proto.write(InstrumentationData.TestStatus.LOGCAT, readLogcat(mTestStartMs));
+            if (captureLogcat) {
+                if (resultCode == STATUS_TEST_STARTED) {
+                    // Logcat -T takes wall clock time (!?)
+                    mTestStartMs = System.currentTimeMillis();
+                } else {
+                    if (mTestStartMs > 0) {
+                        proto.write(InstrumentationData.TestStatus.LOGCAT,
+                                readLogcat(mTestStartMs));
+                    }
+                    mTestStartMs = 0;
                 }
-                mTestStartMs = 0;
             }
-
             proto.end(testStatusToken);
 
             outputProto(proto);
@@ -529,6 +534,9 @@ public class Instrument {
             }
             if (instrumentSdkSandbox) {
                 flags |= INSTR_FLAG_INSTRUMENT_SDK_SANDBOX;
+            }
+            if (instrumentSdkInSandbox) {
+                flags |= INSTR_FLAG_INSTRUMENT_SDK_IN_SANDBOX;
             }
             if (!mAm.startInstrumentation(cn, profileFile, flags, args, watcher, connection, userId,
                         abi)) {

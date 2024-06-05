@@ -20,7 +20,7 @@ package com.android.systemui.user.legacyhelper.ui
 import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.user.data.source.UserRecord
 
 /**
@@ -42,13 +42,13 @@ object LegacyUserUiHelper {
         isManageUsers: Boolean,
     ): Int {
         return if (isAddUser && isTablet) {
-            R.drawable.ic_account_circle_filled
+            com.android.settingslib.R.drawable.ic_account_circle_filled
         } else if (isAddUser) {
             R.drawable.ic_add
         } else if (isGuest) {
-            R.drawable.ic_account_circle
+            com.android.settingslib.R.drawable.ic_account_circle
         } else if (isAddSupervisedUser) {
-            R.drawable.ic_add_supervised_user
+            com.android.settingslib.R.drawable.ic_add_supervised_user
         } else if (isManageUsers) {
             R.drawable.ic_manage_users
         } else {

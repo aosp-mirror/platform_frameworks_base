@@ -16,10 +16,13 @@
 
 package com.android.server.inputmethod;
 
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -34,16 +37,19 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
+import android.view.Display;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.IInputMethod;
+import com.android.internal.inputmethod.InlineSuggestionsRequestCallback;
+import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.server.EventLogTags;
@@ -61,24 +67,26 @@ final class InputMethodBindingController {
     /** Time in milliseconds that the IME service has to bind before it is reconnected. */
     static final long TIME_TO_RECONNECT = 3 * 1000;
 
+    @UserIdInt final int mUserId;
     @NonNull private final InputMethodManagerService mService;
     @NonNull private final Context mContext;
-    @NonNull private final ArrayMap<String, InputMethodInfo> mMethodMap;
-    @NonNull private final InputMethodUtils.InputMethodSettings mSettings;
+    @NonNull private final AutofillSuggestionsController mAutofillController;
     @NonNull private final PackageManagerInternal mPackageManagerInternal;
     @NonNull private final WindowManagerInternal mWindowManagerInternal;
 
     @GuardedBy("ImfLock.class") private long mLastBindTime;
-    @GuardedBy("ImfLock.class") private boolean mHasConnection;
+    @GuardedBy("ImfLock.class") private boolean mHasMainConnection;
     @GuardedBy("ImfLock.class") @Nullable private String mCurId;
     @GuardedBy("ImfLock.class") @Nullable private String mSelectedMethodId;
     @GuardedBy("ImfLock.class") @Nullable private Intent mCurIntent;
     @GuardedBy("ImfLock.class") @Nullable private IInputMethodInvoker mCurMethod;
     @GuardedBy("ImfLock.class") private int mCurMethodUid = Process.INVALID_UID;
     @GuardedBy("ImfLock.class") @Nullable private IBinder mCurToken;
+    @GuardedBy("ImfLock.class") private int mCurTokenDisplayId = Display.INVALID_DISPLAY;
     @GuardedBy("ImfLock.class") private int mCurSeq;
     @GuardedBy("ImfLock.class") private boolean mVisibleBound;
     @GuardedBy("ImfLock.class") private boolean mSupportsStylusHw;
+    @GuardedBy("ImfLock.class") private boolean mSupportsConnectionlessStylusHw;
 
     @Nullable private CountDownLatch mLatchForTesting;
 
@@ -106,16 +114,18 @@ final class InputMethodBindingController {
                     | Context.BIND_INCLUDE_CAPABILITIES
                     | Context.BIND_SHOWING_UI;
 
-    InputMethodBindingController(@NonNull InputMethodManagerService service) {
-        this(service, IME_CONNECTION_BIND_FLAGS, null /* latchForTesting */);
+    InputMethodBindingController(@UserIdInt int userId,
+            @NonNull InputMethodManagerService service) {
+        this(userId, service, IME_CONNECTION_BIND_FLAGS, null /* latchForTesting */);
     }
 
-    InputMethodBindingController(@NonNull InputMethodManagerService service,
-            int imeConnectionBindFlags, CountDownLatch latchForTesting) {
+    InputMethodBindingController(@UserIdInt int userId,
+            @NonNull InputMethodManagerService service, int imeConnectionBindFlags,
+            CountDownLatch latchForTesting) {
+        mUserId = userId;
         mService = service;
         mContext = mService.mContext;
-        mMethodMap = mService.mMethodMap;
-        mSettings = mService.mSettings;
+        mAutofillController = new AutofillSuggestionsController(this);
         mPackageManagerInternal = mService.mPackageManagerInternal;
         mWindowManagerInternal = mService.mWindowManagerInternal;
         mImeConnectionBindFlags = imeConnectionBindFlags;
@@ -136,8 +146,8 @@ final class InputMethodBindingController {
      * a service (whether or not we have gotten its IBinder back yet).
      */
     @GuardedBy("ImfLock.class")
-    boolean hasConnection() {
-        return mHasConnection;
+    boolean hasMainConnection() {
+        return mHasMainConnection;
     }
 
     /**
@@ -186,6 +196,17 @@ final class InputMethodBindingController {
     @Nullable
     IBinder getCurToken() {
         return mCurToken;
+    }
+
+    /**
+     * Returns the displayId associated with {@link #getCurToken()}.
+     *
+     * @return the displayId associated with {@link #getCurToken()}. {@link Display#INVALID_DISPLAY}
+     *         while {@link #getCurToken()} returns {@code null}
+     */
+    @GuardedBy("ImfLock.class")
+    int getCurTokenDisplayId() {
+        return mCurTokenDisplayId;
     }
 
     /**
@@ -247,8 +268,15 @@ final class InputMethodBindingController {
     /**
      * Returns {@code true} if current IME supports Stylus Handwriting.
      */
+    @GuardedBy("ImfLock.class")
     boolean supportsStylusHandwriting() {
         return mSupportsStylusHw;
+    }
+
+    /** Returns whether the current IME supports connectionless stylus handwriting sessions. */
+    @GuardedBy("ImfLock.class")
+    boolean supportsConnectionlessStylusHandwriting() {
+        return mSupportsConnectionlessStylusHw;
     }
 
     /**
@@ -258,7 +286,7 @@ final class InputMethodBindingController {
     private final ServiceConnection mVisibleConnection = new ServiceConnection() {
         @Override public void onBindingDied(ComponentName name) {
             synchronized (ImfLock.class) {
-                mService.invalidateAutofillSessionLocked();
+                mAutofillController.invalidateAutofillSession();
                 if (isVisibleBound()) {
                     unbindVisibleConnection();
                 }
@@ -270,7 +298,7 @@ final class InputMethodBindingController {
 
         @Override public void onServiceDisconnected(ComponentName name) {
             synchronized (ImfLock.class) {
-                mService.invalidateAutofillSessionLocked();
+                mAutofillController.invalidateAutofillSession();
             }
         }
     };
@@ -294,12 +322,28 @@ final class InputMethodBindingController {
                         return;
                     }
                     if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
-                    final InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
+                    final InputMethodInfo info =
+                            InputMethodSettingsRepository.get(mUserId).getMethodMap().get(
+                                    mSelectedMethodId);
+                    boolean supportsStylusHwChanged =
+                            mSupportsStylusHw != info.supportsStylusHandwriting();
                     mSupportsStylusHw = info.supportsStylusHandwriting();
+                    if (supportsStylusHwChanged) {
+                        InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
+                    }
+                    boolean supportsConnectionlessStylusHwChanged =
+                            mSupportsConnectionlessStylusHw
+                                    != info.supportsConnectionlessStylusHandwriting();
+                    if (supportsConnectionlessStylusHwChanged) {
+                        mSupportsConnectionlessStylusHw =
+                                info.supportsConnectionlessStylusHandwriting();
+                        InputMethodManager
+                                .invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches();
+                    }
                     mService.initializeImeLocked(mCurMethod, mCurToken);
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
                     mService.reRequestCurrentClientSessionLocked();
-                    mService.performOnCreateInlineSuggestionsRequestLocked();
+                    mAutofillController.performOnCreateInlineSuggestionsRequest();
                 }
 
                 // reset Handwriting event receiver.
@@ -318,7 +362,7 @@ final class InputMethodBindingController {
         private void updateCurrentMethodUid() {
             final String curMethodPackage = mCurIntent.getComponent().getPackageName();
             final int curMethodUid = mPackageManagerInternal.getPackageUid(
-                    curMethodPackage, 0 /* flags */, mSettings.getCurrentUserId());
+                    curMethodPackage, 0 /* flags */, mUserId);
             if (curMethodUid < 0) {
                 Slog.e(TAG, "Failed to get UID for package=" + curMethodPackage);
                 mCurMethodUid = Process.INVALID_UID;
@@ -358,18 +402,37 @@ final class InputMethodBindingController {
     };
 
     @GuardedBy("ImfLock.class")
+    void invalidateAutofillSession() {
+        mAutofillController.invalidateAutofillSession();
+    }
+
+    @GuardedBy("ImfLock.class")
+    void onCreateInlineSuggestionsRequest(InlineSuggestionsRequestInfo requestInfo,
+            InlineSuggestionsRequestCallback callback, boolean touchExplorationEnabled) {
+        mAutofillController.onCreateInlineSuggestionsRequest(requestInfo, callback,
+                touchExplorationEnabled);
+    }
+
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    IBinder getCurHostInputToken() {
+        return mAutofillController.getCurHostInputToken();
+    }
+
+    @GuardedBy("ImfLock.class")
     void unbindCurrentMethod() {
         if (isVisibleBound()) {
             unbindVisibleConnection();
         }
 
-        if (hasConnection()) {
+        if (hasMainConnection()) {
             unbindMainConnection();
         }
 
         if (getCurToken() != null) {
             removeCurrentToken();
             mService.resetSystemUiLocked();
+            mAutofillController.onResetSystemUi();
         }
 
         mCurId = null;
@@ -385,15 +448,14 @@ final class InputMethodBindingController {
 
     @GuardedBy("ImfLock.class")
     private void removeCurrentToken() {
-        int curTokenDisplayId = mService.getCurTokenDisplayIdLocked();
-
         if (DEBUG) {
             Slog.v(TAG,
-                    "Removing window token: " + mCurToken + " for display: " + curTokenDisplayId);
+                    "Removing window token: " + mCurToken + " for display: " + mCurTokenDisplayId);
         }
-        mWindowManagerInternal.removeWindowToken(mCurToken, false /* removeWindows */,
-                false /* animateExit */, curTokenDisplayId);
+        mWindowManagerInternal.removeWindowToken(mCurToken, true /* removeWindows */,
+                false /* animateExit */, mCurTokenDisplayId);
         mCurToken = null;
+        mCurTokenDisplayId = Display.INVALID_DISPLAY;
     }
 
     @GuardedBy("ImfLock.class")
@@ -404,7 +466,8 @@ final class InputMethodBindingController {
             return InputBindResult.NO_IME;
         }
 
-        InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
+        InputMethodInfo info = InputMethodSettingsRepository.get(mUserId).getMethodMap().get(
+                mSelectedMethodId);
         if (info == null) {
             throw new IllegalArgumentException("Unknown id: " + mSelectedMethodId);
         }
@@ -415,10 +478,19 @@ final class InputMethodBindingController {
             mCurId = info.getId();
             mLastBindTime = SystemClock.uptimeMillis();
 
-            addFreshWindowToken();
+            final int displayIdToShowIme = mService.getDisplayIdToShowImeLocked();
+            mCurToken = new Binder();
+            mCurTokenDisplayId = displayIdToShowIme;
+            if (DEBUG) {
+                Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
+                        + displayIdToShowIme);
+            }
+            mWindowManagerInternal.addWindowToken(mCurToken,
+                    WindowManager.LayoutParams.TYPE_INPUT_METHOD,
+                    displayIdToShowIme, null /* options */);
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                    null, null, null, mCurId, mCurSeq, null, false);
+                    null, null, null, mCurId, mCurSeq, false);
         }
 
         Slog.w(InputMethodManagerService.TAG,
@@ -433,32 +505,19 @@ final class InputMethodBindingController {
         intent.setComponent(component);
         intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                 com.android.internal.R.string.input_method_binding_label);
+        var options = ActivityOptions.makeBasic()
+                .setPendingIntentCreatorBackgroundActivityStartMode(
+                        MODE_BACKGROUND_ACTIVITY_START_DENIED);
         intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                 mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS),
-                PendingIntent.FLAG_IMMUTABLE));
+                PendingIntent.FLAG_IMMUTABLE, options.toBundle()));
         return intent;
-    }
-
-    @GuardedBy("ImfLock.class")
-    private void addFreshWindowToken() {
-        int displayIdToShowIme = mService.getDisplayIdToShowImeLocked();
-        mCurToken = new Binder();
-
-        mService.setCurTokenDisplayIdLocked(displayIdToShowIme);
-
-        if (DEBUG) {
-            Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
-                    + displayIdToShowIme);
-        }
-        mWindowManagerInternal.addWindowToken(mCurToken,
-                WindowManager.LayoutParams.TYPE_INPUT_METHOD,
-                displayIdToShowIme, null /* options */);
     }
 
     @GuardedBy("ImfLock.class")
     private void unbindMainConnection() {
         mContext.unbindService(mMainConnection);
-        mHasConnection = false;
+        mHasMainConnection = false;
     }
 
     @GuardedBy("ImfLock.class")
@@ -473,14 +532,14 @@ final class InputMethodBindingController {
             Slog.e(TAG, "--- bind failed: service = " + mCurIntent + ", conn = " + conn);
             return false;
         }
-        return mContext.bindServiceAsUser(mCurIntent, conn, flags,
-                new UserHandle(mSettings.getCurrentUserId()));
+        return mContext.bindServiceAsUser(mCurIntent, conn, flags, new UserHandle(mUserId));
     }
 
     @GuardedBy("ImfLock.class")
     private boolean bindCurrentInputMethodServiceMainConnection() {
-        mHasConnection = bindCurrentInputMethodService(mMainConnection, mImeConnectionBindFlags);
-        return mHasConnection;
+        mHasMainConnection = bindCurrentInputMethodService(mMainConnection,
+                mImeConnectionBindFlags);
+        return mHasMainConnection;
     }
 
     /**
@@ -493,7 +552,7 @@ final class InputMethodBindingController {
     void setCurrentMethodVisible() {
         if (mCurMethod != null) {
             if (DEBUG) Slog.d(TAG, "setCurrentMethodVisible: mCurToken=" + mCurToken);
-            if (hasConnection() && !isVisibleBound()) {
+            if (hasMainConnection() && !isVisibleBound()) {
                 mVisibleBound = bindCurrentInputMethodService(mVisibleConnection,
                         IME_VISIBLE_BIND_FLAGS);
             }
@@ -501,7 +560,7 @@ final class InputMethodBindingController {
         }
 
         // No IME is currently connected. Reestablish the main connection.
-        if (!hasConnection()) {
+        if (!hasMainConnection()) {
             if (DEBUG) {
                 Slog.d(TAG, "Cannot show input: no IME bound. Rebinding.");
             }
@@ -522,7 +581,7 @@ final class InputMethodBindingController {
             bindCurrentInputMethodServiceMainConnection();
         } else {
             if (DEBUG) {
-                Slog.d(TAG, "Can't show input: connection = " + mHasConnection + ", time = "
+                Slog.d(TAG, "Can't show input: connection = " + mHasMainConnection + ", time = "
                         + (TIME_TO_RECONNECT - bindingDuration));
             }
         }

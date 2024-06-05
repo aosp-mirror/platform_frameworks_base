@@ -37,8 +37,8 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -53,7 +53,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
             new ArrayMap<>();
     private final ArrayList<PendingTransition> mPending = new ArrayList<>();
     private final Transitions mTransitions;
-    private final boolean[] mRegistered = new boolean[]{ false };
+    private final boolean[] mRegistered = new boolean[]{false};
 
     /**
      * TaskView makes heavy use of startTransition. Only one shell-initiated transition can be
@@ -122,6 +122,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     /**
      * Looks through the pending transitions for a closing transaction that matches the provided
      * `taskView`.
+     *
      * @param taskView the pending transition should be for this.
      */
     private PendingTransition findPendingCloseTransition(TaskViewTaskController taskView) {
@@ -135,8 +136,17 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     }
 
     /**
+     * Starts a transition outside of the handler associated with {@link TaskViewTransitions}.
+     */
+    public void startInstantTransition(@WindowManager.TransitionType int type,
+            WindowContainerTransaction wct) {
+        mTransitions.startTransition(type, wct, null);
+    }
+
+    /**
      * Looks through the pending transitions for a opening transaction that matches the provided
      * `taskView`.
+     *
      * @param taskView the pending transition should be for this.
      */
     @VisibleForTesting
@@ -152,8 +162,9 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
 
     /**
      * Looks through the pending transitions for one matching `taskView`.
+     *
      * @param taskView the pending transition should be for this.
-     * @param type the type of transition it's looking for
+     * @param type     the type of transition it's looking for
      */
     PendingTransition findPending(TaskViewTaskController taskView, int type) {
         for (int i = mPending.size() - 1; i >= 0; --i) {
@@ -163,19 +174,6 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
             }
         }
         return null;
-    }
-
-    /**
-     * Returns all the pending transitions for a given `taskView`.
-     * @param taskView the pending transition should be for this.
-     */
-    ArrayList<PendingTransition> findAllPending(TaskViewTaskController taskView) {
-        ArrayList<PendingTransition> list = new ArrayList<>();
-        for (int i = mPending.size() - 1; i >= 0; --i) {
-            if (mPending.get(i).mTaskView != taskView) continue;
-            list.add(mPending.get(i));
-        }
-        return list;
     }
 
     private PendingTransition findPending(IBinder claimed) {
@@ -202,15 +200,10 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         if (taskView == null) return null;
         // Opening types should all be initiated by shell
         if (!TransitionUtil.isClosingType(request.getType())) return null;
-        PendingTransition pending = findPendingCloseTransition(taskView);
-        if (pending == null) {
-            pending = new PendingTransition(request.getType(), null, taskView, null /* cookie */);
-        }
-        if (pending.mClaimed != null) {
-            throw new IllegalStateException("Task is closing in 2 collecting transitions?"
-                    + " This state doesn't make sense");
-        }
+        PendingTransition pending = new PendingTransition(request.getType(), null,
+                taskView, null /* cookie */);
         pending.mClaimed = transition;
+        mPending.add(pending);
         return new WindowContainerTransaction();
     }
 
@@ -238,7 +231,24 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         startNextTransition();
     }
 
-    void setTaskViewVisible(TaskViewTaskController taskView, boolean visible) {
+    /** Starts a new transition to make the given {@code taskView} visible. */
+    public void setTaskViewVisible(TaskViewTaskController taskView, boolean visible) {
+        setTaskViewVisible(taskView, visible, false /* reorder */);
+    }
+
+    /**
+     * Starts a new transition to make the given {@code taskView} visible and optionally change
+     * the task order.
+     *
+     * @param taskView the task view which the visibility is being changed for
+     * @param visible  the new visibility of the task view
+     * @param reorder  whether to reorder the task or not. If this is {@code true}, the task will be
+     *                 reordered as per the given {@code visible}. For {@code visible = true}, task
+     *                 will be reordered to top. For {@code visible = false}, task will be reordered
+     *                 to the bottom
+     */
+    public void setTaskViewVisible(TaskViewTaskController taskView, boolean visible,
+            boolean reorder) {
         if (mTaskViews.get(taskView) == null) return;
         if (mTaskViews.get(taskView).mVisible == visible) return;
         if (taskView.getTaskInfo() == null) {
@@ -249,8 +259,27 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setHidden(taskView.getTaskInfo().token, !visible /* hidden */);
         wct.setBounds(taskView.getTaskInfo().token, mTaskViews.get(taskView).mBounds);
+        if (reorder) {
+            wct.reorder(taskView.getTaskInfo().token, visible /* onTop */);
+        }
         PendingTransition pending = new PendingTransition(
                 visible ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK, wct, taskView, null /* cookie */);
+        mPending.add(pending);
+        startNextTransition();
+        // visibility is reported in transition.
+    }
+
+    /** Starts a new transition to reorder the given {@code taskView}'s task. */
+    public void reorderTaskViewTask(TaskViewTaskController taskView, boolean onTop) {
+        if (mTaskViews.get(taskView) == null) return;
+        if (taskView.getTaskInfo() == null) {
+            // Nothing to update, task is not yet available
+            return;
+        }
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reorder(taskView.getTaskInfo().token, onTop /* onTop */);
+        PendingTransition pending = new PendingTransition(
+                onTop ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK, wct, taskView, null /* cookie */);
         mPending.add(pending);
         startNextTransition();
         // visibility is reported in transition.
@@ -278,10 +307,9 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
             // Task view isn't visible, the bounds will next visibility update.
             return;
         }
-        PendingTransition pendingOpen = findPendingOpeningTransition(taskView);
-        if (pendingOpen != null) {
-            // There is already an opening transition in-flight, the window bounds will be
-            // set in prepareOpenAnimation (via the window crop) if needed.
+        if (hasPending()) {
+            // There is already a transition in-flight, the window bounds will be set in
+            // prepareOpenAnimation.
             return;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -349,6 +377,11 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
                     continue;
                 }
                 if (isHide) {
+                    if (pending != null && pending.mType == TRANSIT_TO_BACK) {
+                        // TO_BACK is only used when setting the task view visibility immediately,
+                        // so in that case we can also hide the surface immediately
+                        startTransaction.hide(chg.getLeash());
+                    }
                     tv.prepareHideAnimation(finishTransaction);
                 } else {
                     tv.prepareCloseAnimation();
@@ -394,7 +427,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
                 }
                 startTransaction.reparent(chg.getLeash(), tv.getSurfaceControl());
                 finishTransaction.reparent(chg.getLeash(), tv.getSurfaceControl())
-                    .setPosition(chg.getLeash(), 0, 0);
+                        .setPosition(chg.getLeash(), 0, 0);
                 changesHandled++;
             }
         }
@@ -409,7 +442,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         }
         // No animation, just show it immediately.
         startTransaction.apply();
-        finishCallback.onTransitionFinished(wct, null /* wctCB */);
+        finishCallback.onTransitionFinished(wct);
         startNextTransition();
         return true;
     }

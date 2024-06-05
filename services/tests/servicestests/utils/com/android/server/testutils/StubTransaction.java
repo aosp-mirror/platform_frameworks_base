@@ -30,8 +30,6 @@ import android.view.InputWindowHandle;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
-import com.android.server.testutils.StubTransaction;
-
 import java.util.HashSet;
 import java.util.concurrent.Executor;
 
@@ -262,6 +260,18 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
+    public SurfaceControl.Transaction setFrameRateCategory(SurfaceControl sc, int category,
+            boolean smoothSwitchOnly) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setFrameRateSelectionStrategy(SurfaceControl sc,
+            int strategy) {
+        return this;
+    }
+
+    @Override
     public SurfaceControl.Transaction unsetColor(SurfaceControl sc) {
         return this;
     }
@@ -308,6 +318,12 @@ public class StubTransaction extends SurfaceControl.Transaction {
     @Override
     public SurfaceControl.Transaction addWindowInfosReportedListener(@NonNull Runnable listener) {
         mWindowInfosReportedListeners.add(listener);
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setCanOccludePresentation(SurfaceControl sc,
+                boolean canOccludePresentation) {
         return this;
     }
 }

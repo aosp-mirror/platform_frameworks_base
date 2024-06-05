@@ -50,3 +50,11 @@ android_test_helper_app {
         "--rename-manifest-package com.android.servicestests.apps.bicmockapp2",
     ],
 }
+
+android_test_helper_app {
+    name: "BackgroundInstallControlMockApp3",
+    defaults: ["bic-mock-app-defaults"],
+    aaptflags: [
+        "--rename-manifest-package com.android.servicestests.apps.bicmockapp3",
+    ],
+}

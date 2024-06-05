@@ -16,21 +16,28 @@
 
 package android.hardware;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.hardware.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import libcore.util.NativeAllocationRegistry;
 
 /**
- * The class provides overlay properties of the device. OverlayProperties
- * exposes some capabilities from HWC e.g. if fp16 can be supported for HWUI.
+ * Provides supported overlay properties of the device.
  *
- * In the future, more capabilities can be added, e.g., whether or not
- * per-layer colorspaces are supported.
- *
- * @hide
+ * <p>
+ * Hardware overlay is a technique to composite different buffers directly
+ * to the screen using display hardware rather than the GPU.
+ * The system compositor is able to assign any content managed by a
+ * {@link android.view.SurfaceControl} onto a hardware overlay if possible.
+ * Applications may be interested in the display hardware capabilities exposed
+ * by this class as a hint to determine if their {@link android.view.SurfaceControl}
+ * tree is power-efficient and performant.
+ * </p>
  */
+@FlaggedApi(Flags.FLAG_OVERLAYPROPERTIES_CLASS_API)
 public final class OverlayProperties implements Parcelable {
 
     private static final NativeAllocationRegistry sRegistry =
@@ -38,10 +45,12 @@ public final class OverlayProperties implements Parcelable {
             nGetDestructor());
 
     private long mNativeObject;
+    // only for virtual displays
+    private static OverlayProperties sDefaultOverlayProperties;
     // Invoked on destruction
     private Runnable mCloser;
 
-    public OverlayProperties(long nativeObject) {
+    private OverlayProperties(long nativeObject) {
         if (nativeObject != 0) {
             mCloser = sRegistry.registerNativeAllocation(this, nativeObject);
         }
@@ -49,47 +58,56 @@ public final class OverlayProperties implements Parcelable {
     }
 
     /**
-     * @return True if the device can support fp16, false otherwise.
+     * For virtual displays, we provide an overlay properties object
+     * with RGBA 8888 only, sRGB only, true for mixed color spaces.
+     * @hide
      */
-    public boolean supportFp16ForHdr() {
-        if (mNativeObject == 0) {
-            return false;
+    public static OverlayProperties getDefault() {
+        if (sDefaultOverlayProperties == null) {
+            sDefaultOverlayProperties = new OverlayProperties(nCreateDefault());
         }
-        return nSupportFp16ForHdr(mNativeObject);
+        return sDefaultOverlayProperties;
     }
 
     /**
-     * @return True if the device can support mixed colorspaces, false otherwise.
+     * Indicates that hardware composition of a buffer encoded with the provided {@link DataSpace}
+     * and {@link HardwareBuffer.Format} is supported on the device.
+     *
+     * @return True if the device can support efficiently compositing the content described by the
+     *         dataspace and format. False if GPU composition fallback is otherwise required.
      */
-    public boolean supportMixedColorSpaces() {
+    @FlaggedApi(Flags.FLAG_OVERLAYPROPERTIES_CLASS_API)
+    public boolean isCombinationSupported(@DataSpace.ColorDataSpace int dataspace,
+            @HardwareBuffer.Format int format) {
+        if (mNativeObject == 0) {
+            return false;
+        }
+
+        return nIsCombinationSupported(mNativeObject, dataspace, format);
+    }
+
+    /**
+     * Indicates that hardware composition of two or more overlays
+     * with different colorspaces is supported on the device.
+     *
+     * @return True if the device can support mixed colorspaces efficiently,
+     *         false if GPU composition fallback is otherwise required.
+     */
+    @FlaggedApi(Flags.FLAG_OVERLAYPROPERTIES_CLASS_API)
+    public boolean isMixedColorSpacesSupported() {
         if (mNativeObject == 0) {
             return false;
         }
         return nSupportMixedColorSpaces(mNativeObject);
     }
 
-    /**
-     * Release the local reference.
-     */
-    public void release() {
-        if (mNativeObject != 0) {
-            mCloser.run();
-            mNativeObject = 0;
-        }
-    }
-
+    @FlaggedApi(Flags.FLAG_OVERLAYPROPERTIES_CLASS_API)
     @Override
     public int describeContents() {
         return 0;
     }
 
-    /**
-     * Flatten this object in to a Parcel.
-     *
-     * @param dest The Parcel in which the object should be written.
-     * @param flags Additional flags about how the object should be written.
-     *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
-     */
+    @FlaggedApi(Flags.FLAG_OVERLAYPROPERTIES_CLASS_API)
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         if (mNativeObject == 0) {
@@ -100,6 +118,7 @@ public final class OverlayProperties implements Parcelable {
         nWriteOverlayPropertiesToParcel(mNativeObject, dest);
     }
 
+    @FlaggedApi(Flags.FLAG_OVERLAYPROPERTIES_CLASS_API)
     public static final @NonNull Parcelable.Creator<OverlayProperties> CREATOR =
             new Parcelable.Creator<OverlayProperties>() {
         public OverlayProperties createFromParcel(Parcel in) {
@@ -115,8 +134,10 @@ public final class OverlayProperties implements Parcelable {
     };
 
     private static native long nGetDestructor();
-    private static native boolean nSupportFp16ForHdr(long nativeObject);
+    private static native long nCreateDefault();
     private static native boolean nSupportMixedColorSpaces(long nativeObject);
+    private static native boolean nIsCombinationSupported(
+            long nativeObject, int dataspace, int format);
     private static native void nWriteOverlayPropertiesToParcel(long nativeObject, Parcel dest);
     private static native long nReadOverlayPropertiesFromParcel(Parcel in);
 }

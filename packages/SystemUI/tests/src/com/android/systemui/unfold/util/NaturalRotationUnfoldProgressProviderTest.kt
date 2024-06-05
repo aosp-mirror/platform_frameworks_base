@@ -16,10 +16,11 @@
 package com.android.systemui.unfold.util
 
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.unfold.TestUnfoldTransitionProvider
+import com.android.systemui.unfold.FakeUnfoldTransitionProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.updates.RotationChangeProvider
 import com.android.systemui.unfold.updates.RotationChangeProvider.RotationListener
@@ -37,21 +38,24 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
+@TestableLooper.RunWithLooper
 class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
 
     @Mock lateinit var rotationChangeProvider: RotationChangeProvider
 
-    private val sourceProvider = TestUnfoldTransitionProvider()
+    private val sourceProvider = FakeUnfoldTransitionProvider()
 
     @Mock lateinit var transitionListener: TransitionProgressListener
 
     @Captor private lateinit var rotationListenerCaptor: ArgumentCaptor<RotationListener>
 
     lateinit var progressProvider: NaturalRotationUnfoldProgressProvider
+    private lateinit var testableLooper: TestableLooper
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        testableLooper = TestableLooper.get(this)
 
         progressProvider =
             NaturalRotationUnfoldProgressProvider(context, rotationChangeProvider, sourceProvider)
@@ -123,5 +127,6 @@ class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
 
     private fun onRotationChanged(rotation: Int) {
         rotationListenerCaptor.value.onRotationChanged(rotation)
+        testableLooper.processAllMessages()
     }
 }

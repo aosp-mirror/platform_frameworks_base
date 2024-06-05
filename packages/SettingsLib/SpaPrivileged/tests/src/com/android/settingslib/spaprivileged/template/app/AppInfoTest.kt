@@ -23,10 +23,12 @@ import android.content.pm.PackageManager
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.testutils.waitUntilExists
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,7 +53,7 @@ class AppInfoTest {
             }
         }
 
-        composeTestRule.onNodeWithText(LABEL).assertIsDisplayed()
+        composeTestRule.waitUntilExists(hasText(LABEL))
     }
 
     @Test
@@ -93,6 +95,7 @@ class AppInfoTest {
         val packageInfo = PackageInfo().apply {
             applicationInfo = APP
             versionName = VERSION_NAME
+            packageName = PACKAGE_NAME
         }
         val appInfoProvider = AppInfoProvider(packageInfo)
 
@@ -102,12 +105,49 @@ class AppInfoTest {
             }
         }
 
-        composeTestRule.onNodeWithText("version $VERSION_NAME").assertIsDisplayed()
+        composeTestRule.onNodeWithText(text = "version $VERSION_NAME", substring = true)
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun footerAppVersion_developmentEnabled_packageNameIsDisplayed() {
+        val packageInfo = PackageInfo().apply {
+            applicationInfo = APP
+            versionName = VERSION_NAME
+            packageName = PACKAGE_NAME
+        }
+        val appInfoProvider = AppInfoProvider(packageInfo)
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(LocalContext provides context) {
+                appInfoProvider.FooterAppVersion(showPackageName = true)
+            }
+        }
+        composeTestRule.onNodeWithText(text = PACKAGE_NAME, substring = true).assertIsDisplayed()
+    }
+
+
+    @Test
+    fun footerAppVersion_developmentDisabled_packageNameDoesNotExist() {
+        val packageInfo = PackageInfo().apply {
+            applicationInfo = APP
+            versionName = VERSION_NAME
+            packageName = PACKAGE_NAME
+        }
+        val appInfoProvider = AppInfoProvider(packageInfo)
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(LocalContext provides context) {
+                appInfoProvider.FooterAppVersion(showPackageName = false)
+            }
+        }
+        composeTestRule.onNodeWithText(text = PACKAGE_NAME, substring = true).assertDoesNotExist()
     }
 
     private companion object {
         const val LABEL = "Label"
         const val VERSION_NAME = "VersionName"
+        const val PACKAGE_NAME = "package.name"
         val APP = object : ApplicationInfo() {
             override fun loadLabel(pm: PackageManager) = LABEL
         }

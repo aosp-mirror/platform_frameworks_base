@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc nhanh"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang sạc chậm"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Quá trình sạc được tối ưu hoá để bảo vệ pin"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Có vấn đề với phụ kiện sạc"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Nhấn vào Menu để mở khóa."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Đang tạm ngưng sạc để bảo vệ pin"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hãy kiểm tra phụ kiện sạc"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Mạng đã bị khóa"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Không có SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Hãy thêm SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Không tìm thấy hoặc không đọc được SIM. Hãy thêm SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM không sử dụng được."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM của bạn đã bị vô hiệu hoá vĩnh viễn.\n Hãy liên hệ với nhà cung cấp dịch vụ viễn thông không dây của bạn để yêu cầu cấp SIM khác."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM này đang bị khoá."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM này đang bị khoá PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Đang mở khoá SIM…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Cần nhập mã PIN sau khi hết thời gian khoá"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Cần nhập mật khẩu sau khi hết thời gian khoá"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Cần vẽ hình mở khoá sau khi hết thời gian khoá"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Bản cập nhật sẽ cài đặt vào các giờ không hoạt động"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Bản cập nhật sẽ được cài đặt khi bạn không sử dụng thiết bị"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Cần tăng cường bảo mật. Đã lâu chưa dùng mã PIN."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Cần tăng cường bảo mật. Đã lâu chưa dùng mật khẩu"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Cần tăng cường bảo mật. Đã lâu chưa dùng hình mở khoá."</string>
@@ -112,9 +108,12 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Cần vẽ hình mở khoá sau khi khởi động lại thiết bị"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Cần nhập mã PIN sau khi khởi động lại thiết bị"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Cần nhập mật khẩu sau khi khởi động lại thiết bị"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Để tăng cường bảo mật, hãy sử dụng hình mở khoá"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Để tăng cường bảo mật, hãy dùng hình mở khoá"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Để tăng cường bảo mật, hãy sử dụng mã PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Để tăng cường bảo mật, hãy sử dụng mật khẩu"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Yêu cầu mã PIN để tăng cường bảo mật"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Yêu cầu hình mở khoá để tăng cường bảo mật"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Yêu cầu mật khẩu để tăng cường bảo mật"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Thiết bị đã bị quản trị viên khóa"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Thiết bị đã bị khóa theo cách thủ công"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Không nhận dạng được"</string>

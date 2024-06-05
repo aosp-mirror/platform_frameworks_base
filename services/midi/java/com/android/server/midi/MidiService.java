@@ -16,7 +16,11 @@
 
 package com.android.server.midi;
 
+import static android.media.midi.Flags.virtualUmp;
+
+import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothUuid;
 import android.content.BroadcastReceiver;
@@ -27,8 +31,10 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.media.MediaMetrics;
 import android.media.midi.IBluetoothMidiService;
@@ -41,6 +47,7 @@ import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceService;
 import android.media.midi.MidiDeviceStatus;
 import android.media.midi.MidiManager;
+import android.media.midi.MidiUmpDeviceService;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -48,6 +55,7 @@ import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.EventLog;
 import android.util.Log;
 
@@ -81,6 +89,11 @@ import java.util.concurrent.atomic.AtomicLong;
 //   2. synchronized (mDeviceConnections)
 //TODO Introduce a single lock object to lock the whole state and avoid the requirement above.
 
+// All users should be able to connect to USB and Bluetooth MIDI devices.
+// All users can create can install an app that provides a Virtual MIDI Device Service.
+// Users can not open virtual MIDI devices created by other users.
+// getDevices() surfaces devices that can be opened by that user.
+// openDevice() rejects devices that are cannot be opened by that user.
 public class MidiService extends IMidiManager.Stub {
 
     public static class Lifecycle extends SystemService {
@@ -97,10 +110,21 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         @Override
+        @RequiresPermission(allOf = {Manifest.permission.INTERACT_ACROSS_USERS},
+                anyOf = {Manifest.permission.QUERY_USERS,
+                Manifest.permission.CREATE_USERS,
+                Manifest.permission.MANAGE_USERS})
+        public void onUserStarting(@NonNull TargetUser user) {
+            mMidiService.onStartOrUnlockUser(user, false /* matchDirectBootUnaware */);
+        }
+
+        @Override
+        @RequiresPermission(allOf = {Manifest.permission.INTERACT_ACROSS_USERS},
+                anyOf = {Manifest.permission.QUERY_USERS,
+                Manifest.permission.CREATE_USERS,
+                Manifest.permission.MANAGE_USERS})
         public void onUserUnlocking(@NonNull TargetUser user) {
-            if (user.getUserIdentifier()  == UserHandle.USER_SYSTEM) {
-                mMidiService.onUnlockUser();
-            }
+            mMidiService.onStartOrUnlockUser(user, true /* matchDirectBootUnaware */);
         }
     }
 
@@ -134,6 +158,7 @@ public class MidiService extends IMidiManager.Stub {
     private int mNextDeviceId = 1;
 
     private final PackageManager mPackageManager;
+    private final UserManager mUserManager;
 
     private static final String MIDI_LEGACY_STRING = "MIDI 1.0";
     private static final String MIDI_UNIVERSAL_STRING = "MIDI 2.0";
@@ -159,21 +184,24 @@ public class MidiService extends IMidiManager.Stub {
     private final HashSet<ParcelUuid> mNonMidiUUIDs = new HashSet<ParcelUuid>();
 
     // PackageMonitor for listening to package changes
+    // uid is the uid of the package so use getChangingUserId() to fetch the userId.
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override
+        @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
         public void onPackageAdded(String packageName, int uid) {
-            addPackageDeviceServers(packageName);
+            addPackageDeviceServers(packageName, getChangingUserId());
         }
 
         @Override
+        @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
         public void onPackageModified(String packageName) {
-            removePackageDeviceServers(packageName);
-            addPackageDeviceServers(packageName);
+            removePackageDeviceServers(packageName, getChangingUserId());
+            addPackageDeviceServers(packageName, getChangingUserId());
         }
 
         @Override
         public void onPackageRemoved(String packageName, int uid) {
-            removePackageDeviceServers(packageName);
+            removePackageDeviceServers(packageName, getChangingUserId());
         }
     };
 
@@ -202,6 +230,10 @@ public class MidiService extends IMidiManager.Stub {
             return mUid;
         }
 
+        private int getUserId() {
+            return UserHandle.getUserId(mUid);
+        }
+
         public void addListener(IMidiDeviceListener listener) {
             if (mListeners.size() >= MAX_LISTENERS_PER_CLIENT) {
                 throw new SecurityException(
@@ -219,8 +251,12 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
 
-        public void addDeviceConnection(Device device, IMidiDeviceOpenCallback callback) {
-            Log.d(TAG, "addDeviceConnection() device:" + device);
+        @RequiresPermission(anyOf = {Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                Manifest.permission.INTERACT_ACROSS_USERS,
+                Manifest.permission.INTERACT_ACROSS_PROFILES})
+        public void addDeviceConnection(Device device, IMidiDeviceOpenCallback callback,
+                int userId) {
+            Log.d(TAG, "addDeviceConnection() device:" + device + " userId:" + userId);
             if (mDeviceConnections.size() >= MAX_CONNECTIONS_PER_CLIENT) {
                 Log.i(TAG, "too many MIDI connections for UID = " + mUid);
                 throw new SecurityException(
@@ -228,7 +264,7 @@ public class MidiService extends IMidiManager.Stub {
             }
             DeviceConnection connection = new DeviceConnection(device, this, callback);
             mDeviceConnections.put(connection.getToken(), connection);
-            device.addDeviceConnection(connection);
+            device.addDeviceConnection(connection, userId);
         }
 
         // called from MidiService.closeDevice()
@@ -251,8 +287,9 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         public void deviceAdded(Device device) {
-            // ignore private devices that our client cannot access
-            if (!device.isUidAllowed(mUid)) return;
+            Log.d(TAG, "deviceAdded() " + device.getUserId() + " userId:" + getUserId());
+            // ignore devices that our client cannot access
+            if (!device.isUidAllowed(mUid) || !device.isUserIdAllowed(getUserId())) return;
 
             MidiDeviceInfo deviceInfo = device.getDeviceInfo();
             try {
@@ -265,8 +302,9 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         public void deviceRemoved(Device device) {
-            // ignore private devices that our client cannot access
-            if (!device.isUidAllowed(mUid)) return;
+            Log.d(TAG, "deviceRemoved() " + device.getUserId() + " userId:" + getUserId());
+            // ignore devices that our client cannot access
+            if (!device.isUidAllowed(mUid) || !device.isUserIdAllowed(getUserId())) return;
 
             MidiDeviceInfo deviceInfo = device.getDeviceInfo();
             try {
@@ -279,8 +317,9 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         public void deviceStatusChanged(Device device, MidiDeviceStatus status) {
-            // ignore private devices that our client cannot access
-            if (!device.isUidAllowed(mUid)) return;
+            Log.d(TAG, "deviceStatusChanged() " + device.getUserId() + " userId:" + getUserId());
+            // ignore devices that our client cannot access
+            if (!device.isUidAllowed(mUid) || !device.isUserIdAllowed(getUserId())) return;
 
             try {
                 for (IMidiDeviceListener listener : mListeners.values()) {
@@ -354,6 +393,8 @@ public class MidiService extends IMidiManager.Stub {
         private final ServiceInfo mServiceInfo;
         // UID of device implementation
         private final int mUid;
+        // User Id of the app. Only used for virtual devices
+        private final int mUserId;
 
         // ServiceConnection for implementing Service (virtual devices only)
         // mServiceConnection is non-null when connected or attempting to connect to the service
@@ -375,10 +416,11 @@ public class MidiService extends IMidiManager.Stub {
         private AtomicInteger mTotalOutputBytes = new AtomicInteger();
 
         public Device(IMidiDeviceServer server, MidiDeviceInfo deviceInfo,
-                ServiceInfo serviceInfo, int uid) {
+                ServiceInfo serviceInfo, int uid, int userId) {
             mDeviceInfo = deviceInfo;
             mServiceInfo = serviceInfo;
             mUid = uid;
+            mUserId = userId;
             mBluetoothDevice = (BluetoothDevice)deviceInfo.getProperties().getParcelable(
                     MidiDeviceInfo.PROPERTY_BLUETOOTH_DEVICE, android.bluetooth.BluetoothDevice.class);;
             setDeviceServer(server);
@@ -388,6 +430,7 @@ public class MidiService extends IMidiManager.Stub {
             mBluetoothDevice = bluetoothDevice;
             mServiceInfo = null;
             mUid = mBluetoothServiceUid;
+            mUserId = UserHandle.getUserId(mUid);
         }
 
         private void setDeviceServer(IMidiDeviceServer server) {
@@ -468,11 +511,22 @@ public class MidiService extends IMidiManager.Stub {
             return mUid;
         }
 
+        public int getUserId() {
+            return mUserId;
+        }
+
         public boolean isUidAllowed(int uid) {
             return (!mDeviceInfo.isPrivate() || mUid == uid);
         }
 
-        public void addDeviceConnection(DeviceConnection connection) {
+        public boolean isUserIdAllowed(int userId) {
+            return (mDeviceInfo.getType() != MidiDeviceInfo.TYPE_VIRTUAL || mUserId == userId);
+        }
+
+        @RequiresPermission(anyOf = {Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                Manifest.permission.INTERACT_ACROSS_USERS,
+                Manifest.permission.INTERACT_ACROSS_PROFILES})
+        public void addDeviceConnection(DeviceConnection connection, int userId) {
             Log.d(TAG, "addDeviceConnection() [A] connection:" + connection);
             synchronized (mDeviceConnections) {
                 mDeviceConnectionsAdded.incrementAndGet();
@@ -531,14 +585,18 @@ public class MidiService extends IMidiManager.Stub {
                         intent.setComponent(new ComponentName(
                                 MidiManager.BLUETOOTH_MIDI_SERVICE_PACKAGE,
                                 MidiManager.BLUETOOTH_MIDI_SERVICE_CLASS));
-                    } else {
+                    } else if (!isUmpDevice(mDeviceInfo)) {
                         intent = new Intent(MidiDeviceService.SERVICE_INTERFACE);
+                        intent.setComponent(
+                                new ComponentName(mServiceInfo.packageName, mServiceInfo.name));
+                    } else {
+                        intent = new Intent(MidiUmpDeviceService.SERVICE_INTERFACE);
                         intent.setComponent(
                                 new ComponentName(mServiceInfo.packageName, mServiceInfo.name));
                     }
 
-                    if (!mContext.bindService(intent, mServiceConnection,
-                            Context.BIND_AUTO_CREATE)) {
+                    if (!mContext.bindServiceAsUser(intent, mServiceConnection,
+                            Context.BIND_AUTO_CREATE, UserHandle.of(mUserId))) {
                         Log.e(TAG, "Unable to bind service: " + intent);
                         setDeviceServer(null);
                         mServiceConnection = null;
@@ -647,8 +705,8 @@ public class MidiService extends IMidiManager.Stub {
                             isDeviceDisconnected ? "true" : "false")
                     .set(MediaMetrics.Property.IS_SHARED,
                             !mDeviceInfo.isPrivate() ? "true" : "false")
-                    .set(MediaMetrics.Property.SUPPORTS_MIDI_UMP, mDeviceInfo.getDefaultProtocol()
-                             != MidiDeviceInfo.PROTOCOL_UNKNOWN ? "true" : "false")
+                    .set(MediaMetrics.Property.SUPPORTS_MIDI_UMP,
+                            isUmpDevice(mDeviceInfo) ? "true" : "false")
                     .set(MediaMetrics.Property.USING_ALSA, mDeviceInfo.getProperties().get(
                             MidiDeviceInfo.PROPERTY_ALSA_CARD) != null ? "true" : "false")
                     .set(MediaMetrics.Property.EVENT, "deviceClosed")
@@ -886,6 +944,8 @@ public class MidiService extends IMidiManager.Stub {
     public MidiService(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
+        mUserManager = mContext.getSystemService(UserManager.class);
+        mPackageMonitor.register(mContext, null, UserHandle.ALL, true);
 
         // TEMPORARY - Disable BTL-MIDI
         //FIXME - b/25689266
@@ -913,32 +973,63 @@ public class MidiService extends IMidiManager.Stub {
         // mNonMidiUUIDs.add(BluetoothUuid.BATTERY);
     }
 
-    private void onUnlockUser() {
-        mPackageMonitor.register(mContext, null, true);
+    @RequiresPermission(allOf = {Manifest.permission.INTERACT_ACROSS_USERS},
+            anyOf = {Manifest.permission.QUERY_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.MANAGE_USERS})
+    private void onStartOrUnlockUser(TargetUser user, boolean matchDirectBootUnaware) {
+        Log.d(TAG, "onStartOrUnlockUser " + user.getUserIdentifier() + " matchDirectBootUnaware: "
+                + matchDirectBootUnaware);
+        int resolveFlags = PackageManager.GET_META_DATA;
+        if (matchDirectBootUnaware) {
+            resolveFlags |= PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+        }
 
-        Intent intent = new Intent(MidiDeviceService.SERVICE_INTERFACE);
-        List<ResolveInfo> resolveInfos = mPackageManager.queryIntentServices(intent,
-                PackageManager.GET_META_DATA);
-        if (resolveInfos != null) {
-            int count = resolveInfos.size();
-            for (int i = 0; i < count; i++) {
-                ServiceInfo serviceInfo = resolveInfos.get(i).serviceInfo;
-                if (serviceInfo != null) {
-                    addPackageDeviceServer(serviceInfo);
+        {
+            Intent intent = new Intent(MidiDeviceService.SERVICE_INTERFACE);
+            List<ResolveInfo> resolveInfos = mPackageManager.queryIntentServicesAsUser(intent,
+                    resolveFlags, user.getUserIdentifier());
+            if (resolveInfos != null) {
+                int count = resolveInfos.size();
+                for (int i = 0; i < count; i++) {
+                    ServiceInfo serviceInfo = resolveInfos.get(i).serviceInfo;
+                    if (serviceInfo != null) {
+                        addLegacyPackageDeviceServer(serviceInfo, user.getUserIdentifier());
+                    }
                 }
             }
         }
 
-        PackageInfo info;
-        try {
-            info = mPackageManager.getPackageInfo(MidiManager.BLUETOOTH_MIDI_SERVICE_PACKAGE, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            info = null;
+        {
+            Intent intent = new Intent(MidiUmpDeviceService.SERVICE_INTERFACE);
+            List<ResolveInfo> resolveInfos = mPackageManager.queryIntentServicesAsUser(intent,
+                    resolveFlags, user.getUserIdentifier());
+            if (resolveInfos != null) {
+                int count = resolveInfos.size();
+                for (int i = 0; i < count; i++) {
+                    ServiceInfo serviceInfo = resolveInfos.get(i).serviceInfo;
+                    if (serviceInfo != null) {
+                        addUmpPackageDeviceServer(serviceInfo, user.getUserIdentifier());
+                    }
+                }
+            }
         }
-        if (info != null && info.applicationInfo != null) {
-            mBluetoothServiceUid = info.applicationInfo.uid;
-        } else {
-            mBluetoothServiceUid = -1;
+
+        // Allow only the main user to create BluetoothMidiService.
+        // If there is no main user, allow all users to create it.
+        UserHandle mainUser = mUserManager.getMainUser();
+        if ((mainUser == null)
+                || (user.getUserIdentifier() == mainUser.getIdentifier())) {
+            PackageInfo info;
+            try {
+                info = mPackageManager.getPackageInfoAsUser(
+                        MidiManager.BLUETOOTH_MIDI_SERVICE_PACKAGE, 0, user.getUserIdentifier());
+            } catch (PackageManager.NameNotFoundException e) {
+                info = null;
+            }
+            if (info != null && info.applicationInfo != null) {
+                mBluetoothServiceUid = info.applicationInfo.uid;
+            }
         }
     }
 
@@ -960,10 +1051,11 @@ public class MidiService extends IMidiManager.Stub {
 
     // Inform listener of the status of all known devices.
     private void updateStickyDeviceStatus(int uid, IMidiDeviceListener listener) {
+        int userId = UserHandle.getUserId(uid);
         synchronized (mDevicesByInfo) {
             for (Device device : mDevicesByInfo.values()) {
-                // ignore private devices that our client cannot access
-                if (device.isUidAllowed(uid)) {
+                // ignore devices that our client cannot access
+                if (device.isUidAllowed(uid) && device.isUserIdAllowed(userId)) {
                     try {
                         MidiDeviceStatus status = device.getDeviceStatus();
                         if (status != null) {
@@ -989,19 +1081,18 @@ public class MidiService extends IMidiManager.Stub {
     public MidiDeviceInfo[] getDevicesForTransport(int transport) {
         ArrayList<MidiDeviceInfo> deviceInfos = new ArrayList<MidiDeviceInfo>();
         int uid = Binder.getCallingUid();
+        int userId = getCallingUserId();
 
         synchronized (mDevicesByInfo) {
             for (Device device : mDevicesByInfo.values()) {
-                if (device.isUidAllowed(uid)) {
+                if (device.isUidAllowed(uid) && device.isUserIdAllowed(userId)) {
                     // UMP devices have protocols that are not PROTOCOL_UNKNOWN
                     if (transport == MidiManager.TRANSPORT_UNIVERSAL_MIDI_PACKETS) {
-                        if (device.getDeviceInfo().getDefaultProtocol()
-                                != MidiDeviceInfo.PROTOCOL_UNKNOWN) {
+                        if (isUmpDevice(device.getDeviceInfo())) {
                             deviceInfos.add(device.getDeviceInfo());
                         }
                     } else if (transport == MidiManager.TRANSPORT_MIDI_BYTE_STREAM) {
-                        if (device.getDeviceInfo().getDefaultProtocol()
-                                == MidiDeviceInfo.PROTOCOL_UNKNOWN) {
+                        if (!isUmpDevice(device.getDeviceInfo())) {
                             deviceInfos.add(device.getDeviceInfo());
                         }
                     }
@@ -1029,6 +1120,9 @@ public class MidiService extends IMidiManager.Stub {
             if (!device.isUidAllowed(Binder.getCallingUid())) {
                 throw new SecurityException("Attempt to open private device with wrong UID");
             }
+            if (!device.isUserIdAllowed(getCallingUserId())) {
+                throw new SecurityException("Attempt to open virtual device with wrong user id");
+            }
         }
 
         if (deviceInfo.getType() == MidiDeviceInfo.TYPE_USB) {
@@ -1044,7 +1138,7 @@ public class MidiService extends IMidiManager.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             Log.i(TAG, "addDeviceConnection() [B] device:" + device);
-            client.addDeviceConnection(device, callback);
+            client.addDeviceConnection(device, callback, getCallingUserId());
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1106,7 +1200,7 @@ public class MidiService extends IMidiManager.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             Log.i(TAG, "addDeviceConnection() [C] device:" + device);
-            client.addDeviceConnection(device, callback);
+            client.addDeviceConnection(device, callback, getCallingUserId());
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1124,6 +1218,7 @@ public class MidiService extends IMidiManager.Stub {
             int numOutputPorts, String[] inputPortNames, String[] outputPortNames,
             Bundle properties, int type, int defaultProtocol) {
         int uid = Binder.getCallingUid();
+        int userId = getCallingUserId();
         if (type == MidiDeviceInfo.TYPE_USB && uid != Process.SYSTEM_UID) {
             throw new SecurityException("only system can create USB devices");
         } else if (type == MidiDeviceInfo.TYPE_BLUETOOTH && uid != mBluetoothServiceUid) {
@@ -1133,7 +1228,7 @@ public class MidiService extends IMidiManager.Stub {
         synchronized (mDevicesByInfo) {
             return addDeviceLocked(type, numInputPorts, numOutputPorts, inputPortNames,
                     outputPortNames, properties, server, null, false, uid,
-                    defaultProtocol);
+                    defaultProtocol, userId);
         }
     }
 
@@ -1210,7 +1305,8 @@ public class MidiService extends IMidiManager.Stub {
     private MidiDeviceInfo addDeviceLocked(int type, int numInputPorts, int numOutputPorts,
             String[] inputPortNames, String[] outputPortNames, Bundle properties,
             IMidiDeviceServer server, ServiceInfo serviceInfo,
-            boolean isPrivate, int uid, int defaultProtocol) {
+            boolean isPrivate, int uid, int defaultProtocol, int userId) {
+        Log.d(TAG, "addDeviceLocked() " + uid + " type:" + type + " userId:" + userId);
 
         // Limit the number of devices per app.
         int deviceCountForApp = 0;
@@ -1250,7 +1346,7 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
         if (device == null) {
-            device = new Device(server, deviceInfo, serviceInfo, uid);
+            device = new Device(server, deviceInfo, serviceInfo, uid, userId);
         }
         mDevicesByInfo.put(deviceInfo, device);
         if (bluetoothDevice != null) {
@@ -1281,12 +1377,14 @@ public class MidiService extends IMidiManager.Stub {
         }
     }
 
-    private void addPackageDeviceServers(String packageName) {
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    private void addPackageDeviceServers(String packageName, int userId) {
         PackageInfo info;
 
         try {
-            info = mPackageManager.getPackageInfo(packageName,
-                    PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
+            info = mPackageManager.getPackageInfoAsUser(packageName,
+                    PackageManager.GET_SERVICES | PackageManager.GET_META_DATA
+                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "handlePackageUpdate could not find package " + packageName, e);
             return;
@@ -1295,26 +1393,31 @@ public class MidiService extends IMidiManager.Stub {
         ServiceInfo[] services = info.services;
         if (services == null) return;
         for (int i = 0; i < services.length; i++) {
-            addPackageDeviceServer(services[i]);
+            addLegacyPackageDeviceServer(services[i], userId);
+            addUmpPackageDeviceServer(services[i], userId);
         }
     }
 
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    private void addPackageDeviceServer(ServiceInfo serviceInfo) {
+    private void addLegacyPackageDeviceServer(ServiceInfo serviceInfo, int userId) {
         XmlResourceParser parser = null;
 
         try {
-            parser = serviceInfo.loadXmlMetaData(mPackageManager,
-                    MidiDeviceService.SERVICE_INTERFACE);
-            if (parser == null) return;
+            if (serviceInfo == null) {
+                Log.w(TAG, "Skipping null service info");
+                return;
+            }
 
             // ignore virtual device servers that do not require the correct permission
             if (!android.Manifest.permission.BIND_MIDI_DEVICE_SERVICE.equals(
                     serviceInfo.permission)) {
-                Log.w(TAG, "Skipping MIDI device service " + serviceInfo.packageName
-                        + ": it does not require the permission "
-                        + android.Manifest.permission.BIND_MIDI_DEVICE_SERVICE);
+                return;
+            }
+            parser = serviceInfo.loadXmlMetaData(mPackageManager,
+                    MidiDeviceService.SERVICE_INTERFACE);
+            if (parser == null) {
+                Log.w(TAG, "loading xml metadata failed");
                 return;
             }
 
@@ -1404,8 +1507,8 @@ public class MidiService extends IMidiManager.Stub {
 
                             int uid;
                             try {
-                                ApplicationInfo appInfo = mPackageManager.getApplicationInfo(
-                                        serviceInfo.packageName, 0);
+                                ApplicationInfo appInfo = mPackageManager.getApplicationInfoAsUser(
+                                        serviceInfo.packageName, 0, userId);
                                 uid = appInfo.uid;
                             } catch (PackageManager.NameNotFoundException e) {
                                 Log.e(TAG, "could not fetch ApplicationInfo for "
@@ -1419,7 +1522,7 @@ public class MidiService extends IMidiManager.Stub {
                                         inputPortNames.toArray(EMPTY_STRING_ARRAY),
                                         outputPortNames.toArray(EMPTY_STRING_ARRAY),
                                         properties, null, serviceInfo, isPrivate, uid,
-                                        MidiDeviceInfo.PROTOCOL_UNKNOWN);
+                                        MidiDeviceInfo.PROTOCOL_UNKNOWN, userId);
                             }
                             // setting properties to null signals that we are no longer
                             // processing a <device>
@@ -1437,12 +1540,158 @@ public class MidiService extends IMidiManager.Stub {
         }
     }
 
-    private void removePackageDeviceServers(String packageName) {
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    private void addUmpPackageDeviceServer(ServiceInfo serviceInfo, int userId) {
+        XmlResourceParser parser = null;
+
+        try {
+            if (serviceInfo == null) {
+                Log.w(TAG, "Skipping null service info");
+                return;
+            }
+
+            // ignore virtual device servers that do not require the correct permission
+            if (!android.Manifest.permission.BIND_MIDI_DEVICE_SERVICE.equals(
+                    serviceInfo.permission)) {
+                return;
+            }
+
+            if (!virtualUmp()) {
+                Log.w(TAG, "Skipping MIDI device service " + serviceInfo.packageName
+                        + ": virtual UMP flag not enabled");
+                return;
+            }
+
+            ComponentName componentName = new ComponentName(serviceInfo.packageName,
+                    serviceInfo.name);
+            Property property = mPackageManager.getProperty(MidiUmpDeviceService.SERVICE_INTERFACE,
+                    componentName);
+            if (property == null) {
+                Log.w(TAG, "Getting MidiUmpDeviceService property failed");
+                return;
+            }
+            int resId = property.getResourceId();
+            if (resId == 0) {
+                Log.w(TAG, "Getting MidiUmpDeviceService resourceId failed");
+                return;
+            }
+            Resources resources = mPackageManager.getResourcesForApplication(
+                    serviceInfo.packageName);
+            if (resources == null) {
+                Log.w(TAG, "Getting resource failed " + serviceInfo.packageName);
+                return;
+            }
+            parser = resources.getXml(resId);
+            if (parser == null) {
+                Log.w(TAG, "Getting XML failed " + resId);
+                return;
+            }
+
+            Bundle properties = null;
+            int numPorts = 0;
+            boolean isPrivate = false;
+            ArrayList<String> portNames = new ArrayList<String>();
+
+            while (true) {
+                int eventType = parser.next();
+                if (eventType == XmlPullParser.END_DOCUMENT) {
+                    break;
+                } else if (eventType == XmlPullParser.START_TAG) {
+                    String tagName = parser.getName();
+                    if ("device".equals(tagName)) {
+                        if (properties != null) {
+                            Log.w(TAG, "nested <device> elements in metadata for "
+                                    + serviceInfo.packageName);
+                            continue;
+                        }
+                        properties = new Bundle();
+                        properties.putParcelable(MidiDeviceInfo.PROPERTY_SERVICE_INFO, serviceInfo);
+                        numPorts = 0;
+                        isPrivate = false;
+
+                        int count = parser.getAttributeCount();
+                        for (int i = 0; i < count; i++) {
+                            String name = parser.getAttributeName(i);
+                            String value = parser.getAttributeValue(i);
+                            if ("private".equals(name)) {
+                                isPrivate = "true".equals(value);
+                            } else {
+                                properties.putString(name, value);
+                            }
+                        }
+                    } else if ("port".equals(tagName)) {
+                        if (properties == null) {
+                            Log.w(TAG, "<port> outside of <device> in metadata for "
+                                    + serviceInfo.packageName);
+                            continue;
+                        }
+                        numPorts++;
+
+                        String portName = null;
+                        int count = parser.getAttributeCount();
+                        for (int i = 0; i < count; i++) {
+                            String name = parser.getAttributeName(i);
+                            String value = parser.getAttributeValue(i);
+                            if ("name".equals(name)) {
+                                portName = value;
+                                break;
+                            }
+                        }
+                        portNames.add(portName);
+                    }
+                } else if (eventType == XmlPullParser.END_TAG) {
+                    String tagName = parser.getName();
+                    if ("device".equals(tagName)) {
+                        if (properties != null) {
+                            if (numPorts == 0) {
+                                Log.w(TAG, "<device> with no ports in metadata for "
+                                        + serviceInfo.packageName);
+                                continue;
+                            }
+
+                            int uid;
+                            try {
+                                ApplicationInfo appInfo = mPackageManager.getApplicationInfoAsUser(
+                                        serviceInfo.packageName, 0, userId);
+                                uid = appInfo.uid;
+                            } catch (PackageManager.NameNotFoundException e) {
+                                Log.e(TAG, "could not fetch ApplicationInfo for "
+                                        + serviceInfo.packageName);
+                                continue;
+                            }
+
+                            synchronized (mDevicesByInfo) {
+                                addDeviceLocked(MidiDeviceInfo.TYPE_VIRTUAL,
+                                        numPorts, numPorts,
+                                        portNames.toArray(EMPTY_STRING_ARRAY),
+                                        portNames.toArray(EMPTY_STRING_ARRAY),
+                                        properties, null, serviceInfo, isPrivate, uid,
+                                        MidiDeviceInfo.PROTOCOL_UMP_MIDI_2_0, userId);
+                            }
+                            // setting properties to null signals that we are no longer
+                            // processing a <device>
+                            properties = null;
+                            portNames.clear();
+                        }
+                    }
+                }
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+                // No such property
+        } catch (Exception e) {
+            Log.w(TAG, "Unable to load component info " + serviceInfo.toString(), e);
+        } finally {
+            if (parser != null) parser.close();
+        }
+    }
+
+    private void removePackageDeviceServers(String packageName, int userId) {
         synchronized (mDevicesByInfo) {
             Iterator<Device> iterator = mDevicesByInfo.values().iterator();
             while (iterator.hasNext()) {
                 Device device = iterator.next();
-                if (packageName.equals(device.getPackageName())) {
+                if (packageName.equals(device.getPackageName())
+                        && (device.getUserId() == userId)) {
                     iterator.remove();
                     removeDeviceLocked(device);
                 }
@@ -1570,5 +1819,16 @@ public class MidiService extends IMidiManager.Stub {
     // Note that MIDI_LEGACY_STRING and MIDI_UNIVERSAL_STRING are the same length.
     String extractUsbDeviceTag(String propertyName) {
         return propertyName.substring(propertyName.length() - MIDI_LEGACY_STRING.length());
+    }
+
+    /**
+     * @return the user id of the calling user.
+     */
+    private int getCallingUserId() {
+        return UserHandle.getUserId(Binder.getCallingUid());
+    }
+
+    private boolean isUmpDevice(MidiDeviceInfo deviceInfo) {
+        return deviceInfo.getDefaultProtocol() != MidiDeviceInfo.PROTOCOL_UNKNOWN;
     }
 }

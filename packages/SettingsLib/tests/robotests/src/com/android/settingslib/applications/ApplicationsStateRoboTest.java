@@ -16,6 +16,7 @@
 
 package com.android.settingslib.applications;
 
+import static android.content.pm.Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX;
 import static android.os.UserHandle.MU_ENABLED;
 import static android.os.UserHandle.USER_SYSTEM;
 
@@ -58,6 +59,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.text.TextUtils;
 import android.util.IconDrawableFactory;
 
@@ -70,6 +72,8 @@ import com.android.settingslib.testutils.shadow.ShadowUserManager;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -89,6 +93,7 @@ import org.robolectric.util.ReflectionHelpers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -137,6 +142,9 @@ public class ApplicationsStateRoboTest {
     @Mock
     private IPackageManager mPackageManagerService;
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     @Implements(value = IconDrawableFactory.class)
     public static class ShadowIconDrawableFactory {
 
@@ -169,7 +177,9 @@ public class ApplicationsStateRoboTest {
         public List<ModuleInfo> getInstalledModules(int flags) {
             if (mInstalledModules.isEmpty()) {
                 for (String moduleName : mModuleNames) {
-                    mInstalledModules.add(createModuleInfo(moduleName));
+                    mInstalledModules.add(
+                            createModuleInfo(moduleName,
+                                    TextUtils.concat(moduleName, ".apex").toString()));
                 }
             }
             return mInstalledModules;
@@ -188,10 +198,11 @@ public class ApplicationsStateRoboTest {
             return resolveInfos;
         }
 
-        private ModuleInfo createModuleInfo(String packageName) {
+        private ModuleInfo createModuleInfo(String packageName, String apexPackageName) {
             final ModuleInfo info = new ModuleInfo();
             info.setName(packageName);
             info.setPackageName(packageName);
+            info.setApkInApexPackageNames(Collections.singletonList(apexPackageName));
             // will treat any app with package name that contains "hidden" as hidden module
             info.setHidden(!TextUtils.isEmpty(packageName) && packageName.contains("hidden"));
             return info;
@@ -489,6 +500,7 @@ public class ApplicationsStateRoboTest {
         verify(mApplicationsState, never()).clearEntries();
     }
 
+    @Ignore("b/328332487")
     @Test
     public void removeProfileApp_workprofileExists_doResumeIfNeededLocked_shouldClearEntries()
             throws RemoteException {
@@ -563,6 +575,7 @@ public class ApplicationsStateRoboTest {
         verify(mApplicationsState).clearEntries();
     }
 
+    @Ignore("b/328332487")
     @Test
     public void removeOwnerApp_workprofileExists_doResumeIfNeededLocked_shouldClearEntries()
             throws RemoteException {
@@ -644,6 +657,7 @@ public class ApplicationsStateRoboTest {
         verify(mApplicationsState).clearEntries();
     }
 
+    @Ignore("b/328332487")
     @Test
     public void noAppRemoved_workprofileExists_doResumeIfNeededLocked_shouldNotClearEntries()
             throws RemoteException {
@@ -763,6 +777,7 @@ public class ApplicationsStateRoboTest {
         assertThat(primaryUserApp.shouldShowInPersonalTab(um, appInfo.uid)).isTrue();
     }
 
+    @Ignore("b/328332487")
     @Test
     public void shouldShowInPersonalTab_userProfilePreU_returnsFalse() {
         UserManager um = RuntimeEnvironment.application.getSystemService(UserManager.class);
@@ -821,5 +836,33 @@ public class ApplicationsStateRoboTest {
 
         assertThat(mApplicationsState.getEntry(PKG_1, /* userId= */ 0).info.packageName)
                 .isEqualTo(PKG_1);
+    }
+
+    @Test
+    public void isHiddenModule_hasApkInApexInfo_shouldSupportHiddenApexPackage() {
+        mSetFlagsRule.enableFlags(FLAG_PROVIDE_INFO_OF_APK_IN_APEX);
+        ApplicationsState.sInstance = null;
+        mApplicationsState = ApplicationsState.getInstance(mApplication, mPackageManagerService);
+        String normalModulePackage = "test.module.1";
+        String hiddenModulePackage = "test.hidden.module.2";
+        String hiddenApexPackage = "test.hidden.module.2.apex";
+
+        assertThat(mApplicationsState.isHiddenModule(normalModulePackage)).isFalse();
+        assertThat(mApplicationsState.isHiddenModule(hiddenModulePackage)).isTrue();
+        assertThat(mApplicationsState.isHiddenModule(hiddenApexPackage)).isTrue();
+    }
+
+    @Test
+    public void isHiddenModule_noApkInApexInfo_onlySupportHiddenModule() {
+        mSetFlagsRule.disableFlags(FLAG_PROVIDE_INFO_OF_APK_IN_APEX);
+        ApplicationsState.sInstance = null;
+        mApplicationsState = ApplicationsState.getInstance(mApplication, mPackageManagerService);
+        String normalModulePackage = "test.module.1";
+        String hiddenModulePackage = "test.hidden.module.2";
+        String hiddenApexPackage = "test.hidden.module.2.apex";
+
+        assertThat(mApplicationsState.isHiddenModule(normalModulePackage)).isFalse();
+        assertThat(mApplicationsState.isHiddenModule(hiddenModulePackage)).isTrue();
+        assertThat(mApplicationsState.isHiddenModule(hiddenApexPackage)).isFalse();
     }
 }

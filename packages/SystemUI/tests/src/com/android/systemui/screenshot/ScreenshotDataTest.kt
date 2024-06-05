@@ -20,6 +20,7 @@ import android.content.ComponentName
 import android.graphics.Insets
 import android.graphics.Rect
 import android.os.UserHandle
+import android.view.Display
 import android.view.WindowManager
 import com.android.internal.util.ScreenshotRequest
 import com.google.common.truth.Truth.assertThat
@@ -54,6 +55,16 @@ class ScreenshotDataTest {
         assertThat(data.taskId).isEqualTo(taskId)
         assertThat(data.userHandle).isEqualTo(UserHandle.of(userId))
         assertThat(data.topComponent).isEqualTo(component)
+        assertThat(data.displayId).isEqualTo(Display.DEFAULT_DISPLAY)
+    }
+
+    @Test
+    fun testConstruction_notDefaultDisplayId() {
+        val request = ScreenshotRequest.Builder(type, source).build()
+
+        val data = ScreenshotData.fromRequest(request, displayId = 42)
+
+        assertThat(data.displayId).isEqualTo(42)
     }
 
     @Test

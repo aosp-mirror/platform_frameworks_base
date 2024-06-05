@@ -16,10 +16,20 @@
 
 package android.os;
 
-import android.test.AndroidTestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.filters.SmallTest;
+
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +39,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MemoryFileTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = MemoryFile.class)
+public class MemoryFileTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private void compareBuffers(byte[] buffer1, byte[] buffer2, int length) throws Exception {
         for (int i = 0; i < length; i++) {
@@ -44,6 +58,8 @@ public class MemoryFileTest extends AndroidTestCase {
      */
     // Flaky test - temporarily suppress from large suite for now
     // @LargeTest
+    @Test
+    @Ignore("Flaky test")
     public void testPurge() throws Exception {
         List<MemoryFile> files = new ArrayList<MemoryFile>();
         try {
@@ -70,6 +86,7 @@ public class MemoryFileTest extends AndroidTestCase {
         }
     }
 
+    @Test
     @SmallTest
     public void testRun() throws Exception {
         MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
@@ -102,6 +119,7 @@ public class MemoryFileTest extends AndroidTestCase {
     }
 
     // http://code.google.com/p/android/issues/detail?id=11415
+    @Test
     public void testOutputStreamAdvances() throws IOException {
         MemoryFile file = new MemoryFile("MemoryFileTest", 10);
 
@@ -142,24 +160,28 @@ public class MemoryFileTest extends AndroidTestCase {
         }
     }
 
+    @Test
     @SmallTest
     public void testReadNegativeOffset() throws Exception {
         readIndexOutOfBoundsException(-1, 5,
                 "read() with negative offset should throw IndexOutOfBoundsException");
     }
 
+    @Test
     @SmallTest
     public void testReadNegativeCount() throws Exception {
         readIndexOutOfBoundsException(5, -1,
                 "read() with negative length should throw IndexOutOfBoundsException");
     }
 
+    @Test
     @SmallTest
     public void testReadOffsetOverflow() throws Exception {
         readIndexOutOfBoundsException(testString.length + 10, 5,
                 "read() with offset outside buffer should throw IndexOutOfBoundsException");
     }
 
+    @Test
     @SmallTest
     public void testReadOffsetCountOverflow() throws Exception {
         readIndexOutOfBoundsException(testString.length, 11,
@@ -167,6 +189,7 @@ public class MemoryFileTest extends AndroidTestCase {
     }
 
     // Test behavior of read() at end of file
+    @Test
     @SmallTest
     public void testReadEOF() throws Exception {
         MemoryFile file = new MemoryFile("MemoryFileTest", testString.length);
@@ -189,6 +212,7 @@ public class MemoryFileTest extends AndroidTestCase {
     }
 
     // Tests that close() is idempotent
+    @Test
     @SmallTest
     public void testCloseClose() throws Exception {
         MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
@@ -199,6 +223,7 @@ public class MemoryFileTest extends AndroidTestCase {
     }
 
     // Tests that we can't read from a closed memory file
+    @Test
     @SmallTest
     public void testCloseRead() throws Exception {
         MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
@@ -214,6 +239,7 @@ public class MemoryFileTest extends AndroidTestCase {
     }
 
     // Tests that we can't write to a closed memory file
+    @Test
     @SmallTest
     public void testCloseWrite() throws Exception {
         MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
@@ -229,6 +255,7 @@ public class MemoryFileTest extends AndroidTestCase {
     }
 
     // Tests that we can't call allowPurging() after close()
+    @Test
     @SmallTest
     public void testCloseAllowPurging() throws Exception {
         MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
@@ -245,6 +272,7 @@ public class MemoryFileTest extends AndroidTestCase {
     }
 
     // Tests that we don't leak file descriptors or mmap areas
+    @Test
     @LargeTest
     public void testCloseLeak() throws Exception {
         // open enough memory files that we should run out of

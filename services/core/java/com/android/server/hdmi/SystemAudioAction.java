@@ -20,6 +20,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
+import android.util.Slog;
 
 import java.util.List;
 
@@ -56,12 +57,14 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
      * @param avrAddress logical address of AVR device
      * @param targetStatus Whether to enable the system audio mode or not
      * @param callback callback interface to be notified when it's done
-     * @throws IllegalArgumentException if device type of sourceAddress and avrAddress is invalid
      */
     SystemAudioAction(HdmiCecLocalDevice source, int avrAddress, boolean targetStatus,
             IHdmiControlCallback callback) {
         super(source, callback);
-        HdmiUtils.verifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        if (!HdmiUtils.verifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)) {
+            Slog.w(TAG, "Device type mismatch, stop the action.");
+            finish();
+        }
         mAvrLogicalAddress = avrAddress;
         mTargetAudioStatus = targetStatus;
     }
@@ -113,7 +116,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
         }
         int param = tv().getActivePath();
         return param != Constants.INVALID_PHYSICAL_ADDRESS
-                ? param : Constants.PATH_INTERNAL;
+                ? param : Constants.TV_PHYSICAL_ADDRESS;
     }
 
     private void handleSendSystemAudioModeRequestTimeout() {

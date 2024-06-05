@@ -21,7 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.content.res.Resources;
 import android.graphics.Paint;
 
-import com.android.settingslib.R;
+import com.android.settingslib.widget.adaptiveicon.R;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

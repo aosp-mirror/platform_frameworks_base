@@ -325,32 +325,25 @@ public abstract class KeyStore2ParameterUtils {
             args.add(KeyStore2ParameterUtils.makeBool(
                     KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED));
         } else {
-            if (spec.getUserAuthenticationValidityDurationSeconds() == 0) {
-                // Every use of this key needs to be authorized by the user.
-                addSids(args, spec);
-                args.add(KeyStore2ParameterUtils.makeEnum(
-                        KeymasterDefs.KM_TAG_USER_AUTH_TYPE, spec.getUserAuthenticationType()
-                ));
-
-                if (spec.isUserAuthenticationValidWhileOnBody()) {
-                    throw new ProviderException(
-                            "Key validity extension while device is on-body is not "
-                                    + "supported for keys requiring fingerprint authentication");
-                }
-            } else {
-                addSids(args, spec);
-                args.add(KeyStore2ParameterUtils.makeEnum(
-                        KeymasterDefs.KM_TAG_USER_AUTH_TYPE, spec.getUserAuthenticationType()
-                ));
+            addSids(args, spec);
+            args.add(KeyStore2ParameterUtils.makeEnum(
+                    KeymasterDefs.KM_TAG_USER_AUTH_TYPE, spec.getUserAuthenticationType()
+            ));
+            if (spec.getUserAuthenticationValidityDurationSeconds() != 0) {
                 args.add(KeyStore2ParameterUtils.makeInt(
                         KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
                         spec.getUserAuthenticationValidityDurationSeconds()
                 ));
-                if (spec.isUserAuthenticationValidWhileOnBody()) {
-                    args.add(KeyStore2ParameterUtils.makeBool(
-                            KeymasterDefs.KM_TAG_ALLOW_WHILE_ON_BODY
-                    ));
+            }
+            if (spec.isUserAuthenticationValidWhileOnBody()) {
+                if (spec.getUserAuthenticationValidityDurationSeconds() == 0) {
+                    throw new ProviderException(
+                            "Key validity extension while device is on-body is not "
+                                    + "supported for keys requiring fingerprint authentication");
                 }
+                args.add(KeyStore2ParameterUtils.makeBool(
+                        KeymasterDefs.KM_TAG_ALLOW_WHILE_ON_BODY
+                ));
             }
         }
     }

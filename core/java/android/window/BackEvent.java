@@ -48,8 +48,14 @@ public final class BackEvent {
     @SwipeEdge
     private final int mSwipeEdge;
 
+    /** @hide */
+    public static BackEvent fromBackMotionEvent(BackMotionEvent backMotionEvent) {
+        return new BackEvent(backMotionEvent.getTouchX(), backMotionEvent.getTouchY(),
+                backMotionEvent.getProgress(), backMotionEvent.getSwipeEdge());
+    }
+
     /**
-     * Creates a new {@link BackMotionEvent} instance.
+     * Creates a new {@link BackEvent} instance.
      *
      * @param touchX Absolute X location of the touch point of this event.
      * @param touchY Absolute Y location of the touch point of this event.

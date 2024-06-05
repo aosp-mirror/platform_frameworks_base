@@ -11,13 +11,16 @@ import android.view.View
 import androidx.annotation.WorkerThread
 import com.android.internal.R
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyChipEvent
 import com.android.systemui.privacy.PrivacyDialogController
+import com.android.systemui.privacy.PrivacyDialogControllerV2
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
@@ -26,7 +29,7 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.shade.ShadeModule.Companion.SHADE_HEADER
+import com.android.systemui.shade.ShadeViewProviderModule.Companion.SHADE_HEADER
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import javax.inject.Named
 
@@ -49,6 +52,7 @@ class HeaderPrivacyIconsController @Inject constructor(
     private val uiEventLogger: UiEventLogger,
     @Named(SHADE_HEADER) private val privacyChip: OngoingPrivacyChip,
     private val privacyDialogController: PrivacyDialogController,
+    private val privacyDialogControllerV2: PrivacyDialogControllerV2,
     private val privacyLogger: PrivacyLogger,
     @Named(SHADE_HEADER) private val iconContainer: StatusIconContainer,
     private val permissionManager: PermissionManager,
@@ -58,7 +62,8 @@ class HeaderPrivacyIconsController @Inject constructor(
     private val appOpsController: AppOpsController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val safetyCenterManager: SafetyCenterManager,
-    private val deviceProvisionedController: DeviceProvisionedController
+    private val deviceProvisionedController: DeviceProvisionedController,
+    private val featureFlags: FeatureFlags
 ) {
 
     var chipVisibilityListener: ChipVisibilityListener? = null
@@ -143,7 +148,11 @@ class HeaderPrivacyIconsController @Inject constructor(
             // If the privacy chip is visible, it means there were some indicators
             uiEventLogger.log(PrivacyChipEvent.ONGOING_INDICATORS_CHIP_CLICK)
             if (safetyCenterEnabled) {
-                showSafetyCenter()
+                if (featureFlags.isEnabled(Flags.ENABLE_NEW_PRIVACY_DIALOG)) {
+                    privacyDialogControllerV2.showDialog(privacyChip.context, privacyChip)
+                } else {
+                    showSafetyCenter()
+                }
             } else {
                 privacyDialogController.showDialog(privacyChip.context)
             }
@@ -166,7 +175,7 @@ class HeaderPrivacyIconsController @Inject constructor(
             startSafetyCenter.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             uiExecutor.execute {
                 activityStarter.startActivity(startSafetyCenter, true,
-                    ActivityLaunchAnimator.Controller.fromView(privacyChip))
+                    ActivityTransitionAnimator.Controller.fromView(privacyChip))
             }
         }
     }

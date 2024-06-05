@@ -33,9 +33,10 @@ import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.support.test.uiautomator.UiDevice;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
+
+import androidx.test.uiautomator.UiDevice;
 
 import com.google.mockwebserver.MockResponse;
 import com.google.mockwebserver.MockWebServer;

@@ -32,7 +32,7 @@ import android.service.controls.ControlsProviderService
 import android.util.IconDrawableFactory
 import androidx.annotation.WorkerThread
 import com.android.settingslib.applications.DefaultAppInfo
-import com.android.systemui.R
+import com.android.systemui.res.R
 import java.util.Objects
 
 open class ControlsServiceInfo(
@@ -71,14 +71,9 @@ open class ControlsServiceInfo(
     private var resolved: Boolean = false
 
     @WorkerThread
-    fun resolvePanelActivity(
-        allowAllApps: Boolean = false
-    ) {
+    fun resolvePanelActivity() {
         if (resolved) return
         resolved = true
-        val validPackages = context.resources
-            .getStringArray(R.array.config_controlsPreferredPackages)
-        if (componentName.packageName !in validPackages && !allowAllApps) return
         panelActivity = _panelActivity?.let {
             val resolveInfos = mPm.queryIntentActivitiesAsUser(
                 Intent().setComponent(it),

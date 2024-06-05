@@ -26,24 +26,36 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
+import com.android.systemui.flags.DisableSceneContainer;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
 import com.android.systemui.util.time.FakeSystemClock;
+
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlowKt;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,6 +67,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class FalsingCollectorImplTest extends SysuiTestCase {
 
     private FalsingCollectorImpl mFalsingCollector;
@@ -72,9 +85,23 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
-    private ShadeExpansionStateManager mShadeExpansionStateManager;
+    private ShadeInteractor mShadeInteractor;
+    @Mock
+    private JavaAdapter mJavaAdapter;
     @Mock
     private BatteryController mBatteryController;
+    @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
+    @Mock
+    private CommunalInteractor mCommunalInteractor;
+    @Mock
+    private DeviceEntryInteractor mDeviceEntryInteractor;
+    private final MutableStateFlow<Boolean> mIsDeviceEntered =
+            StateFlowKt.MutableStateFlow(false);
+    @Mock
+    private SceneContainerOcclusionInteractor mSceneContainerOcclusionInteractor;
+    private final MutableStateFlow<Boolean> mIsInvisibleDueToOcclusion =
+            StateFlowKt.MutableStateFlow(false);
     private final DockManagerFake mDockManager = new DockManagerFake();
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
@@ -85,12 +112,23 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+        when(mShadeInteractor.isQsExpanded()).thenReturn(StateFlowKt.MutableStateFlow(false));
+
+        when(mDeviceEntryInteractor.isDeviceEntered()).thenReturn(mIsDeviceEntered);
+        when(mSceneContainerOcclusionInteractor.getInvisibleDueToOcclusion()).thenReturn(
+                mIsInvisibleDueToOcclusion);
 
         mFalsingCollector = new FalsingCollectorImpl(mFalsingDataProvider, mFalsingManager,
                 mKeyguardUpdateMonitor, mHistoryTracker, mProximitySensor,
-                mStatusBarStateController, mKeyguardStateController, mShadeExpansionStateManager,
-                mBatteryController,
-                mDockManager, mFakeExecutor, mFakeSystemClock);
+                mStatusBarStateController, mKeyguardStateController,
+                () -> mShadeInteractor, mBatteryController,
+                mDockManager, mFakeExecutor,
+                mJavaAdapter, mFakeSystemClock, () -> mSelectedUserInteractor,
+                () -> mCommunalInteractor, () -> mDeviceEntryInteractor,
+                () -> mSceneContainerOcclusionInteractor
+        );
+        mFalsingCollector.init();
     }
 
     @Test
@@ -170,6 +208,66 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
+    public void testRegisterSensor_OccludingActivity_sceneContainerDisabled() {
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+
+        ArgumentCaptor<StatusBarStateController.StateListener> stateListenerArgumentCaptor =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
+        verify(mStatusBarStateController).addCallback(stateListenerArgumentCaptor.capture());
+
+        mFalsingCollector.onScreenTurningOn();
+        reset(mProximitySensor);
+        stateListenerArgumentCaptor.getValue().onStateChanged(StatusBarState.SHADE);
+        verify(mProximitySensor).register(any(ThresholdSensor.Listener.class));
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void testRegisterSensor_OccludingActivity_sceneContainerEnabled() {
+        mIsInvisibleDueToOcclusion.setValue(true);
+
+        ArgumentCaptor<StatusBarStateController.StateListener> stateListenerArgumentCaptor =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
+        verify(mStatusBarStateController).addCallback(stateListenerArgumentCaptor.capture());
+
+        mFalsingCollector.onScreenTurningOn();
+        reset(mProximitySensor);
+        stateListenerArgumentCaptor.getValue().onStateChanged(StatusBarState.SHADE);
+        verify(mProximitySensor).register(any(ThresholdSensor.Listener.class));
+    }
+
+    @Test
+    public void testPassThroughEnterKeyEvent() {
+        KeyEvent enterDown = KeyEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER,
+                0, 0, 0, 0, 0, 0, 0, "");
+        KeyEvent enterUp = KeyEvent.obtain(0, 0, MotionEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER, 0,
+                0, 0, 0, 0, 0, 0, "");
+
+        mFalsingCollector.onKeyEvent(enterDown);
+        verify(mFalsingDataProvider, never()).onKeyEvent(any(KeyEvent.class));
+
+        mFalsingCollector.onKeyEvent(enterUp);
+        verify(mFalsingDataProvider, times(1)).onKeyEvent(enterUp);
+    }
+
+    @Test
+    public void testAvoidAKeyEvent() {
+        // Arbitrarily chose the "A" key, as it is not currently allowlisted. If this key is
+        // allowlisted in the future, please choose another key that will not be collected.
+        KeyEvent aKeyDown = KeyEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, KeyEvent.KEYCODE_A,
+                0, 0, 0, 0, 0, 0, 0, "");
+        KeyEvent aKeyUp = KeyEvent.obtain(0, 0, MotionEvent.ACTION_UP, KeyEvent.KEYCODE_A, 0,
+                0, 0, 0, 0, 0, 0, "");
+
+        mFalsingCollector.onKeyEvent(aKeyDown);
+        verify(mFalsingDataProvider, never()).onKeyEvent(any(KeyEvent.class));
+
+        mFalsingCollector.onKeyEvent(aKeyUp);
+        verify(mFalsingDataProvider, never()).onKeyEvent(any(KeyEvent.class));
+    }
+
+    @Test
     public void testPassThroughGesture() {
         MotionEvent down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
         MotionEvent up = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0);
@@ -217,11 +315,29 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAvoidUnlocked() {
+    @DisableSceneContainer
+    public void testAvoidUnlocked_sceneContainerDisabled() {
         MotionEvent down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
         MotionEvent up = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0);
 
         when(mKeyguardStateController.isShowing()).thenReturn(false);
+
+        // Nothing passed initially
+        mFalsingCollector.onTouchEvent(down);
+        verify(mFalsingDataProvider, never()).onMotionEvent(any(MotionEvent.class));
+
+        // Up event would normally flush the up event, but doesn't.
+        mFalsingCollector.onTouchEvent(up);
+        verify(mFalsingDataProvider, never()).onMotionEvent(any(MotionEvent.class));
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void testAvoidUnlocked_sceneContainerEnabled() {
+        MotionEvent down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
+        MotionEvent up = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0);
+
+        mIsDeviceEntered.setValue(true);
 
         // Nothing passed initially
         mFalsingCollector.onTouchEvent(down);

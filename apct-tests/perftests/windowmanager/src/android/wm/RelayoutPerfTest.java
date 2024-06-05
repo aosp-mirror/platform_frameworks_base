@@ -18,6 +18,8 @@ package android.wm;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
+
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -35,6 +37,7 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.WindowRelayoutResult;
 import android.widget.LinearLayout;
 import android.window.ClientWindowFrames;
 
@@ -111,7 +114,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         stopProfiling();
     }
 
-    /** A dummy view to get IWindow. */
+    /** A placeholder view to get IWindow. */
     private static class ContentView extends LinearLayout {
         ContentView(Context context) {
             super(context);
@@ -128,6 +131,8 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         final MergedConfiguration mOutMergedConfiguration = new MergedConfiguration();
         final InsetsState mOutInsetsState = new InsetsState();
         final InsetsSourceControl.Array mOutControls = new InsetsSourceControl.Array();
+        final Bundle mOutBundle = windowSessionRelayoutInfo() ? null : new Bundle();
+        final WindowRelayoutResult mOutRelayoutResult;
         final IWindow mWindow;
         final View mView;
         final WindowManager.LayoutParams mParams;
@@ -136,7 +141,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         final SurfaceControl mOutSurfaceControl;
 
         final IntSupplier mViewVisibility;
-
+        int mRelayoutSeq;
         int mFlags;
 
         RelayoutRunner(Activity activity, IWindow window, IntSupplier visibilitySupplier) {
@@ -147,15 +152,26 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
             mHeight = mView.getMeasuredHeight();
             mOutSurfaceControl = mView.getViewRootImpl().getSurfaceControl();
             mViewVisibility = visibilitySupplier;
+            mOutRelayoutResult = windowSessionRelayoutInfo()
+                    ? new WindowRelayoutResult(mOutFrames, mOutMergedConfiguration,
+                            mOutSurfaceControl, mOutInsetsState, mOutControls)
+                    : null;
         }
 
         void runBenchmark(BenchmarkState state) throws RemoteException {
             final IWindowSession session = WindowManagerGlobal.getWindowSession();
             while (state.keepRunning()) {
-                session.relayout(mWindow, mParams, mWidth, mHeight,
-                        mViewVisibility.getAsInt(), mFlags, 0 /* seq */, 0 /* lastSyncSeqId */,
-                        mOutFrames, mOutMergedConfiguration, mOutSurfaceControl, mOutInsetsState,
-                        mOutControls, new Bundle());
+                mRelayoutSeq++;
+                if (windowSessionRelayoutInfo()) {
+                    session.relayout(mWindow, mParams, mWidth, mHeight,
+                            mViewVisibility.getAsInt(), mFlags, mRelayoutSeq, 0 /* lastSyncSeqId */,
+                            mOutRelayoutResult);
+                } else {
+                    session.relayoutLegacy(mWindow, mParams, mWidth, mHeight,
+                            mViewVisibility.getAsInt(), mFlags, mRelayoutSeq, 0 /* lastSyncSeqId */,
+                            mOutFrames, mOutMergedConfiguration, mOutSurfaceControl,
+                            mOutInsetsState, mOutControls, mOutBundle);
+                }
             }
         }
     }

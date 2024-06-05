@@ -26,7 +26,7 @@ import android.view.Gravity;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Grid-based implementation of the button layout created by the global actions dialog.

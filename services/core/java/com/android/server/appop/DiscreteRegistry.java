@@ -35,7 +35,9 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_MICROPHONE;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
+import static android.app.AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
+import static android.app.AppOpsManager.OP_RESERVED_FOR_TESTING;
 import static android.app.AppOpsManager.flagsToString;
 import static android.app.AppOpsManager.getUidStateName;
 
@@ -134,7 +136,8 @@ final class DiscreteRegistry {
     private static final String PROPERTY_DISCRETE_OPS_LIST = "discrete_history_ops_cslist";
     private static final String DEFAULT_DISCRETE_OPS = OP_FINE_LOCATION + "," + OP_COARSE_LOCATION
             + "," + OP_CAMERA + "," + OP_RECORD_AUDIO + "," + OP_PHONE_CALL_MICROPHONE + ","
-            + OP_PHONE_CALL_CAMERA + "," + OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
+            + OP_PHONE_CALL_CAMERA + "," + OP_RECEIVE_AMBIENT_TRIGGER_AUDIO + ","
+            + OP_RECEIVE_SANDBOX_TRIGGER_AUDIO + "," + OP_RESERVED_FOR_TESTING;
     private static final long DEFAULT_DISCRETE_HISTORY_CUTOFF = Duration.ofDays(7).toMillis();
     private static final long MAXIMUM_DISCRETE_HISTORY_CUTOFF = Duration.ofDays(30).toMillis();
     private static final long DEFAULT_DISCRETE_HISTORY_QUANTIZATION =

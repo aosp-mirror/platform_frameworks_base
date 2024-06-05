@@ -16,6 +16,8 @@
 
 package com.android.server.input;
 
+import static com.android.input.flags.Flags.rateLimitUserActivityPokeInDispatcher;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,7 +30,6 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.PointerIcon;
 import android.view.ViewConfiguration;
 
 import java.util.Map;
@@ -63,10 +64,14 @@ class InputSettingsObserver extends ContentObserver {
                         (reason) -> updateTouchpadNaturalScrollingEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_TAP_TO_CLICK),
                         (reason) -> updateTouchpadTapToClickEnabled()),
+                Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_TAP_DRAGGING),
+                        (reason) -> updateTouchpadTapDraggingEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE),
                         (reason) -> updateTouchpadRightClickZoneEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_TOUCHES),
                         (reason) -> updateShowTouches()),
+                Map.entry(Settings.System.getUriFor(Settings.System.POINTER_LOCATION),
+                        (reason) -> updatePointerLocation()),
                 Map.entry(
                         Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON),
                         (reason) -> updateAccessibilityLargePointer()),
@@ -77,7 +82,21 @@ class InputSettingsObserver extends ContentObserver {
                                 Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH),
                         (reason) -> updateMaximumObscuringOpacityForTouch()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_KEY_PRESSES),
-                        (reason) -> updateShowKeyPresses()));
+                        (reason) -> updateShowKeyPresses()),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_TIMEOUT_MS),
+                        (reason) -> updateKeyRepeatInfo()),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_DELAY_MS),
+                        (reason) -> updateKeyRepeatInfo()),
+                Map.entry(Settings.System.getUriFor(Settings.System.SHOW_ROTARY_INPUT),
+                        (reason) -> updateShowRotaryInput()),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS),
+                        (reason) -> updateAccessibilityBounceKeys()),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_SLOW_KEYS),
+                        (reason) -> updateAccessibilitySlowKeys()),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_STICKY_KEYS),
+                        (reason) -> updateAccessibilityStickyKeys()),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.STYLUS_POINTER_ICON_ENABLED),
+                        (reason) -> updateStylusPointerIconEnabled()));
     }
 
     /**
@@ -102,6 +121,8 @@ class InputSettingsObserver extends ContentObserver {
         for (Consumer<String> observer : mObservers.values()) {
             observer.accept("just booted");
         }
+
+        configureUserActivityPokeInterval();
     }
 
     @Override
@@ -115,74 +136,91 @@ class InputSettingsObserver extends ContentObserver {
         return setting != 0;
     }
 
-    private int getPointerSpeedValue(String settingName) {
-        int speed = Settings.System.getIntForUser(mContext.getContentResolver(),
-                settingName, InputSettings.DEFAULT_POINTER_SPEED, UserHandle.USER_CURRENT);
+    private int constrainPointerSpeedValue(int speed) {
         return Math.min(Math.max(speed, InputSettings.MIN_POINTER_SPEED),
                 InputSettings.MAX_POINTER_SPEED);
     }
 
     private void updateMousePointerSpeed() {
-        mNative.setPointerSpeed(getPointerSpeedValue(Settings.System.POINTER_SPEED));
+        int speed = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.POINTER_SPEED, InputSettings.DEFAULT_POINTER_SPEED,
+                UserHandle.USER_CURRENT);
+        mNative.setPointerSpeed(constrainPointerSpeedValue(speed));
     }
 
     private void updateTouchpadPointerSpeed() {
         mNative.setTouchpadPointerSpeed(
-                getPointerSpeedValue(Settings.System.TOUCHPAD_POINTER_SPEED));
+                constrainPointerSpeedValue(InputSettings.getTouchpadPointerSpeed(mContext)));
     }
 
     private void updateTouchpadNaturalScrollingEnabled() {
         mNative.setTouchpadNaturalScrollingEnabled(
-                getBoolean(Settings.System.TOUCHPAD_NATURAL_SCROLLING, true));
+                InputSettings.useTouchpadNaturalScrolling(mContext));
     }
 
     private void updateTouchpadTapToClickEnabled() {
-        mNative.setTouchpadTapToClickEnabled(
-                getBoolean(Settings.System.TOUCHPAD_TAP_TO_CLICK, true));
+        mNative.setTouchpadTapToClickEnabled(InputSettings.useTouchpadTapToClick(mContext));
+    }
+
+    private void updateTouchpadTapDraggingEnabled() {
+        mNative.setTouchpadTapDraggingEnabled(InputSettings.useTouchpadTapDragging(mContext));
     }
 
     private void updateTouchpadRightClickZoneEnabled() {
-        mNative.setTouchpadRightClickZoneEnabled(
-                getBoolean(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE, false));
+        mNative.setTouchpadRightClickZoneEnabled(InputSettings.useTouchpadRightClickZone(mContext));
     }
 
     private void updateShowTouches() {
         mNative.setShowTouches(getBoolean(Settings.System.SHOW_TOUCHES, false));
     }
 
+    private void updatePointerLocation() {
+        mService.updatePointerLocationEnabled(
+                getBoolean(Settings.System.POINTER_LOCATION, false));
+    }
+
     private void updateShowKeyPresses() {
-        mService.updateFocusEventDebugViewEnabled(
-                getBoolean(Settings.System.SHOW_KEY_PRESSES, false));
+        mService.updateShowKeyPresses(getBoolean(Settings.System.SHOW_KEY_PRESSES, false));
+    }
+
+    private void updateShowRotaryInput() {
+        mService.updateShowRotaryInput(getBoolean(Settings.System.SHOW_ROTARY_INPUT, false));
     }
 
     private void updateAccessibilityLargePointer() {
         final int accessibilityConfig = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
                 0, UserHandle.USER_CURRENT);
-        PointerIcon.setUseLargeIcons(accessibilityConfig == 1);
-        mNative.reloadPointerIcons();
+        mService.setUseLargePointerIcons(accessibilityConfig == 1);
     }
 
     private void updateLongPressTimeout(String reason) {
-        // Some key gesture timeouts are based on the long press timeout, so update key gesture
-        // timeouts when the value changes. See ViewConfiguration#getKeyRepeatTimeout().
-        mNative.notifyKeyGestureTimeoutsChanged();
-
-        // Update the deep press status.
         // Not using ViewConfiguration.getLongPressTimeout here because it may return a stale value.
-        final int timeout = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+        final int longPressTimeoutMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.LONG_PRESS_TIMEOUT, ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT,
                 UserHandle.USER_CURRENT);
+
         final boolean featureEnabledFlag =
                 DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
                         DEEP_PRESS_ENABLED, true /* default */);
         final boolean enabled =
-                featureEnabledFlag && timeout <= ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT;
-        Log.i(TAG,
-                (enabled ? "Enabling" : "Disabling") + " motion classifier because " + reason
+                featureEnabledFlag
+                        && longPressTimeoutMs <= ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT;
+        Log.i(TAG, (enabled ? "Enabling" : "Disabling") + " motion classifier because " + reason
                 + ": feature " + (featureEnabledFlag ? "enabled" : "disabled")
-                + ", long press timeout = " + timeout);
+                + ", long press timeout = " + longPressTimeoutMs + " ms");
         mNative.setMotionClassifierEnabled(enabled);
+    }
+
+    private void updateKeyRepeatInfo() {
+        // Use ViewConfiguration getters only as fallbacks because they may return stale values.
+        final int timeoutMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_TIMEOUT_MS, ViewConfiguration.getKeyRepeatTimeout(),
+                UserHandle.USER_CURRENT);
+        final int delayMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_DELAY_MS, ViewConfiguration.getKeyRepeatDelay(),
+                UserHandle.USER_CURRENT);
+        mNative.setKeyRepeatConfiguration(timeoutMs, delayMs);
     }
 
     private void updateMaximumObscuringOpacityForTouch() {
@@ -193,5 +231,34 @@ class InputSettingsObserver extends ContentObserver {
             return;
         }
         mNative.setMaximumObscuringOpacityForTouch(opacity);
+    }
+
+    private void updateAccessibilityBounceKeys() {
+        mService.setAccessibilityBounceKeysThreshold(
+                InputSettings.getAccessibilityBounceKeysThreshold(mContext));
+    }
+
+    private void updateAccessibilitySlowKeys() {
+        mService.setAccessibilitySlowKeysThreshold(
+                InputSettings.getAccessibilitySlowKeysThreshold(mContext));
+    }
+
+    private void updateAccessibilityStickyKeys() {
+        mService.setAccessibilityStickyKeysEnabled(
+                InputSettings.isAccessibilityStickyKeysEnabled(mContext));
+    }
+
+    private void configureUserActivityPokeInterval() {
+        if (rateLimitUserActivityPokeInDispatcher()) {
+            final int intervalMillis = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_minMillisBetweenInputUserActivityEvents);
+            Log.i(TAG, "Setting user activity interval (ms) of " + intervalMillis);
+            mNative.setMinTimeBetweenUserActivityPokes(intervalMillis);
+        }
+    }
+
+    private void updateStylusPointerIconEnabled() {
+        mNative.setStylusPointerIconEnabled(
+                InputSettings.isStylusPointerIconEnabled(mContext, true /* forceReloadSetting */));
     }
 }

@@ -39,30 +39,48 @@ import static android.view.KeyEvent.META_SHIFT_RIGHT_ON;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.server.policy.WindowManagerPolicy.ACTION_PASS_TO_USER;
+
+import static org.mockito.ArgumentMatchers.eq;
 
 import static java.util.Collections.unmodifiableMap;
 
 import android.content.Context;
-import android.os.Looper;
-import android.os.SystemClock;
+import android.content.res.Resources;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProviderRule;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.RuleChain;
 
 import java.util.Map;
 
 class ShortcutKeyTestBase {
+
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public final FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+
+    @Rule
+    public RuleChain rules = RuleChain.outerRule(mSettingsProviderRule).around(mSetFlagsRule);
+
+    private Resources mResources;
     TestPhoneWindowManager mPhoneWindowManager;
-    final Context mContext = getInstrumentation().getTargetContext();
+    DispatchedKeyHandler mDispatchedKeyHandler = event -> false;
+    Context mContext;
 
     /** Modifier key to meta state */
-    private static final Map<Integer, Integer> MODIFIER;
+    protected static final Map<Integer, Integer> MODIFIER;
     static {
         final Map<Integer, Integer> map = new ArrayMap<>();
         map.put(KEYCODE_CTRL_LEFT, META_CTRL_LEFT_ON | META_CTRL_ON);
@@ -78,54 +96,104 @@ class ShortcutKeyTestBase {
     }
 
     @Before
-    public void setUp() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
+    public void setup() {
+        mContext = spy(getInstrumentation().getTargetContext());
+        mResources = spy(mContext.getResources());
+        doReturn(mResources).when(mContext).getResources();
+        doReturn(mSettingsProviderRule.mockContentResolver(mContext))
+                .when(mContext).getContentResolver();
+    }
 
-        mPhoneWindowManager = new TestPhoneWindowManager(mContext);
+
+    /** Same as {@link setUpPhoneWindowManager(boolean)}, without supporting settings update. */
+    protected final void setUpPhoneWindowManager() {
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ false);
+    }
+
+    /**
+     * Creates and sets up a {@link TestPhoneWindowManager} instance.
+     *
+     * <p>Subclasses must call this at the start of the test if they intend to interact with phone
+     * window manager.
+     *
+     * @param supportSettingsUpdate {@code true} to have PWM respond to any Settings changes upon
+     *    instantiation. Although this is supposed to also allow a test to listen to any Settings
+     *    changes after instantiation, MockContentResolver in this class's setup stubs out
+     *    notifyChange(), which prevents SettingsObserver from getting notified of events. So
+     *    we're effectively always instantiating TestPhoneWindowManager with
+     *    supportSettingsUpdate=false.
+     */
+    protected final void setUpPhoneWindowManager(boolean supportSettingsUpdate) {
+        mPhoneWindowManager = new TestPhoneWindowManager(mContext, supportSettingsUpdate);
+    }
+
+    protected final void setDispatchedKeyHandler(DispatchedKeyHandler keyHandler) {
+        mDispatchedKeyHandler = keyHandler;
     }
 
     @After
     public void tearDown() {
-        mPhoneWindowManager.tearDown();
+        if (mPhoneWindowManager != null) {
+            mPhoneWindowManager.tearDown();
+        }
     }
 
-    void sendKeyCombination(int[] keyCodes, long duration) {
-        final long downTime = SystemClock.uptimeMillis();
+    void sendKeyCombination(int[] keyCodes, long durationMillis, boolean longPress, int displayId) {
+        final long downTime = mPhoneWindowManager.getCurrentTime();
         final int count = keyCodes.length;
-        final KeyEvent[] events = new KeyEvent[count];
         int metaState = 0;
+
         for (int i = 0; i < count; i++) {
             final int keyCode = keyCodes[i];
             final KeyEvent event = new KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN, keyCode,
                     0 /*repeat*/, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/,
                     0 /*flags*/, InputDevice.SOURCE_KEYBOARD);
-            event.setDisplayId(DEFAULT_DISPLAY);
-            events[i] = event;
+            event.setDisplayId(displayId);
+            interceptKey(event);
             // The order is important here, metaState could be updated and applied to the next key.
             metaState |= MODIFIER.getOrDefault(keyCode, 0);
         }
 
-        for (KeyEvent event: events) {
-            interceptKey(event);
+        if (durationMillis > 0) {
+            mPhoneWindowManager.moveTimeForward(durationMillis);
         }
 
-        try {
-            Thread.sleep(duration);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        if (longPress) {
+            final long nextDownTime = mPhoneWindowManager.getCurrentTime();
+            for (int i = 0; i < count; i++) {
+                final int keyCode = keyCodes[i];
+                final KeyEvent nextDownEvent = new KeyEvent(downTime, nextDownTime,
+                        KeyEvent.ACTION_DOWN, keyCode, 1 /*repeat*/, metaState,
+                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/,
+                        KeyEvent.FLAG_LONG_PRESS /*flags*/, InputDevice.SOURCE_KEYBOARD);
+                nextDownEvent.setDisplayId(displayId);
+                interceptKey(nextDownEvent);
+            }
         }
 
+        final long eventTime = mPhoneWindowManager.getCurrentTime();
         for (int i = count - 1; i >= 0; i--) {
-            final long eventTime = SystemClock.uptimeMillis();
             final int keyCode = keyCodes[i];
             final KeyEvent upEvent = new KeyEvent(downTime, eventTime, KeyEvent.ACTION_UP, keyCode,
                     0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0 /*flags*/,
                     InputDevice.SOURCE_KEYBOARD);
+            upEvent.setDisplayId(displayId);
             interceptKey(upEvent);
             metaState &= ~MODIFIER.getOrDefault(keyCode, 0);
         }
+    }
+
+    void sendKeyCombination(int[] keyCodes, long durationMillis) {
+        sendKeyCombination(keyCodes, durationMillis, false /* longPress */, DEFAULT_DISPLAY);
+    }
+
+    void sendKeyCombination(int[] keyCodes, long durationMillis, int displayId) {
+        sendKeyCombination(keyCodes, durationMillis, false /* longPress */, displayId);
+    }
+
+    void sendLongPressKeyCombination(int[] keyCodes) {
+        sendKeyCombination(keyCodes, ViewConfiguration.getLongPressTimeout(), true /* longPress */,
+                DEFAULT_DISPLAY);
     }
 
     void sendKey(int keyCode) {
@@ -133,37 +201,44 @@ class ShortcutKeyTestBase {
     }
 
     void sendKey(int keyCode, boolean longPress) {
-        final long downTime = SystemClock.uptimeMillis();
-        final KeyEvent event = new KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN, keyCode,
-                0 /*repeat*/, 0 /*metaState*/, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/,
-                0 /*flags*/, InputDevice.SOURCE_KEYBOARD);
-        event.setDisplayId(DEFAULT_DISPLAY);
-        interceptKey(event);
+        sendKeyCombination(new int[]{keyCode}, 0 /*durationMillis*/, longPress, DEFAULT_DISPLAY);
+    }
 
-        if (longPress) {
-            final long nextDownTime = downTime + ViewConfiguration.getLongPressTimeout();
-            final KeyEvent nextDownevent = new KeyEvent(downTime, nextDownTime,
-                    KeyEvent.ACTION_DOWN, keyCode, 1 /*repeat*/, 0 /*metaState*/,
-                    KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/,
-                    KeyEvent.FLAG_LONG_PRESS /*flags*/, InputDevice.SOURCE_KEYBOARD);
-            interceptKey(nextDownevent);
-        }
+    /**
+     * Since we use SettingsProviderRule to mock the ContentResolver in these
+     * tests, the settings observer registered by PhoneWindowManager will not
+     * be triggered automatically by the mock. Use this method to force the
+     * settings observer change after modifying any settings.
+     */
+    void triggerSettingsObserverChange() {
+        mPhoneWindowManager.getSettingsObserver().onChange(
+                // This boolean doesn't matter. This observer does the same thing regardless.
+                /*selfChange=*/true);
+    }
 
-        final long eventTime = longPress
-                ? SystemClock.uptimeMillis() + ViewConfiguration.getLongPressTimeout()
-                : SystemClock.uptimeMillis();
-        final KeyEvent upEvent = new KeyEvent(downTime, eventTime, KeyEvent.ACTION_UP, keyCode,
-                0 /*repeat*/, 0 /*metaState*/, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/,
-                0 /*flags*/, InputDevice.SOURCE_KEYBOARD);
-        interceptKey(upEvent);
+    /** Override a resource's return value. */
+    void overrideResource(int resId, int expectedBehavior) {
+        doReturn(expectedBehavior).when(mResources).getInteger(eq(resId));
     }
 
     private void interceptKey(KeyEvent keyEvent) {
         int actions = mPhoneWindowManager.interceptKeyBeforeQueueing(keyEvent);
         if ((actions & ACTION_PASS_TO_USER) != 0) {
             if (0 == mPhoneWindowManager.interceptKeyBeforeDispatching(keyEvent)) {
-                mPhoneWindowManager.dispatchUnhandledKey(keyEvent);
+                if (!mDispatchedKeyHandler.onKeyDispatched(keyEvent)) {
+                    mPhoneWindowManager.dispatchUnhandledKey(keyEvent);
+                }
             }
         }
+        mPhoneWindowManager.dispatchAllPendingEvents();
+    }
+
+    interface DispatchedKeyHandler {
+        /**
+         * Called when a key event is dispatched to app.
+         *
+         * @return true if the event is consumed by app.
+         */
+        boolean onKeyDispatched(KeyEvent event);
     }
 }

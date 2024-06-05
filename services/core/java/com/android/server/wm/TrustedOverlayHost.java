@@ -54,6 +54,7 @@ class TrustedOverlayHost {
             final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(null)
                 .setContainerLayer()
                 .setHidden(true)
+                .setCallsite("TrustedOverlayHost.requireOverlaySurfaceControl")
                 .setName("Overlay Host Leash");
 
             mSurfaceControl = b.build();
@@ -88,7 +89,17 @@ class TrustedOverlayHost {
 
     void addOverlay(SurfaceControlViewHost.SurfacePackage p, SurfaceControl currentParent) {
         requireOverlaySurfaceControl();
-        mOverlays.add(p);
+
+        boolean hasExistingOverlay = false;
+        for (int i = mOverlays.size() - 1; i >= 0; i--) {
+            SurfaceControlViewHost.SurfacePackage l = mOverlays.get(i);
+            if (l.getSurfaceControl().isSameSurface(p.getSurfaceControl())) {
+                hasExistingOverlay = true;
+            }
+        }
+        if (!hasExistingOverlay) {
+            mOverlays.add(p);
+        }
 
         SurfaceControl.Transaction t = mWmService.mTransactionFactory.get();
         t.reparent(p.getSurfaceControl(), mSurfaceControl)

@@ -267,20 +267,26 @@ public class Spatializer {
             HEAD_TRACKING_MODE_DISABLED,
             HEAD_TRACKING_MODE_RELATIVE_WORLD,
             HEAD_TRACKING_MODE_RELATIVE_DEVICE,
-    }) public @interface HeadTrackingMode {};
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HeadTrackingMode {};
 
     /** @hide */
     @IntDef(flag = false, value = {
             HEAD_TRACKING_MODE_DISABLED,
             HEAD_TRACKING_MODE_RELATIVE_WORLD,
             HEAD_TRACKING_MODE_RELATIVE_DEVICE,
-    }) public @interface HeadTrackingModeSet {};
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HeadTrackingModeSet {};
 
     /** @hide */
     @IntDef(flag = false, value = {
             HEAD_TRACKING_MODE_RELATIVE_WORLD,
             HEAD_TRACKING_MODE_RELATIVE_DEVICE,
-    }) public @interface HeadTrackingModeSupported {};
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HeadTrackingModeSupported {};
 
     /**
      * @hide

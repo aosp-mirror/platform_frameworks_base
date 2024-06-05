@@ -48,6 +48,7 @@ import java.util.function.BinaryOperator;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BundleMerger implements Parcelable {
     private static final String TAG = "BundleMerger";
 

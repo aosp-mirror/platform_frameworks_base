@@ -39,8 +39,34 @@ public class TouchEventGenerator {
         return generateSingleTouchEvent(displayId, ACTION_DOWN, x, y);
     }
 
+    /**
+     * Create a test {@link MotionEvent#ACTION_POINTER_DOWN}, filling in all the basic values that
+     * define the motion.
+     *
+     * @param displayId The id of the display
+     * @param pointFs location on the screen of the all pointers
+     */
+    public static MotionEvent pointerDownEvent(int displayId, PointF[] pointFs) {
+        final int actionIndex = 1 << MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+        final int action = ACTION_POINTER_DOWN | actionIndex;
+        return generateMultiplePointersEvent(displayId, action, pointFs);
+    }
+
     public static MotionEvent moveEvent(int displayId, float x, float y) {
         return generateSingleTouchEvent(displayId, ACTION_MOVE, x, y);
+    }
+
+    /**
+     * Create a test {@link MotionEvent#ACTION_POINTER_UP}, filling in all the basic values that
+     * define the motion.
+     *
+     * @param displayId the id of the display
+     * @param pointFs location on the screen of the all pointers
+     */
+    public static MotionEvent pointerUpEvent(int displayId, PointF[] pointFs) {
+        final int actionIndex = 1 << MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+        final int action = ACTION_POINTER_UP | actionIndex;
+        return generateMultiplePointersEvent(displayId, action, pointFs);
     }
 
     public static MotionEvent upEvent(int displayId, float x, float y) {

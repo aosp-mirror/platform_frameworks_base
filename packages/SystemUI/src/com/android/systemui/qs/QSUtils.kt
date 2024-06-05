@@ -1,7 +1,12 @@
 package com.android.systemui.qs
 
 import android.content.Context
+import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.LifecycleOwner
+import com.android.compose.theme.PlatformTheme
 import com.android.internal.policy.SystemBarUtils
+import com.android.systemui.qs.footer.ui.compose.FooterActions
+import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.util.LargeScreenUtils.shouldUseLargeScreenShadeHeader
 
 object QSUtils {
@@ -20,5 +25,14 @@ object QSUtils {
         } else {
             SystemBarUtils.getQuickQsOffsetHeight(context)
         }
+    }
+
+    @JvmStatic
+    fun setFooterActionsViewContent(
+        view: ComposeView,
+        viewModel: FooterActionsViewModel,
+        qsVisibilityLifecycleOwner: LifecycleOwner,
+    ) {
+        view.setContent { PlatformTheme { FooterActions(viewModel, qsVisibilityLifecycleOwner) } }
     }
 }

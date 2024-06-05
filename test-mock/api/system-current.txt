@@ -1,6 +1,4 @@
 // Signature format: 2.0
-// - add-additional-overrides=no
-// - migrating=Migration in progress see b/299366704
 package android.test.mock {
 
   public class MockContext extends android.content.Context {
@@ -11,30 +9,30 @@ package android.test.mock {
   }
 
   @Deprecated public class MockPackageManager extends android.content.pm.PackageManager {
-    method public void addOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
-    method public boolean arePermissionsIndividuallyControlled();
+    method @Deprecated public void addOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
+    method @Deprecated public boolean arePermissionsIndividuallyControlled();
     method @Deprecated public java.util.List<android.content.IntentFilter> getAllIntentFilters(String);
-    method public String getDefaultBrowserPackageNameAsUser(int);
-    method public java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
-    method public android.graphics.drawable.Drawable getInstantAppIcon(String);
-    method public android.content.ComponentName getInstantAppInstallerComponent();
-    method public android.content.ComponentName getInstantAppResolverSettingsComponent();
-    method public java.util.List<android.content.pm.InstantAppInfo> getInstantApps();
-    method public java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(String);
-    method public int getIntentVerificationStatusAsUser(String, int);
-    method public int getPermissionFlags(String, String, android.os.UserHandle);
-    method public void grantRuntimePermission(String, String, android.os.UserHandle);
-    method public int installExistingPackage(String) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public int installExistingPackage(String, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public void registerDexModule(String, @Nullable android.content.pm.PackageManager.DexModuleRegisterCallback);
-    method public void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
-    method public void revokeRuntimePermission(String, String, android.os.UserHandle);
-    method public boolean setDefaultBrowserPackageNameAsUser(String, int);
+    method @Deprecated public String getDefaultBrowserPackageNameAsUser(int);
+    method @Deprecated public java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
+    method @Deprecated public android.graphics.drawable.Drawable getInstantAppIcon(String);
+    method @Deprecated public android.content.ComponentName getInstantAppInstallerComponent();
+    method @Deprecated public android.content.ComponentName getInstantAppResolverSettingsComponent();
+    method @Deprecated public java.util.List<android.content.pm.InstantAppInfo> getInstantApps();
+    method @Deprecated public java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(String);
+    method @Deprecated public int getIntentVerificationStatusAsUser(String, int);
+    method @Deprecated public int getPermissionFlags(String, String, android.os.UserHandle);
+    method @Deprecated public void grantRuntimePermission(String, String, android.os.UserHandle);
+    method @Deprecated public int installExistingPackage(String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated public int installExistingPackage(String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated public void registerDexModule(String, @Nullable android.content.pm.PackageManager.DexModuleRegisterCallback);
+    method @Deprecated public void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
+    method @Deprecated public void revokeRuntimePermission(String, String, android.os.UserHandle);
+    method @Deprecated public boolean setDefaultBrowserPackageNameAsUser(String, int);
     method public String[] setPackagesSuspended(String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, String);
-    method public void setUpdateAvailable(String, boolean);
-    method public boolean updateIntentVerificationStatusAsUser(String, int, int);
-    method public void updatePermissionFlags(String, String, int, int, android.os.UserHandle);
-    method public void verifyIntentFilter(int, int, java.util.List<java.lang.String>);
+    method @Deprecated public void setUpdateAvailable(String, boolean);
+    method @Deprecated public boolean updateIntentVerificationStatusAsUser(String, int, int);
+    method @Deprecated public void updatePermissionFlags(String, String, int, int, android.os.UserHandle);
+    method @Deprecated public void verifyIntentFilter(int, int, java.util.List<java.lang.String>);
   }
 
 }

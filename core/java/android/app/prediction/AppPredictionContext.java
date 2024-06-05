@@ -24,6 +24,8 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * Class that provides contextual information about the environment in which the app prediction is
  * used, such as package name, UI in which the app targets are shown, and number of targets.
@@ -96,6 +98,13 @@ public final class AppPredictionContext implements Parcelable {
         return mPredictedTargetCount == other.mPredictedTargetCount
                 && mUiSurface.equals(other.mUiSurface)
                 && mPackageName.equals(other.mPackageName);
+    }
+
+    @Override
+    public int hashCode() {
+        int hashCode = Objects.hash(mUiSurface, mPackageName);
+        hashCode = 31 * hashCode + mPredictedTargetCount;
+        return hashCode;
     }
 
     @Override

@@ -21,10 +21,15 @@
 #include "GrBackendSurface.h"
 #include "RenderNode.h"
 #include "SkAndroidFrameworkUtils.h"
+#include "SkCanvas.h"
+#include "SkCanvasAndroid.h"
 #include "SkClipStack.h"
 #include "SkRect.h"
 #include "SkM44.h"
+#include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include "include/gpu/GpuTypes.h" // from Skia
+#include <include/gpu/gl/GrGLTypes.h>
+#include <include/gpu/ganesh/gl/GrGLBackendSurface.h>
 #include "utils/GLUtils.h"
 #include <effects/GainmapRenderer.h>
 #include "renderthread/CanvasContext.h"
@@ -34,7 +39,7 @@ namespace uirenderer {
 namespace skiapipeline {
 
 static void setScissor(int viewportHeight, const SkIRect& clip) {
-    SkASSERT(!clip.isEmpty());
+    LOG_FATAL_IF(clip.isEmpty(), "empty scissor clip");
     // transform to Y-flipped GL space, and prevent negatives
     GLint y = viewportHeight - clip.fBottom;
     GLint height = (viewportHeight - clip.fTop) - y;
@@ -42,9 +47,9 @@ static void setScissor(int viewportHeight, const SkIRect& clip) {
 }
 
 static void GetFboDetails(SkCanvas* canvas, GLuint* outFboID, SkISize* outFboSize) {
-    GrBackendRenderTarget renderTarget = canvas->topLayerBackendRenderTarget();
+    GrBackendRenderTarget renderTarget = skgpu::ganesh::TopLayerBackendRenderTarget(canvas);
     GrGLFramebufferInfo fboInfo;
-    LOG_ALWAYS_FATAL_IF(!renderTarget.getGLFramebufferInfo(&fboInfo),
+    LOG_ALWAYS_FATAL_IF(!GrBackendRenderTargets::GetGLFramebufferInfo(renderTarget, &fboInfo),
         "getGLFrameBufferInfo failed");
 
     *outFboID = fboInfo.fFBOID;
@@ -76,13 +81,13 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     }
 
     // flush will create a GrRenderTarget if not already present.
-    canvas->flush();
+    directContext->flushAndSubmit();
 
     GLuint fboID = 0;
     SkISize fboSize;
     GetFboDetails(canvas, &fboID, &fboSize);
 
-    SkIRect surfaceBounds = canvas->topLayerBounds();
+    SkIRect surfaceBounds = skgpu::ganesh::TopLayerBounds(canvas);
     SkIRect clipBounds = canvas->getDeviceClipBounds();
     SkM44 mat4(canvas->getLocalToDevice());
     SkRegion clipRegion;
@@ -95,12 +100,14 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         SkImageInfo surfaceInfo =
                 canvas->imageInfo().makeWH(clipBounds.width(), clipBounds.height());
         tmpSurface =
-                SkSurface::MakeRenderTarget(directContext, skgpu::Budgeted::kYes, surfaceInfo);
+                SkSurfaces::RenderTarget(directContext, skgpu::Budgeted::kYes, surfaceInfo);
         tmpSurface->getCanvas()->clear(SK_ColorTRANSPARENT);
 
         GrGLFramebufferInfo fboInfo;
-        if (!tmpSurface->getBackendRenderTarget(SkSurface::kFlushWrite_BackendHandleAccess)
-                     .getGLFramebufferInfo(&fboInfo)) {
+        if (!GrBackendRenderTargets::GetGLFramebufferInfo(
+                    SkSurfaces::GetBackendRenderTarget(
+                        tmpSurface.get(), SkSurfaces::BackendHandleAccess::kFlushWrite),
+                    &fboInfo)) {
             ALOGW("Unable to extract renderTarget info from offscreen canvas; aborting GLFunctor");
             return;
         }
@@ -163,7 +170,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
 
         // GL ops get inserted here if previous flush is missing, which could dirty the stencil
         bool stencilWritten = SkAndroidFrameworkUtils::clipWithStencil(tmpCanvas);
-        tmpCanvas->flush();  // need this flush for the single op that draws into the stencil
+        directContext->flushAndSubmit();  // need this flush for the single op that draws into the stencil
 
         // ensure that the framebuffer that the webview will render into is bound before after we
         // draw into the stencil

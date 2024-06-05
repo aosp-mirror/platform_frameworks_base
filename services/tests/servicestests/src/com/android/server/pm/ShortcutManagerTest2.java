@@ -2175,8 +2175,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
     public void testReportShortcutUsed() {
         mRunningUsers.put(USER_10, true);
-        mService.updateConfigurationLocked(
-                ShortcutService.ConfigConstants.KEY_SAVE_DELAY_MILLIS + "=1");
 
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             reset(mMockUsageStatsManagerInternal);

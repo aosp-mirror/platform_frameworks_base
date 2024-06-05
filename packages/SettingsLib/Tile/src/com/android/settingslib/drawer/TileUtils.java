@@ -77,9 +77,7 @@ public class TileUtils {
      */
     public static final String IA_SETTINGS_ACTION = "com.android.settings.action.IA_SETTINGS";
 
-    /**
-     * Same as #EXTRA_SETTINGS_ACTION but used for the platform Settings activities.
-     */
+    /** Same as #EXTRA_SETTINGS_ACTION but used for the platform Settings activities. */
     private static final String SETTINGS_ACTION = "com.android.settings.action.SETTINGS";
 
     private static final String OPERATOR_SETTINGS =
@@ -101,9 +99,7 @@ public class TileUtils {
      */
     static final String EXTRA_CATEGORY_KEY = "com.android.settings.category";
 
-    /**
-     * The key used to get the package name of the icon resource for the preference.
-     */
+    /** The key used to get the package name of the icon resource for the preference. */
     static final String EXTRA_PREFERENCE_ICON_PACKAGE = "com.android.settings.icon_package";
 
     /**
@@ -111,6 +107,12 @@ public class TileUtils {
      * to specify the key that should be used for the preference.
      */
     public static final String META_DATA_PREFERENCE_KEYHINT = "com.android.settings.keyhint";
+
+    /**
+     * Name of the meta-data item that can be set in the AndroidManifest.xml or in the content
+     * provider to specify the key of a group / category where this preference belongs to.
+     */
+    public static final String META_DATA_PREFERENCE_GROUP_KEY = "com.android.settings.group_key";
 
     /**
      * Order of the item that should be displayed on screen. Bigger value items displays closer on
@@ -139,18 +141,17 @@ public class TileUtils {
             "com.android.settings.bg.argb";
 
     /**
-     * Name of the meta-data item that should be set in the AndroidManifest.xml
-     * to specify the content provider providing the icon that should be displayed for
-     * the preference.
+     * Name of the meta-data item that should be set in the AndroidManifest.xml to specify the
+     * content provider providing the icon that should be displayed for the preference.
      *
-     * Icon provided by the content provider overrides any static icon.
+     * <p>Icon provided by the content provider overrides any static icon.
      */
     public static final String META_DATA_PREFERENCE_ICON_URI = "com.android.settings.icon_uri";
 
     /**
-     * Name of the meta-data item that should be set in the AndroidManifest.xml
-     * to specify whether the icon is tintable. This should be a boolean value {@code true} or
-     * {@code false}, set using {@code android:value}
+     * Name of the meta-data item that should be set in the AndroidManifest.xml to specify whether
+     * the icon is tintable. This should be a boolean value {@code true} or {@code false}, set using
+     * {@code android:value}
      */
     public static final String META_DATA_PREFERENCE_ICON_TINTABLE =
             "com.android.settings.icon_tintable";
@@ -165,45 +166,47 @@ public class TileUtils {
     public static final String META_DATA_PREFERENCE_TITLE = "com.android.settings.title";
 
     /**
-     * Name of the meta-data item that should be set in the AndroidManifest.xml
-     * to specify the content provider providing the title text that should be displayed for the
-     * preference.
+     * Name of the meta-data item that should be set in the AndroidManifest.xml to specify the
+     * content provider providing the title text that should be displayed for the preference.
      *
-     * Title provided by the content provider overrides any static title.
+     * <p>Title provided by the content provider overrides any static title.
      */
-    public static final String META_DATA_PREFERENCE_TITLE_URI =
-            "com.android.settings.title_uri";
+    public static final String META_DATA_PREFERENCE_TITLE_URI = "com.android.settings.title_uri";
 
     /**
-     * Name of the meta-data item that should be set in the AndroidManifest.xml
-     * to specify the summary text that should be displayed for the preference.
+     * Name of the meta-data item that should be set in the AndroidManifest.xml to specify the
+     * summary text that should be displayed for the preference.
      */
     public static final String META_DATA_PREFERENCE_SUMMARY = "com.android.settings.summary";
 
     /**
-     * Name of the meta-data item that should be set in the AndroidManifest.xml
-     * to specify the content provider providing the summary text that should be displayed for the
-     * preference.
+     * Name of the meta-data item that should be set in the AndroidManifest.xml to specify the
+     * content provider providing the summary text that should be displayed for the preference.
      *
-     * Summary provided by the content provider overrides any static summary.
+     * <p>Summary provided by the content provider overrides any static summary.
      */
     public static final String META_DATA_PREFERENCE_SUMMARY_URI =
             "com.android.settings.summary_uri";
 
     /**
-     * Name of the meta-data item that should be set in the AndroidManifest.xml
-     * to specify the content provider providing the switch that should be displayed for the
-     * preference.
+     * Name of the meta-data item that should be set in the AndroidManifest.xml to specify the
+     * content provider providing the switch that should be displayed for the preference.
      *
-     * This works with {@link #META_DATA_PREFERENCE_KEYHINT} which should also be set in the
+     * <p>This works with {@link #META_DATA_PREFERENCE_KEYHINT} which should also be set in the
      * AndroidManifest.xml
      */
-    public static final String META_DATA_PREFERENCE_SWITCH_URI =
-            "com.android.settings.switch_uri";
+    public static final String META_DATA_PREFERENCE_SWITCH_URI = "com.android.settings.switch_uri";
 
     /**
-     * Value for {@link #META_DATA_KEY_PROFILE}. When the device has a managed profile,
-     * the app will always be run in the primary profile.
+     * Name of the meta-data item that can be set from the content provider providing the intent
+     * that will be executed when the user taps on the preference.
+     */
+    public static final String META_DATA_PREFERENCE_PENDING_INTENT =
+            "com.android.settings.pending_intent";
+
+    /**
+     * Value for {@link #META_DATA_KEY_PROFILE}. When the device has a managed profile, the app will
+     * always be run in the primary profile.
      *
      * @see #META_DATA_KEY_PROFILE
      */
@@ -218,11 +221,11 @@ public class TileUtils {
     public static final String PROFILE_ALL = "all_profiles";
 
     /**
-     * Name of the meta-data item that should be set in the AndroidManifest.xml
-     * to specify the profile in which the app should be run when the device has a managed profile.
-     * The default value is {@link #PROFILE_ALL} which means the user will be presented with a
-     * dialog to choose the profile. If set to {@link #PROFILE_PRIMARY} the app will always be
-     * run in the primary profile.
+     * Name of the meta-data item that should be set in the AndroidManifest.xml to specify the
+     * profile in which the app should be run when the device has a managed profile. The default
+     * value is {@link #PROFILE_ALL} which means the user will be presented with a dialog to choose
+     * the profile. If set to {@link #PROFILE_PRIMARY} the app will always be run in the primary
+     * profile.
      *
      * @see #PROFILE_PRIMARY
      * @see #PROFILE_ALL
@@ -230,15 +233,16 @@ public class TileUtils {
     public static final String META_DATA_KEY_PROFILE = "com.android.settings.profile";
 
     /**
-     * Name of the meta-data item that should be set in the AndroidManifest.xml
-     * to specify whether the {@link android.app.Activity} should be launched in a separate task.
-     * This should be a boolean value {@code true} or {@code false}, set using {@code android:value}
+     * Name of the meta-data item that should be set in the AndroidManifest.xml to specify whether
+     * the {@link android.app.Activity} should be launched in a separate task. This should be a
+     * boolean value {@code true} or {@code false}, set using {@code android:value}
      */
     public static final String META_DATA_NEW_TASK = "com.android.settings.new_task";
 
-    /**
-     * Build a list of DashboardCategory.
-     */
+    /** If the entry should be shown in settings search results. Defaults to true. */
+    public static final String META_DATA_PREFERENCE_SEARCHABLE = "com.android.settings.searchable";
+
+    /** Build a list of DashboardCategory. */
     public static List<DashboardCategory> getCategories(Context context,
             Map<Pair<String, String>, Tile> cache) {
         final long startTime = System.currentTimeMillis();
@@ -323,20 +327,22 @@ public class TileUtils {
             UserHandle user, Map<Pair<String, String>, Tile> addedCache,
             String defaultCategory, List<Tile> outTiles, Intent intent) {
         final PackageManager pm = context.getPackageManager();
-        final List<ResolveInfo> results = pm.queryIntentContentProvidersAsUser(intent,
-                0 /* flags */, user.getIdentifier());
+        final List<ResolveInfo> results =
+                pm.queryIntentContentProvidersAsUser(intent, 0 /* flags */, user.getIdentifier());
         for (ResolveInfo resolved : results) {
             if (!resolved.system) {
                 // Do not allow any app to add to settings, only system ones.
                 continue;
             }
             final ProviderInfo providerInfo = resolved.providerInfo;
-            final List<Bundle> switchData = getSwitchDataFromProvider(context,
+            final List<Bundle> entryData = getEntryDataFromProvider(
+                    // Build new context so the entry data is retrieved for the queried user.
+                    context.createContextAsUser(user, 0 /* flags */),
                     providerInfo.authority);
-            if (switchData == null || switchData.isEmpty()) {
+            if (entryData == null || entryData.isEmpty()) {
                 continue;
             }
-            for (Bundle metaData : switchData) {
+            for (Bundle metaData : entryData) {
                 loadTile(user, addedCache, defaultCategory, outTiles, intent, metaData,
                         providerInfo);
             }
@@ -383,44 +389,62 @@ public class TileUtils {
             tile.setMetaData(metaData);
         }
 
+        tile.setGroupKey(metaData.getString(META_DATA_PREFERENCE_GROUP_KEY));
+
         if (!tile.userHandle.contains(user)) {
             tile.userHandle.add(user);
+        }
+        if (metaData.containsKey(META_DATA_PREFERENCE_PENDING_INTENT)) {
+            tile.pendingIntentMap.put(
+                    user, metaData.getParcelable(META_DATA_PREFERENCE_PENDING_INTENT));
         }
         if (!outTiles.contains(tile)) {
             outTiles.add(tile);
         }
     }
 
-    /** Returns the switch data of the key specified from the provider */
+    /** Returns the entry data of the key specified from the provider */
     // TODO(b/144732809): rearrange methods by access level modifiers
-    static Bundle getSwitchDataFromProvider(Context context, String authority, String key) {
+    static Bundle getEntryDataFromProvider(Context context, String authority, String key) {
         final Map<String, IContentProvider> providerMap = new ArrayMap<>();
-        final Uri uri = buildUri(authority, SwitchesProvider.METHOD_GET_SWITCH_DATA, key);
-        return getBundleFromUri(context, uri, providerMap, null /* bundle */);
+        final Uri uri = buildUri(authority, EntriesProvider.METHOD_GET_ENTRY_DATA, key);
+        Bundle result = getBundleFromUri(context, uri, providerMap, null /* bundle */);
+        if (result == null) {
+            Uri fallbackUri = buildUri(authority, EntriesProvider.METHOD_GET_SWITCH_DATA, key);
+            result = getBundleFromUri(context, fallbackUri, providerMap, null /* bundle */);
+        }
+        return result;
     }
 
-    /** Returns all switch data from the provider */
-    private static List<Bundle> getSwitchDataFromProvider(Context context, String authority) {
+    /** Returns all entry data from the provider */
+    private static List<Bundle> getEntryDataFromProvider(Context context, String authority) {
         final Map<String, IContentProvider> providerMap = new ArrayMap<>();
-        final Uri uri = buildUri(authority, SwitchesProvider.METHOD_GET_SWITCH_DATA);
+        final Uri uri = buildUri(authority, EntriesProvider.METHOD_GET_ENTRY_DATA);
         final Bundle result = getBundleFromUri(context, uri, providerMap, null /* bundle */);
-        return result != null
-                ? result.getParcelableArrayList(SwitchesProvider.EXTRA_SWITCH_DATA)
-                : null;
+        if (result != null) {
+            return result.getParcelableArrayList(EntriesProvider.EXTRA_ENTRY_DATA);
+        } else {
+            Uri fallbackUri = buildUri(authority, EntriesProvider.METHOD_GET_SWITCH_DATA);
+            Bundle fallbackResult =
+                    getBundleFromUri(context, fallbackUri, providerMap, null /* bundle */);
+            return fallbackResult != null
+                    ? fallbackResult.getParcelableArrayList(EntriesProvider.EXTRA_SWITCH_DATA)
+                    : null;
+        }
     }
 
     /**
      * Returns the complete uri from the meta data key of the tile.
      *
-     * A complete uri should contain at least one path segment and be one of the following types:
-     *      content://authority/method
-     *      content://authority/method/key
+     * <p>A complete uri should contain at least one path segment and be one of the following types:
+     * <br>content://authority/method
+     * <br>content://authority/method/key
      *
-     * If the uri from the tile is not complete, build a uri by the default method and the
+     * <p>If the uri from the tile is not complete, build a uri by the default method and the
      * preference key.
      *
-     * @param tile          Tile which contains meta data
-     * @param metaDataKey   Key mapping to the uri in meta data
+     * @param tile Tile which contains meta data
+     * @param metaDataKey Key mapping to the uri in meta data
      * @param defaultMethod Method to be attached to the uri by default if it has no path segment
      * @return Uri associated with the key
      */
@@ -465,9 +489,9 @@ public class TileUtils {
     /**
      * Gets the icon package name and resource id from content provider.
      *
-     * @param context     context
+     * @param context context
      * @param packageName package name of the target activity
-     * @param uri         URI for the content provider
+     * @param uri URI for the content provider
      * @param providerMap Maps URI authorities to providers
      * @return package name and resource id of the icon specified
      */
@@ -496,10 +520,10 @@ public class TileUtils {
     /**
      * Gets text associated with the input key from the content provider.
      *
-     * @param context     context
-     * @param uri         URI for the content provider
+     * @param context context
+     * @param uri URI for the content provider
      * @param providerMap Maps URI authorities to providers
-     * @param key         Key mapping to the text in bundle returned by the content provider
+     * @param key Key mapping to the text in bundle returned by the content provider
      * @return Text associated with the key, if returned by the content provider
      */
     public static String getTextFromUri(Context context, Uri uri,
@@ -511,10 +535,10 @@ public class TileUtils {
     /**
      * Gets boolean associated with the input key from the content provider.
      *
-     * @param context     context
-     * @param uri         URI for the content provider
+     * @param context context
+     * @param uri URI for the content provider
      * @param providerMap Maps URI authorities to providers
-     * @param key         Key mapping to the text in bundle returned by the content provider
+     * @param key Key mapping to the text in bundle returned by the content provider
      * @return Boolean associated with the key, if returned by the content provider
      */
     public static boolean getBooleanFromUri(Context context, Uri uri,
@@ -526,11 +550,11 @@ public class TileUtils {
     /**
      * Puts boolean associated with the input key to the content provider.
      *
-     * @param context     context
-     * @param uri         URI for the content provider
+     * @param context context
+     * @param uri URI for the content provider
      * @param providerMap Maps URI authorities to providers
-     * @param key         Key mapping to the text in bundle returned by the content provider
-     * @param value       Boolean associated with the key
+     * @param key Key mapping to the text in bundle returned by the content provider
+     * @param value Boolean associated with the key
      * @return Bundle associated with the action, if returned by the content provider
      */
     public static Bundle putBooleanToUriAndGetResult(Context context, Uri uri,

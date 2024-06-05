@@ -287,6 +287,17 @@ public class HdmiCecMessageBuilder {
     }
 
     /**
+     * Build &lt;Image View On&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildImageViewOn(int src, int dest) {
+        return HdmiCecMessage.build(src, dest, Constants.MESSAGE_IMAGE_VIEW_ON);
+    }
+
+    /**
      * Build &lt;Request Active Source&gt; command.
      *
      * @param src source address of command

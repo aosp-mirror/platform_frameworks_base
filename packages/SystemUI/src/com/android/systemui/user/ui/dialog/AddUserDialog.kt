@@ -22,7 +22,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.UserHandle
 import com.android.settingslib.R
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -36,7 +36,7 @@ class AddUserDialog(
     showEphemeralMessage: Boolean,
     private val falsingManager: FalsingManager,
     private val broadcastSender: BroadcastSender,
-    private val dialogLaunchAnimator: DialogLaunchAnimator
+    private val dialogTransitionAnimator: DialogTransitionAnimator
 ) : SystemUIDialog(context) {
 
     private val onClickListener =
@@ -57,7 +57,7 @@ class AddUserDialog(
                     return
                 }
 
-                dialogLaunchAnimator.dismissStack(this@AddUserDialog)
+                dialogTransitionAnimator.dismissStack(this@AddUserDialog)
                 if (ActivityManager.isUserAMonkey()) {
                     return
                 }
@@ -82,7 +82,7 @@ class AddUserDialog(
             context.getString(R.string.user_add_user_message_short) +
                 if (showEphemeralMessage) {
                     context.getString(
-                        com.android.systemui.R.string.user_add_user_message_guest_remove
+                        com.android.systemui.res.R.string.user_add_user_message_guest_remove
                     )
                 } else {
                     ""

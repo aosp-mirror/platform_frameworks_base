@@ -25,11 +25,11 @@ import android.util.ArraySet;
  * Helper class to manage {@link com.android.server.pm.CrossProfileIntentFilter}s.
  */
 public class CrossProfileIntentFilterHelper {
-    private Context mContext;
-    private UserManagerInternal mUserManagerInternal;
-    private Settings mSettings;
-    private UserManagerService mUserManagerService;
-    private PackageManagerTracedLock mLock;
+    private final Context mContext;
+    private final UserManagerInternal mUserManagerInternal;
+    private final Settings mSettings;
+    private final UserManagerService mUserManagerService;
+    private final PackageManagerTracedLock mLock;
 
     public CrossProfileIntentFilterHelper(Settings settings, UserManagerService userManagerService,
             PackageManagerTracedLock lock, UserManagerInternal userManagerInternal,

@@ -62,16 +62,15 @@ import android.window.OnBackInvokedDispatcher;
 import android.window.WindowOnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
-import androidx.core.animation.AnimatorTestRule;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -82,7 +81,7 @@ import com.android.systemui.statusbar.phone.LightBarController;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -102,6 +101,8 @@ public class RemoteInputViewTest extends SysuiTestCase {
             "com.android.sysuitest.dummynotificationsender";
     private static final int DUMMY_MESSAGE_APP_ID = Process.LAST_APPLICATION_UID - 1;
 
+    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
+
     @Mock private RemoteInputController mController;
     @Mock private ShortcutManager mShortcutManager;
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
@@ -109,8 +110,8 @@ public class RemoteInputViewTest extends SysuiTestCase {
     private BlockingQueueIntentReceiver mReceiver;
     private final UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
 
-    @ClassRule
-    public static AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    @Rule
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
 
     @Before
     public void setUp() throws Exception {
@@ -447,14 +448,40 @@ public class RemoteInputViewTest extends SysuiTestCase {
         assertEquals(1f, fadeInView.getAlpha());
     }
 
+    @Test
+    public void testUnanimatedFocusAfterDefocusAnimation() throws Exception {
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
+        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+        bindController(view, row.getEntry());
+
+        FrameLayout parent = new FrameLayout(mContext);
+        parent.addView(view);
+
+        // Play defocus animation
+        view.onDefocus(true /* animate */, false /* logClose */, null /* doAfterDefocus */);
+        mAnimatorTestRule.advanceTimeBy(ANIMATION_DURATION_STANDARD);
+
+        // assert that RemoteInputView is no longer visible, but alpha is reset to 1f
+        assertEquals(View.GONE, view.getVisibility());
+        assertEquals(1f, view.getAlpha());
+
+        // focus RemoteInputView without an animation
+        view.focus();
+        // assert that RemoteInputView is visible, and alpha is 1f
+        assertEquals(View.VISIBLE, view.getVisibility());
+        assertEquals(1f, view.getAlpha());
+    }
+
     // NOTE: because we're refactoring the RemoteInputView and moving logic into the
     // RemoteInputViewController, it's easiest to just test the system of the two classes together.
     @NonNull
     private RemoteInputViewController bindController(
             RemoteInputView view,
             NotificationEntry entry) {
-        FakeFeatureFlags fakeFeatureFlags = new FakeFeatureFlags();
-        fakeFeatureFlags.set(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION, true);
         RemoteInputViewControllerImpl viewController = new RemoteInputViewControllerImpl(
                 view,
                 entry,
@@ -462,7 +489,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 mController,
                 mShortcutManager,
                 mUiEventLoggerFake,
-                fakeFeatureFlags
+                mFeatureFlags
                 );
         viewController.bind();
         return viewController;

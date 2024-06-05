@@ -100,6 +100,9 @@ public class HdmiCecNetwork {
     // Map from port ID to HdmiDeviceInfo.
     private UnmodifiableSparseArray<HdmiDeviceInfo> mPortDeviceMap;
 
+    // Cached physical address.
+    private int mPhysicalAddress = Constants.INVALID_PHYSICAL_ADDRESS;
+
     HdmiCecNetwork(HdmiControlService hdmiControlService,
             HdmiCecController hdmiCecController,
             HdmiMhlControllerStub hdmiMhlController) {
@@ -431,6 +434,8 @@ public class HdmiCecNetwork {
         // each port. Return empty array if CEC HAL didn't provide the info.
         if (mHdmiCecController != null) {
             cecPortInfo = mHdmiCecController.getPortInfos();
+            // Invalid cached physical address.
+            mPhysicalAddress = Constants.INVALID_PHYSICAL_ADDRESS;
         }
         if (cecPortInfo == null) {
             return;
@@ -856,7 +861,10 @@ public class HdmiCecNetwork {
     }
 
     public int getPhysicalAddress() {
-        return mHdmiCecController.getPhysicalAddress();
+        if (mPhysicalAddress == Constants.INVALID_PHYSICAL_ADDRESS) {
+            mPhysicalAddress = mHdmiCecController.getPhysicalAddress();
+        }
+        return mPhysicalAddress;
     }
 
     @ServiceThreadOnly
@@ -865,6 +873,28 @@ public class HdmiCecNetwork {
         initPortInfo();
         clearDeviceList();
         clearLocalDevices();
+    }
+
+    @ServiceThreadOnly
+    void removeUnusedLocalDevices(ArrayList<HdmiCecLocalDevice> allocatedDevices) {
+        ArrayList<Integer> deviceTypesToRemove = new ArrayList<>();
+        for (int i = 0; i < mLocalDevices.size(); i++) {
+            int deviceType = mLocalDevices.keyAt(i);
+            boolean shouldRemoveLocalDevice = allocatedDevices.stream().noneMatch(
+                    localDevice -> localDevice.getDeviceInfo() != null
+                    && localDevice.getDeviceInfo().getDeviceType() == deviceType);
+            if (shouldRemoveLocalDevice) {
+                deviceTypesToRemove.add(deviceType);
+            }
+        }
+        for (Integer deviceType : deviceTypesToRemove) {
+            mLocalDevices.remove(deviceType);
+        }
+    }
+
+    @ServiceThreadOnly
+    void removeLocalDeviceWithType(int deviceType) {
+        mLocalDevices.remove(deviceType);
     }
 
     @ServiceThreadOnly
@@ -899,6 +929,9 @@ public class HdmiCecNetwork {
      * port id.
      */
     int portIdToPath(int portId) {
+        if (portId == Constants.CEC_SWITCH_HOME) {
+            return getPhysicalAddress();
+        }
         HdmiPortInfo portInfo = getPortInfo(portId);
         if (portInfo == null) {
             Slog.e(TAG, "Cannot find the port info: " + portId);

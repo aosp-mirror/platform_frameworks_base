@@ -31,6 +31,7 @@ import android.util.Slog;
 
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.sensors.fingerprint.aidl.AidlSession;
 
 import java.util.function.Supplier;
 
@@ -112,10 +113,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
             getLogger().logOnError(getContext(), getOperationContext(),
                     errorCode, vendorCode, getTargetUserId());
             try {
-                if (getListener() != null) {
-                    mShouldSendErrorToClient = false;
-                    getListener().onError(getSensorId(), getCookie(), errorCode, vendorCode);
-                }
+                mShouldSendErrorToClient = false;
+                getListener().onError(getSensorId(), getCookie(), errorCode, vendorCode);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to invoke sendError", e);
             }
@@ -147,9 +146,7 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
 
         final int errorCode = BiometricConstants.BIOMETRIC_ERROR_CANCELED;
         try {
-            if (getListener() != null) {
-                getListener().onError(getSensorId(), getCookie(), errorCode, 0 /* vendorCode */);
-            }
+            getListener().onError(getSensorId(), getCookie(), errorCode, 0 /* vendorCode */);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendError", e);
         }
@@ -181,7 +178,7 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         }
 
         try {
-            if (getListener() != null && shouldSend) {
+            if (shouldSend) {
                 getListener().onAcquired(getSensorId(), acquiredInfo, vendorCode);
             }
         } catch (RemoteException e) {
@@ -206,8 +203,22 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         }
     }
 
+    // TODO(b/317414324): Deprecate setIgnoreDisplayTouches
+    protected final void resetIgnoreDisplayTouches() {
+        final AidlSession session = (AidlSession) getFreshDaemon();
+        try {
+            session.getSession().setIgnoreDisplayTouches(false);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when resetting setIgnoreDisplayTouches");
+        }
+    }
+
     @Override
     public boolean isInterruptable() {
         return true;
+    }
+
+    public boolean isAlreadyCancelled() {
+        return mAlreadyCancelled;
     }
 }

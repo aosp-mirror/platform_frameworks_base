@@ -27,6 +27,8 @@ import android.view.LayoutInflater;
 import androidx.preference.Preference.OnPreferenceClickListener;
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.preference.layout.R;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

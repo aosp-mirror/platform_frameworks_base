@@ -14,95 +14,126 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.R
-import com.android.systemui.common.shared.model.ContentDescription
-import com.android.systemui.common.shared.model.Icon
+import com.android.compose.animation.scene.Edge
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
-import com.android.systemui.scene.shared.model.SceneKey
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user input for the lockscreen scene. */
+@SysUISingleton
 class LockscreenSceneViewModel
-@AssistedInject
+@Inject
 constructor(
     @Application applicationScope: CoroutineScope,
-    interactorFactory: LockscreenSceneInteractor.Factory,
-    @Assisted containerName: String,
+    deviceEntryInteractor: DeviceEntryInteractor,
+    communalInteractor: CommunalInteractor,
+    shadeInteractor: ShadeInteractor,
+    val longPress: KeyguardLongPressViewModel,
+    val notifications: NotificationsPlaceholderViewModel,
 ) {
-    private val interactor: LockscreenSceneInteractor = interactorFactory.create(containerName)
-
-    /** The icon for the "lock" button on the lockscreen. */
-    val lockButtonIcon: StateFlow<Icon> =
-        interactor.isDeviceLocked
-            .map { isLocked -> lockIcon(isLocked = isLocked) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = lockIcon(isLocked = interactor.isDeviceLocked.value),
-            )
-
-    /** The key of the scene we should switch to when swiping up. */
-    val upDestinationSceneKey: StateFlow<SceneKey> =
-        interactor.isSwipeToDismissEnabled
-            .map { isSwipeToUnlockEnabled -> upDestinationSceneKey(isSwipeToUnlockEnabled) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = upDestinationSceneKey(interactor.isSwipeToDismissEnabled.value),
-            )
-
-    /** Notifies that the lock button on the lock screen was clicked. */
-    fun onLockButtonClicked() {
-        interactor.dismissLockscreen()
-    }
-
-    /** Notifies that some content on the lock screen was clicked. */
-    fun onContentClicked() {
-        interactor.dismissLockscreen()
-    }
-
-    private fun upDestinationSceneKey(
-        isSwipeToUnlockEnabled: Boolean,
-    ): SceneKey {
-        return if (isSwipeToUnlockEnabled) SceneKey.Gone else SceneKey.Bouncer
-    }
-
-    private fun lockIcon(
-        isLocked: Boolean,
-    ): Icon {
-        return Icon.Resource(
-            res =
-                if (isLocked) {
-                    R.drawable.ic_device_lock_on
+    val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+        shadeInteractor.isShadeTouchable
+            .flatMapLatest { isShadeTouchable ->
+                if (!isShadeTouchable) {
+                    flowOf(emptyMap())
                 } else {
-                    R.drawable.ic_device_lock_off
-                },
-            contentDescription =
-                ContentDescription.Resource(
-                    res =
-                        if (isLocked) {
-                            R.string.accessibility_lock_icon
-                        } else {
-                            R.string.accessibility_unlock_button
-                        }
-                )
+                    combine(
+                        deviceEntryInteractor.isUnlocked,
+                        communalInteractor.isCommunalAvailable,
+                        shadeInteractor.shadeMode,
+                    ) { isDeviceUnlocked, isCommunalAvailable, shadeMode ->
+                        destinationScenes(
+                            isDeviceUnlocked = isDeviceUnlocked,
+                            isCommunalAvailable = isCommunalAvailable,
+                            shadeMode = shadeMode,
+                        )
+                    }
+                }
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue =
+                    destinationScenes(
+                        isDeviceUnlocked = deviceEntryInteractor.isUnlocked.value,
+                        isCommunalAvailable = false,
+                        shadeMode = shadeInteractor.shadeMode.value,
+                    ),
+            )
+
+    private fun destinationScenes(
+        isDeviceUnlocked: Boolean,
+        isCommunalAvailable: Boolean,
+        shadeMode: ShadeMode,
+    ): Map<UserAction, UserActionResult> {
+        val shadeSceneKey =
+            UserActionResult(
+                toScene =
+                    if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade,
+                transitionKey = ToSplitShade.takeIf { shadeMode is ShadeMode.Split },
+            )
+
+        val quickSettingsIfSingleShade =
+            if (shadeMode is ShadeMode.Single) UserActionResult(Scenes.QuickSettings)
+            else shadeSceneKey
+
+        return mapOf(
+                Swipe.Left to UserActionResult(Scenes.Communal).takeIf { isCommunalAvailable },
+                Swipe.Up to if (isDeviceUnlocked) Scenes.Gone else Scenes.Bouncer,
+
+                // Swiping down from the top edge goes to QS (or shade if in split shade mode).
+                swipeDownFromTop(pointerCount = 1) to quickSettingsIfSingleShade,
+                swipeDownFromTop(pointerCount = 2) to
+                    // TODO(b/338577208): Remove 'Dual' once we add Dual Shade invocation zones.
+                    if (shadeMode is ShadeMode.Dual) {
+                        UserActionResult(Scenes.QuickSettingsShade)
+                    } else {
+                        quickSettingsIfSingleShade
+                    },
+
+                // Swiping down, not from the edge, always navigates to the shade scene.
+                swipeDown(pointerCount = 1) to shadeSceneKey,
+                swipeDown(pointerCount = 2) to shadeSceneKey,
+            )
+            .filterValues { it != null }
+            .mapValues { checkNotNull(it.value) }
+    }
+
+    private fun swipeDownFromTop(pointerCount: Int): Swipe {
+        return Swipe(
+            SwipeDirection.Down,
+            fromSource = Edge.Top,
+            pointerCount = pointerCount,
         )
     }
 
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            containerName: String,
-        ): LockscreenSceneViewModel
+    private fun swipeDown(pointerCount: Int): Swipe {
+        return Swipe(
+            SwipeDirection.Down,
+            pointerCount = pointerCount,
+        )
     }
 }

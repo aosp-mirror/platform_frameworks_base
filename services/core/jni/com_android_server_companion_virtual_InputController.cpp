@@ -44,6 +44,7 @@ enum class DeviceType {
     MOUSE,
     TOUCHSCREEN,
     DPAD,
+    STYLUS,
 };
 
 static unique_fd invalidFd() {
@@ -98,6 +99,24 @@ static unique_fd openUinput(const char* readableName, jint vendorId, jint produc
             ioctl(fd, UI_SET_ABSBIT, ABS_MT_TOUCH_MAJOR);
             ioctl(fd, UI_SET_ABSBIT, ABS_MT_PRESSURE);
             ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_DIRECT);
+            break;
+        case DeviceType::STYLUS:
+            ioctl(fd, UI_SET_EVBIT, EV_ABS);
+            ioctl(fd, UI_SET_KEYBIT, BTN_TOUCH);
+            ioctl(fd, UI_SET_KEYBIT, BTN_STYLUS);
+            ioctl(fd, UI_SET_KEYBIT, BTN_STYLUS2);
+            ioctl(fd, UI_SET_KEYBIT, BTN_TOOL_PEN);
+            ioctl(fd, UI_SET_KEYBIT, BTN_TOOL_RUBBER);
+            ioctl(fd, UI_SET_ABSBIT, ABS_X);
+            ioctl(fd, UI_SET_ABSBIT, ABS_Y);
+            ioctl(fd, UI_SET_ABSBIT, ABS_TILT_X);
+            ioctl(fd, UI_SET_ABSBIT, ABS_TILT_Y);
+            ioctl(fd, UI_SET_ABSBIT, ABS_PRESSURE);
+            ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_DIRECT);
+            break;
+        default:
+            ALOGE("Invalid input device type %d", static_cast<int32_t>(deviceType));
+            return invalidFd();
     }
 
     int version;
@@ -144,10 +163,59 @@ static unique_fd openUinput(const char* readableName, jint vendorId, jint produc
             }
             uinput_abs_setup slotAbsSetup;
             slotAbsSetup.code = ABS_MT_SLOT;
-            slotAbsSetup.absinfo.maximum = MAX_POINTERS;
+            slotAbsSetup.absinfo.maximum = MAX_POINTERS - 1;
             slotAbsSetup.absinfo.minimum = 0;
             if (ioctl(fd, UI_ABS_SETUP, &slotAbsSetup) != 0) {
                 ALOGE("Error creating touchscreen uinput slots: %s", strerror(errno));
+                return invalidFd();
+            }
+            uinput_abs_setup trackingIdAbsSetup;
+            trackingIdAbsSetup.code = ABS_MT_TRACKING_ID;
+            trackingIdAbsSetup.absinfo.maximum = MAX_POINTERS - 1;
+            trackingIdAbsSetup.absinfo.minimum = 0;
+            if (ioctl(fd, UI_ABS_SETUP, &trackingIdAbsSetup) != 0) {
+                ALOGE("Error creating touchscreen uinput tracking ids: %s", strerror(errno));
+                return invalidFd();
+            }
+        } else if (deviceType == DeviceType::STYLUS) {
+            uinput_abs_setup xAbsSetup;
+            xAbsSetup.code = ABS_X;
+            xAbsSetup.absinfo.maximum = screenWidth - 1;
+            xAbsSetup.absinfo.minimum = 0;
+            if (ioctl(fd, UI_ABS_SETUP, &xAbsSetup) != 0) {
+                ALOGE("Error creating stylus uinput x axis: %s", strerror(errno));
+                return invalidFd();
+            }
+            uinput_abs_setup yAbsSetup;
+            yAbsSetup.code = ABS_Y;
+            yAbsSetup.absinfo.maximum = screenHeight - 1;
+            yAbsSetup.absinfo.minimum = 0;
+            if (ioctl(fd, UI_ABS_SETUP, &yAbsSetup) != 0) {
+                ALOGE("Error creating stylus uinput y axis: %s", strerror(errno));
+                return invalidFd();
+            }
+            uinput_abs_setup tiltXAbsSetup;
+            tiltXAbsSetup.code = ABS_TILT_X;
+            tiltXAbsSetup.absinfo.maximum = 90;
+            tiltXAbsSetup.absinfo.minimum = -90;
+            if (ioctl(fd, UI_ABS_SETUP, &tiltXAbsSetup) != 0) {
+                ALOGE("Error creating stylus uinput tilt x axis: %s", strerror(errno));
+                return invalidFd();
+            }
+            uinput_abs_setup tiltYAbsSetup;
+            tiltYAbsSetup.code = ABS_TILT_Y;
+            tiltYAbsSetup.absinfo.maximum = 90;
+            tiltYAbsSetup.absinfo.minimum = -90;
+            if (ioctl(fd, UI_ABS_SETUP, &tiltYAbsSetup) != 0) {
+                ALOGE("Error creating stylus uinput tilt y axis: %s", strerror(errno));
+                return invalidFd();
+            }
+            uinput_abs_setup pressureAbsSetup;
+            pressureAbsSetup.code = ABS_PRESSURE;
+            pressureAbsSetup.absinfo.maximum = 255;
+            pressureAbsSetup.absinfo.minimum = 0;
+            if (ioctl(fd, UI_ABS_SETUP, &pressureAbsSetup) != 0) {
+                ALOGE("Error creating touchscreen uinput pressure axis: %s", strerror(errno));
                 return invalidFd();
             }
         }
@@ -174,6 +242,17 @@ static unique_fd openUinput(const char* readableName, jint vendorId, jint produc
             fallback.absmax[ABS_MT_TOUCH_MAJOR] = screenWidth - 1;
             fallback.absmin[ABS_MT_PRESSURE] = 0;
             fallback.absmax[ABS_MT_PRESSURE] = 255;
+        } else if (deviceType == DeviceType::STYLUS) {
+            fallback.absmin[ABS_X] = 0;
+            fallback.absmax[ABS_X] = screenWidth - 1;
+            fallback.absmin[ABS_Y] = 0;
+            fallback.absmax[ABS_Y] = screenHeight - 1;
+            fallback.absmin[ABS_TILT_X] = -90;
+            fallback.absmax[ABS_TILT_X] = 90;
+            fallback.absmin[ABS_TILT_Y] = -90;
+            fallback.absmax[ABS_TILT_Y] = 90;
+            fallback.absmin[ABS_PRESSURE] = 0;
+            fallback.absmax[ABS_PRESSURE] = 255;
         }
         if (TEMP_FAILURE_RETRY(write(fd, &fallback, sizeof(fallback))) != sizeof(fallback)) {
             ALOGE("Error creating uinput device: %s", strerror(errno));
@@ -224,6 +303,13 @@ static jlong nativeOpenUinputTouchscreen(JNIEnv* env, jobject thiz, jstring name
     auto fd = openUinputJni(env, name, vendorId, productId, phys, DeviceType::TOUCHSCREEN, height,
                             width);
     return fd.ok() ? reinterpret_cast<jlong>(new VirtualTouchscreen(std::move(fd))) : INVALID_PTR;
+}
+
+static jlong nativeOpenUinputStylus(JNIEnv* env, jobject thiz, jstring name, jint vendorId,
+                                    jint productId, jstring phys, jint height, jint width) {
+    auto fd =
+            openUinputJni(env, name, vendorId, productId, phys, DeviceType::STYLUS, height, width);
+    return fd.ok() ? reinterpret_cast<jlong>(new VirtualStylus(std::move(fd))) : INVALID_PTR;
 }
 
 static void nativeCloseUinput(JNIEnv* env, jobject thiz, jlong ptr) {
@@ -279,6 +365,22 @@ static bool nativeWriteScrollEvent(JNIEnv* env, jobject thiz, jlong ptr, jfloat 
                                           std::chrono::nanoseconds(eventTimeNanos));
 }
 
+// Native methods for VirtualStylus
+static bool nativeWriteStylusMotionEvent(JNIEnv* env, jobject thiz, jlong ptr, jint toolType,
+                                         jint action, jint locationX, jint locationY, jint pressure,
+                                         jint tiltX, jint tiltY, jlong eventTimeNanos) {
+    VirtualStylus* virtualStylus = reinterpret_cast<VirtualStylus*>(ptr);
+    return virtualStylus->writeMotionEvent(toolType, action, locationX, locationY, pressure, tiltX,
+                                           tiltY, std::chrono::nanoseconds(eventTimeNanos));
+}
+
+static bool nativeWriteStylusButtonEvent(JNIEnv* env, jobject thiz, jlong ptr, jint buttonCode,
+                                         jint action, jlong eventTimeNanos) {
+    VirtualStylus* virtualStylus = reinterpret_cast<VirtualStylus*>(ptr);
+    return virtualStylus->writeButtonEvent(buttonCode, action,
+                                           std::chrono::nanoseconds(eventTimeNanos));
+}
+
 static JNINativeMethod methods[] = {
         {"nativeOpenUinputDpad", "(Ljava/lang/String;IILjava/lang/String;)J",
          (void*)nativeOpenUinputDpad},
@@ -288,6 +390,8 @@ static JNINativeMethod methods[] = {
          (void*)nativeOpenUinputMouse},
         {"nativeOpenUinputTouchscreen", "(Ljava/lang/String;IILjava/lang/String;II)J",
          (void*)nativeOpenUinputTouchscreen},
+        {"nativeOpenUinputStylus", "(Ljava/lang/String;IILjava/lang/String;II)J",
+         (void*)nativeOpenUinputStylus},
         {"nativeCloseUinput", "(J)V", (void*)nativeCloseUinput},
         {"nativeWriteDpadKeyEvent", "(JIIJ)Z", (void*)nativeWriteDpadKeyEvent},
         {"nativeWriteKeyEvent", "(JIIJ)Z", (void*)nativeWriteKeyEvent},
@@ -295,6 +399,8 @@ static JNINativeMethod methods[] = {
         {"nativeWriteTouchEvent", "(JIIIFFFFJ)Z", (void*)nativeWriteTouchEvent},
         {"nativeWriteRelativeEvent", "(JFFJ)Z", (void*)nativeWriteRelativeEvent},
         {"nativeWriteScrollEvent", "(JFFJ)Z", (void*)nativeWriteScrollEvent},
+        {"nativeWriteStylusMotionEvent", "(JIIIIIIIJ)Z", (void*)nativeWriteStylusMotionEvent},
+        {"nativeWriteStylusButtonEvent", "(JIIJ)Z", (void*)nativeWriteStylusButtonEvent},
 };
 
 int register_android_server_companion_virtual_InputController(JNIEnv* env) {

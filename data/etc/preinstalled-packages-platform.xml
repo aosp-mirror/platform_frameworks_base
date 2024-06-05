@@ -108,6 +108,7 @@ to pre-existing users, but cannot uninstall pre-existing system packages from pr
         <install-in user-type="FULL" />
         <install-in user-type="PROFILE" />
         <do-not-install-in user-type="android.os.usertype.profile.CLONE" />
+        <do-not-install-in user-type="android.os.usertype.profile.PRIVATE" />
     </install-in-user-type>
 
     <!--  Settings (Settings app) -->
@@ -126,6 +127,11 @@ to pre-existing users, but cannot uninstall pre-existing system packages from pr
 
     <!-- WallpaperBackup (WallpaperBackup)-->
     <install-in-user-type package="com.android.wallpaperbackup">
+        <install-in user-type="FULL" />
+    </install-in-user-type>
+
+    <!-- AvatarPicker (AvatarPicker app)-->
+    <install-in-user-type package="com.android.avatarpicker">
         <install-in user-type="FULL" />
     </install-in-user-type>
 </config>

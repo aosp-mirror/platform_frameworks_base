@@ -30,6 +30,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
@@ -575,6 +576,26 @@ public abstract class ForegroundServiceTypePolicy {
             false /* permissionEnforcementFlagDefaultValue */,
             false /* foregroundOnlyPermission */
     );
+
+    /**
+     * The policy for the {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING}.
+     *
+     * @hide
+     */
+    public static final @NonNull ForegroundServiceTypePolicyInfo FGS_TYPE_POLICY_MEDIA_PROCESSING =
+            new ForegroundServiceTypePolicyInfo(
+                    FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING,
+                    ForegroundServiceTypePolicyInfo.INVALID_CHANGE_ID,
+                    ForegroundServiceTypePolicyInfo.INVALID_CHANGE_ID,
+                    new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
+                            new RegularPermission(
+                                    Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING)
+                    }, true),
+                    null /* anyOfPermissions */,
+                    null /* permissionEnforcementFlag */,
+                    true /* permissionEnforcementFlagDefaultValue */,
+                    false /* foregroundOnlyPermission */
+            );
 
     /**
      * The policy for the {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SPECIAL_USE}.
@@ -1331,6 +1352,8 @@ public abstract class ForegroundServiceTypePolicy {
                     FGS_TYPE_POLICY_SYSTEM_EXEMPTED);
             mForegroundServiceTypePolicies.put(FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
                     FGS_TYPE_POLICY_SHORT_SERVICE);
+            mForegroundServiceTypePolicies.put(FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING,
+                    FGS_TYPE_POLICY_MEDIA_PROCESSING);
             // TODO (b/271950506): revisit it in the next release.
             // Hide the file management type for now. If anyone uses it, will default to "none".
             mForegroundServiceTypePolicies.put(FOREGROUND_SERVICE_TYPE_SPECIAL_USE,

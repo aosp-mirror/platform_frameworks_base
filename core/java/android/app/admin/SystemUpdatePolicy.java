@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 /**
  * Determines when over-the-air system updates are installed on a device. Only a device policy
  * controller (DPC) running in device owner mode or in profile owner mode for an organization-owned
- * device can set an update policy for the device—by calling the {@code DevicePolicyManager} method
+ * device can set an update policy for the device by calling the {@code DevicePolicyManager} method
  * {@link DevicePolicyManager#setSystemUpdatePolicy setSystemUpdatePolicy()}. An update
  * policy affects the pending system update (if there is one) and any future updates for the device.
  *
@@ -78,6 +78,11 @@ import java.util.stream.Collectors;
  *
  * <h3>Developer guide</h3>
  * To learn more, read <a href="{@docRoot}work/dpc/system-updates">Manage system updates</a>.
+ * <p><strong>Note:</strong> <a href="https://source.android.com/docs/core/ota/modular-system">
+ * Google Play system updates</a> (also called Mainline updates) are automatically downloaded
+ * but require a device reboot to be installed. Refer to the mainline section in
+ * <a href="{@docRoot}work/dpc/system-updates#mainline">Manage system
+ * updates</a> for further details.</p>
  *
  * @see DevicePolicyManager#setSystemUpdatePolicy
  * @see DevicePolicyManager#getSystemUpdatePolicy
@@ -125,7 +130,7 @@ public final class SystemUpdatePolicy implements Parcelable {
      *
      * <p>The system limits each update to one 30-day postponement. The period begins when the
      * system first postpones the update and setting new {@code TYPE_POSTPONE} policies won’t extend
-     * the period. If, after 30 days the update isn’t installed (through policy changes), the system
+     * the period. If, after 30 days the update isn't installed (through policy changes), the system
      * prompts the user to install the update.
      *
      * <p><strong>Note</strong>: Device manufacturers or carriers might choose to exempt important

@@ -64,6 +64,7 @@ import com.android.internal.util.RingBuffer;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
+import com.android.server.display.utils.DebugUtils;
 
 import libcore.io.IoUtils;
 
@@ -91,8 +92,10 @@ import java.util.concurrent.TimeUnit;
 public class BrightnessTracker {
 
     static final String TAG = "BrightnessTracker";
-    static final boolean DEBUG = false;
 
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.BrightnessTracker DEBUG && adb reboot'
+    static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
     private static final String EVENTS_FILE = "brightness_events.xml";
     private static final String AMBIENT_BRIGHTNESS_STATS_FILE = "ambient_brightness_stats.xml";
     private static final int MAX_EVENTS = 100;

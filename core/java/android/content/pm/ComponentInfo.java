@@ -37,6 +37,7 @@ import android.util.Printer;
  * implement Parcelable, but does provide convenience methods to assist
  * in the implementation of Parcelable in subclasses.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ComponentInfo extends PackageItemInfo {
     /**
      * Global information about the application/package this component is a
@@ -258,6 +259,7 @@ public class ComponentInfo extends PackageItemInfo {
      * @hide
      */
     @Override
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public Drawable loadDefaultIcon(PackageManager pm) {
         return applicationInfo.loadIcon(pm);
     }
@@ -265,6 +267,7 @@ public class ComponentInfo extends PackageItemInfo {
     /**
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     @Override protected Drawable loadDefaultBanner(PackageManager pm) {
         return applicationInfo.loadBanner(pm);
     }
@@ -273,6 +276,7 @@ public class ComponentInfo extends PackageItemInfo {
      * @hide
      */
     @Override
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     protected Drawable loadDefaultLogo(PackageManager pm) {
         return applicationInfo.loadLogo(pm);
     }
@@ -280,7 +284,7 @@ public class ComponentInfo extends PackageItemInfo {
     /**
      * @hide
      */
-    @Override protected ApplicationInfo getApplicationInfo() {
+    @Override public ApplicationInfo getApplicationInfo() {
         return applicationInfo;
     }
 }

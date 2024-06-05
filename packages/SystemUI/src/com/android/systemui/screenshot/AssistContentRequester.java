@@ -15,6 +15,7 @@
  */
 
 package com.android.systemui.screenshot;
+import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.IAssistDataReceiver;
@@ -55,7 +56,7 @@ public class AssistContentRequester {
          * Called when the {@link android.app.assist.AssistContent} of the requested task is
          * available.
          **/
-        void onAssistContentAvailable(AssistContent assistContent);
+        void onAssistContentAvailable(@Nullable AssistContent assistContent);
     }
 
     private final IActivityTaskManager mActivityTaskManager;
@@ -88,9 +89,12 @@ public class AssistContentRequester {
         // ActivityTaskManager interaction here is synchronous, so call off the main thread.
         mSystemInteractionExecutor.execute(() -> {
             try {
-                mActivityTaskManager.requestAssistDataForTask(
+                boolean success = mActivityTaskManager.requestAssistDataForTask(
                         new AssistDataReceiver(callback, this), taskId, mPackageName,
                         mAttributionTag);
+                if (!success) {
+                    callback.onAssistContentAvailable(null);
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Requesting assist content failed for task: " + taskId, e);
             }
@@ -117,15 +121,9 @@ public class AssistContentRequester {
 
         @Override
         public void onHandleAssistData(Bundle data) {
-            if (data == null) {
-                return;
-            }
-
-            final AssistContent content = data.getParcelable(ASSIST_KEY_CONTENT);
-            if (content == null) {
-                Log.e(TAG, "Received AssistData, but no AssistContent found");
-                return;
-            }
+            final AssistContent content = (data == null) ? null
+                    : data.getParcelable(
+                            ASSIST_KEY_CONTENT, AssistContent.class);
 
             AssistContentRequester requester = mParentRef.get();
             if (requester != null) {

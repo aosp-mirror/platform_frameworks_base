@@ -16,95 +16,55 @@
 
 package com.android.systemui.keyguard.ui.composable
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.common.ui.compose.Icon
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
+import com.android.compose.animation.scene.animateSceneFloatAsState
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
-import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
-import com.android.systemui.scene.shared.model.UserAction
+import com.android.systemui.qs.ui.composable.QuickSettings
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
+import dagger.Lazy
+import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 /** The lock screen scene shows when the device is locked. */
-class LockscreenScene(
-    @Application private val applicationScope: CoroutineScope,
-    private val viewModel: LockscreenSceneViewModel,
+@SysUISingleton
+class LockscreenScene
+@Inject
+constructor(
+    viewModel: LockscreenSceneViewModel,
+    private val lockscreenContent: Lazy<LockscreenContent>,
 ) : ComposableScene {
-    override val key = SceneKey.Lockscreen
+    override val key = Scenes.Lockscreen
 
-    override fun destinationScenes(
-        containerName: String,
-    ): StateFlow<Map<UserAction, SceneModel>> =
-        viewModel.upDestinationSceneKey
-            .map { pageKey -> destinationScenes(up = pageKey) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = destinationScenes(up = viewModel.upDestinationSceneKey.value)
-            )
+    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+        viewModel.destinationScenes
 
     @Composable
-    override fun Content(
-        containerName: String,
+    override fun SceneScope.Content(
         modifier: Modifier,
     ) {
         LockscreenScene(
-            viewModel = viewModel,
+            lockscreenContent = lockscreenContent,
             modifier = modifier,
-        )
-    }
-
-    private fun destinationScenes(
-        up: SceneKey,
-    ): Map<UserAction, SceneModel> {
-        return mapOf(
-            UserAction.Swipe(Direction.UP) to SceneModel(up),
-            UserAction.Swipe(Direction.DOWN) to SceneModel(SceneKey.Shade)
         )
     }
 }
 
 @Composable
-private fun LockscreenScene(
-    viewModel: LockscreenSceneViewModel,
+private fun SceneScope.LockscreenScene(
+    lockscreenContent: Lazy<LockscreenContent>,
     modifier: Modifier = Modifier,
 ) {
-    // TODO(b/280879610): implement the real UI.
+    animateSceneFloatAsState(
+        value = QuickSettings.SharedValues.SquishinessValues.LockscreenSceneStarting,
+        key = QuickSettings.SharedValues.TilesSquishiness,
+    )
 
-    val lockButtonIcon: Icon by viewModel.lockButtonIcon.collectAsState()
-
-    Box(modifier = modifier) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.align(Alignment.Center)
-        ) {
-            Text("Lockscreen", style = MaterialTheme.typography.headlineMedium)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Button(onClick = { viewModel.onLockButtonClicked() }) { Icon(lockButtonIcon) }
-
-                Button(onClick = { viewModel.onContentClicked() }) { Text("Open some content") }
-            }
-        }
-    }
+    with(lockscreenContent.get()) { Content(modifier = modifier.fillMaxSize()) }
 }

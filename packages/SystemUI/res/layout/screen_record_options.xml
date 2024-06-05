@@ -40,29 +40,29 @@
             android:popupBackground="@drawable/screenrecord_spinner_background"
             android:dropDownWidth="274dp"
             android:importantForAccessibility="yes"/>
+
         <Switch
             android:layout_width="wrap_content"
             android:minWidth="48dp"
             android:layout_height="48dp"
-            android:layout_weight="0"
             android:layout_gravity="end"
             android:id="@+id/screenrecord_audio_switch"
+            android:contentDescription="@string/screenrecord_audio_label"
             style="@style/ScreenRecord.Switch"
-            android:importantForAccessibility="yes"/>
+            android:importantForAccessibility="yes" />
     </LinearLayout>
     <LinearLayout
         android:id="@+id/show_taps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:layout_marginTop="@dimen/screenrecord_option_padding">
         <ImageView
             android:layout_width="@dimen/screenrecord_option_icon_size"
             android:layout_height="@dimen/screenrecord_option_icon_size"
-            android:layout_weight="0"
             android:src="@drawable/ic_touch"
             android:tint="?android:attr/textColorSecondary"
-            android:layout_gravity="center_vertical"
             android:layout_marginRight="@dimen/screenrecord_option_padding"
             android:importantForAccessibility="no"/>
         <TextView
@@ -70,19 +70,19 @@
             android:layout_height="wrap_content"
             android:minHeight="48dp"
             android:layout_weight="1"
-            android:gravity="center_vertical"
             android:text="@string/screenrecord_taps_label"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:fontFamily="@*android:string/config_bodyFontFamily"
             android:textColor="?android:attr/textColorPrimary"
             android:contentDescription="@string/screenrecord_taps_label"/>
+
         <Switch
             android:layout_width="wrap_content"
             android:minWidth="48dp"
             android:layout_height="48dp"
-            android:layout_weight="0"
             android:id="@+id/screenrecord_taps_switch"
+            android:contentDescription="@string/screenrecord_taps_label"
             style="@style/ScreenRecord.Switch"
-            android:importantForAccessibility="yes"/>
+            android:importantForAccessibility="yes" />
     </LinearLayout>
 </LinearLayout>

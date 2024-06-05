@@ -16,8 +16,13 @@
 
 package com.android.server.wm.flicker.testapp;
 
+import static com.android.server.wm.flicker.testapp.ActivityOptions.SplitScreen.Primary.EXTRA_LAUNCH_ADJACENT;
+
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.Nullable;
 
 public class SplitScreenActivity extends Activity {
 
@@ -25,5 +30,18 @@ public class SplitScreenActivity extends Activity {
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.activity_splitscreen);
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        final boolean startSecondaryActivity = getIntent().hasExtra(EXTRA_LAUNCH_ADJACENT);
+        if (startSecondaryActivity) {
+            final Intent intent = new Intent(this, SplitScreenSecondaryActivity.class);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT | Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            startActivity(intent);
+        }
     }
 }

@@ -14,7 +14,7 @@
 package com.android.systemui.statusbar.notification
 
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.dagger.NotificationLockscreenLog
 import com.android.systemui.statusbar.StatusBarState
 import javax.inject.Inject
@@ -95,6 +95,7 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
         onKeyguard: Boolean,
         dozing: Boolean,
         bypass: Boolean,
+        idleOnCommunal: Boolean,
         animating: Boolean,
     ) {
         buffer.log(
@@ -103,7 +104,7 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
             {
                 str1 =
                     "willRemove=$willRemove onKeyguard=$onKeyguard dozing=$dozing" +
-                        " bypass=$bypass animating=$animating"
+                        " bypass=$bypass animating=$animating idleOnCommunal=$idleOnCommunal"
             },
             { "maybeClearHardDozeAmountOverrideHidingNotifs() $str1" }
         )

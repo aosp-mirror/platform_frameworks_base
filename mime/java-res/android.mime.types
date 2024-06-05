@@ -52,8 +52,11 @@
 ?application/sdp sdp
 ?application/smil+xml smil
 ?application/ttml+xml ttml dfxp
+?application/vnd.android.haptics.vibration+xml ahv
 ?application/vnd.android.ota ota
 ?application/vnd.apple.mpegurl m3u8
+?application/vnd.apple.pkpass pkpass
+?application/vnd.apple.pkpasses pkpasses
 ?application/vnd.ms-pki.stl stl
 ?application/vnd.ms-powerpoint pot
 ?application/vnd.ms-wpl wpl
@@ -77,6 +80,7 @@
 ?audio/aac-adts aac
 ?audio/ac3 ac3 a52
 ?audio/amr amr
+?audio/x-gsm gsm
 ?audio/imelody imy
 ?audio/midi rtttl xmf
 ?audio/mobile-xmf mxmf
@@ -100,6 +104,7 @@
 ?image/x-adobe-dng dng
 ?image/x-fuji-raf raf
 ?image/x-icon ico
+?image/x-jg art
 ?image/x-nikon-nrw nrw
 ?image/x-panasonic-rw2 rw2
 ?image/x-pentax-pef pef
@@ -114,7 +119,7 @@
 ?text/x-vcard vcf
 
 ?video/3gpp2 3gpp2 3gp2 3g2
-?video/3gpp 3gpp
+?video/3gpp 3gpp 3gp
 ?video/avi avi
 ?video/m4v m4v
 ?video/mp4 m4v f4v mp4v mpeg4
@@ -150,6 +155,7 @@ audio/mpeg mp3 mp2 mp1 mpa m4a m4r
 audio/x-mpegurl m3u m3u8
 image/jpeg jpg
 image/x-ms-bmp bmp
+image/x-photoshop psd
 text/plain txt
 text/x-c++hdr hpp
 text/x-c++src cpp

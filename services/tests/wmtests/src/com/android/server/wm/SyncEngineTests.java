@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -40,9 +41,7 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.spy;
 
 import android.platform.test.annotations.Presubmit;
-import android.util.MergedConfiguration;
 import android.view.SurfaceControl;
-import android.window.ClientWindowFrames;
 
 import androidx.test.filters.SmallTest;
 
@@ -136,6 +135,33 @@ public class SyncEngineTests extends WindowTestsBase {
         assertFalse(r.isSyncFinished(r.getSyncGroup()));
         r.finishRelaunching();
         assertTrue(r.isSyncFinished(r.getSyncGroup()));
+        assertEquals(SYNC_STATE_READY, r.mSyncState);
+
+        // If the container has finished the sync, isSyncFinished should not change the sync state.
+        final BLASTSyncEngine.SyncGroup syncGroup = r.getSyncGroup();
+        r.finishSync(mTransaction, syncGroup, false /* cancel */);
+        assertEquals(SYNC_STATE_NONE, r.mSyncState);
+        assertTrue(r.isSyncFinished(syncGroup));
+        assertEquals(SYNC_STATE_NONE, r.mSyncState);
+    }
+
+    @Test
+    public void testFinishSyncByStartingWindow() {
+        final ActivityRecord taskRoot = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = taskRoot.getTask();
+        final ActivityRecord translucentTop = new ActivityBuilder(mAtm).setTask(task)
+                .setActivityTheme(android.R.style.Theme_Translucent).build();
+        createWindow(null, TYPE_BASE_APPLICATION, taskRoot, "win");
+        final WindowState startingWindow = createWindow(null, TYPE_APPLICATION_STARTING,
+                translucentTop, "starting");
+        startingWindow.mStartingData = new SnapshotStartingData(mWm, null, 0);
+        task.mSharedStartingData = startingWindow.mStartingData;
+        task.prepareSync();
+
+        final BLASTSyncEngine.SyncGroup group = mock(BLASTSyncEngine.SyncGroup.class);
+        assertFalse(task.isSyncFinished(group));
+        startingWindow.onSyncFinishedDrawing();
+        assertTrue(task.isSyncFinished(group));
     }
 
     @Test
@@ -333,8 +359,7 @@ public class SyncEngineTests extends WindowTestsBase {
         w.reparent(botChildWC, POSITION_TOP);
         parentWC.prepareSync();
         // Assume the window has drawn with the latest configuration.
-        w.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
-                new MergedConfiguration(), true /* useLatestConfig */, true /* relayoutVisible */);
+        makeLastConfigReportedToClient(w, true /* visible */);
         assertTrue(w.onSyncFinishedDrawing());
         assertEquals(SYNC_STATE_READY, w.mSyncState);
         w.reparent(topChildWC, POSITION_TOP);

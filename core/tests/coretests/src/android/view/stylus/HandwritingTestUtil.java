@@ -16,37 +16,80 @@
 
 package android.view.stylus;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-public class HandwritingTestUtil {
-    public static View createView(Rect handwritingArea) {
+class HandwritingTestUtil {
+    static View createView(Rect handwritingArea) {
         return createView(handwritingArea, true /* autoHandwritingEnabled */,
                 true /* isStylusHandwritingAvailable */);
     }
 
-    public static View createView(Rect handwritingArea, boolean autoHandwritingEnabled,
+    static View createView(Rect handwritingArea, boolean autoHandwritingEnabled,
             boolean isStylusHandwritingAvailable) {
         return createView(handwritingArea, autoHandwritingEnabled, isStylusHandwritingAvailable,
                 0, 0, 0, 0);
     }
 
-    public static View createView(Rect handwritingArea, boolean autoHandwritingEnabled,
+    static View createView(Rect handwritingArea, boolean autoHandwritingEnabled,
             boolean isStylusHandwritingAvailable,
             float handwritingBoundsOffsetLeft, float handwritingBoundsOffsetTop,
             float handwritingBoundsOffsetRight, float handwritingBoundsOffsetBottom) {
         final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         final Context context = instrumentation.getTargetContext();
-        // mock a parent so that HandwritingInitiator can get
-        final ViewGroup parent = new ViewGroup(context) {
+        View view = spy(new View(context));
+        mockSpy(view, handwritingArea, autoHandwritingEnabled, isStylusHandwritingAvailable,
+                handwritingBoundsOffsetLeft, handwritingBoundsOffsetTop,
+                handwritingBoundsOffsetRight, handwritingBoundsOffsetBottom);
+        return view;
+    }
+
+    static EditText createEditText(Rect handwritingArea, boolean autoHandwritingEnabled,
+            boolean isStylusHandwritingAvailable) {
+        return createEditText(handwritingArea, autoHandwritingEnabled, isStylusHandwritingAvailable,
+                0, 0, 0, 0);
+    }
+
+    static EditText createEditText(Rect handwritingArea, boolean autoHandwritingEnabled,
+            boolean isStylusHandwritingAvailable,
+            float handwritingBoundsOffsetLeft, float handwritingBoundsOffsetTop,
+            float handwritingBoundsOffsetRight, float handwritingBoundsOffsetBottom) {
+        final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        final Context context = instrumentation.getTargetContext();
+        EditText view = spy(new EditText(context));
+        doAnswer(invocation -> {
+            int[] outLocation = invocation.getArgument(0);
+            outLocation[0] = handwritingArea.left;
+            outLocation[1] = handwritingArea.top;
+            return null;
+        }).when(view).getLocationInWindow(any());
+        when(view.getOffsetForPosition(anyFloat(), anyFloat())).thenReturn(0);
+        mockSpy(view, handwritingArea, autoHandwritingEnabled, isStylusHandwritingAvailable,
+                handwritingBoundsOffsetLeft, handwritingBoundsOffsetTop,
+                handwritingBoundsOffsetRight, handwritingBoundsOffsetBottom);
+        return view;
+    }
+
+    private static void mockSpy(View viewSpy, Rect handwritingArea,
+            boolean autoHandwritingEnabled, boolean isStylusHandwritingAvailable,
+            float handwritingBoundsOffsetLeft, float handwritingBoundsOffsetTop,
+            float handwritingBoundsOffsetRight, float handwritingBoundsOffsetBottom) {
+        // Mock a parent so that HandwritingInitiator can get visible rect and hit region.
+        final ViewGroup parent = new ViewGroup(viewSpy.getContext()) {
             @Override
             protected void onLayout(boolean changed, int l, int t, int r, int b) {
                 // We don't layout this view.
@@ -56,19 +99,25 @@ public class HandwritingTestUtil {
                 r.set(handwritingArea);
                 return true;
             }
+
+            @Override
+            public boolean getChildLocalHitRegion(View child, Region region, Matrix matrix,
+                    boolean isHover) {
+                matrix.reset();
+                region.set(handwritingArea);
+                return true;
+            }
         };
 
-        View view = spy(new View(context));
-        when(view.isAttachedToWindow()).thenReturn(true);
-        when(view.isAggregatedVisible()).thenReturn(true);
-        when(view.isStylusHandwritingAvailable()).thenReturn(isStylusHandwritingAvailable);
-        when(view.getHandwritingArea()).thenReturn(handwritingArea);
-        when(view.getHandwritingBoundsOffsetLeft()).thenReturn(handwritingBoundsOffsetLeft);
-        when(view.getHandwritingBoundsOffsetTop()).thenReturn(handwritingBoundsOffsetTop);
-        when(view.getHandwritingBoundsOffsetRight()).thenReturn(handwritingBoundsOffsetRight);
-        when(view.getHandwritingBoundsOffsetBottom()).thenReturn(handwritingBoundsOffsetBottom);
-        view.setAutoHandwritingEnabled(autoHandwritingEnabled);
-        parent.addView(view);
-        return view;
+        when(viewSpy.isAttachedToWindow()).thenReturn(true);
+        when(viewSpy.isAggregatedVisible()).thenReturn(true);
+        when(viewSpy.isStylusHandwritingAvailable()).thenReturn(isStylusHandwritingAvailable);
+        when(viewSpy.getHandwritingArea()).thenReturn(handwritingArea);
+        when(viewSpy.getHandwritingBoundsOffsetLeft()).thenReturn(handwritingBoundsOffsetLeft);
+        when(viewSpy.getHandwritingBoundsOffsetTop()).thenReturn(handwritingBoundsOffsetTop);
+        when(viewSpy.getHandwritingBoundsOffsetRight()).thenReturn(handwritingBoundsOffsetRight);
+        when(viewSpy.getHandwritingBoundsOffsetBottom()).thenReturn(handwritingBoundsOffsetBottom);
+        viewSpy.setAutoHandwritingEnabled(autoHandwritingEnabled);
+        parent.addView(viewSpy);
     }
 }

@@ -1,0 +1,34 @@
+package: "com.android.window.flags"
+container: "system"
+
+flag {
+    name: "always_update_wallpaper_permission"
+    is_exported: true
+    namespace: "wear_frameworks"
+    description: "Allow out of focus process to update wallpaper complications"
+    bug: "271132915"
+}
+
+flag {
+  name: "multi_crop"
+  namespace: "systemui"
+  description: "Support storing different wallpaper crops for different display dimensions. Only effective after rebooting."
+  bug: "281648899"
+}
+
+flag {
+  name: "no_consecutive_visibility_events"
+  namespace: "systemui"
+  description: "Prevent the system from sending consecutive onVisibilityChanged(false) events."
+  bug: "285631818"
+}
+
+flag {
+  name: "offload_color_extraction"
+  namespace: "systemui"
+  description: "Let ImageWallpaper take care of its wallpaper color extraction, instead of system_server"
+  bug: "328791519"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

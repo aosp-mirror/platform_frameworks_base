@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!--
+    This defines the format of the XML file used to define VibrationEffect created via public and
+    hidden APIs. This format is not enforced in a backwards compatible way, and should only be used
+    on device-specific vibration files.
+-->
+<xs:schema version="2.0"
+           elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Root tag definitions -->
+
+    <xs:element name="vibration-effect" type="VibrationEffect"/>
+
+    <xs:element name="vibration-select" type="VibrationSelect"/>
+
+    <!-- Type definitions -->
+
+    <xs:complexType name="VibrationSelect">
+        <xs:sequence>
+            <xs:element name="vibration-effect" type="VibrationEffect" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="VibrationEffect">
+        <xs:choice>
+
+            <!-- Waveform vibration effect -->
+            <xs:element name="waveform-effect" type="WaveformEffect"/>
+
+            <!-- Predefined vibration effect -->
+            <xs:element name="predefined-effect" type="PredefinedEffect"/>
+
+            <!-- Primitive composition effect -->
+            <xs:sequence>
+                <xs:element name="primitive-effect" type="PrimitiveEffect"/>
+            </xs:sequence>
+
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="WaveformEffect">
+        <xs:sequence>
+
+            <!-- Optional preamble, zero or more entries -->
+            <xs:element name="waveform-entry" type="WaveformEntry"
+                        minOccurs="0" maxOccurs="unbounded"/>
+
+            <!-- Repeating element, with one or more entries -->
+            <xs:element name="repeating" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="waveform-entry" type="WaveformEntry"
+                                    maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+        </xs:sequence>
+        <!-- Unsupported by xsd_config, but will be used in validation:
+        <xs:assert test="fn:count(./waveform-entry) > 0 or fn:count(./repeating) > 0)"/>
+        -->
+    </xs:complexType>
+
+    <xs:complexType name="WaveformEntry">
+        <xs:attribute name="durationMs" type="xs:nonNegativeInteger" use="required"/>
+        <xs:attribute name="amplitude" type="WaveformAmplitude" use="required"/>
+    </xs:complexType>
+
+    <xs:simpleType name="WaveformAmplitude">
+        <xs:union memberTypes="WaveformAmplitudeInt WaveformAmplitudeDefault"/>
+    </xs:simpleType>
+
+    <!-- Amplitude int in [0,255] -->
+    <xs:simpleType name="WaveformAmplitudeInt">
+        <xs:restriction base="xs:int">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="255"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Default amplitude as defined by VibrationEffect.DEFAULT_AMPLITUDE -->
+    <xs:simpleType  name="WaveformAmplitudeDefault">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="default"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="PredefinedEffect">
+        <xs:attribute name="name" type="PredefinedEffectName" use="required"/>
+        <xs:attribute name="fallback" type="xs:boolean"/><!-- hidden -->
+    </xs:complexType>
+
+    <!-- Predefined effect names as defined by VibrationEffect.EFFECT_* -->
+    <xs:simpleType  name="PredefinedEffectName">
+        <xs:restriction base="xs:string">
+            <!-- Public effects -->
+            <xs:enumeration value="tick"/>
+            <xs:enumeration value="click"/>
+            <xs:enumeration value="heavy_click"/>
+            <xs:enumeration value="double_click"/>
+            <!-- Hidden effects -->
+            <xs:enumeration value="texture_tick"/>
+            <xs:enumeration value="thud"/>
+            <xs:enumeration value="pop"/>
+            <xs:enumeration value="ringtone_1"/>
+            <xs:enumeration value="ringtone_2"/>
+            <xs:enumeration value="ringtone_3"/>
+            <xs:enumeration value="ringtone_4"/>
+            <xs:enumeration value="ringtone_5"/>
+            <xs:enumeration value="ringtone_6"/>
+            <xs:enumeration value="ringtone_7"/>
+            <xs:enumeration value="ringtone_8"/>
+            <xs:enumeration value="ringtone_9"/>
+            <xs:enumeration value="ringtone_10"/>
+            <xs:enumeration value="ringtone_11"/>
+            <xs:enumeration value="ringtone_12"/>
+            <xs:enumeration value="ringtone_13"/>
+            <xs:enumeration value="ringtone_14"/>
+            <xs:enumeration value="ringtone_15"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="PrimitiveEffect">
+        <xs:attribute name="name" type="PrimitiveEffectName" use="required"/>
+        <xs:attribute name="scale" type="PrimitiveScale"/>
+        <xs:attribute name="delayMs" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+
+    <!-- Primitive names as defined by VibrationEffect.Composition.PRIMITIVE_* -->
+    <xs:simpleType  name="PrimitiveEffectName">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="low_tick"/>
+            <xs:enumeration value="tick"/>
+            <xs:enumeration value="click"/>
+            <xs:enumeration value="slow_rise"/>
+            <xs:enumeration value="quick_rise"/>
+            <xs:enumeration value="quick_fall"/>
+            <xs:enumeration value="spin"/>
+            <xs:enumeration value="thud"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Primitive scale float in [0,1] -->
+    <xs:simpleType name="PrimitiveScale">
+        <xs:restriction base="xs:float">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

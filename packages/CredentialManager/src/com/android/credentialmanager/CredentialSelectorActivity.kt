@@ -18,8 +18,8 @@ package com.android.credentialmanager
 
 import android.app.Activity
 import android.content.Intent
-import android.credentials.ui.BaseDialogResult
-import android.credentials.ui.RequestInfo
+import android.credentials.selection.BaseDialogResult
+import android.credentials.selection.RequestInfo
 import android.net.Uri
 import android.os.Bundle
 import android.os.ResultReceiver
@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.compose.theme.PlatformTheme
 import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
@@ -43,7 +44,6 @@ import com.android.credentialmanager.createflow.CreateCredentialScreen
 import com.android.credentialmanager.createflow.hasContentToDisplay
 import com.android.credentialmanager.getflow.GetCredentialScreen
 import com.android.credentialmanager.getflow.hasContentToDisplay
-import com.android.credentialmanager.ui.theme.PlatformTheme
 
 @ExperimentalMaterialApi
 class CredentialSelectorActivity : ComponentActivity() {
@@ -61,9 +61,7 @@ class CredentialSelectorActivity : ComponentActivity() {
             if (isCancellationRequest && !shouldShowCancellationUi) {
                 return
             }
-            val userConfigRepo = UserConfigRepo(this)
-            val credManRepo = CredentialManagerRepo(
-                this, intent, userConfigRepo, isNewActivity = true)
+            val credManRepo = CredentialManagerRepo(this, intent, isNewActivity = true)
 
             val backPressedCallback = object : OnBackPressedCallback(
                 true // default to enabled
@@ -78,10 +76,7 @@ class CredentialSelectorActivity : ComponentActivity() {
 
             setContent {
                 PlatformTheme {
-                    CredentialManagerBottomSheet(
-                        credManRepo,
-                        userConfigRepo
-                    )
+                    CredentialManagerBottomSheet(credManRepo)
                 }
             }
         } catch (e: Exception) {
@@ -103,9 +98,7 @@ class CredentialSelectorActivity : ComponentActivity() {
                     return
                 }
             } else {
-                val userConfigRepo = UserConfigRepo(this)
-                val credManRepo = CredentialManagerRepo(
-                    this, intent, userConfigRepo, isNewActivity = false)
+                val credManRepo = CredentialManagerRepo(this, intent, isNewActivity = false)
                 viewModel.onNewCredentialManagerRepo(credManRepo)
             }
         } catch (e: Exception) {
@@ -131,11 +124,12 @@ class CredentialSelectorActivity : ComponentActivity() {
             // Cancellation was for a different request, don't cancel the current UI.
             return Triple(true, false, null)
         }
-        val shouldShowCancellationUi = cancelUiRequest.shouldShowCancellationUi()
+        val shouldShowCancellationUi = cancelUiRequest.shouldShowCancellationExplanation()
+        viewModel?.onDeveloperCancellationReceivedForBiometricPrompt()
         Log.d(
             Constants.LOG_TAG, "Received UI cancellation intent. Should show cancellation" +
             " ui = $shouldShowCancellationUi")
-        val appDisplayName = getAppLabel(packageManager, cancelUiRequest.appPackageName)
+        val appDisplayName = getAppLabel(packageManager, cancelUiRequest.packageName)
         if (!shouldShowCancellationUi) {
             this.finish()
         }
@@ -147,10 +141,9 @@ class CredentialSelectorActivity : ComponentActivity() {
     @Composable
     private fun CredentialManagerBottomSheet(
         credManRepo: CredentialManagerRepo,
-        userConfigRepo: UserConfigRepo,
     ) {
         val viewModel: CredentialSelectorViewModel = viewModel {
-            CredentialSelectorViewModel(credManRepo, userConfigRepo)
+            CredentialSelectorViewModel(credManRepo)
         }
         val launcher = rememberLauncherForActivityResult(
             StartBalIntentSenderForResultContract()
@@ -213,7 +206,7 @@ class CredentialSelectorActivity : ComponentActivity() {
     private fun onInitializationError(e: Exception, intent: Intent) {
         Log.e(Constants.LOG_TAG, "Failed to show the credential selector; closing the activity", e)
         val resultReceiver = intent.getParcelableExtra(
-            android.credentials.ui.Constants.EXTRA_RESULT_RECEIVER,
+            android.credentials.selection.Constants.EXTRA_RESULT_RECEIVER,
             ResultReceiver::class.java
         )
         val requestInfo = intent.extras?.getParcelable(

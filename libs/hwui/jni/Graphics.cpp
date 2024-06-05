@@ -1,6 +1,3 @@
-#undef LOG_TAG
-#define LOG_TAG "GraphicsJNI"
-
 #include <assert.h>
 #include <unistd.h>
 
@@ -214,11 +211,7 @@ static jclass   gRegion_class;
 static jfieldID gRegion_nativeInstanceID;
 static jmethodID gRegion_constructorMethodID;
 
-static jclass    gByte_class;
-static jobject   gVMRuntime;
-static jclass    gVMRuntime_class;
-static jmethodID gVMRuntime_newNonMovableArray;
-static jmethodID gVMRuntime_addressOf;
+static jclass gByte_class;
 
 static jclass gColorSpace_class;
 static jmethodID gColorSpace_getMethodID;
@@ -249,6 +242,9 @@ static jfieldID gFontMetricsInt_ascent;
 static jfieldID gFontMetricsInt_descent;
 static jfieldID gFontMetricsInt_bottom;
 static jfieldID gFontMetricsInt_leading;
+
+static jclass gRunInfo_class;
+static jfieldID gRunInfo_clusterCount;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -512,6 +508,10 @@ int GraphicsJNI::set_metrics_int(JNIEnv* env, jobject metrics, const SkFontMetri
         env->SetIntField(metrics, gFontMetricsInt_leading, leading);
     }
     return descent - ascent + leading;
+}
+
+void GraphicsJNI::set_cluster_count_to_run_info(JNIEnv* env, jobject runInfo, jint clusterCount) {
+    env->SetIntField(runInfo, gRunInfo_clusterCount, clusterCount);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -785,13 +785,6 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gByte_class = (jclass) env->NewGlobalRef(
         env->GetStaticObjectField(c, env->GetStaticFieldID(c, "TYPE", "Ljava/lang/Class;")));
 
-    gVMRuntime_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "dalvik/system/VMRuntime"));
-    m = env->GetStaticMethodID(gVMRuntime_class, "getRuntime", "()Ldalvik/system/VMRuntime;");
-    gVMRuntime = env->NewGlobalRef(env->CallStaticObjectMethod(gVMRuntime_class, m));
-    gVMRuntime_newNonMovableArray = GetMethodIDOrDie(env, gVMRuntime_class, "newNonMovableArray",
-                                                     "(Ljava/lang/Class;I)Ljava/lang/Object;");
-    gVMRuntime_addressOf = GetMethodIDOrDie(env, gVMRuntime_class, "addressOf", "(Ljava/lang/Object;)J");
-
     gColorSpace_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ColorSpace"));
     gColorSpace_getMethodID = GetStaticMethodIDOrDie(env, gColorSpace_class,
             "get", "(Landroid/graphics/ColorSpace$Named;)Landroid/graphics/ColorSpace;");
@@ -836,6 +829,11 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gFontMetricsInt_descent = GetFieldIDOrDie(env, gFontMetricsInt_class, "descent", "I");
     gFontMetricsInt_bottom = GetFieldIDOrDie(env, gFontMetricsInt_class, "bottom", "I");
     gFontMetricsInt_leading = GetFieldIDOrDie(env, gFontMetricsInt_class, "leading", "I");
+
+    gRunInfo_class = FindClassOrDie(env, "android/graphics/Paint$RunInfo");
+    gRunInfo_class = MakeGlobalRefOrDie(env, gRunInfo_class);
+
+    gRunInfo_clusterCount = GetFieldIDOrDie(env, gRunInfo_class, "mClusterCount", "I");
 
     return 0;
 }

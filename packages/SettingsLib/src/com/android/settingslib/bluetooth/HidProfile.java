@@ -27,6 +27,8 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.settingslib.R;
 
 import java.util.List;
@@ -126,19 +128,19 @@ public class HidProfile implements LocalBluetoothProfile {
 
     @Override
     public boolean setEnabled(BluetoothDevice device, boolean enabled) {
-        boolean isEnabled = false;
+        boolean isSuccessful = false;
         if (mService == null) {
             return false;
         }
         if (enabled) {
             if (mService.getConnectionPolicy(device) < CONNECTION_POLICY_ALLOWED) {
-                isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
+                isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
             }
         } else {
-            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
+            isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
 
-        return isEnabled;
+        return isSuccessful;
     }
 
     public String toString() {
@@ -185,6 +187,14 @@ public class HidProfile implements LocalBluetoothProfile {
             default:
                 return com.android.internal.R.drawable.ic_bt_misc_hid;
         }
+    }
+
+    /** Set preferred transport for the device */
+    public boolean setPreferredTransport(@NonNull BluetoothDevice device, int transport) {
+        if (mService != null) {
+            mService.setPreferredTransport(device, transport);
+        }
+        return false;
     }
 
     protected void finalize() {

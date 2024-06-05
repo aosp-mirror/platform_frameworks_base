@@ -16,6 +16,8 @@
 
 package android.telephony.data;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.Service;
@@ -29,13 +31,24 @@ import android.os.RemoteException;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.Annotation.ApnType;
+import android.telephony.Annotation.NetCapability;
+import android.telephony.PreciseDataConnectionState;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.IIntegerConsumer;
+import com.android.internal.telephony.flags.FeatureFlags;
+import com.android.internal.telephony.flags.FeatureFlagsImpl;
+import com.android.internal.telephony.flags.Flags;
+import com.android.internal.util.FunctionalUtils;
 import com.android.telephony.Rlog;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Base class of the qualified networks service, which is a vendor service providing up-to-date
@@ -69,6 +82,11 @@ public abstract class QualifiedNetworksService extends Service {
     private static final int QNS_UPDATE_QUALIFIED_NETWORKS                          = 4;
     private static final int QNS_APN_THROTTLE_STATUS_CHANGED                        = 5;
     private static final int QNS_EMERGENCY_DATA_NETWORK_PREFERRED_TRANSPORT_CHANGED = 6;
+    private static final int QNS_REQUEST_NETWORK_VALIDATION                         = 7;
+    private static final int QNS_RECONNECT_QUALIFIED_NETWORK                        = 8;
+
+    /** Feature flags */
+    private static final FeatureFlags sFeatureFlag = new FeatureFlagsImpl();
 
     private final HandlerThread mHandlerThread;
 
@@ -170,14 +188,59 @@ public abstract class QualifiedNetworksService extends Service {
                     qualifiedNetworkTypesArray).sendToTarget();
         }
 
-        private void onUpdateQualifiedNetworkTypes(@ApnType int apnTypes,
-                                                   int[] qualifiedNetworkTypes) {
+        /**
+         * Request to make a clean initial connection instead of handover to a transport type mapped
+         * to the {@code qualifiedNetworkType} for the {@code apnTypes}. This will update the
+         * preferred network type like {@link #updateQualifiedNetworkTypes(int, List)}, however if
+         * the data network for the {@code apnTypes} is not in the state {@link TelephonyManager
+         * #DATA_CONNECTED} or it's already connected on the transport type mapped to the
+         * qualified network type, forced reconnection will be ignored.
+         *
+         * <p>This will tear down current data network even though target transport type mapped to
+         * the {@code qualifiedNetworkType} is not available, and the data network will be connected
+         * to the transport type when it becomes available.
+         *
+         * <p>This is one shot request and does not mean further handover is not allowed to the
+         * qualified network type for this APN type.
+         *
+         * @param apnTypes APN type(s) of the qualified networks. This must be a bitmask combination
+         * of {@link ApnType}. The same qualified networks will be applicable to all APN types
+         * specified here.
+         * @param qualifiedNetworkType Access network types which are qualified for data connection
+         * setup for {@link ApnType}. Empty list means QNS has no suggestion to the frameworks, and
+         * for that APN type frameworks will route the corresponding network requests to
+         * {@link AccessNetworkConstants#TRANSPORT_TYPE_WWAN}.
+         *
+         * <p> If one of the element is invalid, for example, {@link AccessNetworkType#UNKNOWN},
+         * then this operation becomes a no-op.
+         *
+         * @hide
+         */
+        public final void reconnectQualifiedNetworkType(@ApnType int apnTypes,
+                @AccessNetworkConstants.RadioAccessNetworkType int qualifiedNetworkType) {
+            mHandler.obtainMessage(QNS_RECONNECT_QUALIFIED_NETWORK, mSlotIndex, apnTypes,
+                    new Integer(qualifiedNetworkType)).sendToTarget();
+        }
+
+        private void onUpdateQualifiedNetworkTypes(
+                @ApnType int apnTypes, int[] qualifiedNetworkTypes) {
             mQualifiedNetworkTypesList.put(apnTypes, qualifiedNetworkTypes);
             if (mCallback != null) {
                 try {
                     mCallback.onQualifiedNetworkTypesChanged(apnTypes, qualifiedNetworkTypes);
                 } catch (RemoteException e) {
                     loge("Failed to call onQualifiedNetworksChanged. " + e);
+                }
+            }
+        }
+
+        private void onReconnectQualifiedNetworkType(@ApnType int apnTypes,
+                @AccessNetworkConstants.RadioAccessNetworkType int qualifiedNetworkType) {
+            if (mCallback != null) {
+                try {
+                    mCallback.onReconnectQualifiedNetworkType(apnTypes, qualifiedNetworkType);
+                } catch (RemoteException e) {
+                    loge("Failed to call onReconnectQualifiedNetworkType. " + e);
                 }
             }
         }
@@ -205,6 +268,72 @@ public abstract class QualifiedNetworksService extends Service {
                 @AccessNetworkConstants.TransportType int transportType) {
             Log.d(TAG, "reportEmergencyDataNetworkPreferredTransportChanged: "
                     + AccessNetworkConstants.transportTypeToString(transportType));
+        }
+
+        /**
+         * Request network validation to the connected data network for given a network capability.
+         *
+         * <p>This network validation can only be performed when a data network is in connected
+         * state, and will not be triggered if the data network does not support network validation
+         * feature or network validation is not in connected state.
+         *
+         * <p>See {@link DataServiceCallback.ResultCode} for the type of response that indicates
+         * whether the request was successfully submitted or had an error.
+         *
+         * <p>If network validation is requested, monitor network validation status in {@link
+         * PreciseDataConnectionState#getNetworkValidationStatus()}.
+         *
+         * @param networkCapability A network capability. (Note that only APN-type capabilities are
+         *     supported.
+         * @param executor executor The callback executor that responds whether the request has been
+         *     successfully submitted or not.
+         * @param resultCodeCallback A callback to determine whether the request was successfully
+         *     submitted or not.
+         */
+        @FlaggedApi(Flags.FLAG_NETWORK_VALIDATION)
+        public void requestNetworkValidation(
+                @NetCapability int networkCapability,
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull @DataServiceCallback.ResultCode Consumer<Integer> resultCodeCallback) {
+            Objects.requireNonNull(executor, "executor cannot be null");
+            Objects.requireNonNull(resultCodeCallback, "resultCodeCallback cannot be null");
+
+            if (!sFeatureFlag.networkValidation()) {
+                loge("networkValidation feature is disabled");
+                executor.execute(
+                        () ->
+                                resultCodeCallback.accept(
+                                        DataServiceCallback.RESULT_ERROR_UNSUPPORTED));
+                return;
+            }
+
+            IIntegerConsumer callback = new IIntegerConsumer.Stub() {
+                @Override
+                public void accept(int result) {
+                    executor.execute(() -> resultCodeCallback.accept(result));
+                }
+            };
+
+            // Move to the internal handler and process it.
+            mHandler.obtainMessage(
+                            QNS_REQUEST_NETWORK_VALIDATION,
+                            mSlotIndex,
+                            0,
+                            new NetworkValidationRequestData(networkCapability, callback))
+                    .sendToTarget();
+        }
+
+        /** Process a network validation request on the internal handler. */
+        private void onRequestNetworkValidation(NetworkValidationRequestData data) {
+            try {
+                log("onRequestNetworkValidation");
+                // Callback to request a network validation.
+                mCallback.onNetworkValidationRequested(data.mNetworkCapability, data.mCallback);
+            } catch (RemoteException | NullPointerException e) {
+                loge("Failed to call onRequestNetworkValidation. " + e);
+                FunctionalUtils.ignoreRemoteException(data.mCallback::accept)
+                        .accept(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
+            }
         }
 
         /**
@@ -279,6 +408,16 @@ public abstract class QualifiedNetworksService extends Service {
                 case QNS_UPDATE_QUALIFIED_NETWORKS:
                     if (provider == null) break;
                     provider.onUpdateQualifiedNetworkTypes(message.arg2, (int[]) message.obj);
+                    break;
+
+                case QNS_REQUEST_NETWORK_VALIDATION:
+                    if (provider == null) break;
+                    provider.onRequestNetworkValidation((NetworkValidationRequestData) message.obj);
+                    break;
+
+                case QNS_RECONNECT_QUALIFIED_NETWORK:
+                    if (provider == null) break;
+                    provider.onReconnectQualifiedNetworkType(message.arg2, (Integer) message.obj);
                     break;
             }
         }
@@ -361,6 +500,17 @@ public abstract class QualifiedNetworksService extends Service {
             mHandler.obtainMessage(
                     QNS_EMERGENCY_DATA_NETWORK_PREFERRED_TRANSPORT_CHANGED,
                             slotIndex, transportType).sendToTarget();
+        }
+    }
+
+    private static final class NetworkValidationRequestData {
+        final @NetCapability int mNetworkCapability;
+        final IIntegerConsumer mCallback;
+
+        private NetworkValidationRequestData(@NetCapability int networkCapability,
+                @NonNull IIntegerConsumer callback) {
+            mNetworkCapability = networkCapability;
+            mCallback = callback;
         }
     }
 

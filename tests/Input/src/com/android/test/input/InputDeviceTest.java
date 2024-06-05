@@ -51,6 +51,7 @@ public class InputDeviceTest {
         assertEquals(device.getName(), outDevice.getName());
         assertEquals(device.getVendorId(), outDevice.getVendorId());
         assertEquals(device.getProductId(), outDevice.getProductId());
+        assertEquals(device.getDeviceBus(), outDevice.getDeviceBus());
         assertEquals(device.getDescriptor(), outDevice.getDescriptor());
         assertEquals(device.isExternal(), outDevice.isExternal());
         assertEquals(device.getSources(), outDevice.getSources());
@@ -60,14 +61,21 @@ public class InputDeviceTest {
         assertEquals(device.getMotionRanges().size(), outDevice.getMotionRanges().size());
         assertEquals(device.getHostUsiVersion(), outDevice.getHostUsiVersion());
         assertEquals(device.getAssociatedDisplayId(), outDevice.getAssociatedDisplayId());
+        assertEquals(device.isEnabled(), outDevice.isEnabled());
 
         KeyCharacterMap keyCharacterMap = device.getKeyCharacterMap();
         KeyCharacterMap outKeyCharacterMap = outDevice.getKeyCharacterMap();
         assertEquals("keyCharacterMap not equal", keyCharacterMap, outKeyCharacterMap);
 
         for (int j = 0; j < device.getMotionRanges().size(); j++) {
-            assertMotionRangeEquals(device.getMotionRanges().get(j),
-                    outDevice.getMotionRanges().get(j));
+            InputDevice.MotionRange motionRange = device.getMotionRanges().get(j);
+            assertMotionRangeEquals(motionRange, outDevice.getMotionRanges().get(j));
+
+            int axis = motionRange.getAxis();
+            int source = motionRange.getSource();
+            assertEquals(
+                    device.getViewBehavior().shouldSmoothScroll(axis, source),
+                    outDevice.getViewBehavior().shouldSmoothScroll(axis, source));
         }
     }
 
@@ -79,6 +87,7 @@ public class InputDeviceTest {
                 .setName("Test Device " + DEVICE_ID)
                 .setVendorId(44)
                 .setProductId(45)
+                .setDeviceBus(3)
                 .setDescriptor("descriptor")
                 .setExternal(true)
                 .setSources(InputDevice.SOURCE_HDMI)
@@ -91,7 +100,10 @@ public class InputDeviceTest {
                 .setHasBattery(true)
                 .setKeyboardLanguageTag("en-US")
                 .setKeyboardLayoutType("qwerty")
-                .setUsiVersion(new HostUsiVersion(2, 0));
+                .setUsiVersion(new HostUsiVersion(2, 0))
+                .setShouldSmoothScroll(true)
+                .setAssociatedDisplayId(Display.DEFAULT_DISPLAY)
+                .setEnabled(false);
 
         for (int i = 0; i < 30; i++) {
             deviceBuilder.addMotionRange(

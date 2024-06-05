@@ -34,7 +34,7 @@ android_test {
         "androidx.test.rules",
         "androidx.test.espresso.core",
         "mockito-target-minus-junit4",
-        "truth-prebuilt",
+        "truth",
     ],
     dxflags: ["--multi-dex"],
 }

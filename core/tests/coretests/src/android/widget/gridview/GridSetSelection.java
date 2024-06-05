@@ -16,7 +16,7 @@
 
 package android.widget.gridview;
 
-import android.util.GridScenario;
+import android.widget.GridScenario;
 
 /**
  * Basic stacking from top scenario, nothing fancy. Items do not

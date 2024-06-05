@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.Display.Mode.INVALID_MODE_ID;
 import static android.view.DisplayInfoProto.APP_HEIGHT;
 import static android.view.DisplayInfoProto.APP_WIDTH;
 import static android.view.DisplayInfoProto.CUTOUT;
@@ -50,6 +51,7 @@ import java.util.Objects;
  * Describes the characteristics of a particular logical display.
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class DisplayInfo implements Parcelable {
     /**
      * The surface flinger layer stack associated with this logical display.
@@ -200,9 +202,20 @@ public final class DisplayInfo implements Parcelable {
     public int defaultModeId;
 
     /**
+     * The user preferred display mode.
+     */
+    public int userPreferredModeId = INVALID_MODE_ID;
+
+    /**
      * The supported modes of this display.
      */
     public Display.Mode[] supportedModes = Display.Mode.EMPTY_ARRAY;
+
+    /**
+     * The supported modes that will be exposed externally.
+     * Might have different set of modes than supportedModes for VRR displays
+     */
+    public Display.Mode[] appsSupportedModes = Display.Mode.EMPTY_ARRAY;
 
     /** The active color mode. */
     public int colorMode;
@@ -420,7 +433,9 @@ public final class DisplayInfo implements Parcelable {
                 && modeId == other.modeId
                 && renderFrameRate == other.renderFrameRate
                 && defaultModeId == other.defaultModeId
+                && userPreferredModeId == other.userPreferredModeId
                 && Arrays.equals(supportedModes, other.supportedModes)
+                && Arrays.equals(appsSupportedModes, other.appsSupportedModes)
                 && colorMode == other.colorMode
                 && Arrays.equals(supportedColorModes, other.supportedColorModes)
                 && Objects.equals(hdrCapabilities, other.hdrCapabilities)
@@ -478,7 +493,10 @@ public final class DisplayInfo implements Parcelable {
         modeId = other.modeId;
         renderFrameRate = other.renderFrameRate;
         defaultModeId = other.defaultModeId;
+        userPreferredModeId = other.userPreferredModeId;
         supportedModes = Arrays.copyOf(other.supportedModes, other.supportedModes.length);
+        appsSupportedModes = Arrays.copyOf(
+                other.appsSupportedModes, other.appsSupportedModes.length);
         colorMode = other.colorMode;
         supportedColorModes = Arrays.copyOf(
                 other.supportedColorModes, other.supportedColorModes.length);
@@ -530,10 +548,16 @@ public final class DisplayInfo implements Parcelable {
         modeId = source.readInt();
         renderFrameRate = source.readFloat();
         defaultModeId = source.readInt();
+        userPreferredModeId = source.readInt();
         int nModes = source.readInt();
         supportedModes = new Display.Mode[nModes];
         for (int i = 0; i < nModes; i++) {
             supportedModes[i] = Display.Mode.CREATOR.createFromParcel(source);
+        }
+        int nAppModes = source.readInt();
+        appsSupportedModes = new Display.Mode[nAppModes];
+        for (int i = 0; i < nAppModes; i++) {
+            appsSupportedModes[i] = Display.Mode.CREATOR.createFromParcel(source);
         }
         colorMode = source.readInt();
         int nColorModes = source.readInt();
@@ -596,9 +620,14 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(modeId);
         dest.writeFloat(renderFrameRate);
         dest.writeInt(defaultModeId);
+        dest.writeInt(userPreferredModeId);
         dest.writeInt(supportedModes.length);
         for (int i = 0; i < supportedModes.length; i++) {
             supportedModes[i].writeToParcel(dest, flags);
+        }
+        dest.writeInt(appsSupportedModes.length);
+        for (int i = 0; i < appsSupportedModes.length; i++) {
+            appsSupportedModes[i].writeToParcel(dest, flags);
         }
         dest.writeInt(colorMode);
         dest.writeInt(supportedColorModes.length);
@@ -832,11 +861,16 @@ public final class DisplayInfo implements Parcelable {
         sb.append(presentationDeadlineNanos);
         sb.append(", mode ");
         sb.append(modeId);
+        sb.append(", renderFrameRate ");
         sb.append(renderFrameRate);
         sb.append(", defaultMode ");
         sb.append(defaultModeId);
-        sb.append(", modes ");
+        sb.append(", userPreferredModeId ");
+        sb.append(userPreferredModeId);
+        sb.append(", supportedModes ");
         sb.append(Arrays.toString(supportedModes));
+        sb.append(", appsSupportedModes ");
+        sb.append(Arrays.toString(appsSupportedModes));
         sb.append(", hdrCapabilities ");
         sb.append(hdrCapabilities);
         sb.append(", userDisabledHdrTypes ");

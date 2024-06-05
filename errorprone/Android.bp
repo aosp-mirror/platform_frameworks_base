@@ -21,6 +21,8 @@ java_library_host {
     srcs: ["java/**/*.java"],
 
     static_libs: [
+        "annotations",
+        "framework-annotations-lib",
         "//external/error_prone:error_prone_core",
     ],
 
@@ -39,7 +41,7 @@ java_test_host {
     java_resource_dirs: ["tests/res"],
     java_resources: [":error_prone_android_framework_testdata"],
     static_libs: [
-        "truth-prebuilt",
+        "truth",
         "kxml2-2.3.0",
         "compile-testing-prebuilt",
         "error_prone_android_framework_lib",

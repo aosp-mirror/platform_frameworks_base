@@ -26,14 +26,12 @@ import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.WakefulnessLifecycle
-import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.keyguard.domain.interactor.ToAodFoldTransitionInteractor
 import com.android.systemui.shade.ShadeFoldAnimator
 import com.android.systemui.shade.ShadeViewController
-import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.unfold.util.FoldableDeviceStates
@@ -80,9 +78,9 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
     @Mock lateinit var viewTreeObserver: ViewTreeObserver
 
-    @Mock private lateinit var commandQueue: CommandQueue
-
     @Mock lateinit var shadeFoldAnimator: ShadeFoldAnimator
+
+    @Mock lateinit var foldTransitionInteractor: ToAodFoldTransitionInteractor
 
     @Captor private lateinit var foldStateListenerCaptor: ArgumentCaptor<FoldStateListener>
 
@@ -101,25 +99,19 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
         // TODO(b/254878364): remove this call to NPVC.getView()
         whenever(shadeViewController.shadeFoldAnimator).thenReturn(shadeFoldAnimator)
+        whenever(foldTransitionInteractor.foldAnimator).thenReturn(shadeFoldAnimator)
         whenever(shadeFoldAnimator.view).thenReturn(viewGroup)
         whenever(viewGroup.viewTreeObserver).thenReturn(viewTreeObserver)
         whenever(wakefulnessLifecycle.lastSleepReason)
             .thenReturn(PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD)
-        whenever(centralSurfaces.shadeViewController).thenReturn(shadeViewController)
         whenever(shadeFoldAnimator.startFoldToAodAnimation(any(), any(), any())).then {
             val onActionStarted = it.arguments[0] as Runnable
             onActionStarted.run()
         }
 
-        keyguardRepository = FakeKeyguardRepository()
-        val featureFlags = FakeFeatureFlags().apply { set(FACE_AUTH_REFACTOR, true) }
-        val keyguardInteractor =
-            KeyguardInteractor(
-                repository = keyguardRepository,
-                commandQueue = commandQueue,
-                featureFlags = featureFlags,
-                bouncerRepository = FakeKeyguardBouncerRepository(),
-            )
+        val withDeps = KeyguardInteractorFactory.create(featureFlags = FakeFeatureFlags())
+        val keyguardInteractor = withDeps.keyguardInteractor
+        keyguardRepository = withDeps.repository
 
         // Needs to be run on the main thread
         runBlocking(IMMEDIATE) {
@@ -132,8 +124,9 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
                         globalSettings,
                         latencyTracker,
                         { keyguardInteractor },
+                        { foldTransitionInteractor },
                     )
-                    .apply { initialize(centralSurfaces, lightRevealScrim) }
+                    .apply { initialize(centralSurfaces, shadeViewController, lightRevealScrim) }
 
             verify(deviceStateManager).registerCallback(any(), foldStateListenerCaptor.capture())
 
@@ -145,46 +138,33 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
     @Test
     fun onFolded_aodDisabled_doesNotLogLatency() =
         runBlocking(IMMEDIATE) {
-            val job = underTest.listenForDozing(this)
             keyguardRepository.setIsDozing(true)
             setAodEnabled(enabled = false)
-
-            yield()
 
             fold()
             simulateScreenTurningOn()
 
             verifyNoMoreInteractions(latencyTracker)
-
-            job.cancel()
         }
 
     @Test
     fun onFolded_aodEnabled_logsLatency() =
         runBlocking(IMMEDIATE) {
-            val job = underTest.listenForDozing(this)
             keyguardRepository.setIsDozing(true)
             setAodEnabled(enabled = true)
-
-            yield()
 
             fold()
             simulateScreenTurningOn()
 
             verify(latencyTracker).onActionStart(any())
             verify(latencyTracker).onActionEnd(any())
-
-            job.cancel()
         }
 
     @Test
     fun onFolded_onScreenTurningOnInvokedTwice_doesNotLogLatency() =
         runBlocking(IMMEDIATE) {
-            val job = underTest.listenForDozing(this)
             keyguardRepository.setIsDozing(true)
             setAodEnabled(enabled = true)
-
-            yield()
 
             fold()
             simulateScreenTurningOn()
@@ -195,18 +175,13 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
             verify(latencyTracker, never()).onActionStart(any())
             verify(latencyTracker, never()).onActionEnd(any())
-
-            job.cancel()
         }
 
     @Test
     fun onFolded_onScreenTurningOnWithoutDozingThenWithDozing_doesNotLogLatency() =
         runBlocking(IMMEDIATE) {
-            val job = underTest.listenForDozing(this)
             keyguardRepository.setIsDozing(false)
             setAodEnabled(enabled = true)
-
-            yield()
 
             fold()
             simulateScreenTurningOn()
@@ -220,18 +195,13 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
             verify(latencyTracker, never()).onActionStart(any())
             verify(latencyTracker, never()).onActionEnd(any())
-
-            job.cancel()
         }
 
     @Test
     fun onFolded_animationCancelled_doesNotLogLatency() =
         runBlocking(IMMEDIATE) {
-            val job = underTest.listenForDozing(this)
             keyguardRepository.setIsDozing(true)
             setAodEnabled(enabled = true)
-
-            yield()
 
             fold()
             underTest.onScreenTurningOn({})
@@ -242,8 +212,6 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
             verify(latencyTracker).onActionStart(any())
             verify(latencyTracker).onActionCancel(any())
-
-            job.cancel()
         }
 
     private fun simulateScreenTurningOn() {
@@ -258,7 +226,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
     private fun sendFoldEvent(folded: Boolean) {
         val state = if (folded) deviceStates.folded else deviceStates.unfolded
-        foldStateListenerCaptor.value.onStateChanged(state)
+        foldStateListenerCaptor.value.onDeviceStateChanged(state)
     }
 
     companion object {

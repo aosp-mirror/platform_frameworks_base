@@ -22,13 +22,14 @@ import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialOption;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialResponse;
-import android.credentials.ui.Entry;
-import android.credentials.ui.GetCredentialProviderData;
-import android.credentials.ui.ProviderData;
-import android.credentials.ui.ProviderPendingIntentResponse;
+import android.credentials.selection.Entry;
+import android.credentials.selection.GetCredentialProviderData;
+import android.credentials.selection.ProviderData;
+import android.credentials.selection.ProviderPendingIntentResponse;
 import android.os.ICancellationSignal;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialEntry;
@@ -58,7 +59,7 @@ import java.util.stream.Stream;
 public class ProviderRegistryGetSession extends ProviderSession<CredentialOption,
         Set<CredentialDescriptionRegistry.FilterResult>> {
 
-    private static final String TAG = "ProviderRegistryGetSession";
+    private static final String TAG = CredentialManager.TAG;
     @VisibleForTesting
     static final String CREDENTIAL_ENTRY_KEY = "credential_key";
 

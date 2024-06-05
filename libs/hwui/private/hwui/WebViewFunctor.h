@@ -17,15 +17,7 @@
 #ifndef FRAMEWORKS_BASE_WEBVIEWFUNCTOR_H
 #define FRAMEWORKS_BASE_WEBVIEWFUNCTOR_H
 
-#ifdef __ANDROID__  // Layoutlib does not support surface control
 #include <android/surface_control.h>
-#else
-// To avoid ifdefs around overlay implementation all over the place we typedef these to void *. They
-// won't be used.
-typedef void* ASurfaceControl;
-typedef void* ASurfaceTransaction;
-#endif
-
 #include <cutils/compiler.h>
 #include <private/hwui/DrawGlInfo.h>
 #include <private/hwui/DrawVkInfo.h>
@@ -113,6 +105,11 @@ ANDROID_API int WebViewFunctor_create(void* data, const WebViewFunctorCallbacks&
 // The functor will receive an onDestroyed when the last usage of it is released,
 // and it should be considered alive & active until that point.
 ANDROID_API void WebViewFunctor_release(int functor);
+
+// Reports the list of threads critical for frame production for the given
+// functor. Must be called on render thread.
+ANDROID_API void WebViewFunctor_reportRenderingThreads(int functor, const int32_t* thread_ids,
+                                                       size_t size);
 
 }  // namespace android::uirenderer
 

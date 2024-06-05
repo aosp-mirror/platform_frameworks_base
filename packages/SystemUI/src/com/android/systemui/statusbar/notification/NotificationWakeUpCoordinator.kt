@@ -20,10 +20,12 @@ import android.util.FloatProperty
 import android.view.animation.Interpolator
 import androidx.annotation.VisibleForTesting
 import androidx.core.animation.ObjectAnimator
-import com.android.systemui.Dumpable
 import com.android.app.animation.Interpolators
 import com.android.app.animation.InterpolatorsAndroidX
+import com.android.systemui.Dumpable
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionChangeEvent
@@ -31,6 +33,8 @@ import com.android.systemui.shade.ShadeExpansionListener
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
@@ -45,11 +49,14 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @SysUISingleton
 class NotificationWakeUpCoordinator
 @Inject
 constructor(
+    @Application applicationScope: CoroutineScope,
     dumpManager: DumpManager,
     private val mHeadsUpManager: HeadsUpManager,
     private val statusBarStateController: StatusBarStateController,
@@ -57,6 +64,8 @@ constructor(
     private val dozeParameters: DozeParameters,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val logger: NotificationWakeUpCoordinatorLogger,
+    private val notifsKeyguardInteractor: NotificationsKeyguardInteractor,
+    private val communalInteractor: CommunalInteractor,
 ) :
     OnHeadsUpChangedListener,
     StatusBarStateController.StateListener,
@@ -143,6 +152,7 @@ constructor(
                 for (listener in wakeUpListeners) {
                     listener.onFullyHiddenChanged(value)
                 }
+                notifsKeyguardInteractor.setNotificationsFullyHidden(value)
             }
         }
 
@@ -197,6 +207,13 @@ constructor(
                 }
             }
         )
+        applicationScope.launch {
+            communalInteractor.isIdleOnCommunal.collect {
+                if (!overrideDozeAmountIfCommunalShowing()) {
+                    maybeClearHardDozeAmountOverrideHidingNotifs()
+                }
+            }
+        }
     }
 
     fun setStackScroller(stackScrollerController: NotificationStackScrollLayoutController) {
@@ -206,8 +223,16 @@ constructor(
             val nowExpanding = isPulseExpanding()
             val changed = nowExpanding != pulseExpanding
             pulseExpanding = nowExpanding
-            for (listener in wakeUpListeners) {
-                listener.onPulseExpansionChanged(changed)
+            if (!NotificationIconContainerRefactor.isEnabled) {
+                for (listener in wakeUpListeners) {
+                    listener.onPulseExpansionAmountChanged(changed)
+                }
+            }
+            if (changed) {
+                for (listener in wakeUpListeners) {
+                    listener.onPulseExpandingChanged(pulseExpanding)
+                }
+                notifsKeyguardInteractor.setPulseExpanding(pulseExpanding)
             }
         }
     }
@@ -290,6 +315,10 @@ constructor(
             return
         }
 
+        if (overrideDozeAmountIfCommunalShowing()) {
+            return
+        }
+
         if (clearHardDozeAmountOverride()) {
             return
         }
@@ -299,9 +328,12 @@ constructor(
 
     private fun setHardDozeAmountOverride(dozing: Boolean, source: String) {
         logger.logSetDozeAmountOverride(dozing = dozing, source = source)
+        val previousOverride = hardDozeAmountOverride
         hardDozeAmountOverride = if (dozing) 1f else 0f
         hardDozeAmountOverrideSource = source
-        updateDozeAmount()
+        if (previousOverride != hardDozeAmountOverride) {
+            updateDozeAmount()
+        }
     }
 
     private fun clearHardDozeAmountOverride(): Boolean {
@@ -374,6 +406,7 @@ constructor(
         }
     }
 
+    @Deprecated("As part of b/301915812")
     private fun scheduleDelayedDozeAmountAnimation() {
         val alreadyRunning = delayedDozeAmountAnimator != null
         logger.logStartDelayedDozeAmountAnimation(alreadyRunning)
@@ -421,6 +454,11 @@ constructor(
             return
         }
 
+        if (overrideDozeAmountIfCommunalShowing()) {
+            this.state = newState
+            return
+        }
+
         maybeClearHardDozeAmountOverrideHidingNotifs()
 
         this.state = newState
@@ -458,6 +496,18 @@ constructor(
         return false
     }
 
+    private fun overrideDozeAmountIfCommunalShowing(): Boolean {
+        if (communalInteractor.isIdleOnCommunal.value) {
+            if (statusBarStateController.state == StatusBarState.KEYGUARD) {
+                setHardDozeAmountOverride(dozing = true, source = "Override: communal (keyguard)")
+            } else {
+                setHardDozeAmountOverride(dozing = false, source = "Override: communal (shade)")
+            }
+            return true
+        }
+        return false
+    }
+
     /**
      * If the last [setDozeAmount] call was an override to hide notifications, then this call will
      * check for the set of states that may have caused that override, and if none of them still
@@ -470,20 +520,23 @@ constructor(
             val onKeyguard = statusBarStateController.state == StatusBarState.KEYGUARD
             val dozing = statusBarStateController.isDozing
             val bypass = bypassController.bypassEnabled
+            val idleOnCommunal = communalInteractor.isIdleOnCommunal.value
             val animating =
                 screenOffAnimationController.overrideNotificationsFullyDozingOnKeyguard()
-            // Overrides are set by [overrideDozeAmountIfAnimatingScreenOff] and
-            // [overrideDozeAmountIfBypass] based on 'animating' and 'bypass' respectively, so only
-            // clear the override if both those conditions are cleared.  But also require either
+            // Overrides are set by [overrideDozeAmountIfAnimatingScreenOff],
+            // [overrideDozeAmountIfBypass] and [overrideDozeAmountIfCommunalShowing] based on
+            // 'animating', 'bypass' and 'idleOnCommunal' respectively, so only clear the override
+            // if all of those conditions are cleared.  But also require either
             // !dozing or !onKeyguard because those conditions should indicate that we intend
             // notifications to be visible, and thus it is safe to unhide them.
-            val willRemove = (!onKeyguard || !dozing) && !bypass && !animating
+            val willRemove = (!onKeyguard || !dozing) && !bypass && !animating && !idleOnCommunal
             logger.logMaybeClearHardDozeAmountOverrideHidingNotifs(
                 willRemove = willRemove,
                 onKeyguard = onKeyguard,
                 dozing = dozing,
                 bypass = bypass,
                 animating = animating,
+                idleOnCommunal = idleOnCommunal,
             )
             if (willRemove) {
                 clearHardDozeAmountOverride()
@@ -620,13 +673,20 @@ constructor(
          *
          * @param expandingChanged if the user has started or stopped expanding
          */
-        fun onPulseExpansionChanged(expandingChanged: Boolean) {}
+        @Deprecated(
+            message = "Use onPulseExpandedChanged instead.",
+            replaceWith = ReplaceWith("onPulseExpandedChanged"),
+        )
+        fun onPulseExpansionAmountChanged(expandingChanged: Boolean) {}
 
         /**
          * Called when the animator started by [scheduleDelayedDozeAmountAnimation] begins running
          * after the start delay, or after it ends/is cancelled.
          */
         fun onDelayedDozeAmountAnimationRunning(running: Boolean) {}
+
+        /** Called whenever a pulse has started or stopped expanding. */
+        fun onPulseExpandingChanged(isPulseExpanding: Boolean) {}
     }
 
     companion object {

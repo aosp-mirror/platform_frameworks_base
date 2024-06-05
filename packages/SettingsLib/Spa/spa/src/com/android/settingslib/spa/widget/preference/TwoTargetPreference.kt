@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -35,8 +33,9 @@ import com.android.settingslib.spa.framework.theme.divider
 @Composable
 internal fun TwoTargetPreference(
     title: String,
-    summary: State<String>,
-    onClick: () -> Unit,
+    summary: () -> String,
+    primaryEnabled: () -> Boolean = { true },
+    primaryOnClick: (() -> Unit)?,
     icon: @Composable (() -> Unit)? = null,
     widget: @Composable () -> Unit,
 ) {
@@ -47,14 +46,15 @@ internal fun TwoTargetPreference(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(modifier = Modifier.weight(1f)) {
-            Preference(remember {
+            Preference(
                 object : PreferenceModel {
                     override val title = title
                     override val summary = summary
                     override val icon = icon
-                    override val onClick = onClick
+                    override val enabled = primaryEnabled
+                    override val onClick = primaryOnClick
                 }
-            })
+            )
         }
         PreferenceDivider()
         widget()

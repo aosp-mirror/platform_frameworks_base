@@ -40,7 +40,7 @@
             android:exported="true"
             android:label="@string/accessibility_menu_settings_name"
             android:launchMode="singleTop"
-            android:theme="@style/AccessibilityMenuSettings">
+            android:theme="@style/SettingsTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

@@ -22,6 +22,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -73,7 +74,7 @@ public final class KeyboardLayout implements Parcelable, Comparable<KeyboardLayo
     private final int mProductId;
 
     /** Currently supported Layout types in the KCM files */
-    private enum LayoutType {
+    public enum LayoutType {
         UNDEFINED(0, LAYOUT_TYPE_UNDEFINED),
         QWERTY(1, LAYOUT_TYPE_QWERTY),
         QWERTZ(2, LAYOUT_TYPE_QWERTZ),
@@ -81,16 +82,18 @@ public final class KeyboardLayout implements Parcelable, Comparable<KeyboardLayo
         DVORAK(4, LAYOUT_TYPE_DVORAK),
         COLEMAK(5, LAYOUT_TYPE_COLEMAK),
         WORKMAN(6, LAYOUT_TYPE_WORKMAN),
-        TURKISH_F(7, LAYOUT_TYPE_TURKISH_F),
-        TURKISH_Q(8, LAYOUT_TYPE_TURKISH_Q),
+        TURKISH_Q(7, LAYOUT_TYPE_TURKISH_Q),
+        TURKISH_F(8, LAYOUT_TYPE_TURKISH_F),
         EXTENDED(9, LAYOUT_TYPE_EXTENDED);
 
         private final int mValue;
         private final String mName;
         private static final Map<Integer, LayoutType> VALUE_TO_ENUM_MAP = new HashMap<>();
+        private static final Map<String, LayoutType> NAME_TO_ENUM_MAP = new HashMap<>();
         static {
             for (LayoutType type : LayoutType.values()) {
                 VALUE_TO_ENUM_MAP.put(type.mValue, type);
+                NAME_TO_ENUM_MAP.put(type.mName, type);
             }
         }
 
@@ -109,6 +112,25 @@ public final class KeyboardLayout implements Parcelable, Comparable<KeyboardLayo
 
         private String getName() {
             return mName;
+        }
+
+        /**
+         * Returns enum value for provided layout type
+         * @param layoutName name of the layout type
+         * @return int value corresponding to the LayoutType enum that matches the layout name.
+         * (LayoutType.UNDEFINED if no match found)
+         */
+        public static int getLayoutTypeEnumValue(String layoutName) {
+            return NAME_TO_ENUM_MAP.getOrDefault(layoutName, UNDEFINED).getValue();
+        }
+
+        /**
+         * Returns name for provided layout type enum value
+         * @param enumValue value representation for LayoutType enum
+         * @return Layout name corresponding to the enum value (LAYOUT_TYPE_UNDEFINED if not found)
+         */
+        public static String getLayoutNameFromValue(int enumValue) {
+            return VALUE_TO_ENUM_MAP.getOrDefault(enumValue, UNDEFINED).getName();
         }
     }
 
@@ -207,6 +229,33 @@ public final class KeyboardLayout implements Parcelable, Comparable<KeyboardLayo
      */
     public int getProductId() {
         return mProductId;
+    }
+
+    /**
+     * Returns if the Keyboard layout follows the ANSI Physical key layout.
+     */
+    public boolean isAnsiLayout() {
+        for (int i = 0; i < mLocales.size(); i++) {
+            Locale locale = mLocales.get(i);
+            if (locale != null && locale.getCountry().equalsIgnoreCase("us")
+                    && mLayoutType != LayoutType.EXTENDED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns if the Keyboard layout follows the JIS Physical key layout.
+     */
+    public boolean isJisLayout() {
+        for (int i = 0; i < mLocales.size(); i++) {
+            Locale locale = mLocales.get(i);
+            if (locale != null && locale.getCountry().equalsIgnoreCase("jp")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

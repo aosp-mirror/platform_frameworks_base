@@ -39,13 +39,19 @@ android_test {
         "androidx.test.core",
         "frameworks-base-testutils",
         "guava",
-        "mockito-target-minus-junit4",
-        "truth-prebuilt",
+        "mockito-target-extended-minus-junit4",
+        "truth",
     ],
 
     libs: [
         "android.test.runner",
         "android.test.base",
+    ],
+
+    // Required by Extended Mockito
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
     ],
 
     test_suites: [

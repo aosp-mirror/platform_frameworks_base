@@ -79,6 +79,10 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_TIME_SHIFT_SET_MODE = 30;
     private static final int DO_SET_TV_MESSAGE_ENABLED = 31;
     private static final int DO_NOTIFY_TV_MESSAGE = 32;
+    private static final int DO_STOP_PLAYBACK = 33;
+    private static final int DO_RESUME_PLAYBACK = 34;
+    private static final int DO_SET_VIDEO_FROZEN = 35;
+    private static final int DO_NOTIFY_AD_SESSION_DATA = 36;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -284,6 +288,25 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             case DO_NOTIFY_TV_MESSAGE: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 mTvInputSessionImpl.onTvMessageReceived((Integer) args.arg1, (Bundle) args.arg2);
+                args.recycle();
+                break;
+            }
+            case DO_STOP_PLAYBACK: {
+                mTvInputSessionImpl.stopPlayback(msg.arg1);
+                break;
+            }
+            case DO_RESUME_PLAYBACK: {
+                mTvInputSessionImpl.resumePlayback();
+                break;
+            }
+            case DO_SET_VIDEO_FROZEN: {
+                mTvInputSessionImpl.setVideoFrozen((Boolean) msg.obj);
+                break;
+            }
+            case DO_NOTIFY_AD_SESSION_DATA: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSessionImpl.notifyTvAdSessionData((String) args.arg1, (Bundle) args.arg2);
+                args.recycle();
                 break;
             }
             default: {
@@ -473,6 +496,17 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
+    public void notifyTvAdSessionData(String type, Bundle data) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOO(DO_NOTIFY_AD_SESSION_DATA, type, data));
+    }
+
+    @Override
+    public void setVideoFrozen(boolean isFrozen) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_VIDEO_FROZEN, isFrozen));
+    }
+
+    @Override
     public void notifyTvMessage(int type, Bundle data) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_NOTIFY_TV_MESSAGE, type, data));
     }
@@ -482,6 +516,17 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_SET_TV_MESSAGE_ENABLED, type,
                 enabled));
     }
+
+    @Override
+    public void stopPlayback(int mode) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageI(DO_STOP_PLAYBACK, mode));
+    }
+
+    @Override
+    public void resumePlayback() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_RESUME_PLAYBACK));
+    }
+
 
     private final class TvInputEventReceiver extends InputEventReceiver {
         TvInputEventReceiver(InputChannel inputChannel, Looper looper) {

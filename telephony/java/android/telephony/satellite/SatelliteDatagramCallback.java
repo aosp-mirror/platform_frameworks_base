@@ -16,15 +16,26 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 
+import com.android.internal.telephony.flags.Flags;
+
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
  * A callback class for listening to satellite datagrams.
+ * {@link SatelliteDatagramCallback} is registered to telephony when an app which invokes
+ * {@link SatelliteManager#registerForIncomingDatagram(Executor, SatelliteDatagramCallback)},
+ * and {@link #onSatelliteDatagramReceived(long, SatelliteDatagram, int, Consumer)} will be invoked
+ * when a new datagram is received from satellite.
  *
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
 public interface SatelliteDatagramCallback {
     /**
      * Called when there is an incoming datagram to be received.
@@ -36,6 +47,7 @@ public interface SatelliteDatagramCallback {
      *                 that they received the datagram. If the callback is not received within
      *                 five minutes, Telephony will resend the datagram.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     void onSatelliteDatagramReceived(long datagramId, @NonNull SatelliteDatagram datagram,
             int pendingCount, @NonNull Consumer<Void> callback);
 }

@@ -16,31 +16,28 @@
 
 #pragma once
 
-#ifdef __ANDROID__ // Layoutlib does not support device info
-#include "DeviceInfo.h"
-#endif // __ANDROID__
+#include <SkBlendMode.h>
+#include <SkCamera.h>
+#include <SkColor.h>
+#include <SkImageFilter.h>
+#include <SkMatrix.h>
+#include <SkRegion.h>
+#include <androidfw/ResourceTypes.h>
+#include <cutils/compiler.h>
+#include <stddef.h>
+#include <utils/Log.h>
 
+#include <algorithm>
+#include <ostream>
+#include <vector>
+
+#include "DeviceInfo.h"
 #include "Outline.h"
 #include "Rect.h"
 #include "RevealClip.h"
 #include "effects/StretchEffect.h"
 #include "utils/MathUtils.h"
 #include "utils/PaintUtils.h"
-
-#include <SkBlendMode.h>
-#include <SkImageFilter.h>
-#include <SkCamera.h>
-#include <SkColor.h>
-#include <SkMatrix.h>
-#include <SkRegion.h>
-
-#include <androidfw/ResourceTypes.h>
-#include <cutils/compiler.h>
-#include <stddef.h>
-#include <utils/Log.h>
-#include <algorithm>
-#include <ostream>
-#include <vector>
 
 class SkBitmap;
 class SkColorFilter;
@@ -97,7 +94,11 @@ public:
 
     bool setImageFilter(SkImageFilter* imageFilter);
 
+    bool setBackdropImageFilter(SkImageFilter* imageFilter);
+
     SkImageFilter* getImageFilter() const { return mImageFilter.get(); }
+
+    SkImageFilter* getBackdropImageFilter() const { return mBackdropImageFilter.get(); }
 
     const StretchEffect& getStretchEffect() const { return mStretchEffect; }
 
@@ -129,6 +130,7 @@ private:
     SkBlendMode mMode;
     sk_sp<SkColorFilter> mColorFilter;
     sk_sp<SkImageFilter> mImageFilter;
+    sk_sp<SkImageFilter> mBackdropImageFilter;
     StretchEffect mStretchEffect;
 };
 
@@ -541,13 +543,9 @@ public:
     }
 
     bool fitsOnLayer() const {
-#ifdef __ANDROID__ // Layoutlib does not support device info
         const DeviceInfo* deviceInfo = DeviceInfo::get();
         return mPrimitiveFields.mWidth <= deviceInfo->maxTextureSize() &&
                mPrimitiveFields.mHeight <= deviceInfo->maxTextureSize();
-#else
-        return mPrimitiveFields.mWidth <= 4096 && mPrimitiveFields.mHeight <= 4096;
-#endif
     }
 
     bool promotedToLayer() const {

@@ -17,19 +17,11 @@
 package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import android.content.Context
-import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
-import com.android.settingslib.AccessibilityContentDescriptions.WIFI_CONNECTION_STRENGTH
-import com.android.settingslib.AccessibilityContentDescriptions.WIFI_NO_CONNECTION
-import com.android.systemui.R
-import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.Flags.statusBarStaticInoutIndicators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
-import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
-import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_INTERNET_ICONS
-import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_NO_NETWORK
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule.Companion.FIRST_MOBILE_SUB_SHOWING_NETWORK_TYPE_ICON
 import com.android.systemui.statusbar.pipeline.dagger.WifiTableLog
@@ -47,7 +39,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -75,39 +66,6 @@ constructor(
     @Application private val scope: CoroutineScope,
     wifiConstants: WifiConstants,
 ) : WifiViewModelCommon {
-    /** Returns the icon to use based on the given network. */
-    private fun WifiNetworkModel.icon(): WifiIcon {
-        return when (this) {
-            is WifiNetworkModel.Unavailable -> WifiIcon.Hidden
-            is WifiNetworkModel.Invalid -> WifiIcon.Hidden
-            is WifiNetworkModel.CarrierMerged -> WifiIcon.Hidden
-            is WifiNetworkModel.Inactive ->
-                WifiIcon.Visible(
-                    res = WIFI_NO_NETWORK,
-                    ContentDescription.Loaded(
-                        "${context.getString(WIFI_NO_CONNECTION)},${context.getString(NO_INTERNET)}"
-                    )
-                )
-            is WifiNetworkModel.Active -> {
-                val levelDesc = context.getString(WIFI_CONNECTION_STRENGTH[this.level])
-                when {
-                    this.isValidated ->
-                        WifiIcon.Visible(
-                            WIFI_FULL_ICONS[this.level],
-                            ContentDescription.Loaded(levelDesc),
-                        )
-                    else ->
-                        WifiIcon.Visible(
-                            WIFI_NO_INTERNET_ICONS[this.level],
-                            ContentDescription.Loaded(
-                                "$levelDesc,${context.getString(NO_INTERNET)}"
-                            ),
-                        )
-                }
-            }
-        }
-    }
-
     override val wifiIcon: StateFlow<WifiIcon> =
         combine(
                 interactor.isEnabled,
@@ -119,7 +77,8 @@ constructor(
                     return@combine WifiIcon.Hidden
                 }
 
-                val icon = wifiNetwork.icon()
+                // Don't show any hotspot info in the status bar.
+                val icon = WifiIcon.fromModel(wifiNetwork, context, showHotspotInfo = false)
 
                 return@combine when {
                     isDefault -> icon
@@ -142,42 +101,36 @@ constructor(
             )
 
     /** The wifi activity status. Null if we shouldn't display the activity status. */
-    private val activity: Flow<DataActivityModel> = run {
-        val default = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
+    private val activity: Flow<DataActivityModel?> =
         if (!connectivityConstants.shouldShowActivityConfig) {
-                flowOf(default)
+                flowOf(null)
             } else {
                 combine(interactor.activity, interactor.ssid) { activity, ssid ->
                     when (ssid) {
-                        null -> default
+                        null -> null
                         else -> activity
                     }
                 }
             }
-            .distinctUntilChanged()
-            .logDiffsForTable(
-                wifiTableLogBuffer,
-                columnPrefix = "VM.activity",
-                initialValue = default,
-            )
-            .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = default)
-    }
+            .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = null)
 
     override val isActivityInViewVisible: Flow<Boolean> =
         activity
-            .map { it.hasActivityIn }
-            .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
+            .map { it?.hasActivityIn ?: false }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isActivityOutViewVisible: Flow<Boolean> =
         activity
-            .map { it.hasActivityOut }
-            .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
+            .map { it?.hasActivityOut ?: false }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isActivityContainerVisible: Flow<Boolean> =
-        combine(isActivityInViewVisible, isActivityOutViewVisible) { activityIn, activityOut ->
-                activityIn || activityOut
+        if (statusBarStaticInoutIndicators()) {
+                flowOf(connectivityConstants.shouldShowActivityConfig)
+            } else {
+                activity.map { it != null && (it.hasActivityIn || it.hasActivityOut) }
             }
-            .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     // TODO(b/238425913): It isn't ideal for the wifi icon to need to know about whether the
     //  airplane icon is visible. Instead, we should have a parent StatusBarSystemIconsViewModel
@@ -186,10 +139,4 @@ constructor(
         airplaneModeViewModel.isAirplaneModeIconVisible
 
     override val isSignalSpacerVisible: Flow<Boolean> = shouldShowSignalSpacerProvider.get()
-
-    companion object {
-        @StringRes
-        @VisibleForTesting
-        internal val NO_INTERNET = R.string.data_connection_no_internet
-    }
 }

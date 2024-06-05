@@ -20,6 +20,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.text.TextUtils.formatSimple;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1134,6 +1135,9 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         } catch (RemoteException ex) {
         }
         onTimeout(startId);
+        if (Flags.introduceNewServiceOntimeoutCallback()) {
+            onTimeout(startId, ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE);
+        }
     }
 
     /**
@@ -1144,6 +1148,12 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}
      * doesn't finish even after it's timed out,
      * the app will be declared an ANR after a short grace period of several seconds.
+     *
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM},
+     * {@link #onTimeout(int, int)} will also be called when a foreground service of type
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE} times out.
+     * Developers do not need to implement both of the callbacks on
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} and onwards.
      *
      * <p>Note, even though
      * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}
@@ -1160,5 +1170,57 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * the service started.
      */
     public void onTimeout(int startId) {
+    }
+
+    /** @hide */
+    public final void callOnTimeLimitExceeded(int startId, @ForegroundServiceType int fgsType) {
+        // Note, because all the service callbacks (and other similar callbacks, e.g. activity
+        // callbacks) are delivered using the main handler, it's possible the service is already
+        // stopped when before this method is called, so we do a double check here.
+        if (mToken == null) {
+            Log.w(TAG, "Service already destroyed, skipping onTimeLimitExceeded()");
+            return;
+        }
+        try {
+            if (!mActivityManager.hasServiceTimeLimitExceeded(
+                    new ComponentName(this, mClassName), mToken)) {
+                Log.w(TAG, "Service no longer relevant, skipping onTimeLimitExceeded()");
+                return;
+            }
+        } catch (RemoteException ex) {
+        }
+        if (Flags.introduceNewServiceOntimeoutCallback()) {
+            onTimeout(startId, fgsType);
+        }
+    }
+
+    /**
+     * Callback called when a particular foreground service type has timed out.
+     *
+     * <p>This callback is meant to give the app a small grace period of a few seconds to finish
+     * the foreground service of the associated type - if it fails to do so, the app will crash.
+     *
+     * <p>The foreground service of the associated type can be stopped within the time limit by
+     * {@link android.app.Service#stopSelf()},
+     * {@link android.content.Context#stopService(android.content.Intent)} or their overloads.
+     * {@link android.app.Service#stopForeground(int)} can be used as well, which demotes the
+     * service to a "background" service, which will soon be stopped by the system.
+     *
+     * <p>The specific time limit for each type (if one exists) is mentioned in the documentation
+     * for that foreground service type. See
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_DATA_SYNC dataSync} for example.
+     *
+     * <p>Note: time limits are restricted to a rolling 24-hour window - for example, if a
+     * foreground service type has a time limit of 6 hours, that time counter begins as soon as the
+     * foreground service starts. This time limit will only be reset once every 24 hours or if the
+     * app comes into the foreground state.
+     *
+     * @param startId the startId passed to {@link #onStartCommand(Intent, int, int)} when
+     *                the service started.
+     * @param fgsType the {@link ServiceInfo.ForegroundServiceType foreground service type} which
+     *                caused the timeout.
+     */
+    @FlaggedApi(Flags.FLAG_INTRODUCE_NEW_SERVICE_ONTIMEOUT_CALLBACK)
+    public void onTimeout(int startId, @ForegroundServiceType int fgsType) {
     }
 }

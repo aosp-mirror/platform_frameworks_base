@@ -52,8 +52,9 @@ public interface WindowMagnificationSettingsCallback {
      * Called when set magnification scale.
      *
      * @param scale Magnification scale value.
+     * @param updatePersistence whether the scale should be persisted
      */
-    void onMagnifierScale(float scale);
+    void onMagnifierScale(float scale, boolean updatePersistence);
 
     /**
      * Called when magnification mode changed.

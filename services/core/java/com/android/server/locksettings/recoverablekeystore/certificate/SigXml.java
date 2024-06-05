@@ -18,15 +18,13 @@ package com.android.server.locksettings.recoverablekeystore.certificate;
 
 import android.annotation.Nullable;
 
-import com.android.internal.annotations.VisibleForTesting;
+import org.w3c.dom.Element;
 
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import org.w3c.dom.Element;
 
 /**
  * Parses and holds the XML file containing the signature of the XML file containing the list of THM
@@ -58,17 +56,13 @@ public final class SigXml {
      *
      * @param trustedRoot     the trusted root certificate
      * @param signedFileBytes the original file content that has been signed
+     * @param validationDate use null for current time
+     *
      * @throws CertValidationException if the signature verification fails, or the signer's
      *                                 certificate contained in this XML file cannot be validated
      *                                 based on the trusted root certificate
      */
-    public void verifyFileSignature(X509Certificate trustedRoot, byte[] signedFileBytes)
-            throws CertValidationException {
-        verifyFileSignature(trustedRoot, signedFileBytes, /*validationDate=*/ null);
-    }
-
-    @VisibleForTesting
-    void verifyFileSignature(
+    public void verifyFileSignature(
             X509Certificate trustedRoot, byte[] signedFileBytes, @Nullable Date validationDate)
             throws CertValidationException {
         CertUtils.validateCert(validationDate, trustedRoot, intermediateCerts, signerCert);

@@ -104,11 +104,11 @@ public class TimeoutRecordTest {
 
     @Test
     public void forServiceExec_returnsCorrectTimeoutRecord() {
-        TimeoutRecord record = TimeoutRecord.forServiceExec("Test ANR reason");
+        TimeoutRecord record = TimeoutRecord.forServiceExec("com.app.MyService", 1000L);
 
         assertNotNull(record);
         assertEquals(record.mKind, TimeoutRecord.TimeoutKind.SERVICE_EXEC);
-        assertEquals(record.mReason, "Test ANR reason");
+        assertEquals(record.mReason, "executing service com.app.MyService, waited 1000ms");
         assertTrue(record.mEndTakenBeforeLocks);
     }
 

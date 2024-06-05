@@ -22,14 +22,14 @@ import android.content.Intent
 import android.os.Handler
 import android.provider.Settings
 import android.service.quicksettings.Tile
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.lifecycle.LifecycleOwner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlInfo
@@ -70,7 +70,7 @@ import org.mockito.MockitoAnnotations
 import java.util.Optional
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class DeviceControlsTileTest : SysuiTestCase() {
 
@@ -172,6 +172,9 @@ class DeviceControlsTileTest : SysuiTestCase() {
     @Test
     fun testNotAvailableControls() {
         featureEnabled = false
+
+        // Destroy previous tile
+        tile.destroy()
         tile = createTile()
 
         assertThat(tile.isAvailable).isFalse()
@@ -345,7 +348,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
         verify(activityStarter).startActivity(
                 intentCaptor.capture(),
                 eq(true) /* dismissShade */,
-                nullable(ActivityLaunchAnimator.Controller::class.java),
+                nullable(ActivityTransitionAnimator.Controller::class.java),
                 eq(true) /* showOverLockscreenWhenLocked */)
         assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
     }
@@ -376,7 +379,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
         verify(activityStarter).startActivity(
                 intentCaptor.capture(),
                 anyBoolean() /* dismissShade */,
-                nullable(ActivityLaunchAnimator.Controller::class.java),
+                nullable(ActivityTransitionAnimator.Controller::class.java),
                 eq(false) /* showOverLockscreenWhenLocked */)
         assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
     }

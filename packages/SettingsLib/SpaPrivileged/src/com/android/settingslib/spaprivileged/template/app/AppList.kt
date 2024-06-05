@@ -31,12 +31,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.settingslib.spa.framework.compose.LifecycleEffect
 import com.android.settingslib.spa.framework.compose.LogCompositions
 import com.android.settingslib.spa.framework.compose.TimeMeasurer.Companion.rememberTimeMeasurer
 import com.android.settingslib.spa.framework.compose.rememberLazyListStateAndHideKeyboardWhenStartScroll
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.widget.ui.CategoryTitle
 import com.android.settingslib.spa.widget.ui.PlaceholderTitle
 import com.android.settingslib.spa.widget.ui.Spinner
@@ -50,7 +50,6 @@ import com.android.settingslib.spaprivileged.model.app.AppListViewModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.IAppListViewModel
 import com.android.settingslib.spaprivileged.model.app.userId
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 
 private const val TAG = "AppList"
@@ -66,8 +65,8 @@ data class AppListConfig(
 )
 
 data class AppListState(
-    val showSystem: State<Boolean>,
-    val searchQuery: State<String>,
+    val showSystem: () -> Boolean,
+    val searchQuery: () -> String,
 )
 
 data class AppListInput<T : AppRecord>(
@@ -96,9 +95,9 @@ internal fun <T : AppRecord> AppListInput<T>.AppListImpl(
     LogCompositions(TAG, config.userIds.toString())
     val viewModel = viewModelSupplier()
     Column(Modifier.fillMaxSize()) {
-        val optionsState = viewModel.spinnerOptionsFlow.collectAsState(null, Dispatchers.IO)
+        val optionsState = viewModel.spinnerOptionsFlow.collectAsStateWithLifecycle(null)
         SpinnerOptions(optionsState, viewModel.optionFlow)
-        val appListData = viewModel.appListDataFlow.collectAsState(null, Dispatchers.IO)
+        val appListData = viewModel.appListDataFlow.collectAsStateWithLifecycle(null)
         listModel.AppListWidget(appListData, header, bottomPadding, noItemMessage)
     }
 }
@@ -150,7 +149,7 @@ private fun <T : AppRecord> AppListModel<T>.AppListWidget(
                     ?.let { group -> CategoryTitle(title = group) }
 
                 val appEntry = list[it]
-                val summary = getSummary(option, appEntry.record) ?: "".toState()
+                val summary = getSummary(option, appEntry.record) ?: { "" }
                 remember(appEntry) {
                     AppListItemModel(appEntry.record, appEntry.label, summary)
                 }.AppItem()

@@ -17,9 +17,10 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
 import android.telephony.TelephonyManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
@@ -43,7 +44,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
 
     private lateinit var underTest: CarrierMergedConnectionRepository
@@ -68,6 +69,7 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
                 SUB_ID,
                 logger,
                 telephonyManager,
+                testScope.backgroundScope.coroutineContext,
                 testScope.backgroundScope,
                 wifiRepository,
             )
@@ -317,6 +319,14 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
             assertThat(latest).isEqualTo(NetworkNameModel.SimDerived("New SIM name"))
 
             job.cancel()
+        }
+
+    @Test
+    fun isAllowedDuringAirplaneMode_alwaysTrue() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isAllowedDuringAirplaneMode)
+
+            assertThat(latest).isTrue()
         }
 
     private companion object {

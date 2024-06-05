@@ -38,8 +38,10 @@ static struct {
 
     jmethodID dispatchVsync;
     jmethodID dispatchHotplug;
+    jmethodID dispatchHotplugConnectionError;
     jmethodID dispatchModeChanged;
     jmethodID dispatchFrameRateOverrides;
+    jmethodID dispatchHdcpLevelsChanged;
 
     struct {
         jclass clazz;
@@ -89,11 +91,14 @@ private:
     void dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId, uint32_t count,
                        VsyncEventData vsyncEventData) override;
     void dispatchHotplug(nsecs_t timestamp, PhysicalDisplayId displayId, bool connected) override;
+    void dispatchHotplugConnectionError(nsecs_t timestamp, int errorCode) override;
     void dispatchModeChanged(nsecs_t timestamp, PhysicalDisplayId displayId, int32_t modeId,
                              nsecs_t renderPeriod) override;
     void dispatchFrameRateOverrides(nsecs_t timestamp, PhysicalDisplayId displayId,
                                     std::vector<FrameRateOverride> overrides) override;
     void dispatchNullEvent(nsecs_t timestamp, PhysicalDisplayId displayId) override {}
+    void dispatchHdcpLevelsChanged(PhysicalDisplayId displayId, int connectedLevel,
+                                   int maxLevel) override;
 };
 
 NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env, jobject receiverWeak,
@@ -138,7 +143,7 @@ static jobject createJavaVsyncEventData(JNIEnv* env, VsyncEventData vsyncEventDa
         env->ExceptionClear();
         return NULL;
     }
-    for (int i = 0; i < vsyncEventData.frameTimelinesLength; i++) {
+    for (size_t i = 0; i < vsyncEventData.frameTimelinesLength; i++) {
         VsyncEventData::FrameTimeline frameTimeline = vsyncEventData.frameTimelines[i];
         ScopedLocalRef<jobject>
                 frameTimelineObj(env,
@@ -191,7 +196,7 @@ void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDispla
                                                               gDisplayEventReceiverClassInfo
                                                                       .vsyncEventDataClassInfo
                                                                       .frameTimelines)));
-        for (int i = 0; i < vsyncEventData.frameTimelinesLength; i++) {
+        for (size_t i = 0; i < vsyncEventData.frameTimelinesLength; i++) {
             VsyncEventData::FrameTimeline& frameTimeline = vsyncEventData.frameTimelines[i];
             ScopedLocalRef<jobject>
                     frameTimelineObj(env, env->GetObjectArrayElement(frameTimelinesObj.get(), i));
@@ -228,6 +233,22 @@ void NativeDisplayEventReceiver::dispatchHotplug(nsecs_t timestamp, PhysicalDisp
     }
 
     mMessageQueue->raiseAndClearException(env, "dispatchHotplug");
+}
+
+void NativeDisplayEventReceiver::dispatchHotplugConnectionError(nsecs_t timestamp,
+                                                                int connectionError) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+
+    ScopedLocalRef<jobject> receiverObj(env, GetReferent(env, mReceiverWeakGlobal));
+    if (receiverObj.get()) {
+        ALOGV("receiver %p ~ Invoking hotplug dispatchHotplugConnectionError handler.", this);
+        env->CallVoidMethod(receiverObj.get(),
+                            gDisplayEventReceiverClassInfo.dispatchHotplugConnectionError,
+                            timestamp, connectionError);
+        ALOGV("receiver %p ~ Returned from hotplug dispatchHotplugConnectionError handler.", this);
+    }
+
+    mMessageQueue->raiseAndClearException(env, "dispatchHotplugConnectionError");
 }
 
 void NativeDisplayEventReceiver::dispatchModeChanged(nsecs_t timestamp, PhysicalDisplayId displayId,
@@ -276,6 +297,22 @@ void NativeDisplayEventReceiver::dispatchFrameRateOverrides(
     mMessageQueue->raiseAndClearException(env, "dispatchModeChanged");
 }
 
+void NativeDisplayEventReceiver::dispatchHdcpLevelsChanged(PhysicalDisplayId displayId,
+                                                           int connectedLevel, int maxLevel) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+
+    ScopedLocalRef<jobject> receiverObj(env, GetReferent(env, mReceiverWeakGlobal));
+    if (receiverObj.get()) {
+        ALOGV("receiver %p ~ Invoking hdcp levels changed handler.", this);
+        env->CallVoidMethod(receiverObj.get(),
+                            gDisplayEventReceiverClassInfo.dispatchHdcpLevelsChanged,
+                            displayId.value, connectedLevel, maxLevel);
+        ALOGV("receiver %p ~ Returned from hdcp levels changed handler.", this);
+    }
+
+    mMessageQueue->raiseAndClearException(env, "dispatchHdcpLevelsChanged");
+}
+
 static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak, jobject vsyncEventDataWeak,
                         jobject messageQueueObj, jint vsyncSource, jint eventRegistration,
                         jlong layerHandle) {
@@ -292,7 +329,7 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak, jobject
     if (status) {
         String8 message;
         message.appendFormat("Failed to initialize display event receiver.  status=%d", status);
-        jniThrowRuntimeException(env, message.string());
+        jniThrowRuntimeException(env, message.c_str());
         return 0;
     }
 
@@ -316,7 +353,7 @@ static void nativeScheduleVsync(JNIEnv* env, jclass clazz, jlong receiverPtr) {
     if (status) {
         String8 message;
         message.appendFormat("Failed to schedule next vertical sync pulse.  status=%d", status);
-        jniThrowRuntimeException(env, message.string());
+        jniThrowRuntimeException(env, message.c_str());
     }
 }
 
@@ -354,8 +391,12 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
 
     gDisplayEventReceiverClassInfo.dispatchVsync =
             GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz, "dispatchVsync", "(JJI)V");
-    gDisplayEventReceiverClassInfo.dispatchHotplug = GetMethodIDOrDie(env,
-            gDisplayEventReceiverClassInfo.clazz, "dispatchHotplug", "(JJZ)V");
+    gDisplayEventReceiverClassInfo.dispatchHotplug =
+            GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz, "dispatchHotplug",
+                             "(JJZ)V");
+    gDisplayEventReceiverClassInfo.dispatchHotplugConnectionError =
+            GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz,
+                             "dispatchHotplugConnectionError", "(JI)V");
     gDisplayEventReceiverClassInfo.dispatchModeChanged =
             GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz, "dispatchModeChanged",
                              "(JJIJ)V");
@@ -363,6 +404,9 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
             GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz,
                              "dispatchFrameRateOverrides",
                              "(JJ[Landroid/view/DisplayEventReceiver$FrameRateOverride;)V");
+    gDisplayEventReceiverClassInfo.dispatchHdcpLevelsChanged =
+            GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz, "dispatchHdcpLevelsChanged",
+                             "(JII)V");
 
     jclass frameRateOverrideClazz =
             FindClassOrDie(env, "android/view/DisplayEventReceiver$FrameRateOverride");

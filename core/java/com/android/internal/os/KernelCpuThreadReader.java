@@ -244,7 +244,8 @@ public class KernelCpuThreadReader {
     }
 
     /** Set the UID predicate for {@link #getProcessCpuUsage} */
-    void setUidPredicate(Predicate<Integer> uidPredicate) {
+    @VisibleForTesting
+    public void setUidPredicate(Predicate<Integer> uidPredicate) {
         mUidPredicate = uidPredicate;
     }
 

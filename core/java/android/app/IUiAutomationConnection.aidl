@@ -24,6 +24,8 @@ import android.view.SurfaceControl;
 import android.view.WindowContentFrameStats;
 import android.view.WindowAnimationFrameStats;
 import android.os.ParcelFileDescriptor;
+import android.window.ScreenCapture.ScreenCaptureListener;
+import android.window.ScreenCapture.LayerCaptureArgs;
 
 import java.util.List;
 
@@ -43,8 +45,8 @@ interface IUiAutomationConnection {
     void injectInputEventToInputFilter(in InputEvent event);
     void syncInputTransactions(boolean waitForAnimations);
     boolean setRotation(int rotation);
-    Bitmap takeScreenshot(in Rect crop);
-    Bitmap takeSurfaceControlScreenshot(in SurfaceControl surfaceControl);
+    boolean takeScreenshot(in Rect crop, in ScreenCaptureListener listener);
+    boolean takeSurfaceControlScreenshot(in SurfaceControl surfaceControl, in ScreenCaptureListener listener);
     boolean clearWindowContentFrameStats(int windowId);
     WindowContentFrameStats getWindowContentFrameStats(int windowId);
     void clearWindowAnimationFrameStats();
@@ -60,4 +62,8 @@ interface IUiAutomationConnection {
     void executeShellCommandWithStderr(String command, in ParcelFileDescriptor sink,
                 in ParcelFileDescriptor source, in ParcelFileDescriptor stderrSink);
     List<String> getAdoptedShellPermissions();
+    void addOverridePermissionState(int uid, String permission, int result);
+    void removeOverridePermissionState(int uid, String permission);
+    void clearOverridePermissionStates(int uid);
+    void clearAllOverridePermissionStates();
 }

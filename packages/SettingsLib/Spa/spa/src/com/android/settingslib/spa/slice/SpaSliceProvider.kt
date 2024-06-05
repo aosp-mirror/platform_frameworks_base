@@ -64,8 +64,8 @@ class SpaSliceProvider : SliceProvider(), Observer<Slice?> {
         }
     }
 
-    override fun onChanged(slice: Slice?) {
-        val uri = slice?.uri ?: return
+    override fun onChanged(value: Slice?) {
+        val uri = value?.uri ?: return
         Log.d(TAG, "onChanged: $uri")
         context?.contentResolver?.notifyChange(uri, null)
     }

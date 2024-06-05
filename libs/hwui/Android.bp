@@ -1,4 +1,5 @@
 package {
+    default_team: "trendy_team_android_core_graphics_stack",
     default_applicable_licenses: ["frameworks_base_libs_hwui_license"],
 }
 
@@ -28,6 +29,21 @@ license {
     ],
 }
 
+aconfig_declarations {
+    name: "hwui_flags",
+    package: "com.android.graphics.hwui.flags",
+    container: "system",
+    srcs: [
+        "aconfig/hwui_flags.aconfig",
+    ],
+}
+
+cc_aconfig_library {
+    name: "hwui_flags_cc_lib",
+    host_supported: true,
+    aconfig_declarations: "hwui_flags",
+}
+
 cc_defaults {
     name: "hwui_defaults",
     defaults: [
@@ -44,7 +60,7 @@ cc_defaults {
         "-DEGL_EGLEXT_PROTOTYPES",
         "-DGL_GLEXT_PROTOTYPES",
         "-DATRACE_TAG=ATRACE_TAG_VIEW",
-        "-DLOG_TAG=\"OpenGLRenderer\"",
+        "-DLOG_TAG=\"HWUI\"",
         "-Wall",
         "-Wthread-safety",
         "-Wno-unused-parameter",
@@ -64,21 +80,13 @@ cc_defaults {
     include_dirs: [
         "external/skia/include/private",
         "external/skia/src/core",
+        "external/skia/src/utils",
     ],
-
-    product_variables: {
-        eng: {
-            lto: {
-                never: true,
-            },
-        },
-    },
 
     target: {
         android: {
             include_dirs: [
                 "external/skia/src/image",
-                "external/skia/src/utils",
                 "external/skia/src/gpu",
                 "external/skia/src/shaders",
             ],
@@ -86,9 +94,11 @@ cc_defaults {
         host: {
             include_dirs: [
                 "external/vulkan-headers/include",
+                "frameworks/av/media/ndk/include",
             ],
             cflags: [
                 "-Wno-unused-variable",
+                "-D__INTRODUCED_IN(n)=",
             ],
         },
     },
@@ -104,11 +114,14 @@ cc_defaults {
         "libbase",
         "libharfbuzz_ng",
         "libminikin",
+        "server_configurable_flags",
     ],
 
     static_libs: [
         "libui-types",
     ],
+
+    whole_static_libs: ["hwui_flags_cc_lib"],
 
     target: {
         android: {
@@ -130,6 +143,7 @@ cc_defaults {
                 "libcrypto",
                 "libsync",
                 "libui",
+                "aconfig_text_flags_c_lib",
             ],
             static_libs: [
                 "libEGL_blobCache",
@@ -144,6 +158,7 @@ cc_defaults {
         host: {
             static_libs: [
                 "libandroidfw",
+                "libhostgraphics",
                 "libutils",
             ],
         },
@@ -218,15 +233,6 @@ filegroup {
     path: "apex/java",
 }
 
-java_api_contribution {
-    name: "framework-graphics-public-stubs",
-    api_surface: "public",
-    api_file: "api/current.txt",
-    visibility: [
-        "//build/orchestrator/apis",
-    ],
-}
-
 // ------------------------
 // APEX
 // ------------------------
@@ -262,6 +268,7 @@ cc_defaults {
     cppflags: ["-Wno-conversion-null"],
 
     srcs: [
+        "apex/android_canvas.cpp",
         "apex/android_matrix.cpp",
         "apex/android_paint.cpp",
         "apex/android_region.cpp",
@@ -274,7 +281,6 @@ cc_defaults {
         android: {
             srcs: [ // sources that depend on android only libraries
                 "apex/android_bitmap.cpp",
-                "apex/android_canvas.cpp",
                 "apex/jni_runtime.cpp",
             ],
         },
@@ -330,9 +336,12 @@ cc_defaults {
         "jni/android_graphics_animation_NativeInterpolatorFactory.cpp",
         "jni/android_graphics_animation_RenderNodeAnimator.cpp",
         "jni/android_graphics_Canvas.cpp",
+        "jni/android_graphics_Color.cpp",
         "jni/android_graphics_ColorSpace.cpp",
         "jni/android_graphics_drawable_AnimatedVectorDrawable.cpp",
         "jni/android_graphics_drawable_VectorDrawable.cpp",
+        "jni/android_graphics_HardwareRenderer.cpp",
+        "jni/android_graphics_HardwareBufferRenderer.cpp",
         "jni/android_graphics_HardwareRendererObserver.cpp",
         "jni/android_graphics_Matrix.cpp",
         "jni/android_graphics_Picture.cpp",
@@ -342,7 +351,9 @@ cc_defaults {
         "jni/android_nio_utils.cpp",
         "jni/android_util_PathParser.cpp",
 
+        "jni/AnimatedImageDrawable.cpp",
         "jni/Bitmap.cpp",
+        "jni/BitmapRegionDecoder.cpp",
         "jni/BufferUtils.cpp",
         "jni/HardwareBufferHelpers.cpp",
         "jni/BitmapFactory.cpp",
@@ -414,18 +425,13 @@ cc_defaults {
     target: {
         android: {
             srcs: [ // sources that depend on android only libraries
-                "jni/AnimatedImageDrawable.cpp",
                 "jni/android_graphics_TextureLayer.cpp",
-                "jni/android_graphics_HardwareRenderer.cpp",
-                "jni/android_graphics_HardwareBufferRenderer.cpp",
-                "jni/BitmapRegionDecoder.cpp",
                 "jni/GIFMovie.cpp",
                 "jni/GraphicsStatsService.cpp",
                 "jni/Movie.cpp",
                 "jni/MovieImpl.cpp",
                 "jni/pdf/PdfDocument.cpp",
                 "jni/pdf/PdfEditor.cpp",
-                "jni/pdf/PdfRenderer.cpp",
                 "jni/pdf/PdfUtils.cpp",
             ],
             shared_libs: [
@@ -443,6 +449,12 @@ cc_defaults {
                 "libstatspull_lazy",
                 "libstatssocket_lazy",
             ],
+        },
+        linux: {
+            srcs: ["platform/linux/utils/SharedLib.cpp"],
+        },
+        darwin: {
+            srcs: ["platform/darwin/utils/SharedLib.cpp"],
         },
         host: {
             cflags: [
@@ -500,6 +512,17 @@ cc_library_headers {
     ],
     header_libs: ["android_graphics_jni_headers"],
     export_header_lib_headers: ["android_graphics_jni_headers"],
+    target: {
+        android: {
+            export_include_dirs: ["platform/android"],
+        },
+        host: {
+            export_include_dirs: ["platform/host"],
+        },
+        windows: {
+            enabled: true,
+        },
+    },
 }
 
 cc_defaults {
@@ -514,17 +537,26 @@ cc_defaults {
         "canvas/CanvasOpRasterizer.cpp",
         "effects/StretchEffect.cpp",
         "effects/GainmapRenderer.cpp",
+        "pipeline/skia/BackdropFilterDrawable.cpp",
         "pipeline/skia/HolePunch.cpp",
+        "pipeline/skia/SkiaCpuPipeline.cpp",
         "pipeline/skia/SkiaDisplayList.cpp",
+        "pipeline/skia/SkiaPipeline.cpp",
         "pipeline/skia/SkiaRecordingCanvas.cpp",
         "pipeline/skia/StretchMask.cpp",
         "pipeline/skia/RenderNodeDrawable.cpp",
         "pipeline/skia/ReorderBarrierDrawables.cpp",
         "pipeline/skia/TransformCanvas.cpp",
+        "renderstate/RenderState.cpp",
+        "renderthread/CanvasContext.cpp",
+        "renderthread/DrawFrameTask.cpp",
         "renderthread/Frame.cpp",
+        "renderthread/RenderEffectCapabilityQuery.cpp",
+        "renderthread/RenderProxy.cpp",
         "renderthread/RenderTask.cpp",
         "renderthread/TimeLord.cpp",
         "hwui/AnimatedImageDrawable.cpp",
+        "hwui/AnimatedImageThread.cpp",
         "hwui/Bitmap.cpp",
         "hwui/BlurDrawLooper.cpp",
         "hwui/Canvas.cpp",
@@ -533,22 +565,34 @@ cc_defaults {
         "hwui/MinikinUtils.cpp",
         "hwui/PaintImpl.cpp",
         "hwui/Typeface.cpp",
+        "thread/CommonPool.cpp",
         "utils/Blur.cpp",
         "utils/Color.cpp",
         "utils/LinearAllocator.cpp",
+        "utils/StringUtils.cpp",
+        "utils/TypefaceUtils.cpp",
         "utils/VectorDrawableUtils.cpp",
         "AnimationContext.cpp",
         "Animator.cpp",
         "AnimatorManager.cpp",
         "CanvasTransform.cpp",
         "DamageAccumulator.cpp",
+        "DeviceInfo.cpp",
+        "FrameInfo.cpp",
+        "FrameInfoVisualizer.cpp",
+        "FrameMetricsReporter.cpp",
         "Gainmap.cpp",
+        "HWUIProperties.sysprop",
         "Interpolator.cpp",
+        "JankTracker.cpp",
+        "Layer.cpp",
+        "LayerUpdateQueue.cpp",
         "LightingInfo.cpp",
         "Matrix.cpp",
         "Mesh.cpp",
         "MemoryPolicy.cpp",
         "PathParser.cpp",
+        "ProfileData.cpp",
         "Properties.cpp",
         "PropertyValuesAnimatorSet.cpp",
         "PropertyValuesHolder.cpp",
@@ -559,6 +603,7 @@ cc_defaults {
         "SkiaCanvas.cpp",
         "SkiaInterpolator.cpp",
         "Tonemapper.cpp",
+        "TreeInfo.cpp",
         "VectorDrawable.cpp",
     ],
 
@@ -566,58 +611,41 @@ cc_defaults {
         export_proto_headers: true,
     },
 
+    header_libs: ["libandroid_headers_private"],
+
     target: {
         android: {
-            header_libs: [
-                "libandroid_headers_private",
-                "libtonemap_headers",
-            ],
+            header_libs: ["libtonemap_headers"],
+
+            local_include_dirs: ["platform/android"],
 
             srcs: [
-                "hwui/AnimatedImageThread.cpp",
                 "pipeline/skia/ATraceMemoryDump.cpp",
                 "pipeline/skia/GLFunctorDrawable.cpp",
                 "pipeline/skia/LayerDrawable.cpp",
                 "pipeline/skia/ShaderCache.cpp",
+                "pipeline/skia/SkiaGpuPipeline.cpp",
                 "pipeline/skia/SkiaMemoryTracer.cpp",
                 "pipeline/skia/SkiaOpenGLPipeline.cpp",
-                "pipeline/skia/SkiaPipeline.cpp",
                 "pipeline/skia/SkiaProfileRenderer.cpp",
                 "pipeline/skia/SkiaVulkanPipeline.cpp",
                 "pipeline/skia/VkFunctorDrawable.cpp",
                 "pipeline/skia/VkInteropFunctorDrawable.cpp",
-                "renderstate/RenderState.cpp",
                 "renderthread/CacheManager.cpp",
-                "renderthread/CanvasContext.cpp",
-                "renderthread/DrawFrameTask.cpp",
                 "renderthread/EglManager.cpp",
                 "renderthread/ReliableSurface.cpp",
-                "renderthread/RenderEffectCapabilityQuery.cpp",
                 "renderthread/VulkanManager.cpp",
                 "renderthread/VulkanSurface.cpp",
-                "renderthread/RenderProxy.cpp",
                 "renderthread/RenderThread.cpp",
                 "renderthread/HintSessionWrapper.cpp",
                 "service/GraphicsStatsService.cpp",
-                "thread/CommonPool.cpp",
                 "utils/GLUtils.cpp",
                 "utils/NdkUtils.cpp",
-                "utils/StringUtils.cpp",
                 "AutoBackendTextureRelease.cpp",
                 "DeferredLayerUpdater.cpp",
-                "DeviceInfo.cpp",
-                "FrameInfo.cpp",
-                "FrameInfoVisualizer.cpp",
                 "HardwareBitmapUploader.cpp",
-                "HWUIProperties.sysprop",
-                "JankTracker.cpp",
-                "FrameMetricsReporter.cpp",
-                "Layer.cpp",
-                "LayerUpdateQueue.cpp",
-                "ProfileData.cpp",
                 "ProfileDataContainer.cpp",
                 "Readback.cpp",
-                "TreeInfo.cpp",
                 "WebViewFunctorManager.cpp",
                 "protos/graphicsstats.proto",
             ],
@@ -626,11 +654,27 @@ cc_defaults {
             cflags: ["-Wno-implicit-fallthrough"],
         },
         host: {
-            srcs: [
-                "utils/HostColorSpace.cpp",
+            header_libs: [
+                "libnativebase_headers",
+                "libnativedisplay_headers",
             ],
-            export_static_lib_headers: [
-                "libarect",
+
+            local_include_dirs: ["platform/host"],
+
+            srcs: [
+                "platform/host/renderthread/CacheManager.cpp",
+                "platform/host/renderthread/HintSessionWrapper.cpp",
+                "platform/host/renderthread/ReliableSurface.cpp",
+                "platform/host/renderthread/RenderThread.cpp",
+                "platform/host/ProfileDataContainer.cpp",
+                "platform/host/Readback.cpp",
+                "platform/host/WebViewFunctorManager.cpp",
+            ],
+
+            cflags: [
+                "-DHWUI_NULL_GPU",
+                "-DNULL_GPU_MAX_TEXTURE_SIZE=4096",
+                "-Wno-unused-private-field",
             ],
         },
     },
@@ -668,6 +712,7 @@ cc_defaults {
     header_libs: ["libandroid_headers_private"],
     target: {
         android: {
+            local_include_dirs: ["platform/android"],
             shared_libs: [
                 "libgui",
                 "libui",
@@ -697,6 +742,7 @@ cc_test {
     ],
 
     static_libs: [
+        "libflagtest",
         "libgmock",
         "libhwui_static",
     ],
@@ -717,6 +763,7 @@ cc_test {
         "tests/unit/EglManagerTests.cpp",
         "tests/unit/FatVectorTests.cpp",
         "tests/unit/GraphicsStatsServiceTests.cpp",
+        "tests/unit/HintSessionWrapperTests.cpp",
         "tests/unit/JankTrackerTests.cpp",
         "tests/unit/FrameMetricsReporterTests.cpp",
         "tests/unit/LayerUpdateQueueTests.cpp",
@@ -740,6 +787,7 @@ cc_test {
         "tests/unit/TestUtilsTests.cpp",
         "tests/unit/ThreadBaseTests.cpp",
         "tests/unit/TypefaceTests.cpp",
+        "tests/unit/UnderlineTest.cpp",
         "tests/unit/VectorDrawableTests.cpp",
         "tests/unit/WebViewFunctorManagerTests.cpp",
     ],

@@ -30,4 +30,40 @@
 
     <!-- Whether to enable transparent background for notification scrims -->
     <bool name="notification_scrim_transparent">false</bool>
+
+    <!-- Control whether to force apps to give up control over the display of system bars at all
+     times regardless of System Ui Flags.
+     In the Automotive case, this is helpful if there's a requirement for an UI element to be on
+     screen at all times. Setting this to true also gives System UI the ability to override the
+     visibility controls for the system through the usage of the
+     "SYSTEM_BAR_VISIBILITY_OVERRIDE" setting.
+     Ex: Only setting the config to true will force show system bars for the entire system.
+     Ex: Setting the config to true and the "SYSTEM_BAR_VISIBILITY_OVERRIDE" setting to
+     "immersive.status=apps" will force show navigation bar for all apps and force hide status
+     bar for all apps. -->
+    <bool name="config_remoteInsetsControllerControlsSystemBars">false</bool>
+
+    <!-- Control whether the system bars can be requested when using a remote insets control target.
+         This allows for specifying whether or not system bars can be shown by the user (via swipe
+         or other means) when they are hidden by the logic defined by the remote insets controller.
+         This is useful for cases where the system provides alternative affordances for showing and
+         hiding the bars or for cases in which it's desired the bars not be shown for any reason.
+         This configuration will only apply when config_remoteInsetsControllerControlsSystemBars.
+         is set to true. -->
+    <bool name="config_remoteInsetsControllerSystemBarsCanBeShownByUserAction">false</bool>
+
+    <!--  Do update bouncer constraints (port or land) on rotation.
+      Needed for bouncer refactor to use motion layout, because constraints should only be
+      changed on small screens. Only used when flag "lockscreen.enable_landscape" (b/293252410)
+      is enabled
+
+      True here so bouncers constraints are updated when rotating on small screens -->
+    <bool name="update_bouncer_constraints">true</bool>
+
+    <!-- Only use small clock on lockscreen.
+     False here because large clock used by default, unless otherwise specified -->
+    <bool name="force_small_clock_on_lockscreen">false</bool>
+
+    <!--  True when small screen (<sw600dp) is landscape. -->
+    <bool name="is_small_screen_landscape">false</bool>
 </resources>

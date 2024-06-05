@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
+import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.PARSE_APK_IN_APEX;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_DATA_APP_AVG_SCAN_TIME;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_SYSTEM_APP_AVG_SCAN_TIME;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_APK_IN_APEX;
@@ -30,7 +31,6 @@ import static com.android.server.pm.PackageManagerService.SCAN_NO_DEX;
 import static com.android.server.pm.PackageManagerService.SCAN_REQUIRE_KNOWN;
 import static com.android.server.pm.PackageManagerService.SYSTEM_PARTITIONS;
 import static com.android.server.pm.PackageManagerService.TAG;
-import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_APK_IN_APEX;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -46,12 +46,12 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.om.OverlayConfig;
+import com.android.internal.pm.parsing.PackageParser2;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.pm.parsing.PackageCacher;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.WatchedArrayMap;
 
 import java.io.File;
@@ -180,7 +180,9 @@ final class InitAppsHelper {
         // priority of system overlays.
         final ArrayMap<String, File> apkInApexPreInstalledPaths = new ArrayMap<>();
         for (ApexManager.ActiveApexInfo apexInfo : mApexManager.getActiveApexInfos()) {
-            for (String packageName : mApexManager.getApksInApex(apexInfo.apexModuleName)) {
+            final String apexPackageName = mApexManager.getActivePackageNameForApexModuleName(
+                    apexInfo.apexModuleName);
+            for (String packageName : mApexManager.getApksInApex(apexPackageName)) {
                 apkInApexPreInstalledPaths.put(packageName, apexInfo.preInstalledApexPath);
             }
         }

@@ -30,7 +30,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.controller.ControlInfo
@@ -125,7 +125,7 @@ class ControlViewHolderTest : SysuiTestCase() {
             control
         )
         cvh.bindData(cws, false)
-        val chevronIcon = baseLayout.findViewById<View>(R.id.chevron_icon)
+        val chevronIcon = baseLayout.requireViewById<View>(R.id.chevron_icon)
 
         assertThat(chevronIcon.visibility).isEqualTo(View.VISIBLE)
     }

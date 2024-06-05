@@ -22,13 +22,18 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.os.Build;
 import android.text.TextUtils;
+import android.util.SizeF;
 import android.util.Slog;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @hide
@@ -60,6 +65,7 @@ public class AppWidgetXmlUtil {
     private static final String ATTR_DESCRIPTION_RES = "description_res";
     private static final String ATTR_PROVIDER_INHERITANCE = "provider_inheritance";
     private static final String ATTR_OS_FINGERPRINT = "os_fingerprint";
+    private static final String SIZE_SEPARATOR = ",";
 
     /**
      * @hide
@@ -84,8 +90,6 @@ public class AppWidgetXmlUtil {
         }
         if (info.label != null) {
             out.attribute(null, ATTR_LABEL, info.label);
-        } else if (AppWidgetServiceImpl.DEBUG_PROVIDER_INFO_CACHE) {
-            Slog.e(TAG, "Label is empty in " + info.provider);
         }
         out.attributeInt(null, ATTR_ICON, info.icon);
         out.attributeInt(null, ATTR_PREVIEW_IMAGE, info.previewImage);
@@ -139,5 +143,26 @@ public class AppWidgetXmlUtil {
         info.isExtendedFromAppWidgetProvider = parser.getAttributeBoolean(null,
             ATTR_PROVIDER_INHERITANCE, false);
         return info;
+    }
+
+    @NonNull
+    static String serializeWidgetSizes(@NonNull List<SizeF> sizes) {
+        return sizes.stream().map(SizeF::toString)
+                .collect(Collectors.joining(SIZE_SEPARATOR));
+    }
+
+    @Nullable
+    static ArrayList<SizeF> deserializeWidgetSizesStr(@Nullable String sizesStr) {
+        if (sizesStr == null || sizesStr.isEmpty()) {
+            return null;
+        }
+        try {
+            return Arrays.stream(sizesStr.split(SIZE_SEPARATOR))
+                    .map(SizeF::parseSizeF)
+                    .collect(Collectors.toCollection(ArrayList::new));
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "Error parsing widget sizes", e);
+            return null;
+        }
     }
 }

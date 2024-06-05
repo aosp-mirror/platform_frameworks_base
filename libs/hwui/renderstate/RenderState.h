@@ -16,10 +16,12 @@
 #ifndef RENDERSTATE_H
 #define RENDERSTATE_H
 
-#include "utils/Macros.h"
-
+#include <pthread.h>
 #include <utils/RefBase.h>
+
 #include <set>
+
+#include "utils/Macros.h"
 
 namespace android {
 namespace uirenderer {

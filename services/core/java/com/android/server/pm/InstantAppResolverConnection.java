@@ -212,7 +212,12 @@ final class InstantAppResolverConnection implements DeathRecipient {
                 if (DEBUG_INSTANT) {
                     Slog.i(TAG, "[" + token + "] Previous connection never established; rebinding");
                 }
-                mContext.unbindService(mServiceConnection);
+                try {
+                    mContext.unbindService(mServiceConnection);
+                } catch (Exception e) {
+                    Slog.e(TAG, "[" + token + "] Service already unbound", e);
+                }
+
             }
             if (DEBUG_INSTANT) {
                 Slog.v(TAG, "[" + token + "] Binding to instant app resolver");
@@ -280,6 +285,11 @@ final class InstantAppResolverConnection implements DeathRecipient {
             } catch (NoSuchElementException ignore) { }
         }
         mRemoteInstance = null;
+
+        try {
+            mContext.unbindService(mServiceConnection);
+        } catch (Exception ignored) {
+        }
     }
 
     /**

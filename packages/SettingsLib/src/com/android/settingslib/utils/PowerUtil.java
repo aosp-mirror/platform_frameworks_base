@@ -16,6 +16,8 @@
 
 package com.android.settingslib.utils;
 
+import static java.lang.Math.abs;
+
 import android.content.Context;
 import android.icu.text.DateFormat;
 import android.icu.text.MeasureFormat;
@@ -33,7 +35,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-/** Utility class for keeping power related strings consistent**/
+/** Utility class for keeping power related strings consistent. **/
 public class PowerUtil {
 
     private static final long SEVEN_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(7);
@@ -42,45 +44,6 @@ public class PowerUtil {
     private static final long TWO_DAYS_MILLIS = TimeUnit.DAYS.toMillis(2);
     private static final long ONE_HOUR_MILLIS = TimeUnit.HOURS.toMillis(1);
     private static final long ONE_MIN_MILLIS = TimeUnit.MINUTES.toMillis(1);
-
-    /**
-     * This method produces the text used in various places throughout the system to describe the
-     * remaining battery life of the phone in a consistent manner.
-     *
-     * @param context
-     * @param drainTimeMs The estimated time remaining before the phone dies in milliseconds.
-     * @param percentageString An optional percentage of battery remaining string.
-     * @param basedOnUsage Whether this estimate is based on usage or simple extrapolation.
-     * @return a properly formatted and localized string describing how much time remains
-     * before the battery runs out.
-     */
-    public static String getBatteryRemainingStringFormatted(Context context, long drainTimeMs,
-            @Nullable String percentageString, boolean basedOnUsage) {
-        if (drainTimeMs > 0) {
-            if (drainTimeMs <= SEVEN_MINUTES_MILLIS) {
-                // show a imminent shutdown warning if less than 7 minutes remain
-                return getShutdownImminentString(context, percentageString);
-            } else if (drainTimeMs <= FIFTEEN_MINUTES_MILLIS) {
-                // show a less than 15 min remaining warning if appropriate
-                CharSequence timeString = StringUtil.formatElapsedTime(context,
-                        FIFTEEN_MINUTES_MILLIS,
-                        false /* withSeconds */, false /* collapseTimeUnit */);
-                return getUnderFifteenString(context, timeString, percentageString);
-            } else if (drainTimeMs >= TWO_DAYS_MILLIS) {
-                // just say more than two day if over 48 hours
-                return getMoreThanTwoDaysString(context, percentageString);
-            } else if (drainTimeMs >= ONE_DAY_MILLIS) {
-                // show remaining days & hours if more than a day
-                return getMoreThanOneDayString(context, drainTimeMs,
-                        percentageString, basedOnUsage);
-            } else {
-                // show the time of day we think you'll run out
-                return getRegularTimeRemainingString(context, drainTimeMs,
-                        percentageString, basedOnUsage);
-            }
-        }
-        return null;
-    }
 
     /**
      * Method to produce a shortened string describing the remaining battery. Suitable for Quick
@@ -126,14 +89,6 @@ public class PowerUtil {
             return getMoreThanOneDayShortString(context, drainTimeMs,
                 R.string.power_remaining_only_more_than_subtext);
         }
-    }
-
-    private static String getShutdownImminentString(Context context, String percentageString) {
-        return TextUtils.isEmpty(percentageString)
-                ? context.getString(R.string.power_remaining_duration_only_shutdown_imminent)
-                : context.getString(
-                        R.string.power_remaining_duration_shutdown_imminent,
-                        percentageString);
     }
 
     private static String getUnderFifteenString(Context context, CharSequence timeString,
@@ -259,13 +214,34 @@ public class PowerUtil {
      * @return The rounded value as a long
      */
     public static long roundTimeToNearestThreshold(long drainTime, long threshold) {
-        long time = Math.abs(drainTime);
-        long multiple = Math.abs(threshold);
+        long time = abs(drainTime);
+        long multiple = abs(threshold);
         final long remainder = time % multiple;
         if (remainder < multiple / 2) {
             return time - remainder;
         } else {
             return time - remainder + multiple;
         }
+    }
+
+    /** Gets the target time string in a short format. */
+    public static String getTargetTimeShortString(
+            Context context, long targetTimeOffsetMs, long currentTimeMs) {
+        long targetTimeMs = currentTimeMs + targetTimeOffsetMs;
+        if (targetTimeOffsetMs >= FIFTEEN_MINUTES_MILLIS) {
+            targetTimeMs = roundUpTimeToNextThreshold(targetTimeMs, FIFTEEN_MINUTES_MILLIS);
+        }
+
+        // convert the time to a properly formatted string.
+        String skeleton = android.text.format.DateFormat.getTimeFormatString(context);
+        DateFormat fmt = DateFormat.getInstanceForSkeleton(skeleton);
+        Date date = Date.from(Instant.ofEpochMilli(targetTimeMs));
+        return fmt.format(date);
+    }
+
+    private static long roundUpTimeToNextThreshold(long timeMs, long threshold) {
+        var time = abs(timeMs);
+        var multiple = abs(threshold);
+        return ((time + multiple - 1) / multiple) * multiple;
     }
 }

@@ -37,14 +37,15 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -55,9 +56,7 @@ import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 
 import java.io.PrintWriter;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -83,11 +82,10 @@ public class DozeParameters implements
     private final Resources mResources;
     private final BatteryController mBatteryController;
     private final ScreenOffAnimationController mScreenOffAnimationController;
+    private final DozeInteractor mDozeInteractor;
     private final FoldAodAnimationController mFoldAodAnimationController;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     private final UserTracker mUserTracker;
-
-    private final Set<Callback> mCallbacks = new HashSet<>();
 
     private boolean mDozeAlwaysOn;
     private boolean mControlScreenOffAnimation;
@@ -131,7 +129,8 @@ public class DozeParameters implements
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ConfigurationController configurationController,
             StatusBarStateController statusBarStateController,
-            UserTracker userTracker) {
+            UserTracker userTracker,
+            DozeInteractor dozeInteractor) {
         mResources = resources;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
         mAlwaysOnPolicy = alwaysOnDisplayPolicy;
@@ -144,6 +143,7 @@ public class DozeParameters implements
         mScreenOffAnimationController = screenOffAnimationController;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mUserTracker = userTracker;
+        mDozeInteractor = dozeInteractor;
 
         keyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
         tunerService.addTunable(
@@ -406,20 +406,6 @@ public class DozeParameters implements
         return mResources.getStringArray(R.array.doze_brightness_sensor_name_posture_mapping);
     }
 
-    /**
-     * Callback to listen for DozeParameter changes.
-     */
-    public void addCallback(Callback callback) {
-        mCallbacks.add(callback);
-    }
-
-    /**
-     * Remove callback that listens for DozeParameter changes.
-     */
-    public void removeCallback(Callback callback) {
-        mCallbacks.remove(callback);
-    }
-
     @Override
     public void onTuningChanged(String key, String newValue) {
         mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(mUserTracker.getUserId());
@@ -465,10 +451,9 @@ public class DozeParameters implements
     }
 
     private void dispatchAlwaysOnEvent() {
-        for (Callback callback : mCallbacks) {
-            callback.onAlwaysOnChange();
-        }
         mScreenOffAnimationController.onAlwaysOnChanged(getAlwaysOn());
+        mDozeInteractor.setAodAvailable(getAlwaysOn());
+
     }
 
     private boolean getPostureSpecificBool(
@@ -483,14 +468,6 @@ public class DozeParameters implements
         }
 
         return bool;
-    }
-
-    /** Callbacks for doze parameter related information */
-    public interface Callback {
-        /**
-         * Invoked when the value of getAlwaysOn may have changed.
-         */
-        void onAlwaysOnChange();
     }
 
     private final class SettingsObserver extends ContentObserver {

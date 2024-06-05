@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
@@ -59,8 +60,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+import android.widget.flags.Flags;
 
 import com.android.internal.R;
+import com.android.internal.widget.ConversationAvatarData.GroupConversationAvatarData;
+import com.android.internal.widget.ConversationAvatarData.OneToOneConversationAvatarData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,6 +109,9 @@ public class ConversationLayout extends FrameLayout
     private int mConversationIconTopPaddingExpandedGroup;
     private int mConversationIconTopPadding;
     private int mExpandedGroupMessagePadding;
+    // TODO (b/217799515) Currently, mConversationText shows the conversation title, the actual
+    //  conversation text is inside of mMessagingLinearLayout, which is misleading, we should rename
+    //  this to mConversationTitleView
     private TextView mConversationText;
     private View mConversationIconBadge;
     private CachingIconView mConversationIconBadgeBg;
@@ -125,6 +132,11 @@ public class ConversationLayout extends FrameLayout
     private int mNotificationBackgroundColor;
     private CharSequence mFallbackChatName;
     private CharSequence mFallbackGroupChatName;
+    //TODO (b/217799515) Currently, Notification.MessagingStyle, ConversationLayout, and
+    // HybridConversationNotificationView, each has their own definition of "ConversationTitle".
+    // What make things worse is that the term of "ConversationTitle" often confuses with
+    // "ConversationText".
+    // We need to unify them or differentiate the namings.
     private CharSequence mConversationTitle;
     private int mMessageSpacingStandard;
     private int mMessageSpacingGroup;
@@ -149,6 +161,9 @@ public class ConversationLayout extends FrameLayout
     private View mAppNameDivider;
     private TouchDelegateComposite mTouchDelegate = new TouchDelegateComposite(this);
     private ArrayList<MessagingLinearLayout.MessagingChild> mToRecycle = new ArrayList<>();
+    private boolean mPrecomputedTextEnabled = false;
+    @Nullable
+    private ConversationHeaderData mConversationHeaderData;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -296,13 +311,17 @@ public class ConversationLayout extends FrameLayout
         mNameReplacement = nameReplacement;
     }
 
-    /** Sets this conversation as "important", adding some additional UI treatment. */
+    /**
+     * Sets this conversation as "important", adding some additional UI treatment.
+     */
     @RemotableViewMethod
     public void setIsImportantConversation(boolean isImportantConversation) {
         setIsImportantConversation(isImportantConversation, false);
     }
 
-    /** @hide **/
+    /**
+     * @hide
+     **/
     public void setIsImportantConversation(boolean isImportantConversation, boolean animate) {
         mImportantConversation = isImportantConversation;
         mImportanceRingView.setVisibility(isImportantConversation && mIcon.getVisibility() != GONE
@@ -383,30 +402,107 @@ public class ConversationLayout extends FrameLayout
         updateContentEndPaddings();
     }
 
-    @RemotableViewMethod
+    /**
+     * Set conversation data
+     *
+     * @param extras Bundle contains conversation data
+     */
+    @RemotableViewMethod(asyncImpl = "setDataAsync")
     public void setData(Bundle extras) {
+        bind(parseMessagingData(extras,
+                /* usePrecomputedText= */ false,
+                /*includeConversationIcon= */false));
+    }
+
+    @NonNull
+    private MessagingData parseMessagingData(Bundle extras, boolean usePrecomputedText,
+            boolean includeConversationIcon) {
         Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
-        List<Notification.MessagingStyle.Message> newMessages
-                = Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
+        List<Notification.MessagingStyle.Message> newMessages =
+                Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
         Parcelable[] histMessages = extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES);
-        List<Notification.MessagingStyle.Message> newHistoricMessages
-                = Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
+        List<Notification.MessagingStyle.Message> newHistoricMessages =
+                Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
 
         // mUser now set (would be nice to avoid the side effect but WHATEVER)
-        setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, android.app.Person.class));
-
+        final Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, Person.class);
         // Append remote input history to newMessages (again, side effect is lame but WHATEVS)
         RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
-                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS, android.app.RemoteInputHistoryItem.class);
+                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
+                        RemoteInputHistoryItem.class);
         addRemoteInputHistoryToMessages(newMessages, history);
 
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
-        // bind it, baby
-        bind(newMessages, newHistoricMessages, showSpinner);
-
         int unreadCount = extras.getInt(Notification.EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
-        setUnreadCount(unreadCount);
+
+        final List<MessagingMessage> newMessagingMessages =
+                createMessages(newMessages, /* isHistoric= */false, usePrecomputedText);
+        final List<MessagingMessage> newHistoricMessagingMessages =
+                createMessages(newHistoricMessages, /* isHistoric= */true, usePrecomputedText);
+
+        // Add our new MessagingMessages to groups
+        List<List<MessagingMessage>> groups = new ArrayList<>();
+        List<Person> senders = new ArrayList<>();
+        // Lets first find the groups (populate `groups` and `senders`)
+        findGroups(newHistoricMessagingMessages, newMessagingMessages, user, groups, senders);
+
+        // load conversation header data, avatar and title.
+        final ConversationHeaderData conversationHeaderData;
+        if (includeConversationIcon && Flags.conversationStyleSetAvatarAsync()) {
+            conversationHeaderData = loadConversationHeaderData(mIsOneToOne,
+                    mConversationTitle,
+                    mShortcutIcon,
+                    mLargeIcon, newMessagingMessages, user, groups, mLayoutColor);
+        } else {
+            conversationHeaderData = null;
+        }
+
+        return new MessagingData(user, showSpinner, unreadCount,
+                newHistoricMessagingMessages, newMessagingMessages, groups, senders,
+                conversationHeaderData);
+    }
+
+    /**
+     * RemotableViewMethod's asyncImpl of {@link #setData(Bundle)}.
+     * This should be called on a background thread, and returns a Runnable which is then must be
+     * called on the main thread to complete the operation and set text.
+     *
+     * @param extras Bundle contains conversation data
+     * @hide
+     */
+    @NonNull
+    public Runnable setDataAsync(Bundle extras) {
+        if (!mPrecomputedTextEnabled) {
+            return () -> setData(extras);
+        }
+
+        final MessagingData messagingData =
+                parseMessagingData(extras,
+                        /* usePrecomputedText= */ true,
+                        /*includeConversationIcon=*/true);
+
+        return () -> {
+            finalizeInflate(messagingData.getHistoricMessagingMessages());
+            finalizeInflate(messagingData.getNewMessagingMessages());
+
+            bind(messagingData);
+        };
+    }
+
+    /**
+     * enable/disable precomputed text usage
+     *
+     * @hide
+     */
+    public void setPrecomputedTextEnabled(boolean precomputedTextEnabled) {
+        mPrecomputedTextEnabled = precomputedTextEnabled;
+    }
+
+    private void finalizeInflate(List<MessagingMessage> historicMessagingMessages) {
+        for (MessagingMessage messagingMessage : historicMessagingMessages) {
+            messagingMessage.finalizeInflate();
+        }
     }
 
     @Override
@@ -414,7 +510,9 @@ public class ConversationLayout extends FrameLayout
         mImageResolver = resolver;
     }
 
-    /** @hide */
+    /**
+     * @hide
+     */
     public void setUnreadCount(int unreadCount) {
         mExpandButton.setNumber(unreadCount);
     }
@@ -436,28 +534,17 @@ public class ConversationLayout extends FrameLayout
         }
     }
 
-    private void bind(List<Notification.MessagingStyle.Message> newMessages,
-            List<Notification.MessagingStyle.Message> newHistoricMessages,
-            boolean showSpinner) {
-        // convert MessagingStyle.Message to MessagingMessage, re-using ones from a previous binding
-        // if they exist
-        List<MessagingMessage> historicMessages = createMessages(newHistoricMessages,
-                true /* isHistoric */);
-        List<MessagingMessage> messages = createMessages(newMessages, false /* isHistoric */);
+    private void bind(MessagingData messagingData) {
+        setUser(messagingData.getUser());
+        setUnreadCount(messagingData.getUnreadCount());
 
         // Copy our groups, before they get clobbered
         ArrayList<MessagingGroup> oldGroups = new ArrayList<>(mGroups);
 
-        // Add our new MessagingMessages to groups
-        List<List<MessagingMessage>> groups = new ArrayList<>();
-        List<Person> senders = new ArrayList<>();
-
-        // Lets first find the groups (populate `groups` and `senders`)
-        findGroups(historicMessages, messages, groups, senders);
-
         // Let's now create the views and reorder them accordingly
         //   side-effect: updates mGroups, mAddedGroups
-        createGroupViews(groups, senders, showSpinner);
+        createGroupViews(messagingData.getGroups(), messagingData.getSenders(),
+                messagingData.getShowSpinner());
 
         // Let's first check which groups were removed altogether and remove them in one animation
         removeGroups(oldGroups);
@@ -470,13 +557,12 @@ public class ConversationLayout extends FrameLayout
             historicMessage.removeMessage(mToRecycle);
         }
 
-        mMessages = messages;
-        mHistoricMessages = historicMessages;
-
+        mMessages = messagingData.getNewMessagingMessages();
+        mHistoricMessages = messagingData.getHistoricMessagingMessages();
         updateHistoricMessageVisibility();
         updateTitleAndNamesDisplay();
 
-        updateConversationLayout();
+        updateConversationLayout(messagingData);
 
         // Recycle everything at the end of the update, now that we know it's no longer needed.
         for (MessagingLinearLayout.MessagingChild child : mToRecycle) {
@@ -488,7 +574,31 @@ public class ConversationLayout extends FrameLayout
     /**
      * Update the layout according to the data provided (i.e mIsOneToOne, expanded etc);
      */
-    private void updateConversationLayout() {
+    private void updateConversationLayout(MessagingData messagingData) {
+        if (!Flags.conversationStyleSetAvatarAsync()) {
+            computeAndSetConversationAvatarAndName();
+        } else {
+            ConversationHeaderData conversationHeaderData =
+                    messagingData.getConversationHeaderData();
+            if (conversationHeaderData == null) {
+                conversationHeaderData = loadConversationHeaderData(mIsOneToOne,
+                        mConversationTitle, mShortcutIcon, mLargeIcon, mMessages, mUser,
+                        messagingData.getGroups(),
+                        mLayoutColor);
+            }
+            setConversationAvatarAndNameFromData(conversationHeaderData);
+        }
+
+        updateAppName();
+        updateIconPositionAndSize();
+        updateImageMessages();
+        updatePaddingsBasedOnContentAvailability();
+        updateActionListPadding();
+        updateAppNameDividerVisibility();
+    }
+
+    @Deprecated
+    private void computeAndSetConversationAvatarAndName() {
         // Set avatar and name
         CharSequence conversationText = mConversationTitle;
         mConversationIcon = mShortcutIcon;
@@ -539,12 +649,44 @@ public class ConversationLayout extends FrameLayout
         // Update if the groups can hide the sender if they are first (applies to 1:1 conversations)
         // This needs to happen after all of the above o update all of the groups
         mPeopleHelper.maybeHideFirstSenderName(mGroups, mIsOneToOne, conversationText);
-        updateAppName();
-        updateIconPositionAndSize();
-        updateImageMessages();
-        updatePaddingsBasedOnContentAvailability();
-        updateActionListPadding();
-        updateAppNameDividerVisibility();
+    }
+
+    private void setConversationAvatarAndNameFromData(
+            ConversationHeaderData conversationHeaderData) {
+        mConversationHeaderData = conversationHeaderData;
+        final OneToOneConversationAvatarData oneToOneConversationDrawable;
+        final GroupConversationAvatarData groupConversationAvatarData;
+        final ConversationAvatarData conversationAvatar =
+                conversationHeaderData.getConversationAvatar();
+        if (conversationAvatar instanceof OneToOneConversationAvatarData) {
+            oneToOneConversationDrawable =
+                    ((OneToOneConversationAvatarData) conversationAvatar);
+            groupConversationAvatarData = null;
+        } else {
+            oneToOneConversationDrawable = null;
+            groupConversationAvatarData = ((GroupConversationAvatarData) conversationAvatar);
+        }
+
+        if (oneToOneConversationDrawable != null) {
+            mConversationIconView.setVisibility(VISIBLE);
+            mConversationFacePile.setVisibility(GONE);
+            mConversationIconView.setImageDrawable(oneToOneConversationDrawable.mDrawable);
+        } else {
+            mConversationIconView.setVisibility(GONE);
+            // This will also inflate it!
+            mConversationFacePile.setVisibility(VISIBLE);
+            // rebind the value to the inflated view instead of the stub
+            mConversationFacePile = findViewById(R.id.conversation_face_pile);
+            bindFacePile(groupConversationAvatarData);
+        }
+        CharSequence conversationText = conversationHeaderData.getConversationText();
+        if (TextUtils.isEmpty(conversationText)) {
+            conversationText = mIsOneToOne ? mFallbackChatName : mFallbackGroupChatName;
+        }
+        mConversationText.setText(conversationText);
+        // Update if the groups can hide the sender if they are first (applies to 1:1 conversations)
+        // This needs to happen after all of the above o update all of the groups
+        mPeopleHelper.maybeHideFirstSenderName(mGroups, mIsOneToOne, conversationText);
     }
 
     private void updateActionListPadding() {
@@ -559,7 +701,7 @@ public class ConversationLayout extends FrameLayout
 
             // When collapsed, we're displaying the image message in a dedicated container
             // on the right of the layout instead of inline. Let's add the isolated image there
-            MessagingGroup messagingGroup = mGroups.get(mGroups.size() -1);
+            MessagingGroup messagingGroup = mGroups.get(mGroups.size() - 1);
             MessagingImageMessage isolatedMessage = messagingGroup.getIsolatedMessage();
             if (isolatedMessage != null) {
                 newMessage = isolatedMessage.getView();
@@ -611,7 +753,12 @@ public class ConversationLayout extends FrameLayout
         topView.setImageIcon(secondLastIcon);
     }
 
+    @Deprecated
     private void bindFacePile() {
+        bindFacePile(null);
+    }
+
+    private void bindFacePile(@Nullable GroupConversationAvatarData groupConversationAvatarData) {
         ImageView bottomBackground = mConversationFacePile.findViewById(
                 R.id.conversation_face_pile_bottom_background);
         ImageView bottomView = mConversationFacePile.findViewById(
@@ -619,7 +766,13 @@ public class ConversationLayout extends FrameLayout
         ImageView topView = mConversationFacePile.findViewById(
                 R.id.conversation_face_pile_top);
 
-        bindFacePile(bottomBackground, bottomView, topView);
+        if (groupConversationAvatarData == null) {
+            bindFacePile(bottomBackground, bottomView, topView);
+        } else {
+            bindFacePileWithDrawable(bottomBackground, bottomView, topView,
+                    groupConversationAvatarData);
+
+        }
 
         int conversationAvatarSize;
         int facepileAvatarSize;
@@ -652,6 +805,16 @@ public class ConversationLayout extends FrameLayout
         layoutParams.width = facePileBackgroundSize;
         layoutParams.height = facePileBackgroundSize;
         bottomBackground.setLayoutParams(layoutParams);
+    }
+
+    /**
+     * Binds group avatar drawables to face pile.
+     */
+    public void bindFacePileWithDrawable(ImageView bottomBackground, ImageView bottomView,
+            ImageView topView, GroupConversationAvatarData groupConversationAvatarData) {
+        applyNotificationBackgroundColor(bottomBackground);
+        bottomView.setImageDrawable(groupConversationAvatarData.mLastIcon);
+        topView.setImageDrawable(groupConversationAvatarData.mSecondLastIcon);
     }
 
     private void updateAppName() {
@@ -725,14 +888,54 @@ public class ConversationLayout extends FrameLayout
                 mMessagingLinearLayout.getPaddingBottom());
     }
 
+    /**
+     * async version of {@link ConversationLayout#setLargeIcon}
+     */
     @RemotableViewMethod
+    public Runnable setLargeIconAsync(Icon largeIcon) {
+        if (!Flags.conversationStyleSetAvatarAsync()) {
+            return () -> setLargeIcon(largeIcon);
+        }
+
+        mLargeIcon = largeIcon;
+        return NotificationRunnables.NOOP;
+    }
+
+    @RemotableViewMethod(asyncImpl = "setLargeIconAsync")
     public void setLargeIcon(Icon largeIcon) {
         mLargeIcon = largeIcon;
     }
 
+    /**
+     * async version of {@link ConversationLayout#setShortcutIcon}
+     */
     @RemotableViewMethod
+    public Runnable setShortcutIconAsync(Icon shortcutIcon) {
+        if (!Flags.conversationStyleSetAvatarAsync()) {
+            return () -> setShortcutIcon(shortcutIcon);
+        }
+
+        mShortcutIcon = shortcutIcon;
+        return NotificationRunnables.NOOP;
+    }
+
+    @RemotableViewMethod(asyncImpl = "setShortcutIconAsync")
     public void setShortcutIcon(Icon shortcutIcon) {
         mShortcutIcon = shortcutIcon;
+    }
+
+    /**
+     * async version of {@link ConversationLayout#setConversationTitle}
+     */
+    @RemotableViewMethod
+    public Runnable setConversationTitleAsync(CharSequence conversationTitle) {
+        if (!Flags.conversationStyleSetAvatarAsync()) {
+            return () -> setConversationTitle(conversationTitle);
+        }
+
+        // Remove formatting from the title.
+        mConversationTitle = conversationTitle != null ? conversationTitle.toString() : null;
+        return NotificationRunnables.NOOP;
     }
 
     /**
@@ -740,12 +943,16 @@ public class ConversationLayout extends FrameLayout
      *
      * @param conversationTitle the conversation title
      */
-    @RemotableViewMethod
+    @RemotableViewMethod(asyncImpl = "setConversationTitleAsync")
     public void setConversationTitle(CharSequence conversationTitle) {
         // Remove formatting from the title.
         mConversationTitle = conversationTitle != null ? conversationTitle.toString() : null;
     }
 
+    // TODO (b/217799515) getConversationTitle is not consistent with setConversationTitle
+    //  if you call getConversationTitle() immediately after setConversationTitle(), the result
+    //  will not correctly reflect the new change without calling updateConversationLayout, for
+    //  example.
     public CharSequence getConversationTitle() {
         return mConversationText.getText();
     }
@@ -820,12 +1027,37 @@ public class ConversationLayout extends FrameLayout
         }
     }
 
+    /**
+     * async version of {@link ConversationLayout#setLayoutColor}
+     */
     @RemotableViewMethod
+    public Runnable setLayoutColorAsync(int color) {
+        if (!Flags.conversationStyleSetAvatarAsync()) {
+            return () -> setLayoutColor(color);
+        }
+
+        mLayoutColor = color;
+        return NotificationRunnables.NOOP;
+    }
+
+    @RemotableViewMethod(asyncImpl = "setLayoutColorAsync")
     public void setLayoutColor(int color) {
         mLayoutColor = color;
     }
 
+    /**
+     * async version of {@link ConversationLayout#setIsOneToOne}
+     */
     @RemotableViewMethod
+    public Runnable setIsOneToOneAsync(boolean oneToOne) {
+        if (!Flags.conversationStyleSetAvatarAsync()) {
+            return () -> setIsOneToOne(oneToOne);
+        }
+        mIsOneToOne = oneToOne;
+        return NotificationRunnables.NOOP;
+    }
+
+    @RemotableViewMethod(asyncImpl = "setIsOneToOneAsync")
     public void setIsOneToOne(boolean oneToOne) {
         mIsOneToOne = oneToOne;
     }
@@ -913,9 +1145,12 @@ public class ConversationLayout extends FrameLayout
         }
     }
 
+    /**
+     * Finds groups and senders from the given messaging messages and fills outGroups and outSenders
+     */
     private void findGroups(List<MessagingMessage> historicMessages,
-            List<MessagingMessage> messages, List<List<MessagingMessage>> groups,
-            List<Person> senders) {
+            List<MessagingMessage> messages, Person user, List<List<MessagingMessage>> outGroups,
+            List<Person> outSenders) {
         CharSequence currentSenderKey = null;
         List<MessagingMessage> currentGroup = null;
         int histSize = historicMessages.size();
@@ -933,14 +1168,14 @@ public class ConversationLayout extends FrameLayout
             isNewGroup |= !TextUtils.equals(key, currentSenderKey);
             if (isNewGroup) {
                 currentGroup = new ArrayList<>();
-                groups.add(currentGroup);
+                outGroups.add(currentGroup);
                 if (sender == null) {
-                    sender = mUser;
+                    sender = user;
                 } else {
                     // Remove all formatting from the sender name
                     sender = sender.toBuilder().setName(Objects.toString(sender.getName())).build();
                 }
-                senders.add(sender);
+                outSenders.add(sender);
                 currentSenderKey = key;
             }
             currentGroup.add(message);
@@ -951,21 +1186,173 @@ public class ConversationLayout extends FrameLayout
         return person == null ? null : person.getKey() == null ? person.getName() : person.getKey();
     }
 
+    private ConversationHeaderData loadConversationHeaderData(boolean isOneToOne,
+            CharSequence conversationTitle, Icon shortcutIcon, Icon largeIcon,
+            List<MessagingMessage> messages,
+            Person user,
+            List<List<MessagingMessage>> groups, int layoutColor) {
+        Icon conversationIcon = shortcutIcon;
+        CharSequence conversationText = conversationTitle;
+        final CharSequence userKey = getKey(user);
+        if (isOneToOne) {
+            for (int i = messages.size() - 1; i >= 0; i--) {
+                final Notification.MessagingStyle.Message message = messages.get(i).getMessage();
+                final Person sender = message.getSenderPerson();
+                final CharSequence senderKey = getKey(sender);
+                if ((sender != null && senderKey != userKey) || i == 0) {
+                    if (conversationText == null || conversationText.length() == 0) {
+                        conversationText = sender != null ? sender.getName() : "";
+                    }
+                    if (conversationIcon == null) {
+                        conversationIcon = sender != null ? sender.getIcon()
+                                : mPeopleHelper.createAvatarSymbol(conversationText, "",
+                                        layoutColor);
+                    }
+                    break;
+                }
+            }
+        }
+        if (android.app.Flags.cleanUpSpansAndNewLines() && conversationText != null) {
+            // remove formatting from title.
+            conversationText = conversationText.toString();
+        }
+
+        if (conversationIcon == null) {
+            conversationIcon = largeIcon;
+        }
+
+        if (isOneToOne || conversationIcon != null) {
+            return new ConversationHeaderData(
+                    conversationText,
+                    new OneToOneConversationAvatarData(
+                            resolveAvatarImageForOneToOne(conversationIcon)));
+        }
+
+        final List<List<Notification.MessagingStyle.Message>> groupMessages = new ArrayList<>();
+        for (int i = 0; i < groups.size(); i++) {
+            final List<Notification.MessagingStyle.Message> groupMessage = new ArrayList<>();
+            for (int j = 0; j < groups.get(i).size(); j++) {
+                groupMessage.add(groups.get(i).get(j).getMessage());
+            }
+            groupMessages.add(groupMessage);
+        }
+
+        final PeopleHelper.NameToPrefixMap nameToPrefixMap =
+                mPeopleHelper.mapUniqueNamesToPrefixWithGroupList(groupMessages);
+
+        Icon lastIcon = null;
+        Icon secondLastIcon = null;
+
+        CharSequence lastKey = null;
+
+        for (int i = groups.size() - 1; i >= 0; i--) {
+            final Notification.MessagingStyle.Message message = groups.get(i).get(0).getMessage();
+            final Person sender =
+                    message.getSenderPerson() != null ? message.getSenderPerson() : user;
+            final CharSequence senderKey = getKey(sender);
+            final boolean notUser = senderKey != userKey;
+            final boolean notIncluded = senderKey != lastKey;
+
+            if ((notUser && notIncluded) || (i == 0 && lastKey == null)) {
+                if (lastIcon == null) {
+                    if (sender.getIcon() != null) {
+                        lastIcon = sender.getIcon();
+                    } else {
+                        final CharSequence senderName =
+                                sender.getName() != null ? sender.getName() : "";
+                        lastIcon = mPeopleHelper.createAvatarSymbol(
+                                senderName, nameToPrefixMap.getPrefix(senderName),
+                                layoutColor);
+                    }
+                    lastKey = senderKey;
+                } else {
+                    if (sender.getIcon() != null) {
+                        secondLastIcon = sender.getIcon();
+                    } else {
+                        final CharSequence senderName =
+                                sender.getName() != null ? sender.getName() : "";
+                        secondLastIcon = mPeopleHelper.createAvatarSymbol(
+                                senderName, nameToPrefixMap.getPrefix(senderName),
+                                layoutColor);
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (lastIcon == null) {
+            lastIcon = mPeopleHelper.createAvatarSymbol(
+                    "", "", layoutColor);
+        }
+
+        if (secondLastIcon == null) {
+            secondLastIcon = mPeopleHelper.createAvatarSymbol(
+                    "", "", layoutColor);
+        }
+
+        return new ConversationHeaderData(
+                conversationText,
+                new GroupConversationAvatarData(resolveAvatarImageForFacePile(lastIcon),
+                        resolveAvatarImageForFacePile(secondLastIcon)));
+    }
+
+    /**
+     * One To One Conversation Avatars is loaded by CachingIconView(conversation icon view).
+     */
+    @Nullable
+    private Drawable resolveAvatarImageForOneToOne(Icon conversationIcon) {
+        final Drawable conversationIconDrawable =
+                tryLoadingSizeRestrictedIconForOneToOne(conversationIcon);
+        if (conversationIconDrawable != null) {
+            return conversationIconDrawable;
+        }
+        // when size restricted icon loading fails, we fallback to icons load drawable.
+        return loadDrawableFromIcon(conversationIcon);
+    }
+
+    @Nullable
+    private Drawable tryLoadingSizeRestrictedIconForOneToOne(Icon conversationIcon) {
+        try {
+            return mConversationIconView.loadSizeRestrictedIcon(conversationIcon);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Group Avatar drawables are loaded by Icon.
+     */
+    @Nullable
+    private Drawable resolveAvatarImageForFacePile(Icon conversationIcon) {
+        return loadDrawableFromIcon(conversationIcon);
+    }
+
+    @Nullable
+    private Drawable loadDrawableFromIcon(Icon conversationIcon) {
+        try {
+            return conversationIcon.loadDrawable(getContext());
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
     /**
      * Creates new messages, reusing existing ones if they are available.
      *
      * @param newMessages the messages to parse.
      */
     private List<MessagingMessage> createMessages(
-            List<Notification.MessagingStyle.Message> newMessages, boolean historic) {
+            List<Notification.MessagingStyle.Message> newMessages, boolean isHistoric,
+            boolean usePrecomputedText) {
         List<MessagingMessage> result = new ArrayList<>();
         for (int i = 0; i < newMessages.size(); i++) {
             Notification.MessagingStyle.Message m = newMessages.get(i);
             MessagingMessage message = findAndRemoveMatchingMessage(m);
             if (message == null) {
-                message = MessagingMessage.createMessage(this, m, mImageResolver);
+                message = MessagingMessage.createMessage(this, m,
+                        mImageResolver, usePrecomputedText);
             }
-            message.setIsHistoric(historic);
+            message.setIsHistoric(isHistoric);
             result.add(message);
         }
         return result;
@@ -1014,7 +1401,7 @@ public class ConversationLayout extends FrameLayout
             }
             if (visibleChildren > 0 && group.getVisibility() == GONE) {
                 group.setVisibility(VISIBLE);
-            } else if (visibleChildren == 0 && group.getVisibility() != GONE)   {
+            } else if (visibleChildren == 0 && group.getVisibility() != GONE) {
                 group.setVisibility(GONE);
             }
         }
@@ -1212,6 +1599,11 @@ public class ConversationLayout extends FrameLayout
         return mConversationIcon;
     }
 
+    @Nullable
+    public ConversationHeaderData getConversationHeaderData() {
+        return mConversationHeaderData;
+    }
+
     private static class TouchDelegateComposite extends TouchDelegate {
         private final ArrayList<TouchDelegate> mDelegates = new ArrayList<>();
 
@@ -1231,7 +1623,7 @@ public class ConversationLayout extends FrameLayout
         public boolean onTouchEvent(MotionEvent event) {
             float x = event.getX();
             float y = event.getY();
-            for (TouchDelegate delegate: mDelegates) {
+            for (TouchDelegate delegate : mDelegates) {
                 event.setLocation(x, y);
                 if (delegate.onTouchEvent(event)) {
                     return true;

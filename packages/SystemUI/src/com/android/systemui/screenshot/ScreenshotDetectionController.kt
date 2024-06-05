@@ -24,7 +24,7 @@ import android.view.IWindowManager
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.TextView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 class ScreenshotDetectionController

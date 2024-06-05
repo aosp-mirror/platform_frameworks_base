@@ -22,11 +22,13 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.Mockito.mock;
 
 import android.annotation.NonNull;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.IDeviceVolumeBehaviorDispatcher;
+import android.os.PermissionEnforcer;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
@@ -50,6 +52,7 @@ public class DeviceVolumeBehaviorTest {
     private AudioSystemAdapter mAudioSystem;
     private SystemServerAdapter mSystemServer;
     private SettingsAdapter mSettingsAdapter;
+    private AudioVolumeGroupHelperBase mAudioVolumeGroupHelper;
     private TestLooper mTestLooper;
     private AudioPolicyFacade mAudioPolicyMock = mock(AudioPolicyFacade.class);
 
@@ -71,8 +74,11 @@ public class DeviceVolumeBehaviorTest {
         mAudioSystem = new NoOpAudioSystemAdapter();
         mSystemServer = new NoOpSystemServerAdapter();
         mSettingsAdapter = new NoOpSettingsAdapter();
+        mAudioVolumeGroupHelper = new AudioVolumeGroupHelperBase();
         mAudioService = new AudioService(mContext, mAudioSystem, mSystemServer,
-                mSettingsAdapter, mAudioPolicyMock, mTestLooper.getLooper());
+                mSettingsAdapter, mAudioVolumeGroupHelper, mAudioPolicyMock,
+                mTestLooper.getLooper(), mock(AppOpsManager.class), mock(PermissionEnforcer.class),
+                mock(AudioServerPermissionProvider.class));
         mTestLooper.dispatchAll();
     }
 

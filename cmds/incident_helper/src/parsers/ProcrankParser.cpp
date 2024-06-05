@@ -60,7 +60,7 @@ ProcrankParser::Parse(const int in, const int out) const
             if (record[record.size() - 1] == "TOTAL") { // TOTAL record
                 total = line;
             } else {
-                fprintf(stderr, "[%s]Line %d has missing fields\n%s\n", this->name.string(), nline,
+                fprintf(stderr, "[%s]Line %d has missing fields\n%s\n", this->name.c_str(), nline,
                     line.c_str());
             }
             continue;
@@ -70,7 +70,7 @@ ProcrankParser::Parse(const int in, const int out) const
         for (int i=0; i<(int)record.size(); i++) {
             if (!table.insertField(&proto, header[i], record[i])) {
                 fprintf(stderr, "[%s]Line %d has bad value %s of %s\n",
-                        this->name.string(), nline, header[i].c_str(), record[i].c_str());
+                        this->name.c_str(), nline, header[i].c_str(), record[i].c_str());
             }
         }
         proto.end(token);
@@ -104,9 +104,9 @@ ProcrankParser::Parse(const int in, const int out) const
     }
 
     if (!proto.flush(out)) {
-        fprintf(stderr, "[%s]Error writing proto back\n", this->name.string());
+        fprintf(stderr, "[%s]Error writing proto back\n", this->name.c_str());
         return -1;
     }
-    fprintf(stderr, "[%s]Proto size: %zu bytes\n", this->name.string(), proto.size());
+    fprintf(stderr, "[%s]Proto size: %zu bytes\n", this->name.c_str(), proto.size());
     return NO_ERROR;
 }

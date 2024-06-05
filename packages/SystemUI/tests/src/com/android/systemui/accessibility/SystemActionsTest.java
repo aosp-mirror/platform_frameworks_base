@@ -39,10 +39,9 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
-
-import dagger.Lazy;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -63,9 +62,11 @@ public class SystemActionsTest extends SysuiTestCase {
     @Mock
     private NotificationShadeWindowController mNotificationShadeController;
     @Mock
+    private KeyguardStateController mKeyguardStateController;
+    @Mock
     private ShadeController mShadeController;
     @Mock
-    private Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    private PanelExpansionInteractor mPanelExpansionInteractor;
     @Mock
     private Optional<Recents> mRecentsOptional;
     @Mock
@@ -81,8 +82,15 @@ public class SystemActionsTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mContext.addMockSystemService(TelecomManager.class, mTelecomManager);
         mContext.addMockSystemService(InputManager.class, mInputManager);
-        mSystemActions = new SystemActions(mContext, mUserTracker, mNotificationShadeController,
-                mShadeController, mCentralSurfacesOptionalLazy, mRecentsOptional, mDisplayTracker);
+        mSystemActions = new SystemActions(
+                mContext,
+                mUserTracker,
+                mNotificationShadeController,
+                mKeyguardStateController,
+                mShadeController,
+                () -> mPanelExpansionInteractor,
+                mRecentsOptional,
+                mDisplayTracker);
     }
 
     @Test

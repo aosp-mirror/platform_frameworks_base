@@ -33,6 +33,8 @@ import android.provider.settings.backup.SystemSettings;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.display.feature.flags.Flags;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -53,58 +55,6 @@ public class SettingsBackupTest {
     public static final String HYBRID_SYSUI_BATTERY_WARNING_FLAGS =
             "hybrid_sysui_battery_warning_flags";
 
-    /**
-     * The following denylists contain settings that should *not* be backed up and restored to
-     * another device.  As a general rule, anything that is not user configurable should be
-     * denied (and conversely, things that *are* user configurable *should* be backed up)
-     */
-    private static final Set<String> BACKUP_DENY_LIST_SYSTEM_SETTINGS =
-            newHashSet(
-                    Settings.System.ADVANCED_SETTINGS, // candidate for backup?
-                    Settings.System.ALARM_ALERT_CACHE, // internal cache
-                    Settings.System.APPEND_FOR_LAST_AUDIBLE, // suffix deprecated since API 2
-                    Settings.System.EGG_MODE, // I am the lolrus
-                    Settings.System.END_BUTTON_BEHAVIOR, // bug?
-                    Settings.System
-                            .HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, // candidate for backup?
-                    Settings.System.LOCKSCREEN_DISABLED, // ?
-                    Settings.System.MEDIA_BUTTON_RECEIVER, // candidate for backup?
-                    Settings.System.MUTE_STREAMS_AFFECTED, //  candidate for backup?
-                    Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
-                    Settings.System.POINTER_LOCATION, // backup candidate?
-                    Settings.System.DEBUG_ENABLE_ENHANCED_CALL_BLOCKING, // used for testing only
-                    Settings.System.RINGTONE_CACHE, // internal cache
-                    Settings.System.SCREEN_BRIGHTNESS, // removed in P
-                    Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
-                    Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
-                    Settings.System.SHOW_TOUCHES,
-                    Settings.System.SHOW_KEY_PRESSES,
-                    Settings.System.SIP_ADDRESS_ONLY, // value, not a setting
-                    Settings.System.SIP_ALWAYS, // value, not a setting
-                    Settings.System.SYSTEM_LOCALES, // bug?
-                    Settings.System.USER_ROTATION, // backup candidate?
-                    Settings.System.VIBRATE_IN_SILENT, // deprecated?
-                    Settings.System.VOLUME_ACCESSIBILITY, // used internally, changing value will
-                                                          // not change volume
-                    Settings.System.VOLUME_ALARM, // deprecated since API 2?
-                    Settings.System.VOLUME_ASSISTANT, // candidate for backup?
-                    Settings.System.VOLUME_BLUETOOTH_SCO, // deprecated since API 2?
-                    Settings.System.VOLUME_MASTER, // candidate for backup?
-                    Settings.System.VOLUME_MUSIC, // deprecated since API 2?
-                    Settings.System.VOLUME_NOTIFICATION, // deprecated since API 2?
-                    Settings.System.VOLUME_RING, // deprecated since API 2?
-                    Settings.System.VOLUME_SYSTEM, // deprecated since API 2?
-                    Settings.System.VOLUME_VOICE, // deprecated since API 2?
-                    Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
-                    Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
-                    Settings.System.DESKTOP_MODE, // developer setting for internal prototyping
-                    Settings.System.MIN_REFRESH_RATE, // depends on hardware capabilities
-                    Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
-                    Settings.System.SCREEN_BRIGHTNESS_FLOAT,
-                    Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
-                    Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
-                    );
-
     private static final Set<String> BACKUP_DENY_LIST_GLOBAL_SETTINGS =
             newHashSet(
                     Settings.Global.ACTIVITY_MANAGER_CONSTANTS,
@@ -113,7 +63,6 @@ public class SettingsBackupTest {
                     Settings.Global.ADB_ENABLED,
                     Settings.Global.ADB_WIFI_ENABLED,
                     Settings.Global.ADB_DISCONNECT_SESSIONS_ON_REVOKE,
-                    Settings.Global.ADD_USERS_WHEN_LOCKED,
                     Settings.Global.AIRPLANE_MODE_ON,
                     Settings.Global.AIRPLANE_MODE_RADIOS,
                     Settings.Global.ALLOW_WORK_PROFILE_TELEPHONY_FOR_NON_DPM_ROLE_HOLDERS,
@@ -144,6 +93,7 @@ public class SettingsBackupTest {
                     Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
                     Settings.Global.AUTO_TIME_ZONE_EXPLICIT,
                     Settings.Global.AVERAGE_TIME_TO_DISCHARGE,
+                    Settings.Global.BATTERY_CHARGING_STATE_ENFORCE_LEVEL,
                     Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY,
                     Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME,
                     Settings.Global.BROADCAST_BG_CONSTANTS,
@@ -231,9 +181,10 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_FORCE_RTL,
                     Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
                     Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR,
-                    Settings.Global.DEVELOPMENT_USE_BLAST_ADAPTER_VR,
                     Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH,
                     Settings.Global.DEVICE_DEMO_MODE,
+                    Settings.Global.DEVICE_IDLE_CONSTANTS,
+                    Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS,
                     Settings.Global.DISABLE_WINDOW_BLURS,
                     Settings.Global.BATTERY_SAVER_CONSTANTS,
                     Settings.Global.BATTERY_TIP_CONSTANTS,
@@ -271,7 +222,6 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE,
                     Settings.Global.ENABLE_DISKSTATS_LOGGING,
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
-                    Settings.Global.ENABLE_TARE,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_ENABLED,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
@@ -280,7 +230,9 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_ADB_INCREMENTAL_INSTALL_DEFAULT,
                     Settings.Global.ENABLE_MULTI_SLOT_TIMEOUT_MILLIS,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
+                    Settings.Global.ENABLE_16K_PAGES, // Added for 16K developer option
                     Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
+                    Settings.Global.ERROR_KERNEL_LOG_PREFIX,
                     Settings.Global.ERROR_LOGCAT_PREFIX,
                     Settings.Global.EUICC_PROVISIONED,
                     Settings.Global.EUICC_SUPPORTED_COUNTRIES,
@@ -345,7 +297,10 @@ public class SettingsBackupTest {
                     Settings.Global.MIN_DURATION_BETWEEN_RECOVERY_STEPS_IN_MS,
                     Settings.Global.MOBILE_DATA, // Candidate for backup?
                     Settings.Global.MOBILE_DATA_ALWAYS_ON,
+                    Settings.Global.DSRM_DURATION_MILLIS,
+                    Settings.Global.DSRM_ENABLED_ACTIONS,
                     Settings.Global.MODE_RINGER,
+                    Settings.Global.MUTE_ALARM_STREAM_WITH_RINGER_MODE,
                     Settings.Global.MULTI_SIM_DATA_CALL_SUBSCRIPTION,
                     Settings.Global.MULTI_SIM_SMS_PROMPT,
                     Settings.Global.MULTI_SIM_SMS_SUBSCRIPTION,
@@ -425,7 +380,6 @@ public class SettingsBackupTest {
                     Settings.Global.RADIO_WIFI,
                     Settings.Global.RADIO_WIMAX,
                     Settings.Global.RADIO_UWB,
-                    Settings.Global.REMOVE_GUEST_ON_EXIT,
                     Settings.Global.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS,
                     Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT,
                     Settings.Global.RESTRICTED_NETWORKING_MODE,
@@ -452,7 +406,6 @@ public class SettingsBackupTest {
                     Settings.Global.SHOW_PEOPLE_SPACE,
                     Settings.Global.SHOW_NEW_NOTIF_DISMISS,
                     Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
-                    Settings.Global.SHOW_TARE_DEVELOPER_OPTIONS,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
                     Settings.Global.SHOW_USB_TEMPERATURE_ALARM,
                     Settings.Global.SIGNED_CONFIG_VERSION,
@@ -479,8 +432,6 @@ public class SettingsBackupTest {
                     Settings.Global.SYS_UIDCPUPOWER,
                     Settings.Global.SYS_TRACED,
                     Settings.Global.FPS_DEVISOR,
-                    Settings.Global.TARE_ALARM_MANAGER_CONSTANTS,
-                    Settings.Global.TARE_JOB_SCHEDULER_CONSTANTS,
                     Settings.Global.TCP_DEFAULT_INIT_RWND,
                     Settings.Global.TETHER_DUN_APN,
                     Settings.Global.TETHER_DUN_REQUIRED,
@@ -532,7 +483,6 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT,
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS,
-                    Settings.Global.USER_SWITCHER_ENABLED,
                     Settings.Global.WARNING_TEMPERATURE,
                     Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY,
                     Settings.Global.WEBVIEW_MULTIPROCESS,
@@ -590,11 +540,19 @@ public class SettingsBackupTest {
                     Settings.Global.APPOP_HISTORY_BASE_INTERVAL_MILLIS,
                     Settings.Global.AUTO_REVOKE_PARAMETERS,
                     Settings.Global.ENABLE_RADIO_BUG_DETECTION,
+                    Settings.Global.REPAIR_MODE_ACTIVE,
                     Settings.Global.RADIO_BUG_WAKELOCK_TIMEOUT_COUNT_THRESHOLD,
                     Settings.Global.RADIO_BUG_SYSTEM_ERROR_COUNT_THRESHOLD,
                     Settings.Global.ENABLED_SUBSCRIPTION_FOR_SLOT,
                     Settings.Global.MODEM_STACK_ENABLED_FOR_SLOT,
+                    Settings.Global.POWER_BUTTON_SHORT_PRESS,
+                    Settings.Global.POWER_BUTTON_DOUBLE_PRESS,
+                    Settings.Global.POWER_BUTTON_TRIPLE_PRESS,
                     Settings.Global.POWER_BUTTON_VERY_LONG_PRESS,
+                    Settings.Global.STEM_PRIMARY_BUTTON_SHORT_PRESS,
+                    Settings.Global.STEM_PRIMARY_BUTTON_DOUBLE_PRESS,
+                    Settings.Global.STEM_PRIMARY_BUTTON_TRIPLE_PRESS,
+                    Settings.Global.STEM_PRIMARY_BUTTON_LONG_PRESS,
                     Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, // Temporary for R beta
                     Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
                     Settings.Global.CACHED_APPS_FREEZER_ENABLED,
@@ -605,7 +563,7 @@ public class SettingsBackupTest {
                     Settings.Global.MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER,
                     Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
                     Settings.Global.ENABLE_BACK_ANIMATION, // Temporary for T, dev option only
-                    Settings.Global.Wearable.COMBINED_LOCATION_ENABLED,
+                    Settings.Global.Wearable.COMBINED_LOCATION_ENABLE,
                     Settings.Global.Wearable.HAS_PAY_TOKENS,
                     Settings.Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN,
                     Settings.Global.Wearable.HOTWORD_DETECTION_ENABLED,
@@ -637,6 +595,7 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR,
                     Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED_DEV,
                     Settings.Global.Wearable.AMBIENT_TILT_TO_BRIGHT,
+                    Settings.Global.Wearable.BATTERY_SAVER_MODE,
                     Settings.Global.Wearable.DECOMPOSABLE_WATCHFACE,
                     Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
                     Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,
@@ -645,7 +604,6 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.COMPANION_BLE_ROLE,
                     Settings.Global.Wearable.COMPANION_NAME,
                     Settings.Global.Wearable.COMPANION_APP_NAME,
-                    Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
                     Settings.Global.Wearable.COMPANION_OS_VERSION,
                     Settings.Global.Wearable.ENABLE_ALL_LANGUAGES,
                     Settings.Global.Wearable.SETUP_LOCALE,
@@ -660,16 +618,10 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.CLOCKWORK_LONG_PRESS_TO_ASSISTANT_ENABLED,
                     Settings.Global.Wearable.WET_MODE_ON,
                     Settings.Global.Wearable.COOLDOWN_MODE_ON,
-                    Settings.Global.Wearable.CHARGING_SOUNDS_ENABLED,
-                    Settings.Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED,
                     Settings.Global.Wearable.BEDTIME_MODE,
                     Settings.Global.Wearable.BEDTIME_HARD_MODE,
-                    Settings.Global.Wearable.RSB_WAKE_ENABLED,
+                    Settings.Global.Wearable.VIBRATE_FOR_ACTIVE_UNLOCK,
                     Settings.Global.Wearable.LOCK_SCREEN_STATE,
-                    Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_ENABLED,
-                    Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE,
-                    Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED,
-                    Settings.Global.Wearable.SCREENSHOT_ENABLED,
                     Settings.Global.Wearable.DISABLE_AOD_WHILE_PLUGGED,
                     Settings.Global.Wearable.NETWORK_LOCATION_OPT_IN,
                     Settings.Global.Wearable.CUSTOM_COLOR_FOREGROUND,
@@ -678,12 +630,15 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.TETHER_CONFIG_STATE,
                     Settings.Global.Wearable.PHONE_SWITCHING_SUPPORTED,
                     Settings.Global.Wearable.WEAR_MEDIA_CONTROLS_PACKAGE,
-                    Settings.Global.Wearable.WEAR_MEDIA_SESSIONS_PACKAGE);
+                    Settings.Global.Wearable.WEAR_MEDIA_SESSIONS_PACKAGE,
+                    Settings.Global.Wearable.WEAR_POWER_ANOMALY_SERVICE_ENABLED,
+                    Settings.Global.Wearable.CONNECTIVITY_KEEP_DATA_ON);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
                  Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, // Deprecated since O.
+                 Settings.Secure.ALLOW_PRIMARY_GAIA_ACCOUNT_REMOVAL_FOR_TESTS,
                  Settings.Secure.ALLOWED_GEOLOCATION_ORIGINS,
                  Settings.Secure.ALWAYS_ON_VPN_APP,
                  Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
@@ -700,7 +655,6 @@ public class SettingsBackupTest {
                  Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
                  Settings.Secure.ASSIST_STRUCTURE_ENABLED,
                  Settings.Secure.ATTENTIVE_TIMEOUT,
-                 Settings.Secure.AUDIO_DEVICE_INVENTORY, // setting not controllable by user
                  Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE,
@@ -712,6 +666,7 @@ public class SettingsBackupTest {
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_TURNED_OFF_BY_POLICY,
+                 Settings.Secure.AUDIO_SAFE_CSD_AS_A_FEATURE_ENABLED, // not controllable by user
                  Settings.Secure.BACKUP_AUTO_RESTORE,
                  Settings.Secure.BACKUP_ENABLED,
                  Settings.Secure.BACKUP_PROVISIONED,
@@ -725,9 +680,11 @@ public class SettingsBackupTest {
                  Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
                  Settings.Secure.CONTENT_CAPTURE_ENABLED,
                  Settings.Secure.DEFAULT_INPUT_METHOD,
+                 Settings.Secure.DEFAULT_DEVICE_INPUT_METHOD,
                  Settings.Secure.DEVICE_PAIRED,
                  Settings.Secure.DIALER_DEFAULT_APPLICATION,
                  Settings.Secure.DISABLED_PRINT_SERVICES,
+                 Settings.Secure.DISABLE_SECURE_WINDOWS,
                  Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,
                  Settings.Secure.DOCKED_CLOCK_FACE,
                  Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
@@ -741,7 +698,6 @@ public class SettingsBackupTest {
                  Settings.Secure.ENABLED_PRINT_SERVICES,
                  Settings.Secure.GLOBAL_ACTIONS_PANEL_AVAILABLE,
                  Settings.Secure.GLOBAL_ACTIONS_PANEL_DEBUG_ENABLED,
-                 Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
                  Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR,
                  Settings.Secure.INPUT_METHOD_SELECTOR_VISIBILITY,
                  Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY,
@@ -794,8 +750,6 @@ public class SettingsBackupTest {
                  Settings.Secure.SLEEP_TIMEOUT,
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
                  Settings.Secure.SPELL_CHECKER_ENABLED,  // Intentionally removed in Q
-                 Settings.Secure.STYLUS_BUTTONS_ENABLED,
-                 Settings.Secure.STYLUS_HANDWRITING_ENABLED,
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.KNOWN_TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.TV_APP_USES_NON_SYSTEM_INPUTS,
@@ -843,15 +797,18 @@ public class SettingsBackupTest {
                  Settings.Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT,
                  Settings.Secure.ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
                  Settings.Secure.UI_TRANSLATION_ENABLED,
-                 Settings.Secure.CREDENTIAL_SERVICE,
-                 Settings.Secure.CREDENTIAL_SERVICE_PRIMARY);
+                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_EDGE_HAPTIC_ENABLED,
+                 Settings.Secure.DND_CONFIGS_MIGRATED,
+                 Settings.Secure.NAVIGATION_MODE_RESTORE,
+                 Settings.Secure.V_TO_U_RESTORE_ALLOWLIST,
+                 Settings.Secure.V_TO_U_RESTORE_DENYLIST);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {
         checkSettingsBackedUpOrDenied(
                 getCandidateSettings(Settings.System.class),
                 newHashSet(SystemSettings.SETTINGS_TO_BACKUP),
-                BACKUP_DENY_LIST_SYSTEM_SETTINGS);
+                getBackUpDenyListSystemSettings());
     }
 
     @Test
@@ -883,6 +840,8 @@ public class SettingsBackupTest {
                         Settings.Secure.BIOMETRIC_APP_ENABLED,
                         Settings.Secure.BIOMETRIC_KEYGUARD_ENABLED,
                         Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED,
+                        Settings.Secure.BIOMETRIC_FINGERPRINT_VIRTUAL_ENABLED,
+                        Settings.Secure.BIOMETRIC_FACE_VIRTUAL_ENABLED,
                         Settings.Secure.BLUETOOTH_ADDR_VALID,
                         Settings.Secure.BLUETOOTH_ADDRESS,
                         Settings.Secure.BLUETOOTH_NAME,
@@ -895,6 +854,7 @@ public class SettingsBackupTest {
                         Settings.Secure.EXTRA_AUTOMATIC_POWER_SAVE_MODE,
                         Settings.Secure.GAME_DASHBOARD_ALWAYS_ON,
                         Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST,
+                        Settings.Secure.HIDE_PRIVATESPACE_ENTRY_POINT,
                         Settings.Secure.LAUNCHER_TASKBAR_EDUCATION_SHOWING,
                         Settings.Secure.LOCATION_COARSE_ACCURACY_M,
                         Settings.Secure.LOCATION_SHOW_SYSTEM_OPS,
@@ -905,6 +865,7 @@ public class SettingsBackupTest {
                         Settings.Secure.NEARBY_SHARING_SLICE_URI,
                         Settings.Secure.NOTIFIED_NON_ACCESSIBILITY_CATEGORY_SERVICES,
                         Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT,
+                        Settings.Secure.PRIVATE_SPACE_AUTO_LOCK,
                         Settings.Secure.RELEASE_COMPRESS_BLOCKS_ON_INSTALL,
                         Settings.Secure.SCREENSAVER_COMPLICATIONS_ENABLED,
                         Settings.Secure.SHOW_QR_CODE_SCANNER_SETTING,
@@ -923,6 +884,69 @@ public class SettingsBackupTest {
         allSettings.removeAll(settingsNotBackedUpOrDeniedTemporaryAllowList);
 
         checkSettingsBackedUpOrDenied(allSettings, keys, BACKUP_DENY_LIST_SECURE_SETTINGS);
+    }
+
+    /**
+     * The following denylists contain settings that should *not* be backed up and restored to
+     * another device.  As a general rule, anything that is not user configurable should be
+     * denied (and conversely, things that *are* user configurable *should* be backed up)
+     */
+    private static Set<String> getBackUpDenyListSystemSettings() {
+        Set<String> settings =
+                newHashSet(
+                        Settings.System.ADVANCED_SETTINGS, // candidate for backup?
+                        Settings.System.ALARM_ALERT_CACHE, // internal cache
+                        Settings.System.APPEND_FOR_LAST_AUDIBLE, // suffix deprecated since API 2
+                        Settings.System.EGG_MODE, // I am the lolrus
+                        Settings.System.END_BUTTON_BEHAVIOR, // bug?
+                        Settings.System.DEFAULT_DEVICE_FONT_SCALE, // Non configurable
+                        Settings.System
+                                .HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+                        // candidate for backup?
+                        Settings.System.LOCKSCREEN_DISABLED, // ?
+                        Settings.System.MEDIA_BUTTON_RECEIVER, // candidate for backup?
+                        Settings.System.MUTE_STREAMS_AFFECTED, //  candidate for backup?
+                        Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
+                        Settings.System.POINTER_LOCATION, // backup candidate?
+                        Settings.System.DEBUG_ENABLE_ENHANCED_CALL_BLOCKING,
+                        // used for testing only
+                        Settings.System.RINGTONE_CACHE, // internal cache
+                        Settings.System.SCREEN_BRIGHTNESS, // removed in P
+                        Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
+                        Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
+                        Settings.System.SHOW_TOUCHES,
+                        Settings.System.SHOW_KEY_PRESSES,
+                        Settings.System.SHOW_ROTARY_INPUT,
+                        Settings.System.SIP_ADDRESS_ONLY, // value, not a setting
+                        Settings.System.SIP_ALWAYS, // value, not a setting
+                        Settings.System.SYSTEM_LOCALES, // bug?
+                        Settings.System.USER_ROTATION, // backup candidate?
+                        Settings.System.VIBRATE_IN_SILENT, // deprecated?
+                        Settings.System.VOLUME_ACCESSIBILITY,
+                        // used internally, changing value will
+                        // not change volume
+                        Settings.System.VOLUME_ALARM, // deprecated since API 2?
+                        Settings.System.VOLUME_ASSISTANT, // candidate for backup?
+                        Settings.System.VOLUME_BLUETOOTH_SCO, // deprecated since API 2?
+                        Settings.System.VOLUME_MASTER, // candidate for backup?
+                        Settings.System.VOLUME_MUSIC, // deprecated since API 2?
+                        Settings.System.VOLUME_NOTIFICATION, // deprecated since API 2?
+                        Settings.System.VOLUME_RING, // deprecated since API 2?
+                        Settings.System.VOLUME_SYSTEM, // deprecated since API 2?
+                        Settings.System.VOLUME_VOICE, // deprecated since API 2?
+                        Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
+                        Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
+                        Settings.System.SCREEN_BRIGHTNESS_FOR_ALS,
+                        Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
+                        Settings.System.WEAR_TTS_PREWARM_ENABLED,
+                        Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
+                        Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
+                );
+        if (!Flags.backUpSmoothDisplayAndForcePeakRefreshRate()) {
+            settings.add(Settings.System.MIN_REFRESH_RATE);
+            settings.add(Settings.System.PEAK_REFRESH_RATE);
+        }
+        return settings;
     }
 
     private static void checkSettingsBackedUpOrDenied(

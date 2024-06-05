@@ -23,13 +23,11 @@ import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST
 import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA_FILENAME;
 import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
 import android.app.backup.BackupTransport;
 import android.app.backup.FullBackupDataOutput;
-import android.app.backup.IBackupManagerMonitor;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -44,7 +42,7 @@ import com.android.server.backup.OperationStorage.OpType;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.utils.BackupEligibilityRules;
-import com.android.server.backup.utils.BackupManagerMonitorUtils;
+import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 import com.android.server.backup.utils.FullBackupUtils;
 
 import java.io.File;
@@ -69,7 +67,7 @@ public class FullBackupEngine {
     private final int mTransportFlags;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final BackupEligibilityRules mBackupEligibilityRules;
-    @Nullable private final IBackupManagerMonitor mMonitor;
+    private final BackupManagerMonitorEventSender mBackupManagerMonitorEventSender;
 
     class FullBackupRunner implements Runnable {
         private final @UserIdInt int mUserId;
@@ -198,7 +196,7 @@ public class FullBackupEngine {
             int opToken,
             int transportFlags,
             BackupEligibilityRules backupEligibilityRules,
-            IBackupManagerMonitor monitor) {
+            BackupManagerMonitorEventSender backupManagerMonitorEventSender) {
         this.backupManagerService = backupManagerService;
         mOutput = output;
         mPreflightHook = preflightHook;
@@ -213,7 +211,7 @@ public class FullBackupEngine {
                         backupManagerService.getAgentTimeoutParameters(),
                         "Timeout parameters cannot be null");
         mBackupEligibilityRules = backupEligibilityRules;
-        mMonitor = monitor;
+        mBackupManagerMonitorEventSender = backupManagerMonitorEventSender;
     }
 
     public int preflightCheck() throws RemoteException {
@@ -270,7 +268,7 @@ public class FullBackupEngine {
                     result = BackupTransport.TRANSPORT_OK;
                 }
 
-                BackupManagerMonitorUtils.monitorAgentLoggingResults(mMonitor, mPkg, mAgent);
+                mBackupManagerMonitorEventSender.monitorAgentLoggingResults(mPkg, mAgent);
             } catch (IOException e) {
                 Slog.e(TAG, "Error backing up " + mPkg.packageName + ": " + e.getMessage());
                 result = BackupTransport.AGENT_ERROR;

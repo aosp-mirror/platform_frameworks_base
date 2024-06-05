@@ -204,6 +204,13 @@ public class PhysicsAnimationLayout extends FrameLayout {
             return animationForChild(mLayout.getChildAt(index));
         }
 
+
+        protected MultiAnimationStarter animationsForChildrenFromIndex(
+                int startIndex, ChildAnimationConfigurator configurator) {
+            return animationsForChildrenFromIndex(startIndex, /* fadeChildren= */ false,
+                    configurator);
+        }
+
         /**
          * Returns a {@link MultiAnimationStarter} whose startAll method will start the physics
          * animations for all children from startIndex onward. The provided configurator will be
@@ -211,14 +218,16 @@ public class PhysicsAnimationLayout extends FrameLayout {
          * animation appropriately.
          */
         protected MultiAnimationStarter animationsForChildrenFromIndex(
-                int startIndex, ChildAnimationConfigurator configurator) {
+                int startIndex, boolean fadeChildren, ChildAnimationConfigurator configurator) {
             final Set<DynamicAnimation.ViewProperty> allAnimatedProperties = new HashSet<>();
             final List<PhysicsPropertyAnimator> allChildAnims = new ArrayList<>();
 
             // Retrieve the animator for each child, ask the configurator to configure it, then save
             // it and the properties it chose to animate.
             for (int i = startIndex; i < mLayout.getChildCount(); i++) {
-                final PhysicsPropertyAnimator anim = animationForChildAtIndex(i);
+                final PhysicsPropertyAnimator anim = fadeChildren
+                        ? animationForChildAtIndex(i).alpha(0)
+                        : animationForChildAtIndex(i);
                 configurator.configureAnimationForChildAtIndex(i, anim);
                 allAnimatedProperties.addAll(anim.getAnimatedProperties());
                 allChildAnims.add(anim);
@@ -327,6 +336,12 @@ public class PhysicsAnimationLayout extends FrameLayout {
         addViewInternal(child, index, params, false /* isReorder */);
     }
 
+    /** Removes the child view immediately. */
+    public void removeViewNoAnimation(View view) {
+        super.removeView(view);
+        view.setTag(R.id.physics_animator_tag, null);
+    }
+
     @Override
     public void removeView(View view) {
         if (mController != null) {
@@ -362,6 +377,8 @@ public class PhysicsAnimationLayout extends FrameLayout {
             return;
         }
         final int oldIndex = indexOfChild(view);
+
+        if (oldIndex == index) return;
 
         super.removeView(view);
         if (view.getParent() != null) {
@@ -402,7 +419,8 @@ public class PhysicsAnimationLayout extends FrameLayout {
             // be animating in this case, even if the physics animations haven't been started yet.
             final boolean isTranslation =
                     property.equals(DynamicAnimation.TRANSLATION_X)
-                            || property.equals(DynamicAnimation.TRANSLATION_Y);
+                            || property.equals(DynamicAnimation.TRANSLATION_Y)
+                            || property.equals(DynamicAnimation.TRANSLATION_Z);
             if (isTranslation && targetAnimator != null && targetAnimator.isRunning()) {
                 return true;
             }
@@ -478,6 +496,8 @@ public class PhysicsAnimationLayout extends FrameLayout {
             return "TRANSLATION_X";
         } else if (property.equals(DynamicAnimation.TRANSLATION_Y)) {
             return "TRANSLATION_Y";
+        } else if (property.equals(DynamicAnimation.TRANSLATION_Z)) {
+            return "TRANSLATION_Z";
         } else if (property.equals(DynamicAnimation.SCALE_X)) {
             return "SCALE_X";
         } else if (property.equals(DynamicAnimation.SCALE_Y)) {
@@ -581,6 +601,8 @@ public class PhysicsAnimationLayout extends FrameLayout {
             return R.id.translation_x_dynamicanimation_tag;
         } else if (property.equals(DynamicAnimation.TRANSLATION_Y)) {
             return R.id.translation_y_dynamicanimation_tag;
+        } else if (property.equals(DynamicAnimation.TRANSLATION_Z)) {
+            return R.id.translation_z_dynamicanimation_tag;
         } else if (property.equals(DynamicAnimation.SCALE_X)) {
             return R.id.scale_x_dynamicanimation_tag;
         } else if (property.equals(DynamicAnimation.SCALE_Y)) {
@@ -746,6 +768,12 @@ public class PhysicsAnimationLayout extends FrameLayout {
             return property(DynamicAnimation.TRANSLATION_X, translationX, endActions);
         }
 
+        /** Animate the view's translationZ value to the provided value. */
+        public PhysicsPropertyAnimator translationZ(float translationZ, Runnable... endActions) {
+            mPathAnimator = null; // We aren't using the path anymore if we're translating.
+            return property(DynamicAnimation.TRANSLATION_Z, translationZ, endActions);
+        }
+
         /** Set the view's translationX value to 'from', then animate it to the given value. */
         public PhysicsPropertyAnimator translationX(
                 float from, float to, Runnable... endActions) {
@@ -768,13 +796,14 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         /**
          * Animate the view's translationX and translationY values, and call the end actions only
-         * once both TRANSLATION_X and TRANSLATION_Y animations have completed.
+         * once both TRANSLATION_X, TRANSLATION_Y and TRANSLATION_Z animations have completed.
          */
-        public PhysicsPropertyAnimator position(
-                float translationX, float translationY, Runnable... endActions) {
+        public PhysicsPropertyAnimator position(float translationX, float translationY,
+                float translationZ, Runnable... endActions) {
             mPositionEndActions = endActions;
             translationX(translationX);
-            return translationY(translationY);
+            translationY(translationY);
+            return translationZ(translationZ);
         }
 
         /**
@@ -828,10 +857,13 @@ public class PhysicsAnimationLayout extends FrameLayout {
         private void clearTranslationValues() {
             mAnimatedProperties.remove(DynamicAnimation.TRANSLATION_X);
             mAnimatedProperties.remove(DynamicAnimation.TRANSLATION_Y);
+            mAnimatedProperties.remove(DynamicAnimation.TRANSLATION_Z);
             mInitialPropertyValues.remove(DynamicAnimation.TRANSLATION_X);
             mInitialPropertyValues.remove(DynamicAnimation.TRANSLATION_Y);
+            mInitialPropertyValues.remove(DynamicAnimation.TRANSLATION_Z);
             mEndActionForProperty.remove(DynamicAnimation.TRANSLATION_X);
             mEndActionForProperty.remove(DynamicAnimation.TRANSLATION_Y);
+            mEndActionForProperty.remove(DynamicAnimation.TRANSLATION_Z);
         }
 
         /** Animate the view's scaleX value to the provided value. */
@@ -922,15 +954,19 @@ public class PhysicsAnimationLayout extends FrameLayout {
                 }, propertiesArray);
             }
 
-            // If we used position-specific end actions, we'll need to listen for both TRANSLATION_X
-            // and TRANSLATION_Y animations ending, and call them once both have finished.
+            // If we used position-specific end actions, we'll need to listen for TRANSLATION_X
+            // TRANSLATION_Y and TRANSLATION_Z animations ending, and call them once both have
+            // finished.
             if (mPositionEndActions != null) {
                 final SpringAnimation translationXAnim =
                         getSpringAnimationFromView(DynamicAnimation.TRANSLATION_X, mView);
                 final SpringAnimation translationYAnim =
                         getSpringAnimationFromView(DynamicAnimation.TRANSLATION_Y, mView);
-                final Runnable waitForBothXAndY = () -> {
-                    if (!translationXAnim.isRunning() && !translationYAnim.isRunning()) {
+                final SpringAnimation translationZAnim =
+                        getSpringAnimationFromView(DynamicAnimation.TRANSLATION_Z, mView);
+                final Runnable waitForXYZ = () -> {
+                    if (!translationXAnim.isRunning() && !translationYAnim.isRunning()
+                            && !translationZAnim.isRunning()) {
                         if (mPositionEndActions != null) {
                             for (Runnable callback : mPositionEndActions) {
                                 callback.run();
@@ -942,9 +978,11 @@ public class PhysicsAnimationLayout extends FrameLayout {
                 };
 
                 mEndActionsForProperty.put(DynamicAnimation.TRANSLATION_X,
-                        new Runnable[]{waitForBothXAndY});
+                        new Runnable[]{waitForXYZ});
                 mEndActionsForProperty.put(DynamicAnimation.TRANSLATION_Y,
-                        new Runnable[]{waitForBothXAndY});
+                        new Runnable[]{waitForXYZ});
+                mEndActionsForProperty.put(DynamicAnimation.TRANSLATION_Z,
+                        new Runnable[]{waitForXYZ});
             }
 
             if (mPathAnimator != null) {
@@ -955,9 +993,10 @@ public class PhysicsAnimationLayout extends FrameLayout {
             for (DynamicAnimation.ViewProperty property : properties) {
                 // Don't start translation animations if we're using a path animator, the update
                 // listeners added to that animator will take care of that.
-                if (mPathAnimator != null
-                        && (property.equals(DynamicAnimation.TRANSLATION_X)
-                            || property.equals(DynamicAnimation.TRANSLATION_Y))) {
+                boolean isTranslationProperty = property.equals(DynamicAnimation.TRANSLATION_X)
+                        || property.equals(DynamicAnimation.TRANSLATION_Y)
+                        || property.equals(DynamicAnimation.TRANSLATION_Z);
+                if (mPathAnimator != null && isTranslationProperty) {
                     return;
                 }
 
@@ -989,6 +1028,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
             if (mPathAnimator != null) {
                 animatedProperties.add(DynamicAnimation.TRANSLATION_X);
                 animatedProperties.add(DynamicAnimation.TRANSLATION_Y);
+                animatedProperties.add(DynamicAnimation.TRANSLATION_Z);
             }
 
             return animatedProperties;

@@ -20,8 +20,16 @@
 #include <sys/types.h>  // umask
 
 #include <android-base/file.h>
+#include <android-base/strings.h>
+#include <androidfw/BigBuffer.h>
+#include <androidfw/BigBufferStream.h>
+#include <androidfw/FileStream.h>
+#include <androidfw/Image.h>
+#include <androidfw/Png.h>
 #include <androidfw/ResourceUtils.h>
+#include <androidfw/StringPiece.h>
 #include <androidfw/StringPool.h>
+#include <androidfw/Streams.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <utils/ByteOrder.h>
@@ -32,9 +40,9 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <sys/utsname.h>
 
 namespace android::idmap2 {
-
 constexpr auto kBufferSize = 1024;
 
 namespace {
@@ -55,7 +63,7 @@ void Write32(std::ostream& stream, uint32_t value) {
 
 FabricatedOverlay::FabricatedOverlay(pb::FabricatedOverlay&& overlay,
                                      std::string&& string_pool_data,
-                                     std::vector<android::base::borrowed_fd> binary_files,
+                                     std::vector<FabricatedOverlay::BinaryData> binary_files,
                                      off_t total_binary_bytes,
                                      std::optional<uint32_t> crc_from_disk)
     : overlay_pb_(std::forward<pb::FabricatedOverlay>(overlay)),
@@ -81,7 +89,7 @@ FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetResourceValue(
     const std::string& resource_name, uint8_t data_type, uint32_t data_value,
     const std::string& configuration) {
   entries_.emplace_back(
-      Entry{resource_name, data_type, data_value, "", std::nullopt, configuration});
+      Entry{resource_name, data_type, data_value, "", std::nullopt, 0, 0, configuration, false});
   return *this;
 }
 
@@ -89,15 +97,88 @@ FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetResourceValue(
     const std::string& resource_name, uint8_t data_type, const std::string& data_string_value,
     const std::string& configuration) {
   entries_.emplace_back(
-      Entry{resource_name, data_type, 0, data_string_value, std::nullopt, configuration});
+      Entry{resource_name,
+            data_type,
+            0,
+            data_string_value,
+            std::nullopt,
+            0,
+            0,
+            configuration,
+            false});
   return *this;
 }
 
 FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetResourceValue(
     const std::string& resource_name, std::optional<android::base::borrowed_fd>&& binary_value,
-    const std::string& configuration) {
-  entries_.emplace_back(Entry{resource_name, 0, 0, "", binary_value, configuration});
+    off64_t data_binary_offset, size_t data_binary_size, const std::string& configuration,
+    bool nine_patch) {
+  entries_.emplace_back(Entry{resource_name, 0, 0, "", binary_value,
+                              data_binary_offset, data_binary_size, configuration, nine_patch});
   return *this;
+}
+
+static Result<FabricatedOverlay::BinaryData> buildBinaryData(
+        pb::ResourceValue* pb_value, const TargetValue &value) {
+  pb_value->set_data_type(Res_value::TYPE_STRING);
+  size_t binary_size;
+  off64_t binary_offset;
+  std::unique_ptr<android::InputStream> binary_stream;
+
+  if (value.nine_patch) {
+    std::string file_contents;
+    file_contents.resize(value.data_binary_size);
+    if (!base::ReadFullyAtOffset(value.data_binary_value->get(), file_contents.data(),
+                                 value.data_binary_size, value.data_binary_offset)) {
+      return Error("Failed to read binary file data.");
+    }
+    const StringPiece content(file_contents.c_str(), file_contents.size());
+    android::PngChunkFilter png_chunk_filter(content);
+    android::AndroidLogDiagnostics diag;
+    auto png = android::ReadPng(&png_chunk_filter, &diag);
+    if (!png) {
+      return Error("Error opening file as png");
+    }
+
+    std::string err;
+    std::unique_ptr<NinePatch> nine_patch = NinePatch::Create(png->rows.get(),
+                                                              png->width, png->height,
+                                                              &err);
+    if (!nine_patch) {
+      return Error("%s", err.c_str());
+    }
+
+    png->width -= 2;
+    png->height -= 2;
+    memmove(png->rows.get(), png->rows.get() + 1, png->height * sizeof(uint8_t**));
+    for (int32_t h = 0; h < png->height; h++) {
+      memmove(png->rows[h], png->rows[h] + 4, png->width * 4);
+    }
+
+    android::BigBuffer buffer(value.data_binary_size);
+    android::BigBufferOutputStream buffer_output_stream(&buffer);
+    if (!android::WritePng(png.get(), nine_patch.get(), &buffer_output_stream, {},
+                           &diag, false)) {
+      return Error("Error writing frro png");
+    }
+
+    binary_size = buffer.size();
+    binary_offset = 0;
+    android::BigBufferInputStream *buffer_input_stream
+            = new android::BigBufferInputStream(std::move(buffer));
+    binary_stream.reset(buffer_input_stream);
+  } else {
+    binary_size = value.data_binary_size;
+    binary_offset = value.data_binary_offset;
+    android::FileInputStream *fis
+            = new android::FileInputStream(value.data_binary_value.value());
+    binary_stream.reset(fis);
+  }
+
+  return FabricatedOverlay::BinaryData{
+          std::move(binary_stream),
+          binary_offset,
+          binary_size};
 }
 
 Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
@@ -148,7 +229,9 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
     }
 
     value->second = TargetValue{res_entry.data_type, res_entry.data_value,
-        res_entry.data_string_value, res_entry.data_binary_value};
+                                res_entry.data_string_value, res_entry.data_binary_value,
+                                res_entry.data_binary_offset, res_entry.data_binary_size,
+                                res_entry.nine_patch};
   }
 
   pb::FabricatedOverlay overlay_pb;
@@ -157,7 +240,7 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
   overlay_pb.set_target_package_name(target_package_name_);
   overlay_pb.set_target_overlayable(target_overlayable_);
 
-  std::vector<android::base::borrowed_fd> binary_files;
+  std::vector<FabricatedOverlay::BinaryData> binary_files;
   size_t total_binary_bytes = 0;
   // 16 for the number of bytes in the frro file before the binary data
   const size_t FRRO_HEADER_SIZE = 16;
@@ -181,19 +264,20 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
             auto ref = string_pool.MakeRef(value.second.data_string_value);
             pb_value->set_data_value(ref.index());
           } else if (value.second.data_binary_value.has_value()) {
-              pb_value->set_data_type(Res_value::TYPE_STRING);
-              struct stat s;
-              if (fstat(value.second.data_binary_value->get(), &s) == -1) {
-                return Error("unable to get size of binary file: %d", errno);
-              }
-              std::string uri
-                  = StringPrintf("frro:/%s?offset=%d&size=%d", frro_path_.c_str(),
-                                 static_cast<int> (FRRO_HEADER_SIZE + total_binary_bytes),
-                                 static_cast<int> (s.st_size));
-              total_binary_bytes += s.st_size;
-              binary_files.emplace_back(value.second.data_binary_value->get());
-              auto ref = string_pool.MakeRef(std::move(uri));
-              pb_value->set_data_value(ref.index());
+            auto binary_data = buildBinaryData(pb_value, value.second);
+            if (!binary_data) {
+              return binary_data.GetError();
+            }
+            pb_value->set_data_type(Res_value::TYPE_STRING);
+
+            std::string uri
+                = StringPrintf("frro:/%s?offset=%d&size=%d", frro_path_.c_str(),
+                               static_cast<int> (FRRO_HEADER_SIZE + total_binary_bytes),
+                               static_cast<int> (binary_data->size));
+            total_binary_bytes += binary_data->size;
+            binary_files.emplace_back(std::move(*binary_data));
+            auto ref = string_pool.MakeRef(std::move(uri));
+            pb_value->set_data_value(ref.index());
           } else {
             pb_value->set_data_value(value.second.data_value);
           }
@@ -310,8 +394,9 @@ Result<Unit> FabricatedOverlay::ToBinaryStream(std::ostream& stream) const {
   Write32(stream, (*data)->pb_crc);
   Write32(stream, total_binary_bytes_);
   std::string file_contents;
-  for (const android::base::borrowed_fd fd : binary_files_) {
-    if (!ReadFdToString(fd, &file_contents)) {
+  for (const FabricatedOverlay::BinaryData& bd : binary_files_) {
+    file_contents.resize(bd.size);
+    if (!bd.input_stream->ReadFullyAtOffset(file_contents.data(), bd.size, bd.offset)) {
       return Error("Failed to read binary file data.");
     }
     stream.write(file_contents.data(), file_contents.length());
@@ -383,9 +468,9 @@ Result<OverlayData> FabContainer::GetOverlayData(const OverlayManifestInfo& info
                                        entry.name().c_str());
         const auto& res_value = entry.res_value();
         result.pairs.emplace_back(OverlayData::Value{
-            name, TargetValueWithConfig{.config = entry.configuration(), .value = TargetValue{
+            name, TargetValueWithConfig{.value = TargetValue{
                     .data_type = static_cast<uint8_t>(res_value.data_type()),
-                    .data_value = res_value.data_value()}}});
+                    .data_value = res_value.data_value()}, .config = entry.configuration()}});
       }
     }
   }

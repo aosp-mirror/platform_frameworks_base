@@ -40,17 +40,24 @@ class _ZipEntryRO {
 public:
     ZipEntry entry;
     std::string_view name;
-    void *cookie;
+    void *cookie = nullptr;
 
-    _ZipEntryRO() : cookie(NULL) {}
+    _ZipEntryRO() = default;
 
     ~_ZipEntryRO() {
-      EndIteration(cookie);
+        EndIteration(cookie);
+    }
+
+    android::ZipEntryRO convertToPtr() {
+        _ZipEntryRO* result = new _ZipEntryRO;
+        result->entry = std::move(this->entry);
+        result->name = std::move(this->name);
+        result->cookie = std::exchange(this->cookie, nullptr);
+        return result;
     }
 
 private:
-    _ZipEntryRO(const _ZipEntryRO& other);
-    _ZipEntryRO& operator=(const _ZipEntryRO& other);
+    DISALLOW_COPY_AND_ASSIGN(_ZipEntryRO);
 };
 
 ZipFileRO::~ZipFileRO() {
@@ -94,17 +101,15 @@ ZipFileRO::~ZipFileRO() {
 
 ZipEntryRO ZipFileRO::findEntryByName(const char* entryName) const
 {
-    _ZipEntryRO* data = new _ZipEntryRO;
+    _ZipEntryRO data;
+    data.name = entryName;
 
-    data->name = entryName;
-
-    const int32_t error = FindEntry(mHandle, entryName, &(data->entry));
+    const int32_t error = FindEntry(mHandle, entryName, &(data.entry));
     if (error) {
-        delete data;
-        return NULL;
+        return nullptr;
     }
 
-    return (ZipEntryRO) data;
+    return data.convertToPtr();
 }
 
 /*
@@ -115,63 +120,81 @@ ZipEntryRO ZipFileRO::findEntryByName(const char* entryName) const
  */
 bool ZipFileRO::getEntryInfo(ZipEntryRO entry, uint16_t* pMethod,
     uint32_t* pUncompLen, uint32_t* pCompLen, off64_t* pOffset,
-    uint32_t* pModWhen, uint32_t* pCrc32) const
+    uint32_t* pModWhen, uint32_t* pCrc32, uint16_t* pExtraFieldSize) const
 {
     const _ZipEntryRO* zipEntry = reinterpret_cast<_ZipEntryRO*>(entry);
     const ZipEntry& ze = zipEntry->entry;
 
-    if (pMethod != NULL) {
+    if (pMethod != nullptr) {
         *pMethod = ze.method;
     }
-    if (pUncompLen != NULL) {
+    if (pUncompLen != nullptr) {
         *pUncompLen = ze.uncompressed_length;
     }
-    if (pCompLen != NULL) {
+    if (pCompLen != nullptr) {
         *pCompLen = ze.compressed_length;
     }
-    if (pOffset != NULL) {
+    if (pOffset != nullptr) {
         *pOffset = ze.offset;
     }
-    if (pModWhen != NULL) {
+    if (pModWhen != nullptr) {
         *pModWhen = ze.mod_time;
     }
-    if (pCrc32 != NULL) {
+    if (pCrc32 != nullptr) {
         *pCrc32 = ze.crc32;
+    }
+    if (pExtraFieldSize != nullptr) {
+        *pExtraFieldSize = ze.extra_field_size;
     }
 
     return true;
 }
 
 bool ZipFileRO::startIteration(void** cookie) {
-  return startIteration(cookie, NULL, NULL);
+  return startIteration(cookie, nullptr, nullptr);
 }
 
-bool ZipFileRO::startIteration(void** cookie, const char* prefix, const char* suffix)
-{
-    _ZipEntryRO* ze = new _ZipEntryRO;
-    int32_t error = StartIteration(mHandle, &(ze->cookie),
+bool ZipFileRO::startIteration(void** cookie, const char* prefix, const char* suffix) {
+    auto result = startIterationOrError(prefix, suffix);
+    if (!result.ok()) {
+        return false;
+    }
+    *cookie = result.value();
+    return true;
+}
+
+base::expected<void*, int32_t>
+ZipFileRO::startIterationOrError(const char* prefix, const char* suffix) {
+    _ZipEntryRO ze;
+    int32_t error = StartIteration(mHandle, &(ze.cookie),
                                    prefix ? prefix : "", suffix ? suffix : "");
     if (error) {
         ALOGW("Could not start iteration over %s: %s", mFileName != NULL ? mFileName : "<null>",
                 ErrorCodeString(error));
-        delete ze;
-        return false;
+        return base::unexpected(error);
     }
 
-    *cookie = ze;
-    return true;
+    return ze.convertToPtr();
 }
 
-ZipEntryRO ZipFileRO::nextEntry(void* cookie)
-{
+ZipEntryRO ZipFileRO::nextEntry(void* cookie) {
+    auto result = nextEntryOrError(cookie);
+    if (!result.ok()) {
+        return nullptr;
+    }
+    return result.value();
+}
+
+base::expected<ZipEntryRO, int32_t> ZipFileRO::nextEntryOrError(void* cookie) {
     _ZipEntryRO* ze = reinterpret_cast<_ZipEntryRO*>(cookie);
     int32_t error = Next(ze->cookie, &(ze->entry), &(ze->name));
     if (error) {
         if (error != -1) {
             ALOGW("Error iteration over %s: %s", mFileName != NULL ? mFileName : "<null>",
                     ErrorCodeString(error));
+            return base::unexpected(error);
         }
-        return NULL;
+        return nullptr;
     }
 
     return &(ze->entry);
@@ -284,9 +307,13 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
     _ZipEntryRO *zipEntry = reinterpret_cast<_ZipEntryRO*>(entry);
     const int32_t error = ExtractEntryToFile(mHandle, &(zipEntry->entry), fd);
     if (error) {
-        ALOGW("ExtractToMemory failed with %s", ErrorCodeString(error));
+        ALOGW("ExtractToFile failed with %s", ErrorCodeString(error));
         return false;
     }
 
     return true;
+}
+
+const char* ZipFileRO::getZipFileName() {
+    return mFileName;
 }

@@ -4,7 +4,16 @@
       "name": "FrameworksInputMethodSystemServerTests",
       "options": [
         {"include-filter": "com.android.server.inputmethod"},
-        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "FrameworksImeTests",
+      "options": [
+        {"include-filter": "com.android.inputmethodservice"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"},
         {"exclude-annotation": "org.junit.Ignore"}
       ]

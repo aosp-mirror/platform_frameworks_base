@@ -208,3 +208,22 @@ android_app {
     ],
     min_sdk_version: "24",
 }
+
+//##########################################################
+// Variant: Add apk to an apex
+android_app {
+    name: "CtsShimAddApkToApex",
+    sdk_version: "current",
+    srcs: ["shim_add_apk_to_apex/src/android/addapktoapex/app/AddApkToApexDeviceActivity.java"],
+    optimize: {
+        enabled: false,
+    },
+    dex_preopt: {
+        enabled: false,
+    },
+    manifest: "shim_add_apk_to_apex/AndroidManifestAddApkToApex.xml",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.apex.cts.shim.v2_add_apk_to_apex",
+    ],
+}

@@ -20,6 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -53,6 +54,7 @@ import android.os.Message;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.service.voice.flags.Flags;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.Log;
@@ -183,6 +185,17 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @see #show(Bundle, int)
      */
     public static final String KEY_SHOW_SESSION_ID = "android.service.voice.SHOW_SESSION_ID";
+
+    /**
+     * Bundle key used to specify foreground activity app components.
+     * <p>
+     * Type: ArrayList&ltComponentName&gt
+     * </p>
+     * @see #onShow(Bundle, int)
+     */
+    @FlaggedApi(Flags.FLAG_ALLOW_FOREGROUND_ACTIVITIES_IN_ON_SHOW)
+    public static final String KEY_FOREGROUND_ACTIVITIES =
+            "android.service.voice.FOREGROUND_ACTIVITIES";
 
     final Context mContext;
     final HandlerCaller mHandlerCaller;
@@ -1803,14 +1816,39 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      *
      * @param args The arguments that were supplied to
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
-     * Some example keys include : "invocation_type", "invocation_phone_state",
-     * {@link #KEY_SHOW_SESSION_ID}, "invocation_time_ms",
-     * Intent.EXTRA_TIME ("android.intent.extra.TIME") indicating timing
-     * in milliseconds of the KeyEvent that triggered Assistant and
-     * Intent.EXTRA_ASSIST_INPUT_DEVICE_ID (android.intent.extra.ASSIST_INPUT_DEVICE_ID)
-     *  referring to the device that sent the request. Starting from Android 14, the system will
-     * add {@link VoiceInteractionService#KEY_SHOW_SESSION_ID}, the Bundle is not null. But the
-     * application should handle null case before Android 14.
+     * Some example keys include :
+     * <ul>
+     *     <li>
+     *         invocation_type
+     *     </li>
+     *     <li>
+     *         invocation_phone_state
+     *     </li>
+     *     <li>
+     *         {@link #KEY_SHOW_SESSION_ID}
+     *     </li>
+     *     <li>
+     *         invocation_time_ms
+     *     </li>
+     *     <li>
+     *         Intent.EXTRA_TIME ("android.intent.extra.TIME") indicating timing in milliseconds of
+     *         the KeyEvent that triggered Assistant
+     *     </li>
+     *     <li>
+     *         Intent.EXTRA_ASSIST_INPUT_DEVICE_ID (android.intent.extra.ASSIST_INPUT_DEVICE_ID)
+     *         referring to the device that sent the request
+     *     </li>
+     *     <li>
+     *         {@link #KEY_FOREGROUND_ACTIVITIES} provides foreground activities of up coming
+     *         onHandleAssist/onHandleScreenshot calls earlier. This is only populated if session
+     *         was requested with {@link VoiceInteractionSession.SHOW_WITH_ASSIST} show flag.
+     *     </li>
+     *     <li>
+     *         Starting from Android 14, the system will add {@link #KEY_SHOW_SESSION_ID}, the
+     *         Bundle is not null. But the application should handle null case before Android 14.
+     *     </li>
+     * </ul>
+     *
      * @param showFlags The show flags originally provided to
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
      */

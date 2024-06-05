@@ -1,0 +1,26 @@
+package: "android.service.voice.flags"
+container: "system"
+
+flag {
+    name: "allow_training_data_egress_from_hds"
+    is_exported: true
+    namespace: "machine_learning"
+    description: "This flag allows the hotword detection service to egress training data to the default assistant."
+    bug: "296074924"
+}
+
+flag {
+    name: "allow_hotword_bump_egress"
+    is_exported: true
+    namespace: "machine_learning"
+    description: "This flag allows hotword detection service to egress reason code for hotword bump."
+    bug: "290951024"
+}
+
+flag {
+    name: "allow_foreground_activities_in_on_show"
+    is_exported: true
+    namespace: "machine_learning"
+    description: "This flag allows providing foreground app component along with onShow args."
+    bug: "319409708"
+}

@@ -39,10 +39,11 @@ import android.os.Looper;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.SignalIcon.MobileIconGroup;
 import com.android.settingslib.mobile.TelephonyIcons;
@@ -59,7 +60,7 @@ import org.junit.runner.RunWith;
 import java.util.HashMap;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
@@ -340,7 +341,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     public void testIsDataInService_notInService_false() {
         setupDefaultSignal();
         setVoiceRegState(ServiceState.STATE_OUT_OF_SERVICE);
-        setDataRegState(ServiceState.STATE_OUT_OF_SERVICE);
+        setDataRegInService(false);
         assertFalse(mNetworkController.isMobileDataNetworkInService());
     }
 
@@ -408,3 +409,4 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 false);
     }
 }
+

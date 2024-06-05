@@ -17,10 +17,14 @@
 
 package android.os;
 
+import android.hardware.power.WorkDuration;
+
 /** {@hide} */
 oneway interface IHintSession {
     void updateTargetWorkDuration(long targetDurationNanos);
     void reportActualWorkDuration(in long[] actualDurationNanos, in long[] timeStampNanos);
     void close();
     void sendHint(int hint);
+    void setMode(int mode, boolean enabled);
+    void reportActualWorkDuration2(in WorkDuration[] workDurations);
 }

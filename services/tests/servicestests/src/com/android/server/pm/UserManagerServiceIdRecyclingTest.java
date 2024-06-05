@@ -111,7 +111,7 @@ public class UserManagerServiceIdRecyclingTest {
 
     private void removeUser(int userId) {
         mUserManagerService.removeUserInfo(userId);
-        mUserManagerService.addRemovingUserIdLocked(userId);
+        mUserManagerService.addRemovingUserId(userId);
     }
 
     private void assertNoNextIdAvailable(String message) {

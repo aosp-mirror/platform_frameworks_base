@@ -92,7 +92,6 @@ public class ConfirmationPrompt {
     private Executor mExecutor;
     private Context mContext;
 
-    private final KeyStore mKeyStore = KeyStore.getInstance();
     private AndroidProtectedConfirmation mProtectedConfirmation;
 
     private AndroidProtectedConfirmation getService() {

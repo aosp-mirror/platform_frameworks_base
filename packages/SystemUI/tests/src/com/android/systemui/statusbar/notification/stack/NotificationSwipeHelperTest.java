@@ -37,16 +37,17 @@ import android.animation.Animator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.os.Handler;
 import android.service.notification.StatusBarNotification;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
@@ -69,7 +70,7 @@ import java.util.stream.Collectors;
  * Tests for {@link NotificationSwipeHelper}.
  */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper()
 public class NotificationSwipeHelperTest extends SysuiTestCase {
 
@@ -83,7 +84,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     private Handler mHandler;
     private ExpandableNotificationRow mNotificationRow;
     private Runnable mFalsingCheck;
-    private FeatureFlags mFeatureFlags;
+    private final FeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     private static final int FAKE_ROW_WIDTH = 20;
     private static final int FAKE_ROW_HEIGHT = 20;
@@ -96,7 +97,6 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         mCallback = mock(NotificationSwipeHelper.NotificationCallback.class);
         mListener = mock(NotificationMenuRowPlugin.OnMenuEventListener.class);
         mNotificationRoundnessManager = mock(NotificationRoundnessManager.class);
-        mFeatureFlags = mock(FeatureFlags.class);
         mSwipeHelper = spy(new NotificationSwipeHelper(
                 mContext.getResources(),
                 ViewConfiguration.get(mContext),

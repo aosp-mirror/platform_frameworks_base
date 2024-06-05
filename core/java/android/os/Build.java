@@ -27,6 +27,7 @@ import android.app.ActivityThread;
 import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.sysprop.DeviceProperties;
 import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
@@ -34,6 +35,8 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.View;
+
+import com.android.internal.ravenwood.RavenwoodEnvironment;
 
 import dalvik.system.VMRuntime;
 
@@ -46,7 +49,12 @@ import java.util.stream.Collectors;
 /**
  * Information about the current build, extracted from system properties.
  */
+@RavenwoodKeepWholeClass
 public class Build {
+    static {
+        // Set up the default system properties.
+        RavenwoodEnvironment.ensureRavenwoodInitialized();
+    }
     private static final String TAG = "Build";
 
     /** Value used for when a build property is unknown. */
@@ -306,7 +314,7 @@ public class Build {
          * compatibility.
          */
         final String[] abiList;
-        if (VMRuntime.getRuntime().is64Bit()) {
+        if (android.os.Process.is64Bit()) {
             abiList = SUPPORTED_64_BIT_ABIS;
         } else {
             abiList = SUPPORTED_32_BIT_ABIS;
@@ -1223,6 +1231,11 @@ public class Build {
          * Upside Down Cake.
          */
         public static final int UPSIDE_DOWN_CAKE = 34;
+
+        /**
+         * Vanilla Ice Cream.
+         */
+        public static final int VANILLA_ICE_CREAM = 35;
     }
 
     /** The type of build, like "user" or "eng". */
@@ -1308,9 +1321,7 @@ public class Build {
         if (IS_ENG) return true;
 
         if (IS_TREBLE_ENABLED) {
-            // If we can run this code, the device should already pass AVB.
-            // So, we don't need to check AVB here.
-            int result = VintfObject.verifyWithoutAvb();
+            int result = VintfObject.verifyBuildAtBoot();
 
             if (result != 0) {
                 Slog.e(TAG, "Vendor interface is incompatible, error="
@@ -1555,7 +1566,7 @@ public class Build {
         String attestProp = getString(
                 TextUtils.formatSimple("ro.product.%s_for_attestation", property));
         return attestProp.equals(UNKNOWN)
-                ? getString(TextUtils.formatSimple("ro.product.vendor.%s", property)) : UNKNOWN;
+                ? getString(TextUtils.formatSimple("ro.product.vendor.%s", property)) : attestProp;
     }
 
     private static String[] getStringList(String property, String separator) {

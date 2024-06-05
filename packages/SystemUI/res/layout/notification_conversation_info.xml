@@ -17,6 +17,7 @@
 
 <com.android.systemui.statusbar.notification.row.NotificationConversationInfo
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/notification_guts"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -173,7 +174,7 @@
             android:contentDescription="@string/notification_more_settings"
             android:background="@drawable/ripple_drawable_20dp"
             android:src="@drawable/ic_settings"
-            android:tint="?android:attr/colorAccent"
+            android:tint="?androidprv:attr/materialColorPrimary"
             android:layout_alignParentEnd="true" />
 
     </LinearLayout>
