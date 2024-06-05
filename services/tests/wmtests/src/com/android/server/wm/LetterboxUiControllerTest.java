@@ -63,8 +63,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.LetterboxUiController.MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP;
-import static com.android.server.wm.LetterboxUiController.SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS;
+import static com.android.server.wm.AppCompatCapability.MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP;
+import static com.android.server.wm.AppCompatCapability.SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS;
 import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
 
 import static org.junit.Assert.assertEquals;
