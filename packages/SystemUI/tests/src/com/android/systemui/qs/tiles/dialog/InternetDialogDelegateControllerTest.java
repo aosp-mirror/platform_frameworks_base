@@ -51,7 +51,6 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.text.TextUtils;
@@ -59,6 +58,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -101,7 +101,7 @@ import java.util.Locale;
 import java.util.Map;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class InternetDialogDelegateControllerTest extends SysuiTestCase {
 
@@ -1114,6 +1114,34 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
 
         assertThat(mInternetDialogController.hasActiveSubIdOnDds()).isFalse();
+    }
+
+    @Test
+    public void hasActiveSubIdOnDds_activeDdsAndIsOnlyNonTerrestrialNetwork_returnFalse() {
+        when(SubscriptionManager.getDefaultDataSubscriptionId())
+                .thenReturn(SUB_ID);
+        SubscriptionInfo info = mock(SubscriptionInfo.class);
+        when(info.isEmbedded()).thenReturn(true);
+        when(info.isOnlyNonTerrestrialNetwork()).thenReturn(true);
+        when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(info);
+
+        mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
+
+        assertFalse(mInternetDialogController.hasActiveSubIdOnDds());
+    }
+
+    @Test
+    public void hasActiveSubIdOnDds_activeDdsAndIsNotOnlyNonTerrestrialNetwork_returnTrue() {
+        when(SubscriptionManager.getDefaultDataSubscriptionId())
+                .thenReturn(SUB_ID);
+        SubscriptionInfo info = mock(SubscriptionInfo.class);
+        when(info.isEmbedded()).thenReturn(true);
+        when(info.isOnlyNonTerrestrialNetwork()).thenReturn(false);
+        when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(info);
+
+        mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
+
+        assertTrue(mInternetDialogController.hasActiveSubIdOnDds());
     }
 
     private String getResourcesString(String name) {

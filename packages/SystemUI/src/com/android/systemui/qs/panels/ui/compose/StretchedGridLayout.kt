@@ -60,14 +60,13 @@ constructor(
         // Icon [3 | 4]
         // Large [6 | 8]
         val columns = 12
-        val iconTilesSpecs by iconTilesViewModel.iconTilesSpecs.collectAsStateWithLifecycle()
         val stretchedTiles =
             remember(tiles) {
                 val sizedTiles =
                     tiles.map {
                         SizedTile(
                             it,
-                            if (iconTilesSpecs.contains(it.spec)) {
+                            if (iconTilesViewModel.isIconTile(it.spec)) {
                                 3
                             } else {
                                 6
@@ -81,7 +80,7 @@ constructor(
             items(stretchedTiles.size, span = { GridItemSpan(stretchedTiles[it].width) }) { index ->
                 Tile(
                     tile = stretchedTiles[index].tile,
-                    iconOnly = iconTilesSpecs.contains(stretchedTiles[index].tile.spec),
+                    iconOnly = iconTilesViewModel.isIconTile(stretchedTiles[index].tile.spec),
                     modifier = Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
                 )
             }
@@ -95,12 +94,11 @@ constructor(
         onAddTile: (TileSpec, Int) -> Unit,
         onRemoveTile: (TileSpec) -> Unit
     ) {
-        val iconOnlySpecs by iconTilesViewModel.iconTilesSpecs.collectAsStateWithLifecycle()
         val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
 
         DefaultEditTileGrid(
             tiles = tiles,
-            iconOnlySpecs = iconOnlySpecs,
+            isIconOnly = iconTilesViewModel::isIconTile,
             columns = GridCells.Fixed(columns),
             modifier = modifier,
             onAddTile = onAddTile,

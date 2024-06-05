@@ -85,15 +85,14 @@ internal class SceneTransitionLayoutImpl(
      * The different values of a shared value keyed by a a [ValueKey] and the different elements and
      * scenes it is associated to.
      */
-    private var _sharedValues:
-        MutableMap<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>? =
+    private var _sharedValues: MutableMap<ValueKey, MutableMap<ElementKey?, SharedValue<*, *>>>? =
         null
-    internal val sharedValues:
-        MutableMap<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>
+    internal val sharedValues: MutableMap<ValueKey, MutableMap<ElementKey?, SharedValue<*, *>>>
         get() =
             _sharedValues
-                ?: mutableMapOf<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>()
-                    .also { _sharedValues = it }
+                ?: mutableMapOf<ValueKey, MutableMap<ElementKey?, SharedValue<*, *>>>().also {
+                    _sharedValues = it
+                }
 
     // TODO(b/317958526): Lazily allocate scene gesture handlers the first time they are needed.
     private val horizontalDraggableHandler: DraggableHandlerImpl
@@ -107,6 +106,13 @@ internal class SceneTransitionLayoutImpl(
                 ?: UserActionDistanceScopeImpl(layoutImpl = this).also {
                     _userActionDistanceScope = it
                 }
+
+    /**
+     * The [LookaheadScope] of this layout, that can be used to compute offsets relative to the
+     * layout.
+     */
+    internal lateinit var lookaheadScope: LookaheadScope
+        private set
 
     init {
         updateScenes(builder)
@@ -185,17 +191,19 @@ internal class SceneTransitionLayoutImpl(
     }
 
     @Composable
-    internal fun Content(modifier: Modifier) {
+    internal fun Content(modifier: Modifier, swipeDetector: SwipeDetector) {
         Box(
             modifier
                 // Handle horizontal and vertical swipes on this layout.
                 // Note: order here is important and will give a slight priority to the vertical
                 // swipes.
-                .swipeToScene(horizontalDraggableHandler)
-                .swipeToScene(verticalDraggableHandler)
+                .swipeToScene(horizontalDraggableHandler, swipeDetector)
+                .swipeToScene(verticalDraggableHandler, swipeDetector)
                 .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {
+                lookaheadScope = this
+
                 BackHandler()
 
                 scenesToCompose().fastForEach { scene -> key(scene.key) { scene.Content() } }

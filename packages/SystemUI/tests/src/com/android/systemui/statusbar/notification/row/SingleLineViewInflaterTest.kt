@@ -372,7 +372,7 @@ class SingleLineViewInflaterTest : SysuiTestCase() {
         }
 
         // Inflate the SingleLineViewModel
-        // Mock the behavior of NotificationContentInflater.doInBackground
+        // Mock the behavior of NotificationRowContentBinder.doInBackground
         val messagingStyle = builder.getMessagingStyle()
         val isConversation = type is OneToOneConversation || type is GroupConversation
         return SingleLineViewInflater.inflateSingleLineViewModel(

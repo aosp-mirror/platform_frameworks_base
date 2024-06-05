@@ -139,8 +139,6 @@ constructor(
      */
     val scrolledToTop: Flow<Boolean> =
         stackAppearanceInteractor.scrolledToTop.dumpValue("scrolledToTop")
-    /** The y-coordinate in px of bottom of the contents of the HUN. */
-    val headsUpTop: Flow<Float> = stackAppearanceInteractor.headsUpTop.dumpValue("headsUpTop")
 
     /** Receives the amount (px) that the stack should scroll due to internal expansion. */
     val syntheticScrollConsumer: (Float) -> Unit = stackAppearanceInteractor::setSyntheticScroll
@@ -150,8 +148,6 @@ constructor(
      */
     val currentGestureOverscrollConsumer: (Boolean) -> Unit =
         stackAppearanceInteractor::setCurrentGestureOverscroll
-    /** Receives the height of the heads up notification. */
-    val headsUpHeightConsumer: (Float) -> Unit = stackAppearanceInteractor::setHeadsUpHeight
 
     /** Whether the notification stack is scrollable or not. */
     val isScrollable: Flow<Boolean> =

@@ -2514,7 +2514,7 @@ public class CameraExtensionsProxyService extends Service {
         public Plane[] getPlanes() {
             throwISEIfImageIsInvalid();
             if (mPlanes == null) {
-                int fenceFd = mParcelImage.fence != null ? mParcelImage.fence.getFd() : -1;
+                int fenceFd = mParcelImage.fence != null ? mParcelImage.fence.detachFd() : -1;
                 mGraphicBuffer = GraphicBuffer.createFromHardwareBuffer(mParcelImage.buffer);
                 mPlanes = ImageReader.initializeImagePlanes(mParcelImage.planeCount, mGraphicBuffer,
                         fenceFd, mParcelImage.format, mParcelImage.timestamp,

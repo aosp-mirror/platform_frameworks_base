@@ -18,7 +18,8 @@ package com.android.wm.shell.desktopmode;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
-import static com.android.wm.shell.transition.Transitions.TRANSIT_MOVE_TO_DESKTOP;
+import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.getEnterTransitionType;
+import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.isEnterDesktopModeTransition;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -30,6 +31,7 @@ import android.os.IBinder;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.view.WindowManager.TransitionType;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
@@ -37,6 +39,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener;
 
@@ -82,8 +85,12 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
      * @param wct WindowContainerTransaction for transition
      * @return the token representing the started transition
      */
-    public IBinder moveToDesktop(@NonNull WindowContainerTransaction wct) {
-        final IBinder token = mTransitions.startTransition(TRANSIT_MOVE_TO_DESKTOP, wct, this);
+    public IBinder moveToDesktop(
+            @NonNull WindowContainerTransaction wct,
+            DesktopModeTransitionSource transitionSource
+    ) {
+        final IBinder token = mTransitions.startTransition(getEnterTransitionType(transitionSource),
+                wct, this);
         mPendingTransitionTokens.add(token);
         return token;
     }
@@ -117,7 +124,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
 
     private boolean startChangeTransition(
             @NonNull IBinder transition,
-            @WindowManager.TransitionType int type,
+            @TransitionType int type,
             @NonNull TransitionInfo.Change change,
             @NonNull SurfaceControl.Transaction startT,
             @NonNull SurfaceControl.Transaction finishT,
@@ -127,7 +134,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
         }
 
         final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-        if (type == TRANSIT_MOVE_TO_DESKTOP
+        if (isEnterDesktopModeTransition(type)
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             return animateMoveToDesktop(change, startT, finishCallback);
         }

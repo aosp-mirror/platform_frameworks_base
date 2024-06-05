@@ -22,15 +22,28 @@ sealed interface PromptKind {
     data class Biometric(
         /** The available modalities for the authentication on the prompt. */
         val activeModalities: BiometricModalities = BiometricModalities(),
-        // TODO(b/330908557): Use this value to decide whether to show two pane layout, instead of
-        // simply depending on rotations.
-        val showTwoPane: Boolean = false,
-    ) : PromptKind
+        val paneType: PaneType = PaneType.ONE_PANE_PORTRAIT,
+    ) : PromptKind {
+        enum class PaneType {
+            TWO_PANE_LANDSCAPE,
+            ONE_PANE_PORTRAIT,
+            ONE_PANE_NO_SENSOR_LANDSCAPE,
+            ONE_PANE_LARGE_SCREEN_LANDSCAPE
+        }
+    }
 
-    object Pin : PromptKind
-    object Pattern : PromptKind
-    object Password : PromptKind
+    data object Pin : PromptKind
+    data object Pattern : PromptKind
+    data object Password : PromptKind
 
     fun isBiometric() = this is Biometric
-    fun isCredential() = (this is Pin) or (this is Pattern) or (this is Password)
+    fun isTwoPaneLandscapeBiometric(): Boolean =
+        (this as? Biometric)?.paneType == Biometric.PaneType.TWO_PANE_LANDSCAPE
+    fun isOnePanePortraitBiometric() =
+        (this as? Biometric)?.paneType == Biometric.PaneType.ONE_PANE_PORTRAIT
+    fun isOnePaneNoSensorLandscapeBiometric() =
+        (this as? Biometric)?.paneType == Biometric.PaneType.ONE_PANE_NO_SENSOR_LANDSCAPE
+    fun isOnePaneLargeScreenLandscapeBiometric() =
+        (this as? Biometric)?.paneType == Biometric.PaneType.ONE_PANE_LARGE_SCREEN_LANDSCAPE
+    fun isCredential() = (this is Pin) || (this is Pattern) || (this is Password)
 }

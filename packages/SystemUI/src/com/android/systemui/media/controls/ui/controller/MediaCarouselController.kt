@@ -217,7 +217,7 @@ constructor(
     private val animationScaleObserver: ContentObserver =
         object : ContentObserver(null) {
             override fun onChange(selfChange: Boolean) {
-                if (!mediaFlags.isMediaControlsRefactorEnabled()) {
+                if (!mediaFlags.isSceneContainerEnabled()) {
                     MediaPlayerData.players().forEach { it.updateAnimatorDurationScale() }
                 } else {
                     controllerByViewModel.values.forEach { it.updateAnimatorDurationScale() }
@@ -347,7 +347,7 @@ constructor(
         inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
         configurationController.addCallback(configListener)
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) {
+        if (!mediaFlags.isSceneContainerEnabled()) {
             setUpListeners()
         } else {
             val visualStabilityCallback = OnReorderingAllowedListener {
@@ -389,13 +389,13 @@ constructor(
                 listenForAnyStateToLockscreenTransition(this)
                 listenForLockscreenSettingChanges(this)
 
-                if (!mediaFlags.isMediaControlsRefactorEnabled()) return@repeatOnLifecycle
+                if (!mediaFlags.isSceneContainerEnabled()) return@repeatOnLifecycle
                 listenForMediaItemsChanges(this)
             }
         }
 
         // Notifies all active players about animation scale changes.
-        globalSettings.registerContentObserver(
+        globalSettings.registerContentObserverSync(
             Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
             animationScaleObserver
         )
@@ -1092,7 +1092,7 @@ constructor(
     }
 
     private fun updatePlayers(recreateMedia: Boolean) {
-        if (mediaFlags.isMediaControlsRefactorEnabled()) {
+        if (mediaFlags.isSceneContainerEnabled()) {
             updateMediaPlayers(recreateMedia)
             return
         }
@@ -1192,7 +1192,7 @@ constructor(
             currentStartLocation = startLocation
             currentEndLocation = endLocation
             currentTransitionProgress = progress
-            if (!mediaFlags.isMediaControlsRefactorEnabled()) {
+            if (!mediaFlags.isSceneContainerEnabled()) {
                 for (mediaPlayer in MediaPlayerData.players()) {
                     updateViewControllerToState(mediaPlayer.mediaViewController, immediately)
                 }
@@ -1254,7 +1254,7 @@ constructor(
 
     /** Update listening to seekbar. */
     private fun updateSeekbarListening(visibleToUser: Boolean) {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) {
+        if (!mediaFlags.isSceneContainerEnabled()) {
             for (player in MediaPlayerData.players()) {
                 player.setListening(visibleToUser && currentlyExpanded)
             }
@@ -1269,7 +1269,7 @@ constructor(
     private fun updateCarouselDimensions() {
         var width = 0
         var height = 0
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) {
+        if (!mediaFlags.isSceneContainerEnabled()) {
             for (mediaPlayer in MediaPlayerData.players()) {
                 val controller = mediaPlayer.mediaViewController
                 // When transitioning the view to gone, the view gets smaller, but the translation
@@ -1361,7 +1361,7 @@ constructor(
                         !mediaManager.hasActiveMediaOrRecommendation() &&
                         desiredHostState.showsOnlyActiveMedia
 
-                if (!mediaFlags.isMediaControlsRefactorEnabled()) {
+                if (!mediaFlags.isSceneContainerEnabled()) {
                     for (mediaPlayer in MediaPlayerData.players()) {
                         if (animate) {
                             mediaPlayer.mediaViewController.animatePendingStateChange(
@@ -1401,7 +1401,7 @@ constructor(
         }
 
     fun closeGuts(immediate: Boolean = true) {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) {
+        if (!mediaFlags.isSceneContainerEnabled()) {
             MediaPlayerData.players().forEach { it.closeGuts(immediate) }
         } else {
             controllerByViewModel.values.forEach { it.closeGuts(immediate) }
@@ -1544,7 +1544,7 @@ constructor(
 
     @VisibleForTesting
     fun onSwipeToDismiss() {
-        if (mediaFlags.isMediaControlsRefactorEnabled()) {
+        if (mediaFlags.isSceneContainerEnabled()) {
             mediaCarouselViewModel.onSwipeToDismiss()
             return
         }

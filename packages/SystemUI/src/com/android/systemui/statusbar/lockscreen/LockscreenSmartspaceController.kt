@@ -143,6 +143,12 @@ constructor(
     private var managedUserHandle: UserHandle? = null
     private var mSplitShadeEnabled = false
 
+    var suppressDisconnects = false
+        set(value) {
+            field = value
+            disconnect()
+        }
+
     // TODO(b/202758428): refactor so that we can test color updates via region samping, similar to
     //  how we test color updates when theme changes (See testThemeChangeUpdatesTextColor).
 
@@ -522,6 +528,7 @@ constructor(
      */
     fun disconnect() {
         if (!smartspaceViews.isEmpty()) return
+        if (suppressDisconnects) return
 
         execution.assertIsMainThread()
 

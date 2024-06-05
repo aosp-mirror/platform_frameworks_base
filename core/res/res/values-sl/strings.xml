@@ -2198,7 +2198,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Smerni gumb levo"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Smerni gumb desno"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Smerni gumb sredina"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Vrstica s podnapisi aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Paket <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> je bil dodan v segment OMEJENO"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"je poslal(-a) sliko"</string>

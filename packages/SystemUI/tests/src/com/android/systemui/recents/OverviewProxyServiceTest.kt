@@ -23,9 +23,9 @@ import android.content.pm.ResolveInfo
 import android.os.PowerManager
 import android.os.Process
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
 import android.testing.TestableContext
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.app.AssistUtils
@@ -81,7 +81,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class OverviewProxyServiceTest : SysuiTestCase() {
 

@@ -179,8 +179,15 @@ class TextAnimator(
 
     private val fontVariationUtils = FontVariationUtils()
 
-    fun updateLayout(layout: Layout) {
+    fun updateLayout(layout: Layout, textSize: Float = -1f) {
         textInterpolator.layout = layout
+
+        if (textSize >= 0) {
+            textInterpolator.targetPaint.textSize = textSize
+            textInterpolator.basePaint.textSize = textSize
+            textInterpolator.onTargetPaintModified()
+            textInterpolator.onBasePaintModified()
+        }
     }
 
     fun isRunning(): Boolean {

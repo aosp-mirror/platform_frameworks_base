@@ -26,11 +26,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.theme.PlatformTheme
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.people.ui.compose.PeopleScreen
-import com.android.systemui.people.ui.view.PeopleViewBinder
-import com.android.systemui.people.ui.view.PeopleViewBinder.bind
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -38,10 +34,7 @@ import kotlinx.coroutines.launch
 /** People Tile Widget configuration activity that shows the user their conversation tiles. */
 class PeopleSpaceActivity
 @Inject
-constructor(
-    private val viewModelFactory: PeopleViewModel.Factory,
-    private val featureFlags: FeatureFlags,
-) : ComponentActivity() {
+constructor(private val viewModelFactory: PeopleViewModel.Factory) : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setResult(RESULT_CANCELED)
@@ -66,17 +59,7 @@ constructor(
         }
 
         // Set the content of the activity, using either the View or Compose implementation.
-        if (featureFlags.isEnabled(Flags.COMPOSE_PEOPLE_SPACE)) {
-            Log.d(TAG, "Using the Compose implementation of the PeopleSpaceActivity")
-            setContent {
-                PlatformTheme { PeopleScreen(viewModel, onResult = { finishActivity(it) }) }
-            }
-        } else {
-            Log.d(TAG, "Using the View implementation of the PeopleSpaceActivity")
-            val view = PeopleViewBinder.create(this)
-            bind(view, viewModel, lifecycleOwner = this, onResult = { finishActivity(it) })
-            setContentView(view)
-        }
+        setContent { PlatformTheme { PeopleScreen(viewModel, onResult = { finishActivity(it) }) } }
     }
 
     private fun finishActivity(result: PeopleViewModel.Result) {

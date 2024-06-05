@@ -1538,6 +1538,8 @@ public final class DisplayPowerControllerTest {
 
     @Test
     public void testDozeScreenStateOverride_toSupportedOffloadStateFromDoze_DisplayStateChanges() {
+        when(mDisplayManagerFlagsMock.isOffloadDozeOverrideHoldsWakelockEnabled()).thenReturn(true);
+
         // set up.
         int initState = Display.STATE_DOZE;
         int supportedTargetState = Display.STATE_DOZE_SUSPEND;
@@ -1556,9 +1558,14 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
+        reset(mHolder.wakelockController);
         mHolder.dpc.overrideDozeScreenState(
                 supportedTargetState, Display.STATE_REASON_DEFAULT_POLICY);
         advanceTime(1); // Run updatePowerState
+
+        // Should get a wakelock to notify powermanager
+        verify(mHolder.wakelockController, atLeastOnce()).acquireWakelock(
+                eq(WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS));
 
         verify(mHolder.displayPowerState)
                 .setScreenState(supportedTargetState, Display.STATE_REASON_DEFAULT_POLICY);

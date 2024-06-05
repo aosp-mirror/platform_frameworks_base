@@ -74,6 +74,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -1609,7 +1610,7 @@ public class ThermalManagerService extends SystemService {
         /** Map of skin temperature sensor name to a corresponding list of samples */
         @GuardedBy("mSamples")
         @VisibleForTesting
-        final ArrayMap<String, ArrayList<Sample>> mSamples = new ArrayMap<>();
+        final ArrayMap<String, LinkedList<Sample>> mSamples = new ArrayMap<>();
 
         /** Map of skin temperature sensor name to the corresponding SEVERE temperature threshold */
         @GuardedBy("mSamples")
@@ -1706,10 +1707,10 @@ public class ThermalManagerService extends SystemService {
                         continue;
                     }
 
-                    ArrayList<Sample> samples = mSamples.computeIfAbsent(temperature.getName(),
-                            k -> new ArrayList<>(RING_BUFFER_SIZE));
+                    LinkedList<Sample> samples = mSamples.computeIfAbsent(temperature.getName(),
+                            k -> new LinkedList<>());
                     if (samples.size() == RING_BUFFER_SIZE) {
-                        samples.remove(0);
+                        samples.removeFirst();
                     }
                     samples.add(new Sample(now, temperature.getValue()));
                 }
@@ -1724,8 +1725,7 @@ public class ThermalManagerService extends SystemService {
         float getSlopeOf(List<Sample> samples) {
             long sumTimes = 0L;
             float sumTemperatures = 0.0f;
-            for (int s = 0; s < samples.size(); ++s) {
-                Sample sample = samples.get(s);
+            for (final Sample sample : samples) {
                 sumTimes += sample.time;
                 sumTemperatures += sample.temperature;
             }
@@ -1734,8 +1734,7 @@ public class ThermalManagerService extends SystemService {
 
             long sampleVariance = 0L;
             float sampleCovariance = 0.0f;
-            for (int s = 0; s < samples.size(); ++s) {
-                Sample sample = samples.get(s);
+            for (final Sample sample : samples) {
                 long timeDelta = sample.time - meanTime;
                 float temperatureDelta = sample.temperature - meanTemperature;
                 sampleVariance += timeDelta * timeDelta;
@@ -1795,9 +1794,9 @@ public class ThermalManagerService extends SystemService {
 
                 float maxNormalized = Float.NaN;
                 int noThresholdSampleCount = 0;
-                for (Map.Entry<String, ArrayList<Sample>> entry : mSamples.entrySet()) {
+                for (Map.Entry<String, LinkedList<Sample>> entry : mSamples.entrySet()) {
                     String name = entry.getKey();
-                    ArrayList<Sample> samples = entry.getValue();
+                    LinkedList<Sample> samples = entry.getValue();
 
                     Float threshold = mSevereThresholds.get(name);
                     if (threshold == null) {
@@ -1806,7 +1805,7 @@ public class ThermalManagerService extends SystemService {
                         continue;
                     }
 
-                    float currentTemperature = samples.get(0).temperature;
+                    float currentTemperature = samples.getLast().temperature;
 
                     if (samples.size() < MINIMUM_SAMPLE_COUNT) {
                         // Don't try to forecast, just use the latest one we have

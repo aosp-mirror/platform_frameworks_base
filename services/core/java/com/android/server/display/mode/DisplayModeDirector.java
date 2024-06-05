@@ -1254,13 +1254,9 @@ public class DisplayModeDirector {
      *  Responsible for keeping track of app requested refresh rates per display
      */
     public final class AppRequestObserver {
-        private final SparseArray<Display.Mode> mAppRequestedModeByDisplay;
-        private final SparseArray<RefreshRateRange> mAppPreferredRefreshRateRangeByDisplay;
         private final boolean mIgnorePreferredRefreshRate;
 
         AppRequestObserver(DisplayManagerFlags flags) {
-            mAppRequestedModeByDisplay = new SparseArray<>();
-            mAppPreferredRefreshRateRangeByDisplay = new SparseArray<>();
             mIgnorePreferredRefreshRate = flags.ignoreAppPreferredRefreshRateRequest();
         }
 
@@ -1269,34 +1265,77 @@ public class DisplayModeDirector {
          */
         public void setAppRequest(int displayId, int modeId, float requestedRefreshRate,
                 float requestedMinRefreshRateRange, float requestedMaxRefreshRateRange) {
+            Display.Mode requestedMode;
+            synchronized (mLock) {
+                requestedMode = findModeLocked(displayId, modeId, requestedRefreshRate);
+            }
 
-            if (modeId == 0 && requestedRefreshRate != 0 && !mIgnorePreferredRefreshRate) {
+            Vote frameRateVote = getFrameRateVote(
+                    requestedMinRefreshRateRange, requestedMaxRefreshRateRange);
+            Vote baseModeRefreshRateVote = getBaseModeVote(requestedMode, requestedRefreshRate);
+            Vote sizeVote = getSizeVote(requestedMode);
+
+            mVotesStorage.updateVote(displayId, Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE,
+                    frameRateVote);
+            mVotesStorage.updateVote(displayId, Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
+                    baseModeRefreshRateVote);
+            mVotesStorage.updateVote(displayId, Vote.PRIORITY_APP_REQUEST_SIZE, sizeVote);
+        }
+
+        private Display.Mode findModeLocked(int displayId, int modeId, float requestedRefreshRate) {
+            Display.Mode mode = null;
+            if (modeId != 0) {
+                mode = findAppModeByIdLocked(displayId, modeId);
+            } else if (requestedRefreshRate != 0 && !mIgnorePreferredRefreshRate) { // modeId == 0
                 // Scan supported modes returned to find a mode with the same
                 // size as the default display mode but with the specified refresh rate instead.
-                Display.Mode mode = findDefaultModeByRefreshRate(displayId, requestedRefreshRate);
-                if (mode != null) {
-                    modeId = mode.getModeId();
-                } else {
+                mode = findDefaultModeByRefreshRateLocked(displayId, requestedRefreshRate);
+                if (mode == null) {
                     Slog.e(TAG, "Couldn't find a mode for the requestedRefreshRate: "
                             + requestedRefreshRate + " on Display: " + displayId);
                 }
             }
+            return mode;
+        }
 
-            synchronized (mLock) {
-                setAppRequestedModeLocked(displayId, modeId);
-                setAppPreferredRefreshRateRangeLocked(displayId, requestedMinRefreshRateRange,
-                        requestedMaxRefreshRateRange);
+        private Vote getFrameRateVote(float minRefreshRate, float maxRefreshRate) {
+            RefreshRateRange refreshRateRange = null;
+            if (minRefreshRate > 0 || maxRefreshRate > 0) {
+                float max = maxRefreshRate > 0
+                        ? maxRefreshRate : Float.POSITIVE_INFINITY;
+                refreshRateRange = new RefreshRateRange(minRefreshRate, max);
+                if (refreshRateRange.min == 0 && refreshRateRange.max == 0) {
+                    // minRefreshRate/maxRefreshRate were invalid
+                    refreshRateRange = null;
+                }
             }
+            return refreshRateRange != null
+                    ? Vote.forRenderFrameRates(refreshRateRange.min, refreshRateRange.max) : null;
+        }
+
+        private Vote getSizeVote(@Nullable Display.Mode mode) {
+            return mode != null
+                    ?  Vote.forSize(mode.getPhysicalWidth(), mode.getPhysicalHeight()) : null;
+        }
+
+        private Vote getBaseModeVote(@Nullable Display.Mode mode, float requestedRefreshRate) {
+            Vote vote = null;
+            if (mode != null) {
+                if (mode.isSynthetic()) {
+                    vote = Vote.forRequestedRefreshRate(mode.getRefreshRate());
+                } else {
+                    vote = Vote.forBaseModeRefreshRate(mode.getRefreshRate());
+                }
+            } else if (requestedRefreshRate != 0f && mIgnorePreferredRefreshRate) {
+                vote = Vote.forRequestedRefreshRate(requestedRefreshRate);
+            } // !mIgnorePreferredRefreshRate case is handled by findModeLocked
+            return vote;
         }
 
         @Nullable
-        private Display.Mode findDefaultModeByRefreshRate(int displayId, float refreshRate) {
-            Display.Mode[] modes;
-            Display.Mode defaultMode;
-            synchronized (mLock) {
-                modes = mAppSupportedModesByDisplay.get(displayId);
-                defaultMode = mDefaultModeByDisplay.get(displayId);
-            }
+        private Display.Mode findDefaultModeByRefreshRateLocked(int displayId, float refreshRate) {
+            Display.Mode[] modes = mAppSupportedModesByDisplay.get(displayId);
+            Display.Mode defaultMode = mDefaultModeByDisplay.get(displayId);
             for (int i = 0; i < modes.length; i++) {
                 if (modes[i].matches(defaultMode.getPhysicalWidth(),
                         defaultMode.getPhysicalHeight(), refreshRate)) {
@@ -1304,69 +1343,6 @@ public class DisplayModeDirector {
                 }
             }
             return null;
-        }
-
-        private void setAppRequestedModeLocked(int displayId, int modeId) {
-            final Display.Mode requestedMode = findAppModeByIdLocked(displayId, modeId);
-            if (Objects.equals(requestedMode, mAppRequestedModeByDisplay.get(displayId))) {
-                return;
-            }
-            final Vote baseModeRefreshRateVote;
-            final Vote sizeVote;
-            if (requestedMode != null) {
-                mAppRequestedModeByDisplay.put(displayId, requestedMode);
-                sizeVote = Vote.forSize(requestedMode.getPhysicalWidth(),
-                        requestedMode.getPhysicalHeight());
-                if (requestedMode.isSynthetic()) {
-                    // TODO: for synthetic mode we should not limit frame rate, we must ensure
-                    // that frame rate is reachable within other Votes constraints
-                    baseModeRefreshRateVote = Vote.forRenderFrameRates(
-                            requestedMode.getRefreshRate(), requestedMode.getRefreshRate());
-                } else {
-                    baseModeRefreshRateVote =
-                            Vote.forBaseModeRefreshRate(requestedMode.getRefreshRate());
-                }
-            } else {
-                mAppRequestedModeByDisplay.remove(displayId);
-                baseModeRefreshRateVote = null;
-                sizeVote = null;
-            }
-
-            mVotesStorage.updateVote(displayId, Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
-                    baseModeRefreshRateVote);
-            mVotesStorage.updateVote(displayId, Vote.PRIORITY_APP_REQUEST_SIZE, sizeVote);
-        }
-
-        private void setAppPreferredRefreshRateRangeLocked(int displayId,
-                float requestedMinRefreshRateRange, float requestedMaxRefreshRateRange) {
-            final Vote vote;
-
-            RefreshRateRange refreshRateRange = null;
-            if (requestedMinRefreshRateRange > 0 || requestedMaxRefreshRateRange > 0) {
-                float min = requestedMinRefreshRateRange;
-                float max = requestedMaxRefreshRateRange > 0
-                        ? requestedMaxRefreshRateRange : Float.POSITIVE_INFINITY;
-                refreshRateRange = new RefreshRateRange(min, max);
-                if (refreshRateRange.min == 0 && refreshRateRange.max == 0) {
-                    // requestedMinRefreshRateRange/requestedMaxRefreshRateRange were invalid
-                    refreshRateRange = null;
-                }
-            }
-
-            if (Objects.equals(refreshRateRange,
-                    mAppPreferredRefreshRateRangeByDisplay.get(displayId))) {
-                return;
-            }
-
-            if (refreshRateRange != null) {
-                mAppPreferredRefreshRateRangeByDisplay.put(displayId, refreshRateRange);
-                vote = Vote.forRenderFrameRates(refreshRateRange.min, refreshRateRange.max);
-            } else {
-                mAppPreferredRefreshRateRangeByDisplay.remove(displayId);
-                vote = null;
-            }
-            mVotesStorage.updateVote(displayId, Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE,
-                    vote);
         }
 
         private Display.Mode findAppModeByIdLocked(int displayId, int modeId) {
@@ -1384,19 +1360,7 @@ public class DisplayModeDirector {
 
         private void dumpLocked(PrintWriter pw) {
             pw.println("  AppRequestObserver");
-            pw.println("    mAppRequestedModeByDisplay:");
-            for (int i = 0; i < mAppRequestedModeByDisplay.size(); i++) {
-                final int id = mAppRequestedModeByDisplay.keyAt(i);
-                final Display.Mode mode = mAppRequestedModeByDisplay.valueAt(i);
-                pw.println("    " + id + " -> " + mode);
-            }
-            pw.println("    mAppPreferredRefreshRateRangeByDisplay:");
-            for (int i = 0; i < mAppPreferredRefreshRateRangeByDisplay.size(); i++) {
-                final int id = mAppPreferredRefreshRateRangeByDisplay.keyAt(i);
-                final RefreshRateRange refreshRateRange =
-                        mAppPreferredRefreshRateRangeByDisplay.valueAt(i);
-                pw.println("    " + id + " -> " + refreshRateRange);
-            }
+            pw.println("    mIgnorePreferredRefreshRate: " + mIgnorePreferredRefreshRate);
         }
     }
 

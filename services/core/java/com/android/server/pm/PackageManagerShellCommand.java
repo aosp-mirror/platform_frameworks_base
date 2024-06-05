@@ -3380,7 +3380,7 @@ class PackageManagerShellCommand extends ShellCommand {
         params.sessionParams = sessionParams;
         // Allowlist all permissions by default
         sessionParams.installFlags |= PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
-        // Set package source to other by default
+        // Set package source to other by default. Can be overridden by "--package-source"
         sessionParams.setPackageSource(PackageInstaller.PACKAGE_SOURCE_OTHER);
 
         // Encodes one of the states:
@@ -3566,6 +3566,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "--ignore-dexopt-profile":
                     sessionParams.installFlags |= PackageManager.INSTALL_IGNORE_DEXOPT_PROFILE;
+                    break;
+                case "--package-source":
+                    sessionParams.setPackageSource(Integer.parseInt(getNextArg()));
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
