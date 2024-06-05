@@ -439,7 +439,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
                 if (!decoration.isHandleMenuActive()) {
                     moveTaskToFront(decoration.mTaskInfo);
-                    decoration.createHandleMenu();
+                    decoration.createHandleMenu(mSplitScreenController);
                 } else {
                     decoration.closeHandleMenu();
                 }
