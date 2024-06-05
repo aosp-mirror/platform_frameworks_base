@@ -370,6 +370,17 @@ internal class ElementNode(
                 placeable.place(offset)
             } else {
                 placeable.placeWithLayer(offset) {
+                    // This layer might still run on its own (outside of the placement phase) even
+                    // if this element is not placed anymore, so we need to double check again here
+                    // before calling [elementAlpha] (which will update [SceneState.lastAlpha]). We
+                    // also need to recompute the current transition to make sure that we are using
+                    // the current transition and not a reference to an old one. See b/343138966 for
+                    // details.
+                    val transition = elementTransition(element, currentTransitions)
+                    if (!shouldPlaceElement(layoutImpl, scene, element, transition)) {
+                        return@placeWithLayer
+                    }
+
                     alpha = elementAlpha(layoutImpl, scene, element, transition, sceneState)
                     compositingStrategy = CompositingStrategy.ModulateAlpha
                 }

@@ -30,7 +30,7 @@ fun transition(
     current: () -> SceneKey = { from },
     progress: () -> Float = { 0f },
     progressVelocity: () -> Float = { 0f },
-    interruptionProgress: () -> Float = { 100f },
+    interruptionProgress: () -> Float = { 0f },
     isInitiatedByUserInput: Boolean = false,
     isUserInputOngoing: Boolean = false,
     isUpOrLeft: Boolean = false,
