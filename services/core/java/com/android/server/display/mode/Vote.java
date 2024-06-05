@@ -205,13 +205,6 @@ interface Vote {
         return new SupportedModesVote(modeIds);
     }
 
-    static Vote forSupportedRefreshRatesAndDisableSwitching(
-            List<SupportedRefreshRatesVote.RefreshRates> supportedRefreshRates) {
-        return new CombinedVote(
-                List.of(forDisableRefreshRateSwitching(),
-                        new SupportedRefreshRatesVote(supportedRefreshRates)));
-    }
-
     static String priorityToString(int priority) {
         switch (priority) {
             case PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE:
