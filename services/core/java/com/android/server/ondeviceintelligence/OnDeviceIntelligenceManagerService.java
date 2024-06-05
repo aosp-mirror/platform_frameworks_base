@@ -56,6 +56,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -143,6 +144,9 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
     volatile boolean mIsServiceEnabled;
 
     @GuardedBy("mLock")
+    private int remoteInferenceServiceUid = -1;
+
+    @GuardedBy("mLock")
     private String[] mTemporaryServiceNames;
     @GuardedBy("mLock")
     private String[] mTemporaryBroadcastKeys;
@@ -174,7 +178,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 Context.ON_DEVICE_INTELLIGENCE_SERVICE, getOnDeviceIntelligenceManagerService(),
                 /* allowIsolated = */true);
         LocalServices.addService(OnDeviceIntelligenceManagerInternal.class,
-                OnDeviceIntelligenceManagerService.this::getRemoteConfiguredPackageName);
+                this::getRemoteInferenceServiceUid);
     }
 
     @Override
@@ -603,7 +607,13 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                                 try {
                                     ensureRemoteIntelligenceServiceInitialized();
                                     service.registerRemoteStorageService(
-                                            getIRemoteStorageService());
+                                            getIRemoteStorageService(), new IRemoteCallback.Stub() {
+                                                @Override
+                                                public void sendResult(Bundle bundle) {
+                                                    final int uid = Binder.getCallingUid();
+                                                    setRemoteInferenceServiceUid(uid);
+                                                }
+                                            });
                                     mRemoteOnDeviceIntelligenceService.run(
                                             IOnDeviceIntelligenceService::notifyInferenceServiceConnected);
                                     broadcastExecutor.execute(
@@ -1037,5 +1047,17 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         return Settings.Secure.getLongForUser(mContext.getContentResolver(),
                 Settings.Secure.ON_DEVICE_INTELLIGENCE_IDLE_TIMEOUT_MS, TimeUnit.HOURS.toMillis(1),
                 mContext.getUserId());
+    }
+
+    private int getRemoteInferenceServiceUid() {
+        synchronized (mLock) {
+            return remoteInferenceServiceUid;
+        }
+    }
+
+    private void setRemoteInferenceServiceUid(int remoteInferenceServiceUid) {
+        synchronized (mLock){
+            this.remoteInferenceServiceUid = remoteInferenceServiceUid;
+        }
     }
 }

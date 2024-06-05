@@ -4359,7 +4359,7 @@ public class ComputerEngine implements Computer {
             uid = getBaseSdkSandboxUid();
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
-        if (isKnownIsolatedComputeApp(uid, callingUserId)) {
+        if (isKnownIsolatedComputeApp(uid)) {
             try {
                 uid = getIsolatedOwner(uid);
             } catch (IllegalStateException e) {
@@ -4402,7 +4402,7 @@ public class ComputerEngine implements Computer {
             if (Process.isSdkSandboxUid(uid)) {
                 uid = getBaseSdkSandboxUid();
             }
-            if (isKnownIsolatedComputeApp(uid, callingUserId)) {
+            if (isKnownIsolatedComputeApp(uid)) {
                 try {
                     uid = getIsolatedOwner(uid);
                 } catch (IllegalStateException e) {
@@ -5804,7 +5804,7 @@ public class ComputerEngine implements Computer {
     }
 
 
-    private boolean isKnownIsolatedComputeApp(int uid, int callingUserId) {
+    private boolean isKnownIsolatedComputeApp(int uid) {
         if (!Process.isIsolatedUid(uid)) {
             return false;
         }
@@ -5817,27 +5817,8 @@ public class ComputerEngine implements Computer {
         }
         OnDeviceIntelligenceManagerInternal onDeviceIntelligenceManagerInternal =
                 mInjector.getLocalService(OnDeviceIntelligenceManagerInternal.class);
-        if (onDeviceIntelligenceManagerInternal == null) {
-            return false;
-        }
-
-        String onDeviceIntelligencePackage =
-                onDeviceIntelligenceManagerInternal.getRemoteServicePackageName();
-        if (onDeviceIntelligencePackage == null) {
-            return false;
-        }
-
-        try {
-            if (getIsolatedOwner(uid) == getPackageUid(onDeviceIntelligencePackage, 0,
-                    callingUserId)) {
-                return true;
-            }
-        } catch (IllegalStateException e) {
-            // If the owner uid doesn't exist, just use the current uid
-            Slog.wtf(TAG, "Expected isolated uid " + uid + " to have an owner", e);
-        }
-
-        return false;
+        return onDeviceIntelligenceManagerInternal != null
+                && uid == onDeviceIntelligenceManagerInternal.getInferenceServiceUid();
     }
 
     @Nullable
