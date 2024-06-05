@@ -521,6 +521,7 @@
   <java-symbol type="bool" name="config_preferKeepClearForFocus" />
   <java-symbol type="bool" name="config_hibernationDeletesOatArtifactsEnabled"/>
   <java-symbol type="integer" name="config_defaultAnalogClockSecondsHandFps"/>
+  <java-symbol type="bool" name="config_notificationCloseButtonSupported"/>
   <java-symbol type="bool" name="config_enableGaiaEducationInPrivateSpace"/>
 
   <java-symbol type="color" name="tab_indicator_text_v4" />

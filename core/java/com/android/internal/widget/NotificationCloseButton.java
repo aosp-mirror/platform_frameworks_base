@@ -20,8 +20,10 @@ import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
+import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -60,6 +62,9 @@ public class NotificationCloseButton extends ImageView {
     protected void onFinishInflate() {
         super.onFinishInflate();
         setContentDescription(mContext.getText(R.string.close_button_text));
+        boolean notificationCloseButtonSupported = Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_notificationCloseButtonSupported);
+        this.setVisibility(notificationCloseButtonSupported ? View.VISIBLE : View.GONE);
     }
 
     @Override
