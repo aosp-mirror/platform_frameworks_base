@@ -144,12 +144,12 @@ constructor(
         setListeningToMediaData(true)
         hostView.addOnAttachStateChangeListener(
             object : OnAttachStateChangeListener {
-                override fun onViewAttachedToWindow(v: View?) {
+                override fun onViewAttachedToWindow(v: View) {
                     setListeningToMediaData(true)
                     updateViewVisibility()
                 }
 
-                override fun onViewDetachedFromWindow(v: View?) {
+                override fun onViewDetachedFromWindow(v: View) {
                     setListeningToMediaData(false)
                 }
             }
@@ -199,7 +199,9 @@ constructor(
      */
     fun updateViewVisibility() {
         state.visible =
-            if (showsOnlyActiveMedia) {
+            if (mediaHierarchyManager.isLockedAndHidden()) {
+                false
+            } else if (showsOnlyActiveMedia) {
                 mediaDataManager.hasActiveMediaOrRecommendation()
             } else {
                 mediaDataManager.hasAnyMediaOrRecommendation()

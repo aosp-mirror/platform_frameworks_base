@@ -803,7 +803,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Kuweka kanuni za nenosiri"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Dhibiti urefu na maandishi yanayokubalika katika nenosiri la kufunga skrini na PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Kuhesabu mara ambazo skrini inajaribu kufunguliwa"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Kufuatilia idadi ya manenosiri yasiyo sahihi yatakayoingizwa wakati wa kufungua skrini, na kufunga kompyuta kibao au kufuta data yote iliyomo kama manenosiri mengi yasiyo sahihi yataingizwa."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Fuatilia idadi ya manenosiri yasiyo sahihi yatakayoingizwa wakati wa kufungua skrini, na kufunga kishikwambi au kufuta data yote iliyomo ikiwa manenosiri mengi yasiyo sahihi yataingizwa."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Fuatilia idadi ya manenosiri yasiyo sahihi yanayowekwa wakati wa kufungua skrini na ufunge kifaa chako cha Android TV au ufute data yake yote ikiwa mtumiaji ataweka manenosiri mengi mno yasiyo sahihi."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Fuatilia idadi ya manenosiri yasiyo sahihi yanayowekwa wakati wa kufungua skrini, na ufunge mfumo wa burudani na habari au ufute data yote kwenye mfumo wa burudani na habari ikiwa manenosiri mengi mno yasiyo sahihi yatawekwa."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Kufuatilia idadi ya manenosiri yasiyo sahihi yatakayoingizwa wakati wa kufungua skrini, na kufunga simu au kufuta data yote iliyomo kama manenosiri mengi sana yasiyo sahihi yataingizwa."</string>
@@ -816,7 +816,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Kufunga skrini"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Kudhibiti jinsi na wakati skrini inapofunga."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Kufuta data yote"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Futa data ya kompyuta kibao bila ilani kwa kurejesha mipangilio ambayo kompyuta ilitoka nayo kiwandani."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Futa data ya kishikwambi bila ilani kwa kurejesha mipangilio ambayo ilitoka nayo kiwandani."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Futa data ya kifaa chako cha Android TV bila onyo kwa kurejesha data kiliyotoka nayo kiwandani."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Futa data ya mfumo wa burudani na habari bila onyo kwa kurejesha data iliyotoka nayo kiwandani."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Kufuta data ya simu bila ilani kwa kurejesha mipangilio iliyotoka nayo kiwandani."</string>
@@ -1938,7 +1938,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Weka mtumiaji anayesimamiwa"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Ongeza lugha"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Mapendeleo ya eneo"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Weka jina la lugha"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Andika jina la lugha"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Zinazopendekezwa"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Yanayopendekezwa"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Lugha zinazopendekezwa"</string>

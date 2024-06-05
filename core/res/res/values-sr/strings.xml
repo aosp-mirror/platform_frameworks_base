@@ -313,7 +313,7 @@
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"приступ фајловима на уређају"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музика и звук"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"приступ музици и аудио садржају на уређају"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Слике и видео снимци"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Слике и видеи"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"приступ сликама и видеима на уређају"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"снима звук"</string>
@@ -594,7 +594,7 @@
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"онемогућавање закључавања екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дозвољава апликацији да онемогући закључавање тастатуре и све повезане безбедносне мере са лозинкама. На пример, телефон онемогућава закључавање тастатуре при пријему долазног телефонског позива, а затим га поново омогућава по завршетку позива."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"тражење сложености закључавања екрана"</string>
-    <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Дозвољава апликацији да сазна ниво сложености закључавања екрана (висока, средња, ниска или ниједна), што указује на могући опсег трајања и тип закључавања екрана. Апликација може и да предлаже корисницима да ажурирају закључавање екрана на одређени ниво, али корисници слободно могу да занемаре то и да иду на друге странице. Имајте на уму да се подаци за закључавање екрана не чувају као обичан текст, па апликација не зна тачну лозинку."</string>
+    <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Дозвољава апликацији да сазна ниво сложености закључавања екрана (висока, средња, ниска или ниједна), што указује на могући опсег трајања и тип закључавања екрана. Апликација може и да предлаже корисницима да ажурирају откључавање екрана на одређени ниво, али корисници слободно могу да занемаре то и да иду на друге странице. Имајте на уму да се подаци за откључавање екрана не чувају као обичан текст, па апликација не зна тачну лозинку."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"приказивање обавештења"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Дозвољава апликацији да приказује обавештења"</string>
     <string name="permlab_turnScreenOn" msgid="219344053664171492">"укључивање екрана"</string>
@@ -614,18 +614,18 @@
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"читање локација из медијске колекције"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Дозвољава апликацији да чита локације из медијске колекције."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Користите биометрију"</string>
-    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Користите биометрију или закључавање екрана"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Користите биометрију или откључавање екрана"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Потврдите свој идентитет"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Користите биометријски податак да бисте наставили"</string>
-    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Користите биометријски податак или закључавање екрана да бисте наставили"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Користите биометријски податак или откључавање екрана да бисте наставили"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Биометријски хардвер није доступан"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Потврда идентитета је отказана"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Није препознато"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Потврда идентитета је отказана"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Нисте подесили ни PIN, ни шаблон, ни лозинку"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Грешка при потврди идентитета"</string>
-    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Користите закључавање екрана"</string>
-    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Употребите закључавање екрана да бисте наставили"</string>
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Користите откључавање екрана"</string>
+    <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Употребите откључавање екрана да бисте наставили"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Чврсто притисните сензор"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Препознавање отиска прста није успело. Пробајте поново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Обришите сензор за отисак прста и пробајте поново"</string>
@@ -649,8 +649,8 @@
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Време за подешавање отиска прста је истекло. Пробајте поново."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Радња са отиском прста је отказана."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Корисник је отказао радњу са отиском прста."</string>
-    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Превише покушаја. Користите закључавање екрана уместо тога."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Превише покушаја. Користите закључавање екрана уместо тога."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Превише покушаја. Користите откључавање екрана уместо тога."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Превише покушаја. Користите откључавање екрана уместо тога."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Обрађивање отиска прста није успело. Пробајте поново."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Није регистрован ниједан отисак прста."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Овај уређај нема сензор за отисак прста."</string>
@@ -659,9 +659,9 @@
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Притиснуто је дугме за укључивање"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Прст <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Користите отисак прста"</string>
-    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Користите отисак прста или закључавање екрана"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Користите отисак прста или откључавање екрана"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Наставите помоћу отиска прста"</string>
-    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Користите отисак прста или закључавање екрана да бисте наставили"</string>
+    <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Користите отисак прста или откључавање екрана да бисте наставили"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Дошло је до проблема. Пробајте поново."</string>
@@ -713,16 +713,16 @@
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Корисник је отказао откључавање лицем"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Превише покушаја. Пробајте поново касније."</string>
     <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Превише покушаја. Откључавање лицем није доступно."</string>
-    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Превише покушаја. Користите закључавање екрана за то."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Превише покушаја. Користите откључавање екрана за то."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Провера лица није успела. Пробајте поново."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Нисте подесили откључавање лицем"</string>
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"Откључавање лицем није подржано на овом уређају"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Сензор је привремено онемогућен."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
     <string name="face_app_setting_name" msgid="5854024256907828015">"Користите откључавање лицем"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Користите закључавање лицем или закључавање екрана"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Користите закључавање лицем или откључавање екрана"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Потврдите идентитет лицем да бисте наставили"</string>
-    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Користите лице или закључавање екрана да бисте наставили"</string>
+    <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Користите лице или откључавање екрана да бисте наставили"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Дошло је до проблема. Пробајте поново."</string>
@@ -802,35 +802,35 @@
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ажурирање апликације без радњи корисника"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Дозвољава власнику да ажурира апликацију коју је претходно инсталирала без радњи корисника"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Подешавање правила за лозинку"</string>
-    <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролише дужину и знакове дозвољене у лозинкама и PIN-овима за закључавање екрана."</string>
+    <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролише дужину и знакове дозвољене у лозинкама и PIN-овима за откључавање екрана."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Надзор покушаја откључавања екрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Прати број нетачно унетих лозинки приликом откључавања екрана и закључава таблет или брише податке са таблета ако је нетачна лозинка унета превише пута."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава Android TV уређај или брише све податке са Android TV уређаја ако се унесе превише нетачних лозинки."</string>
-    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Прати број нетачно унетих лозинки при откључавању екрана и закључава систем за инфо-забаву или брише све податке са система за инфо-забаву ако је нетачна лозинка унета превише пута."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Прати број нетачно унетих лозинки при откључавању екрана и закључава систем за информације и забаву или брише све податке са система за информације и забаву ако је нетачна лозинка унета превише пута."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Прати број нетачно унетих лозинки при откључавању екрана и закључава телефон или брише све податке са телефона ако је нетачна лозинка унета превише пута."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава таблет или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава Android TV уређај или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава систем за инфо-забаву или брише све податке овог профила ако се унесе превише нетачних лозинки."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава систем за информације и забаву или брише све податке овог профила ако се унесе превише нетачних лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава телефон или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Промена закључавања екрана"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Мења закључавање екрана."</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Мења откључавање екрана."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Закључавање екрана"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Контрола начина и времена закључавања екрана."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Брисање свих података"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Брисање података на таблету без упозорења ресетовањем на фабричка подешавања."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Брише податке Android TV уређаја без упозорења помоћу ресетовања на фабричка подешавања."</string>
-    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Брише податке на систему за инфо-забаву без упозорења ресетовањем на фабричка подешавања."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Брише податке на систему за информације и забаву без упозорења ресетовањем на фабричка подешавања."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Брисање података на телефону без упозорења ресетовањем на фабричка подешавања."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Брисање података профила"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Обриши податке корисника"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Брише податке овог корисника на овом таблету без упозорења."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Брише податке овог корисника на овом Android TV уређају без упозорења."</string>
-    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Брише податке овог профила на овом систему за инфо-забаву без упозорења."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Брише податке овог профила на овом систему за информације и забаву без упозорења."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Брише податке овог корисника на овом телефону без упозорења."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Подесите глобални прокси сервер уређаја"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Подешава глобални прокси уређаја који ће се користити док су смернице омогућене. Само власник уређаја може да подеси глобални прокси."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"Подеси истек. лозин. за закљ. екр."</string>
-    <string name="policydesc_expirePassword" msgid="9136524319325960675">"Мења колико често лозинка, PIN или шаблон за закључавање екрана мора да се мења."</string>
+    <string name="policydesc_expirePassword" msgid="9136524319325960675">"Мења колико често лозинка, PIN или шаблон за откључавање екрана мора да се мења."</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"Подешавање шифровања складишта"</string>
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Захтева да сачувани подаци апликације буду шифровани."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"Онемогућавање камера"</string>
@@ -1196,7 +1196,7 @@
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"Измени"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"Делите"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Делите помоћу апликације %1$s"</string>
-    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Дели"</string>
+    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Дељење"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"Пошаљите помоћу:"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"Пошаљите помоћу: %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"Пошаљи"</string>

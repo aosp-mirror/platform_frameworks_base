@@ -421,7 +421,7 @@
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"静音"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"对话"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"清除所有无声通知"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"清除所有静音通知"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"勿扰模式暂停的通知"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"立即开始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"没有通知"</string>
@@ -584,7 +584,7 @@
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"无法修改来电通知。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"您无法在此处配置这组通知"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"代理通知"</string>
-    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"所有的<xliff:g id="APP_NAME">%1$s</xliff:g>通知"</string>
+    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"所有“<xliff:g id="APP_NAME">%1$s</xliff:g>”通知"</string>
     <string name="see_more_title" msgid="7409317011708185729">"查看更多"</string>
     <string name="feedback_alerted" msgid="5192459808484271208">"系统已自动将此通知的重要性&lt;b&gt;提升为“默认”&lt;/b&gt;。"</string>
     <string name="feedback_silenced" msgid="9116540317466126457">"系统已自动将此通知的重要性&lt;b&gt;降低为“静音”&lt;/b&gt;。"</string>
@@ -646,16 +646,16 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"未找到任何快捷键"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"系统"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"输入"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"已开应用"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"打开应用"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"当前应用"</string>
     <string name="group_system_access_notification_shade" msgid="7116898151485382275">"访问通知栏"</string>
     <string name="group_system_full_screenshot" msgid="7389040853798023211">"截取全屏"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"访问系统/应用快捷方式的列表"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"访问系统/应用快捷键列表"</string>
     <string name="group_system_go_back" msgid="8838454003680364227">"返回：返回到上一个状态（返回按钮）"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"访问主屏幕"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"已开应用概览"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"循环浏览近期使用的应用（向前）"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"循环浏览近期使用的应用（向后）"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"循环浏览最近用过的应用（向前）"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"循环浏览最近用过的应用（向后）"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"访问所有应用的列表并搜索所需应用（即搜索/启动器）"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"隐藏和重新显示任务栏"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"访问系统设置"</string>
@@ -720,7 +720,7 @@
     <string name="left_icon" msgid="5036278531966897006">"向左图标"</string>
     <string name="right_icon" msgid="1103955040645237425">"向右图标"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住并拖动即可添加功能块"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列图块"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列功能块"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"拖动到此处即可移除"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"您至少需要 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 个卡片"</string>
     <string name="qs_edit" msgid="5583565172803472437">"编辑"</string>
@@ -1050,7 +1050,7 @@
     <string name="mobile_data_connection_active" msgid="944490013299018227">"已连接"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"已暂时连接"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"连接状况不佳"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"系统将不会自动连接到移动数据网络"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"不会自动连接到移动数据网络"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"无网络连接"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"没有其他可用网络"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"没有可用网络"</string>
@@ -1071,7 +1071,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# 个应用处于活动状态}other{# 个应用处于活动状态}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新信息"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"已开启的应用"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"这些应用正在保持活跃运行状态，即使您没有在使用它们。这可以改进它们的功能，但可能会影响到电池续航时间。"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"这些应用即使在闲置时仍处于活跃运行状态。应用的功能会因此提升，但可能会影响电池续航时间。"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完成"</string>
@@ -1142,7 +1142,7 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"切换到工作资料"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"安装工作电话应用"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"取消"</string>
-    <string name="lock_screen_settings" msgid="6152703934761402399">"自定义锁屏状态"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"自定义锁屏"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"解锁以自定义锁定屏幕"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"没有 WLAN 连接"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"已禁用摄像头"</string>

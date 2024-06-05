@@ -105,7 +105,7 @@
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"אודיו של מדיה"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"שיחות טלפון"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"העברת קבצים"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"מכשיר קלט"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"התקן קלט"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"גישה לאינטרנט"</string>
     <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"שיתוף אנשי הקשר והיסטוריית השיחות"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"ההגדרה משמשת לשיתוף של אנשי הקשר והיסטוריית השיחות"</string>
@@ -514,7 +514,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"‏סטטוס הרשמה ל-IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"רשום"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"לא רשום"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"לא זמין"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"לא זמינה"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"‏כתובת ה-MAC אקראית"</string>
     <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{אין מכשירים מחוברים}=1{מכשיר אחד מחובר}one{# מכשירים מחוברים}two{# מכשירים מחוברים}other{# מכשירים מחוברים}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"יותר זמן."</string>
@@ -545,7 +545,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"הרגע"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"הטלפון הזה"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"הטאבלט הזה"</string>
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"הרמקול של אביזר העגינה"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"רמקול של אביזר העגינה"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"מכשיר חיצוני"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"המכשיר המחובר"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"הטלפון הזה"</string>

@@ -100,7 +100,7 @@ constructor(
             .stateIn(scope, SharingStarted.WhileSubscribed(), getResolutionScale())
 
     override fun getResolutionScale(): Float {
-        context.display.getDisplayInfo(displayInfo.value)
+        context.display?.getDisplayInfo(displayInfo.value)
         val maxDisplayMode =
             displayUtils.getMaximumResolutionDisplayMode(displayInfo.value.supportedModes)
         maxDisplayMode?.let {

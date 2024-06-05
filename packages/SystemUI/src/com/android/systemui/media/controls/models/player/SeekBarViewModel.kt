@@ -514,7 +514,7 @@ constructor(
          * Returns true when the down event of the scroll hits within the target box of the thumb.
          */
         override fun onScroll(
-            eventStart: MotionEvent,
+            eventStart: MotionEvent?,
             event: MotionEvent,
             distanceX: Float,
             distanceY: Float
@@ -528,7 +528,7 @@ constructor(
          * Gestures that include a fling are considered a false gesture on the seek bar.
          */
         override fun onFling(
-            eventStart: MotionEvent,
+            eventStart: MotionEvent?,
             event: MotionEvent,
             velocityX: Float,
             velocityY: Float

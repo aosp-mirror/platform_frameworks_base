@@ -314,7 +314,7 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"표준"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"보통"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"높음"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"기기 마이크를 &amp;#173;차단 해제하시겠습니까?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"기기 마이크를 차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"기기 카메라를 차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"기기 카메라 및 마이크를 차단 해제하시겠습니까?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"마이크를 사용할 수 있는 모든 앱 및 서비스에 대해 액세스가 차단 해제됩니다."</string>
@@ -499,7 +499,7 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"거부"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"앱 고정됨"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"앱 고정 해제됨"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"전화걸기"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"통화"</string>
     <string name="stream_system" msgid="7663148785370565134">"시스템"</string>
     <string name="stream_ring" msgid="7550670036738697526">"벨소리"</string>
     <string name="stream_music" msgid="2188224742361847580">"미디어"</string>
@@ -521,7 +521,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"음소거 해제"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"진동"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s 볼륨 컨트롤"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"전화 및 알림이 오면 벨소리가 울림(<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"전화 및 알림이 오면 벨소리가 울립니다(<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)."</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"시스템 UI 튜너"</string>
     <string name="status_bar" msgid="4357390266055077437">"상태 표시줄"</string>
     <string name="demo_mode" msgid="263484519766901593">"시스템 UI 데모 모드"</string>
@@ -646,7 +646,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"단축키 없음"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"시스템"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"입력"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"열린 앱"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"앱 열기"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"현재 앱"</string>
     <string name="group_system_access_notification_shade" msgid="7116898151485382275">"알림 창에 액세스"</string>
     <string name="group_system_full_screenshot" msgid="7389040853798023211">"전체 스크린샷 촬영"</string>

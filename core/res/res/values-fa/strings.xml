@@ -462,7 +462,7 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"‏به برنامه اجازه می‌دهد گزارش‌های تماس در دستگاه Android TV را تغییر دهد، ازجمله داده‌های مربوط به تماس‎های ورودی و خروجی. برنامه‌های مخرب می‌توانند از این مجوز برای پاک کردن یا تغییر دادن گزارش تماس شما استفاده کنند."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"‏به برنامه اجازه می‌دهد گزارشات تماس تلفنی شما، از جمله داده‌هایی درمورد تماس‎های ورودی و خروجی را تغییر دهد. برنامه‌های مخرب ممکن است از این ویژگی برای پاک کردن یا تغییر گزارش تماس شما استفاده کنند."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"دسترسی به داده‌های حسگر بدن، مثل ضربان قلب، درحین استفاده"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"به برنامه اجازه می‌دهد تا زمانی که درحال استفاده است، به داده‌های حسگر بدن، مثل ضربان قلب، دما، و درصد اکسیژن خون دسترسی داشته باشد."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"هنگامی که از برنامه استفاده می‌شود به برنامه اجازه می‌دهد به داده‌های حسگر بدن مانند ضربان قلب، دما، و درصد اکسیژن خون دسترسی داشته باشد."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"دسترسی به داده‌های حسگر بدن، مثل ضربان قلب، درحین اجرا در پس‌زمینه"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"به برنامه اجازه می‌دهد تا زمانی که در پس‌زمینه درحال اجرا است، به داده‌های حسگر بدن، مثل ضربان قلب، دما، و درصد اکسیژن خون دسترسی داشته باشد."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"خواندن رویدادها و جزئیات تقویم"</string>
@@ -484,17 +484,17 @@
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"تغییر تنظیمات صوتی"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"به برنامه امکان می‌دهد تنظیمات صوتی کلی مانند میزان صدا و بلندگوی مورد استفاده برای پخش صدا را تغییر دهد."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ضبط صدا"</string>
-    <string name="permdesc_recordAudio" msgid="5857246765327514062">"این برنامه وقتی درحال استفاده است، می‌تواند بااستفاده از میکروفون صدا ضبط کند."</string>
+    <string name="permdesc_recordAudio" msgid="5857246765327514062">"هنگامی که از برنامه استفاده می‌شود، این برنامه می‌تواند بااستفاده از میکروفون صدا ضبط کند."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ضبط صدا در پس‌زمینه"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"این برنامه می‌تواند در هرزمانی با استفاده از میکروفون صدا ضبط کند."</string>
     <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"تشخیص ضبط صفحه‌نمایش از پنجره برنامه‌ها"</string>
-    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"وقتی نماگرفتی درحین استفاده از برنامه گرفته می‌شود، به این برنامه اطلاع داده می‌شود."</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"درحین گرفتن نماگرفت، هنگامی که از برنامه استفاده می‌شود، به این برنامه اطلاع داده می‌شود."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ارسال فرمان به سیم کارت"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"به برنامه اجازه ارسال دستورات به سیم کارت را می‌دهد. این بسیار خطرناک است."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"تشخیص فعالیت فیزیکی"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"این برنامه نمی‌تواند فعالیت فیزیکی‌تان را تشخیص دهد."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"عکسبرداری و فیلمبرداری"</string>
-    <string name="permdesc_camera" msgid="5240801376168647151">"این برنامه وقتی درحال استفاده است، می‌تواند بااستفاده از دوربین عکس و فیلم بگیرد."</string>
+    <string name="permdesc_camera" msgid="5240801376168647151">"هنگامی که از برنامه استفاده می‌شود، این برنامه می‌تواند بااستفاده از دوربین عکس و فیلم بگیرد."</string>
     <string name="permlab_backgroundCamera" msgid="7549917926079731681">"گرفتن عکس و فیلم در پس‌زمینه"</string>
     <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"این برنامه می‌تواند در هرزمانی با استفاده از دوربین عکس و فیلم بگیرد."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"به برنامه یا سرویسی اجازه دهید برای عکس‌برداری و فیلم‌برداری به دوربین‌های سیستم دسترسی داشته باشد"</string>
@@ -582,8 +582,8 @@
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"به برنامه اجازه می‌دهد به دستگاه‌های بلوتوث مرتبط‌شده متصل شود"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"تبلیغ در دستگاه‌های بلوتوث اطراف"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"برنامه مجاز می‌شود در دستگاه‌های بلوتوث اطراف تبلیغ کند."</string>
-    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"مشخص کردن موقعیت نسبی بین دستگاه‌های باند فوق‌وسیع اطراف"</string>
-    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های باند فوق‌وسیع اطراف را مشخص کند"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"مشخص کردن موقعیت نسبی بین دستگاه‌های «فراپهن‌باند» اطراف"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های «فراپهن‌باند» اطراف را مشخص کند"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏برقراری تعامل با دستگاه‌های Wi-Fi اطراف"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏به برنامه اجازه می‌دهد در دستگاه‌های Wi-Fi اطراف تبلیغ کند، به آن‌ها متصل شود، و موقعیت نسبی آن‌ها را تشخیص دهد"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پولی NFC"</string>
@@ -612,8 +612,8 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"به برنامه اجازه می‌دهد مجموعه عکستان را تغییر دهد."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"خواندن مکان‌ها از مجموعه رسانه شما"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"به برنامه اجازه می‌دهد مکان‌ها را از مجموعه رسانه‌تان بخواند."</string>
-    <string name="biometric_app_setting_name" msgid="3339209978734534457">"استفاده از زیست‌سنجشی"</string>
-    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"استفاده از زیست‌سنجشی یا قفل صفحه"</string>
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"استفاده از داده‌های زیست‌سنجشی"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"استفاده از داده‌های زیست‌سنجشی یا قفل صفحه"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شمایید"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"برای ادامه، از زیست‌سنجشی استفاده کنید"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"برای ادامه، از زیست‌سنجشی یا قفل صفحه استفاده کنید"</string>
@@ -1870,8 +1870,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"تأیید"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"«بهینه‌سازی باتری» «زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"«بهینه‌سازی باتری» «زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"«بهینه‌سازی باتری» «زمینه تاریک» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"«بهینه‌سازی باتری» «زمینه تاریک» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه در بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است. این می‌تواند به این معنی باشد که، برای مثال، تصاویر تازمانی‌که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"«صرفه‌جویی داده» روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"روشن کردن"</string>
@@ -2340,7 +2340,7 @@
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"صفحه‌کلیدهای فیزیکی پیکربندی شدند"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"برای مشاهده صفحه‌کلیدها ضربه بزنید"</string>
     <string name="profile_label_private" msgid="6463418670715290696">"خصوصی"</string>
-    <string name="profile_label_clone" msgid="769106052210954285">"مشابه‌سازی"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"همسانه‌سازی"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"کار"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"کار ۲"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"کار ۳"</string>

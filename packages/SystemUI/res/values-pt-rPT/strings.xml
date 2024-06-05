@@ -179,7 +179,7 @@
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Configure o Desbloqueio facial"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Para configurar o Desbloqueio facial novamente, o seu modelo de rosto atual vai ser eliminado.\n\nVai ter de configurar novamente esta funcionalidade para desbloquear o telemóvel com o rosto."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Não foi possível configurar o Desbloqueio facial. Aceda às Definições para tentar novamente."</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toque no sensor de impressões digitais."</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toque no sensor de impressões digitais"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Impos. reconh. rosto. Utilize a impressão digital."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -234,7 +234,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"O ecrã está bloqueado na orientação horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"O ecrã está bloqueado na orientação vertical."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Vitrina de sobremesas"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"Proteção de ecrã"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"Proteção ecrã"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Não incomodar"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
@@ -248,9 +248,9 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotação auto."</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rodar o ecrã automaticamente"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Localização"</string>
-    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Proteção de ecrã"</string>
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Proteção ecrã"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acesso câmara"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Ac. microfone"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acesso micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponível"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqueado"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Dispositivo multimédia"</string>
@@ -291,13 +291,13 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Aviso de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Apps trabalho"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Luz noturna"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ativ. ao pôr-do-sol"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Ativa ao pôr do sol"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Até ao amanhecer"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Ativada à(s) <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Até à(s) <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Tema escuro"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Poup. bateria"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Ativ. ao pôr do sol"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Ativa ao pôr do sol"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Até ao amanhecer"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Ativado à(s) <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Até à(s) <xliff:g id="TIME">%s</xliff:g>."</string>
@@ -317,9 +317,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Desbloquear o microfone do dispositivo?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Desbloquear a câmara do dispositivo?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Quer desbloquear a câmara e o microfone?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Isto desbloqueia o acesso a todas as apps e serviços com autorização para utilizar o seu microfone."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Isto desbloqueia o acesso a todas as apps e serviços com autorização para utilizar a sua câmara."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Isto desbloqueia o acesso a todas as apps e serviços com autorização para utilizar a sua câmara ou microfone."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Esta ação desbloqueia o acesso de todas as apps e serviços com autorização para usar o microfone."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Esta ação desbloqueia o acesso de todas as apps e serviços com autorização para usar a câmara."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Esta ação desbloqueia o acesso de todas as apps e serviços com autorização para usar a câmara ou microfone."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"O microfone está bloqueado"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"A câmara está bloqueada"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"O microfone e a câmara estão bloqueados"</string>
@@ -496,7 +496,7 @@
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Para soltar esta app, toque sem soltar nos botões Anterior e Página inicial."</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Para soltar esta app, deslize rapidamente para cima sem soltar."</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
-    <string name="screen_pinning_negative" msgid="6882816864569211666">"Não, obrigado"</string>
+    <string name="screen_pinning_negative" msgid="6882816864569211666">"Não"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"App fixada"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App solta"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Chamada"</string>
@@ -566,7 +566,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Predefinição"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automática"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sem som ou vibração"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sem som ou vibração e aparece na parte inferior na secção de conversas."</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sem som ou vibração e aparece na parte inferior na secção de conversas"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Pode tocar ou vibrar com base nas definições do dispositivo"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Pode tocar ou vibrar com base nas definições do dispositivo. As conversas da app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem como um balão por predefinição."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Faça com que o sistema determine se esta notificação deve emitir um som ou uma vibração"</string>
@@ -689,7 +689,7 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Abrir as definições"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Auscultadores ligados"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Auscultadores com microfone integrado ligados"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Poup. dados"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Poupança de dados"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Poupança de dados ativada"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Ativado"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Desativado"</string>
@@ -878,9 +878,9 @@
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Atalho de <xliff:g id="FEATURE_NAME">%s</xliff:g> removido"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# atalho removido}many{# atalhos removidos}other{# atalhos removidos}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover p/ parte sup. esquerda"</string>
-    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mover parte superior direita"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mover p/ parte sup. direita"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Mover p/ parte infer. esquerda"</string>
-    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Mover parte inferior direita"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Mover p/ parte infer. direita"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Mover p/ extremidade e ocultar"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Retirar extremidade e mostrar"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Remover"</string>
@@ -974,7 +974,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> dispositivos selecionados"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(desligado)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Não é possível mudar. Toque para tentar novamente."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Ligue um dispositivo"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Ligar um dispositivo"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Para transmitir esta sessão, abra a app."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"App desconhecida"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Parar transmissão"</string>
@@ -1142,7 +1142,7 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Mudar para perfil de trabalho"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instalar app telefone de trabalho"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"Cancelar"</string>
-    <string name="lock_screen_settings" msgid="6152703934761402399">"Personalizar o ecrã de bloqueio"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Personalizar ecrã de bloqueio"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Desbloqueie para personalizar o ecrã de bloqueio"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi indisponível"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Câmara bloqueada"</string>

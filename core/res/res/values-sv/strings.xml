@@ -50,7 +50,7 @@
       <item quantity="other">Du har <xliff:g id="NUMBER_1">%d</xliff:g> försök kvar innan SIM-kortet låses.</item>
       <item quantity="one">Du har <xliff:g id="NUMBER_0">%d</xliff:g> försök kvar innan SIM-kortet låses.</item>
     </plurals>
-    <string name="imei" msgid="2157082351232630390">"IMEI-kod"</string>
+    <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"Nummerpresentatör för inkommande samtal"</string>
     <string name="ClirMmi" msgid="6752346475055446417">"Dölj nummerpresentatör för utgående samtal"</string>
@@ -598,12 +598,12 @@
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Tillåter att appen visar aviseringar"</string>
     <string name="permlab_turnScreenOn" msgid="219344053664171492">"Slå på skärmen"</string>
     <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Tillåter att appen slår på skärmen."</string>
-    <string name="permlab_useBiometric" msgid="6314741124749633786">"använd biometrisk maskinvara"</string>
-    <string name="permdesc_useBiometric" msgid="7502858732677143410">"Tillåter att appen använder biometrisk maskinvara vid autentisering"</string>
-    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"hantera maskinvara för fingeravtryck"</string>
+    <string name="permlab_useBiometric" msgid="6314741124749633786">"använd biometrisk hårdvara"</string>
+    <string name="permdesc_useBiometric" msgid="7502858732677143410">"Tillåter att appen använder biometrisk hårdvara vid autentisering"</string>
+    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"hantera hårdvara för fingeravtryck"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Tillåter att appen anropar metoder för att lägga till och radera fingeravtrycksmallar."</string>
-    <string name="permlab_useFingerprint" msgid="1001421069766751922">"använda maskinvara för fingeravtryck"</string>
-    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Tillåter att appen använder maskinvara för fingeravtryck vid autentisering"</string>
+    <string name="permlab_useFingerprint" msgid="1001421069766751922">"använda hårdvara för fingeravtryck"</string>
+    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Tillåter att appen använder hårdvara för fingeravtryck vid autentisering"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"göra ändringar i din musiksamling"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"Tillåter att appen gör ändringar i din musiksamling."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"göra ändringar i din videosamling"</string>
@@ -617,7 +617,7 @@
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifiera din identitet"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Fortsätt med hjälp av din biometriska data"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Fortsätt med hjälp av din biometriska data eller skärmlåset"</string>
-    <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk maskinvara är inte tillgänglig"</string>
+    <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk hårdvara är inte tillgänglig"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentiseringen avbröts"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Identifierades inte"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autentiseringen avbröts"</string>
@@ -643,7 +643,7 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingeravtrycket har autentiserats"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Ansiktet har autentiserats"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ansiktet har autentiserats. Tryck på Bekräfta"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Det finns ingen maskinvara för fingeravtryck."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Det finns ingen hårdvara för fingeravtryck."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Det gick inte att konfigurera fingeravtryck"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Tiden för fingeravtrycksinställning gick ut. Försök igen."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingeravtrycksåtgärden avbröts."</string>
@@ -705,7 +705,7 @@
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Något täcker ansiktet. Hela ansiktet måste synas."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
-    <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansiktsverifiering går ej. Otillgänglig maskinvara."</string>
+    <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansiktsverifiering går ej. Otillgänglig hårdvara."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Försök att använda ansiktslåset igen"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Kan inte lagra ny ansiktsdata. Radera först gammal data."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Ansiktsåtgärden har avbrutits."</string>
@@ -806,7 +806,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Övervaka antalet felaktiga lösenord som angetts för skärmlåset och lås surfplattan eller ta bort alla data från surfplattan om för många felaktiga försök görs."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås Android TV-enheten eller rensa all data på Android TV-enheten om för många felaktiga lösenord har skrivits in."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Övervaka antalet felaktiga lösenord som angetts för skärmlåset och lås infotainmentsystemet eller rensa all data från infotainmentsystemet om för många felaktiga försök görs."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Övervaka antalet felaktiga lösenord som angivits för skärmlåset och lås mobilen eller ta bort alla data från mobilen om för många felaktiga försök görs."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Övervaka antalet felaktiga lösenord som angivits för skärmlåset och lås telefonen eller ta bort alla data från telefonen om för många felaktiga försök görs."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås surfplattan eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås Android TV-enheten eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Övervaka antalet felaktiga lösenord som angetts för skärmlåset och lås infotainmentsystemet eller rensa all data från profilen om för många felaktiga lösenord har skrivits in."</string>
@@ -819,7 +819,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Ta bort data från surfplattan utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Radera data på Android TV-enheten utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Rensa data från infotainmentsystemet utan förvarning genom att återställa standardinställningarna."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Ta bort data från mobilen utan förvarning genom att återställa standardinställningarna."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Ta bort data från telefonen utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Rensa profildata"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Radera användaruppgifter"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Rensa användarens uppgifter på den här surfplattan utan förvarning."</string>
@@ -1246,7 +1246,7 @@
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Mobilen uppdateras …"</string>
     <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"Surfplattan uppdateras …"</string>
     <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"Enheten uppdateras …"</string>
-    <string name="android_start_title" product="default" msgid="4036708252778757652">"Mobilen startar …"</string>
+    <string name="android_start_title" product="default" msgid="4036708252778757652">"Telefonen startar …"</string>
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android startar …"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Surfplattan startar …"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Enheten startar …"</string>
@@ -1464,7 +1464,7 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Tillåter att en app begär paketborttagning."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"får be om tillstånd att ignorera batterioptimering"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Appen får be om tillstånd att ignorera batterioptimering."</string>
-    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"fråga alla paket"</string>
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"sök efter alla paket"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Tillåter att en app ser alla installerade paket."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Peka två gånger för zoomkontroll"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Det gick inte att lägga till widgeten."</string>
@@ -1500,10 +1500,10 @@
     <string name="vpn_title_long" msgid="6834144390504619998">"VPN aktiveras av <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="2275388920267251078">"Knacka lätt för att hantera nätverket."</string>
     <string name="vpn_text_long" msgid="278540576806169831">"Ansluten till <xliff:g id="SESSION">%s</xliff:g>. Knacka lätt för att hantera nätverket."</string>
-    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Ansluter till Always-on VPN ..."</string>
-    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Ansluten till Always-on VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Frånkopplad från Always-on VPN"</string>
-    <string name="vpn_lockdown_error" msgid="4453048646854247947">"Det gick inte att ansluta till Always-on VPN"</string>
+    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"Ansluter till Alltid på-VPN ..."</string>
+    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"Ansluten till Alltid på-VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Frånkopplad från Alltid på-VPN"</string>
+    <string name="vpn_lockdown_error" msgid="4453048646854247947">"Det gick inte att ansluta till Alltid på-VPN"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Ändra inställningarna för nätverk eller VPN"</string>
     <string name="upload_file" msgid="8651942222301634271">"Välj fil"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Ingen fil har valts"</string>
@@ -1700,7 +1700,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Visa och styra skärmen"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Den kan läsa allt innehåll på skärmen och visa innehåll över andra appar."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Visa och vidta åtgärder"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Den kan registrera din användning av en app eller maskinvarusensor och interagera med appar åt dig."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Den kan registrera din användning av en app eller hårdvarusensor och interagera med appar åt dig."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Tillåt"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Neka"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tryck på funktioner som du vill aktivera:"</string>
@@ -2150,7 +2150,7 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Konversation"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Gruppkonversation"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Privat"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Personlig"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Jobb"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personlig vy"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Jobbvy"</string>

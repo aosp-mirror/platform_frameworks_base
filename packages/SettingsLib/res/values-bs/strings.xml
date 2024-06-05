@@ -258,7 +258,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Vidite dugme za prijavu grešaka u meniju napajanja"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Ne zaključavaj"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Ekran neće prelaziti u stanje mirovanja tokom punjenja"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Omogući Bluetooth HCI snoop zapis"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Omogući Bluetooth HCI snoop zapisnik"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Snimite Bluetooth pakete. (Uključite/isključite Bluetooth nakon što promijenite ovu postavku)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM otključavanje"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Dozvoli otključavanje bootloadera"</string>
@@ -378,7 +378,7 @@
     <string name="force_msaa" msgid="4081288296137775550">"Prinudno primijeni 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Omogućava 4x MSAA u OpenGL ES 2.0 aplikacijama"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Otkl. greške na operac. nepravoug. isjecanja"</string>
-    <string name="track_frame_time" msgid="522674651937771106">"Profil HWUI iscrtavanja"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"Iscrtavanje pomoću HWUI-a"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Omogući slojeve za otklanjanje grešaka na GPU-u"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Omogućite slojeve za otkl. grešaka na GPU-u za apl. za otkl. grešaka"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Omogući opširni zapisnik"</string>
@@ -510,7 +510,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Koristi jezik sistema"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Otvaranje postavki za <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> nije uspjelo"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Ovaj način unosa može prikupiti sav tekst koji upišete, uključujući lične podatke kao što su lozinke i brojevi kreditnih kartica. Način omogućava aplikacija <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Da li želite koristiti ovaj način unosa?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Napomena: Nakon ponovnog pokretanja, ova aplikacija se neće moći pokrenuti dok ne otključate telefon"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Napomena: nakon ponovnog pokretanja ova aplikacija se neće moći pokrenuti dok ne otključate telefon"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Stanje IMS registracije"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Registrirano"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Nije registrirano"</string>

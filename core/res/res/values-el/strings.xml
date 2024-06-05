@@ -176,8 +176,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"Αδυναμία συγχρονισμού"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"Επιχειρήθηκε η διαγραφή πάρα πολλών <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"Ο αποθηκευτικός χώρος του tablet είναι πλήρης. Διαγράψτε μερικά αρχεία για να δημιουργήσετε ελεύθερο χώρο."</string>
-    <string name="low_memory" product="watch" msgid="3479447988234030194">"Ο αποθηκευτικός χώρος παρακολούθησης είναι πλήρης! Διαγράψτε μερικά αρχεία για να απελευθερώσετε χώρο."</string>
-    <string name="low_memory" product="tv" msgid="6663680413790323318">"Ο αποθηκευτικός χώρος της συσκευής Android TV είναι πλήρης. Διαγράψτε μερικά αρχεία για να απελευθερώσετε χώρο."</string>
+    <string name="low_memory" product="watch" msgid="3479447988234030194">"Ο αποθηκευτικός χώρος παρακολούθησης είναι πλήρης! Διαγράψτε μερικά αρχεία για να αποδεσμεύσετε χώρο."</string>
+    <string name="low_memory" product="tv" msgid="6663680413790323318">"Ο αποθηκευτικός χώρος της συσκευής Android TV είναι πλήρης. Διαγράψτε μερικά αρχεία για να αποδεσμεύσετε χώρο."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Ο αποθηκευτικός χώρος του τηλεφώνου είναι πλήρης. Διαγράψτε μερικά αρχεία για να δημιουργήσετε ελεύθερο χώρο."</string>
     <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Η αρχή έκδοσης πιστοποιητικών εγκαταστάθηκε}other{Οι αρχές έκδοσης πιστοποιητικών εγκαταστάθηκαν}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Από ένα άγνωστο τρίτο μέρος"</string>
@@ -1872,7 +1872,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Η Εξοικονόμηση μπαταρίας ενεργοποιεί το Σκούρο θέμα και περιορίζει ή απενεργοποιεί τη δραστηριότητα στο παρασκήνιο, ορισμένα οπτικά εφέ, συγκεκριμένες λειτουργίες και κάποιες συνδέσεις δικτύου."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Η Εξοικονόμηση μπαταρίας ενεργοποιεί το Σκούρο θέμα και περιορίζει ή απενεργοποιεί τη δραστηριότητα στο παρασκήνιο, ορισμένα οπτικά εφέ, συγκεκριμένες λειτουργίες και ορισμένες συνδέσεις δικτύου."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτήν τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτή τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ενεργ. Εξοικονόμησης δεδομένων;"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ενεργοποίηση"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Για ένα λεπτό (μέχρι τις {formattedTime})}other{Για # λεπτά (μέχρι τις {formattedTime})}}"</string>
@@ -2150,7 +2150,7 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Συνομιλία"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Ομαδική συνομιλία"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Προσωπικό"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Προσωπικός"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Εργασία"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Προσωπική προβολή"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Προβολή εργασίας"</string>
@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Η διάταξη πληκτρολογίου ορίστηκε σε <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Πατήστε για αλλαγή."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Τα φυσικά πληκτρολόγια διαμορφώθηκαν"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Πατήστε για να δείτε πληκτρολόγια"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Ιδιωτικό"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Ιδιωτικός"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Κλώνος"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Εργασία"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Εργασία 2"</string>

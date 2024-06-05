@@ -616,6 +616,19 @@ class Owners {
         }
     }
 
+    void markPostUpgradeMigration() {
+        synchronized (mData) {
+            mData.mPoliciesMigratedPostUpdate = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    boolean isMigratedPostUpdate() {
+        synchronized (mData) {
+            return mData.mPoliciesMigratedPostUpdate;
+        }
+    }
+
     @GuardedBy("mData")
     void pushToAppOpsLocked() {
         if (!mSystemReady) {

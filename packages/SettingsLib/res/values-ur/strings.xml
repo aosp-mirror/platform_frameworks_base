@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"منسوخ کریں"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"منسلک ہونے پر جوڑا بنانے سے آپ کے رابطوں اور کال کی سرگزشت تک رسائی حاصل ہو جاتی ہے۔"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> کے ساتھ جوڑا نہیں بنا سکا۔"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"‏غلط PIN یا پاس کلید کی وجہ سے <xliff:g id="DEVICE_NAME">%1$s</xliff:g> کے ساتھ جوڑا نہیں بنا سکا۔"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"‏غلط PIN یا پاس کلید کی وجہ سے <xliff:g id="DEVICE_NAME">%1$s</xliff:g> کے ساتھ جوڑا نہیں بنایا جا سکا۔"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> کے ساتھ مواصلت نہیں ہو سکتی۔"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> نے جوڑا بنانے کو مسترد کر دیا۔"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"کمپیوٹر"</string>
@@ -455,7 +455,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"آپ کے استعمال کی بنیاد پر تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> تک"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"‫<xliff:g id="TIME">%1$s</xliff:g> تک"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"‫<xliff:g id="TIME">%1$s</xliff:g> تک بیٹری ختم ہو سکتی ہے"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

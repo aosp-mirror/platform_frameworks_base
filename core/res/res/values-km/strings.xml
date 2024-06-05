@@ -803,20 +803,20 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"គ្រប់គ្រងប្រវែង និងតួអក្សរដែលអនុញ្ញាតឲ្យប្រើក្នុងពាក្យសម្ងាត់ និងលេខសម្ងាត់ចាក់សោអេក្រង់។"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"តាមដាន​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ពិនិត្យ​ចំនួន​​បញ្ចូល​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ។ ពេល​ដោះ​សោ​អេក្រង់ និង​ចាក់​សោ​ទូរស័ព្ទ ឬ​លុប​ទិន្នន័យ​ទូរស័ព្ទ​ទាំងអស់​ ប្រសិន​បើ​មាន​ពាក្យ​សម្ងាត់​បញ្ចូល​មិន​ត្រឹមត្រូវ​ច្រើន​ដង​ពេក។"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ពិនិត្យ​មើលចំនួនដងនៃការ​​វាយបញ្ចូល​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ នៅពេល​ដោះ​សោ​អេក្រង់ និង​ចាក់​សោ​ថេប្លេត ឬ​លុប​ទិន្នន័យ​ថេប្លេតទាំងអស់​ ប្រសិន​បើ​វាយបញ្ចូលពាក្យ​សម្ងាត់​​មិន​ត្រឹមត្រូវ​ច្រើន​ដង​ពេក។"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ពិនិត្យ​ចំនួននៃការវាយបញ្ចូលពាក្យសម្ងាត់ដែលមិនត្រឹមត្រូវ នៅពេលដោះ​សោអេក្រង់ និងចាក់​សោឧបករណ៍ Android TV របស់អ្នក ឬ​លុបទិន្នន័យ​ឧបករណ៍ Android TV របស់អ្នកទាំងអស់ ប្រសិនបើ​វាយបញ្ចូល​ពាក្យសម្ងាត់​ខុសច្រើនដងពេក។"</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ពិនិត្យមើល​ចំនួនដងនៃការវាយបញ្ចូល​ពាក្យសម្ងាត់​មិនត្រឹមត្រូវ នៅពេល​ដោះសោ​អេក្រង់ និងចាក់សោ​ប្រព័ន្ធ​ព័ត៌មាន​និងកម្សាន្ត ឬ​លុបទិន្នន័យ​ទាំងអស់​របស់ប្រព័ន្ធ​ព័ត៌មាន​និងកម្សាន្ត ប្រសិនបើ​វាយបញ្ចូល​ពាក្យសម្ងាត់​មិនត្រឹមត្រូវ​ច្រើនដងពេក។"</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ពិនិត្យ​ចំនួន​​បញ្ចូល​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ។ ពេល​ដោះ​សោ​អេក្រង់ និង​ចាក់​សោ​ទូរស័ព្ទ ឬ​លុប​ទិន្នន័យ​ទូរស័ព្ទ​ទាំងអស់​ ប្រសិន​បើ​មាន​ពាក្យ​សម្ងាត់​បញ្ចូល​មិន​ត្រឹមត្រូវ​ច្រើន​ដង​ពេក។"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ពិនិត្យ​មើលចំនួនដងនៃការ​​វាយបញ្ចូល​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ នៅពេល​ដោះ​សោ​អេក្រង់ និង​ចាក់​សោ​ទូរសព្ទ ឬ​លុប​ទិន្នន័យ​ទូរសព្ទទាំងអស់​ ប្រសិន​បើ​វាយបញ្ចូលពាក្យ​សម្ងាត់​​មិន​ត្រឹមត្រូវ​ច្រើន​ដង​ពេក។"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ត្រួតពិនិត្យចំនួននៃការវាយបញ្ចូលពាក្យសម្ងាត់ដែលមិនត្រឹមត្រូវ នៅពេលដោះសោអេក្រង់ និងចាក់សោថេប្លេត ឬលុបទិន្នន័យអ្នកប្រើនេះទាំងអស់ ប្រសិនបើមានការវាយបញ្ចូលពាក្យសម្ងាត់ខុសច្រើនដងពេក។"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ពិនិត្យ​ចំនួននៃការវាយបញ្ចូលពាក្យសម្ងាត់ដែលមិនត្រឹមត្រូវ នៅពេលដោះ​សោអេក្រង់ និងចាក់​សោឧបករណ៍ Android TV របស់អ្នក ឬ​លុបទិន្នន័យ​របស់អ្នកប្រើប្រាស់នេះ​ទាំងអស់ ប្រសិនបើ​វាយបញ្ចូល​ពាក្យសម្ងាត់​ខុសច្រើនដងពេក។"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ពិនិត្យមើល​ចំនួនដងនៃការវាយបញ្ចូល​ពាក្យសម្ងាត់​មិនត្រឹមត្រូវ នៅពេល​ដោះសោ​អេក្រង់ និងចាក់សោ​ប្រព័ន្ធ​ព័ត៌មាន​និងកម្សាន្ត ឬ​លុបទិន្នន័យ​ទាំងអស់​របស់កម្រងព័ត៌មាននេះ ប្រសិនបើ​វាយបញ្ចូល​ពាក្យសម្ងាត់​មិនត្រឹមត្រូវ​ច្រើនដងពេក។"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ត្រួតពិនិត្យចំនួននៃការវាយបញ្ចូលពាក្យសម្ងាត់ដែលមិនត្រឹមត្រូវ នៅពេលដោះសោអេក្រង់ និងចាក់សោទូរស័ព្ទ ឬលុបទិន្នន័យអ្នកប្រើនេះទាំងអស់ ប្រសិនបើមានការវាយបញ្ចូលពាក្យសម្ងាត់ខុសច្រើនដងពេក។"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ពិនិត្យ​មើលចំនួនដងនៃការ​​វាយបញ្ចូល​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ នៅពេល​ដោះ​សោ​អេក្រង់ និង​ចាក់​សោ​ទូរសព្ទ ឬ​លុប​ទិន្នន័យ​ទូរសព្ទទាំងអស់​ ប្រសិន​បើ​វាយបញ្ចូលពាក្យ​សម្ងាត់​​មិន​ត្រឹមត្រូវ​ច្រើន​ដង​ពេក។"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"ប្តូរការចាក់សោអេក្រង់"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ប្តូរការចាក់សោអេក្រង់។"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"ចាក់សោ​អេក្រង់"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"គ្រប់គ្រងវិធី និង​ពេលវេលា​ចាក់សោ​អេក្រង់។"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"លុប​ទិន្នន័យ​ទាំង​អស់"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"លុប​ទិន្នន័យ​កុំព្យូទ័រ​បន្ទះ​ដោយ​មិន​​ព្រមាន​ដោយ​អនុវត្ត​ការ​កំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ។"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"លុប​ទិន្នន័យ​ថេប្លេត​ដោយ​គ្មានការព្រមាន​ដោយធ្វើការ​កំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ។"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"លុប​ទិន្នន័យឧបករណ៍ Android TV របស់អ្នក​ដោយមិនមានការព្រមាន ដោយ​ធ្វើការកំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ។"</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"លុប​ទិន្នន័យ​របស់​ប្រព័ន្ធ​ព័ត៌មាន និងកម្សាន្ត​ដោយមិនមានការព្រមាន ដោយ​ធ្វើការកំណត់​ទិន្នន័យដូច​ចេញពី​រោងចក្រ។"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"លុប​ទិន្នន័យ​ទូរសព្ទ​ដោយ​មិន​មានការព្រមានជាមុន ដោយ​អនុវត្ត​ការ​កំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ ។"</string>
@@ -970,7 +970,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"ត្រឹមត្រូវ!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ព្យាយាម​ម្ដង​ទៀត"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ព្យាយាម​ម្ដង​ទៀត"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"ដោះសោលក្ខណៈពិសេស និងទិន្នន័យទាំងអស់"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"ដោះសោមុខងារ និងទិន្នន័យទាំងអស់"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"បាន​លើស​ការ​ព្យាយាម​ដោះ​សោ​តាម​ទម្រង់​មុខ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"គ្មានស៊ីមទេ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"គ្មានស៊ីមក្នុងថេប្លេតទេ។"</string>
@@ -1714,7 +1714,7 @@
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"ការបញ្ច្រាស​ពណ៌"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"ការកែតម្រូវ​ពណ៌"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"មុខងារប្រើដៃម្ខាង"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ពន្លឺតិចខ្លាំង"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ងងឹតខ្លាំង"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ឧបករណ៍ជំនួយការស្ដាប់"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បិទ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
@@ -1732,7 +1732,7 @@
     <string name="owner_name" msgid="8713560351570795743">"ម្ចាស់"</string>
     <string name="guest_name" msgid="8502103277839834324">"ភ្ញៀវ"</string>
     <string name="error_message_title" msgid="4082495589294631966">"កំហុស"</string>
-    <string name="error_message_change_not_allowed" msgid="843159705042381454">"ការ​ផ្លាស់ប្ដូរ​នេះ​មិន​ត្រូវ​បាន​អនុញ្ញាត​ដោយ​អ្នក​គ្រប់គ្រង​របស់​អ្នក"</string>
+    <string name="error_message_change_not_allowed" msgid="843159705042381454">"ការ​ផ្លាស់ប្ដូរ​នេះ​មិន​ត្រូវ​បាន​អនុញ្ញាត​ដោយ​អ្នក​គ្រប់គ្រង​របស់​អ្នកទេ"</string>
     <string name="app_not_found" msgid="3429506115332341800">"រក​មិន​ឃើញ​កម្មវិធី​ ដើម្បី​គ្រប់គ្រង​សកម្មភាព​នេះ"</string>
     <string name="revoke" msgid="5526857743819590458">"ដកហូត"</string>
     <string name="mediasize_iso_a0" msgid="7039061159929977973">"ISO A0"</string>
@@ -1936,7 +1936,7 @@
     <string name="user_creation_account_exists" msgid="2239146360099708035">"អនុញ្ញាតឱ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើប្រាស់​ថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> (អ្នកប្រើប្រាស់ដែលមានគណនីនេះមានរួចហើយ) ដែរឬទេ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"អនុញ្ញាតឱ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើប្រាស់​ថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> ដែរឬទេ?"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"បញ្ចូលអ្នកប្រើប្រាស់ដែលស្ថិតក្រោមការគ្រប់គ្រង"</string>
-    <string name="language_selection_title" msgid="52674936078683285">"បន្ថែមភាសា"</string>
+    <string name="language_selection_title" msgid="52674936078683285">"បញ្ចូលភាសា"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ចំណូលចិត្តតំបន់"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"វាយបញ្ចូលឈ្មោះភាសា"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"បាន​ណែនាំ"</string>

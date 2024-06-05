@@ -188,11 +188,11 @@
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instal·la dades de veu"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Instal·la les dades de veu necessàries per a la síntesi de veu"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Pot ser que aquest motor de síntesi de parla pugui recopilar tot el text que s\'enunciarà, incloses les dades personals, com ara les contrasenyes i els números de les targetes de crèdit. Ve del motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Vols activar l\'ús d\'aquest motor de síntesi de parla?"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"Aquest idioma requereix una connexió a la xarxa activa per a la sortida de text a parla."</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"Aquest idioma requereix una connexió de xarxa activa per a la sortida de text a parla."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"Això és un exemple de síntesi de veu"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Estat de l\'idioma predeterminat"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> és totalment compatible"</string>
-    <string name="tts_status_requires_network" msgid="8327617638884678896">"Es necessita una connexió a la xarxa per a <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
+    <string name="tts_status_requires_network" msgid="8327617638884678896">"Es necessita una connexió de xarxa per a <xliff:g id="LOCALE">%1$s</xliff:g>"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> no és compatible"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"S\'està comprovant…"</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"Configuració de: <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
@@ -260,9 +260,9 @@
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla no entra mai en mode de repòs si el dispositiu s\'està carregant"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Activa el registre de Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Captura els paquets de Bluetooth. Activa el Bluetooth un cop hagis canviat aquesta opció."</string>
-    <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueig d\'OEM"</string>
+    <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueig OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Permet desbloquejar el bootloader"</string>
-    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Permetre el desbloqueig d\'OEM?"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Permetre el desbloqueig OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ADVERTIMENT: les funcions de protecció del dispositiu no funcionaran mentre aquesta opció estigui activada."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Selecciona una aplicació d\'ubicació simulada"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"No s\'ha definit cap aplicació d\'ubicació simulada"</string>
@@ -455,7 +455,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Hauria de durar aproximadament fins a les <xliff:g id="TIME">%1$s</xliff:g> segons l\'ús que en facis"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Hauria de durar aproximadament fins a les <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Hauria de durar aproximadament fins a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Fins a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"fins a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"És possible que la bateria s\'esgoti a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Temps restant inferior a <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Temps restant inferior a <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -474,20 +474,20 @@
     <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g>: càrrega optimitzada"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconegut"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"S\'està carregant"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carregant ràpidament"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Càrrega ràpida"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carregant lentament"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Carregant sense fil"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Càrrega sense fil"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"S\'està carregant"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"No s\'està carregant"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Connectat; no s\'està carregant"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Carregada"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Totalment carregada"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlat per l\'administrador"</string>
-    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlat per la configuració restringida"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Controlat per l\'opció de configuració restringida"</string>
     <string name="disabled" msgid="8017887509554714950">"Desactivat"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Amb permís"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Sense permís"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instal·lar aplicacions desconegudes"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instal·la aplicacions desconegudes"</string>
     <string name="home" msgid="973834627243661438">"Pàgina d\'inici de configuració"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

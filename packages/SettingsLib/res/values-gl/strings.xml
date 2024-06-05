@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"A vinculación garante acceso aos teus contactos e ao historial de chamadas ao estar conectado"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Non se puido vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Non se puido vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, clave de acceso ou PIN incorrectos."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Non se puido vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>; clave de acceso ou PIN incorrectos."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Non se pode comunicar con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Vinculación rexeitada por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Ordenador"</string>
@@ -510,7 +510,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Usar idiomas do sistema"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Non se puido abrir a configuración de <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Este método de introdución de texto pode recompilar todo o que escribas, incluídos os datos persoais como os contrasinais e os números de tarxetas de crédito. Provén da aplicación <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Queres usar este método de introdución de texto?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Nota: Tras un reinicio, non se pode iniciar esta aplicación ata que desbloquees o teléfono"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Nota: Tras un reinicio, non se poderá iniciar esta aplicación ata que se desbloquee o teléfono"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Estado de rexistro de IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Rexistrado"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Non rexistrado"</string>

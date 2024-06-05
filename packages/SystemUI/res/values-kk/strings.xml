@@ -244,7 +244,7 @@
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнитура"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Кіріс"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Есту аппараттары"</string>
-    <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Қосылуда…"</string>
+    <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Қосылып жатыр…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Автоматты түрде бұру"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Автоматты айналатын экран"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Локация"</string>
@@ -260,7 +260,7 @@
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Желілер бар"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Желілер қолжетімді емес."</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Қолжетімді Wi-Fi желілері жоқ"</string>
-    <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Қосылуда…"</string>
+    <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Қосылып жатыр…"</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"Экранды трансляциялау"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Трансляциялануда"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Атаусыз құрылғы"</string>
@@ -275,9 +275,9 @@
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Жабу"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Қосылды"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Қосылды, батарея деңгейі: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="quick_settings_connecting" msgid="2381969772953268809">"Қосылуда…"</string>
+    <string name="quick_settings_connecting" msgid="2381969772953268809">"Қосылып жатыр…"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Хотспот"</string>
-    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Қосылуда…"</string>
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Қосылып жатыр…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Трафикті үнемдеу режимі қосулы"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# құрылғы}other{# құрылғы}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Қолшам"</string>
@@ -293,13 +293,13 @@
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Түнгі жарық"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Күн батқанда қосу"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Күн шыққанға дейін"</string>
-    <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Қосылу уақыты: <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Қосылатын уақыты: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> дейін"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Қараңғы режим"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Батареяны үнемдеу режимі"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Күн батқанда қосу"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Күн шыққанға дейін"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Қосылу уақыты: <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Қосылатын уақыты: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> дейін"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Ұйқы режимінде"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Ұйқы режимі аяқталғанға дейін"</string>
@@ -317,8 +317,8 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Құрылғы микрофонын блоктан шығару керек пе?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Құрылғы камерасын блоктан шығару керек пе?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Құрылғы камерасы мен микрофонын блоктан шығару керек пе?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Микрофоныңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Камераңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Микрофоныңызды пайдалануға рұқсат берілген барлық қолданба мен қызмет блоктан шығарылады."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Камераңызды пайдалануға рұқсат берілген барлық қолданба мен қызмет блоктан шығарылады."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Камераңызды немесе микрофоныңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон блокталған"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера блокталған"</string>
@@ -406,7 +406,7 @@
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Бастау"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Трансляциялау басталсын ба?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Трансляциялау кезінде Android жүйесі экраныңызда көрінетін не құрылғыңызда ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Қолданба экранын трансляциялау кезінде Android жүйесі қолданбада көрінетін не ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Қолданба экранын трансляциялау кезінде Android қолданбада көрінетін не ойнатылатын барлық контентті пайдалана алады. Сондықтан құпия сөздер, төлем туралы мәлімет, хабарлар, фотосуреттер, дыбыстар мен бейнелер сияқты ақпаратқа сақ болыңыз."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Трансляциялауды бастау"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Бөлісу басталсын ба?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Бөлісу, жазу не трансляциялау кезінде Android жүйесі экраныңызда көрінетін не құрылғыңызда ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
@@ -537,7 +537,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Пайдалану үшін құлыпты ашу"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Карталарыңыз алынбады, кейінірек қайталап көріңіз."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Экран құлпының параметрлері"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR кодының сканері"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR сканері"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Жаңартылып жатыр"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Жұмыс профилі"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Ұшақ режимі"</string>
@@ -662,7 +662,7 @@
     <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Google Assistant-ке кіру"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Экранды құлыптау"</string>
     <string name="group_system_quick_memo" msgid="2914234890158583919">"Жылдам ескертпе жасау үшін ескертпелер қолданбасын ашу"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Жүйе мультитаскингі"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Көп тапсырма режимі"</string>
     <string name="system_multitasking_rhs" msgid="6593269428880305699">"Ағымдағы қолданбамен оң жаққа қарай экранды бөлу режиміне кіру"</string>
     <string name="system_multitasking_lhs" msgid="8839380725557952846">"Ағымдағы қолданбамен сол жаққа қарай экранды бөлу режиміне кіру"</string>
     <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Экранды бөлу режимінен толық экран режиміне ауысу"</string>
@@ -942,7 +942,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Кідірту"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Алдыңғы трек"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Келесі трек"</string>
-    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Жалғануда"</string>
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Жалғанып жатыр"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Ойнату"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> қолданбасын ашу"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> қолданбасында <xliff:g id="ARTIST_NAME">%2$s</xliff:g> орындайтын \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" әнін ойнату"</string>
@@ -1136,7 +1136,7 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Қалған батарея заряды: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Стилусты зарядтағышқа жалғаңыз."</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Стилус батареясының заряды аз"</string>
-    <string name="video_camera" msgid="7654002575156149298">"Бейнекамера"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Бейне­камера"</string>
     <string name="call_from_work_profile_title" msgid="5418253516453177114">"Жеке қолданбадан қоңырау шалу мүмкін емес"</string>
     <string name="call_from_work_profile_text" msgid="2856337395968118274">"Ұйымыңыз тек жұмыс қолданбаларынан қоңырау шалуға рұқсат етеді."</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Жұмыс профиліне ауысу"</string>

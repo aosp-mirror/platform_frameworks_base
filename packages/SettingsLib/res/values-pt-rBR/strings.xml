@@ -514,7 +514,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"Estado do registro de IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Registrado"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Não registrado"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Não disponível"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Indisponível"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"O MAC é randomizado"</string>
     <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 dispositivo conectado}=1{1 dispositivo conectado}one{# dispositivo conectado}other{# dispositivos conectados}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mais tempo."</string>
@@ -548,7 +548,7 @@
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Alto-falante da base"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este telefone"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Neste telefone"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Não é possível reproduzir neste dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Faça upgrade da conta para trocar"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Não é possível abrir os downloads aqui"</string>
@@ -622,7 +622,7 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Excluir"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Salvar"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Sair do modo visitante"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"Redefinir Sessão de visitante"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Redefinir sessão de visitante"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Sair do modo visitante"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Todas as atividades serão excluídas ao sair"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Você pode salvar ou excluir sua atividade ao sair"</string>
@@ -675,7 +675,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Padrão"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ligar tela"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir que a tela seja ligada"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permitir que um app ligue a tela. Se permitido, o app vai poder ligar a tela a qualquer momento sem uma intent explícita."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permitir que um app ative a tela. Com sua autorização, o app vai poder ligar a tela a qualquer momento, sem você pedir."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Interromper a transmissão do app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se você transmitir o app <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou mudar a saída, a transmissão atual será interrompida"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmitir <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

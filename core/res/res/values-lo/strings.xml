@@ -803,7 +803,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ຕັ້ງຄ່າກົດຂອງລະຫັດຜ່ານ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ຄວບຄຸມຄວາມຍາວ ແລະຕົວອັກສອນທີ່ອະ​ນຸ​ຍາດ​ໃຫ້​ຢູ່​ໃນລະ​ຫັດລັອກໜ້າຈໍ ແລະ PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ຕິດຕາມການພະຍາຍາມປົດລັອກໜ້າຈໍ"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ຕິດຕາມເບິ່ງຈຳນວນການພິມລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງ ໃນເວລາປົດລັອກໜ້າຈໍ ແລະລັອກແທັບເລັດ ຫຼືລຶບຂໍ້ມູນທັງໝົດຂອງແທັບເລັດ ຖ້າມີການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງຫຼາຍເທື່ອເກີນໄປ."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ຕິດຕາມເບິ່ງຈຳນວນການພິມລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງ ໃນເວລາປົດລັອກໜ້າຈໍ ແລະ ລັອກແທັບເລັດ ຫຼື ລຶບຂໍ້ມູນທັງໝົດຂອງແທັບເລັດ ຖ້າມີການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງຫຼາຍເທື່ອເກີນໄປ."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ຕິດຕາມຈຳນວນລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງທີ່ພິມຕອນກຳລັງປົດລັອກໜ້າຈໍ ແລະ ລັອກອຸປະກອນ Android TV ຂອງທ່ານ ຫຼື ລຶບຂໍ້ມູນຂອງອຸປະກອນ Android TV ຂອງທ່ານຫາກພິມລະຫັດຜ່ານຜິດຫຼາຍເທື່ອເກີນໄປ."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ຕິດຕາມຈຳນວນການພິມລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງໃນເວລາປົດລັອກໜ້າຈໍ ແລະ ລັອກລະບົບສາລະບັນເທີງ ຫຼື ລຶບຂໍ້ມູນຂອງລະບົບສາລະບັນເທີງທັງໝົດຫາກມີການພິມລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງຫຼາຍເກີນໄປ."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ຕິດຕາມເບິ່ງຈຳນວນການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ ໃນເວລາປົດລັອກໜ້າຈໍ ແລະລັອກໂທລະສັບ ຫຼືລຶບຂໍ້ມູນທັງໝົດຂອງໂປລະສັບ ຖ້າມີການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງຫຼາຍເທື່ອເກີນໄປ."</string>
@@ -1848,7 +1848,7 @@
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ລອງໃໝ່ອີກຄັ້ງໃນພາຍຫລັງ."</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ການ​ເບິ່ງ​ເຕັມ​ໜ້າ​ຈໍ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ຫາກຕ້ອງການອອກ, ໃຫ້ຮູດຈາກທາງເທິງລົງມາທາງລຸ່ມ."</string>
-    <string name="immersive_cling_positive" msgid="7047498036346489883">"ໄດ້​ແລ້ວ"</string>
+    <string name="immersive_cling_positive" msgid="7047498036346489883">"ເຂົ້າ​ໃຈ​ແລ້ວ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ໝຸນເພື່ອມຸມມອງທີ່ດີຂຶ້ນ"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ເປີດ <xliff:g id="NAME">%s</xliff:g> ໃນໂໝດເຕັມຈໍເພື່ອມຸມມອງທີ່ດີຂຶ້ນ"</string>
     <string name="done_label" msgid="7283767013231718521">"ແລ້ວໆ"</string>
@@ -1872,7 +1872,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ຕົກລົງ"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ຕົວປະຢັດແບັດເຕີຣີຈະເປີດໃຊ້ຮູບແບບສີສັນມືດ ແລະ ຈຳກັດ ຫຼື ປິດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກທາງພາບຈຳນວນໜຶ່ງ, ຄຸນສົມບັດບາງຢ່າງ ແລະ ການເຊື່ອມຕໍ່ເຄືອຂ່າຍບາງອັນ."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"ຕົວປະຢັດແບັດເຕີຣີຈະເປີດໃຊ້ຮູບແບບສີສັນມືດ ແລະ ຈຳກັດ ຫຼື ປິດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກທາງພາບຈຳນວນໜຶ່ງ, ຄຸນສົມບັດບາງຢ່າງ ແລະ ການເຊື່ອມຕໍ່ເຄືອຂ່າຍບາງອັນ."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດອິນເຕີເນັດຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດຂໍ້ມູນຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ເປີດຕົວປະຢັດອິນເຕີເນັດບໍ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ເປີດໃຊ້"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{ໄລຍະເວລາ 1 ນາທີ (ຈົນຮອດ {formattedTime})}other{ໄລຍະເວລາ # ນາທີ (ຈົນຮອດ {formattedTime})}}"</string>
@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ຕັ້ງໂຄງຮ່າງແປ້ນພິມເປັນ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… ແຕະເພື່ອປ່ຽນແປງ."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ຕັ້ງຄ່າແປ້ນພິມແທ້ແລ້ວ"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ແຕະເພື່ອເບິ່ງແປ້ນພິມ"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"ສ່ວນຕົວ"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"ສ່ວນບຸກຄົນ"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"ໂຄລນ"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"ວຽກ"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"ວຽກ 2"</string>

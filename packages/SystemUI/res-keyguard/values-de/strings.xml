@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Gib deine PIN ein"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"PIN eingeben"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"Gib die PIN ein"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Muster eingeben"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Zeichne das Muster"</string>

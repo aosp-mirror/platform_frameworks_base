@@ -250,7 +250,7 @@
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Ubicación"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Salvapantallas"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Acceso a cámara"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acceso al micro"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Acceso a micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqueado"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Dispositivo multimedia"</string>
@@ -404,7 +404,7 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Cuando compartes, grabas o envías contenido, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> puede acceder a todo lo que se muestre en la pantalla o se reproduzca en tu dispositivo. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Cuando compartes, grabas o envías una aplicación, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> puede acceder a todo lo que se muestre o se reproduzca en ella. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Empezar"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"¿Empezar a enviar contenido?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"¿Empezar a enviar?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Cuando envías contenido, Android puede acceder a todo lo que se muestre en la pantalla o se reproduzca en tu dispositivo. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Cuando envías una aplicación, Android puede acceder a todo lo que se muestre o se reproduzca en ella. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Empezar a enviar"</string>
@@ -663,8 +663,8 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueo"</string>
     <string name="group_system_quick_memo" msgid="2914234890158583919">"Abrir la aplicación de notas para tomar una nota rápida"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Función multitarea del sistema"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Iniciar pantalla dividida con esta aplicación en el lado derecho"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Iniciar pantalla dividida con esta aplicación en el lado izquierdo"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Iniciar pantalla dividida con la aplicación actual en el lado derecho"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Iniciar pantalla dividida con la aplicación actual en el lado izquierdo"</string>
     <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Cambiar de pantalla dividida a pantalla completa"</string>
     <string name="system_multitasking_replace" msgid="844285282472557186">"Con pantalla dividida: reemplazar una aplicación por otra"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>

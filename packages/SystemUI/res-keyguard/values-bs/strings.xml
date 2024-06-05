@@ -23,7 +23,7 @@
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Unesite PIN"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"Unesite PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Unesite uzorak"</string>
-    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Unesite uzorak"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Nacrtajte uzorak"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Unesite lozinku"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Unesite lozinku"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Nevažeća kartica."</string>
@@ -112,9 +112,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Uzorak je potreban nakon ponovnog pokretanja uređaja"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"PIN je potreban nakon ponovnog pokretanja uređaja"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Lozinka je potrebna nakon pokretanja uređaja"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Radi dodatne zaštite, umjesto toga koristite uzorak"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Radi dodatne zaštite, umjesto toga koristite PIN"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Radi dodatne zašitite, umjesto toga koristite lozinku"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Za dodatnu sigurnost koristite uzorak"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Za dodatnu sigurnost koristite PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Za dodatnu sigurnost koristite lozinku"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Uređaj je zaključao administrator"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Uređaj je ručno zaključan"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nije prepoznato"</string>
@@ -127,8 +127,8 @@
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Otključajte uređaj da nastavite"</string>
     <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Unesite PIN da kasnije instalirate ažuriranje"</string>
     <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Unesite lozinku da kasnije instalirate ažuriranje"</string>
-    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Unesite uzorak da kasnije instalirate ažuriranje"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Nacrtajte uzorak da kasnije instalirate ažuriranje"</string>
     <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Uređaj je ažuriran. Unesite PIN da nastavite."</string>
     <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Uređaj je ažuriran. Unesite lozinku da nastavite."</string>
-    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Uređaj je ažuriran. Unesite uzorak da nastavite."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Uređaj je ažuriran. Nacrtajte uzorak da nastavite."</string>
 </resources>

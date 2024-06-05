@@ -88,7 +88,7 @@ constructor(
                 .inflate(R.layout.media_projection_recent_tasks, parent, /* attachToRoot= */ false)
                 as ViewGroup
 
-        val container = recentsRoot.findViewById<View>(R.id.media_projection_recent_tasks_container)
+        val container = recentsRoot.requireViewById<View>(R.id.media_projection_recent_tasks_container)
         container.setTaskHeightSize()
 
         val progress = recentsRoot.requireViewById<View>(R.id.media_projection_recent_tasks_loader)

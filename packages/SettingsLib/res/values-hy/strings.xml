@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Չեղարկել"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Զուգակցում է մուտքի թույլտվությունը դեպի ձեր կոնտակտները և զանգերի պատմությունը, երբ միացված է:"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ սխալ PIN-ի կամ անցաբառի պատճառով:"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Չհաջողվեց զուգակցել <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ՝ սխալ PIN-ի կամ մուտքի բանալու պատճառով:"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Հնարավոր չէ կապ հաստատել  <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի հետ:"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Զուգավորումը մերժվեց <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ի կողմից:"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Համակարգիչ"</string>
@@ -237,7 +237,7 @@
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Զուգակցեք նոր սարքեր՝ օգտագործելով վեցանիշ կոդը"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Զուգակցված սարքեր"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Միացված է"</string>
-    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Սարքի տվյալները"</string>
+    <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Սարքի տվյալներ"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Հեռացնել"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Սարքի մատնահետք՝ <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Չհաջողվեց միացնել"</string>
@@ -560,8 +560,8 @@
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Լարով աուդիո սարք"</string>
     <string name="help_label" msgid="3528360748637781274">"Օգնություն և հետադարձ կապ"</string>
     <string name="storage_category" msgid="2287342585424631813">"Տարածք"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"Հասանելի դարձված տվյալներ"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"Դիտեք և փոփոխեք հասանելի դարձված տվյալները"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Ընդհանուր տվյալներ"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Դիտեք և փոփոխեք ընդհանուր տվյալները"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Այս օգտատիրոջ համար ընդհանուր տվյալներ չկան։"</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Չհաջողվեց բեռնել ընդհանուր տվյալները։ Նորից փորձեք։"</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Հասանելի դարձված տվյալների ID՝ <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
@@ -571,7 +571,7 @@
     <string name="accessor_info_title" msgid="8289823651512477787">"Տվյալներով կիսվող հավելվածներ"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"Հավելվածի կողմից տրամադրված նկարագրություն չկա։"</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"Վարձակալության ժակետն ավարտվում է՝ <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="delete_blob_text" msgid="2819192607255625697">"Ջնջել հասանելի դարձված տվյալները"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Ջնջել ընդհանուր տվյալները"</string>
     <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Իսկապե՞ս ուզում եք ջնջել հասանելի դարձված այս տվյալները։"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"Օգտվողներն իրենց անձնական հավելվածներն ու բովանդակությունն ունեն"</string>
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Դուք կարող եք սահմանափակել մուտքի իրավունքը ծրագրեր և ձեր հաշվի բովանդակություն:"</string>

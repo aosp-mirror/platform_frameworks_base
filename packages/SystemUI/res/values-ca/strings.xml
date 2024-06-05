@@ -317,9 +317,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vols desbloquejar el micròfon del dispositiu?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Vols desbloquejar la càmera del dispositiu?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Vols desbloquejar la càmera i el micròfon del dispositiu?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Aquesta opció desbloqueja l\'accés de tots els serveis i aplicacions que tenen permís per utilitzar el micròfon."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Aquesta opció desbloqueja l\'accés de tots els serveis i aplicacions que tenen permís per utilitzar la càmera."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Aquesta opció desbloqueja l\'accés de tots els serveis i aplicacions que tenen permís per utilitzar la càmera o el micròfon."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Si ho fas, tots els serveis i les aplicacions que tenen permís podran utilitzar el micròfon."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Si ho fas, tots els serveis i les aplicacions que tenen permís podran utilitzar la càmera."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Si ho fas, tots els serveis i les aplicacions que tenen permís podran utilitzar la càmera o el micròfon."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"El micròfon està bloquejat"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"La càmera està bloquejada"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"El micròfon i la càmera estan bloquejats"</string>
@@ -402,7 +402,7 @@
     <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Comparteix o grava una aplicació"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Vols començar a gravar o emetre contingut amb <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Quan comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Quan comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Quan comparteixes, graves o emets una aplicació, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es mostri o que es reprodueixi en aquella aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Inicia"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Vols iniciar una emissió?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Quan emets contingut, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
@@ -410,7 +410,7 @@
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Inicia una emissió"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Vols començar a compartir?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Quan comparteixes, graves o emets contingut, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Quan comparteixes, graves o emets contingut, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Quan comparteixes, graves o emets una aplicació, Android té accés a qualsevol cosa que es mostri o que es reprodueixi en aquella aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Inicia"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloquejat per l\'administrador de TI"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Les captures de pantalla estan desactivades per la política de dispositius"</string>
@@ -501,7 +501,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"S\'ha deixat de fixar l\'aplicació"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Trucada"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"To de trucada"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"So"</string>
     <string name="stream_music" msgid="2188224742361847580">"Multimèdia"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarma"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notificació"</string>
@@ -646,7 +646,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"No s\'ha trobat cap drecera"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistema"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Entrada"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Obre aplicacions"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Aplicacions obertes"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Aplicació actual"</string>
     <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Accedeix a l\'àrea de notificacions"</string>
     <string name="group_system_full_screenshot" msgid="7389040853798023211">"Fes una captura de pantalla completa"</string>
@@ -660,7 +660,7 @@
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Amaga i torna a mostrar la barra de tasques"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"Accedeix a la configuració del sistema"</string>
     <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Accedeix a l\'Assistent de Google"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueig"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Bloqueja la pantalla"</string>
     <string name="group_system_quick_memo" msgid="2914234890158583919">"Obre l\'aplicació Notes per prendre notes ràpides"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitasques del sistema"</string>
     <string name="system_multitasking_rhs" msgid="6593269428880305699">"Entra al mode de pantalla dividida amb l\'aplicació actual a la dreta"</string>
@@ -881,7 +881,7 @@
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mou a dalt a la dreta"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Mou a baix a l\'esquerra"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Mou a baix a la dreta"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Mou dins de les vores i amaga"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Mou fins la vora i amaga"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Mou fora de les vores i mostra"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Suprimeix"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"commuta"</string>
@@ -1062,7 +1062,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Per ara la Wi‑Fi no es connectarà automàticament"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Mostra-ho tot"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Per canviar de xarxa, desconnecta la connexió Ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Per millorar l\'experiència del dispositiu, les aplicacions i els serveis poden cercar xarxes Wi‑Fi en qualsevol moment, fins i tot quan la Wi‑Fi estigui desactivada. Pots canviar aquesta opció a la configuració de cerca de xarxes Wi‑Fi. "<annotation id="link">"Canvia-la"</annotation>"."</string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Per millorar l\'experiència amb el dispositiu, les aplicacions i els serveis poden continuar cercant xarxes Wi‑Fi en qualsevol moment, fins i tot amb la Wi‑Fi desactivada. Pots canviar aquesta opció a la configuració de cerca de xarxes Wi‑Fi. "<annotation id="link">"Canvia-la"</annotation>"."</string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Desactiva el mode d\'avió"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vol afegir la icona següent a la configuració ràpida"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Afegeix la icona"</string>

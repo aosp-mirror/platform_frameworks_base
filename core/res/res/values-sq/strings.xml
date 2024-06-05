@@ -803,7 +803,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Cakto rregullat e fjalëkalimit"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrollo gjatësinë dhe karakteret e lejuara në fjalëkalimet dhe kodet PIN të kyçjes së ekranit."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitoron tentativat e shkyçjes së ekranit"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitoro numrin e fjalëkalimeve të shkruar gabim kur shkyç ekranin. Kyç tabletin ose fshi të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyç tabletin ose fshi të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyç pajisjen tënde Android TV ose spastro të gjitha të dhënat e pajisjes sate Android TV nëse shkruhen gabim shumë fjalëkalime."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyç sistemin info-argëtues ose spastro të gjitha të dhënat e tij nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitoron numrin e fjalëkalimeve të shkruar gabim kur shkyç ekranin. Kyç telefonin ose fshin të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Struktura e tastierës u caktua në: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Trokit për ta ndryshuar."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Tastierat fizike u konfiguruan"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Trokit për të parë tastierat"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Privat"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Private"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Klon"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Puna"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Puna 2"</string>

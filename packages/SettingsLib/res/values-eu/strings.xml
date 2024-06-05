@@ -102,10 +102,10 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktibo, ezkerrekoa soilik"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktibo, eskuinekoa soilik"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktibo, ezkerreko eta eskuineko audifonoak"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Euskarriaren audioa"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Multimedia-audioa"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefono-deiak"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Fitxategi-transferentzia"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Sarrerako gailua"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Sarrera-gailua"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Interneteko konexioa"</string>
     <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Kontaktuak eta deien historia partekatzeko aukera"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Erabili kontaktuetarako eta deien historia partekatzeko"</string>
@@ -264,16 +264,16 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Onartu abiarazlea desblokeatzea"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM desblokeoa onartu nahi duzu?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ABISUA: ezarpen hau aktibatuta dagoen bitartean, gailua babesteko eginbideek ez dute gailu honetan funtzionatuko."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Hautatu kokapen faltsuen aplikazioa"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Hautatu asmatutako kokapenen aplikazioa"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ez da ezarri kokapen faltsuen aplikaziorik"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"Kokapen faltsuen aplikazioa: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"Asmatutako kokapenen aplikazioa: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Sareak"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Hari gabe bistaratzeko ziurtagiria"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Gaitu wifi-sareetan saioa hasteko modu xehatua"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wifi-sareen bilaketaren moteltzea"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wifi-konexioetan iraunkorrak ez diren MAC helbideak ausaz antolatzea"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Datu-konexioa beti aktibo"</string>
-    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Konexioa partekatzeko hardwarearen azelerazioa"</string>
+    <string name="tethering_hardware_offload" msgid="4116053719006939161">"Konexioa partekatzeko hardwarearen bizkortzea"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Erakutsi Bluetooth bidezko gailuak izenik gabe"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Desgaitu bolumen absolutua"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gaitu Gabeldorsche"</string>
@@ -318,7 +318,7 @@
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Onartu kokapen faltsuak"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Gaitu ikuspegiaren atributuak ikuskatzeko aukera"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mantendu datu-konexioa beti aktibo, baita wifi-konexioa aktibo dagoenean ere (sare batetik bestera bizkor aldatu ahal izateko)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Erabilgarri badago, erabili konexioa partekatzeko hardwarearen azelerazioa"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Erabilgarri badago, erabili konexioa partekatzeko hardwarearen bizkortzea"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB bidezko arazketa onartu?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB bidezko arazketa garapen-xedeetarako soilik dago diseinatuta. Erabil ezazu ordenagailuaren eta gailuaren artean datuak kopiatzeko, aplikazioak gailuan jakinarazi gabe instalatzeko eta erregistro-datuak irakurtzeko."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Hari gabeko arazketa baimendu nahi duzu?"</string>
@@ -394,7 +394,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Erakutsi atzeko planoko ANRak"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Erakutsi aplikazioak ez erantzutearen (ANR) leihoa atzeko planoan dabiltzan aplikazioen kasuan"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Erakutsi jakinarazpenen kanalen abisuak"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bistaratu abisuak aplikazioek baliozko kanalik gabeko jakinarazpenak argitaratzean"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bistaratu abisuak aplikazioek kanal baliodunik gabeko jakinarazpenak argitaratzean"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Behartu aplikazioak onartzera kanpoko memorian"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Aplikazioek kanpoko memorian idatz dezakete, ezarritako balioak kontuan izan gabe"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Behartu jardueren tamaina doitu ahal izatera"</string>
@@ -564,7 +564,7 @@
     <string name="shared_data_summary" msgid="5516326713822885652">"Ikusi eta aldatu datu partekatuak"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Ez dago erabiltzaile honen datu partekaturik."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Errore bat gertatu da datu partekatuak eskuratzean. Saiatu berriro."</string>
-    <string name="blob_id_text" msgid="8680078988996308061">"Partekatutako datuen IDa: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"Partekatutako datuenidentifikatzailea: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Iraungitze-data: <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Errore bat gertatu da datu partekatuak ezabatzean."</string>
     <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Ez da eskuratu alokairu-hitzarmenik datu partekatu hauetarako. Ezabatu egin nahi dituzu?"</string>
@@ -675,7 +675,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Lehenetsia"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Piztu pantaila"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Eman pantaila pizteko baimena"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Eman pantaila pizteko baimena aplikazioei. Baimena emanez gero, aplikazioek edonoiz piztu ahal izango dute pantaila, zuk halako asmorik izan ez arren."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Eman pantaila pizteko baimena aplikazioari. Baimena emanez gero, aplikazioak edonoiz piztu ahal izango du pantaila, zuk halako asmorik izan ez arren."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren audioa igortzeari utzi nahi diozu?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> aplikazioaren audioa igortzen edo audio-irteera aldatzen baduzu, une hartako igorpena etengo da"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Igorri <xliff:g id="SWITCHAPP">%1$s</xliff:g> aplikazioaren audioa"</string>

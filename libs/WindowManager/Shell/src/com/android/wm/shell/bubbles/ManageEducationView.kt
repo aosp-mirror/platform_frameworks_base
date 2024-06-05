@@ -41,9 +41,9 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
     private val ANIMATE_DURATION: Long = 200
 
     private val positioner: BubblePositioner = positioner
-    private val manageView by lazy { findViewById<ViewGroup>(R.id.manage_education_view) }
-    private val manageButton by lazy { findViewById<Button>(R.id.manage_button) }
-    private val gotItButton by lazy { findViewById<Button>(R.id.got_it) }
+    private val manageView by lazy { requireViewById<ViewGroup>(R.id.manage_education_view) }
+    private val manageButton by lazy { requireViewById<Button>(R.id.manage_button) }
+    private val gotItButton by lazy { requireViewById<Button>(R.id.got_it) }
 
     private var isHiding = false
     private var realManageButtonRect = Rect()
@@ -122,7 +122,7 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
             manageButton
                 .setOnClickListener {
                     hide()
-                    expandedView.findViewById<View>(R.id.manage_button).performClick()
+                    expandedView.requireViewById<View>(R.id.manage_button).performClick()
                 }
             gotItButton.setOnClickListener { hide() }
             setOnClickListener { hide() }

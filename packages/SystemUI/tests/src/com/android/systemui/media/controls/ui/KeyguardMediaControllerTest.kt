@@ -16,7 +16,6 @@
 
 package com.android.systemui.media.controls.ui
 
-import android.provider.Settings
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -32,8 +31,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
-import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertTrue
 import org.junit.Before
@@ -60,10 +57,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
 
     private val mediaContainerView: MediaContainerView = MediaContainerView(context, null)
     private val hostView = UniqueObjectHostView(context)
-    private val settings = FakeSettings()
     private lateinit var keyguardMediaController: KeyguardMediaController
-    private lateinit var testableLooper: TestableLooper
-    private lateinit var fakeHandler: FakeHandler
     private lateinit var statusBarStateListener: StatusBarStateController.StateListener
 
     @Before
@@ -79,16 +73,12 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
         whenever(mediaHost.hostView).thenReturn(hostView)
         hostView.layoutParams = FrameLayout.LayoutParams(100, 100)
-        testableLooper = TestableLooper.get(this)
-        fakeHandler = FakeHandler(testableLooper.looper)
         keyguardMediaController =
             KeyguardMediaController(
                 mediaHost,
                 bypassController,
                 statusBarStateController,
                 context,
-                settings,
-                fakeHandler,
                 configurationController,
             )
         keyguardMediaController.attachSinglePaneContainer(mediaContainerView)
@@ -115,24 +105,6 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         whenever(statusBarStateController.state).thenReturn(state)
         keyguardMediaController.refreshMediaPosition()
         assertThat(mediaContainerView.visibility).isEqualTo(visibility)
-    }
-
-    @Test
-    fun testHiddenOnKeyguard_whenMediaOnLockScreenDisabled() {
-        settings.putInt(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, 0)
-
-        keyguardMediaController.refreshMediaPosition()
-
-        assertThat(mediaContainerView.visibility).isEqualTo(GONE)
-    }
-
-    @Test
-    fun testAvailableOnKeyguard_whenMediaOnLockScreenEnabled() {
-        settings.putInt(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, 1)
-
-        keyguardMediaController.refreshMediaPosition()
-
-        assertThat(mediaContainerView.visibility).isEqualTo(VISIBLE)
     }
 
     @Test

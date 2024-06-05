@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"முகத் தோற்றம் பதிவாகவில்லை. மீண்டும் முயலவும்."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"அடர் நிறக் கண்ணாடிகள் கண்டறியப்பட்டுள்ளது. உங்கள் முகத்தை முழுமையாகக் காட்டவும்."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"முகம் மறைக்கப்பட்டுள்ளது. உங்கள் முகத்தை முழுமையாகக் காட்டவும்."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"முகத்தை மறைக்காமல் முழுமையாகக் காட்டவும்."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"முகத்தைச் சரிபார்க்க இயலவில்லை. வன்பொருள் இல்லை."</string>
@@ -816,7 +816,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"திரையைப் பூட்டுதல்"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"திரை எப்படி, எப்போது பூட்டப்படுகிறது என்பதைக் கட்டுப்படுத்தலாம்."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"எல்லா டேட்டாவையும் அழித்தல்"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ஆரம்பநிலைத் தரவு மீட்டமைப்பின் மூலம் எச்சரிக்கை வழங்காமல் டேப்லெட்டின் தரவை அழிக்கலாம்."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ஆரம்பநிலைத் தரவு மீட்டமைப்பின் மூலம் எச்சரிக்கை வழங்காமல் டேப்லெட்டின் தரவை அழிக்கும்."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"தரவின் ஆரம்பநிலைக்கு மீட்டமைப்பதன் மூலம் எச்சரிக்கை செய்யாமல் Android TVயின் தரவை அழிக்கும்."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"தரவின் ஆரம்பநிலை மீட்டமைப்பைச் செயல்படுத்துவதன் மூலம் எச்சரிக்கை எதுவுமின்றி இன்ஃபோடெயின்மென்ட் சிஸ்டமின் தரவை அழிக்கும்."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ஆரம்பநிலைத் தரவு மீட்டமைப்பின் மூலம் எச்சரிக்கை வழங்காமல் மொபைலின் தரவை அழிக்கலாம்."</string>

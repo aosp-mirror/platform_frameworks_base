@@ -50,22 +50,20 @@ open class BaseScreenSharePermissionDialog(
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.apply {
-            addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
-            setGravity(Gravity.CENTER)
-        }
+        window?.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS)
+        window?.setGravity(Gravity.CENTER)
         setContentView(R.layout.screen_share_dialog)
-        dialogTitle = findViewById(R.id.screen_share_dialog_title)
-        warning = findViewById(R.id.text_warning)
-        startButton = findViewById(android.R.id.button1)
-        cancelButton = findViewById(android.R.id.button2)
+        dialogTitle = requireViewById(R.id.screen_share_dialog_title)
+        warning = requireViewById(R.id.text_warning)
+        startButton = requireViewById(android.R.id.button1)
+        cancelButton = requireViewById(android.R.id.button2)
         updateIcon()
         initScreenShareOptions()
         createOptionsView(getOptionsViewLayoutId())
     }
 
     private fun updateIcon() {
-        val icon = findViewById<ImageView>(R.id.screen_share_dialog_icon)
+        val icon = requireViewById<ImageView>(R.id.screen_share_dialog_icon)
         if (dialogIconTint != null) {
             icon.setColorFilter(context.getColor(dialogIconTint))
         }
@@ -92,7 +90,7 @@ open class BaseScreenSharePermissionDialog(
                 options
             )
         adapter.setDropDownViewResource(R.layout.screen_share_dialog_spinner_item_text)
-        screenShareModeSpinner = findViewById(R.id.screen_share_mode_spinner)
+        screenShareModeSpinner = requireViewById(R.id.screen_share_mode_spinner)
         screenShareModeSpinner.adapter = adapter
         screenShareModeSpinner.onItemSelectedListener = this
     }

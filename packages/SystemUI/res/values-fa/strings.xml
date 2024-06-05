@@ -21,7 +21,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"واسط کاربری سیستم"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"«بهینه‌سازی باتری» روشن شود؟"</string>
-    <string name="battery_low_description" msgid="3282977755476423966">"<xliff:g id="PERCENTAGE">%s</xliff:g> از باتری‌تان باقی مانده است. «بهینه‌سازی باتری» زمینه تیره را روشن می‌کند، فعالیت‌های پس‌زمینه را محدود می‌کند، و اعلان‌ها را به‌تأخیر می‌اندازد."</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"<xliff:g id="PERCENTAGE">%s</xliff:g> از باتری‌تان باقی مانده است. «بهینه‌سازی باتری» زمینه تاریک را روشن می‌کند، فعالیت‌های پس‌زمینه را محدود می‌کند، و اعلان‌ها را به‌تأخیر می‌اندازد."</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"«بهینه‌سازی باتری» زمینه «تیره» را روشن می‌کند، فعالیت‌های پس‌زمینه را محدود می‌کند، و اعلان‌ها را به‌تأخیر می‌اندازد."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی مانده است"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"‏ازطریق USB شارژ نمی‌شود"</string>
@@ -166,7 +166,7 @@
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"اگر در تلاش بعدی‌ پین نادرستی وارد کنید، نمایه کاری شما و داده‌های آن حذف خواهند شد."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"اگر در تلاش بعدی‌ گذرواژه نادرستی وارد کنید، نمایه کاری شما و داده‌های آن حذف خواهند شد."</string>
     <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"راه‌اندازی"</string>
-    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"اکنون نه"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"حالا نه"</string>
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"این کار برای بهبود امنیت و عملکرد لازم است"</string>
     <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"راه‌اندازی مجدد «قفل‌گشایی با اثر انگشت»"</string>
     <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"قفل‌گشایی با اثر انگشت"</string>
@@ -295,7 +295,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"تا طلوع"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"ساعت <xliff:g id="TIME">%s</xliff:g> روشن می‌شود"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"تا <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"زمینه تیره"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"زمینه تاریک"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"بهینه‌سازی باتری"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"غروب روشن می‌شود"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"تا طلوع آفتاب"</string>
@@ -1130,7 +1130,7 @@
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"باز کردن تلفن"</string>
     <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"صفحه‌ها جابه‌جا شود؟"</string>
     <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"برای وضوح بیشتر، از دوربین پشت استفاده کنید"</string>
-    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"برای وضوح بیشتر، تلفن را برگردانید"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"برای وضوح بیشتر، تلفن را بچرخانید"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"دستگاه تاشو درحال باز شدن"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"دستگاه تاشو درحال چرخش به اطراف"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> باتری باقی مانده است"</string>

@@ -319,7 +319,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"snimati zvuk"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Tjelesna aktivnost"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"pristupiti vašoj tjelesnoj aktivnosti"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotoaparat"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"snimati fotografije i videozapise"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Uređaji u blizini"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"otkrivanje i povezivanje s uređajima u blizini"</string>
@@ -804,7 +804,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Postavi pravila zaporke"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Upravlja duljinom i znakovima koji su dopušteni u zaporkama i PIN-ovima zaključavanja zaslona."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Nadzor pokušaja otključavanja zaslona"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Nadziri broj netočnih zaporki unesenih pri otključavanju zaslona i zaključaj tabletno računalo ili izbriši sve podatke na njemu ako je uneseno previše netočnih zaporki."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Nadzire se broj netočnih zaporki unesenih pri otključavanju zaslona, a tablet se zaključava ili se s njega brišu svi podaci ako je uneseno previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava Android TV uređaj ili s njega briše sve podatke ako se unese previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava sustav za informiranje i zabavu ili briše sve njegove podatke ako se unese previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Nadzire broj netočno unesenih zaporki pri otključavanju zaslona i zaključava telefon ili briše sve podatke na telefonu ako je uneseno previše netočnih zaporki."</string>
@@ -817,7 +817,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Zaključavanje zaslona"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Upravlja se načinom i vremenom zaključavanja zaslona."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Brisanje svih podataka"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Vraćanjem u tvorničko stanje izbriši podatke tabletnog računala bez upozorenja."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Vraćanjem na tvorničke postavke brišu se podaci tableta bez upozorenja."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Podatke Android TV uređaja izbrišite bez upozorenja vraćanjem uređaja na tvorničke postavke."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Briše podatke sustava za informiranje i zabavu bez upozorenja vraćanjem na tvorničko stanje."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Vraćanjem na tvorničke postavke brišu se podaci s telefona bez upozorenja."</string>
@@ -1034,7 +1034,7 @@
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widget."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Birač korisnika"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Status"</string>
-    <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Fotoaparat"</string>
+    <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Nadzor medija"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Pokrenuta je promjena redoslijeda widgeta."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Završena je promjena redoslijeda widgeta."</string>
@@ -1181,7 +1181,7 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Jedna zvjezdica od {max}}one{# zvjezdica od {max}}few{# zvjezdice od {max}}other{# zvjezdica od {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"u tijeku"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Radnju dovrši pomoću stavke"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"Dovršavanje radnje pomoću aplikacije %1$s"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"Dovršite radnju putem aplikacije %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Dovrši radnju"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Otvaranje pomoću aplikacije"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Otvaranje pomoću aplikacije %1$s"</string>
@@ -1393,7 +1393,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"DIJELI"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ODBIJ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Odabir načina unosa"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Zadrži na zaslonu dok je fizička tipkovnica aktivna"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Zadržava se na zaslonu dok je fizička tipkovnica aktivna"</string>
     <string name="hardware" msgid="1800597768237606953">"Prikaži virtualnu tipkovnicu"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Konfigurirajte uređaj <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Konfigurirajte fizičke tipkovnice"</string>
@@ -1508,7 +1508,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Promijenite mrežu ili postavke VPN-a"</string>
     <string name="upload_file" msgid="8651942222301634271">"Odaberite datoteku"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Nema odabranih datoteka"</string>
-    <string name="reset" msgid="3865826612628171429">"Ponovo postavi"</string>
+    <string name="reset" msgid="3865826612628171429">"Poništi"</string>
     <string name="submit" msgid="862795280643405865">"Pošalji"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Pokrenuta je aplikacija za vožnju"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Dodirnite za zatvaranje aplikacije za vožnju."</string>
@@ -2080,7 +2080,7 @@
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Odbaci"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sustav"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Postavke"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotoaparat"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"prikazuje se preko drugih aplikacija na zaslonu"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Slanje povratnih informacija"</string>
@@ -2292,7 +2292,7 @@
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Uključite u Postavkama"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Odbaci"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Deblokiraj mikrofon uređaja"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Deblokiraj fotoaparat uređaja"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Deblokiraj kameru uređaja"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Za &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; i sve aplikacije i usluge"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Deblokiraj"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privatnost senzora"</string>

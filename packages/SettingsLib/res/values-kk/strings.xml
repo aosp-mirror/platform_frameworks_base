@@ -102,10 +102,10 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Тек сол жағы қосулы"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Тек оң жағы қосулы"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Екеуі де қосулы"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Meдиа аудиосы"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Mультимeдиа дыбысы"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Телефон қоңыраулары"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Файл жіберу"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Кіріс құрылғысы"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Енгізу құрылғысы"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Интернетке қосылу"</string>
     <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Контактілер мен қоңыраулар тарихын бөлісу"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Контактілер мен қоңыраулар тарихын бөлісу үшін пайдалану"</string>
@@ -180,7 +180,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Дауыс жиілігі"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Синтезделген сөйлеу үніне әсер етеді"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Тіл"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"Жүйелік тілді пайдалану"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Жүйе тілін пайдалану"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Тіл таңдалған жоқ"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Сөйлеу мәтіні үшін тілге тән дауыс орнатады"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Үлгіні тыңдау"</string>
@@ -350,7 +350,7 @@
     <string name="media_category" msgid="8122076702526144053">"Mультимeдиа"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Бақылау"</string>
     <string name="strict_mode" msgid="889864762140862437">"Қатаң режим қосылған"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Қолданбалар негізгі жолда ұзақ әрекеттерді орындағанда экранды жыпылықтату"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Қолданбалар ұзақ операцияларды орындағанда экранды жыпылықтату"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Меңзер орны"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Экран бетіне түртілген элемент дерегі көрсетіледі"</string>
     <string name="show_touches" msgid="8437666942161289025">"Түрту қимылын көрсету"</string>
@@ -367,7 +367,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Түстер кеңістігінің симуляциясы"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL трейстерін қосу"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB-мен аудио жіберуді өшіру"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Сыртқы USB аудио құрылғыларына автоматты жіберуді өшіру"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Сыртқы USB аудио құрылғыларына автоматты түрде жіберуді өшіру"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Жиектерді көрсету"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Қию шегін, шеттерді, т.б. көрсету"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Оңнан солға орналастыру"</string>
@@ -476,7 +476,7 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарядталуда"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Жылдам зарядтау"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Баяу зарядталуда"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Сымсыз зарядталуда"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Сымсыз зарядталып жатыр"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Зарядталып жатыр."</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Зарядталу орындалып жатқан жоқ"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Жалғанған, зарядталып жатқан жоқ"</string>
@@ -510,7 +510,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Жүйелік тілдерді пайдалану"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> қолданбасы үшін параметрлерді ашу орындалмады"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Бұл енгізу әдісі сіз терген барлық мәтінді, кілтсөз және кредит карта нөмірлері сияқты жеке ақпаратты қоса, жинауы мүмкін. Бұл <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> қолданбасы арқылы жасалады. Осы әдіс қолданылсын ба?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Ескертпе: қайта жүктегеннен кейін, телефонның құлпын ашпайынша, бұл қолданба іске қосылмайды"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Ескертпе: қайта жүктегеннен кейін, телефонның құлпын ашпайынша, бұл қолданба іске қосылмайды."</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS тіркеу күйі"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Тіркелген"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Тіркелмеген"</string>
@@ -545,7 +545,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Дәл қазір"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Осы телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Осы планшет"</string>
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Қондыру динамигі"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Динамигі бар қондыру станциясы"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Сыртқы құрылғы"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Жалғанған құрылғы"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Осы телефон"</string>
@@ -560,7 +560,7 @@
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Сымды аудио құрылғысы"</string>
     <string name="help_label" msgid="3528360748637781274">"Анықтама және пікір"</string>
     <string name="storage_category" msgid="2287342585424631813">"Жад"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"Бөліскен дерек"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Ортақ дерек"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Ортақ деректерді көру және өзгерту"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Бұл пайдаланушымен бөліскен дерек жоқ."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Ортақ деректер алу кезінде қате шықты. Қайталап көріңіз."</string>
@@ -622,7 +622,7 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Жою"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Сақтау"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Қонақ режимінен шығу"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"Қонақ режимін қалпына келтіру"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Қонақ режимін бастапқы күйге қайтару"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Қонақ режимінен шығу"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Шыққанда барлық әрекет жойылады."</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Шыққанда барлық әрекетті сақтай немесе жоя аласыз."</string>

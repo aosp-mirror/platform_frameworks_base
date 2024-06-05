@@ -128,7 +128,8 @@ public class DeviceControlsControllerImpl @Inject constructor(
 
         val prefs = userContextProvider.userContext.getSharedPreferences(
             PREFS_CONTROLS_FILE, Context.MODE_PRIVATE)
-        val seededPackages = prefs.getStringSet(PREFS_CONTROLS_SEEDING_COMPLETED, emptySet())
+        val seededPackages =
+            prefs.getStringSet(PREFS_CONTROLS_SEEDING_COMPLETED, emptySet()) ?: emptySet()
 
         val controlsController = controlsComponent.getControlsController().get()
         val componentsToSeed = mutableListOf<ComponentName>()
@@ -174,7 +175,8 @@ public class DeviceControlsControllerImpl @Inject constructor(
     }
 
     private fun addPackageToSeededSet(prefs: SharedPreferences, pkg: String) {
-        val seededPackages = prefs.getStringSet(PREFS_CONTROLS_SEEDING_COMPLETED, emptySet())
+        val seededPackages =
+            prefs.getStringSet(PREFS_CONTROLS_SEEDING_COMPLETED, emptySet()) ?: emptySet()
         val updatedPkgs = seededPackages.toMutableSet()
         updatedPkgs.add(pkg)
         prefs.edit().putStringSet(PREFS_CONTROLS_SEEDING_COMPLETED, updatedPkgs).apply()

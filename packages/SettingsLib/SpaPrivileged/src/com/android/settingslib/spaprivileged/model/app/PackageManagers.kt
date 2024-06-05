@@ -82,7 +82,8 @@ internal class PackageManagersImpl(
         val packageInfo = getPackageInfoAsUser(packageName, PackageManager.GET_PERMISSIONS, userId)
         val index = packageInfo?.requestedPermissions?.indexOf(permission) ?: return false
         return index >= 0 &&
-            packageInfo.requestedPermissionsFlags[index].hasFlag(REQUESTED_PERMISSION_GRANTED)
+            checkNotNull(packageInfo.requestedPermissionsFlags)[index]
+                .hasFlag(REQUESTED_PERMISSION_GRANTED)
     }
 
     override suspend fun getAppOpPermissionPackages(userId: Int, permission: String): Set<String> =

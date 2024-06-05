@@ -165,7 +165,7 @@ android_library {
         // *.kt sources are inside a filegroup.
         "kotlin-annotations",
     ],
-    kotlincflags: ["-Xjvm-default=enable"],
+    kotlincflags: ["-Xjvm-default=all"],
     manifest: "AndroidManifest.xml",
     plugins: ["dagger2-compiler"],
 }

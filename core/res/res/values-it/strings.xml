@@ -817,7 +817,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Bloccare lo schermo"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Controlla come e quando si blocca lo schermo."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Cancellare tutti i dati"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Cancella i dati del tablet senza preavviso eseguendo un ripristino dati di fabbrica."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Cancella i dati del tablet senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Consente di cancellare i dati del dispositivo Android TV senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Cancella i dati del sistema di infotainment senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Cancella i dati del telefono senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
@@ -1166,7 +1166,7 @@
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Memoria insufficiente per il sistema. Assicurati di avere 250 MB di spazio libero e riavvia."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> è in esecuzione"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Tocca per ulteriori informazioni o per interrompere l\'app."</string>
-    <string name="ok" msgid="2646370155170753815">"OK"</string>
+    <string name="ok" msgid="2646370155170753815">"Ok"</string>
     <string name="cancel" msgid="6908697720451760115">"Annulla"</string>
     <string name="yes" msgid="9069828999585032361">"OK"</string>
     <string name="no" msgid="5122037903299899715">"Annulla"</string>
@@ -1181,7 +1181,7 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Una stella su {max}}many{# stelle su {max}}other{# stelle su {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"In corso"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Completa l\'azione con"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"Completamento azione con %1$s"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"Completa l\'azione con %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Completa azione"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Apri con"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Apri con %1$s"</string>

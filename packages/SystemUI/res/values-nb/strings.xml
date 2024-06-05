@@ -617,7 +617,7 @@
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Mellomrom"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Tilbaketasten"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Tilbake"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Spill av / sett på pause"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Stopp"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Neste"</string>
@@ -719,7 +719,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Høyre-tastkode"</string>
     <string name="left_icon" msgid="5036278531966897006">"Venstre-ikon"</string>
     <string name="right_icon" msgid="1103955040645237425">"Høyre-ikon"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Hold og dra for å legge til ruter"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Hold og dra for å legge til brikker"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Hold og dra for å flytte på rutene"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Dra hit for å fjerne"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Du trenger minst <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> infobrikker"</string>
@@ -756,11 +756,11 @@
     <string name="data_connection_no_internet" msgid="691058178914184544">"Ingen internettilkobling"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Åpne <xliff:g id="ID_1">%s</xliff:g>-innstillingene."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Endre rekkefølgen på innstillingene."</string>
-    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Av/på-meny"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"På/av-meny"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Side <xliff:g id="ID_1">%1$d</xliff:g> av <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låseskjerm"</string>
-    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Se vedlikeholdstrinnene"</string>
-    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Se vedlikeholdstrinnene"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Se hva du kan gjøre"</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Se hva du kan gjøre"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Koble fra enheten"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Enheten begynner å bli varm nær ladeporten. Hvis den er koblet til en lader eller et USB-tilbehør, må du koble den fra. Vær forsiktig da kabelen også kan være varm."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Se vedlikeholdstrinnene"</string>
@@ -1124,7 +1124,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• minst én enhet er tilgjengelig"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Velg en standard notatapp du vil bruke med notatsnarveien"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Velg app"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Trykk på og hold inne snarveien"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Trykk på snarveien og hold den inne"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Avbryt"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Bytt skjerm nå"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Åpne telefonen"</string>

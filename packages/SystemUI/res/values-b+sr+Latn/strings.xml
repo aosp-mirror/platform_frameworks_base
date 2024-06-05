@@ -100,8 +100,8 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obrađujemo video snimka ekrana"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obaveštenje o sesiji snimanja ekrana je aktivno"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Želite da započnete snimanje?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Android ima pristup kompletnom sadržaju koji je vidljiv na ekranu ili se pušta na uređaju dok snimate. Zato budite pažljivi sa lozinkama, informacijama o plaćanju, porukama, slikama i audio i videima."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Kada snimate aplikaciju, Android ima pristup kompletnom sadržaju koji je vidljiv ili se pušta u toj aplikaciji. Zato budite pažljivi sa lozinkama, informacijama o plaćanju, porukama, slikama i audio i videima."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Android ima pristup kompletnom sadržaju koji je vidljiv na ekranu ili se pušta na uređaju dok snimate. Zato pazite na lozinke, informacije o plaćanju, poruke, slike, i audio i video sadržaj."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Kada snimate aplikaciju, Android ima pristup kompletnom sadržaju koji je vidljiv ili se pušta u toj aplikaciji. Zato pazite na lozinke, informacije o plaćanju, poruke, slike, i audio i video sadržaj."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Započni snimanje"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimaj zvuk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk uređaja"</string>
@@ -147,7 +147,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Lice je prepoznato. Pritisnite da biste nastavili."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Lice prepoznato. Pritisnite ikonu otključavanja za nastavak."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Identitet je potvrđen"</string>
-    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Koristite PIN"</string>
+    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Koristi PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Koristite šablon"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Koristite lozinku"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Pogrešan PIN"</string>
@@ -401,16 +401,16 @@
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Jedna aplikacija"</string>
     <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Delite ili snimite aplikaciju"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Želite da počnete snimanje ili prebacivanje pomoću aplikacije <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Kada delite, snimate ili prebacujete, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup kompletnom sadržaju koji je vidljiv na ekranu ili se pušta na uređaju. Zato budite pažljivi sa lozinkama, informacijama o plaćanju, porukama, slikama i audio i videima."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Kada delite, snimate ili prebacujete aplikaciju, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup kompletnom sadržaju koji je vidljiv ili se pušta u toj aplikaciji. Zato budite pažljivi sa lozinkama, informacijama o plaćanju, porukama, slikama i audio i videima."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Kada delite, snimate ili prebacujete, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup kompletnom sadržaju koji je vidljiv na ekranu ili se pušta na uređaju. Zato pazite na lozinke, informacije o plaćanju, poruke, slike, i audio i video sadržaj."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Kada delite, snimate ili prebacujete aplikaciju, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup kompletnom sadržaju koji je vidljiv ili se pušta u toj aplikaciji. Zato pazite na lozinke, informacije o plaćanju, poruke, slike, i audio i video sadržaj."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Pokreni"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Želite da započnete prebacivanje?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Kada prebacujete, Android ima pristup kompletnom sadržaju koji je vidljiv na ekranu ili se pušta na uređaju. Zato budite pažljivi sa lozinkama, informacijama o plaćanju, porukama, slikama i audio i videima."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Kada prebacujete aplikaciju, Android ima pristup kompletnom sadržaju koji je vidljiv ili se pušta u toj aplikaciji. Zato budite pažljivi sa lozinkama, informacijama o plaćanju, porukama, slikama i audio i videima."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Kada prebacujete, Android ima pristup kompletnom sadržaju koji je vidljiv na ekranu ili se pušta na uređaju. Zato pazite na lozinke, informacije o plaćanju, poruke, slike, i audio i video sadržaj."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Kada prebacujete aplikaciju, Android ima pristup kompletnom sadržaju koji je vidljiv ili se pušta u toj aplikaciji. Zato pazite na lozinke, informacije o plaćanju, poruke, slike, i audio i video sadržaj."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Započni prebacivanje"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Želite da počnete da delite?"</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kada delite, snimate ili prebacujete, Android ima pristup kompletnom sadržaju koji je vidljiv na ekranu ili se pušta na uređaju. Zato budite pažljivi sa lozinkama, informacijama o plaćanju, porukama, slikama i audio i videima."</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kada delite, snimate ili prebacujete aplikaciju, Android ima pristup kompletnom sadržaju koji je vidljiv ili se pušta u toj aplikaciji. Zato budite pažljivi sa lozinkama, informacijama o plaćanju, porukama, slikama i audio i videima."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kada delite, snimate ili prebacujete, Android ima pristup kompletnom sadržaju koji je vidljiv na ekranu ili se pušta na uređaju. Zato pazite na lozinke, informacije o plaćanju, poruke, slike, i audio i video sadržaj."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kada delite, snimate ili prebacujete aplikaciju, Android ima pristup kompletnom sadržaju koji je vidljiv ili se pušta u toj aplikaciji. Zato pazite na lozinke, informacije o plaćanju, poruke, slike, i audio i video sadržaj."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Pokreni"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokira IT administrator"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Snimanje ekrana je onemogućeno smernicama za uređaj"</string>
@@ -1060,7 +1060,7 @@
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Traže se mreže…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Povezivanje sa mrežom nije uspelo"</string>
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WiFi trenutno ne može da se automatski poveže"</string>
-    <string name="see_all_networks" msgid="3773666844913168122">"Pogledajte sve"</string>
+    <string name="see_all_networks" msgid="3773666844913168122">"Prikaži sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da biste promenili mrežu, prekinite eternet vezu"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi boljeg doživljaja uređaja, aplikacije i usluge i dalje mogu da traže WiFi mreže u bilo kom trenutku, čak i kada je WiFi isključen. To možete da promenite u podešavanjima WiFi skeniranja. "<annotation id="link">"Promenite"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Isključi režim rada u avionu"</string>

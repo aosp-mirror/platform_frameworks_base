@@ -212,7 +212,7 @@
     <item msgid="4446831566506165093">"350%"</item>
     <item msgid="6946761421234586000">"400%"</item>
   </string-array>
-    <string name="choose_profile" msgid="343803890897657450">"Wybierz profil"</string>
+    <string name="choose_profile" msgid="343803890897657450">"Wybierz profil konta"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobiste"</string>
     <string name="category_work" msgid="4014193632325996115">"Służbowe"</string>
     <string name="category_clone" msgid="1554511758987195974">"Klon"</string>
@@ -250,7 +250,7 @@
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Paruję urządzenie…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Nie udało się sparować z urządzeniem. Kod QR jest nieprawidłowy albo urządzenie nie jest podłączone do tej samej sieci."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adres IP i port"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skaner kodów QR"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Zeskanuj kod QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Sparuj urządzenia przez Wi-Fi, skanując kod QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Połącz się z siecią Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
@@ -265,7 +265,7 @@
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Zezwolić na zdjęcie blokady OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"UWAGA: gdy to ustawienie jest włączone, na urządzeniu nie będą działać funkcje ochrony."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Aplikacja do pozorowania lokalizacji"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Nie ustawiono aplikacji do pozorowania lokalizacji"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Nie wybrano aplikacji do pozorowania lokalizacji"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikacja do pozorowania lokalizacji: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Sieci"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certyfikacja wyświetlacza bezprzewodowego"</string>
@@ -307,7 +307,7 @@
     <string name="wifi_metered_label" msgid="8737187690304098638">"Użycie danych jest mierzone"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Użycie danych nie jest mierzone"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Rozmiary bufora rejestratora"</string>
-    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Wybierz rozmiary Rejestratora/bufor dziennika"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Wybierz rozmiary Rejestratora na bufor dziennika"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Wyczyścić pamięć trwałych dzienników?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Po zakończeniu monitorowania przy użyciu trwale zapisywanych dzienników musimy usunąć ich dane zapisane na urządzeniu."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"Zapisuj trwale dane dzienników na urządzeniu"</string>
@@ -483,7 +483,7 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Naładowana"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Bateria w pełni naładowana"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolowane przez administratora"</string>
-    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kontrolowane przez ograniczone ustawienia"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Obowiązują ustawienia z ograniczonym dostępem"</string>
     <string name="disabled" msgid="8017887509554714950">"Wyłączone"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dozwolone"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Niedozwolone"</string>
@@ -510,7 +510,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Użyj języków systemu"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Nie udało się otworzyć ustawień aplikacji <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Ta metoda wprowadzania tekstu może gromadzić cały wpisywany tekst, w tym dane osobowe takie jak hasła czy numery kart kredytowych. Pochodzi ona z aplikacji <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Użyć jej?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Uwaga: po restarcie ta aplikacja będzie mogła uruchomić się dopiero po odblokowaniu telefonu"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Uwaga: po restarcie ta aplikacja będzie mogła uruchomić się dopiero, gdy odblokujesz telefon."</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Stan rejestracji IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Zarejestrowane"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Niezarejestrowane"</string>

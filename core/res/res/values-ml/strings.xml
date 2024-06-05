@@ -683,8 +683,8 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ഫോൺ അടുത്തേക്ക് നീക്കുക"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ഫോൺ മുകളിലേക്ക് ഉയർത്തുക"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"ഫോൺ കൂടുതൽ താഴേക്ക് നീക്കുക"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"ഫോൺ നിങ്ങളുടെ ഇടതുവശത്തേക്ക് നീക്കുക"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"ഫോൺ നിങ്ങളുടെ വലതുവശത്തേക്ക് നീക്കുക"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ഫോൺ ഇടതുവശത്തേക്ക് നീക്കുക"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ഫോൺ വലതുവശത്തേക്ക് നീക്കുക"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"നിങ്ങളുടെ ഉപകരണത്തിന് നേരെ കൂടുതൽ നന്നായി നോക്കുക."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"മുഖം കാണുന്നില്ല. ഫോൺ കണ്ണിന് നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"വളരെയധികം ചലനം. ഫോൺ അനക്കാതെ നേരെ പിടിക്കുക."</string>
@@ -806,7 +806,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ടാബ്‌ലെറ്റ് ലോക്കുചെയ്യുകയോ ടാബ്‌ലെറ്റിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"സ്‌ക്രീൻ അൺലോക്ക് ചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പ് ചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പ് ചെയ്‌തിട്ടുണ്ടെങ്കിൽ നിങ്ങളുടെ Android TV ലോക്ക് ചെയ്യുകയോ Android TV-യിലെ എല്ലാ ഡാറ്റയും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"സ്ക്രീൻ അൺലോക്ക് ചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പ് ചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക. നിരവധി തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പ് ചെയ്‌താൽ, ഇൻഫോറ്റേയിൻമെന്റ് സിസ്‌റ്റം ലോക്ക് ചെയ്യുകയോ ഇൻഫോറ്റേയിൻമെന്റ് സിസ്‌റ്റത്തിന്റെ ഡാറ്റ മുഴുവനും മായ്ക്കുകയോ ചെയ്യുക."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ഫോൺ ലോക്കുചെയ്യുകയോ ഫോണിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോചെയ്യുക."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ഫോൺ ലോക്കുചെയ്യുകയോ ഫോണിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോചെയ്യുക."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"സ്‌ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ പാസ്‌വേഡ് ടൈപ്പുചെയ്‌തെങ്കിൽ ടാബ്‌ലെറ്റ് ലോക്കുചെയ്യുകയോ ഈ എല്ലാ ഉപയോക്തൃവിവരവും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"സ്‌ക്രീൻ അൺലോക്ക് ചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പ് ചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പ് ചെയ്‌തിട്ടുണ്ടെങ്കിൽ നിങ്ങളുടെ Android TV ലോക്ക് ചെയ്യുകയോ ഈ ഉപയോക്തൃ ഡാറ്റയെല്ലാം മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"സ്ക്രീൻ അൺലോക്ക് ചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പ് ചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിച്ച്, നിരവധി തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പ് ചെയ്‌താൽ ഇൻഫോറ്റേയിൻമെന്റ് സിസ്‌റ്റം ലോക്ക് ചെയ്യുകയോ ഈ പ്രൊഫൈലിന്റെ ഡാറ്റ മുഴുവനും മായ്ക്കുകയോ ചെയ്യുക."</string>
@@ -1870,8 +1870,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"നിങ്ങളുടെ അഡ്‌മിൻ അപ്‌ഡേറ്റ് ചെയ്യുന്നത്"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ശരി"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"\'ബാറ്ററി ലാഭിക്കൽ\' ഡാർക്ക് തീം ഓണാക്കുന്നു, ഒപ്പം പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"ബാറ്ററി ലാഭിക്കൽ ഡാർക്ക് തീം ഓണാക്കുന്നു, പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും അത് പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"\'ബാറ്ററി സേവർ\' ഡാർക്ക് തീം ഓണാക്കുന്നു, ഒപ്പം പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"ബാറ്ററി സേവർ ഡാർക്ക് തീം ഓണാക്കുന്നു, പശ്ചാത്തല ആക്‌റ്റിവിറ്റിയും ചില വിഷ്വൽ ഇഫക്റ്റുകളും ചില ഫീച്ചറുകളും ചില നെറ്റ്‌വർക്ക് കണക്ഷനുകളും അത് പരിമിതപ്പെടുത്തുകയോ ഓഫാക്കുകയോ ചെയ്യുന്നു."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ഡാറ്റാ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ഓണാക്കുക"</string>
@@ -2096,8 +2096,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ദിനചര്യ മോഡ് വിവരത്തെ കുറിച്ചുള്ള അറിയിപ്പ്"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ബാറ്ററി സേവർ ഓണാക്കി"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ബാറ്ററി ലൈഫ് വർദ്ധിപ്പിക്കാൻ ബാറ്ററി ഉപയോഗം കുറയ്ക്കുന്നു"</string>
-    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ബാറ്ററി ലാഭിക്കൽ"</string>
-    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കിയിരിക്കുന്നു"</string>
+    <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ബാറ്ററി സേവർ"</string>
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ബാറ്ററി സേവർ ഓഫാക്കിയിരിക്കുന്നു"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ഫോണിൽ വേണ്ടത്ര ചാർജ് ഉണ്ട്. ഫീച്ചറുകൾക്ക് ഇനി നിയന്ത്രണമില്ല."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"ടാബ്‌ലെറ്റിൽ വേണ്ടത്ര ചാർജ് ഉണ്ട്. ഫീച്ചറുകൾക്ക് ഇനി നിയന്ത്രണമില്ല."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"ഉപകരണത്തിൽ വേണ്ടത്ര ചാർജ് ഉണ്ട്. ഫീച്ചറുകൾക്ക് ഇനി നിയന്ത്രണമില്ല."</string>
@@ -2329,7 +2329,7 @@
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ഉപകരണത്തിന് ചൂട് കൂടുതലാണ്"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"നിങ്ങളുടെ ഫോൺ വളരെയധികം ചൂടാകുന്നതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"ബാറ്ററി ലാഭിക്കൽ ഓണായതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല. നിങ്ങൾക്ക് ഇത് ക്രമീകരണത്തിൽ ഓഫാക്കാം."</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"ബാറ്ററി സേവർ ഓണായതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല. നിങ്ങൾക്ക് ഇത് ക്രമീകരണത്തിൽ ഓഫാക്കാം."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"ക്രമീകരണത്തിലേക്ക് പോകുക"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ഓഫാക്കുക"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> കോൺഫിഗർ ചെയ്‌തു"</string>

@@ -245,7 +245,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Schermvergrendeling"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Uitzetten"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Aan/uit"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"Opnieuw opstarten"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Herstarten"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Noodgeval"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Bugrapport"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Sessie beëindigen"</string>
@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan gezichtsmodel niet maken. Probeer het opnieuw."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Donkere bril waargenomen. Je gezicht moet helemaal zichtbaar zijn."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gezichtsbedekking waargenomen. Je hele gezicht moet zichtbaar zijn."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gezichtsbedekking waargenomen. Je gezicht moet helemaal zichtbaar zijn."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kan gezicht niet verifiëren. Hardware niet beschikbaar."</string>
@@ -803,20 +803,20 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"De lengte en het aantal tekens beheren die zijn toegestaan in wachtwoorden en pincodes voor schermvergrendeling."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Pogingen voor schermontgrendeling bijhouden"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tablet vergrendelen of alle gegevens op de tablet wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Houd bij hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en vergrendel de tablet of wis alle gegevens op de tablet als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en het Android TV-apparaat vergrendelen of alle gegevens van het Android TV-apparaat wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
-    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Bijhouden hoe vaak onjuiste wachtwoorden worden getypt als het scherm wordt ontgrendeld, en het infotainmentsysteem vergrendelen of alle gegevens op het infotainmentsysteem wissen als te veel onjuiste wachtwoorden worden getypt."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld, en het infotainmentsysteem vergrendelen of alle gegevens op het infotainmentsysteem wissen bij te veel onjuiste wachtwoorden."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens op de telefoon wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tablet vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Houd bij hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en vergrendel de tablet of wis alle gegevens op de tablet als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en het Android TV-apparaat vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Bijhouden hoe vaak onjuiste wachtwoorden worden getypt als het scherm wordt ontgrendeld, en het infotainmentsysteem vergrendelen of alle gegevens van dit profiel wissen als te veel onjuiste wachtwoorden worden getypt."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd als het scherm wordt ontgrendeld, en het infotainmentsysteem vergrendelen of alle gegevens van dit profiel wissen bij te veel onjuiste wachtwoorden."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens van deze gebruiker wissen bij te veel onjuiste wachtwoorden."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"De schermvergrendeling wijzigen"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Wijzig de schermvergrendeling."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Het scherm vergrendelen"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Beheer hoe en wanneer het scherm wordt vergrendeld."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Alle gegevens wissen"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"De gegevens van de tablet zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Wis de gegevens van de tablet zonder waarschuwing door de fabrieksinstellingen te herstellen."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"De gegevens van het Android TV-apparaat zonder waarschuwing wissen door de fabrieksinstellingen terug te zetten."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"De gegevens van het infotainmentsysteem zonder waarschuwing wissen door de fabrieksinstellingen terug te zetten."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Wis de gegevens van de telefoon zonder waarschuwing door de fabrieksinstellingen te herstellen."</string>
@@ -1621,7 +1621,7 @@
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefoon"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Dockluidsprekers"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Extern apparaat"</string>
-    <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Hoofdtelefoon"</string>
+    <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Koptelefoon"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Systeem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Bluetooth-audio"</string>
@@ -1837,7 +1837,7 @@
     <string name="print_service_installed_title" msgid="6134880817336942482">"<xliff:g id="NAME">%s</xliff:g>-service geïnstalleerd"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"Tik om aan te zetten"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Beheerderspincode invoeren"</string>
-    <string name="restr_pin_enter_pin" msgid="373139384161304555">"Geef de pincode op"</string>
+    <string name="restr_pin_enter_pin" msgid="373139384161304555">"Voer pincode in"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"Onjuist"</string>
     <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"Huidige pincode"</string>
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"Nieuwe pincode"</string>
@@ -1864,7 +1864,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3e <xliff:g id="LABEL">%1$s</xliff:g>, werk"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Kloon van <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Vraag pin voor losmaken"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Vraag om ontgrendelingspatroon voor losmaken"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Ontgrendelingspatroon vragen om app los te maken"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Vraag wachtwoord voor losmaken"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Geïnstalleerd door je beheerder"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Geüpdatet door je beheerder"</string>
@@ -1872,7 +1872,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Met Batterijbesparing wordt het donkere thema aangezet en worden achtergrondactiviteit, bepaalde visuele effecten, bepaalde functies en sommige netwerkverbindingen beperkt of uitgezet."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Met Batterijbesparing wordt het donkere thema aangezet en worden achtergrondactiviteit, bepaalde visuele effecten, bepaalde functies en sommige netwerkverbindingen beperkt of uitgezet."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens sturen of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden dan bijvoorbeeld niet getoond totdat je erop tikt."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens sturen of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden bijvoorbeeld pas getoond als je erop tikt."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Databesparing aanzetten?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aanzetten"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Gedurende 1 minuut (tot {formattedTime})}other{Gedurende # minuten (tot {formattedTime})}}"</string>
@@ -1894,7 +1894,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Downtime"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Doordeweekse avond"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
-    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Afspraken"</string>
+    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Afspraak"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Slapen"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> zet sommige geluiden uit"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Er is een intern probleem met je apparaat. Het apparaat kan instabiel zijn totdat u het apparaat terugzet naar de fabrieksinstellingen."</string>
@@ -2159,7 +2159,7 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Deze content kan niet worden geopend met werk-apps"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Deze content kan niet worden gedeeld met persoonlijke apps"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Deze content kan niet worden geopend met persoonlijke apps"</string>
-    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Werk-apps zijn onderbroken"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Werk-apps zijn gepauzeerd"</string>
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Hervatten"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Geen werk-apps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Geen persoonlijke apps"</string>
@@ -2290,7 +2290,7 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Je kunt nu een deel van je scherm vergroten"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Aanzetten in Instellingen"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Sluiten"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Blokkeren van apparaatmicrofoon opheffen"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Microfoon van apparaat niet meer blokkeren"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Blokkeren van apparaatcamera opheffen"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Voor &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; en alle andere apps en services"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Niet meer blokkeren"</string>

@@ -136,12 +136,13 @@ constructor(
 
     private fun constructCircleRevealFromPoint(point: Point): LightRevealEffect {
         return with(point) {
+            val display = checkNotNull(context.display)
             CircleReveal(
                 x,
                 y,
                 startRadius = 0,
                 endRadius =
-                    max(max(x, context.display.width - x), max(y, context.display.height - y)),
+                    max(max(x, display.width - x), max(y, display.height - y)),
             )
         }
     }

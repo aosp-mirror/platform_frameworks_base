@@ -294,8 +294,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"触发蓝牙音频 LDAC\n编解码器选择：播放质量"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"正在流式传输：<xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"专用 DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"选择私人 DNS 模式"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"已关闭"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"选择专用 DNS 模式"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"关闭"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"自动"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"专用 DNS 提供商主机名"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"输入 DNS 提供商的主机名"</string>
@@ -442,7 +442,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"红色弱视（红绿不分）"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"蓝色弱视（蓝黄不分）"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色彩校正"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"“色彩校正”功能适用于以下情况：&lt;br/&gt; &lt;ol&gt; &lt;li&gt;您想更准确地查看颜色&lt;/li&gt; &lt;li&gt;您想移除颜色以提高专注程度&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"“色彩校正”功能适用于以下情况：&lt;br/&gt; &lt;ol&gt; &lt;li&gt;您想更准确地查看颜色&lt;/li&gt; &lt;li&gt;您想移除颜色以提高专注度&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已被“<xliff:g id="TITLE">%1$s</xliff:g>”覆盖"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"大约还可使用<xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -578,8 +578,8 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"用户"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"受限个人资料"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"要添加新用户吗？"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"创建新用户后，您就能够与其他人共用此设备。每位用户都有自己的专属空间，而且在自己的个人空间内还可以自行安装自己想要的应用、设置壁纸等。此外，用户还可以调整会影响所有用户的设备设置（例如 WLAN 设置）。\n\n当您添加新用户后，该用户需要自行设置个人空间。\n\n任何用户都可以为所有其他用户更新应用。无障碍功能设置和服务可能无法转移给新用户。"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"当您添加新用户后，该用户需要自行设置个人空间。\n\n任何用户都可以为所有其他用户更新应用。"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"创建新用户后，您就能够与其他人共用此设备。每位用户都有自己的专属空间，而且在自己的个人空间内还可以自行安装自己想要的应用、设置壁纸等。此外，用户还可以调整会影响所有用户的设备设置（例如 WLAN 设置）。\n\n新添加的用户需要自行设置个人空间。\n\n任何用户都可为所有其他用户更新应用。无障碍功能设置和服务可能无法转移给新用户。"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"新添加的用户需要自行设置个人空间。\n\n任何用户都可为所有其他用户更新应用。"</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"将此用户设为管理员？"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"管理员拥有其他用户没有的特殊权限。管理员可以管理所有用户、更新或重置此设备、修改设置、查看所有已安装的应用，以及授予或撤消其他用户的管理员权限。"</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"设为管理员"</string>
@@ -624,7 +624,7 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"退出访客模式"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"重置访客会话"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"退出访客模式"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"退出时所有活动都将被删除"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"退出时所有活动记录都将被删除"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"您可以在退出时保存或删除您的活动"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"请立即重置以删除会话活动记录；或者，您也可以在退出时保存或删除活动记录"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"拍摄照片"</string>
@@ -673,9 +673,9 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"实体键盘"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"选择键盘布局"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"默认"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"开启屏幕"</string>
-    <string name="allow_turn_screen_on" msgid="6194845766392742639">"允许开启屏幕"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"允许应用开启屏幕。如获授权，该应用便可在您未明确表达意愿的情况下随时开启屏幕。"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"唤醒屏幕"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"允许唤醒屏幕"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"允许应用唤醒屏幕。如获授权，该应用便可在您未明确表达意愿的情况下随时唤醒屏幕。"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"要停止广播“<xliff:g id="APP_NAME">%1$s</xliff:g>”的内容吗？"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"如果广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容或更改输出来源，当前的广播就会停止"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容"</string>

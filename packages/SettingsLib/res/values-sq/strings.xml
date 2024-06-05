@@ -102,7 +102,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktive, vetëm majtas"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktive, vetëm djathtas"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktive, majtas dhe djathtas"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audioja e klipit \"media\""</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audioja e medias"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonatat"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferimi i skedarëve"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Pajisja e hyrjes"</string>
@@ -402,8 +402,8 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktivizo dritaret me formë të lirë"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktivizo mbështetjen për dritaret eksperimentale me formë të lirë."</string>
     <string name="desktop_mode" msgid="2389067840550544462">"Modaliteti i desktopit"</string>
-    <string name="local_backup_password_title" msgid="4631017948933578709">"Fjalëkalimi rezervë i kompjuterit"</string>
-    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Rezervimet e plota në kompjuter nuk janë të mbrojtura aktualisht"</string>
+    <string name="local_backup_password_title" msgid="4631017948933578709">"Fjalëkalimi i rezervimit të desktopit"</string>
+    <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Rezervimet e plota të desktopit nuk janë të mbrojtura aktualisht"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Trokit për të ndryshuar ose hequr fjalëkalimin për rezervime të plota të desktopit"</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"Fjalëkalimi i ri u vendos"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"Fjalëkalimi i ri dhe konfirmimi nuk përputhen"</string>

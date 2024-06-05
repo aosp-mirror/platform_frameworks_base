@@ -631,7 +631,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Не удалось распознать отпечаток. Повторите попытку."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Очистите сканер отпечатков пальцев и повторите попытку."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Очистите сканер и повторите попытку."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Плотно прижмите палец к сканеру."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Плотно прижмите палец к сканеру"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Вы перемещали палец слишком медленно. Повторите попытку."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Попробуйте сохранить отпечаток другого пальца."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Слишком светло."</string>
@@ -805,10 +805,10 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Настройка правил для паролей"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролировать длину и символы при вводе пароля и PIN-кода."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Отслеживание попыток разблокировать экран"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует планшетный ПК или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Отслеживать попытки ввода пароля при разблокировке экрана и блокировать планшет или удалять с него все данные, если было сделано слишком много таких попыток."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Блокировать устройство Android TV или удалять с него все ваши данные при слишком большом количестве неудачных попыток ввести пароль для разблокировки экрана."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Блокировать информационно-развлекательную систему или удалять из нее все данные, если совершено слишком много неудачных попыток ввести пароль для разблокировки экрана."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует телефон или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Отслеживать попытки ввода пароля при разблокировке экрана и блокировать телефон или удалять с него все данные, если было сделано слишком много таких попыток."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Отслеживать неверно введенные пароли при разблокировке экрана и блокировать планшет или удалять с него все данные, если сделано слишком много неудачных попыток."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Блокировать устройство Android TV или удалять с него все данные этого пользователя при слишком большом количестве неудачных попыток ввести пароль для разблокировки экрана."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Блокировать информационно-развлекательную систему или удалять все данные профиля, если совершено слишком много неудачных попыток ввести пароль для разблокировки экрана."</string>
@@ -818,7 +818,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Блокировка экрана"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Управлять способом и временем блокировки экрана."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Удаление всех данных"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Удалять все данные на планшетном ПК без предупреждения путем сброса настроек."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Удалять все данные на планшете без предупреждения путем сброса настроек."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Удалять данные с устройства Android TV без предупреждения, выполняя восстановление заводских настроек."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Сбрасывать настройки без предупреждения, таким образом удаляя все данные из информационно-развлекательной системы."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Удалять все данные на телефоне без предупреждения путем сброса настроек."</string>
@@ -1258,7 +1258,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Запуск приложений."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Окончание загрузки..."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Вы нажали кнопку питания. Обычно это приводит к отключению экрана.\n\nПри добавлении отпечатка пальца слегка прикоснитесь к кнопке."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Для завершения нужно отключить экран"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Для завершения нужно отключить экран."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Отключить"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Продолжить сканирование отпечатка?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Вы нажали кнопку питания. Обычно это приводит к отключению экрана.\n\nЧтобы отсканировать отпечаток пальца, слегка прикоснитесь к кнопке."</string>
@@ -2152,7 +2152,7 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Чат"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Групповой чат"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Личное"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Личный"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Рабочее"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Просмотр личных данных"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Просмотр рабочих данных"</string>
@@ -2341,7 +2341,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Настроены раскладки клавиатуры для яз.: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> и др. Нажмите, чтобы изменить."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Физические клавиатуры настроены"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Нажмите, чтобы посмотреть подключенные клавиатуры."</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Личный"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Частный"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Клон"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Рабочий"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Рабочий 2"</string>

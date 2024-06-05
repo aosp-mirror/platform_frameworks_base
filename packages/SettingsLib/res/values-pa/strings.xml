@@ -216,7 +216,7 @@
     <string name="category_personal" msgid="6236798763159385225">"ਨਿੱਜੀ"</string>
     <string name="category_work" msgid="4014193632325996115">"ਕੰਮ ਸੰਬੰਧੀ"</string>
     <string name="category_clone" msgid="1554511758987195974">"ਕਲੋਨ ਕਰੋ"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"ਵਿਕਾਸਕਾਰ ਚੋਣਾਂ"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"ਵਿਕਾਸਕਾਰ ਵਿਕਲਪ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ਵਿਕਾਸਕਾਰ ਵਿਕਲਪਾਂ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ਐਪ ਵਿਕਾਸ ਲਈ ਚੋਣਾਂ ਸੈੱਟ ਕਰੋ"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ਇਸ ਵਰਤੋਂਕਾਰ ਲਈ ਵਿਕਾਸਕਾਰ ਵਿਕਲਪ ਉਪਲਬਧ ਨਹੀਂ ਹਨ"</string>
@@ -480,7 +480,7 @@
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"ਕਨੈਕਟ ਹੈ, ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਹੀ"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"ਚਾਰਜ ਹੋ ਗਈ"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"ਬੈਟਰੀ ਚਾਰਜ ਹੋ ਗਈ"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"ਪੂਰੀ ਚਾਰਜ ਹੋ ਗਈ ਹੈ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਕੰਟਰੋਲ ਕੀਤੀ ਗਈ"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"ਪ੍ਰਤਿਬੰਧਿਤ ਸੈਟਿੰਗ ਰਾਹੀਂ ਕੰਟਰੋਲ ਕੀਤੀ ਜਾਂਦੀ ਹੈ"</string>
@@ -528,7 +528,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ ਸੈੱਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"ਇਸ ਐਪ ਨੂੰ ਅਲਾਰਮ ਸੈੱਟ ਕਰਨ ਜਾਂ ਹੋਰ ਸਮਾਂ-ਸੰਵੇਦਨਸ਼ੀਲ ਕਾਰਵਾਈਆਂ ਨੂੰ ਨਿਯਤ ਕਰਨ ਦਿਓ। ਇਸ ਨਾਲ ਐਪ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲਣ ਦੀ ਇਜਾਜ਼ਤ ਮਿਲਦੀ ਹੈ, ਜਿਸ ਨਾਲ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਵੱਧ ਸਕਦੀ ਹੈ।\n\nਜੇ ਇਹ ਇਜਾਜ਼ਤ ਬੰਦ ਹੈ, ਤਾਂ ਮੌਜੂਦਾ ਅਲਾਰਮ ਅਤੇ ਇਸ ਐਪ ਰਾਹੀਂ ਨਿਯਤ ਕੀਤੇ ਸਮਾਂ-ਆਧਾਰਿਤ ਇਵੈਂਟ ਕੰਮ ਨਹੀਂ ਕਰਨਗੇ।"</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"ਇਸ ਐਪ ਨੂੰ ਅਲਾਰਮ ਸੈੱਟ ਕਰਨ ਜਾਂ ਹੋਰ ਸਮਾਂ-ਸੰਵੇਦਨਸ਼ੀਲ ਕਾਰਵਾਈਆਂ ਨੂੰ ਨਿਯਤ ਕਰਨ ਦਿਓ। ਇਸ ਨਾਲ ਐਪ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲਣ ਦੀ ਇਜਾਜ਼ਤ ਮਿਲਦੀ ਹੈ, ਜਿਸ ਨਾਲ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਵੱਧ ਸਕਦੀ ਹੈ।\n\nਜੇ ਇਹ ਇਜਾਜ਼ਤ ਬੰਦ ਹੈ, ਤਾਂ ਇਸ ਐਪ ਰਾਹੀਂ ਨਿਯਤ ਕੀਤੇ ਮੌਜੂਦਾ ਅਲਾਰਮ ਅਤੇ ਸਮਾਂ-ਆਧਾਰਿਤ ਇਵੈਂਟ ਕੰਮ ਨਹੀਂ ਕਰਨਗੇ।"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ਸਮਾਂ-ਸੂਚੀ, ਅਲਾਰਮ, ਰਿਮਾਈਂਡਰ, ਘੜੀ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ਚਾਲੂ ਕਰੋ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
@@ -624,7 +624,7 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"ਮਹਿਮਾਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਓ"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਨੂੰ ਰੀਸੈੱਟ ਕਰੋ"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ਮਹਿਮਾਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਓ"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ਬਾਹਰ ਜਾਣ \'ਤੇ ਸਾਰੀ ਸਰਗਰਮੀ ਮਿਟਾਈ ਜਾਵੇਗੀ"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ਬਾਹਰ ਜਾਣ \'ਤੇ ਸਾਰੀ ਸਰਗਰਮੀ ਮਿਟਾ ਦਿੱਤੀ ਜਾਵੇਗੀ"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ਤੁਸੀਂ ਬਾਹਰ ਜਾਣ \'ਤੇ ਆਪਣੀ ਸਰਗਰਮੀ ਰੱਖਿਅਤ ਕਰ ਜਾਂ ਮਿਟਾ ਸਕਦੇ ਹੋ"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"ਸੈਸ਼ਨ ਦੀ ਸਰਗਰਮੀ ਹੁਣੇ ਮਿਟਾਉਣ ਲਈ ਰੀਸੈੱਟ ਕਰੋ ਜਾਂ ਤੁਸੀਂ ਬਾਹਰ ਜਾਣ \'ਤੇ ਸਰਗਰਮੀ ਨੂੰ ਰੱਖਿਅਤ ਕਰ ਜਾਂ ਮਿਟਾ ਸਕਦੇ ਹੋ"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ਇੱਕ ਫ਼ੋਟੋ ਖਿੱਚੋ"</string>
@@ -675,7 +675,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ਸਕ੍ਰੀਨ ਚਾਲੂ ਕਰੋ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ਸਕ੍ਰੀਨ ਚਾਲੂ ਕਰਨ ਦਿਓ"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ਐਪ ਨੂੰ ਸਕ੍ਰੀਨ ਚਾਲੂ ਕਰਨ ਦਿਓ। ਜੇ ਇਜਾਜ਼ਤ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ, ਤਾਂ ਐਪ ਕਿਸੇ ਵੀ ਸਮੇਂ ਸਕ੍ਰੀਨ ਨੂੰ ਚਾਲੂ ਕਰ ਸਕਦੀ ਹੈ, ਭਾਵੇਂ ਤੁਹਾਨੂੰ ਇਸਦੀ ਲੋੜ ਨਾ ਹੋਵੇ।"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ਐਪ ਨੂੰ ਸਕ੍ਰੀਨ ਚਾਲੂ ਕਰਨ ਦਿਓ। ਇਜਾਜ਼ਤ ਦਿੱਤੇ ਜਾਣ \'ਤੇ, ਇਹ ਐਪ ਤੁਹਾਡੇ ਇਰਾਦੇ ਦੇ ਬਿਨਾਂ ਕਿਸੇ ਵੇਲੇ ਵੀ ਸਕ੍ਰੀਨ ਨੂੰ ਚਾਲੂ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਦੇ ਪ੍ਰਸਾਰਨ ਨੂੰ ਰੋਕਣਾ ਹੈ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ਜੇ ਤੁਸੀਂ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ਦਾ ਪ੍ਰਸਾਰਨ ਕਰਦੇ ਹੋ ਜਾਂ ਆਊਟਪੁੱਟ ਬਦਲਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡਾ ਮੌਜੂਦਾ ਪ੍ਰਸਾਰਨ ਰੁਕ ਜਾਵੇਗਾ"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ਦਾ ਪ੍ਰਸਾਰਨ ਕਰੋ"</string>

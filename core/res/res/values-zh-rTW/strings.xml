@@ -257,7 +257,7 @@
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"完整報告"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"如果你的裝置沒有回應或運行速度過慢，或是當你需要所有區段的報告時，建議你使用這個選項來減少系統干擾。這個選項不支援你輸入更多資訊，也不會擷取其他螢幕畫面。"</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{系統將在 # 秒後擷取錯誤報告的螢幕截圖。}other{系統將在 # 秒後擷取錯誤報告的螢幕截圖。}}"</string>
-    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"已拍攝錯誤報告的螢幕截圖"</string>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"已擷取錯誤報告的螢幕截圖"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"無法拍攝錯誤報告的螢幕截圖"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"靜音模式"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"音效已關閉"</string>
@@ -477,8 +477,8 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"允許應用程式存取額外位置資訊提供者指令。這項設定可能會造成應用程式干擾 GPS 或其他位置資訊來源的運作。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"僅可在前景中取得精確位置"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"只有在你使用時，這個應用程式才能透過定位服務取得你的精確位置。你必須在裝置上開啟定位服務，這個應用程式才能取得位置資訊。這麼做可能會增加電池用量。"</string>
-    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"僅可在前景中取得概略位置"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"只有在你使用時，這個應用程式才能透過定位服務取得你的概略位置。你必須在裝置上開啟定位服務，這個應用程式才能取得位置資訊。"</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"僅可在前景中取得大概位置"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"只有在你使用時，這個應用程式才能透過定位服務取得你的大概位置。你必須在裝置上開啟定位服務，這個應用程式才能取得位置資訊。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"在背景存取位置資訊"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"這個應用程式隨時都能取得位置資訊 (包括未使用應用程式時)。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"變更音訊設定"</string>
@@ -803,7 +803,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"管理螢幕鎖定密碼和 PIN 碼支援的字元和長度上限。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"監控螢幕解鎖嘗試次數"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"監控螢幕解鎖時密碼輸入錯誤的次數；如果密碼輸入錯誤的次數過多，則會鎖住平板電腦或全部清除平板電腦中的資料。"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"監控螢幕解鎖時密碼輸入錯誤的次數；如果錯誤次數過多，會鎖住平板電腦或清除平板電腦的所有資料。"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"監控螢幕解鎖密碼輸入錯誤的次數。如果輸入錯誤的次數超過上限，系統會將 Android TV 裝置鎖定，或清除 Android TV 裝置的所有資料。"</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"監控密碼輸入錯誤的次數。解鎖螢幕時，如果密碼輸入錯誤次數過多，系統就會鎖住資訊娛樂系統或清除資訊娛樂系統的所有資料。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"監控螢幕解鎖時密碼輸入錯誤的次數；如果密碼輸入錯誤的次數過多，則會鎖住手機或清除手機的所有資料。"</string>
@@ -1500,10 +1500,10 @@
     <string name="vpn_title_long" msgid="6834144390504619998">"<xliff:g id="APP">%s</xliff:g> 已啟用 VPN"</string>
     <string name="vpn_text" msgid="2275388920267251078">"輕觸一下即可管理網路。"</string>
     <string name="vpn_text_long" msgid="278540576806169831">"已連線至 <xliff:g id="SESSION">%s</xliff:g>，輕觸一下即可管理網路。"</string>
-    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"正在連線至永久連線的 VPN…"</string>
-    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"已連線至永久連線的 VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"已中斷連線至永久連線的 VPN"</string>
-    <string name="vpn_lockdown_error" msgid="4453048646854247947">"無法連上永久連線的 VPN"</string>
+    <string name="vpn_lockdown_connecting" msgid="6096725311950342607">"正在連線至永久連線 VPN…"</string>
+    <string name="vpn_lockdown_connected" msgid="2853127976590658469">"已連線至永久連線 VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"已中斷連線至永久連線 VPN"</string>
+    <string name="vpn_lockdown_error" msgid="4453048646854247947">"無法連上永久連線 VPN"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"變更網路或 VPN 設定"</string>
     <string name="upload_file" msgid="8651942222301634271">"選擇檔案"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"未選擇任何檔案"</string>
@@ -1561,7 +1561,7 @@
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"完成"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"模式變更"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Shift 鍵"</string>
-    <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter 鍵"</string>
+    <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="3500574466367891463">"選擇應用程式"</string>
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"無法啟動 <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"分享對象："</string>
@@ -1698,7 +1698,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要將裝置的完整控制權授予「<xliff:g id="SERVICE">%1$s</xliff:g>」嗎？"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，建議可將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看及控制螢幕"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"可讀取螢幕上的所有內容及在其他應用程式上顯示內容。"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"可讀取螢幕上的所有內容，並在其他應用程式上顯示內容。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"查看及執行動作"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"可追蹤你與應用程式或硬體感應器的互動，並代表你與應用程式進行互動。"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"允許"</string>
@@ -1872,7 +1872,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"確定"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"省電模式會開啟深色主題，並限制或關閉背景活動、某些視覺效果、特定功能和部分網路連線。"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"省電模式會開啟深色主題，並限制或關閉背景活動、某些視覺效果、特定功能和部分網路連線。"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你使用中的一個應用程式仍可存取資料，但存取頻率可能會變低。舉例來說，圖片可能要等到你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"開啟"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{1 分鐘 (直到 {formattedTime})}other{# 分鐘 (直到 {formattedTime})}}"</string>
@@ -1938,7 +1938,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"新增受監管的使用者"</string>
     <string name="language_selection_title" msgid="52674936078683285">"新增語言"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"地區偏好設定"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"請輸入語言名稱"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"請輸入語言"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"建議語言"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"建議地區"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"建議語言"</string>

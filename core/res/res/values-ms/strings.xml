@@ -683,10 +683,10 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Dekatkan telefon"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Tinggikan lagi telefon"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Rendahkan lagi telefon"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Gerakkan telefon ke kiri anda"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Gerakkan telefon ke kanan anda"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Gerakkan telefon ke kiri"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Gerakkan telefon ke kanan"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Sila lihat terus pada peranti anda."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Wajah tidak kelihatan. Pegang telefon pada paras mata."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Wajah tidak kelihatan. Pegang telefon pada aras mata."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Terlalu bnyk gerakan. Pegang telefon dgn stabil."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Sila daftarkan semula wajah anda."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Tidak dapat mengecam wajah. Cuba lagi."</string>
@@ -819,7 +819,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Memadamkan data tablet tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Padamkan data peranti Android TV anda tanpa amaran dengan melaksanakan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Memadam data sistem maklumat hibur tanpa amaran dengan melakukan tetapan semula data kilang."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Padamkan data telefon tanpa amaran dengan melakukan tetapan semula data kilang."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Memadam data telefon tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Padam data profil"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Padam data pengguna"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Padam data pengguna ini pada tablet ini tanpa amaran."</string>
@@ -1005,11 +1005,11 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"Anda telah mencuba untuk membuka kunci tablet secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Tablet kini akan ditetapkan semula ke tetapan lalai kilang."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"Anda telah cuba membuka peranti Android TV secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Peranti Android TV anda kini akan ditetapkan semula kepada tetapan lalai kilang."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"Anda telah mencuba untuk membuka kunci telefon secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Telefon kini akan ditetapkan semula kepada tetapan lalai kilang."</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"Cuba lagi dalam <xliff:g id="NUMBER">%d</xliff:g> saat."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"Cuba lagi selepas <xliff:g id="NUMBER">%d</xliff:g> saat."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Lupa corak?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Buka kunci akaun"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"Terlalu banyak percubaan melukis corak"</string>
-    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Untuk membuka kunci, log masuk dengan akaun Google anda."</string>
+    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Untuk membuka kunci, log masuk dengan Google Account anda."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Nama Pengguna (E-mel)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Kata laluan"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Log masuk"</string>
@@ -1490,7 +1490,7 @@
     <string name="input_method_binding_label" msgid="1166731601721983656">"Kaedah input"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Penyegerakan"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Kebolehaksesan"</string>
-    <string name="wallpaper_binding_label" msgid="1197440498000786738">"Kertas dinding"</string>
+    <string name="wallpaper_binding_label" msgid="1197440498000786738">"Hiasan latar"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Tukar hiasan latar"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Pendengar pemberitahuan"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"Pendengar VR"</string>
@@ -1660,7 +1660,7 @@
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Masukkan semula kod PIN yang betul. Percubaan berulang akan melumpuhkan SIM secara kekal."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"Kod PIN tidak sepadan"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Terlalu banyak percubaan melukis corak"</string>
-    <string name="kg_login_instructions" msgid="3619844310339066827">"Untuk membuka kunci, log masuk dengan akaun Google anda."</string>
+    <string name="kg_login_instructions" msgid="3619844310339066827">"Untuk membuka kunci, log masuk dengan Google Account anda."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Nama Pengguna (E-mel)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Kata laluan"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"Log masuk"</string>
@@ -1699,7 +1699,7 @@
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kawalan penuh sesuai untuk apl yang membantu anda berkaitan dengan keperluan kebolehaksesan tetapi bukan untuk kebanyakan apl."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengawal skrin"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ciri ini boleh membaca semua kandungan pada skrin dan memaparkan kandungan di atas apl lain."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Lihat dan laksanakan tindakan"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Melihat dan melaksanakan tindakan"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ciri ini boleh menjejaki interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Benarkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
@@ -1872,7 +1872,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Penjimat Bateri menghidupkan tema Gelap dan mengehadkan atau mematikan aktiviti latar, sesetengah kesan visual, ciri tertentu dan sesetengah sambungan rangkaian."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Penjimat Bateri menghidupkan tema Gelap dan mengehadkan atau mematikan aktiviti latar, sesetengah kesan visual, ciri tertentu dan sesetengah sambungan rangkaian."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Untuk membantu penggunaan data dikurangkan, Penjimat Data menghalang sesetengah apl daripada menghantar atau menerima data di latar. Apl yang sedang digunakan boleh mengakses data tetapi mungkin tidak secara kerap. Perkara ini mungkin bermaksud bahawa imej tidak dipaparkan sehingga anda mengetik pada imej itu, contohnya."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Untuk mengurangkan penggunaan data, Penjimat Data menghalang sesetengah apl daripada menghantar atau menerima data di latar. Apl yang sedang digunakan boleh mengakses data tetapi mungkin tidak secara kerap. Sebagai contoh, imej tidak dipaparkan sehingga anda mengetik pada imej itu."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Hidupkan Penjimat Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Hidupkan"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Selama satu minit (hingga{formattedTime})}other{Selama # minit (hingga {formattedTime})}}"</string>
@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Reka letak papan kekunci ditetapkan kepada <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Ketik untuk menukar reka letak."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Papan kekunci fizikal dikonfigurasikan"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Ketik untuk melihat papan kekunci"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Peribadi"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Persendirian"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Klon"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Kerja"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Kerja 2"</string>

@@ -44,7 +44,7 @@ android_app {
     platform_apis: true,
     privileged: true,
 
-    kotlincflags: ["-Xjvm-default=enable"],
+    kotlincflags: ["-Xjvm-default=all"],
 
     optimize: {
         proguard_compatibility: false,

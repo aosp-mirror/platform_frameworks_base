@@ -100,8 +100,8 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Przetwarzam nagrywanie ekranu"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Stałe powiadomienie o sesji rejestrowania zawartości ekranu"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Rozpocząć nagrywanie?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Podczas nagrywania Android ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Podczas nagrywania treści z aplikacji Android ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Podczas nagrywania Android ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, dźwięku i filmów."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Podczas nagrywania treści z aplikacji Android ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, dźwięku i filmów."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Zacznij nagrywać"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nagrywaj dźwięk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Dźwięki z urządzenia"</string>
@@ -401,16 +401,16 @@
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Pojedyncza aplikacja"</string>
     <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Udostępnianie i nagrywanie aplikacji"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Rozpocząć nagrywanie lub przesyłanie za pomocą aplikacji <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Podczas udostępniania, nagrywania lub przesyłania treści aplikacja <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Podczas udostępniania, nagrywania lub przesyłania treści aplikacja <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Podczas udostępniania, nagrywania lub przesyłania treści aplikacja <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, dźwięku i filmów."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Podczas udostępniania, nagrywania lub przesyłania treści aplikacja <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, dźwięku i filmów."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Rozpocznij"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Rozpocząć przesyłanie?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Podczas przesyłania, Android ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Podczas przesyłania treści z aplikacji Android ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Podczas przesyłania, Android ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, dźwięku i filmów."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Podczas przesyłania treści z aplikacji Android ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, dźwięku i filmów."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Rozpocznij przesyłanie"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Rozpocząć udostępnianie?"</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Podczas udostępniania, nagrywania lub przesyłania treści Android ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Podczas udostępniania, nagrywania lub przesyłania treści Android ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Podczas udostępniania, nagrywania lub przesyłania treści Android ma dostęp do wszystkiego, co jest widoczne na ekranie lub odtwarzane na urządzeniu. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, dźwięku i filmów."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Podczas udostępniania, nagrywania lub przesyłania treści Android ma dostęp do wszystkiego, co jest w niej wyświetlane lub odtwarzane. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, dźwięku i filmów."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Rozpocznij"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Zablokowane przez administratora IT"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Zrzuty ekranu są wyłączone zgodnie z zasadami dotyczącymi urządzeń"</string>
@@ -566,17 +566,17 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Domyślne"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatycznie"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Bez dźwięku i wibracji"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brak dźwięku i wibracji, wyświetla się niżej w sekcji rozmów"</string>
-    <string name="notification_channel_summary_default" msgid="777294388712200605">"Może włączać dzwonek lub wibracje w zależności od ustawień urządzenia"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Może włączyć dzwonek lub wibracje w zależności od ustawień urządzenia. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brak dźwięku i wibracji, wyświetlają się niżej w sekcji rozmów"</string>
+    <string name="notification_channel_summary_default" msgid="777294388712200605">"Mogą włączać dzwonek lub wibracje w zależności od ustawień urządzenia"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Mogą włączać dzwonek lub wibracje w zależności od ustawień urządzenia. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Pozwól systemowi decydować, czy o powiadomieniu powinien informować dźwięk czy wibracja"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stan:&lt;/b&gt; zmieniony na Domyślny"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stan:&lt;/b&gt; zmieniono na Ciche"</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Stan:&lt;/b&gt; podniesiono ważność"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stan:&lt;/b&gt; obniżono ważność"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, jako dymek"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, przerywa działanie trybu Nie przeszkadzać"</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Wyświetlają się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Wyświetlają się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, jako dymek"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Wyświetlają się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, przerywają działanie trybu Nie przeszkadzać"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, jako dymek, przerywa działanie trybu Nie przeszkadzać"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorytetowe"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje funkcji rozmów"</string>
@@ -654,17 +654,17 @@
     <string name="group_system_go_back" msgid="8838454003680364227">"Wstecz: powrót do poprzedniego stanu (przycisk Wstecz)"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"Otwieranie ekranu głównego"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Przegląd otwartych aplikacji"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Przełączanie się między ostatnimi aplikacjami (do przodu)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Przełączanie się między ostatnimi aplikacjami (wstecz)"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Przełącz się między ostatnimi aplikacjami (do przodu)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"Przełącz się między ostatnimi aplikacjami (wstecz)"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Otwieranie listy wszystkich aplikacji i wyszukiwanie (tj. wyszukiwarka/Launcher)"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Ukrywanie i ponowne pokazywanie paska aplikacji"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"Otwieranie ustawień systemu"</string>
     <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Otwieranie Asystenta Google"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Blokada ekranu"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Zablokuj ekran"</string>
     <string name="group_system_quick_memo" msgid="2914234890158583919">"Otwieranie aplikacji do notatek w przypadku szybkich notatek"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Wielozadaniowość w systemie"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Uruchamianie trybu podzielonego ekranu z bieżącą aplikacją po prawej"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Uruchamianie trybu podzielonego ekranu z bieżącą aplikacją po lewej"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Uruchom tryb podzielonego ekranu z bieżącą aplikacją po prawej"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Uruchom tryb podzielonego ekranu z bieżącą aplikacją po lewej"</string>
     <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Przełączanie podzielonego ekranu na pełny ekran"</string>
     <string name="system_multitasking_replace" msgid="844285282472557186">"Podczas podzielonego ekranu: zastępowanie aplikacji"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Wprowadzanie"</string>
@@ -751,7 +751,7 @@
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Otwórz ustawienia."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Otwórz szybkie ustawienia."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Zamknij szybkie ustawienia."</string>
-    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Zalogowany użytkownik: <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Używasz konta: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"wybrać użytkownika"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Brak internetu"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Otwórz ustawienia: <xliff:g id="ID_1">%s</xliff:g>."</string>
@@ -1124,7 +1124,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Dostępne jest co najmniej 1 urządzenie."</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Wybierz domyślną aplikację do obsługi notatek, której skrótu będziesz używać do funkcji notowania"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Wybierz aplikację"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Skrót – naciśnij i przytrzymaj"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Naciśnij i przytrzymaj skrót"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Anuluj"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Przełącz ekrany teraz"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Otwieranie telefonu"</string>

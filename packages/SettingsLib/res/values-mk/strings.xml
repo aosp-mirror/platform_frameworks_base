@@ -96,7 +96,7 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (без телефон и аудиовизуелни содржини), ниво на батеријата <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Активен, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Активен, Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија"</string>
-    <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија"</string>
+    <string name="bluetooth_battery_level" msgid="2893696778200201555">"Батерија: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Активен"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Активно, само лево"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Откажи"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Кога е поврзано, спарувањето одобрува пристап до контактите и историјата на повиците."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не може да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не може да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g> поради погрешен PIN или лозинка."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не може да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g> поради погрешен PIN или криптографски клуч."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Не може да комуницира со <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Спарувањето е одбиено од <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компјутер"</string>
@@ -173,7 +173,7 @@
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Корисник: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Поставени се некои стандардни вредности"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Нема поставено стандардни вредности"</string>
-    <string name="tts_settings" msgid="8130616705989351312">"Поставки на текст-во-говор"</string>
+    <string name="tts_settings" msgid="8130616705989351312">"Поставки за „Од текст во говор“"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Претворање текст во говор"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Брзина на говорот"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Брзина со која се кажува текстот"</string>
@@ -213,7 +213,7 @@
     <item msgid="6946761421234586000">"400 %"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Изберете профил"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Лични"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Лично"</string>
     <string name="category_work" msgid="4014193632325996115">"Работа"</string>
     <string name="category_clone" msgid="1554511758987195974">"Клон"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Програмерски опции"</string>
@@ -350,7 +350,7 @@
     <string name="media_category" msgid="8122076702526144053">"Аудиовизуелни содржини"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Следење"</string>
     <string name="strict_mode" msgid="889864762140862437">"Овозможен е строг режим"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Осветли екран при долги операции на главна нишка"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Трепкај со екранот при долги операции на главна нишка"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Локација на покажувач"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Прекривката на екран ги покажува тековните податоци на допир"</string>
     <string name="show_touches" msgid="8437666942161289025">"Прикажувај допири"</string>
@@ -444,7 +444,7 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Корекција на боите"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Корекцијата на боите може да биде корисна кога сакате:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;да ги гледате боите попрецизно&lt;/li&gt; &lt;li&gt;&amp;nbsp;да ги отстраните боите за полесно да се концентрирате&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Прескокнато според <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Уште околу <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"Уште околу <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"Уште околу <xliff:g id="TIME_REMAINING">%1$s</xliff:g> според вашето користење"</string>
@@ -470,8 +470,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> до полна батерија"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до полна батерија"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Полнењето е оптимизирано"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Полнењето е оптимизирано"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – полнењето е оптимизирано"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – полнењето е оптимизирано"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Непознато"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Се полни"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Брзо полнење"</string>
@@ -487,12 +487,12 @@
     <string name="disabled" msgid="8017887509554714950">"Оневозможено"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Со дозвола"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Без дозвола"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Непознати апликации"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Инсталирање непознати апликации"</string>
     <string name="home" msgid="973834627243661438">"Почетна страница за поставки"</string>
   <string-array name="battery_labels">
-    <item msgid="7878690469765357158">"0%"</item>
-    <item msgid="8894873528875953317">"50%"</item>
-    <item msgid="7529124349186240216">"100%"</item>
+    <item msgid="7878690469765357158">"0 %"</item>
+    <item msgid="8894873528875953317">"50 %"</item>
+    <item msgid="7529124349186240216">"100 %"</item>
   </string-array>
     <string name="charge_length_format" msgid="6941645744588690932">"Пред <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"Преостануваат <xliff:g id="ID_1">%1$s</xliff:g>"</string>
@@ -675,7 +675,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Стандардно"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Вклучување на екранот"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволи вклучување на екранот"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозволува одредена апликација да го вклучува екранот. Ако е дозволено, апликацијата може да го вклучува екранот во секое време без ваша намера."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозволете одредена апликација да го вклучува екранот. Ако е дозволено, апликацијата ќе може да го вклучува екранот во секое време без ваша намера."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Да се прекине емитувањето на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ако емитувате на <xliff:g id="SWITCHAPP">%1$s</xliff:g> или го промените излезот, тековното емитување ќе запре"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Емитување на <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

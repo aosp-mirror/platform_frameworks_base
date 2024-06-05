@@ -52,7 +52,7 @@
     <string name="wifi_remembered" msgid="3266709779723179188">"सेव्ह केले"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"डिस्कनेक्ट केले"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"अक्षम"</string>
-    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉंफिगरेशन अयशस्वी"</string>
+    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉन्फिगरेशन अयशस्वी"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"प्रमाणीकरण समस्या"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"कनेक्ट करू शकत नाही"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'शी कनेक्‍ट करू शकत नाही"</string>
@@ -257,7 +257,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"बग रिपोर्ट शॉर्टकट"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"बग रिपोर्ट घेण्यासाठी पॉवर मेनूमध्ये एक बटण दर्शवा"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"सक्रिय रहा"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"चार्ज होत असताना स्क्रीन कधीही निष्क्रिय होणार नाही"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"चार्ज होत असताना स्क्रीन कधीही स्लीप मोडवर जाणार नाही"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ब्लूटूथ HCI स्नूप लॉग सुरू करा"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ब्लूटूथ पॅकेट कॅप्चर करा (हे सेटिंग बदलल्यानंतर ब्ल्यूटूथ टॉगल करा)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM अनलॉक करणे"</string>
@@ -510,7 +510,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"सिस्टम भाषा वापरा"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> साठी सेटिंग्ज उघडण्यात अयशस्वी"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"ही इनपुट पद्धत पासवर्ड आणि क्रेडिट कार्ड नंबर यासह, तुम्ही टाइप करता तो सर्व मजकूर संकलित करण्यात सक्षम होऊ शकते. ही <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ॲपवरून येते. ही इनपुट पद्धत वापरायची?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"टीप: रीबूट केल्यानंतर, तुम्ही तुमचा फोन अनलॉक करे पर्यंत हे अ‍ॅप सुरू होऊ शकत नाही"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"टीप: रीबूट केल्यानंतर, तुम्ही तुमचा फोन अनलॉक करेपर्यंत हे अ‍ॅप सुरू होऊ शकत नाही"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS नोंदणी स्थिती"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"नोंदवलेले"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"नोंदवलेले नाही"</string>

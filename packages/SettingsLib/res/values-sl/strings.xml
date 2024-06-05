@@ -114,7 +114,7 @@
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Dostop do kartice SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Zvok visoke kakovosti: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Zvok visoke kakovosti"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Slušni pripomočki"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Slušni aparati"</string>
     <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE zvok"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Povezava s slušnimi pripomočki je vzpostavljena"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Povezano s profilom LE Audio"</string>
@@ -347,7 +347,7 @@
     <string name="debug_input_category" msgid="7349460906970849771">"Vnos"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Risanje"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Upodabljanje s strojnim pospeševanjem"</string>
-    <string name="media_category" msgid="8122076702526144053">"Predstavnosti"</string>
+    <string name="media_category" msgid="8122076702526144053">"Predstavnost"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Spremljanje"</string>
     <string name="strict_mode" msgid="889864762140862437">"Strog način je omogočen"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"Osveži zaslon pri dolgih postopkih v glavni niti."</string>

@@ -24,7 +24,7 @@
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"Introduza o PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Introduza o padrão"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Desenhe o padrão"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Introduza a palavra-passe."</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Introduza a palavra-passe"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Introduza a palavra-passe"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Cartão inválido."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Carregada"</string>
@@ -61,7 +61,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN incorreto"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN errado. Tente de novo."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Ou desbloqueie com a impressão digital"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Impr. dig. não reconhecida"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Impressão digital não reconhecida"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Rosto não reconhecido"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Tente novamente ou introduza o PIN"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Tente novamente ou introduza a palavra-passe"</string>
@@ -112,9 +112,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Padrão necessário após reiniciar o dispositivo"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"PIN necessário após reiniciar o dispositivo"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Palavra-passe necessária após reiniciar dispositivo"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Para uma segurança adicional, use antes o padrão"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Para uma segurança adicional, use antes o PIN"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Para uma segurança adicional, use antes a palavra-passe"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Para segurança adicional, use o padrão"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Para segurança adicional, use o PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Para segurança adicional, use a palavra-passe"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispositivo bloqueado pelo gestor"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"O dispositivo foi bloqueado manualmente"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Não reconhecido."</string>

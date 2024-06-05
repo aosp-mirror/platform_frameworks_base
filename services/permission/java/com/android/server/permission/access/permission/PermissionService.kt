@@ -931,7 +931,7 @@ class PermissionService(
         isGranted: Boolean
     ) {
         val appOpPolicy = service.getSchemePolicy(UidUri.SCHEME, AppOpUri.SCHEME) as UidAppOpPolicy
-        val appOpName = AppOpsManager.permissionToOp(permissionName)
+        val appOpName = checkNotNull(AppOpsManager.permissionToOp(permissionName))
         val mode = if (isGranted) AppOpsManager.MODE_ALLOWED else AppOpsManager.MODE_ERRORED
         with(appOpPolicy) { setAppOpMode(packageState.appId, userId, appOpName, mode) }
     }
@@ -1889,7 +1889,7 @@ class PermissionService(
         packageName: String,
         appId: Int,
         packageState: PackageState,
-        androidPackage: AndroidPackage?,
+        androidPackage: AndroidPackage,
         sharedUserPkgs: List<AndroidPackage>,
         userId: Int
     ) {

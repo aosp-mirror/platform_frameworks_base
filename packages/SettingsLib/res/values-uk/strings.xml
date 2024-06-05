@@ -102,7 +102,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Активовано, лише лівий"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Активовано, лише правий"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Активовано, лівий і правий"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Звук медіа-файлів"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Звук медіафайлів"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Телефонні дзвінки"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Передавання файлів"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Пристрій введення"</string>
@@ -258,7 +258,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Показувати в меню живлення кнопку створення звіту про помилки"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Залишати активним"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Екран не засинатиме під час заряджання"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Журнал інтерфейсу Bluetooth"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Увімкнути журнал перехоплення даних інтерфейсу Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Отримання пакетів Bluetooth. (Змінивши це налаштування, увімкніть Bluetooth.)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Розблокування виробником"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Дозволити розблокування завантажувача"</string>
@@ -561,7 +561,7 @@
     <string name="help_label" msgid="3528360748637781274">"Довідка й відгуки"</string>
     <string name="storage_category" msgid="2287342585424631813">"Пам\'ять"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Спільні дані"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"Переглянути та змінити спільні дані"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Переглянути й змінити спільні дані"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Немає спільних даних для цього користувача."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Не вдалось отримати спільні дані. Повторіть спробу."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Ідентифікатор спільних даних: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
@@ -675,7 +675,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"За умовчанням"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Увімкнення екрана"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволити ввімкнення екрана"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозвольте додатку вмикати екран. Якщо ви надасте цей дозвіл, додаток зможе будь-коли вмикати екран пристрою навіть без вашого явного наміру."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Додатку буде дозволено вмикати екран. З таким дозволом додаток зможе будь-коли вмикати екран пристрою навіть без вашого явного наміру."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Зупинити трансляцію з додатка <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Якщо ви зміните додаток (<xliff:g id="SWITCHAPP">%1$s</xliff:g>) або аудіовихід, поточну трансляцію буде припинено"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Змінити додаток для трансляції на <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

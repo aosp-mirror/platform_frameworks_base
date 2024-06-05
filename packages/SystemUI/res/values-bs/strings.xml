@@ -103,9 +103,9 @@
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Dok snimate, Android ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Dok snimate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Pokreni snimanje"</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimi zvučni zapis"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimanje zvuka"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk na uređaju"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk s vašeg uređaja, naprimjer muzika, pozivi i melodije zvona"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk s vašeg uređaja, npr. muzika, pozivi i melodije zvona"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk na uređaju i mikrofon"</string>
     <string name="screenrecord_continue" msgid="4055347133700593164">"Pokreni"</string>
@@ -134,7 +134,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skeniranje lica"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Pošalji"</string>
     <string name="cancel" msgid="1089011503403416730">"Otkaži"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Potvrdite"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Potvrdi"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Pokušaj ponovo"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Dodirnite da otkažete autentifikaciju"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Pokušajte ponovo"</string>
@@ -147,7 +147,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Lice prepoznato. Pritisnite da nastavite."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Lice prepoznato. Pritisnite ikonu za otklj. da nastavite."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autentificirano"</string>
-    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Koristi PIN"</string>
+    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Koristite PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Koristi uzorak"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Koristi lozinku"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Pogrešan PIN kôd"</string>
@@ -209,8 +209,8 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Obavještenja sa sjenčenjem."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Brze postavke."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Brze postavke i lokacija za obavještenja."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Zaključan ekran."</string>
-    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Zaključan ekran radnog profila"</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Zaključani ekran."</string>
+    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Zaključani ekran radnog profila"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Zatvori"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"potpuna tišina"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"samo alarmi"</string>
@@ -536,7 +536,7 @@
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Ažuriranje"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Otključajte da koristite"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Došlo je do problema prilikom preuzimanja vaših kartica. Pokušajte ponovo kasnije"</string>
-    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Postavke zaključavanja ekrana"</string>
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Postavke zaključanog ekrana"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"Skener QR koda"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Ažuriranje"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Radni profil"</string>
@@ -558,7 +558,7 @@
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Uključi"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Kontrole obavještenja o napajanju"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Uključeno – na osnovu lica"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Uz kontrolu obavještenja o napajanju, možete postaviti nivo značaja obavještenja iz aplikacije, i to od nivoa 0 do 5. \n\n"<b>"Nivo 5"</b>" \n- Prikaži na vrhu liste obavještenja \n- Dopusti prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nvio 4"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nivo 3"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n\n"<b>"Nivo 2"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n\n"<b>"Nivo 1"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikada ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n- Sakrij sa ekrana za zaključavanje i statusne trake \n- Prikaži na dnu liste obavještenja \n\n"<b>"Nivo 0"</b>" \n- Blokiraj sva obavještenja iz aplikacije"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"Uz kontrolu obavještenja o napajanju, možete postaviti nivo značaja obavještenja iz aplikacije, i to od nivoa 0 do 5. \n\n"<b>"Nivo 5"</b>" \n- Prikaži na vrhu liste obavještenja \n- Dopusti prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nvio 4"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Uvijek izviruj \n\n"<b>"Nivo 3"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n\n"<b>"Nivo 2"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikad ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n\n"<b>"Nivo 1"</b>" \n- Spriječi prekid prikaza cijelog ekrana \n- Nikada ne izviruj \n- Nikada ne puštaj zvuk ili vibraciju \n- Sakrij sa zaključanog ekrana i statusne trake \n- Prikaži na dnu liste obavještenja \n\n"<b>"Nivo 0"</b>" \n- Blokiraj sva obavještenja iz aplikacije"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Gotovo"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Primijeni"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Isključi obavještenja"</string>
@@ -660,7 +660,7 @@
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Sakrivanje i (ponovno) prikazivanje trake zadataka"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"Pristup postavkama sistema"</string>
     <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Pristup Google Asistentu"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Zaključavanje ekrana"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Zaključani ekran"</string>
     <string name="group_system_quick_memo" msgid="2914234890158583919">"Preuzimanje aplikacije Bilješke za brzi podsjetnik"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitasking sistema"</string>
     <string name="system_multitasking_rhs" msgid="6593269428880305699">"Otvaranje podijeljenog ekrana s trenutnom aplikacijom na desnoj strani"</string>
@@ -1142,8 +1142,8 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Pređite na radni profil"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instalirajte poslovnu aplikaciju za telefon"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"Otkaži"</string>
-    <string name="lock_screen_settings" msgid="6152703934761402399">"Prilagodi zaključavanje ekrana"</string>
-    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Otključajte da prilagodite zaključavanje ekrana"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Prilagodi zaključani ekran"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Otključajte da prilagodite zaključani ekran"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"WiFi mreža nije dostupna"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera je blokirana"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera i mikrofon su blokirani"</string>

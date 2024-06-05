@@ -499,8 +499,8 @@
     <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"แอปนี้ถ่ายภาพและวิดีโอด้วยกล้องได้ทุกเมื่อ"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"อนุญาตให้แอปพลิเคชันหรือบริการเข้าถึงกล้องของระบบเพื่อถ่ายภาพและวิดีโอ"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"แอปของระบบหรือที่ได้รับสิทธิ์นี้จะถ่ายภาพและบันทึกวิดีโอโดยใช้กล้องของระบบได้ทุกเมื่อ แอปต้องมีสิทธิ์ android.permission.CAMERA ด้วย"</string>
-    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"อนุญาตให้แอปพลิเคชันหรือบริการได้รับโค้ดเรียกกลับเมื่อมีการเปิดหรือปิดอุปกรณ์กล้อง"</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"แอปนี้จะได้รับโค้ดเรียกกลับเมื่อมีการปิดหรือเปิดอุปกรณ์กล้อง (โดยแอปพลิเคชันที่เปิด)"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"อนุญาตให้แอปพลิเคชันหรือบริการได้รับ Callback เมื่อมีการเปิดหรือปิดอุปกรณ์กล้อง"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"แอปนี้จะได้รับ Callback เมื่อมีการปิดหรือเปิดอุปกรณ์กล้อง (โดยแอปพลิเคชันที่เปิด)"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ควบคุมการสั่นเตือน"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"อนุญาตให้แอปพลิเคชันควบคุมการสั่นเตือน"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"อนุญาตให้แอปเข้าถึงสถานะการสั่น"</string>
@@ -1270,12 +1270,12 @@
     <string name="new_app_action" msgid="547772182913269801">"เปิด <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1958903080400806644">"<xliff:g id="OLD_APP">%1$s</xliff:g> จะปิดโดยไม่บันทึก"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"<xliff:g id="PROC">%1$s</xliff:g> เกินขีดจำกัดของหน่วยความจำ"</string>
-    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"ฮีพดัมพ์ <xliff:g id="PROC">%1$s</xliff:g> พร้อมแล้ว"</string>
-    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"รวบรวมฮีพดัมพ์แล้ว แตะเพื่อแชร์"</string>
-    <string name="dump_heap_title" msgid="4367128917229233901">"แชร์ฮีพดัมพ์ไหม"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> ใช้หน่วยความจำเกินขีดจำกัดขนาด <xliff:g id="SIZE">%2$s</xliff:g> มีฮีพดัมพ์พร้อมให้แชร์กับนักพัฒนาซอฟต์แวร์ โปรดระวัง: ฮีพดัมพ์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งแอปพลิเคชันเข้าถึงได้"</string>
-    <string name="dump_heap_system_text" msgid="6805155514925350849">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> ใช้หน่วยความจำเกินขีดจำกัดขนาด <xliff:g id="SIZE">%2$s</xliff:g> มีฮีพดัมพ์พร้อมให้แชร์ โปรดระวัง: ฮีพดัมพ์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งกระบวนการดังกล่าวเข้าถึงได้ ซึ่งอาจรวมถึงข้อมูลต่างๆ ที่คุณพิมพ์ไว้"</string>
-    <string name="dump_heap_ready_text" msgid="5849618132123045516">"มีฮีพดัมพ์ของกระบวนการ <xliff:g id="PROC">%1$s</xliff:g> พร้อมให้แชร์ โปรดระวัง: ฮีพดัมพ์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งกระบวนการดังกล่าวเข้าถึงได้ ซึ่งอาจรวมถึงข้อมูลต่างๆ ที่คุณพิมพ์ไว้"</string>
+    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"ฮีปดัมป์ <xliff:g id="PROC">%1$s</xliff:g> พร้อมแล้ว"</string>
+    <string name="dump_heap_notification_detail" msgid="8431586843001054050">"รวบรวมฮีปดัมป์แล้ว แตะเพื่อแชร์"</string>
+    <string name="dump_heap_title" msgid="4367128917229233901">"แชร์ฮีปดัมป์ไหม"</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> ใช้หน่วยความจำเกินขีดจำกัดขนาด <xliff:g id="SIZE">%2$s</xliff:g> มีฮีปดัมป์พร้อมให้แชร์กับนักพัฒนาซอฟต์แวร์ โปรดระวัง: ฮีปดัมป์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งแอปพลิเคชันเข้าถึงได้"</string>
+    <string name="dump_heap_system_text" msgid="6805155514925350849">"กระบวนการ <xliff:g id="PROC">%1$s</xliff:g> ใช้หน่วยความจำเกินขีดจำกัดขนาด <xliff:g id="SIZE">%2$s</xliff:g> มีฮีปดัมป์พร้อมให้แชร์ โปรดระวัง: ฮีปดัมป์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งกระบวนการดังกล่าวเข้าถึงได้ ซึ่งอาจรวมถึงข้อมูลต่างๆ ที่คุณพิมพ์ไว้"</string>
+    <string name="dump_heap_ready_text" msgid="5849618132123045516">"มีฮีปดัมป์ของกระบวนการ <xliff:g id="PROC">%1$s</xliff:g> พร้อมให้แชร์ โปรดระวัง: ฮีปดัมป์นี้อาจมีข้อมูลส่วนบุคคลที่มีความละเอียดอ่อนซึ่งกระบวนการดังกล่าวเข้าถึงได้ ซึ่งอาจรวมถึงข้อมูลต่างๆ ที่คุณพิมพ์ไว้"</string>
     <string name="sendText" msgid="493003724401350724">"เลือกการทำงานกับข้อความ"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"ระดับความดังเสียงเรียกเข้า"</string>
     <string name="volume_music" msgid="7727274216734955095">"ระดับเสียงของสื่อ"</string>
@@ -1588,7 +1588,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="101888478915677895">"เกินปริมาณเน็ตมือถือที่กำหนดไว้"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="1622359254521960508">"เกินขีดจำกัดของข้อมูล Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"คุณใช้อินเทอร์เน็ตเกินไป <xliff:g id="SIZE">%s</xliff:g> จากปริมาณที่กำหนดไว้"</string>
-    <string name="data_usage_restricted_title" msgid="126711424380051268">"จำกัดอินเทอร์เน็ตที่ใช้งานอยู่เบื้องหลัง"</string>
+    <string name="data_usage_restricted_title" msgid="126711424380051268">"จำกัดข้อมูลในเบื้องหลัง"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"แตะเพื่อนำข้อจำกัดออก"</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"ปริมาณการใช้เน็ตมือถือสูง"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"แอปของคุณใช้อินเทอร์เน็ตมากกว่าปกติ"</string>
@@ -2150,7 +2150,7 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"การสนทนา"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"บทสนทนากลุ่ม"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"ส่วนตัว"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"ส่วนบุคคล"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"งาน"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"มุมมองส่วนตัว"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ดูงาน"</string>

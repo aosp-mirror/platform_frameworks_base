@@ -312,7 +312,7 @@
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"acceder a ficheiros no teu dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música e audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"acceder a música e audio do dispositivo"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"fotos e vídeos"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos e vídeos"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"acceder a fotos e vídeos do dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrófono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"gravar audio"</string>
@@ -329,7 +329,7 @@
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Sensores corporais"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"acceder aos datos dos sensores sobre as túas constantes vitais"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notificacións"</string>
-    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"mostra notificacións"</string>
+    <string name="permgroupdesc_notifications" msgid="4608679556801506580">"mostrar notificacións"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Recuperar contido da ventá"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspecciona o contido dunha ventá coa que estás interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Activar a exploración táctil"</string>
@@ -970,9 +970,9 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Correcto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Téntao de novo"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Téntao de novo"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbloquea para gozar todas as funcións e datos"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbloquear para gozar de todas as funcións e datos"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Superouse o número máximo de intentos de desbloqueo facial"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Non hai ningunha SIM"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Non hai SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Non hai ningunha SIM na tableta."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Non hai ningunha SIM no dispositivo Android TV."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Non hai ningunha SIM no teléfono."</string>
@@ -1932,7 +1932,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Sen clasificar"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Ti defines a importancia destas notificacións."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"É importante polas persoas involucradas."</string>
-    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notificación de aplicacións personalizada"</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notificación de aplicación personalizada"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Xa existe un usuario con esta conta)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Engadir usuario supervisado"</string>
@@ -1987,7 +1987,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Fixar a <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"Deixar de fixar"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Deixar de fixar a <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="app_info" msgid="6113278084877079851">"Información da aplicación"</string>
+    <string name="app_info" msgid="6113278084877079851">"Información da app"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Iniciando demostración…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Restablecendo dispositivo…"</string>

@@ -665,10 +665,10 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"কিবা ভুল হ’ল। পুনৰ চেষ্টা কৰক।"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ফিংগাৰপ্ৰিণ্ট আইকন"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ফেচ আনলক"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ফে’চ আনলক"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ফেচ আনলক ব্যৱহাৰ কৰোঁতে সমস্যা হৈছে"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"আপোনাৰ মুখাৱয়বৰ মডেলটো মচিবলৈ টিপক, তাৰ পাছত পুনৰ আপোনাৰ মুখাৱয়ব যোগ দিয়ক"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"ফেচ আনলক সুবিধাটো ছেট আপ কৰক"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"ফে’চ আনলক ছেট আপ কৰক"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"আপোনাৰ ফ’নটোলৈ চাই সেইটো আনলক কৰক"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ফেচ আনলক সুবিধাটো ব্যৱহাৰ কৰিবলৈ ছেটিং &gt; গোপনীয়তাত "<b>"কেমেৰাৰ এক্সেছ"</b>" অন কৰক"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"আনলক কৰাৰ অধিক উপায় ছেট আপ কৰক"</string>
@@ -1041,7 +1041,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"আনলক ক্ষেত্ৰ বিস্তাৰ কৰক।"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"শ্লাইডৰদ্বাৰা আনলক।"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"আৰ্হিৰদ্বাৰা আনলক।"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"ফেচ আনলক।"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"ফে’চ আনলক।"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"পিনৰদ্বাৰা আনলক।"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"ছিম পিন আনলক।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"ছিম পিইউকে আনলক।"</string>
@@ -1699,7 +1699,7 @@
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"আপোনাক সাধ্য সুবিধাৰ প্ৰয়োজনসমূহৰ জৰিয়তে সহায় কৰা এপ্‌সমূহৰ বাবে সম্পূর্ণ নিয়ন্ত্ৰণৰ সুবিধাটো সঠিক যদিও অধিকাংশ এপৰ বাবে এয়া সঠিক নহয়।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"চাওক আৰু স্ক্ৰীন নিয়ন্ত্ৰণ কৰক"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ই স্ক্ৰীনত থকা আটাইখিনি সমল পঢ়িব পাৰে আৰু অন্য এপ্‌সমূহৰ ওপৰত সমল প্ৰদর্শন কৰিব পাৰে।"</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"কার্যসমূহ চাওক আৰু কৰক"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"কার্যসমূহ চোৱা আৰু কৰা"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ই আপুনি কোনো এপ্ বা হার্ডৱেৰ ছেন্সৰৰ সৈতে কৰা ভাব-বিনিময় আৰু আপোনাৰ হৈ অন্য কোনো লোকে এপৰ সৈতে কৰা ভাব-বিনিময় ট্ৰেক কৰিব পাৰে।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"অনুমতি দিয়ক"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"অস্বীকাৰ কৰক"</string>
@@ -1894,7 +1894,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ডাউনটাইম"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"কাৰ্য-দিনৰ নিশা"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"সপ্তাহ অন্ত"</string>
-    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"কার্যক্ৰম"</string>
+    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"অনুষ্ঠান"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"নিদ্ৰাৰত"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>এ কিছুমান ধ্বনি মিউট কৰি আছে"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"আপোনাৰ ডিভাইচত এটা আভ্যন্তৰীণ সমস্যা আছে আৰু আপুনি ফেক্টৰী ডেটা ৰিছেট নকৰালৈকে ই সুস্থিৰভাৱে কাম নকৰিব পাৰে।"</string>
@@ -1939,7 +1939,7 @@
     <string name="language_selection_title" msgid="52674936078683285">"ভাষা যোগ কৰক"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"অঞ্চলৰ অগ্ৰাধিকাৰ"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ভাষাৰ নাম লিখক"</string>
-    <string name="language_picker_section_suggested" msgid="6556199184638990447">"প্ৰস্তাৱিত"</string>
+    <string name="language_picker_section_suggested" msgid="6556199184638990447">"পৰামৰ্শিত"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"পৰামৰ্শিত"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"পৰামৰ্শিত ভাষাসমূহ"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"চুপাৰিছ কৰা অঞ্চলসমূহ"</string>
@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"কীব’ৰ্ডৰ লে’আউট <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> হিচাপে ছেট কৰা হৈছে… সলনি কৰিবলৈ টিপক।"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ভৌতিক কীব’ৰ্ড কনফিগাৰ কৰা হৈছে"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"কীব’ৰ্ড চাবলৈ টিপক"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"ব্যক্তিগত"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"প্ৰাইভেট"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"ক্ল’ন"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"কৰ্মস্থান"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"কৰ্মস্থান ২"</string>

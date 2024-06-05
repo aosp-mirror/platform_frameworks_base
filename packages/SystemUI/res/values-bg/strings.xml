@@ -104,10 +104,10 @@
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Докато записвате дадено приложение, Android има достъп до всичко, което се показва или възпроизвежда в него. Затова бъдете внимателни с неща като пароли, подробности за начини на плащане, съобщения, снимки, аудио и видео."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Стартиране на записването"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Записване на звук"</string>
-    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Аудио от устройството"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Звук от устройството"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук от устройството ви, като например музика, обаждания и мелодии"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Микрофон"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Аудио от устройството и микрофона"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Звук от устройството и микрофона"</string>
     <string name="screenrecord_continue" msgid="4055347133700593164">"Стартиране"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Екранът се записва"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Екранът и аудиото се записват"</string>

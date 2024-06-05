@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Peru"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Laiteparin muodostaminen mahdollistaa yhteystietojen ja soittohistorian käyttämisen yhteyden aikana."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Laiteparin muodostaminen laitteeseen <xliff:g id="DEVICE_NAME">%1$s</xliff:g> epäonnistui."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Laiteparia (<xliff:g id="DEVICE_NAME">%1$s</xliff:g>) ei voitu muodostaa, koska PIN tai avain oli väärä."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Laiteparia (<xliff:g id="DEVICE_NAME">%1$s</xliff:g>) ei voitu muodostaa, koska PIN tai avainkoodi oli väärä."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Ei yhteyttä laitteeseen <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Laite <xliff:g id="DEVICE_NAME">%1$s</xliff:g> torjui laitepariyhteyden."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Tietokone"</string>
@@ -186,7 +186,7 @@
     <string name="tts_play_example_title" msgid="1599468547216481684">"Kuuntele esimerkki"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"Toista lyhyt esittely puhesynteesistä"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"Asenna äänidata"</string>
-    <string name="tts_install_data_summary" msgid="3608874324992243851">"Asenna puhesynteesiin tarvittavat äänitiedot"</string>
+    <string name="tts_install_data_summary" msgid="3608874324992243851">"Asenna puhesynteesiin tarvittava äänidata"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Tämä puhesynteesimoottori saattaa kerätä kaiken puhutun tekstin, mukaan lukien henkilökohtaiset tiedot kuten salasanat ja luottokorttinumerot. Se on lähtöisin moottorista <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Haluatko ottaa tämän puhesynteesimoottorin käyttöön?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"Tämä kieli vaatii verkkoyhteyden, jotta tekstistä puheeksi muuntaminen toimii."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"Tämä on esimerkki puhesynteesistä."</string>
@@ -531,7 +531,7 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Anna sovelluksen lisätä herätyksiä ja ajoittaa kiireellisiä tapahtumia. Näin sovellus voi toimia taustalla, mikä voi kuluttaa enemmän virtaa.\n\nIlman tätä lupaa sovelluksen ajoittamat herätykset ja aikaan perustuvat tapahtumat eivät toimi."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ajoitus, herätys, muistutus, kello"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ota käyttöön"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Ota Älä häiritse ‑tila käyttöön"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Laita Älä häiritse ‑tila päälle"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Ei koskaan"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Vain tärkeät"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -558,7 +558,7 @@
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Mediaa ei voi toistaa tällä"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Yhteysvirhe. Sammuta laite ja käynnistä se uudelleen."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Langallinen äänilaite"</string>
-    <string name="help_label" msgid="3528360748637781274">"Ohje ja palaute"</string>
+    <string name="help_label" msgid="3528360748637781274">"Ohjeet ja palaute"</string>
     <string name="storage_category" msgid="2287342585424631813">"Tallennustila"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Jaettu data"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Katso ja muokkaa jaettua dataa"</string>
@@ -579,7 +579,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Rajoitettu profiili"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Lisätäänkö uusi käyttäjä?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Voit jakaa tämän laitteen muiden kanssa luomalla lisää käyttäjiä. Kullakin käyttäjällä on oma tilansa, jota he voivat muokata esimerkiksi omilla sovelluksilla ja taustakuvilla. Käyttäjät voivat myös muokata laiteasetuksia, kuten Wi‑Fi-asetuksia, jotka vaikuttavat laitteen kaikkiin käyttäjiin.\n\nKun lisäät uuden käyttäjän, hänen tulee määrittää oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää muiden käyttäjien sovelluksia. Saavutettavuusominaisuuksia tai ‑palveluita ei välttämättä siirretä uudelle käyttäjälle."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Kun lisäät uuden käyttäjän, hänen tulee määrittää oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää sovelluksia muille käyttäjille."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Kun lisäät uuden käyttäjän, hänen tulee valita oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää sovelluksia muille käyttäjille."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Tehdäänkö tästä käyttäjästä järjestelmänvalvoja?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Järjestelmänvalvojilla on enemmän oikeuksia kuin muilla. Järjestelmänvalvoja voi hallinnoida kaikkia käyttäjiä, päivittää tai nollata tämän laitteen, muokata asetuksia, nähdä asennetut sovellukset ja antaa tai peruuttaa järjestelmänvalvojan oikeudet muilta."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Muuta järjestelmänvalvojaksi"</string>
@@ -674,8 +674,8 @@
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Valitse näppäimistöasettelu"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Oletus"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Näytön käynnistys"</string>
-    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Salli näytön käynnistäminen"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Salli sovelluksen käynnistää näyttö. Jos sovellus saa luvan, se voi käynnistää näytön itsenäisesti milloin tahansa."</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Salli näytön laittaminen päälle"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Salli sovelluksen laittaa näyttö päälle. Jos sovellus saa luvan, se voi laittaa näytön päälle itsenäisesti milloin tahansa."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Lopetetaanko <xliff:g id="APP_NAME">%1$s</xliff:g>-sovelluksen lähettäminen?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Jos lähetät <xliff:g id="SWITCHAPP">%1$s</xliff:g>-sovellusta tai muutat ulostuloa, nykyinen lähetyksesi loppuu"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Lähetä <xliff:g id="SWITCHAPP">%1$s</xliff:g>-sovellusta"</string>

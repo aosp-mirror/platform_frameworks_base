@@ -805,20 +805,20 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ovládání délky a znaků povolených v heslech a kódech PIN zámku obrazovky."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Sledovat pokusy o odemknutí obrazovky"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout tablet nebo vymazat z tabletu všechna data, pokud bylo zadáno příliš mnoho nesprávných hesel."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitoruje se počet nesprávných hesel zadaných při odemykání obrazovky, a pokud bylo zadáno příliš mnoho nesprávných hesel, tablet se uzamkne nebo se z něj vymažou všechna data."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud jich bude zadáno příliš mnoho, uzamknout zařízení Android TV nebo z něj vymazat všechna data."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitorovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout informační a zábavní systém nebo vymazat veškerá data v informačním a zábavním systému, pokud je zadáno příliš mnoho nesprávných hesel."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout telefon nebo vymazat z telefonu všechna data, pokud bylo zadáno příliš mnoho nesprávných hesel."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Sleduje počet nesprávných hesel zadaných při odemykání obrazovky a uzamkne telefon nebo vymaže z telefonu všechna data, pokud bylo zadáno příliš mnoho nesprávných hesel."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitorovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud je zadáno příliš mnoho nesprávných hesel, uzamknout tablet nebo vymazat veškerá data uživatele."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud jich bude zadáno příliš mnoho, uzamknout zařízení Android TV nebo z něj vymazat všechna data tohoto uživatele."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Monitorovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud je zadáno příliš mnoho nesprávných hesel, uzamknout informační a zábavní systém nebo vymazat veškerá data profilu."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitorovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud je zadáno příliš mnoho nesprávných hesel, uzamknout telefon nebo vymazat veškerá data uživatele."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitoruje počet nesprávných hesel zadaných při odemykání obrazovky, a pokud je zadáno příliš mnoho nesprávných hesel, uzamkne telefon nebo vymaže veškerá data uživatele."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Změnit zámek obrazovky"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Změní se zámek obrazovky."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Uzamknout obrazovku"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Určíte, jak a kdy se obrazovka uzamkne."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Vymazat všechna data"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Bez upozornění smazat všechna data tabletu obnovením továrních dat."</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Mazat všechna data"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Bez upozornění se smažou všechna data tabletu obnovením továrních dat."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Provést obnovení továrních dat a bez upozornění tím vymazat data v zařízení Android TV."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Bez upozornění se smažou všechna data informačního a zábavního systému obnovením továrních dat."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Bez upozornění se smažou všechna data telefonu obnovením továrních dat."</string>
@@ -1604,7 +1604,7 @@
     <string name="issued_by" msgid="7872459822431585684">"Vydal:"</string>
     <string name="validity_period" msgid="1717724283033175968">"Platnost:"</string>
     <string name="issued_on" msgid="5855489688152497307">"Datum vydání:"</string>
-    <string name="expires_on" msgid="1623640879705103121">"Platnost vyprší:"</string>
+    <string name="expires_on" msgid="1623640879705103121">"Platnost skončí:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Sériové číslo:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Digitální otisky:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"Digitální otisk SHA-256"</string>
@@ -1700,9 +1700,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Chcete službě <xliff:g id="SERVICE">%1$s</xliff:g> povolit plnou kontrolu nad vaším zařízením?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Plná kontrola je vhodná u aplikací, které vám pomáhají s usnadněním přístupu. U většiny aplikací však vhodná není."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Zobrazení a ovládání obrazovky"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Služba může číst veškerý obsah obrazovky a zobrazovat ho přes ostatní aplikace."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Služba může číst veškerý obsah obrazovky a zobrazovat ho přes ostatní aplikace."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Zobrazení a provádění akcí"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Služba může sledovat vaše interakce s aplikací nebo hardwarovým senzorem a komunikovat s aplikacemi namísto vás."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Služba může sledovat vaše interakce s aplikací nebo hardwarovým senzorem a komunikovat s aplikacemi za vás."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Povolit"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Zakázat"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Chcete-li některou funkci začít používat, klepněte na ni:"</string>
@@ -1716,7 +1716,7 @@
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"Převrácení barev"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Korekce barev"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Režim jedné ruky"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Velmi tmavé"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Velmi tmavé zobrazení"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Naslouchátka"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Byla podržena tlačítka hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je zapnutá."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Byla podržena tlačítka hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> byla vypnuta."</string>
@@ -1874,7 +1874,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Spořič baterie zapíná tmavý motiv a omezuje či vypíná aktivitu na pozadí, některé vizuální efekty, některé funkce a připojení k některým sítím."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Spořič baterie zapíná tmavý motiv a omezuje či vypíná aktivitu na pozadí, některé vizuální efekty, některé funkce a připojení k některým sítím."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"S cílem snížit spotřebu dat brání spořič dat některým aplikacím odesílat nebo přijímat data na pozadí. Aplikace, kterou právě používáte, data přenášet může, ale může tak činit méně často. V důsledku toho se například obrázky nemusejí zobrazit, dokud na ně neklepnete."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"S cílem snížit spotřebu dat brání spořič dat některým aplikacím odesílat nebo přijímat data na pozadí. Aplikace, kterou právě používáte, sice data využívat může, ale méně často. Může to například znamenat, že obrázky se zobrazí, až na ně klepnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Chcete zapnout Spořič dat?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Zapnout"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Na jednu minutu (do {formattedTime})}few{Na # minuty (do {formattedTime})}many{Na # minuty (do {formattedTime})}other{Na # minut (do {formattedTime})}}"</string>
@@ -1940,7 +1940,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Přidat dozorovaného uživatele"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Přidat jazyk"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferovaná oblast"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Zadejte název jazyka"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Zadejte jazyk"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Navrhované"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Navrženo"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Navrhované jazyky"</string>
@@ -2341,9 +2341,9 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Rozložení klávesnice je nastaveno na <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Klepnutím jej změníte."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fyzické klávesnice byly nakonfigurovány"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Klepnutím zobrazíte klávesnice"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Soukromé"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Soukromý"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Klonovat"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"Práce"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Pracovní"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Práce 2"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"Práce 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>

@@ -165,7 +165,11 @@ constructor(
                     now.isBefore(Instant.ofEpochMilli(t.expiryTimeMillis))
         }
         if (weatherTarget != null) {
-            val weatherData = WeatherData.fromBundle(weatherTarget.baseAction.extras)
+            val weatherData = weatherTarget.baseAction?.extras?.let { extras ->
+                WeatherData.fromBundle(
+                    extras,
+                )
+	    }
             if (weatherData != null) {
                 keyguardUpdateMonitor.sendWeatherData(weatherData)
             }

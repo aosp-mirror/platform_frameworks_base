@@ -23,12 +23,12 @@
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"आफ्नो PIN हाल्नुहोस्"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"PIN हाल्नुहोस्"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"प्याटर्न हाल्नुहोस्"</string>
-    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"प्याटर्न कोर्नुहोस्"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"पासवर्ड हाल्नुहोस्…"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"प्याटर्न हाल्नुहोस्"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"पासवर्ड हाल्नुहोस्"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"पासवर्ड हाल्नुहोस्"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"अमान्य कार्ड।"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"चार्ज भयो"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • तारविनै चार्ज गर्दै"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वायरलेस तरिकाले चार्ज गरिँदै छ"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज हुँदै छ"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज गरिँदै"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • द्रुत गतिमा चार्ज गरिँदै छ"</string>
@@ -61,11 +61,11 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"गलत PIN"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN मिलेन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"वा फिंगरप्रिन्ट प्रयोग गरी अनलक गर्नुहोस्"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"फिंगरप्रिन्ट पहिचान गर्न सकिएन"</string>
-    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"अनुहार पहिचान गर्न सकिएन"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"फिंगरप्रिन्ट मिलेन"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"अनुहार मिलेन"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"फेरि प्रयास गर्नुहोस् वा PIN हाल्नुहोस्"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"फेरि प्रयास गर्नुहोस् वा पासवर्ड हाल्नुहोस्"</string>
-    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"फेरि प्रयास गर्नुहोस् वा प्याटर्न कोर्नुहोस्"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"फेरि प्रयास गर्नुहोस् वा प्याटर्न हाल्नुहोस्"</string>
     <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"अत्यन्तै धेरै पटक प्रयास गरिसकेपछि PIN हाल्नु पर्ने हुन्छ"</string>
     <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"अत्यन्तै धेरै पटक प्रयास गरिसकेपछि पासवर्ड हाल्नु पर्ने हुन्छ"</string>
     <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"अत्यन्तै धेरै पटक प्रयास गरिसकेपछि प्याटर्न कोर्नु पर्ने हुन्छ"</string>
@@ -112,9 +112,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"डिभाइस रिस्टार्ट भएपछि प्याटर्न कोर्नु पर्ने हुन्छ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"डिभाइस रिस्टार्ट भएपछि PIN हाल्नु पर्ने हुन्छ"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"डिभाइस रिस्टार्ट भएपछि पासवर्ड हाल्नु पर्ने हुन्छ"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"अतिरिक्त सुरक्षाका लागि यो प्रमाणीकरण विधिको साटो प्याटर्न प्रयोग गर्नुहोस्"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"अतिरिक्त सुरक्षाका लागि यो प्रमाणीकरण विधिको साटो पिन प्रयोग गर्नुहोस्"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"अतिरिक्त सुरक्षाका लागि यो प्रमाणीकरण विधिको साटो पासवर्ड प्रयोग गर्नुहोस्"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"अतिरिक्त सुरक्षाका लागि यसको साटो पासवर्ड प्रयोग गर्नुहोस्"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"अतिरिक्त सुरक्षाका लागि यसको साटो पासवर्ड प्रयोग गर्नुहोस्"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"अतिरिक्त सुरक्षाका लागि यसको साटो पासवर्ड प्रयोग गर्नुहोस्"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"प्रशासकले यन्त्रलाई लक गर्नुभएको छ"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"यन्त्रलाई म्यानुअल तरिकाले लक गरिएको थियो"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"पहिचान भएन"</string>
@@ -127,8 +127,8 @@
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"आफ्नो डिभाइस अनलक गरी जारी राख्नुहोस्"</string>
     <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"पछि अपडेट इन्स्टल गर्न PIN हाल्नुहोस्"</string>
     <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"पछि अपडेट इन्स्टल गर्न पासवर्ड हाल्नुहोस्"</string>
-    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"पछि अपडेट इन्स्टल गर्न प्याटर्न बनाउनुहोस्"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"पछि अपडेट इन्स्टल गर्न प्याटर्न हाल्नुहोस्"</string>
     <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"डिभाइस अपडेट गरिएको छ। जारी राख्न PIN हाल्नुहोस्।"</string>
     <string name="kg_prompt_after_update_password" msgid="153703052501352094">"डिभाइस अपडेट गरिएको छ। जारी राख्न पासवर्ड हाल्नुहोस्।"</string>
-    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"डिभाइस अपडेट गरिएको छ। जारी राख्न प्याटर्न बनाउनुहोस्।"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"डिभाइस अपडेट गरिएको छ। जारी राख्न प्याटर्न हाल्नुहोस्।"</string>
 </resources>

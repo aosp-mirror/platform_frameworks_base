@@ -263,7 +263,7 @@
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM бөгөттөн чыгаруу"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Кайра жүктөгүчтү бөгөттөн чыгарууга уруксат берүү"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM бөгөттөн чыгарууга уруксатпы?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ЭСКЕРТҮҮ: Бул жөндөө күйгүзүлүп турганда түзмөктү коргоо өзгөчөлүктөрү иштебейт."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ЭСКЕРТҮҮ: Бул параметр күйгүзүлүп турганда түзмөктү коргоо өзгөчөлүктөрү иштебейт."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Жалган жайгашкан жерлерди көрсөткөн колдонмону тандоо"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Жалган жайгашкан жерлерди көрсөткөн колдонмо жок"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Жалган жайгашкан жерлерди көрсөткөн колдонмо: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -310,7 +310,7 @@
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Каттоо буфери үчүн Каттагычтын көлөмүн тандаңыз"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Таржымалдын туруктуу диски тазалансынбы?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Туруктуу таржымалга көз салууну токтотсок, анын түзмөктө сакталган дайындарын жок кылууга аргасыз болобуз."</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"Журналдагы маалымат түзмөккө сакталсын"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"Журналдагы нерселерди түзмөккө сактоо"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Түзмөккө туруктуу сактоо үчүн таржымал буферлерин тандаңыз"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"USB конфигурациясын тандоо"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB конфигурациясын тандоо"</string>
@@ -367,7 +367,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Аномалияга окшошуу"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL трейстерин иштетүү"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Аудиону өткөрүүнү өчүрүү (USB)"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Тышкы USB аудио жабдыктарына авто өткөрүү өчрлт"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Тышкы USB түзмөктөргө автоматтык түрдө өтпөйт"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Элементтрдн чектрин көрст"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Кесилген нерсенин чектери жана жээктери көрүнөт"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Интерфейсти чагылдыруу"</string>
@@ -545,7 +545,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Жаңы эле"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ушул телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ушул планшет"</string>
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Док бекети үчүн динамик"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Док бекеттин динамиги"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Тышкы түзмөк"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Туташкан түзмөк"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ушул телефон"</string>
@@ -605,12 +605,12 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Конок кошуу"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Конокту өчүрүү"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Конок сеансын баштапкы абалга келтирүү"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Конок сеансын баштапкы абалга келтиресизби?"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Конок сеансын кайра коёсузбу?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Конокту өчүрөсүзбү?"</string>
-    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Баштапкы абалга келтирүү"</string>
+    <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Ооба"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Өчүрүү"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Конок сеансы баштапкы абалга келтирилүүдө…"</string>
-    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Конок сеансын баштапкы абалга келтиресизби?"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Конок сеансын кайра коёсузбу?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Бул аракет жаңы конок сеансын баштап, учурдагы сеанстагы бардык колдонмолорду жана алардагы нерселерди жок кылат"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Конок режиминен чыгасызбы?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Учурдагы конок сеансындагы бардык колдонмолор менен алардагы нерселер өчүп калат"</string>

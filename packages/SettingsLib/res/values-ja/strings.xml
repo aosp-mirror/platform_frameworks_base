@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"キャンセル"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"ペア設定により、接続時に連絡先や通話履歴へのアクセスが許可されます。"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>をペアに設定できません。"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PINまたはパスキーが正しくないため、<xliff:g id="DEVICE_NAME">%1$s</xliff:g>をペアに設定できませんでした。"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN またはパスキーが正しくないため、<xliff:g id="DEVICE_NAME">%1$s</xliff:g> をペアに設定できませんでした。"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>と通信できません。"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"ペア設定が<xliff:g id="DEVICE_NAME">%1$s</xliff:g>に拒否されました。"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"コンピュータ"</string>
@@ -250,7 +250,7 @@
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"デバイスをペア設定しています…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"デバイスをペア設定できませんでした。QR コードが間違っているか、デバイスが同じネットワークに接続されていません。"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP アドレスとポート"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR コードのスキャン"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR コードをスキャン"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR コードをスキャンして Wi-Fi 経由でデバイスをペア設定します"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi ネットワークに接続してください"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, デバッグ, dev"</string>
@@ -630,9 +630,9 @@
     <string name="user_image_take_photo" msgid="467512954561638530">"写真を撮る"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"画像を選択"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"写真を選択"</string>
-    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"間違えた回数が上限を超えました。このデバイスのデータが削除されます。"</string>
-    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"間違えた回数が上限を超えました。このユーザーが削除されます。"</string>
-    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"間違えた回数が上限を超えました。この仕事用プロファイルと関連データが削除されます。"</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"試行回数が上限に達しました。このデバイスのデータが削除されます。"</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"試行回数が上限に達しました。このユーザーが削除されます。"</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"試行回数が上限に達しました。この仕事用プロファイルと関連データが削除されます。"</string>
     <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"閉じる"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"デバイスのデフォルト"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"無効"</string>

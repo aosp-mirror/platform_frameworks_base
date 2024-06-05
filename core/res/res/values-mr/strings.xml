@@ -438,7 +438,7 @@
     <string name="permlab_getPackageSize" msgid="375391550792886641">"अ‍ॅप संचयन स्थान मोजा"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"अ‍ॅप ला त्याचा कोड, डेटा आणि कॅशे    आकार पुनर्प्राप्त करण्यासाठी अनुमती देते"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"सिस्टीम सेटिंग्ज सुधारित करा"</string>
-    <string name="permdesc_writeSettings" msgid="8293047411196067188">"सिस्टीमचा सेटिंग्ज डेटा सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स आपल्या सिस्टीमचे कॉंफिगरेशन दूषित करू शकतात."</string>
+    <string name="permdesc_writeSettings" msgid="8293047411196067188">"सिस्टीमचा सेटिंग्ज डेटा सुधारित करण्यासाठी अ‍ॅपला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स तुमच्या सिस्टीमचे कॉन्फिगरेशन दूषित करू शकतात."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"सुरूवातीस चालवा"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"जसे सिस्टम बूट करणे समाप्त करते तसे अ‍ॅप ला स्वतः सुरू करण्यास अनुमती देते. यामुळे टॅबलेट सुरू करण्यास वेळ लागू शकतो आणि नेहमी सुरू राहून एकंदर टॅबलेटला धीमे करण्यास अ‍ॅप ला अनुमती देते."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"सिस्टम बूट होणे संपल्यावर ॲपला स्वतः सुरू होण्याची अनुमती देते. यामुळे तुमच्या Android TV डिव्हाइसला सुरू होण्यास वेळ लागू शकतो आणि नेहमी सुरू राहून एकंदर डिव्हाइसलाच धीमे करण्याची अनुमती ॲपला देते."</string>
@@ -563,9 +563,9 @@
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"फक्त तुमच्या Android TV डिव्हाइसलाच नाही, तर मल्टिकास्ट पत्ते वापरून एका वाय-फाय नेटवर्कवरील सर्व डिव्हाइसवर पाठविलेली पॅकेट प्राप्त करण्यासाठी ॲपला अनुमती देते. हे मल्टिकास्ट मोड नसताना वापरल्या जाणाऱ्या ऊर्जेपेक्षा अधिक उर्जा वापरते."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"मल्टिकास्ट पत्ते वापरून फक्त तुमच्या फोनवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डीव्हाइसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अ‍ॅप ला अनुमती देते. हे मल्टिकास्टखेरिज इतर मोडसाठी अधिक पॉवर वापरते."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"ब्लूटूथ सेटिंग्ज अ‍ॅक्सेस करा"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"स्थानिक ब्लूटूथ टॅबलेट कॉंफिगर करण्याकरिता आणि दूरस्थ डिव्हाइस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अ‍ॅप ला अनुमती देते."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"तुमच्या Android TV डिव्हाइसवर ब्लूटूथ कॉंफिगर करण्याकरिता आणि पेअर केलेली आणि रीमोट डिव्हाइस शोधण्यासाठी ॲपला अनुमती देते."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"स्थानिक ब्लूटूथ फोन कॉंफिगर करण्याकरिता आणि दूरस्थ डिव्हाइस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अ‍ॅप ला अनुमती देते."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"स्थानिक ब्लूटूथ टॅबलेट कॉन्फिगर करण्याकरिता आणि दूरस्थ डिव्हाइस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अ‍ॅप ला अनुमती देते."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"तुमच्या Android TV डिव्हाइसवर ब्लूटूथ कॉन्फिगर करण्याकरिता आणि पेअर केलेली आणि रीमोट डिव्हाइस शोधण्यासाठी ॲपला अनुमती देते."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"स्थानिक ब्लूटूथ फोन कॉन्फिगर करण्याकरिता आणि दूरस्थ डिव्हाइस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_accessWimaxState" msgid="7029563339012437434">"WiMAX कनेक्ट करा आणि त्यावरून डिस्कनेक्ट करा"</string>
     <string name="permdesc_accessWimaxState" msgid="5372734776802067708">"WiMAX सक्षम केले आहे किंवा नाही आणि कनेक्ट केलेल्या कोणत्याही WiMAX नेटवर्क विषयीची माहिती निर्धारित करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_changeWimaxState" msgid="6223305780806267462">"WiMAX स्थिती बदला"</string>
@@ -573,9 +573,9 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"ॲपला तुमच्या Android TV डिव्हाइसशी कनेक्ट करण्याची आणि तुमचे Android TV डिव्हाइस WiMAX नेटवर्कवरून डिस्कनेक्ट करण्याची परवानगी देते."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"WiMAX नेटवर्कवर फोन कनेक्ट करण्यास आणि त्यावरून फोन डिस्कनेक्ट करण्यास अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_bluetooth" msgid="586333280736937209">"ब्लूटूथ डीव्हाइससह जोडा"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"टॅबलेटवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन इंस्टॉल करण्यासाठी आणि स्वीकारण्यासाठी, अ‍ॅप ला अनुमती देते."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Android TV डिव्हाइसवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन तयार करण्यासाठी आणि स्वीकारण्यासाठी, ॲपला अनुमती देते."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"फोनवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन इंस्टॉल करण्यासाठी आणि स्वीकारण्यासाठी, अ‍ॅप ला अनुमती देते."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"टॅबलेटवर ब्लूटूथचे कॉन्फिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डिव्हाइससह कनेक्शन इंस्टॉल करण्यासाठी आणि स्वीकारण्यासाठी, अ‍ॅपला अनुमती देते."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Android TV डिव्हाइसवर ब्लूटूथ चे कॉन्फिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डिव्हाइससह कनेक्शन तयार करण्यासाठी आणि स्वीकारण्यासाठी, अ‍ॅपला अनुमती देते."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"फोनवर ब्लूटूथचे कॉन्फिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डिव्हाइससह कनेक्शन इंस्टॉल करण्यासाठी आणि स्वीकारण्यासाठी, अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"जवळपासची ब्लूटूथ डिव्‍हाइस शोधा आणि ती पेअर करा"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"ॲपला जवळपासची ब्लूटूथ डिव्‍हाइस शोधण्यासाठी आणि ती पेअर करण्यासाठी अनुमती देते"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"पेअर केलेल्या ब्लूटूथ डिव्‍हाइसशी कनेक्ट करा"</string>
@@ -594,7 +594,7 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"कीलॉक आणि कोणतीही संबद्ध पासवर्ड सुरक्षितता अक्षम करण्यासाठी अ‍ॅप ला अनुमती देते. उदाहरणार्थ, येणारा फोन कॉल प्राप्त करताना फोन कीलॉक अक्षम करतो, नंतर जेव्हा कॉल समाप्त होतो तेव्हा तो कीलॉक पुन्हा-सक्षम करतो."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"स्क्रीन लॉक क्लिष्टतेची विनंती करा"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"अ‍ॅपला स्क्रीन लॉक क्लिष्टता पातळी (उच्च, मध्यम, खालची किंवा काहीही नाही) जाणून घेऊ देते, जी लांबीची संभाव्य रेंज आणि स्क्रीन लॉकचा प्रकार सूचित करते. अ‍ॅप वापरकर्त्यांना असेदेखील सुचवू शकते की त्यांनी स्क्रीन लॉक ठरावीक पातळीपर्यंत अपडेट करावे, परंतु वापरकर्ते त्याकडे मोकळेपणाने दुर्लक्ष करू शकतात आणि तेथून नेव्हिगेट करू शकतात. स्क्रीन लॉक प्लेनटेक्स्टमध्ये स्टोअर केले जात नसल्यामुळे अ‍ॅपला नेमका पासवर्ड माहीत नसतो याची नोंद घ्या."</string>
-    <string name="permlab_postNotification" msgid="4875401198597803658">"सूचना दाखवा"</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"नोटिफिकेशन दाखवा"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"ॲपला सूचना दाखवू देते"</string>
     <string name="permlab_turnScreenOn" msgid="219344053664171492">"स्क्रीन सुरू करा"</string>
     <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"अ‍ॅपला स्क्रीन सुरू करण्याची परवानगी देते."</string>
@@ -642,7 +642,7 @@
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिंट ओळखली नाही"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिंट ऑथेंटिकेट केली आहे"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
-    <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म प्रेस करा"</string>
+    <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कन्फर्म प्रेस करा"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"फिंगरप्रिंट हार्डवेअर उपलब्‍ध नाही."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"फिंगरप्रिंट सेट करता आली नाही"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"फिंगरप्रिंट सेट करण्याची वेळ संपली आहे. पुन्हा प्रयत्न करा."</string>
@@ -773,7 +773,7 @@
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"स्‍वप्न सेवेवर प्रतिबद्ध करा"</string>
     <string name="permdesc_bindDreamService" msgid="9129615743300572973">"होल्‍डरला स्‍वप्नसेवेच्या शीर्ष-स्‍तराच्या इंटरफेसशी प्रतिबद्ध करण्‍यास अनुमती देते. सामान्‍य अ‍ॅप्‍सकरिता कधीही आवश्‍यक नसते."</string>
     <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"वाहकाद्वारे-प्रदान केलेल्‍या कॉन्‍फिगरेशन अ‍ॅपची विनंती करा"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"होल्‍डरला वाहकद्वारे-प्रदान केलेल्या कॉंफिगरेशन अ‍ॅपची विनंती करण्‍याची अनुमती देते. सामान्‍य अ‍ॅप्‍ससाठी कधीही आवश्‍यक नसावे."</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"होल्‍डरला वाहकाद्वारे दिलेल्या कॉन्फिगरेशन अ‍ॅपची विनंती करण्‍याची अनुमती देते. सामान्‍य अ‍ॅप्‍ससाठी कधीही आवश्‍यक नसावे."</string>
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"नेटवर्क स्‍थितींवरील निरीक्षणांसाठी ऐका"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"अनु्प्रयोगाला नेटवर्क स्‍थितींवरील निरीक्षणे ऐकण्‍यासाठी अनुमती देते. सामान्‍य अ‍ॅप्‍ससाठी कधीही आवश्‍यक नसावे."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"इनपुट डिव्हाइस कॅलिब्रेशन बदला"</string>
@@ -789,7 +789,7 @@
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"वाहक सेवांवर प्रतिबद्ध करा"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"वाहक सेवांवर प्रतिबद्ध करण्यासाठी होल्डरला अनुमती देते. सामान्य ॲप्ससाठी कधीही आवश्यकता नसावी."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"व्यत्यय आणू नका अ‍ॅक्सेस करा"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"व्यत्यय आणू नका कॉंफिगरेशन वाचण्यासाठी आणि लिहिण्यासाठी ॲपला अनुमती देते."</string>
+    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"व्यत्यय आणू नका हे कॉन्फिगरेशन वाचण्यासाठी आणि लिहिण्यासाठी अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"व्ह्यू परवानगी वापर सुरू करा"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"धारकास अ‍ॅपसाठी परवानगी वापरणे सुरू करण्याची अनुमती देते. सामान्य अ‍ॅप्ससाठी कधीही आवश्यकता नसते."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"परवानगीशी संबंधित निर्णय पाहणे सुरू करा"</string>
@@ -803,7 +803,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियम सेट करा"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्क्रीन लॉक पासवर्ड आणि पिन मध्ये अनुमती दिलेले लांबी आणि वर्ण नियंत्रित करा."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"स्क्रीन अनलॉक प्रयत्नांवर लक्ष ठेवा"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"टाइप केलेल्या अयोग्य पासवर्डांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा टॅबलेट लॉक करा किंवा बरेच पासवर्ड टाइप केले असल्यास टॅबलेटचा सर्व डेटा मिटवा."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"टाइप केलेल्या चुकीच्या पासवर्डच्या संख्येचे निरीक्षण करा. स्क्रीन अनलॉक करताना, टॅबलेट लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास, टॅबलेटचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्ड संख्येचे परीक्षण करते आणि Android TV डिव्हाइस लॉक करते किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास Android TV डिव्हाइसचा सर्व डेटा मिटवते."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"टाइप केलेल्या चुकीच्या पासवर्डच्या संख्येचे निरीक्षण करा. स्क्रीन अनलॉक करताना, इंफोटेनमेंट सिस्टीम लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास, इंफोटेनमेंट सिस्टीमचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"स्क्रीन अनलॉक करताना टाइप केलेल्या अयोग्य पासवर्डच्या संख्येवर लक्ष ठेवा. बरेच पासवर्ड टाइप केले असल्यास फोन लॉक करा किंवा फोनचा सर्व डेटा मिटवा."</string>
@@ -816,7 +816,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"स्क्रीन लॉक करा"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"स्क्रीन कशी आणि केव्हा लॉक होते ते नियंत्रित करा."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"सर्व डेटा मिटवा"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"फॅक्टरी डेटा रीसेट करून चेतावणीशिवाय टॅब्लेटचा डेटा मिटवा."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"फॅक्टरी डेटा रीसेट करून चेतावणीशिवाय टॅबलेटचा डेटा मिटवा."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"चेतावणी न देता फॅक्टरी डेटा रीसेट करून Android TV डिव्हाइसचा डेटा मिटवा."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"फॅक्टरी डेटा रीसेट करून कोणत्याही चेतावणीशिवाय इंफोटेनमेंट सिस्टीमचा डेटा मिटवा."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"फॅक्टरी डेटा रीसेट करून चेतावणीशिवाय फोनचा डेटा मिटवा."</string>
@@ -1394,8 +1394,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"इनपुट पद्धत निवडा"</string>
     <string name="show_ime" msgid="6406112007347443383">"भौतिक कीबोर्ड सक्रिय असताना त्यास स्क्रीनवर ठेवा"</string>
     <string name="hardware" msgid="1800597768237606953">"व्हर्च्युअल कीबोर्ड दर्शवा"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> कॉंफिगर करा"</string>
-    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"वास्तविक कीबोर्ड कॉंफिगर करा"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> कॉन्फिगर करा"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"वास्तविक कीबोर्ड कॉन्फिगर करा"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"भाषा आणि लेआउट निवडण्यासाठी टॅप करा"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1732,7 +1732,7 @@
     <string name="owner_name" msgid="8713560351570795743">"मालक"</string>
     <string name="guest_name" msgid="8502103277839834324">"अतिथी"</string>
     <string name="error_message_title" msgid="4082495589294631966">"एरर"</string>
-    <string name="error_message_change_not_allowed" msgid="843159705042381454">"या बदलास आपल्या प्रशासकाद्वारे अनुमती नाही"</string>
+    <string name="error_message_change_not_allowed" msgid="843159705042381454">"या बदलासाठी तुमच्या अ‍ॅडमिनची अनुमती नाही"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ही क्रिया हाताळण्यासाठी कोणताही ॲप्लिकेशन आढळला नाही"</string>
     <string name="revoke" msgid="5526857743819590458">"मागे घ्‍या"</string>
     <string name="mediasize_iso_a0" msgid="7039061159929977973">"ISO A0"</string>
@@ -2332,12 +2332,12 @@
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"बॅटरी सेव्हर सुरू असल्यामुळे Dual Screen उपलब्ध नाही. तुम्ही हे सेटिंग्ज मध्ये बंद करू शकता."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"सेटिंग्ज वर जा"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"बंद करा"</string>
-    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> कॉंफिगर केले आहे"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> कॉन्फिगर केले आहे"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"कीबोर्ड लेआउट <xliff:g id="LAYOUT_1">%s</xliff:g> वर सेट केला. बदलण्यासाठी टॅप करा."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"कीबोर्ड लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> वर सेट केला. बदलण्यासाठी टॅप करा."</string>
     <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"कीबोर्ड लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> वर सेट केला. बदलण्यासाठी टॅप करा."</string>
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"कीबोर्ड लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> वर सेट करा… बदलण्यासाठी टॅप करा."</string>
-    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"वास्तविक कीबोर्ड कॉंफिगर केला"</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"वास्तविक कीबोर्ड कॉन्फिगर केला"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"कीबोर्ड पाहण्यासाठी टॅप करा"</string>
     <string name="profile_label_private" msgid="6463418670715290696">"खाजगी"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"क्लोन"</string>

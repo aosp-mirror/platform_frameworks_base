@@ -327,7 +327,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"упатува и управува со телефонски повици"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Телесни сензори"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"пристапува до податоците од сензорите за виталните знаци"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"пристапува до податоците од сензорите за виталните функции"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Известувања"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"да прикажува известувања"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"да ги вчитува содржините од прозорците"</string>
@@ -800,7 +800,7 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Дозволува апликацијата да пристапува до податоците од сензорите со фреквенција на семпл поголема од 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ажурирај ја апликацијата без дејство од корисникот"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Дозволува сопственикот да ја ажурира апликацијата што претходно ја инсталирал без дејство од корисникот"</string>
-    <string name="policylab_limitPassword" msgid="4851829918814422199">"Постави правила за лозинката"</string>
+    <string name="policylab_limitPassword" msgid="4851829918814422199">"Поставување правила за лозинката"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролирај ги должината и знаците што се дозволени за лозинки и PIN-броеви за отклучување екран."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Следење на обидите за отклучување на екранот"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Го следи бројот на неточни лозинки што се внесени за отклучување на екранот и го заклучува таблетот или ги брише сите податоци од него ако се внесат голем број неточни лозинки."</string>
@@ -811,31 +811,31 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Го следи бројот на погрешно внесени лозинки при отклучување на екранот и го заклучува уредот Android TV или ги брише сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го системот за информации и забава или избриши ги сите податоци од овој профил доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го телефонот или избриши ги сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"Промени го заклучувањето на екранот"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Промени го заклучувањето на екранот."</string>
-    <string name="policylab_forceLock" msgid="7360335502968476434">"Заклучи го екранот"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Контролирај како и кога се заклучува екранот."</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"Менување на заклучувањето на екранот"</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Го менува заклучувањето на екранот."</string>
+    <string name="policylab_forceLock" msgid="7360335502968476434">"Заклучување на екранот"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Контролира како и кога се заклучува екранот."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Бришење на сите податоци"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Избриши ги податоците во таблетот без предупредување со ресетирање на фабрички податоци."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Ги брише податоците од таблетот без предупредување вршејќи ресетирање на фабрички податоци."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Ги брише податоците на вашиот уред Android TV без предупредување, така што ќе изврши ресетирање на фабричките податоци."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Избриши ги податоците во системот за информации и забава без предупредување со ресетирање на фабрички податоци."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Ги брише податоците од телефонот без предупредување вршејќи ресетирање на фабрички податоци."</string>
-    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Избриши ги податоците на профилот"</string>
-    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Избриши ги податоците на корисникот"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Бришење на податоците на профилот"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Бришење на податоците на корисникот"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Избриши ги податоците на овој корисник на таблетот без предупредување."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Ги брише податоците на овој корисник на уредов Android TV без предупредување."</string>
     <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Избриши ги податоците на профилов во системот за информации и забава без предупредување."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Избриши ги податоците на овој корисник на телефонот без предупредување."</string>
-    <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Постави го глобалниот прокси на уредот"</string>
+    <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Поставување глобален прокси на уредот"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Поставете го глобалниот прокси на уредот да се користи додека политиката е овозможена. Само сопственикот на уредот може да го поставува глобалниот прокси."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"Рок на лозинка за закл. екран"</string>
     <string name="policydesc_expirePassword" msgid="9136524319325960675">"Измени колку често мора да се менува лозинката, PIN-бројот или шемата за заклучување екран."</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"Постави шифрирање на меморија"</string>
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Барај зачуваните податоци за апликација да се шифрирани."</string>
-    <string name="policylab_disableCamera" msgid="5749486347810162018">"Оневозможи фотоапарати"</string>
+    <string name="policylab_disableCamera" msgid="5749486347810162018">"Оневозможување на камерите"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Спречи употреба на сите камери на уредот."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Онев. функции од заклуч. екран"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Спречи користење на некои функции од заклучување на екранот."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Оневозможување функции за заклучување на екранот"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Го спречува користењето на некои функции за заклучување на екранот."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Дома"</item>
     <item msgid="7740243458912727194">"Мобилен"</item>
@@ -970,7 +970,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Точно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Обидете се повторно"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Обидете се повторно"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Отклучи за сите функции и податоци"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Отклучете за пристап до сите функции и податоци"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Максималниот број обиди на отклучување со лик е надминат"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Нема SIM-картичка"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Нема SIM-картичка во таблетот."</string>
@@ -1080,7 +1080,7 @@
     <string name="menu_sym_shortcut_label" msgid="4037566049061218776">"копче Sym+"</string>
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"копче Function+"</string>
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"празен простор"</string>
-    <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"внеси"</string>
+    <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"избриши"</string>
     <string name="search_go" msgid="2141477624421347086">"Пребарај"</string>
     <string name="search_hint" msgid="455364685740251925">"Пребарување…"</string>
@@ -1278,7 +1278,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Слика од меморијата на <xliff:g id="PROC">%1$s</xliff:g> ви е достапна за споделување. Бидете внимателни: оваа слика од меморијата можеби ги содржи сите чувствителни лични информации до коишто процесот има пристап, што може да вклучуваат работи што сте ги напишале."</string>
     <string name="sendText" msgid="493003724401350724">"Избери дејство за текст"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Јачина на звук на ѕвонче"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Јачина на аудио/видео звук"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Јачина на звук за аудио/видео"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Се репродуцира преку Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Поставено ѕвонење на тивко"</string>
     <string name="volume_call" msgid="7625321655265747433">"Јачина на звук на дојдовен повик"</string>
@@ -1289,7 +1289,7 @@
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Јачина на звук на Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Јачина на звук на мелодија"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Јачина на звук на повик"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Јачина на аудио/видео звук"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Јачина на звук за аудио/видео"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Јачина на звук за известување"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Стандардна мелодија"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Стандардна (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1647,7 +1647,7 @@
     <string name="kg_wrong_password" msgid="2384677900494439426">"Погрешна лозинка"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Погрешен PIN"</string>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Употреби ја својата шема"</string>
-    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Внеси PIN на SIM картичка"</string>
+    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Внесете PIN за SIM-картичката"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Впишете PIN"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Внеси лозинка"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM картичката е сега оневозможена. Внесете ПУК код за да продолжите. Контактирајте го операторот за детали."</string>
@@ -1948,7 +1948,7 @@
     <string name="locale_search_menu" msgid="6258090710176422934">"Пребарај"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"Апликацијата не е достапна"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Апликацијата <xliff:g id="APP_NAME_0">%1$s</xliff:g> не е достапна во моментов. Со ова управува <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
-    <string name="app_suspended_more_details" msgid="211260942831587014">"Дознај повеќе"</string>
+    <string name="app_suspended_more_details" msgid="211260942831587014">"Дознајте повеќе"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Прекини ја паузата"</string>
     <string name="work_mode_off_title" msgid="6367463960165135829">"Да се актив. работните аплик.?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Прекини ја паузата"</string>
@@ -2150,7 +2150,7 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Разговор"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Групен разговор"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Лични"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Лично"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"За работа"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Личен приказ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Работен приказ"</string>
@@ -2339,9 +2339,9 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Распоредот на тастатурата е поставен на <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Допрете за да промените."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Физичките тастатури се конфигурирани"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Допрете за да ги видите тастатурите"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Приватен профил"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Приватно"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Клониран профил"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"Работен профил"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Работно"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Работен профил 2"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"Работен профил 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Профил за тестирање"</string>

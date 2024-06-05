@@ -499,16 +499,16 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nej tak"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Appen er fastgjort"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Appen er frigjort"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Ring op"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Opkald"</string>
     <string name="stream_system" msgid="7663148785370565134">"System"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Ring"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Ringetone"</string>
     <string name="stream_music" msgid="2188224742361847580">"Medie"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarm"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notifikation"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Tonesignalfrekvens (DTMF)"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Hjælpefunktioner"</string>
-    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ring"</string>
+    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ringetone"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibration"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Slå lyden fra"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Tryk for at slå lyden til."</string>
@@ -891,12 +891,12 @@
     <string name="controls_removed" msgid="3731789252222856959">"Fjernet"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vil du tilføje <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> kan vælge, hvilke styringselementer og hvilket indhold der skal vises her."</string>
-    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vil du fjerne styringselementerne for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vil du fjerne sty­rings­ele­men­ter­ne for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Angivet som favorit"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Angivet som favorit. Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Fjernet fra favoritter"</string>
-    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"markér som favorit"</string>
-    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"fjern fra favoritter"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"markere som favorit"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"fjerne som favorit"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Flyt til position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Betjeningselementer"</string>
     <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Vælg, hvilke enhedsindstillinger du vil have hurtig adgang til"</string>
@@ -978,7 +978,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Åbn appen for at caste denne session."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ukendt app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stop med at caste"</string>
-    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Enheder, der er tilgængelige for lydoutput."</string>
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Enheder, der er tilgængelige for lydudgang."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Lydstyrke"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Højttalere og skærme"</string>
@@ -1029,7 +1029,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Indhold dukker snart op"</string>
     <string name="missed_call" msgid="4228016077700161689">"Ubesvaret opkald"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Se dine seneste beskeder, mistede opkald og statusopdateringer"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Se dine seneste beskeder, ubesvarede opkald og statusopdateringer"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Samtale"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Sat på pause af Forstyr ikke"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> har sendt en besked: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>

@@ -175,7 +175,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"Aucune préférence par défaut définie"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Paramètres de synthèse vocale"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Synthèse vocale"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Cadence"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Débit"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Vitesse à laquelle le texte est énoncé"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Ton"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Touche le ton utilisé pour la synthèse vocale"</string>
@@ -250,7 +250,7 @@
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Association de l\'appareil en cours…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Échec de l\'association de l\'appareil Soit le code QR est incorrect, soit l\'appareil n\'est pas connecté au même réseau."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresse IP et port"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Numériser le code QR"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Balayer le code QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Associer l\'appareil par Wi-Fi en numérisant un code QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Veuillez vous connecter à un réseau Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, débogage, développeur"</string>
@@ -264,7 +264,7 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Autoriser le déverrouillage du fichier d\'amorce"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Permettre le déverrouillage par le fabricant?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"AVERTISSEMENT : Les fonctionnalités de protection de l\'appareil ne fonctionneront pas sur cet appareil lorsque ce paramètre est activé."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Sélectionner l\'application de position fictive"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Sélectionner l\'appli de position fictive"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Aucune application de position fictive définie"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Application de position fictive : <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Réseautage"</string>
@@ -487,7 +487,7 @@
     <string name="disabled" msgid="8017887509554714950">"Désactivée"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Autorisée"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Non autorisée"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Installer les applications inconnues"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Installer les applis inconnues"</string>
     <string name="home" msgid="973834627243661438">"Accueil des paramètres"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0 %"</item>

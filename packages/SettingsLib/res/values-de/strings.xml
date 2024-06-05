@@ -66,7 +66,7 @@
     <string name="connected_via_app" msgid="3532267661404276584">"Verbunden über <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Zum Anmelden tippen"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Kein Internet"</string>
-    <string name="private_dns_broken" msgid="1984159464346556931">"Auf den privaten DNS-Server kann nicht zugegriffen werden"</string>
+    <string name="private_dns_broken" msgid="1984159464346556931">"Auf den Server des privaten DNS kann nicht zugegriffen werden"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"Eingeschränkte Verbindung"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Kein Internet"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Anmeldung erforderlich"</string>
@@ -294,10 +294,10 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Bluetooth-Audio-LDAC-Codec auslösen\nAuswahl: Wiedergabequalität"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Privates DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Privaten DNS-Modus auswählen"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Modus des privaten DNS auswählen"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Aus"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automatisch"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Hostname des privaten DNS-Anbieters"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Hostname des Anbieters des privaten DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Hostname des DNS-Anbieters eingeben"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Verbindung nicht möglich"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
@@ -442,7 +442,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (Rot-Grün-Sehschwäche)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (Blau-Gelb-Sehschwäche)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Farbkorrektur"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Die Farbkorrektur kann nützlich sein, wenn du:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Farben noch genauer sehen möchtest&lt;/li&gt; &lt;li&gt;&amp;nbsp;bestimmte Farben entfernen möchtest, um dich besser zu konzentrieren&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Die Farbkorrektur kann nützlich sein, wenn du:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Farben noch genauer sehen möchtest&lt;/li&gt; &lt;li&gt;&amp;nbsp;Bestimmte Farben entfernen möchtest, um dich besser zu konzentrieren&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Außer Kraft gesetzt von \"<xliff:g id="TITLE">%1$s</xliff:g>\""</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Noch etwa <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -556,7 +556,7 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Gerät aktivieren, um hier etwas wiedergeben zu lassen"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Gerät nicht für die Wiedergabe zugelassen"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Diese Medien können hier nicht wiedergegeben werden"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Verbindung kann nicht hergestellt werden. Schalte das Gerät aus &amp; und wieder ein."</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Verbindung kann nicht hergestellt werden. Schalte das Gerät aus und wieder ein."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Netzbetriebenes Audiogerät"</string>
     <string name="help_label" msgid="3528360748637781274">"Hilfe und Feedback"</string>
     <string name="storage_category" msgid="2287342585424631813">"Speicher"</string>
@@ -578,10 +578,10 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Nutzer"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Eingeschränkte Profile"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Neuen Nutzer hinzufügen?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kannst dieses Gerät zusammen mit anderen nutzen, indem du weitere Nutzer erstellst. Jeder erhält einen eigenen Bereich, in dem er Apps, den Hintergrund usw. personalisieren kann. Außerdem lassen sich Geräteeinstellungen wie WLAN ändern, die sich auf alle Nutzer auswirken.\n\nWenn du einen neuen Nutzer hinzufügst, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren. Bedienungshilfen-Einstellungen und -Dienste werden möglicherweise nicht auf den neuen Nutzer übertragen."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kannst dieses Gerät zusammen mit anderen nutzen, indem du weitere Nutzer erstellst. Jeder erhält einen eigenen Bereich, in dem er Apps, den Hintergrund usw. personalisieren kann. Außerdem lassen sich Geräteeinstellungen wie WLAN ändern, die sich auf alle Nutzer auswirken.\n\nWenn du einen neuen Nutzer hinzufügst, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren. Einstel­lun­gen und Dienste für die Bedie­nungs­hil­fen werden mög­licher­weise nicht auf den neuen Nutzer übertragen."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Wenn du einen neuen Nutzer hinzufügst, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Diesen Nutzer als Administrator festlegen?"</string>
-    <string name="user_grant_admin_message" msgid="1673791931033486709">"Im Gegensatz zu anderen Nutzern haben Administratoren besondere Berechtigungen. Ein Administrator kann alle Nutzer verwalten, dieses Gerät aktualisieren oder zurücksetzen, Einstellungen ändern, alle installierten Apps sehen und für andere Administratorberechtigungen gewähren oder aufheben."</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Im Gegensatz zu anderen Nutzern haben Administratoren besondere Berechtigungen. Ein Administrator kann alle Nutzer verwalten, dieses Gerät aktualisieren oder zurücksetzen, Einstellungen ändern, alle installierten Apps sehen und anderen Administrator­­­berech­ti­gungen gewähren oder diese widerrufen."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Als Administrator festlegen"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Nutzer jetzt einrichten?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Die Person muss Zugang zum Gerät haben und bereit sein, ihren Bereich einzurichten."</string>
@@ -615,7 +615,7 @@
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Gastmodus beenden?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Hierdurch werden Apps und Daten der aktuellen Gastsitzung gelöscht"</string>
     <string name="grant_admin" msgid="4323199171790522574">"Ja, als Administrator festlegen"</string>
-    <string name="not_grant_admin" msgid="3557849576157702485">"Nein, nicht als Administrator festlegen"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Nein, nicht als Admini­stra­tor festlegen"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Beenden"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Gastaktivität speichern?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Speichere Aktivitäten der aktuellen Sitzung oder lösche alle Apps und Daten"</string>

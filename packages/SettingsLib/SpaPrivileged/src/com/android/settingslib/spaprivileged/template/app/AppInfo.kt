@@ -55,7 +55,7 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
                 .semantics(mergeDescendants = true) {},
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            val app = packageInfo.applicationInfo
+            val app = checkNotNull(packageInfo.applicationInfo)
             Box(modifier = Modifier.padding(SettingsDimension.itemPaddingAround)) {
                 AppIcon(app = app, size = SettingsDimension.appIconInfoSize)
             }

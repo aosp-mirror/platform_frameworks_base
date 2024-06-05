@@ -268,7 +268,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Sozlamalar"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Yordam"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Ovozli yordam"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Bloklash"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Qulflash"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Yangi bildirishnoma"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Tashqi klaviatura"</string>
@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Klaviatura terilmasi bunga sozlandi: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Oʻzgartirish uchun ustiga bosing."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Tashqi klaviaturalar sozlandi"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Klaviaturalarni ochish uchun ustiga bosing"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Yopiq"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Maxfiy"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Nusxasini yaratish"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Ish"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Ish 2"</string>

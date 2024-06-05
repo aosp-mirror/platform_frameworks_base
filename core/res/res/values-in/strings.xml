@@ -614,7 +614,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Mengizinkan aplikasi untuk membaca lokasi dari koleksi media Anda."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Gunakan biometrik"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Gunakan biometrik atau kunci layar"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifikasi bahwa ini memang Anda"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifikasi diri Anda"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Gunakan biometrik untuk melanjutkan"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Gunakan biometrik atau kunci layar untuk melanjutkan"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biometrik tidak tersedia"</string>
@@ -970,7 +970,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Perbaiki!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Coba lagi"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Coba lagi"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Membuka kunci untuk semua fitur dan data"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Buka kunci untuk melihat semua fitur dan data"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Percobaan Buka dengan Wajah melebihi batas maksimum"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Tidak ada SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Tidak ada SIM di tablet."</string>
@@ -1206,7 +1206,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"Jepret gambar dengan %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"Jepret gambar"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"Gunakan secara default untuk tindakan ini."</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"Gunakan aplikasi yang berbeda"</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"Gunakan aplikasi lain"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Menghapus default di Setelan sistem &gt; Apl &gt; Terdownload."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"Pilih tindakan"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"Pilih apl untuk perangkat USB"</string>
@@ -1340,7 +1340,7 @@
     <string name="sim_removed_message" msgid="8469588437451533845">"Jaringan seluler tidak akan tersedia sampai Anda memulai ulang dengan SIM yang valid."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Selesai"</string>
     <string name="sim_added_title" msgid="2976783426741012468">"SIM ditambahkan"</string>
-    <string name="sim_added_message" msgid="6602906609509958680">"Mulai ulang perangkat Anda untuk mengakses jaringan selular."</string>
+    <string name="sim_added_message" msgid="6602906609509958680">"Mulai ulang perangkat Anda untuk mengakses jaringan seluler."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Mulai Ulang"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktifkan layanan seluler"</string>
     <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Download aplikasi operator untuk mengaktifkan SIM baru"</string>
@@ -1698,9 +1698,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Izinkan <xliff:g id="SERVICE">%1$s</xliff:g> mengontrol perangkat Anda secara penuh?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrol penuh sesuai untuk aplikasi yang mendukung kebutuhan aksesibilitas Anda, tetapi tidak untuk sebagian besar aplikasi."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengontrol layar"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Voice Access dapat membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Menampilkan dan melakukan tindakan"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Voice Access dapat melacak interaksi Anda dengan aplikasi atau sensor hardware, dan berinteraksi dengan aplikasi untuk Anda."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Melacak interaksi Anda dengan aplikasi atau sensor hardware, dan berinteraksi dengan aplikasi untuk Anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Izinkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketuk fitur untuk mulai menggunakannya:"</string>
@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Tata letak keyboard disetel ke <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Ketuk untuk mengubah."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Keyboard fisik telah dikonfigurasi"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Ketuk untuk melihat keyboard"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Pribadi"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Privasi"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Clone"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Kerja"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Kerja 2"</string>

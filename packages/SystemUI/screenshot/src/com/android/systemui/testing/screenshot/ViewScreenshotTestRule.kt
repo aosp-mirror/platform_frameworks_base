@@ -145,6 +145,7 @@ open class ViewScreenshotTestRule(
         activityRule.scenario.onActivity { activity ->
             dialog =
                 dialogProvider(activity).apply {
+                    val window = checkNotNull(window)
                     // Make sure that the dialog draws full screen and fits the whole display
                     // instead of the system bars.
                     window.setDecorFitsSystemWindows(false)
@@ -175,7 +176,7 @@ open class ViewScreenshotTestRule(
     }
 
     private fun Dialog.toBitmap(): Bitmap {
-        val window = window
+        val window = checkNotNull(window)
         return window.decorView.toBitmap(window)
     }
 

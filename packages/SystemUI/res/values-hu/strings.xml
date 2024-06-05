@@ -881,7 +881,7 @@
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Áthelyezés fel és jobbra"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Áthelyezés le és balra"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Áthelyezés le és jobbra"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Áthelyezés a szélen kívül és elrejtés"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Áthelyezés a szélére és elrejtés"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Áthelyezés a szélen kívül és mutatás"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Eltávolítás"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"váltás"</string>

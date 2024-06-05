@@ -186,7 +186,7 @@
     <string name="work_profile_deleted" msgid="5891181538182009328">"仕事用プロファイルが削除されました"</string>
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"仕事用プロファイルの管理アプリがないか、破損しています。そのため仕事用プロファイルと関連データが削除されました。管理者にサポートをご依頼ください。"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"お使いの仕事用プロファイルはこのデバイスで使用できなくなりました"</string>
-    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"パスワード入力回数が上限を超えました"</string>
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"パスワード入力回数が上限に達しました"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"管理者により、デバイスの個人使用が許可されました"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"管理対象のデバイス"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"このデバイスは組織によって管理され、ネットワーク トラフィックが監視される場合があります。詳しくはタップしてください。"</string>
@@ -648,8 +648,8 @@
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"指紋の設定がタイムアウトしました。もう一度お試しください。"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指紋の操作をキャンセルしました。"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"指紋の操作がユーザーによりキャンセルされました。"</string>
-    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"試行回数が上限を超えました。代わりに画面ロックを使用してください。"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"試行回数が上限を超えました。代わりに画面ロックを使用してください。"</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"試行回数が上限に達しました。代わりに画面ロックを使用してください。"</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"試行回数が上限に達しました。代わりに画面ロックを使用してください。"</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"指紋を処理できません。もう一度お試しください。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"指紋が登録されていません。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"このデバイスには指紋認証センサーがありません。"</string>
@@ -711,8 +711,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"顔の操作をキャンセルしました。"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"顔認証はユーザーによりキャンセルされました"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"試行回数の上限です。後でもう一度お試しください。"</string>
-    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"試行回数が上限を超えました。顔認証を利用できません。"</string>
-    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"試行回数が上限を超えました。代わりに画面ロック解除を入力してください。"</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"試行回数が上限に達しました。顔認証を利用できません。"</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"試行回数が上限に達しました。代わりに画面ロック解除を入力してください。"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"顔を確認できません。もう一度お試しください。"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"顔認証を設定していません"</string>
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"このデバイスは顔認証に対応していません"</string>
@@ -803,14 +803,14 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"画面ロック解除試行の監視"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はタブレットをロックするかタブレットのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合は Android TV デバイスをロックするか Android TV デバイスのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はインフォテインメント システムをロックするかインフォテインメント システムのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はモバイルデバイスをロックするかモバイルデバイスのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はタブレットをロックするかこのユーザーのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合は Android TV デバイスをロックするかこのユーザーのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はインフォテインメント システムをロックするかこのプロファイルのデータをすべて消去します。"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はスマートフォンをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"画面のロック解除に失敗した回数を監視し、多すぎる場合はタブレットをロックするかタブレットのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"画面のロック解除に失敗した回数を監視し、多すぎる場合は Android TV デバイスをロックするか Android TV デバイスのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"画面のロック解除に失敗した回数を監視し、多すぎる場合はインフォテインメント システムをロックするかインフォテインメント システムのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"画面のロック解除に失敗した回数を監視し、多すぎる場合はモバイルデバイスをロックするかモバイルデバイスのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"画面のロック解除に失敗した回数を監視し、多すぎる場合はタブレットをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"画面のロック解除に失敗した回数を監視し、多すぎる場合は Android TV デバイスをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"画面のロック解除に失敗した回数を監視し、多すぎる場合はインフォテインメント システムをロックするかこのプロファイルのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"画面のロック解除に失敗した回数を監視し、多すぎる場合はスマートフォンをロックするかこのユーザーのデータをすべて消去します。"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"画面ロックの変更"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"画面ロックを変更します。"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"画面のロック"</string>
@@ -2136,7 +2136,7 @@
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"ヘッドセット: フック"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"画面上のユーザー補助機能のショートカット"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"画面上のユーザー補助機能のショートカットの選択メニュー"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助機能のショートカット"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助のショートカット"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"通知シェードを閉じる"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"D-pad: 上"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"D-pad: 下"</string>
@@ -2326,8 +2326,8 @@
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"デュアル スクリーン"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"デュアル スクリーン: ON"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>は 2 画面でコンテンツを表示しています"</string>
-    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"デバイスが熱くなりすぎています"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"スマートフォンが熱くなりすぎているため、デュアル スクリーンを使用できません"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"デバイスが熱くなっています"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"スマートフォンが熱いため、デュアル スクリーンを使用できません"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"デュアル スクリーンを使用できません"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"バッテリー セーバーが ON のため、デュアル スクリーンを使用できません。この動作は設定で OFF にできます。"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"設定に移動"</string>
@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>などに設定されています。タップで変更できます。"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"物理キーボードの設定完了"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"タップするとキーボードを表示できます"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"非公開"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"プライベート"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"複製"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"仕事用"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"仕事用 2"</string>

@@ -268,7 +268,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"సెట్టింగ్‌లు"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"సహాయం"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"వాయిస్ అసిస్టెంట్"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"లాక్ చేయి"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"లాక్ చేయండి"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"కొత్త నోటిఫికేషన్"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"భౌతిక కీబోర్డ్"</string>
@@ -802,7 +802,7 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"యూజర్ చర్య లేకుండా హోల్డర్ మునుపు ఇన్‌స్టాల్ చేసిన యాప్‌ను అప్‌డేట్ చేయడానికి హోల్డర్‌ను అనుమతిస్తుంది"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"పాస్‌వర్డ్ నియమాలను సెట్ చేయండి"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"స్క్రీన్ లాక్ పాస్‌వర్డ్‌లు మరియు PINల్లో అనుమతించబడిన పొడవు మరియు అక్షరాలను నియంత్రిస్తుంది."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"స్క్రీన్ అన్‌లాక్ ప్రయత్నాలను పర్యవేక్షించండి"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"స్క్రీన్‌ను అన్‌లాక్ చేయడానికి చేస్తున్న ప్రయత్నాలను మానిటర్ చేయడానికి"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"టైప్ చేసిన చెల్లని పాస్‌వర్డ్‌ల సంఖ్యను పర్యవేక్షిస్తుంది. స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు, అనేక సార్లు చెల్లని పాస్‌వర్డ్‌లను టైప్ చేస్తే టాబ్లెట్ లాక్ చేయబడుతుంది లేదా టాబ్లెట్‌లోని మొత్తం డేటా ఎరేజ్ చేయబడుతుంది."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు పాస్‌వర్డ్‌లను ఎన్నిసార్లు తప్పుగా టైప్ చేశారో పర్యవేక్షిస్తుంది, అలాగే చాలా ఎక్కువసార్లు పాస్‌వర్డ్‌లను తప్పుగా టైప్ చేసి ఉంటే మీ Android TV పరికరాన్ని లాక్ చేస్తుంది లేదా మీ Android TV డేటా మొత్తాన్ని తొలగిస్తుంది."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు, పాస్‌వర్డ్‌ను ఎన్నిసార్లు తప్పుగా టైప్ చేశారో పర్యవేక్షిస్తుంది. ఒకవేళ చాలా ఎక్కువ సార్లు పాస్‌వర్డ్‌ను తప్పుగా టైప్ చేసి ఉంటే, సమాచారంతో కూడిన వినోదం సిస్టమ్‌ను లాక్ చేస్తుంది లేదా సమాచారంతో కూడిన వినోదం సిస్టమ్ డేటాను తొలగించి ఫ్యాక్టరీ రీసెట్ చేస్తుంది."</string>
@@ -816,7 +816,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"స్క్రీన్‌ను లాక్ చేయడానికి"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"స్క్రీన్‌ను ఎలా మరియు ఎప్పుడు లాక్ చేయాలనే దాన్ని నియంత్రిస్తుంది."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"మొత్తం డేటాను ఎరేజ్ చేయడానికి"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరించకుండానే టాబ్లెట్ డేటాను ఎరేజ్ చేయండి."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"\'ఫ్యాక్టరీ డేటా రీసెట్‌\'ను అమలు చేయడం ద్వారా వార్నింగ్‌తో పని లేకుండా టాబ్లెట్ డేటాను ఎరేజ్ చేయండి."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"హెచ్చరించకుండానే మీ Android TV పరికరం డేటాను ఫ్యాక్టరీ డేటా రీసెట్ ద్వారా తొలగిస్తుంది."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా, హెచ్చరిక లేకుండానే సమాచారంతో కూడిన వినోదం సిస్టమ్ డేటాను తొలగించి ఫ్యాక్టరీ రీసెట్ చేయబడుతుంది."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరించకుండానే ఫోన్ డేటాను ఎరేజ్ చేస్తుంది."</string>
@@ -970,7 +970,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"సరైనది!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"మళ్లీ ట్రై చేయండి"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"మళ్లీ ట్రై చేయండి"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"అన్ని లక్షణాలు మరియు డేటా కోసం అన్‌లాక్ చేయండి"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"అన్ని ఫీచర్ల కోసం, డేటా కోసం అన్‌లాక్ చేయండి"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ఫేస్ అన్‌లాక్ ప్రయత్నాల గరిష్ఠ పరిమితిని మించిపోయారు"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM లేదు"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"టాబ్లెట్‌లో SIM లేదు."</string>
@@ -1180,7 +1180,7 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max}కి ఒక స్టార్}other{{max}కి # స్టార్‌లు}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"ప్రోగ్రెస్‌లో ఉంది"</string>
     <string name="whichApplication" msgid="5432266899591255759">"దీన్ని ఉపయోగించి చర్యను పూర్తి చేయండి"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$sను ఉపయోగించి చర్యను పూర్తి చేయి"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$sను ఉపయోగించి చర్యను పూర్తి చేయండి"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"చర్యను పూర్తి చేయి"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"దీనితో తెరువు"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"%1$sతో తెరువు"</string>
@@ -1195,7 +1195,7 @@
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"ఎడిట్"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"షేర్ చేయండి"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$sతో షేర్ చేయండి"</string>
-    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"షేర్ చేయి"</string>
+    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"షేర్ చేయండి"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"దీన్ని ఉపయోగించి పంపండి"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"%1$sని ఉపయోగించి పంపండి"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"పంపండి"</string>
@@ -1217,10 +1217,10 @@
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> పునరావృతంగా ఆపివేయబడుతోంది"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"యాప్‌ను మళ్లీ తెరువు"</string>
     <string name="aerr_report" msgid="3095644466849299308">"ఫీడ్‌బ్యాక్‌ను పంపు"</string>
-    <string name="aerr_close" msgid="3398336821267021852">"మూసివేయి"</string>
+    <string name="aerr_close" msgid="3398336821267021852">"మూసివేయండి"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"పరికరం పునఃప్రారంభమయ్యే వరకు మ్యూట్ చేయి"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"వేచి ఉండండి"</string>
-    <string name="aerr_close_app" msgid="8318883106083050970">"యాప్‌ను మూసివేయి"</string>
+    <string name="aerr_close_app" msgid="8318883106083050970">"యాప్‌ను మూసివేయండి"</string>
     <string name="anr_title" msgid="7290329487067300120"></string>
     <string name="anr_activity_application" msgid="8121716632960340680">"<xliff:g id="APPLICATION">%2$s</xliff:g> ప్రతిస్పందించడం లేదు"</string>
     <string name="anr_activity_process" msgid="3477362583767128667">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ప్రతిస్పందించడం లేదు"</string>
@@ -1389,7 +1389,7 @@
     <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"బగ్ రిపోర్ట్‌ను షేర్ చేయాలా?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="3077385149217638550">"బగ్ రిపోర్ట్‌ను షేర్ చేస్తోంది..."</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"మీ అడ్మిన్ ఈ పరికరం సమస్యకు పరిష్కారాన్ని కనుగొనడంలో సహాయం కోసం బగ్ రిపోర్ట్‌ను రిక్వెస్ట్ చేశారు. యాప్‌లు మరియు డేటా షేర్ చేయబడవచ్చు."</string>
-    <string name="share_remote_bugreport_action" msgid="7630880678785123682">"షేర్ చేయి"</string>
+    <string name="share_remote_bugreport_action" msgid="7630880678785123682">"షేర్ చేయండి"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"తిరస్కరిస్తున్నాను"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ఇన్‌పుట్ పద్ధతిని ఎంచుకోండి"</string>
     <string name="show_ime" msgid="6406112007347443383">"దీన్ని భౌతిక కీబోర్డ్ యాక్టివ్‌గా ఉన్నప్పుడు స్క్రీన్‌పై ఉంచుతుంది"</string>
@@ -1872,7 +1872,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"సరే"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"బ్యాటరీ సేవర్ ముదురు రంగు రూపాన్ని ఆన్ చేసి, బ్యాక్‌గ్రౌండ్ యాక్టివిటీ, కొన్ని విజువల్ ఎఫెక్ట్‌లు, నిర్దిష్ట ఫీచర్‌లు, ఇంకా కొన్ని నెట్‌వర్క్ కనెక్షన్‌లను పరిమితం చేస్తుంది లేదా ఆఫ్ చేస్తుంది."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"బ్యాటరీ సేవర్ ముదురు రంగు రూపాన్ని ఆన్ చేసి, బ్యాక్‌గ్రౌండ్ యాక్టివిటీ, కొన్ని విజువల్ ఎఫెక్ట్‌లు, నిర్దిష్ట ఫీచర్‌లు, ఇంకా కొన్ని నెట్‌వర్క్ కనెక్షన్‌లను పరిమితం చేస్తుంది లేదా ఆఫ్ చేస్తుంది."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌, డేటాను యాక్సెస్ చేయగలదు. కానీ త‌క్కువ సార్లు మాత్ర‌మే అలా చేయవచ్చు. ఉదాహరణకు, మీరు నొక్కే వరకు ఇమేజ్‌లు ప్రదర్శించబడవు."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌, డేటాను యాక్సెస్ చేయగలదు. కానీ త‌క్కువ సార్లు మాత్ర‌మే అలా చేయవచ్చు. ఉదాహరణకు, మీరు ఇమేజ్‌ల‌పై ట్యాప్ చేసే వరకు అవి క‌నిపించ‌వు."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ఆన్ చేయి"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{ఒక నిమిషానికి ({formattedTime} వరకు)}other{# నిమిషాలకు ({formattedTime} వరకు)}}"</string>
@@ -1895,7 +1895,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"వారపు రోజుల్లో రాత్రి"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ఈవెంట్"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"నిద్రావస్థ"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"నిద్ర"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> కొన్ని ధ్వనులను మ్యూట్ చేస్తోంది"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది. వివరాల కోసం మీ తయారీదారుని సంప్రదించండి."</string>
@@ -1920,7 +1920,7 @@
     <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"మరిన్ని ఆప్షన్‌లు"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"అతివ్యాప్తిని మూసివేస్తుంది"</string>
     <string name="maximize_button_text" msgid="4258922519914732645">"గరిష్టీకరించు"</string>
-    <string name="close_button_text" msgid="10603510034455258">"మూసివేయి"</string>
+    <string name="close_button_text" msgid="10603510034455258">"మూసివేయండి"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <string name="call_notification_answer_action" msgid="5999246836247132937">"పికప్ చేయండి"</string>
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"వీడియో కాల్"</string>

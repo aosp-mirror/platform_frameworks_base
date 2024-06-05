@@ -20,6 +20,8 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
+import static com.android.systemui.statusbar.notification.row.NotificationTestHelper.PKG;
+import static com.android.systemui.statusbar.notification.row.NotificationTestHelper.USER_HANDLE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -40,10 +42,12 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -56,6 +60,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 import com.android.internal.widget.CachingIconView;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -731,6 +736,26 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         verify(vectorDrawable, times(1)).start();
         verify(lowPriDrawable, times(1)).start();
         verify(lowPriVectorDrawable, times(1)).start();
+    }
+
+    @Test
+    public void imageResolver_sameNotificationUser_usesContext() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow(PKG,
+                USER_HANDLE.getUid(1234), USER_HANDLE);
+
+        assertThat(row.getImageResolver().getContext()).isSameInstanceAs(mContext);
+    }
+
+    @Test
+    public void imageResolver_differentNotificationUser_createsUserContext() throws Exception {
+        UserHandle user = new UserHandle(33);
+        Context userContext = new SysuiTestableContext(mContext);
+        mContext.prepareCreateContextAsUser(user, userContext);
+
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow(PKG,
+                user.getUid(1234), user);
+
+        assertThat(row.getImageResolver().getContext()).isSameInstanceAs(userContext);
     }
 
     private void setDrawableIconsInImageView(CachingIconView icon, Drawable iconDrawable,

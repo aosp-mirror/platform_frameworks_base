@@ -68,9 +68,9 @@ constructor(
         )
         rippleView.addOnAttachStateChangeListener(
             object : View.OnAttachStateChangeListener {
-                override fun onViewDetachedFromWindow(view: View?) {}
+                override fun onViewDetachedFromWindow(view: View) {}
 
-                override fun onViewAttachedToWindow(view: View?) {
+                override fun onViewAttachedToWindow(view: View) {
                     if (view == null) {
                         return
                     }

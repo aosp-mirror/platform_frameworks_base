@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"لغو"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"وقتی وصل باشید، مرتبط‌سازی اجازه دسترسی به مخاطبین و سابقه تماستان را فراهم می‌کند."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> مرتبط‌سازی نشد."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"به‌دلیل پین یا گذرکلید نادرست، مرتبط‌سازی با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> انجام نشد."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"به‌دلیل پین یا گذرکلید نادرست، جفت‌سازی با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> انجام نشد."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"ارتباط با <xliff:g id="DEVICE_NAME">%1$s</xliff:g> امکان‌پذیر نیست."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> مرتبط‌سازی را رد کرد."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"رایانه"</string>
@@ -215,7 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"انتخاب نمایه"</string>
     <string name="category_personal" msgid="6236798763159385225">"شخصی"</string>
     <string name="category_work" msgid="4014193632325996115">"کاری"</string>
-    <string name="category_clone" msgid="1554511758987195974">"مشابه‌سازی"</string>
+    <string name="category_clone" msgid="1554511758987195974">"همسانه‌سازی"</string>
     <string name="development_settings_title" msgid="140296922921597393">"گزینه‌های برنامه‌نویسان"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"فعال کردن گزینه‌های برنامه‌نویس"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"تنظیم گزینه‌های مربوط به طراحی برنامه"</string>
@@ -675,7 +675,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"پیش‌فرض"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"روشن کردن صفحه‌نمایش"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"اجازه روشن کردن صفحه‌نمایش"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"به برنامه اجازه می‌دهد صفحه‌نمایش را روشن کند. اگر اجازه داده شود، ممکن است این برنامه در هر زمانی بدون هدف صریح شما صفحه‌نمایش را روشن کند."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"به برنامه اجازه می‌دهد صفحه‌نمایش را روشن کند. اگر این اجازه داده شود، ممکن است این برنامه در هر زمانی بدون توجه به منظور صریح شما صفحه‌نمایش را روشن کند."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"همه‌فرستی <xliff:g id="APP_NAME">%1$s</xliff:g> متوقف شود؟"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"اگر <xliff:g id="SWITCHAPP">%1$s</xliff:g> را همه‌فرستی کنید یا خروجی را تغییر دهید، همه‌فرستی کنونی متوقف خواهد شد"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"همه‌فرستی <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

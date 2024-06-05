@@ -462,9 +462,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Ermöglicht der App, die Anrufliste deines Android TV-Geräts zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Du solltest wissen, dass dies von schädlichen Apps genutzt werden kann, um Einträge in der Anrufliste zu löschen oder zu ändern."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Ermöglicht der App, die Anrufliste deines Telefons zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so die Einträge in der Anrufliste löschen oder sie ändern."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"Zugriff auf Daten des Körpersensors, etwa Herzfrequenz, wenn in Benutzung"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Ermöglicht der App den Zugriff auf Daten des Körpersensors, etwa solche zur Herzfrequenz, zur Temperatur und zum Blutsauerstoffanteil, während die App in Benutzung ist."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Ermöglicht der App den Zugriff auf Daten des Körpersensors, etwa solche zur Herzfrequenz, zur Temperatur und zur Sauerstoffsättigung, während die App in Benutzung ist."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Zugriff auf Daten des Körpersensors, etwa Herzfrequenz, wenn im Hintergrund"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Ermöglicht der App den Zugriff auf Daten des Körpersensors, etwa solche zur Herzfrequenz, zur Temperatur und zum Blutsauerstoffanteil, während die App im Hintergrund ist."</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Ermöglicht der App den Zugriff auf Daten des Körpersensors, etwa solche zur Herzfrequenz, zur Temperatur und zur Sauerstoffsättigung, während die App im Hintergrund ist."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Kalendertermine und Details lesen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Diese App kann alle auf deinem Tablet gespeicherten Kalendertermine lesen und deine Kalenderdaten teilen oder speichern."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Diese App kann alle auf deinem Android TV-Gerät gespeicherten Kalendertermine lesen und die Kalenderdaten teilen oder speichern."</string>
@@ -683,7 +683,7 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Bewege das Smartphone näher heran"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Bewege das Smartphone nach oben"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Bewege das Smartphone nach unten"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Bewege das Smartphone nach links"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Bewege das Smart­phone nach links"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Bewege das Smartphone nach rechts"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Bitte sieh direkt auf dein Gerät."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Gesicht nicht erkannt. Smartphone auf Augenhöhe halten."</string>
@@ -803,7 +803,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Passwortregeln festlegen"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Zulässige Länge und Zeichen für Passwörter für die Displaysperre festlegen"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Versuche zum Entsperren des Displays überwachen"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Tablet sperren oder alle Daten auf dem Tablet löschen, wenn zu häufig ein falsches Passwort eingegeben wird."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Tablet sperren oder alle Daten auf dem Tablet löschen, wenn zu häufig ein falsches Passwort eingegeben wird"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Es wird überwacht, wie oft beim Versuch, den Bildschirm zu entsperren, ein falsches Passwort eingegeben wird. Wenn es zu viele Fehlversuche gibt, wird das Android TV-Gerät gesperrt oder alle Daten darauf werden gelöscht."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays erfassen und Infotainmentsystem sperren oder alle Daten des Infotainmentsystems löschen, wenn zu häufig ein falsches Passwort eingegeben wird."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Bildschirms überwachen und Telefon sperren oder alle Daten auf dem Telefon löschen, wenn zu häufig ein falsches Passwort eingegeben wird."</string>
@@ -1113,12 +1113,12 @@
     <string name="year" msgid="5182610307741238982">"Jahr"</string>
     <string name="years" msgid="5797714729103773425">"Jahre"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"Jetzt"</string>
-    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
-    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> Min."</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> Std."</string>
     <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> T"</string>
     <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> J"</string>
-    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"in <xliff:g id="COUNT">%d</xliff:g> min"</string>
-    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"in <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"in <xliff:g id="COUNT">%d</xliff:g> Min."</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"in <xliff:g id="COUNT">%d</xliff:g> Std."</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"in <xliff:g id="COUNT">%d</xliff:g> T"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"in <xliff:g id="COUNT">%d</xliff:g> J"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Vor # Minute}other{Vor # Minuten}}"</string>
@@ -1722,7 +1722,7 @@
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Wähle eine Funktion aus, die verwendet wird, wenn du auf die Schaltfläche \"Bedienungshilfen\" tippst:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Wähle die Funktion aus, die mit der Touch-Geste für die Bedienungshilfen verwendet werden soll (mit zwei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Wähle eine Funktion aus, die mit der Touch-Geste für die Bedienungshilfen verwendet werden soll (mit drei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Wenn du zwischen den Funktionen wechseln möchtest, halte die Schaltfläche \"Bedienungshilfen\" gedrückt."</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Wenn du zwischen den Funktionen wechseln möchtest, halte die Schaltfläche „Bedienungshilfen“ gedrückt."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Wenn du zwischen den Funktionen wechseln möchtest, wische mit zwei Fingern nach oben und halte."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Wenn du zwischen den Funktionen wechseln möchtest, wische mit drei Fingern nach oben und halte."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Vergrößerung"</string>
@@ -2092,7 +2092,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Ausschalten"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Weitere Informationen"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Die adaptiven Benachrichtigungen wurden in Android 12 durch die Funktion „Erweiterte Benachrichtigungen“ ersetzt. Diese Funktion zeigt Vorschläge für Aktionen und Antworten an und sortiert Benachrichtigungen.\n\nDie Funktion hat Zugriff auf alle Benachrichtigungen, darunter auch personenbezogene Daten wie Kontaktnamen und Nachrichten. Außerdem kann sie auf Benachrichtigungen antworten oder diese schließen und so beispielsweise Anrufe entgegennehmen oder „Bitte nicht stören“ steuern."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Die adaptiven Benachrichtigungen wurden in Android 12 durch die Funktion „Erweiterte Benachrichtigungen“ ersetzt. Diese Funktion zeigt Vorschläge für Aktionen und Antworten an und sortiert Benachrichtigungen.\n\nDie Funktion hat Zugriff auf alle Benachrichtigungen, darunter auch personenbezogene Daten wie Namen von Kontakten und Nachrichten. Außerdem kann sie auf Benachrichtigungen antworten oder diese schließen und so unter anderem Anrufe entgegennehmen oder „Bitte nicht stören“ steuern."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Infomitteilung zum Ablaufmodus"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Energiesparmodus aktiviert"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Reduzierung der Akkunutzung, um die Akkulaufzeit zu verlängern"</string>
@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Tastaturlayout festgelegt auf <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Zum Ändern tippen."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Physische Tastaturen konfiguriert"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Zum Ansehen der Tastaturen tippen"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Privat"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Vertraulich"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Klon"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Geschäftlich"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Geschäftlich 2"</string>

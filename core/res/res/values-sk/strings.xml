@@ -704,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Model tváre sa nedá vytvoriť. Skúste to znova."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Boli rozpoznané tmavé okuliare. Musí vám byť vidieť celú tvár."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Bolo rozpoznané rúško. Musí vám byť vidieť celú tvár."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Máte čiastočne zakrytú tvár. Musí byť viditeľná celá."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tvár sa nedá overiť. Hardvér nie je k dispozícii."</string>
@@ -808,7 +808,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Sledovať počet nesprávnych hesiel zadaných pri odomykaní obrazovky a zamknúť tablet alebo vymazať všetky údaje tabletu v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Sledovanie počtu nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknutie zariadenia Android TV alebo vymazanie všetkých jeho údajov."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a uzamknite palubný systém alebo vymažte všetky údaje v palubnom systéme v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Sledovať počet nesprávnych hesiel zadaných pri odomykaní obrazovky a zamknúť telefón alebo vymazať všetky údaje v telefóne v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Sleduje počet nesprávnych hesiel zadaných pri odomykaní obrazovky a uzamkne telefón alebo vymaže z telefónu všetky dáta, ak bolo zadaných príliš veľa nesprávnych hesiel."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite tablet alebo vymažte všetky údaje tohto používateľa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Sledovanie počtu nesprávnych hesiel zadaných pri odomykaní obrazovky a ak je ich zadaných príliš mnoho, uzamknutie zariadenia Android TV alebo vymazanie všetkých údajov tohto používateľa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite palubný systém alebo vymažte všetky údaje tohto profilu."</string>
@@ -821,7 +821,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Bez predchádzajúceho upozornenia vymazať všetky dáta obnovením výrobných nastavení tabletu."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Vymazanie údajov v zariadení Android TV bez upozornenia obnovením výrobných nastavení."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Vymažte údaje palubného systému bez upozornenia obnovením výrobných nastavení."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Bez predchádzajúceho upozornenia vymazať všetky dáta obnovením výrobných nastavení telefónu."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Bez predchádzajúceho upozornenia vymaže všetky dáta obnovením výrobných nastavení telefónu."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Vymazanie údajov profilu"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Vymazať údaje používateľa"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Vymažte bez upozornenia údaje tohto používateľa na tomto tablete."</string>
@@ -1144,7 +1144,7 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"Vybrať všetko"</string>
     <string name="cut" msgid="2561199725874745819">"Vystrihnúť"</string>
-    <string name="copy" msgid="5472512047143665218">"Kopírovať"</string>
+    <string name="copy" msgid="5472512047143665218">"Skopírovať"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Nepodarilo sa skopírovať do schránky"</string>
     <string name="paste" msgid="461843306215520225">"Prilepiť"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Prilepiť ako obyčajný text"</string>
@@ -2341,9 +2341,9 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Rozloženie klávesnice je nastavené na jazyky <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> a <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Môžete to zmeniť klepnutím."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fyzické klávesnice sú nakonfigurované"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Klávesnice si zobrazíte klepnutím"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Súkromný"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Súkromné"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Klon"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"Pracovný"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Pracovné"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"2. pracovný"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"3. pracovný"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Testovací"</string>

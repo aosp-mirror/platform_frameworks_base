@@ -49,11 +49,10 @@ interface SystemStatusAnimationCallback {
     fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator? { return null }
 
     // Best method name, change my mind
-    @JvmDefault
     fun onSystemStatusAnimationTransitionToPersistentDot(contentDescription: String?): Animator? {
         return null
     }
-    @JvmDefault fun onHidePersistentDot(): Animator? { return null }
+    fun onHidePersistentDot(): Animator? { return null }
 }
 
 

@@ -1695,7 +1695,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Без включване"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ВКЛ."</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ИЗКЛ."</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Искате ли да разрешите на <xliff:g id="SERVICE">%1$s</xliff:g> да има пълен контрол над устройството ви?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Искате ли да разрешите на „<xliff:g id="SERVICE">%1$s</xliff:g>“ да има пълен контрол над устройството ви?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Пълният контрол е подходящ за приложенията, които помагат на потребителите със специални нужди, но не и за повечето приложения."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Преглед и управление на екрана"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Услугата може да чете цялото съдържание на екрана и да показва такова върху други приложения."</string>

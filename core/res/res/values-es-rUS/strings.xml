@@ -109,7 +109,7 @@
     <string name="serviceClassPAD" msgid="6850244583416306321">"PAD"</string>
     <string name="roamingText0" msgid="7793257871609854208">"Indicador de roaming activado"</string>
     <string name="roamingText1" msgid="5073028598334616445">"Indicador de roaming desactivado"</string>
-    <string name="roamingText2" msgid="2834048284153110598">"Indicador de roaming titilando"</string>
+    <string name="roamingText2" msgid="2834048284153110598">"Indicador de roaming parpadeando"</string>
     <string name="roamingText3" msgid="831690234035748988">"Fuera del vecindario"</string>
     <string name="roamingText4" msgid="2171252529065590728">"Fuera de construcción"</string>
     <string name="roamingText5" msgid="4294671587635796641">"Roaming: sistema preferido"</string>
@@ -817,7 +817,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Bloquear la pantalla"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Controla cómo y cuándo se bloquea la pantalla."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Borrar todos los datos"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Eliminar los datos de la tablet sin avisar y restablecer la configuración de fábrica"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Borra los datos de la tablet sin avisar y restablece la configuración de fábrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Restablece la configuración de fábrica para borrar los datos del dispositivo Android TV sin previo aviso."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Permite borrar los datos del sistema de infoentretenimiento sin previo aviso mediante el restablecimiento de la configuración de fábrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Borra los datos del dispositivo sin avisar y restablece la configuración de fábrica."</string>
@@ -1701,7 +1701,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver y controlar la pantalla"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Puede leer todo el contenido en la pantalla y mostrar contenido sobre otras apps."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ver y realizar acciones"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Puede realizar el seguimiento de tus interacciones con una app o un sensor de hardware, así como interactuar con las apps por ti."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Puede seguir tus interacciones con una app o un sensor de hardware, así como interactuar con las apps por ti."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Rechazar"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Presiona una función para comenzar a usarla:"</string>
@@ -2093,7 +2093,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Aceptar"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desactivar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Más información"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Las notificaciones mejoradas reemplazaron a las notificaciones adaptables en Android 12. Esta función muestra respuestas y acciones sugeridas, y organiza tus notificaciones.\n\nLas notificaciones mejoradas pueden acceder a todo el contenido de notificaciones, lo que incluye información personal, como nombres de contactos y mensajes. También pueden descartar o responder notificaciones (como contestar llamadas) y controlar la función No interrumpir."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Las notificaciones mejoradas reemplazaron a las notificaciones adaptables en Android 12. Esta función muestra respuestas y acciones sugeridas, y organiza tus notificaciones.\n\nLas notificaciones mejoradas pueden acceder a todo el contenido de notificaciones, incluida información personal, como nombres de contactos y mensajes. También pueden descartar o responder notificaciones (como contestar llamadas) y controlar la función No interrumpir."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación de información del modo de Rutinas"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Ahorro de batería activado"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Reduciendo el uso de la batería para extender su duración"</string>

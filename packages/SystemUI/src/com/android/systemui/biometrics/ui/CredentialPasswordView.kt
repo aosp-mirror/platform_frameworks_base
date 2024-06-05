@@ -122,7 +122,7 @@ class CredentialPasswordView(context: Context, attrs: AttributeSet?) :
                 titleView.ellipsize = TextUtils.TruncateAt.MARQUEE
                 titleView.marqueeRepeatLimit = -1
                 // select to enable marquee unless a screen reader is enabled
-                titleView.isSelected = accessibilityManager.shouldMarquee()
+                titleView.isSelected = accessibilityManager?.shouldMarquee() ?: false
             } else {
                 titleView.isSingleLine = false
                 titleView.ellipsize = null

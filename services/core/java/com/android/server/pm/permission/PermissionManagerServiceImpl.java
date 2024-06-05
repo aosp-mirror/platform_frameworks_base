@@ -695,6 +695,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 // TODO: switch this back to SecurityException
                 Slog.wtf(TAG, "Not allowed to modify non-dynamic permission "
                         + permName);
+                return;
             }
             mRegistry.removePermission(permName);
         }

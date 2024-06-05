@@ -243,7 +243,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvok"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Slušalke z mikrofonom"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Vhodna naprava"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Slušni pripomočki"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Slušni aparati"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Vklapljanje …"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Samodejno sukanje"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Samodejno sukanje zaslona"</string>
@@ -405,7 +405,7 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Pri deljenju, snemanju ali predvajanju aplikacije ima aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> dostop do vsega, kar je prikazano ali predvajano v tej aplikaciji, zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Začni"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Želite začeti predvajati?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Pri predvajanju ima Android dostop do vsega, kar je prikazano na zaslonu ali se predvaja v napravi. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Pri predvajanju ima Android dostop do vsega, kar je prikazano na zaslonu ali se predvaja v napravi, zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Pri predvajanju aplikacije ima Android dostop do vsega, kar je prikazano ali predvajano v tej aplikaciji, zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Začni predvajanje"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Želite začeti deliti?"</string>
@@ -646,7 +646,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Ni najdenih bližnjic."</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistem"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Vnos"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Odprte aplikacije"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Odpiranje aplikacij"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Trenutna aplikacija"</string>
     <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Dostop do zaslona z obvestili"</string>
     <string name="group_system_full_screenshot" msgid="7389040853798023211">"Ustvarjanje posnetka celotnega zaslona"</string>
@@ -667,7 +667,7 @@
     <string name="system_multitasking_lhs" msgid="8839380725557952846">"Vklop razdeljenega zaslona s trenutno aplikacijo na levi"</string>
     <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Preklop iz razdeljenega zaslona v celozaslonski način"</string>
     <string name="system_multitasking_replace" msgid="844285282472557186">"Pri razdeljenem zaslonu: Medsebojna zamenjava aplikacij"</string>
-    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Vnosna naprava"</string>
+    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Vnos"</string>
     <string name="input_switch_input_language_next" msgid="3394291576873633793">"Preklop jezika vnosa (naslednji jezik)"</string>
     <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Preklop jezika vnosa (prejšnji jezik)"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Dostop do emodžijev"</string>
@@ -863,7 +863,7 @@
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Ročica desno"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Ročica spodaj"</string>
     <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Nastavitve povečave"</string>
-    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Velikost povečevalnika"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Velikost lupe"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Povečava/pomanjšava"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Srednja"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Majhna"</string>
@@ -871,7 +871,7 @@
     <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"Celozaslonski način"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"Končano"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Uredi"</string>
-    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Nastavitve okna povečevalnika"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Nastavitve okna lupe"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Dotaknite se za funkcije dostopnosti. Ta gumb lahko prilagodite ali zamenjate v nastavitvah.\n\n"<annotation id="link">"Ogled nastavitev"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Če želite gumb začasno skriti, ga premaknite ob rob."</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Razveljavi"</string>

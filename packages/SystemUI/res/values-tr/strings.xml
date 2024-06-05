@@ -501,14 +501,14 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Uygulamanın sabitlemesi kaldırıldı"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Çağrı"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistem"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Zili çaldır"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Zil"</string>
     <string name="stream_music" msgid="2188224742361847580">"Medya"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarm"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Bildirim"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Çift ton çoklu frekans"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Erişilebilirlik"</string>
-    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Zili çaldır"</string>
+    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Zil"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Titreşim"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Sesi kapat"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Sesi açmak için dokunun."</string>
@@ -875,7 +875,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Erişilebilirlik özelliklerini açmak için dokunun. Bu düğmeyi Ayarlar\'dan özelleştirin veya değiştirin.\n\n"<annotation id="link">"Ayarları göster"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Düğmeyi geçici olarak gizlemek için kenara taşıyın"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Geri al"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> kısayol kaldırıldı"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> kısayolu kaldırıldı"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# kısayol kaldırıldı}other{# kısayol kaldırıldı}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Sol üste taşı"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Sağ üste taşı"</string>

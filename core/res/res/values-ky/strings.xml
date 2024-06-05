@@ -970,7 +970,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Туура!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Дагы аракет кылыңыз"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Дагы аракет кылыңыз"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Элементтердин жана дайындардын кулпусун ачуу"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Функциялар менен колдонмолордун кулпусун ачуу"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Жүзүнөн таанып ачуу аракеттеринин чегинен аштыңыз"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM карта жок"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Планшетте SIM карта жок."</string>
@@ -1256,7 +1256,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Колдонмолорду иштетип баштоо"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Жүктөлүүдө"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Кубат баскычын бастыңыз — адатта, бул экранды өчүрөт.\n\nМанжаңыздын изин жөндөп жатканда аны акырын басып көрүңүз."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Кошуп бүтүрүү үчүн экранды өчүрүңүз"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Бүтүрүү үчүн экранды өчүрүңүз"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Өчүрүү"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Манжаңыздын изин ырастоону улантасызбы?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Кубат баскычын бастыңыз — адатта, бул экранды өчүрөт.\n\nМанжаңыздын изин ырастоо үчүн аны акырын басып көрүңүз."</string>
@@ -1303,7 +1303,7 @@
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />
     <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> Интернетке туташуусу жок"</string>
-    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Параметрлерди ачуу үчүн таптап коюңуз"</string>
+    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Параметрлерди ачуу үчүн тийип коюңуз"</string>
     <string name="mobile_no_internet" msgid="4014455157529909781">"Мобилдик Интернет жок"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Тармактын Интернет жок"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Жеке DNS сервери жеткиликсиз"</string>
@@ -1365,7 +1365,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB аркылуу MIDI режими күйгүзүлдү"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Түзмөк веб-камера катары туташты"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB шайманы туташты"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Кошумча параметрлерди ачуу үчүн таптап коюңуз."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Кошумча параметрлерди ачуу үчүн тийип коюңуз."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Туташкан түзмөк кубатталууда. Дагы параметрлерди көрүү үчүн таптап коюңуз."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Аналогдук аудио жабдуу табылды"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Тиркелген түзмөк бул телефонго шайкеш келбейт. Көбүрөөк маалымат алуу үчүн таптап коюңуз."</string>
@@ -1926,7 +1926,7 @@
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Видео"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Четке кагуу"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Чалууну бүтүрүү"</string>
-    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Кирүүчү чалуу"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Чалып жатат"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Учурдагы чалуу"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Кирүүчү чалууну иргөө"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Категорияларга бөлүнгөн эмес"</string>

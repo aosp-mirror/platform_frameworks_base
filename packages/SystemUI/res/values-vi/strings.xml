@@ -315,10 +315,10 @@
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Vừa"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Cao"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Bỏ chặn micrô của thiết bị?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Bỏ chặn máy ảnh của thiết bị?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Bỏ chặn camera của thiết bị?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Bỏ chặn máy ảnh và micrô của thiết bị?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Sau khi được bỏ chặn, mọi ứng dụng và dịch vụ có quyền sẽ có thể sử dụng micrô của bạn."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Sau khi được bỏ chặn, mọi ứng dụng và dịch vụ có quyền sẽ có thể sử dụng máy ảnh của bạn."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Sau khi được bỏ chặn, mọi ứng dụng và dịch vụ có quyền sẽ có thể sử dụng micrô trên thiết bị của bạn."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Sau khi được bỏ chặn, mọi ứng dụng và dịch vụ có quyền sẽ có thể sử dụng camera trên thiết bị của bạn."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng máy ảnh hoặc micrô của bạn."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Micrô bị chặn"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Máy ảnh bị chặn"</string>
@@ -502,7 +502,7 @@
     <string name="stream_voice_call" msgid="7468348170702375660">"Gọi"</string>
     <string name="stream_system" msgid="7663148785370565134">"Hệ thống"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Chuông"</string>
-    <string name="stream_music" msgid="2188224742361847580">"Phương tiện"</string>
+    <string name="stream_music" msgid="2188224742361847580">"Nội dung nghe nhìn"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Báo thức"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Thông báo"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
@@ -875,7 +875,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Nhấn để mở bộ tính năng hỗ trợ tiếp cận. Tuỳ chỉnh/thay thế nút này trong phần Cài đặt.\n\n"<annotation id="link">"Xem chế độ cài đặt"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Di chuyển nút sang cạnh để ẩn nút tạm thời"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Huỷ"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Đã xoá phím tắt dành cho <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Đã xoá lối tắt cho <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Đã xoá # lối tắt}other{Đã xoá # lối tắt}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Chuyển lên trên cùng bên trái"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Chuyển lên trên cùng bên phải"</string>
@@ -1124,7 +1124,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Có ít nhất một thiết bị đang hoạt động"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Chọn một ứng dụng ghi chú mặc định để dùng lối tắt ghi chú"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Chọn ứng dụng"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Chạm và giữ phím tắt"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Chạm và giữ lối tắt"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Huỷ"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Chuyển đổi màn hình ngay"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Mở điện thoại"</string>

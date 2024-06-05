@@ -105,7 +105,7 @@ open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
 
         hideAnimator.addListener(
             object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     super@BouncerKeyguardMessageArea.setMessage(msg, animate)
                 }
             }
@@ -118,7 +118,7 @@ open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
 
         showAnimator.addListener(
             object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     textAboutToShow = null
                 }
             }

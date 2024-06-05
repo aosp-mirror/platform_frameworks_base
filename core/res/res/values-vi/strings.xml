@@ -889,7 +889,7 @@
     <string name="phoneTypeOther" msgid="6918196243648754715">"Khác"</string>
     <string name="phoneTypeCallback" msgid="3455781500844157767">"Số gọi lại"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"Ô tô"</string>
-    <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"Số ĐT CQ chính"</string>
+    <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"Số chính ở nơi làm việc"</string>
     <string name="phoneTypeIsdn" msgid="2496238954533998512">"ISDN"</string>
     <string name="phoneTypeMain" msgid="5199722006991000111">"Số chính"</string>
     <string name="phoneTypeOtherFax" msgid="3037145630364770357">"Số fax Khác"</string>
@@ -2134,9 +2134,9 @@
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Khóa màn hình"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Chụp ảnh màn hình"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Giá treo tai nghe"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Phím tắt hỗ trợ tiếp cận trên màn hình"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Bộ chọn phím tắt hỗ trợ tiếp cận trên màn hình"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Phím tắt hỗ trợ tiếp cận"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Lối tắt hỗ trợ tiếp cận trên màn hình"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Bộ chọn lối tắt hỗ trợ tiếp cận trên màn hình"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Lối tắt hỗ trợ tiếp cận"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Đóng Ngăn thông báo"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Chuyển lên trên bằng bàn phím di chuyển"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Chuyển xuống dưới bằng bàn phím di chuyển"</string>

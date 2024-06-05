@@ -102,7 +102,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"ນຳໃຊ້ຢູ່, ຊ້າຍເທົ່ານັ້ນ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"ນຳໃຊ້ຢູ່, ຂວາເທົ່ານັ້ນ"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"ນຳໃຊ້ຢູ່, ຊ້າຍ ແລະ ຂວາ"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"ສຽງ"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"ສຽງມີເດຍ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ການໂທ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ການໂອນຍ້າຍໄຟລ໌"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ອຸປະກອນປ້ອນຂໍ້ມູນ"</string>
@@ -213,7 +213,7 @@
     <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"ເລືອກໂປຣໄຟລ໌"</string>
-    <string name="category_personal" msgid="6236798763159385225">"​ສ່ວນ​ໂຕ"</string>
+    <string name="category_personal" msgid="6236798763159385225">"ສ່ວນຕົວ"</string>
     <string name="category_work" msgid="4014193632325996115">"​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="category_clone" msgid="1554511758987195974">"ໂຄລນ"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ຕົວເລືອກນັກພັດທະນາ"</string>
@@ -350,7 +350,7 @@
     <string name="media_category" msgid="8122076702526144053">"ມີເດຍ"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"ກຳລັງກວດສອບ"</string>
     <string name="strict_mode" msgid="889864762140862437">"ເປີດໃຊ້ໂໝດເຄັ່ງຄັດ"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"ກະພິບໜ້າຈໍເມື່ອມີແອັບ ເຮັດວຽກດົນເກີນໄປໃນເທຣດຫຼັກ"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"ກະພິບໜ້າຈໍເມື່ອມີແອັບເຮັດວຽກດົນເກີນໄປໃນເທຣດຫຼັກ"</string>
     <string name="pointer_location" msgid="7516929526199520173">"ຕຳແໜ່ງໂຕຊີ້"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"ການວາງຊ້ອນໜ້າຈໍກຳລັງສະແດງຂໍ້ມູນການສຳຜັດໃນປັດຈຸບັນ"</string>
     <string name="show_touches" msgid="8437666942161289025">"ສະແດງການແຕະ"</string>

@@ -803,7 +803,7 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Atļauj īpašniekam atjaunināt iepriekš instalēto lietotni bez lietotāja darbības"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Paroles kārtulu iestatīšana"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolēt ekrāna bloķēšanas paroļu un PIN garumu un tajos atļautās rakstzīmes."</string>
-    <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>
+    <string name="policylab_watchLogin" msgid="7599669460083719504">"Pārraudzīt ekrāna atbloķēšanas mēģinājumus"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Pārrauga nepareizi ievadīto paroļu skaitu, atbloķējot ekrānu, un bloķē planšetdatoru vai dzēš visus planšetdatora datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Pārraudzīt nepareizi ievadīto ekrāna atbloķēšanas paroļu skaitu un bloķēt Android TV vai dzēst visus Android TV ierīces datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Ekrāna atbloķēšanas laikā pārraudzīt nepareizi ievadīto paroļu skaitu un bloķēt informatīvi izklaidējošo sistēmu vai dzēst visus informatīvi izklaidējošās sistēmas datus, ja tiek ievadīts pārāk daudz nepareizu paroļu."</string>
@@ -1271,12 +1271,12 @@
     <string name="new_app_action" msgid="547772182913269801">"Atvērt <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1958903080400806644">"Lietotne <xliff:g id="OLD_APP">%1$s</xliff:g> tiks aizvērta, neko nesaglabājot"</string>
     <string name="dump_heap_notification" msgid="5316644945404825032">"Process <xliff:g id="PROC">%1$s</xliff:g> pārsniedza atmiņas ierobežojumu."</string>
-    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> kaudzes izraksts ir gatavs"</string>
+    <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> grēdas izraksts ir gatavs"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"Apkopots kaudzes izraksts. Pieskarieties, lai kopīgotu."</string>
-    <string name="dump_heap_title" msgid="4367128917229233901">"Vai kopīgot kaudzes izrakstu?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"Process <xliff:g id="PROC">%1$s</xliff:g> pārsniedza atmiņas ierobežojumu (<xliff:g id="SIZE">%2$s</xliff:g>). Tika vākts kaudzes izraksts, ko varat kopīgot ar procesa izstrādātāju. Ņemiet vērā: kaudzes izrakstā var būt ietverta jūsu personas informācija, kurai var piekļūt lietojumprogramma."</string>
+    <string name="dump_heap_title" msgid="4367128917229233901">"Vai kopīgot grēdas izrakstu?"</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"Process <xliff:g id="PROC">%1$s</xliff:g> pārsniedza atmiņas ierobežojumu (<xliff:g id="SIZE">%2$s</xliff:g>). Tika vākts grēdas izraksts, ko varat kopīgot ar procesa izstrādātāju. Ņemiet vērā: grēdas izrakstā var būt ietverta jūsu personas informācija, kurai var piekļūt lietojumprogramma."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"Process <xliff:g id="PROC">%1$s</xliff:g> pārsniedza atmiņas ierobežojumu (<xliff:g id="SIZE">%2$s</xliff:g>). Tika vākts kaudzes izraksts, ko varat kopīgot. Ievērojiet piesardzību, jo kaudzes izrakstā var būt ietverta visa sensitīvā personas informācija, kurai var piekļūt process, tostarp jūsu rakstīts teksts."</string>
-    <string name="dump_heap_ready_text" msgid="5849618132123045516">"Ir pieejams procesa <xliff:g id="PROC">%1$s</xliff:g> kaudzes izraksts, ko varat kopīgot. Ievērojiet piesardzību, jo kaudzes izrakstā var būt ietverta visa sensitīvā personas informācija, kurai var piekļūt process, tostarp jūsu rakstīts teksts."</string>
+    <string name="dump_heap_ready_text" msgid="5849618132123045516">"Ir pieejams procesa <xliff:g id="PROC">%1$s</xliff:g> grēdas izraksts, ko varat kopīgot. Ievērojiet piesardzību, jo grēdas izrakstā var būt ietverta visa sensitīvā personas informācija, kurai var piekļūt process, tostarp jūsu rakstīts teksts."</string>
     <string name="sendText" msgid="493003724401350724">"Izvēlieties darbību tekstam"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Zvanītāja skaļums"</string>
     <string name="volume_music" msgid="7727274216734955095">"Multivides skaļums"</string>
@@ -2151,7 +2151,7 @@
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Saruna"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Grupas saruna"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Privātais profils"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Personīgais"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Darba profils"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personisks skats"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Darba skats"</string>

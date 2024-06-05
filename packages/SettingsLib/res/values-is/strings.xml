@@ -159,7 +159,7 @@
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Fullur Wi-Fi sendistyrkur."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Opið net"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Öruggt net"</string>
-    <string name="process_kernel_label" msgid="950292573930336765">"Android stýrikerfið"</string>
+    <string name="process_kernel_label" msgid="950292573930336765">"Android-stýrikerfið"</string>
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Fjarlægð forrit"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Fjarlægð forrit og notendur"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Kerfisuppfærslur"</string>
@@ -213,7 +213,7 @@
     <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Veldu snið"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Persónulegt"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Einkasnið"</string>
     <string name="category_work" msgid="4014193632325996115">"Vinna"</string>
     <string name="category_clone" msgid="1554511758987195974">"Afrit"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Forritunarkostir"</string>

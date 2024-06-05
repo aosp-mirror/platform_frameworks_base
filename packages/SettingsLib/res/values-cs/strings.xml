@@ -264,7 +264,7 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Povolit odemknutí zavaděče"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Povolit odemknutí OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"UPOZORNĚNÍ: Pokud bude toto nastavení zapnuto, nebudou v tomto zařízení fungovat funkce ochrany zařízení."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Vybrat aplikaci k simulování polohy"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Vybrat aplikaci k simulování polohy"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Aplikace k simulování polohy není nastavena"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikace k simulování polohy: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Sítě"</string>
@@ -293,8 +293,8 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Kodek Bluetooth Audio LDAC: Kvalita přehrávání"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Spustit zvukový kodek Bluetooth LDAC\nVýběr kodeku: kvalita přehrávání"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Streamování: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Soukromé DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Vyberte soukromý režim DNS"</string>
+    <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Soukromý DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Režim výběru soukromého DNS"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Vypnuto"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automaticky"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Název hostitele poskytovatele soukromého DNS"</string>
@@ -545,7 +545,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Právě teď"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Tento telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Tento tablet"</string>
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dok s reproduktorem"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Reproduktor doku"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Externí zařízení"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Připojené zařízení"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Tento telefon"</string>
@@ -565,7 +565,7 @@
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Pro tohoto uživatele nejsou k dispozici žádná sdílená data."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Při načítání sdílených dat došlo k chybě. Zkuste to znovu."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"ID sdílených dat: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
-    <string name="blob_expires_text" msgid="7882727111491739331">"Platnost vyprší <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Platnost skončí <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Při mazání sdílených dat došlo k chybě."</string>
     <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Pro tato sdílená data nejsou k dispozici žádné smlouvy. Chcete je smazat?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Aplikace, které sdílejí data"</string>
@@ -675,7 +675,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Výchozí"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Zapínání obrazovky"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Povolit zapínání obrazovky"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Povolte aplikaci zapínat obrazovku. Pokud aplikace bude mít toto oprávnění, může kdykoli zapnout obrazovku bez požadavku uživatele."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Aplikaci můžete povolit zapínat obrazovku. Pokud bude mít toto oprávnění, může kdykoli zapnout obrazovku bez požadavku uživatele."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zastavit vysílání v aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Pokud budete vysílat v aplikaci <xliff:g id="SWITCHAPP">%1$s</xliff:g> nebo změníte výstup, aktuální vysílání se zastaví"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Vysílat v aplikaci <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

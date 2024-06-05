@@ -23,7 +23,7 @@
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"পিন লিখুন"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"পিন লিখুন"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"প্যাটার্ন আঁকুন"</string>
-    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"প্যাটার্ন দিন"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"প্যাটার্ন আঁকুন"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"পাসওয়ার্ড লিখুন"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"পাসওয়ার্ড লিখুন"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ভুল কার্ড।"</string>

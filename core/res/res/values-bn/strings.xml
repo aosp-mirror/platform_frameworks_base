@@ -619,7 +619,7 @@
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"চালিয়ে যেতে আপনার বায়োমেট্রিক্স বা স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"বায়োমেট্রিক হার্ডওয়্যার পাওয়া যাবে না"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"যাচাইকরণ বাতিল হয়েছে"</string>
-    <string name="biometric_not_recognized" msgid="5106687642694635888">"স্বীকৃত নয়"</string>
+    <string name="biometric_not_recognized" msgid="5106687642694635888">"শনাক্ত করা যায়নি"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"যাচাইকরণ বাতিল হয়েছে"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"পিন, প্যাটার্ন অথবা পাসওয়ার্ড সেট করা নেই"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"যাচাইকরণে সমস্যা হয়েছে"</string>
@@ -1180,7 +1180,7 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max}টির মধ্যে একটি স্টার}one{#টির মধ্যে {max}টি স্টার}other{#টির মধ্যে {max}টি স্টার}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"কাজ চলছে"</string>
     <string name="whichApplication" msgid="5432266899591255759">"এটি ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ব্যবহার করে কাজটি করুন"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"এর মাধ্যমে খুলুন"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"%1$s দিয়ে খুলুন"</string>
@@ -1206,7 +1206,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"%1$s দিয়ে ছবি তুলুন"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"ছবি তুলুন"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"এই ক্রিয়াটির জন্য এটিকে ডিফল্টরুপে ব্যবহার করুন৷"</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"আলাদা কোনো অ্যাপ্লিকেশান ব্যবহার করুন"</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"আলাদা কোনও অ্যাপ ব্যবহার করুন"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"সিস্টেম সেটিংস &gt; অ্যাপ্স &gt; ডাউনলোড করাগুলি এ গিয়ে ডিফল্ট সরিয়ে দিন৷"</string>
     <string name="chooseActivity" msgid="8563390197659779956">"একটি ক্রিয়া বেছে নিন"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"USB ডিভাইসটির জন্য একটি অ্যাপ্লিকেশান বেছে নিন"</string>
@@ -1693,7 +1693,7 @@
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"উভয় ভলিউম কী কয়েক সেকেন্ড ধরে থাকলে <xliff:g id="SERVICE">%1$s</xliff:g> চালু হয়ে যাবে। এটি একটি অ্যাক্সেসিবিলিটি ফিচার। এর ফলে, আপনার ডিভাইস কীভাবে কাজ করবে সেটিতে পরিবর্তন হতে পারে।\n\nসেটিংস &gt; অ্যাক্সেসিবিলিটি থেকে আপনি এই শর্টকাট পরিবর্তন করতে পারবেন।"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"চালু করুন"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"চালু করবেন না"</string>
-    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"চালু"</string>
+    <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"চালু আছে"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"বন্ধ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> অ্যাপটিকে আপনার ডিভাইসে সম্পূর্ণ নিয়ন্ত্রণের অনুমতি দিতে চান?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"যে অ্যাপগুলি আপনাকে অ্যাক্সেসিবিলিটির প্রয়োজন মেটাতে সাহায্য করে সেই অ্যাপগুলির জন্য সম্পূর্ণ নিয়ন্ত্রণের বিষয়টি উপযুক্ত, কিন্তু তা বলে সমস্ত অ্যাপের জন্য নয়।"</string>
@@ -1714,7 +1714,7 @@
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"কালার ইনভার্সন"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"রঙ সংশোধন করা"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"এক হাতে ব্যবহার করার মোড"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিরিক্ত কম ব্রাইটনেস"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিরিক্ত কম উজ্জ্বলতা"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"হিয়ারিং ডিভাইস"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কী ধরে ছিলেন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> চালু করা হয়েছে।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধরে ছিলেন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> বন্ধ করা হয়েছে।"</string>
@@ -2339,7 +2339,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"কীবোর্ড লেআউট <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>-এ সেট করা আছে… পালটাতে ট্যাপ করুন।"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ফিজিক্যাল কীবোর্ড কনফিগার করা হয়েছে"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"কীবোর্ড দেখতে ট্যাপ করুন"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"ব্যক্তিগত"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"প্রাইভেট"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"ক্লোন করুন"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"অফিস"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"২য় অফিস"</string>

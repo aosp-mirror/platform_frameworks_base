@@ -816,7 +816,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Lukita ruudun"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Hallinnoida, milloin ja miten näyttö lukittuu."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Pyyhkiä kaikki tiedot"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Tyhjennä tablet-laitteen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Tyhjentää tablet-laitteen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Tyhjentää Android TV ‑laitteen tiedot ilman varoitusta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Poistaa infotainment-järjestelmän datan ilman varoitusta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Tyhjentää puhelimen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
@@ -1357,7 +1357,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Lupia ei tarvita"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"tämä voi maksaa"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Laite lataa USB-yhteydellä"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Laitetta ladataan USB:llä"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Ladataan yhdistettyä laitetta USB:n kautta"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB-tiedostonsiirto on käytössä"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP USB:n kautta on käytössä"</string>
@@ -1628,7 +1628,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Langaton näyttö"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Suoratoisto"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Yhdistä laitteeseen"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Lähetä näyttö laitteeseen"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Striimaa näyttö laitteeseen"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Etsitään laitteita…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Asetukset"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Katkaise yhteys"</string>
@@ -1873,8 +1873,8 @@
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Virransäästö laittaa tumman teeman päälle ja rajoittaa tai laittaa pois päältä taustatoimintoja, tiettyjä ominaisuuksia sekä joitakin visuaalisia tehosteita ja verkkoyhteyksiä."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Virransäästö laittaa tumman teeman päälle ja rajoittaa tai laittaa pois päältä taustatoimintoja, tiettyjä ominaisuuksia sekä joitakin visuaalisia tehosteita ja verkkoyhteyksiä."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Data Saver estää joitakin sovelluksia lähettämästä tai vastaanottamasta tietoja taustalla, jotta datan käyttöä voidaan vähentää. Käytössäsi oleva sovellus voi yhä käyttää dataa, mutta se saattaa tehdä niin tavallista harvemmin. Tämä voi tarkoittaa esimerkiksi sitä, että kuva ladataan vasta, kun kosketat sitä."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Otetaanko Data Saver käyttöön?"</string>
-    <string name="data_saver_enable_button" msgid="4399405762586419726">"Ota käyttöön"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Laitetaanko Data Saver päälle?"</string>
+    <string name="data_saver_enable_button" msgid="4399405762586419726">"Laita päälle"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Yhdeksi minuutiksi ({formattedTime} asti)}other{# minuutiksi ({formattedTime} asti)}}"</string>
     <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Yhdeksi minuutiksi ({formattedTime} asti)}other{# minuutiksi ({formattedTime} asti)}}"</string>
     <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Yhdeksi tunniksi ({formattedTime} asti)}other{# tunniksi ({formattedTime} asti)}}"</string>

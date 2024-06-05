@@ -97,7 +97,7 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> e altre app aperte hanno rilevato questo screenshot."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Aggiungi alla nota"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Registrazione dello schermo"</string>
-    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Elaboraz. registraz. schermo"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Elaborazione registrazione…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifica costante per una sessione di registrazione dello schermo"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Iniziare a registrare?"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Quando registri, Android ha accesso a qualsiasi elemento visibile sul tuo schermo o in riproduzione sul tuo dispositivo. Presta quindi attenzione a password, dettagli sui pagamenti, messaggi, foto, audio e video."</string>
@@ -109,7 +109,7 @@
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Microfono"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio del dispositivo e microfono"</string>
     <string name="screenrecord_continue" msgid="4055347133700593164">"Inizia"</string>
-    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Registrazione schermo"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Registrazione schermo in corso…"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Registrazione schermo e audio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostra tocchi sullo schermo"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Interrompi"</string>
@@ -249,7 +249,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rotazione automatica dello schermo"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Geolocalizzazione"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Salvaschermo"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accesso alla videocamera"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accesso alla fotocamera"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accesso al microfono"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponibile"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloccato"</string>
@@ -502,7 +502,7 @@
     <string name="stream_voice_call" msgid="7468348170702375660">"Chiamata"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Suoneria"</string>
-    <string name="stream_music" msgid="2188224742361847580">"Supporti multimediali"</string>
+    <string name="stream_music" msgid="2188224742361847580">"Contenuti multimediali"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Sveglia"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notifica"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
@@ -863,7 +863,7 @@
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Punto di manipolazione destro"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Punto di manipolazione inferiore"</string>
     <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Impostazioni di ingrandimento"</string>
-    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Dimensione dell\'ingrandimento"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Dimensione ingrandimento"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Zoom"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Medio"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Piccolo"</string>
@@ -881,7 +881,7 @@
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Sposta in alto a destra"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Sposta in basso a sinistra"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Sposta in basso a destra"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Sposta fino a bordo e nascondi"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Sposta fino al bordo e nascondi"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Sposta fuori da bordo e mostra"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Rimuovi"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"attiva/disattiva"</string>
