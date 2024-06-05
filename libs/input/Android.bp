@@ -46,7 +46,6 @@ cc_library_shared {
         "liblog",
         "libutils",
         "libgui",
-        "libui",
         "libinput",
     ],
 

@@ -4862,7 +4862,7 @@ public final class ActiveServices {
                 }
                 // TODO: come back and remove this assumption to triage all services
                 ResolveInfo rInfo = mAm.getPackageManagerInternal().resolveService(service,
-                        resolvedType, flags, userId, callingUid);
+                        resolvedType, flags, userId, callingUid, callingPid);
                 ServiceInfo sInfo = rInfo != null ? rInfo.serviceInfo : null;
                 if (sInfo == null) {
                     Slog.w(TAG_SERVICE, "Unable to start service " + service + " U=" + userId +
@@ -4982,7 +4982,7 @@ public final class ActiveServices {
                         try {
                             ResolveInfo rInfoForUserId0 =
                                     mAm.getPackageManagerInternal().resolveService(service,
-                                            resolvedType, flags, userId, callingUid);
+                                            resolvedType, flags, userId, callingUid, callingPid);
                             if (rInfoForUserId0 == null) {
                                 Slog.w(TAG_SERVICE,
                                         "Unable to resolve service " + service + " U=" + userId

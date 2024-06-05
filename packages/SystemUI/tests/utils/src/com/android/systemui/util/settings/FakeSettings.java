@@ -27,6 +27,8 @@ import androidx.annotation.NonNull;
 
 import com.android.systemui.settings.UserTracker;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +64,11 @@ public class FakeSettings implements SecureSettings, SystemSettings {
 
     @Override
     public UserTracker getUserTracker() {
+        return null;
+    }
+
+    @Override
+    public CoroutineDispatcher getBackgroundDispatcher() {
         return null;
     }
 

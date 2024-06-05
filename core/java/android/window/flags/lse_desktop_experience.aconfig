@@ -92,3 +92,10 @@ flag {
     description: "Makes the App Header style adapt to the system's and app's light/dark theme"
     bug: "328668781"
 }
+
+flag {
+    name: "enable_camera_compat_for_desktop_windowing"
+    namespace: "lse_desktop_experience"
+    description: "Whether to apply Camera Compat treatment to fixed-orientation apps in desktop windowing mode"
+    bug: "314952133"
+}

@@ -27,7 +27,6 @@
         app:layout_constraintTop_toTopOf="@id/topBarrier"
         app:layout_constraintWidth_max="@dimen/biometric_prompt_panel_max_width" />
 
-
     <include
         android:id="@+id/button_bar"
         layout="@layout/biometric_prompt_button_bar"
@@ -148,9 +147,10 @@
     <TextView
         android:id="@+id/indicator"
         style="@style/TextAppearance.AuthCredential.Indicator"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="24dp"
         android:accessibilityLiveRegion="assertive"
         android:fadingEdge="horizontal"
         android:gravity="center_horizontal"

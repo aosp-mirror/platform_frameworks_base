@@ -655,8 +655,10 @@ public class Transitions implements RemoteCallable<Transitions>,
             }
             if (change.hasFlags(FLAG_NO_ANIMATION)) {
                 hasNoAnimation = true;
-            } else {
-                // at-least one relevant participant *is* animated, so we need to animate.
+            } else if (!TransitionUtil.isOrderOnly(change) && !change.hasFlags(FLAG_IS_OCCLUDED)) {
+                // Ignore the order only or occluded changes since they shouldn't be visible during
+                // animation. For anything else, we need to animate if at-least one relevant
+                // participant *is* animated,
                 return false;
             }
         }

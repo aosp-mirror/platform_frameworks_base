@@ -16,6 +16,7 @@
 
 package com.android.egg.landroid
 
+import kotlin.math.exp
 import kotlin.math.pow
 
 /** smoothstep. Ken Perlin's version */
@@ -31,4 +32,9 @@ fun invsmoothish(x: Float): Float {
 /** Compute the fraction that progress represents between start and end (inverse of lerp). */
 fun lexp(start: Float, end: Float, progress: Float): Float {
     return (progress - start) / (end - start)
+}
+
+/** Exponentially smooth current toward target by a factor of speed. */
+fun expSmooth(current: Float, target: Float, dt: Float = 1f / 60, speed: Float = 5f): Float {
+    return current + (target - current) * (1 - exp(-dt * speed))
 }

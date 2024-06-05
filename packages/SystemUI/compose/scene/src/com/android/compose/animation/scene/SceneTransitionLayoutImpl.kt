@@ -107,6 +107,13 @@ internal class SceneTransitionLayoutImpl(
                     _userActionDistanceScope = it
                 }
 
+    /**
+     * The [LookaheadScope] of this layout, that can be used to compute offsets relative to the
+     * layout.
+     */
+    internal lateinit var lookaheadScope: LookaheadScope
+        private set
+
     init {
         updateScenes(builder)
 
@@ -195,6 +202,8 @@ internal class SceneTransitionLayoutImpl(
                 .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {
+                lookaheadScope = this
+
                 BackHandler()
 
                 scenesToCompose().fastForEach { scene -> key(scene.key) { scene.Content() } }

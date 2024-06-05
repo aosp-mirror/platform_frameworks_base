@@ -1343,6 +1343,27 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(mAppWindow, mDisplayContent.computeImeControlTarget());
     }
 
+    @SetupWindows(addWindows = W_ACTIVITY)
+    @Test
+    public void testShouldImeAttachedToApp_targetBoundsDifferentFromImeContainer_returnsFalse()
+            throws Exception {
+        Rect imeContainerBounds = new Rect(0, 0, 100, 100);
+        Rect imeTargetBounds = new Rect(0, 0, 100, 200);
+        spyOn(mAppWindow);
+        spyOn(mAppWindow.mActivityRecord);
+        doReturn(imeTargetBounds).when(mAppWindow).getBounds();
+        doReturn(true).when(mAppWindow.mActivityRecord).matchParentBounds();
+        mDisplayContent.setImeInputTarget(mAppWindow);
+        mDisplayContent.setImeLayeringTarget(
+                mDisplayContent.getImeInputTarget().getWindowState());
+        mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
+        final DisplayArea.Tokens imeContainer = mDisplayContent.getImeContainer();
+        spyOn(imeContainer);
+        doReturn(imeContainerBounds).when(imeContainer).getBounds();
+
+        assertFalse(mDisplayContent.shouldImeAttachedToApp());
+    }
+
     @Test
     public void testUpdateSystemGestureExclusion() throws Exception {
         final DisplayContent dc = createNewDisplay();

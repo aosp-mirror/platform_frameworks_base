@@ -2327,10 +2327,12 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @NonNull InputMethodBindingController bindingController, @NonNull ClientState cs) {
         if (bindingController.hasMainConnection()) {
             if (getCurMethodLocked() != null) {
-                // Return to client, and we will get back with it when
-                // we have had a session made for it.
-                requestClientSessionLocked(cs);
-                requestClientSessionForAccessibilityLocked(cs);
+                if (!Flags.useZeroJankProxy()) {
+                    // Return to client, and we will get back with it when
+                    // we have had a session made for it.
+                    requestClientSessionLocked(cs);
+                    requestClientSessionForAccessibilityLocked(cs);
+                }
                 return new InputBindResult(
                         InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
                         null, null, null,
@@ -2942,8 +2944,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             id = imi.getId();
             settings.putSelectedInputMethod(id);
         }
-        final var bindingController = getInputMethodBindingController(userId);
-        bindingController.setSelectedMethodId(id);
     }
 
     @GuardedBy("ImfLock.class")

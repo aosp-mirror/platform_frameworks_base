@@ -40,7 +40,6 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestUtils
@@ -159,7 +158,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         testDispatcher = UnconfinedTestDispatcher()
         mediaCarouselController =
             MediaCarouselController(
-                applicationScope = kosmos.applicationCoroutineScope,
                 context = context,
                 mediaControlPanelFactory = mediaControlPanelFactory,
                 visualStabilityProvider = visualStabilityProvider,
@@ -895,10 +893,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
             mediaCarouselController.mediaCarousel = mediaCarousel
 
-            val settingsJob =
-                mediaCarouselController.listenForLockscreenSettingChanges(
-                    kosmos.applicationCoroutineScope
-                )
+            val settingsJob = mediaCarouselController.listenForLockscreenSettingChanges(this)
             secureSettings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, false)
 
             val keyguardJob = mediaCarouselController.listenForAnyStateToLockscreenTransition(this)
@@ -925,10 +920,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaCarouselController.updateHostVisibility = { updatedVisibility = true }
             mediaCarouselController.mediaCarousel = mediaCarousel
 
-            val settingsJob =
-                mediaCarouselController.listenForLockscreenSettingChanges(
-                    kosmos.applicationCoroutineScope
-                )
+            val settingsJob = mediaCarouselController.listenForLockscreenSettingChanges(this)
             secureSettings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, true)
 
             val keyguardJob = mediaCarouselController.listenForAnyStateToLockscreenTransition(this)

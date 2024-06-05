@@ -179,11 +179,13 @@ android:layout_height="match_parent">
         android:fadingEdge="horizontal"
         android:gravity="center_horizontal"
         android:scrollHorizontally="true"
+        android:maxLines="2"
         app:layout_constraintBottom_toTopOf="@+id/button_bar"
         app:layout_constraintEnd_toEndOf="@+id/biometric_icon"
         app:layout_constraintStart_toStartOf="@+id/biometric_icon"
         app:layout_constraintTop_toBottomOf="@+id/biometric_icon"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintWidth_max="@dimen/biometric_dialog_indicator_max_width" />
 
     <include
         android:id="@+id/button_bar"

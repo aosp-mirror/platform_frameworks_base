@@ -556,7 +556,7 @@ public final class ServiceBindingOomAdjPolicyTest {
         rInfo.serviceInfo = makeServiceInfo(compName.getClassName(), compName.getPackageName(),
                 serviceUid);
         doReturn(rInfo).when(mPackageManagerInt).resolveService(any(Intent.class), any(),
-                anyLong(), anyInt(), anyInt());
+                anyLong(), anyInt(), anyInt(), anyInt());
 
         return serviceIntent;
     }

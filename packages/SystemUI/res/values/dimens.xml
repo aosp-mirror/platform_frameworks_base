@@ -1101,6 +1101,7 @@
     <dimen name="biometric_dialog_button_negative_max_width">160dp</dimen>
     <dimen name="biometric_dialog_button_positive_max_width">136dp</dimen>
     <dimen name="biometric_dialog_corner_size">28dp</dimen>
+    <dimen name="biometric_dialog_indicator_max_width">280dp</dimen>
     <!-- Y translation when showing/dismissing the dialog-->
     <dimen name="biometric_dialog_animation_translation_offset">350dp</dimen>
     <dimen name="biometric_dialog_border_padding">4dp</dimen>
@@ -1117,9 +1118,7 @@
     <dimen name="biometric_prompt_panel_max_width">640dp</dimen>
     <dimen name="biometric_prompt_land_small_horizontal_guideline_padding">344dp</dimen>
     <dimen name="biometric_prompt_two_pane_udfps_horizontal_guideline_padding">114dp</dimen>
-    <dimen name="biometric_prompt_two_pane_udfps_mid_guideline_padding">409dp</dimen>
     <dimen name="biometric_prompt_two_pane_medium_horizontal_guideline_padding">640dp</dimen>
-    <dimen name="biometric_prompt_two_pane_medium_mid_guideline_padding">330dp</dimen>
     <dimen name="biometric_prompt_one_pane_medium_top_guideline_padding">119dp</dimen>
     <dimen name="biometric_prompt_one_pane_medium_horizontal_guideline_padding">0dp</dimen>
 

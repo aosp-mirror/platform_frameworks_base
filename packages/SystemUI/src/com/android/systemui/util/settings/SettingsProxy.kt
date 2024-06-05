@@ -19,6 +19,10 @@ import android.content.ContentResolver
 import android.database.ContentObserver
 import android.net.Uri
 import android.provider.Settings.SettingNotFoundException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Used to interact with mainly with Settings.Global, but can also be used for Settings.System and
@@ -37,6 +41,13 @@ import android.provider.Settings.SettingNotFoundException
 interface SettingsProxy {
     /** Returns the [ContentResolver] this instance was constructed with. */
     fun getContentResolver(): ContentResolver
+
+    /**
+     * Returns the background [CoroutineDispatcher] that the async APIs will use for a specific
+     * implementation.
+     */
+    fun getBackgroundDispatcher(): CoroutineDispatcher
+
     /**
      * Construct the content URI for a particular name/value pair, useful for monitoring changes
      * with a ContentObserver.
@@ -45,6 +56,7 @@ interface SettingsProxy {
      * @return the corresponding content URI, or null if not present
      */
     fun getUriFor(name: String): Uri
+
     /**
      * Convenience wrapper around [ContentResolver.registerContentObserver].'
      *
@@ -53,9 +65,55 @@ interface SettingsProxy {
     fun registerContentObserverSync(name: String, settingsObserver: ContentObserver) {
         registerContentObserverSync(getUriFor(name), settingsObserver)
     }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * suspend API corresponding to [registerContentObserver] to ensure that [ContentObserver]
+     * registration happens on a worker thread. Caller may wrap the API in an async block if they
+     * wish to synchronize execution.
+     */
+    suspend fun registerContentObserver(name: String, settingsObserver: ContentObserver) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverSync(getUriFor(name), settingsObserver)
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserver] for Java usage.
+     */
+    fun registerContentObserverAsync(name: String, settingsObserver: ContentObserver) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            registerContentObserverSync(getUriFor(name), settingsObserver)
+        }
+
     /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
     fun registerContentObserverSync(uri: Uri, settingsObserver: ContentObserver) =
         registerContentObserverSync(uri, false, settingsObserver)
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * suspend API corresponding to [registerContentObserver] to ensure that [ContentObserver]
+     * registration happens on a worker thread. Caller may wrap the API in an async block if they
+     * wish to synchronize execution.
+     */
+    suspend fun registerContentObserver(uri: Uri, settingsObserver: ContentObserver) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverSync(uri, settingsObserver)
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserver] for Java usage.
+     */
+    fun registerContentObserverAsync(uri: Uri, settingsObserver: ContentObserver) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            registerContentObserverSync(uri, settingsObserver)
+        }
+
     /**
      * Convenience wrapper around [ContentResolver.registerContentObserver].'
      *
@@ -66,15 +124,102 @@ interface SettingsProxy {
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver
     ) = registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * suspend API corresponding to [registerContentObserver] to ensure that [ContentObserver]
+     * registration happens on a worker thread. Caller may wrap the API in an async block if they
+     * wish to synchronize execution.
+     */
+    suspend fun registerContentObserver(
+        name: String,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver
+    ) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserver] for Java usage.
+     */
+    fun registerContentObserverAsync(
+        name: String,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver
+    ) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            registerContentObserverSync(getUriFor(name), notifyForDescendants, settingsObserver)
+        }
+
     /** Convenience wrapper around [ContentResolver.registerContentObserver].' */
     fun registerContentObserverSync(
         uri: Uri,
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver
-    ) = getContentResolver().registerContentObserver(uri, notifyForDescendants, settingsObserver)
+    ) {
+        getContentResolver().registerContentObserver(uri, notifyForDescendants, settingsObserver)
+    }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * suspend API corresponding to [registerContentObserver] to ensure that [ContentObserver]
+     * registration happens on a worker thread. Caller may wrap the API in an async block if they
+     * wish to synchronize execution.
+     */
+    suspend fun registerContentObserver(
+        uri: Uri,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver
+    ) =
+        withContext(getBackgroundDispatcher()) {
+            registerContentObserverSync(uri, notifyForDescendants, settingsObserver)
+        }
+
+    /**
+     * Convenience wrapper around [ContentResolver.registerContentObserver].'
+     *
+     * API corresponding to [registerContentObserver] for Java usage.
+     */
+    fun registerContentObserverAsync(
+        uri: Uri,
+        notifyForDescendants: Boolean,
+        settingsObserver: ContentObserver
+    ) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            getContentResolver()
+                .registerContentObserver(uri, notifyForDescendants, settingsObserver)
+        }
+
     /** See [ContentResolver.unregisterContentObserver]. */
     fun unregisterContentObserverSync(settingsObserver: ContentObserver) =
         getContentResolver().unregisterContentObserver(settingsObserver)
+
+    /**
+     * Convenience wrapper around [ContentResolver.unregisterContentObserver].'
+     *
+     * API corresponding to [unregisterContentObserver] for Java usage to ensure that
+     * [ContentObserver] un-registration happens on a worker thread. Caller may wrap the API in an
+     * async block if they wish to synchronize execution.
+     */
+    suspend fun unregisterContentObserver(settingsObserver: ContentObserver) =
+        withContext(getBackgroundDispatcher()) { unregisterContentObserverSync(settingsObserver) }
+
+    /**
+     * Convenience wrapper around [ContentResolver.unregisterContentObserver].'
+     *
+     * API corresponding to [unregisterContentObserver] for Java usage to ensure that
+     * [ContentObserver] registration happens on a worker thread.
+     */
+    fun unregisterContentObserverAsync(settingsObserver: ContentObserver) =
+        CoroutineScope(getBackgroundDispatcher()).launch {
+            unregisterContentObserver(settingsObserver)
+        }
+
     /**
      * Look up a name in the database.
      *
@@ -82,6 +227,7 @@ interface SettingsProxy {
      * @return the corresponding value, or null if not present
      */
     fun getString(name: String): String
+
     /**
      * Store a name/value pair into the database.
      *
@@ -90,6 +236,7 @@ interface SettingsProxy {
      * @return true if the value was set, false on database errors
      */
     fun putString(name: String, value: String): Boolean
+
     /**
      * Store a name/value pair into the database.
      *
@@ -120,6 +267,7 @@ interface SettingsProxy {
      * @see .resetToDefaults
      */
     fun putString(name: String, value: String, tag: String, makeDefault: Boolean): Boolean
+
     /**
      * Convenience function for retrieving a single secure settings value as an integer. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -138,6 +286,7 @@ interface SettingsProxy {
             def
         }
     }
+
     /**
      * Convenience function for retrieving a single secure settings value as an integer. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -160,6 +309,7 @@ interface SettingsProxy {
             throw SettingNotFoundException(name)
         }
     }
+
     /**
      * Convenience function for updating a single settings value as an integer. This will either
      * create a new entry in the table if the given name does not exist, or modify the value of the
@@ -173,6 +323,7 @@ interface SettingsProxy {
     fun putInt(name: String, value: Int): Boolean {
         return putString(name, value.toString())
     }
+
     /**
      * Convenience function for retrieving a single secure settings value as a boolean. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -186,6 +337,7 @@ interface SettingsProxy {
     fun getBool(name: String, def: Boolean): Boolean {
         return getInt(name, if (def) 1 else 0) != 0
     }
+
     /**
      * Convenience function for retrieving a single secure settings value as a boolean. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -203,6 +355,7 @@ interface SettingsProxy {
     fun getBool(name: String): Boolean {
         return getInt(name) != 0
     }
+
     /**
      * Convenience function for updating a single settings value as a boolean. This will either
      * create a new entry in the table if the given name does not exist, or modify the value of the
@@ -216,6 +369,7 @@ interface SettingsProxy {
     fun putBool(name: String, value: Boolean): Boolean {
         return putInt(name, if (value) 1 else 0)
     }
+
     /**
      * Convenience function for retrieving a single secure settings value as a `long`. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -230,6 +384,7 @@ interface SettingsProxy {
         val valString = getString(name)
         return parseLongOrUseDefault(valString, def)
     }
+
     /**
      * Convenience function for retrieving a single secure settings value as a `long`. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -248,6 +403,7 @@ interface SettingsProxy {
         val valString = getString(name)
         return parseLongOrThrow(name, valString)
     }
+
     /**
      * Convenience function for updating a secure settings value as a long integer. This will either
      * create a new entry in the table if the given name does not exist, or modify the value of the
@@ -261,6 +417,7 @@ interface SettingsProxy {
     fun putLong(name: String, value: Long): Boolean {
         return putString(name, value.toString())
     }
+
     /**
      * Convenience function for retrieving a single secure settings value as a floating point
      * number. Note that internally setting values are always stored as strings; this function
@@ -275,6 +432,7 @@ interface SettingsProxy {
         val v = getString(name)
         return parseFloat(v, def)
     }
+
     /**
      * Convenience function for retrieving a single secure settings value as a float. Note that
      * internally setting values are always stored as strings; this function converts the string to
@@ -293,6 +451,7 @@ interface SettingsProxy {
         val v = getString(name)
         return parseFloatOrThrow(name, v)
     }
+
     /**
      * Convenience function for updating a single settings value as a floating point number. This
      * will either create a new entry in the table if the given name does not exist, or modify the
@@ -306,6 +465,7 @@ interface SettingsProxy {
     fun putFloat(name: String, value: Float): Boolean {
         return putString(name, value.toString())
     }
+
     companion object {
         /** Convert a string to a long, or uses a default if the string is malformed or null */
         @JvmStatic
@@ -319,6 +479,7 @@ interface SettingsProxy {
                 }
             return value
         }
+
         /** Convert a string to a long, or throws an exception if the string is malformed or null */
         @JvmStatic
         @Throws(SettingNotFoundException::class)
@@ -332,6 +493,7 @@ interface SettingsProxy {
                 throw SettingNotFoundException(name)
             }
         }
+
         /** Convert a string to a float, or uses a default if the string is malformed or null */
         @JvmStatic
         fun parseFloat(v: String?, def: Float): Float {
@@ -341,6 +503,7 @@ interface SettingsProxy {
                 def
             }
         }
+
         /**
          * Convert a string to a float, or throws an exception if the string is malformed or null
          */
