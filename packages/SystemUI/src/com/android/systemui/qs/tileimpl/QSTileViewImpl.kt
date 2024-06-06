@@ -19,6 +19,7 @@ package com.android.systemui.qs.tileimpl
 import android.animation.ArgbEvaluator
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
@@ -37,27 +38,31 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
+import androidx.core.animation.doOnCancel
+import androidx.core.animation.doOnEnd
+import androidx.core.animation.doOnStart
 import androidx.core.graphics.drawable.updateBounds
 import com.android.app.tracing.traceSection
 import com.android.settingslib.Utils
 import com.android.systemui.Flags
-import com.android.systemui.Flags.quickSettingsVisualHapticsLongpress
 import com.android.systemui.FontSizeUtils
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
 import com.android.systemui.haptics.qs.QSLongPressEffect
-import com.android.systemui.haptics.qs.QSLongPressEffectViewBinder
 import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTile.AdapterState
@@ -65,11 +70,13 @@ import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSIconViewImpl.QS_ANIM_LENGTH
 import com.android.systemui.res.R
-import kotlinx.coroutines.DisposableHandle
 import java.util.Objects
 
 private const val TAG = "QSTileViewImpl"
-open class QSTileViewImpl @JvmOverloads constructor(
+
+open class QSTileViewImpl
+@JvmOverloads
+constructor(
     context: Context,
     private val collapsed: Boolean = false,
     private val longPressEffect: QSLongPressEffect? = null,
@@ -83,12 +90,9 @@ open class QSTileViewImpl @JvmOverloads constructor(
         private const val CHEVRON_NAME = "chevron"
         private const val OVERLAY_NAME = "overlay"
         const val UNAVAILABLE_ALPHA = 0.3f
-        @VisibleForTesting
-        internal const val TILE_STATE_RES_PREFIX = "tile_states_"
-        @VisibleForTesting
-        internal const val LONG_PRESS_EFFECT_WIDTH_SCALE = 1.1f
-        @VisibleForTesting
-        internal const val LONG_PRESS_EFFECT_HEIGHT_SCALE = 1.2f
+        @VisibleForTesting internal const val TILE_STATE_RES_PREFIX = "tile_states_"
+        @VisibleForTesting internal const val LONG_PRESS_EFFECT_WIDTH_SCALE = 1.1f
+        @VisibleForTesting internal const val LONG_PRESS_EFFECT_HEIGHT_SCALE = 1.2f
     }
 
     private val icon: QSIconViewImpl = QSIconViewImpl(context)
@@ -116,22 +120,25 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private val colorInactive = Utils.getColorAttrDefaultColor(context, R.attr.shadeInactive)
     private val colorUnavailable = Utils.getColorAttrDefaultColor(context, R.attr.shadeDisabled)
 
-    private val overlayColorActive = Utils.applyAlpha(
-        /* alpha= */ 0.11f,
-        Utils.getColorAttrDefaultColor(context, R.attr.onShadeActive))
-    private val overlayColorInactive = Utils.applyAlpha(
-        /* alpha= */ 0.08f,
-        Utils.getColorAttrDefaultColor(context, R.attr.onShadeInactive))
+    private val overlayColorActive =
+        Utils.applyAlpha(
+            /* alpha= */ 0.11f,
+            Utils.getColorAttrDefaultColor(context, R.attr.onShadeActive)
+        )
+    private val overlayColorInactive =
+        Utils.applyAlpha(
+            /* alpha= */ 0.08f,
+            Utils.getColorAttrDefaultColor(context, R.attr.onShadeInactive)
+        )
 
     private val colorLabelActive = Utils.getColorAttrDefaultColor(context, R.attr.onShadeActive)
     private val colorLabelInactive = Utils.getColorAttrDefaultColor(context, R.attr.onShadeInactive)
-    private val colorLabelUnavailable =
-        Utils.getColorAttrDefaultColor(context, R.attr.outline)
+    private val colorLabelUnavailable = Utils.getColorAttrDefaultColor(context, R.attr.outline)
 
     private val colorSecondaryLabelActive =
         Utils.getColorAttrDefaultColor(context, R.attr.onShadeActiveVariant)
     private val colorSecondaryLabelInactive =
-            Utils.getColorAttrDefaultColor(context, R.attr.onShadeInactiveVariant)
+        Utils.getColorAttrDefaultColor(context, R.attr.onShadeInactiveVariant)
     private val colorSecondaryLabelUnavailable =
         Utils.getColorAttrDefaultColor(context, R.attr.outline)
 
@@ -143,9 +150,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private lateinit var chevronView: ImageView
     private var mQsLogger: QSLogger? = null
 
-    /**
-     * Controls if tile background is set to a [RippleDrawable] see [setClickable]
-     */
+    /** Controls if tile background is set to a [RippleDrawable] see [setClickable] */
     protected var showRippleEffect = true
 
     private lateinit var qsTileBackground: RippleDrawable
@@ -157,20 +162,21 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private var backgroundColor: Int = 0
     private var backgroundOverlayColor: Int = 0
 
-    private val singleAnimator: ValueAnimator = ValueAnimator().apply {
-        setDuration(QS_ANIM_LENGTH)
-        addUpdateListener { animation ->
-            setAllColors(
-                // These casts will throw an exception if some property is missing. We should
-                // always have all properties.
-                animation.getAnimatedValue(BACKGROUND_NAME) as Int,
-                animation.getAnimatedValue(LABEL_NAME) as Int,
-                animation.getAnimatedValue(SECONDARY_LABEL_NAME) as Int,
-                animation.getAnimatedValue(CHEVRON_NAME) as Int,
-                animation.getAnimatedValue(OVERLAY_NAME) as Int,
-            )
+    private val singleAnimator: ValueAnimator =
+        ValueAnimator().apply {
+            setDuration(QS_ANIM_LENGTH)
+            addUpdateListener { animation ->
+                setAllColors(
+                    // These casts will throw an exception if some property is missing. We should
+                    // always have all properties.
+                    animation.getAnimatedValue(BACKGROUND_NAME) as Int,
+                    animation.getAnimatedValue(LABEL_NAME) as Int,
+                    animation.getAnimatedValue(SECONDARY_LABEL_NAME) as Int,
+                    animation.getAnimatedValue(CHEVRON_NAME) as Int,
+                    animation.getAnimatedValue(OVERLAY_NAME) as Int,
+                )
+            }
         }
-    }
 
     private var accessibilityClass: String? = null
     private var stateDescriptionDeltas: CharSequence? = null
@@ -178,32 +184,37 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private var tileState = false
     private var lastState = INVALID
     private var lastIconTint = 0
-    private val launchableViewDelegate = LaunchableViewDelegate(
-        this,
-        superSetVisibility = { super.setVisibility(it) },
-    )
+    private val launchableViewDelegate =
+        LaunchableViewDelegate(
+            this,
+            superSetVisibility = { super.setVisibility(it) },
+        )
     private var lastDisabledByPolicy = false
 
     private val locInScreen = IntArray(2)
 
     /** Visuo-haptic long-press effects */
+    private var longPressEffectAnimator: ValueAnimator? = null
     var haveLongPressPropertiesBeenReset = true
         private set
+
     private var paddingForLaunch = Rect()
     private var initialLongPressProperties: QSLongPressProperties? = null
     private var finalLongPressProperties: QSLongPressProperties? = null
     private val colorEvaluator = ArgbEvaluator.getInstance()
     val isLongPressEffectInitialized: Boolean
         get() = longPressEffect?.hasInitialized == true
-    private var longPressEffectHandle: DisposableHandle? = null
-    val isLongPressEffectBound: Boolean
-        get() = longPressEffectHandle != null
+
+    val areLongPressEffectPropertiesSet: Boolean
+        get() = initialLongPressProperties != null && finalLongPressProperties != null
 
     init {
         val typedValue = TypedValue()
         if (!getContext().theme.resolveAttribute(R.attr.isQsTheme, typedValue, true)) {
-            throw IllegalStateException("QSViewImpl must be inflated with a theme that contains " +
-                    "Theme.SystemUI.QuickSettings")
+            throw IllegalStateException(
+                "QSViewImpl must be inflated with a theme that contains " +
+                    "Theme.SystemUI.QuickSettings"
+            )
         }
         setId(generateViewId())
         orientation = LinearLayout.HORIZONTAL
@@ -261,13 +272,9 @@ open class QSTileViewImpl @JvmOverloads constructor(
         setPaddingRelative(startPadding, padding, padding, padding)
 
         val labelMargin = resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
-        (labelContainer.layoutParams as MarginLayoutParams).apply {
-            marginStart = labelMargin
-        }
+        (labelContainer.layoutParams as MarginLayoutParams).apply { marginStart = labelMargin }
 
-        (sideView.layoutParams as MarginLayoutParams).apply {
-            marginStart = labelMargin
-        }
+        (sideView.layoutParams as MarginLayoutParams).apply { marginStart = labelMargin }
         (chevronView.layoutParams as MarginLayoutParams).apply {
             height = iconSize
             width = iconSize
@@ -285,8 +292,9 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     private fun createAndAddLabels() {
-        labelContainer = LayoutInflater.from(context)
-                .inflate(R.layout.qs_tile_label, this, false) as IgnorableChildLinearLayout
+        labelContainer =
+            LayoutInflater.from(context).inflate(R.layout.qs_tile_label, this, false)
+                as IgnorableChildLinearLayout
         label = labelContainer.requireViewById(R.id.tile_label)
         secondaryLabel = labelContainer.requireViewById(R.id.app_label)
         if (collapsed) {
@@ -304,8 +312,9 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     private fun createAndAddSideView() {
-        sideView = LayoutInflater.from(context)
-                .inflate(R.layout.qs_tile_side_icon, this, false) as ViewGroup
+        sideView =
+            LayoutInflater.from(context).inflate(R.layout.qs_tile_side_icon, this, false)
+                as ViewGroup
         customDrawableView = sideView.requireViewById(R.id.customDrawable)
         chevronView = sideView.requireViewById(R.id.chevron)
         setChevronColor(getChevronColorForState(QSTile.State.DEFAULT_STATE))
@@ -313,11 +322,12 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     private fun createTileBackground(): Drawable {
-        qsTileBackground = if (Flags.qsTileFocusState()) {
-            mContext.getDrawable(R.drawable.qs_tile_background_flagged) as RippleDrawable
-        } else {
-            mContext.getDrawable(R.drawable.qs_tile_background) as RippleDrawable
-        }
+        qsTileBackground =
+            if (Flags.qsTileFocusState()) {
+                mContext.getDrawable(R.drawable.qs_tile_background_flagged) as RippleDrawable
+            } else {
+                mContext.getDrawable(R.drawable.qs_tile_background) as RippleDrawable
+            }
         qsTileFocusBackground = mContext.getDrawable(R.drawable.qs_tile_focused_background)!!
         backgroundDrawable =
             qsTileBackground.findDrawableByLayerId(R.id.background) as LayerDrawable
@@ -332,21 +342,21 @@ open class QSTileViewImpl @JvmOverloads constructor(
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
         updateHeight()
-        maybeUpdateLongPressEffectDimensions()
+        maybeUpdateLongPressEffectWidth(measuredWidth.toFloat())
     }
 
-    private fun maybeUpdateLongPressEffectDimensions() {
+    private fun maybeUpdateLongPressEffectWidth(width: Float) {
         if (!isLongClickable || longPressEffect == null) return
 
-        val actualHeight = if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
-            heightOverride
-        } else {
-            measuredHeight
-        }
-        initialLongPressProperties?.height = actualHeight.toFloat()
-        initialLongPressProperties?.width = measuredWidth.toFloat()
-        finalLongPressProperties?.height = LONG_PRESS_EFFECT_HEIGHT_SCALE * actualHeight
-        finalLongPressProperties?.width = LONG_PRESS_EFFECT_WIDTH_SCALE * measuredWidth
+        initialLongPressProperties?.width = width
+        finalLongPressProperties?.width = LONG_PRESS_EFFECT_WIDTH_SCALE * width
+    }
+
+    private fun maybeUpdateLongPressEffectHeight(height: Float) {
+        if (!isLongClickable || longPressEffect == null) return
+
+        initialLongPressProperties?.height = height
+        finalLongPressProperties?.height = LONG_PRESS_EFFECT_HEIGHT_SCALE * height
     }
 
     override fun onFocusChanged(gainFocus: Boolean, direction: Int, previouslyFocusedRect: Rect?) {
@@ -360,6 +370,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
             }
         }
     }
+
     private fun updateHeight() {
         // TODO(b/332900989): Find a more robust way of resetting the tile if not reset by the
         //  launch animation.
@@ -368,16 +379,18 @@ open class QSTileViewImpl @JvmOverloads constructor(
             // we must do it here
             resetLongPressEffectProperties()
         }
-        val actualHeight = if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
-            heightOverride
-        } else {
-            measuredHeight
-        }
+        val actualHeight =
+            if (heightOverride != HeightOverrideable.NO_OVERRIDE) {
+                heightOverride
+            } else {
+                measuredHeight
+            }
         // Limit how much we affect the height, so we don't have rounding artifacts when the tile
         // is too short.
         val constrainedSquishiness = constrainSquishiness(squishinessFraction)
         bottom = top + (actualHeight * constrainedSquishiness).toInt()
         scrollY = (actualHeight - height) / 2
+        maybeUpdateLongPressEffectHeight(actualHeight.toFloat())
     }
 
     override fun updateAccessibilityOrder(previousView: View?): View {
@@ -395,22 +408,77 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     override fun init(tile: QSTile) {
         val expandable = Expandable.fromView(this)
-        init(
+        if (longPressEffect != null) {
+            isHapticFeedbackEnabled = false
+            longPressEffect.qsTile = tile
+            longPressEffect.expandable = expandable
+            initLongPressEffectCallback()
+            init(
+                { _: View -> longPressEffect.onTileClick() },
+                null, // Haptics and long-clicks will be handled by the [QSLongPressEffect]
+            )
+        } else {
+            init(
                 { _: View? -> tile.click(expandable) },
                 { _: View? ->
                     tile.longClick(expandable)
                     true
-                }
-        )
-        if (quickSettingsVisualHapticsLongpress()) {
-            isHapticFeedbackEnabled = false // Haptics will be handled by the [QSLongPressEffect]
+                },
+            )
         }
     }
 
-    private fun init(
-        click: OnClickListener?,
-        longClick: OnLongClickListener?
-    ) {
+    private fun initLongPressEffectCallback() {
+        longPressEffect?.callback =
+            object : QSLongPressEffect.Callback {
+
+                override fun onPrepareForLaunch() {
+                    prepareForLaunch()
+                }
+
+                override fun onResetProperties() {
+                    resetLongPressEffectProperties()
+                }
+
+                override fun onStartAnimator() {
+                    if (longPressEffectAnimator?.isRunning != true) {
+                        longPressEffectAnimator =
+                            ValueAnimator.ofFloat(0f, 1f).apply {
+                                this.duration = longPressEffect?.effectDuration?.toLong() ?: 0L
+                                interpolator = AccelerateDecelerateInterpolator()
+
+                                doOnStart { longPressEffect?.handleAnimationStart() }
+                                addUpdateListener {
+                                    val value = animatedValue as Float
+                                    if (value == 0f) {
+                                        bringToFront()
+                                    } else {
+                                        updateLongPressEffectProperties(value)
+                                    }
+                                }
+                                doOnEnd { longPressEffect?.handleAnimationComplete() }
+                                doOnCancel { longPressEffect?.handleAnimationCancel() }
+                                start()
+                            }
+                    }
+                }
+
+                override fun onReverseAnimator() {
+                    longPressEffectAnimator?.let {
+                        val pausedProgress = it.animatedFraction
+                        longPressEffect?.playReverseHaptics(pausedProgress)
+                        it.reverse()
+                    }
+                }
+
+                override fun onCancelAnimator() {
+                    resetLongPressEffectProperties()
+                    longPressEffectAnimator?.cancel()
+                }
+            }
+    }
+
+    private fun init(click: OnClickListener?, longClick: OnLongClickListener?) {
         setOnClickListener(click)
         onLongClickListener = longClick
     }
@@ -438,16 +506,18 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     override fun setClickable(clickable: Boolean) {
         super.setClickable(clickable)
-        if (!Flags.qsTileFocusState()){
-            background = if (clickable && showRippleEffect) {
-                qsTileBackground.also {
-                    // In case that the colorBackgroundDrawable was used as the background, make sure
-                    // it has the correct callback instead of null
-                    backgroundDrawable.callback = it
+        if (!Flags.qsTileFocusState()) {
+            background =
+                if (clickable && showRippleEffect) {
+                    qsTileBackground.also {
+                        // In case that the colorBackgroundDrawable was used as the background, make
+                        // sure
+                        // it has the correct callback instead of null
+                        backgroundDrawable.callback = it
+                    }
+                } else {
+                    backgroundDrawable
                 }
-            } else {
-                backgroundDrawable
-            }
         }
     }
 
@@ -482,8 +552,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
         if (!TextUtils.isEmpty(accessibilityClass)) {
             event.className = accessibilityClass
         }
-        if (event.contentChangeTypes == AccessibilityEvent.CONTENT_CHANGE_TYPE_STATE_DESCRIPTION &&
-                stateDescriptionDeltas != null) {
+        if (
+            event.contentChangeTypes == AccessibilityEvent.CONTENT_CHANGE_TYPE_STATE_DESCRIPTION &&
+                stateDescriptionDeltas != null
+        ) {
             event.text.add(stateDescriptionDeltas)
             stateDescriptionDeltas = null
         }
@@ -493,36 +565,39 @@ open class QSTileViewImpl @JvmOverloads constructor(
         super.onInitializeAccessibilityNodeInfo(info)
         // Clear selected state so it is not announce by talkback.
         info.isSelected = false
-        info.text = if (TextUtils.isEmpty(secondaryLabel.text)) {
-            "${label.text}"
-        } else {
-            "${label.text}, ${secondaryLabel.text}"
-        }
+        info.text =
+            if (TextUtils.isEmpty(secondaryLabel.text)) {
+                "${label.text}"
+            } else {
+                "${label.text}, ${secondaryLabel.text}"
+            }
         if (lastDisabledByPolicy) {
             info.addAction(
-                    AccessibilityNodeInfo.AccessibilityAction(
-                            AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.id,
-                            resources.getString(
-                                R.string.accessibility_tile_disabled_by_policy_action_description
-                            )
+                AccessibilityNodeInfo.AccessibilityAction(
+                    AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.id,
+                    resources.getString(
+                        R.string.accessibility_tile_disabled_by_policy_action_description
                     )
+                )
             )
         }
         if (!TextUtils.isEmpty(accessibilityClass)) {
-            info.className = if (lastDisabledByPolicy) {
-                Button::class.java.name
-            } else {
-                accessibilityClass
-            }
+            info.className =
+                if (lastDisabledByPolicy) {
+                    Button::class.java.name
+                } else {
+                    accessibilityClass
+                }
             if (Switch::class.java.name == accessibilityClass) {
                 info.isChecked = tileState
                 info.isCheckable = true
                 if (isLongClickable) {
                     info.addAction(
-                            AccessibilityNodeInfo.AccessibilityAction(
-                                    AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id,
-                                    resources.getString(
-                                            R.string.accessibility_long_click_tile)))
+                        AccessibilityNodeInfo.AccessibilityAction(
+                            AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id,
+                            resources.getString(R.string.accessibility_long_click_tile)
+                        )
+                    )
                 }
             }
         }
@@ -539,6 +614,28 @@ open class QSTileViewImpl @JvmOverloads constructor(
         sb.append(", tileState=$tileState")
         sb.append("]")
         return sb.toString()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        // let the View run the onTouch logic for click and long-click detection
+        val result = super.onTouchEvent(event)
+        if (longPressEffect != null) {
+            when (event?.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    longPressEffect.handleActionDown()
+                    if (isLongClickable) {
+                        postDelayed(
+                            { longPressEffect.handleTimeoutComplete() },
+                            ViewConfiguration.getTapTimeout().toLong(),
+                        )
+                    }
+                }
+                MotionEvent.ACTION_UP -> longPressEffect.handleActionUp()
+                MotionEvent.ACTION_CANCEL -> longPressEffect.handleActionCancel()
+            }
+        }
+        return result
     }
 
     // HANDLE STATE CHANGES RELATED METHODS
@@ -565,8 +662,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
         if (!TextUtils.isEmpty(state.stateDescription)) {
             stateDescription.append(", ")
             stateDescription.append(state.stateDescription)
-            if (lastState != INVALID && state.state == lastState &&
-                    state.stateDescription != lastStateDescription) {
+            if (
+                lastState != INVALID &&
+                    state.state == lastState &&
+                    state.stateDescription != lastStateDescription
+            ) {
                 stateDescriptionDeltas = state.stateDescription
             }
         }
@@ -574,11 +674,12 @@ open class QSTileViewImpl @JvmOverloads constructor(
         setStateDescription(stateDescription.toString())
         lastStateDescription = state.stateDescription
 
-        accessibilityClass = if (state.state == Tile.STATE_UNAVAILABLE) {
-            null
-        } else {
-            state.expandedAccessibilityClassName
-        }
+        accessibilityClass =
+            if (state.state == Tile.STATE_UNAVAILABLE) {
+                null
+            } else {
+                state.expandedAccessibilityClassName
+            }
 
         if (state is AdapterState) {
             val newState = state.value
@@ -593,49 +694,51 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
         if (!Objects.equals(secondaryLabel.text, state.secondaryLabel)) {
             secondaryLabel.text = state.secondaryLabel
-            secondaryLabel.visibility = if (TextUtils.isEmpty(state.secondaryLabel)) {
-                GONE
-            } else {
-                VISIBLE
-            }
+            secondaryLabel.visibility =
+                if (TextUtils.isEmpty(state.secondaryLabel)) {
+                    GONE
+                } else {
+                    VISIBLE
+                }
         }
 
         // Colors
         if (state.state != lastState || state.disabledByPolicy != lastDisabledByPolicy) {
             singleAnimator.cancel()
             mQsLogger?.logTileBackgroundColorUpdateIfInternetTile(
-                    state.spec,
-                    state.state,
-                    state.disabledByPolicy,
-                    getBackgroundColorForState(state.state, state.disabledByPolicy))
+                state.spec,
+                state.state,
+                state.disabledByPolicy,
+                getBackgroundColorForState(state.state, state.disabledByPolicy)
+            )
             if (allowAnimations) {
                 singleAnimator.setValues(
-                        colorValuesHolder(
-                                BACKGROUND_NAME,
-                                backgroundColor,
-                                getBackgroundColorForState(state.state, state.disabledByPolicy)
-                        ),
-                        colorValuesHolder(
-                                LABEL_NAME,
-                                label.currentTextColor,
-                                getLabelColorForState(state.state, state.disabledByPolicy)
-                        ),
-                        colorValuesHolder(
-                                SECONDARY_LABEL_NAME,
-                                secondaryLabel.currentTextColor,
-                                getSecondaryLabelColorForState(state.state, state.disabledByPolicy)
-                        ),
-                        colorValuesHolder(
-                                CHEVRON_NAME,
-                                chevronView.imageTintList?.defaultColor ?: 0,
-                                getChevronColorForState(state.state, state.disabledByPolicy)
-                        ),
-                        colorValuesHolder(
-                                OVERLAY_NAME,
-                                backgroundOverlayColor,
-                                getOverlayColorForState(state.state)
-                        )
+                    colorValuesHolder(
+                        BACKGROUND_NAME,
+                        backgroundColor,
+                        getBackgroundColorForState(state.state, state.disabledByPolicy)
+                    ),
+                    colorValuesHolder(
+                        LABEL_NAME,
+                        label.currentTextColor,
+                        getLabelColorForState(state.state, state.disabledByPolicy)
+                    ),
+                    colorValuesHolder(
+                        SECONDARY_LABEL_NAME,
+                        secondaryLabel.currentTextColor,
+                        getSecondaryLabelColorForState(state.state, state.disabledByPolicy)
+                    ),
+                    colorValuesHolder(
+                        CHEVRON_NAME,
+                        chevronView.imageTintList?.defaultColor ?: 0,
+                        getChevronColorForState(state.state, state.disabledByPolicy)
+                    ),
+                    colorValuesHolder(
+                        OVERLAY_NAME,
+                        backgroundOverlayColor,
+                        getOverlayColorForState(state.state)
                     )
+                )
                 singleAnimator.start()
             } else {
                 setAllColors(
@@ -658,25 +761,16 @@ open class QSTileViewImpl @JvmOverloads constructor(
         lastIconTint = icon.getColor(state)
 
         // Long-press effects
-        if (state.handlesLongClick &&
-            longPressEffect?.initializeEffect(longPressEffectDuration) == true) {
-            // bind the long-press effect and set it as the touch listener
-            if (!isLongPressEffectBound) {
-                longPressEffectHandle =
-                    QSLongPressEffectViewBinder.bind(
-                        this,
-                        longPressEffect,
-                        state.spec,
-                    )
-            }
+        if (
+            state.handlesLongClick &&
+                longPressEffect?.initializeEffect(longPressEffectDuration) == true
+        ) {
             showRippleEffect = false
             initializeLongPressProperties(measuredHeight, measuredWidth)
         } else {
             // Long-press effects might have been enabled before but the new state does not
             // handle a long-press. In this case, we go back to the behaviour of a regular tile
             // and clean-up the resources
-            setOnTouchListener(null)
-            unbindLongPressEffect()
             showRippleEffect = isClickable
             initialLongPressProperties = null
             finalLongPressProperties = null
@@ -791,7 +885,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     private fun getChevronColorForState(state: Int, disabledByPolicy: Boolean = false): Int =
-            getSecondaryLabelColorForState(state, disabledByPolicy)
+        getSecondaryLabelColorForState(state, disabledByPolicy)
 
     private fun getOverlayColorForState(state: Int): Int {
         return when (state) {
@@ -828,16 +922,18 @@ open class QSTileViewImpl @JvmOverloads constructor(
         // Dimensions change
         val newHeight =
             interpolateFloat(
-                effectProgress,
-                initialLongPressProperties?.height ?: 0f,
-                finalLongPressProperties?.height ?: 0f,
-            ).toInt()
+                    effectProgress,
+                    initialLongPressProperties?.height ?: 0f,
+                    finalLongPressProperties?.height ?: 0f,
+                )
+                .toInt()
         val newWidth =
             interpolateFloat(
-                effectProgress,
-                initialLongPressProperties?.width ?: 0f,
-                finalLongPressProperties?.width ?: 0f,
-            ).toInt()
+                    effectProgress,
+                    initialLongPressProperties?.width ?: 0f,
+                    finalLongPressProperties?.width ?: 0f,
+                )
+                .toInt()
 
         val startingHeight = initialLongPressProperties?.height?.toInt() ?: 0
         val startingWidth = initialLongPressProperties?.width?.toInt() ?: 0
@@ -896,11 +992,6 @@ open class QSTileViewImpl @JvmOverloads constructor(
                 finalLongPressProperties?.iconColor ?: 0,
             ) as Int,
         )
-    }
-
-    private fun unbindLongPressEffect() {
-        longPressEffectHandle?.dispose()
-        longPressEffectHandle = null
     }
 
     private fun interpolateFloat(fraction: Float, start: Float, end: Float): Float =
@@ -964,12 +1055,13 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     @VisibleForTesting
-    internal fun getCurrentColors(): List<Int> = listOf(
+    internal fun getCurrentColors(): List<Int> =
+        listOf(
             backgroundColor,
             label.currentTextColor,
             secondaryLabel.currentTextColor,
             chevronView.imageTintList?.defaultColor ?: 0
-    )
+        )
 
     inner class StateChangeRunnable(private val state: QSTile.State) : Runnable {
         override fun run() {
