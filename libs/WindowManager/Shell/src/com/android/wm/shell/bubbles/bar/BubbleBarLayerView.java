@@ -132,7 +132,7 @@ public class BubbleBarLayerView extends FrameLayout
                     }
                 });
 
-        setOnClickListener(view -> hideMenuOrCollapse());
+        setOnClickListener(view -> hideMenuOrImeOrCollapse());
     }
 
     @Override
@@ -217,7 +217,7 @@ public class BubbleBarLayerView extends FrameLayout
 
                 @Override
                 public void onBackPressed() {
-                    hideMenuOrCollapse();
+                    hideMenuOrImeOrCollapse();
                 }
             });
 
@@ -344,15 +344,23 @@ public class BubbleBarLayerView extends FrameLayout
         addView(mDismissView);
     }
 
-    /** Hides the current modal education/menu view, expanded view or collapses the bubble stack */
-    private void hideMenuOrCollapse() {
+    /** Hides the current modal education/menu view, IME or collapses the expanded view */
+    private void hideMenuOrImeOrCollapse() {
         if (mEducationViewController.isEducationVisible()) {
             mEducationViewController.hideEducation(/* animated = */ true);
-        } else if (isExpanded() && mExpandedView != null) {
-            mExpandedView.hideMenuOrCollapse();
-        } else {
-            mBubbleController.collapseStack();
+            return;
         }
+        if (isExpanded() && mExpandedView != null) {
+            boolean menuHidden = mExpandedView.hideMenuIfVisible();
+            if (menuHidden) {
+                return;
+            }
+            boolean imeHidden = mExpandedView.hideImeIfVisible();
+            if (imeHidden) {
+                return;
+            }
+        }
+        mBubbleController.collapseStack();
     }
 
     /** Updates the expanded view size and position. */

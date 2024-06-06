@@ -592,11 +592,12 @@ public class BubbleController implements ConfigurationChangeListener,
      * Hides the current input method, wherever it may be focused, via InputMethodManagerInternal.
      */
     void hideCurrentInputMethod() {
+        mBubblePositioner.setImeVisible(false /* visible */, 0 /* height */);
         int displayId = mWindowManager.getDefaultDisplay().getDisplayId();
         try {
             mBarService.hideCurrentInputMethodForBubbles(displayId);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to hide IME", e);
         }
     }
 
