@@ -157,9 +157,15 @@ constructor(
     private var anyBouncerShowing = false
 
     /**
-     * True if the shade is fully expanded, meaning the hub should not receive any touch input.
+     * True if the shade is fully expanded and the user is not interacting with it anymore, meaning
+     * the hub should not receive any touch input.
      *
-     * Tracks [ShadeInteractor.isAnyFullyExpanded].
+     * We need to not pause the touch handling lifecycle as soon as the shade opens because if the
+     * user swipes down, then back up without lifting their finger, the lifecycle will be paused
+     * then resumed, and resuming force-stops all active touch sessions. This means the shade will
+     * not receive the end of the gesture and will be stuck open.
+     *
+     * Based on [ShadeInteractor.isAnyFullyExpanded] and [ShadeInteractor.isUserInteracting].
      */
     private var shadeShowing = false
 
