@@ -187,7 +187,7 @@ private fun shouldComposeMovableElement(
         } ?: return false
 
     // Always compose movable elements in the scene picked by their scene picker.
-    return shouldDrawOrComposeSharedElement(
+    return shouldPlaceOrComposeSharedElement(
         layoutImpl,
         scene,
         element,

@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -46,9 +47,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertTopPositionInRootIsEqualTo
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
@@ -1528,5 +1532,104 @@ class ElementTest {
         interruptionProgress = 0.5f
         rule.waitForIdle()
         assertThat(fooInB.lastAlpha).isEqualTo(0.3f)
+    }
+
+    @Test
+    fun sharedElementIsOnlyPlacedInOverscrollingScene() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions {
+                        overscroll(SceneA, Orientation.Horizontal)
+                        overscroll(SceneB, Orientation.Horizontal)
+                    }
+                )
+            }
+
+        @Composable
+        fun SceneScope.Foo() {
+            Box(Modifier.element(TestElements.Foo).size(10.dp))
+        }
+
+        rule.setContent {
+            SceneTransitionLayout(state) {
+                scene(SceneA) { Foo() }
+                scene(SceneB) { Foo() }
+            }
+        }
+
+        rule.onNode(isElement(TestElements.Foo, SceneA)).assertIsDisplayed()
+        rule.onNode(isElement(TestElements.Foo, SceneB)).assertDoesNotExist()
+
+        // A => B while overscrolling at scene B.
+        var progress by mutableStateOf(2f)
+        rule.runOnUiThread {
+            state.startTransition(transition(from = SceneA, to = SceneB, progress = { progress }))
+        }
+        rule.waitForIdle()
+
+        // Foo should only be placed in scene B.
+        rule.onNode(isElement(TestElements.Foo, SceneA)).assertExists().assertIsNotDisplayed()
+        rule.onNode(isElement(TestElements.Foo, SceneB)).assertIsDisplayed()
+
+        // Overscroll at scene A.
+        progress = -1f
+        rule.waitForIdle()
+
+        // Foo should only be placed in scene A.
+        rule.onNode(isElement(TestElements.Foo, SceneA)).assertIsDisplayed()
+        rule.onNode(isElement(TestElements.Foo, SceneB)).assertExists().assertIsNotDisplayed()
+    }
+
+    @Test
+    fun sharedMovableElementIsOnlyComposedInOverscrollingScene() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions {
+                        overscroll(SceneA, Orientation.Horizontal)
+                        overscroll(SceneB, Orientation.Horizontal)
+                    }
+                )
+            }
+
+        val fooInA = "fooInA"
+        val fooInB = "fooInB"
+
+        @Composable
+        fun SceneScope.MovableFoo(text: String, modifier: Modifier = Modifier) {
+            MovableElement(TestElements.Foo, modifier) { content { Text(text) } }
+        }
+
+        rule.setContent {
+            SceneTransitionLayout(state) {
+                scene(SceneA) { MovableFoo(text = fooInA) }
+                scene(SceneB) { MovableFoo(text = fooInB) }
+            }
+        }
+
+        rule.onNode(hasText(fooInA)).assertIsDisplayed()
+        rule.onNode(hasText(fooInB)).assertDoesNotExist()
+
+        // A => B while overscrolling at scene B.
+        var progress by mutableStateOf(2f)
+        rule.runOnUiThread {
+            state.startTransition(transition(from = SceneA, to = SceneB, progress = { progress }))
+        }
+        rule.waitForIdle()
+
+        // Foo content should only be composed in scene B.
+        rule.onNode(hasText(fooInA)).assertDoesNotExist()
+        rule.onNode(hasText(fooInB)).assertIsDisplayed()
+
+        // Overscroll at scene A.
+        progress = -1f
+        rule.waitForIdle()
+
+        // Foo content should only be composed in scene A.
+        rule.onNode(hasText(fooInA)).assertIsDisplayed()
+        rule.onNode(hasText(fooInB)).assertDoesNotExist()
     }
 }
