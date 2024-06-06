@@ -29,6 +29,7 @@ import android.os.IInputConstants.UNMULTIPLIED_DEFAULT_DISPATCHING_TIMEOUT_MILLI
 import android.os.SystemClock
 import android.provider.Settings
 import android.provider.Settings.Global.HIDE_ERROR_DIALOGS
+import android.server.wm.CtsWindowInfoUtils.waitForStableWindowGeometry
 import android.testing.PollingCheck
 
 import androidx.test.uiautomator.By
@@ -37,6 +38,8 @@ import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 
 import com.android.cts.input.UinputTouchScreen
+
+import java.util.concurrent.TimeUnit
 
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -183,5 +186,6 @@ class AnrTest {
         val flags = " -W -n "
         val startCmd = "am start $flags $PACKAGE_NAME/.UnresponsiveGestureMonitorActivity"
         instrumentation.uiAutomation.executeShellCommand(startCmd)
+        waitForStableWindowGeometry(5L, TimeUnit.SECONDS)
     }
 }
