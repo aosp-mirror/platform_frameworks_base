@@ -268,7 +268,7 @@
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Informe completo"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utiliza esta opción para que la interferencia del sistema sea mínima cuando el dispositivo no responda o funcione demasiado lento, o bien cuando necesites todas las secciones del informe. No permite introducir más detalles ni hacer más capturas de pantalla."</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{La captura de pantalla para el informe de errores se hará en # segundo.}many{La captura de pantalla para el informe de errores se hará en # segundos.}other{La captura de pantalla para el informe de errores se hará en # segundos.}}"</string>
-    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Se ha hecho la captura de pantalla con el informe de errores"</string>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Captura de pantalla generada con el informe de errores"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"No se ha podido hacer la captura de pantalla con el informe de errores"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo Silencio"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"El sonido está desactivado. Activar"</string>
