@@ -1595,11 +1595,31 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
             }
             case OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE: {
-                taskFragment.getTask().moveOrCreateDecorSurfaceFor(taskFragment);
+                final Task task = taskFragment.getTask();
+                if (task == null) {
+                    break;
+                }
+                // If any TaskFragment in the Task is collected by the transition, we make the decor
+                // surface visible in sync with the TaskFragment transition. Otherwise, we make the
+                // decor surface visible immediately.
+                final TaskFragment syncTaskFragment = transition != null
+                        ? task.getTaskFragment(transition.mParticipants::contains)
+                        : null;
+
+                if (syncTaskFragment != null) {
+                    task.moveOrCreateDecorSurfaceFor(taskFragment, false /* visible */);
+                    task.setDecorSurfaceVisible(syncTaskFragment.getSyncTransaction());
+                } else {
+                    task.moveOrCreateDecorSurfaceFor(taskFragment, true /* visible */);
+                }
                 break;
             }
             case OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE: {
-                taskFragment.getTask().removeDecorSurface();
+                final Task task = taskFragment.getTask();
+                if (task == null) {
+                    break;
+                }
+                task.removeDecorSurface();
                 break;
             }
             case OP_TYPE_SET_DIM_ON_TASK: {
@@ -1627,21 +1647,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         clientTransaction.sanitize(caller.mPid, caller.mUid);
                     }
 
-                    if (transition != null) {
-                        // The decor surface boost/unboost must happen after the transition is
-                        // completed. Otherwise, the decor surface could be moved before Shell
-                        // completes the transition, causing flicker.
-                        transition.addTransitionEndedListener(() ->
-                                task.setDecorSurfaceBoosted(
-                                        taskFragment,
-                                        operation.getBooleanValue() /* isBoosted */,
-                                        clientTransaction));
-                    } else {
-                        task.setDecorSurfaceBoosted(
-                                taskFragment,
-                                operation.getBooleanValue() /* isBoosted */,
-                                clientTransaction);
-                    }
+                    task.requestDecorSurfaceBoosted(
+                            taskFragment,
+                            operation.getBooleanValue() /* isBoosted */,
+                            clientTransaction);
+
+                    // The decor surface boost/unboost must be applied after the transition is
+                    // completed. Otherwise, the decor surface could be moved before Shell completes
+                    // the transition, causing flicker.
+                    runAfterTransition(transition, task::commitDecorSurfaceBoostedState);
                 }
                 break;
             }
@@ -1652,6 +1666,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
         return effects;
+    }
+
+    /**
+     * Executes the provided {@code runnable} after the {@code transition}. If the
+     * {@code transition} is {@code null}, the {@code runnable} is executed immediately.
+     */
+    private static void runAfterTransition(
+            @Nullable Transition transition, @NonNull Runnable runnable) {
+        if (transition == null) {
+            runnable.run();
+        } else {
+            transition.addTransitionEndedListener(runnable);
+        }
     }
 
     private boolean validateTaskFragmentOperation(
