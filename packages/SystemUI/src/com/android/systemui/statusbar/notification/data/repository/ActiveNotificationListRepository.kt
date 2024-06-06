@@ -42,6 +42,9 @@ class ActiveNotificationListRepository @Inject constructor() {
     /** Stats about the list of notifications attached to the shade */
     val notifStats = MutableStateFlow(NotifStats.empty)
 
+    /** The key of the top ongoing notification */
+    val topOngoingNotificationKey = MutableStateFlow<String?>(null)
+
     /** The key of the top unseen notification */
     val topUnseenNotificationKey = MutableStateFlow<String?>(null)
 }
@@ -75,6 +78,7 @@ data class ActiveNotificationsStore(
     /** Unique key identifying an [ActiveNotificationEntryModel] in the store. */
     sealed class Key {
         data class Individual(val key: String) : Key()
+
         data class Group(val key: String) : Key()
     }
 
