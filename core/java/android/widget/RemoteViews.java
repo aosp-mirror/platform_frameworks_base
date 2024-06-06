@@ -6661,7 +6661,8 @@ public class RemoteViews implements Parcelable, Filter {
     public static final class ColorResources {
         // Set of valid colors resources.
         private static final int FIRST_RESOURCE_COLOR_ID = android.R.color.system_neutral1_0;
-        private static final int LAST_RESOURCE_COLOR_ID = android.R.color.system_accent3_1000;
+        private static final int LAST_RESOURCE_COLOR_ID =
+            android.R.color.system_error_1000;
         // Size, in bytes, of an entry in the array of colors in an ARSC file.
         private static final int ARSC_ENTRY_SIZE = 16;
 

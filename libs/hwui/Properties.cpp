@@ -39,6 +39,9 @@ constexpr bool clip_surfaceviews() {
 constexpr bool hdr_10bit_plus() {
     return false;
 }
+constexpr bool initialize_gl_always() {
+    return false;
+}
 }  // namespace hwui_flags
 #endif
 
@@ -255,6 +258,10 @@ bool Properties::isDrawingEnabled() {
         enableRTAnimations = drawingEnabledProp;
     }
     return drawingEnabled == DrawingEnabled::On;
+}
+
+bool Properties::initializeGlAlways() {
+    return base::GetBoolProperty(PROPERTY_INITIALIZE_GL_ALWAYS, hwui_flags::initialize_gl_always());
 }
 
 }  // namespace uirenderer

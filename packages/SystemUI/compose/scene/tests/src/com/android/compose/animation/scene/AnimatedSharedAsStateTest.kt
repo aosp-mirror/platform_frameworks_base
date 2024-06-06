@@ -32,7 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.TestScenes.SceneA
+import com.android.compose.animation.scene.TestScenes.SceneB
+import com.android.compose.animation.scene.TestScenes.SceneC
+import com.android.compose.animation.scene.TestScenes.SceneD
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
@@ -130,8 +135,8 @@ class AnimatedSharedAsStateTest {
                 // The transition lasts 64ms = 4 frames.
                 spec = tween(durationMillis = 16 * 4, easing = LinearEasing)
             },
-            fromScene = TestScenes.SceneA,
-            toScene = TestScenes.SceneB,
+            fromScene = SceneA,
+            toScene = SceneB,
         ) {
             before {
                 assertThat(lastValueInFrom).isEqualTo(fromValues)
@@ -189,8 +194,8 @@ class AnimatedSharedAsStateTest {
                 // The transition lasts 64ms = 4 frames.
                 spec = tween(durationMillis = 16 * 4, easing = LinearEasing)
             },
-            fromScene = TestScenes.SceneA,
-            toScene = TestScenes.SceneB,
+            fromScene = SceneA,
+            toScene = SceneB,
         ) {
             before {
                 assertThat(lastValueInFrom).isEqualTo(fromValues)
@@ -243,8 +248,8 @@ class AnimatedSharedAsStateTest {
                 // The transition lasts 64ms = 4 frames.
                 spec = tween(durationMillis = 16 * 4, easing = LinearEasing)
             },
-            fromScene = TestScenes.SceneA,
-            toScene = TestScenes.SceneB,
+            fromScene = SceneA,
+            toScene = SceneB,
         ) {
             before {
                 assertThat(lastValueInFrom).isEqualTo(fromValues)
@@ -380,5 +385,62 @@ class AnimatedSharedAsStateTest {
                 assertThat(lastValueInTo).isEqualTo(toValues)
             }
         }
+    }
+
+    @Test
+    fun animatedValueIsUsingLastTransition() = runTest {
+        val state =
+            rule.runOnUiThread { MutableSceneTransitionLayoutStateImpl(SceneA, transitions {}) }
+
+        val foo = ValueKey("foo")
+        val bar = ValueKey("bar")
+        val lastValues = mutableMapOf<ValueKey, MutableMap<SceneKey, Float>>()
+
+        @Composable
+        fun SceneScope.animateFloat(value: Float, key: ValueKey) {
+            val animatedValue = animateSceneFloatAsState(value, key)
+            LaunchedEffect(animatedValue) {
+                snapshotFlow { animatedValue.value }
+                    .collect { lastValues.getOrPut(key) { mutableMapOf() }[sceneKey] = it }
+            }
+        }
+
+        rule.setContent {
+            SceneTransitionLayout(state) {
+                // foo goes from 0f to 100f in A => B.
+                scene(SceneA) { animateFloat(0f, foo) }
+                scene(SceneB) { animateFloat(100f, foo) }
+
+                // bar goes from 0f to 10f in C => D.
+                scene(SceneC) { animateFloat(0f, bar) }
+                scene(SceneD) { animateFloat(10f, bar) }
+            }
+        }
+
+        rule.runOnUiThread {
+            // A => B is at 30%.
+            state.startTransition(
+                transition(
+                    from = SceneA,
+                    to = SceneB,
+                    progress = { 0.3f },
+                    onFinish = neverFinish(),
+                )
+            )
+
+            // C => D is at 70%.
+            state.startTransition(transition(from = SceneC, to = SceneD, progress = { 0.7f }))
+        }
+        rule.waitForIdle()
+
+        assertThat(lastValues[foo]?.get(SceneA)).isWithin(0.001f).of(30f)
+        assertThat(lastValues[foo]?.get(SceneB)).isWithin(0.001f).of(30f)
+        assertThat(lastValues[foo]?.get(SceneC)).isNull()
+        assertThat(lastValues[foo]?.get(SceneD)).isNull()
+
+        assertThat(lastValues[bar]?.get(SceneA)).isNull()
+        assertThat(lastValues[bar]?.get(SceneB)).isNull()
+        assertThat(lastValues[bar]?.get(SceneC)).isWithin(0.001f).of(7f)
+        assertThat(lastValues[bar]?.get(SceneD)).isWithin(0.001f).of(7f)
     }
 }

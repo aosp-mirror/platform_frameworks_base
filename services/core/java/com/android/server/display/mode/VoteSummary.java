@@ -23,7 +23,9 @@ import android.view.Display;
 import android.view.SurfaceControl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 final class VoteSummary {
     private static final float FLOAT_TOLERANCE = SurfaceControl.RefreshRateRange.FLOAT_TOLERANCE;
@@ -38,7 +40,14 @@ final class VoteSummary {
     public int minWidth;
     public int minHeight;
     public boolean disableRefreshRateSwitching;
+    /**
+     *  available modes should have mode with specific refresh rate
+     */
     public float appRequestBaseModeRefreshRate;
+    /**
+     * requestRefreshRate should be within [minRenderFrameRate, maxRenderFrameRate] range
+     */
+    public Set<Float> requestedRefreshRates = new HashSet<>();
 
     @Nullable
     public List<SupportedRefreshRatesVote.RefreshRates> supportedRefreshRates;
@@ -329,6 +338,21 @@ final class VoteSummary {
             }
             return false;
         }
+
+        for (Float requestedRefreshRate : requestedRefreshRates) {
+            if (requestedRefreshRate < minRenderFrameRate
+                    || requestedRefreshRate > maxRenderFrameRate) {
+                if (mLoggingEnabled) {
+                    Slog.w(TAG, "Requested refreshRate is outside frame rate range"
+                            + ": requestedRefreshRates=" + requestedRefreshRates
+                            + ", requestedRefreshRate=" + requestedRefreshRate
+                            + ", minRenderFrameRate=" + minRenderFrameRate
+                            + ", maxRenderFrameRate=" + maxRenderFrameRate);
+                }
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -370,6 +394,7 @@ final class VoteSummary {
         minHeight = 0;
         disableRefreshRateSwitching = false;
         appRequestBaseModeRefreshRate = 0f;
+        requestedRefreshRates.clear();
         supportedRefreshRates = null;
         supportedModeIds = null;
         if (mLoggingEnabled) {
@@ -393,6 +418,7 @@ final class VoteSummary {
                 + ", minHeight=" + minHeight
                 + ", disableRefreshRateSwitching=" + disableRefreshRateSwitching
                 + ", appRequestBaseModeRefreshRate=" + appRequestBaseModeRefreshRate
+                + ", requestRefreshRates=" + requestedRefreshRates
                 + ", supportedRefreshRates=" + supportedRefreshRates
                 + ", supportedModeIds=" + supportedModeIds
                 + ", mIsDisplayResolutionRangeVotingEnabled="

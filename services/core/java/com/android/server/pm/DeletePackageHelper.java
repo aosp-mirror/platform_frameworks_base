@@ -241,7 +241,7 @@ final class DeletePackageHelper {
             isInstallerPackage = mPm.mSettings.isInstallerPackage(packageName);
         }
 
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageX: pkg=" + packageName + " user=" + userId);
             try (PackageFreezer freezer = mPm.freezePackageForDelete(packageName, freezeUser,
                     deleteFlags, "deletePackageX", ApplicationExitInfo.REASON_OTHER)) {
@@ -280,7 +280,7 @@ final class DeletePackageHelper {
 
         // Delete the resources here after sending the broadcast to let
         // other processes clean up before deleting resources.
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             if (info.mArgs != null) {
                 mRemovePackageHelper.cleanUpResources(info.mArgs.getPackageName(),
                         info.mArgs.getCodeFile(), info.mArgs.getInstructionSets());
@@ -435,7 +435,7 @@ final class DeletePackageHelper {
     public void executeDeletePackage(DeletePackageAction action, String packageName,
             boolean deleteCodeAndResources, @NonNull int[] allUserHandles, boolean writeSettings)
             throws SystemDeleteException {
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             executeDeletePackageLIF(action, packageName, deleteCodeAndResources, allUserHandles,
                     writeSettings);
         }
@@ -681,7 +681,7 @@ final class DeletePackageHelper {
             // Preserve data by setting flag
             flags |= PackageManager.DELETE_KEEP_DATA;
         }
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             deleteInstalledPackageLIF(deletedPs, UserHandle.USER_ALL, true, flags, allUserHandles,
                     outInfo, writeSettings);
         }

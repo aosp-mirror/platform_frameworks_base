@@ -269,7 +269,7 @@ class MediaDataProcessor(
         }
 
     override fun start() {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) {
+        if (!mediaFlags.isSceneContainerEnabled()) {
             return
         }
 
@@ -746,8 +746,7 @@ class MediaDataProcessor(
             notif.extras.getParcelable(
                 Notification.EXTRA_BUILDER_APPLICATION_INFO,
                 ApplicationInfo::class.java
-            )
-                ?: getAppInfoFromPackage(sbn.packageName)
+            ) ?: getAppInfoFromPackage(sbn.packageName)
 
         // App name
         val appName = getAppName(sbn, appInfo)

@@ -203,7 +203,7 @@ constructor(
     private val scrubbingChangeListener =
         object : SeekBarViewModel.ScrubbingChangeListener {
             override fun onScrubbingChanged(scrubbing: Boolean) {
-                if (!mediaFlags.isMediaControlsRefactorEnabled()) return
+                if (!mediaFlags.isSceneContainerEnabled()) return
                 if (isScrubbing == scrubbing) return
                 isScrubbing = scrubbing
                 updateDisplayForScrubbingChange()
@@ -213,7 +213,7 @@ constructor(
     private val enabledChangeListener =
         object : SeekBarViewModel.EnabledChangeListener {
             override fun onEnabledChanged(enabled: Boolean) {
-                if (!mediaFlags.isMediaControlsRefactorEnabled()) return
+                if (!mediaFlags.isSceneContainerEnabled()) return
                 if (isSeekBarEnabled == enabled) return
                 isSeekBarEnabled = enabled
                 MediaControlViewBinder.updateSeekBarVisibility(expandedLayout, isSeekBarEnabled)
@@ -229,7 +229,7 @@ constructor(
      * @param listening True when player should be active. Otherwise, false.
      */
     fun setListening(listening: Boolean) {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) return
+        if (!mediaFlags.isSceneContainerEnabled()) return
         seekBarViewModel.listening = listening
     }
 
@@ -263,7 +263,7 @@ constructor(
                             )
                         )
                     }
-                    if (mediaFlags.isMediaControlsRefactorEnabled()) {
+                    if (mediaFlags.isSceneContainerEnabled()) {
                         if (
                             this@MediaViewController::recsConfigurationChangeListener.isInitialized
                         ) {
@@ -305,6 +305,7 @@ constructor(
      */
     var collapsedLayout = ConstraintSet()
         @VisibleForTesting set
+
     /**
      * The expanded constraint set used to render a collapsed player. If it is modified, make sure
      * to call [refreshState]
@@ -334,7 +335,7 @@ constructor(
      * Notify this controller that the view has been removed and all listeners should be destroyed
      */
     fun onDestroy() {
-        if (mediaFlags.isMediaControlsRefactorEnabled()) {
+        if (mediaFlags.isSceneContainerEnabled()) {
             if (this::seekBarObserver.isInitialized) {
                 seekBarViewModel.progress.removeObserver(seekBarObserver)
             }
@@ -657,7 +658,7 @@ constructor(
         }
 
     fun attachPlayer(mediaViewHolder: MediaViewHolder) {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) return
+        if (!mediaFlags.isSceneContainerEnabled()) return
         this.mediaViewHolder = mediaViewHolder
 
         // Setting up seek bar.
@@ -731,7 +732,7 @@ constructor(
     }
 
     fun updateAnimatorDurationScale() {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) return
+        if (!mediaFlags.isSceneContainerEnabled()) return
         if (this::seekBarObserver.isInitialized) {
             seekBarObserver.animationEnabled =
                 globalSettings.getFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
@@ -787,7 +788,7 @@ constructor(
     }
 
     fun attachRecommendations(recommendationViewHolder: RecommendationViewHolder) {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) return
+        if (!mediaFlags.isSceneContainerEnabled()) return
         this.recommendationViewHolder = recommendationViewHolder
 
         attach(recommendationViewHolder.recommendations, TYPE.RECOMMENDATION)
@@ -796,13 +797,13 @@ constructor(
     }
 
     fun bindSeekBar(onSeek: () -> Unit, onBindSeekBar: (SeekBarViewModel) -> Unit) {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) return
+        if (!mediaFlags.isSceneContainerEnabled()) return
         seekBarViewModel.logSeek = onSeek
         onBindSeekBar.invoke(seekBarViewModel)
     }
 
     fun setUpTurbulenceNoise() {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) return
+        if (!mediaFlags.isSceneContainerEnabled()) return
         if (!this::turbulenceNoiseAnimationConfig.isInitialized) {
             turbulenceNoiseAnimationConfig =
                 createTurbulenceNoiseConfig(
@@ -1153,13 +1154,13 @@ constructor(
     }
 
     fun setUpPrevButtonInfo(isAvailable: Boolean, notVisibleValue: Int = ConstraintSet.GONE) {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) return
+        if (!mediaFlags.isSceneContainerEnabled()) return
         isPrevButtonAvailable = isAvailable
         prevNotVisibleValue = notVisibleValue
     }
 
     fun setUpNextButtonInfo(isAvailable: Boolean, notVisibleValue: Int = ConstraintSet.GONE) {
-        if (!mediaFlags.isMediaControlsRefactorEnabled()) return
+        if (!mediaFlags.isSceneContainerEnabled()) return
         isNextButtonAvailable = isAvailable
         nextNotVisibleValue = notVisibleValue
     }

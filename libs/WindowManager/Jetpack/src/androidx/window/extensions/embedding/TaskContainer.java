@@ -510,7 +510,7 @@ class TaskContainer {
             return;
         }
         final TaskFragmentContainer primaryContainer = topSplitContainer.getPrimaryContainer();
-        final float newRatio = dividerPresenter.calculateNewSplitRatio(topSplitContainer);
+        final float newRatio = dividerPresenter.calculateNewSplitRatio();
 
         // If the primary container is fully expanded, we should finish all the associated
         // secondary containers.

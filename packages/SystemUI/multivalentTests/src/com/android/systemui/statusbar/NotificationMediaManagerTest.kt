@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar
 
+import android.media.MediaMetadata
+import android.media.session.MediaController
+import android.media.session.MediaSession
+import android.os.fakeExecutorHandler
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.service.notification.NotificationListenerService
@@ -54,6 +58,7 @@ class NotificationMediaManagerTest : SysuiTestCase() {
     private val notifPipeline = kosmos.notifPipeline
     private val notifCollection = kosmos.mockNotifCollection
     private val dumpManager = kosmos.dumpManager
+    private val handler = kosmos.fakeExecutorHandler
     private val mediaDataManager = mock<MediaDataManager>()
     private val backgroundExecutor = FakeExecutor(FakeSystemClock())
 
@@ -72,7 +77,11 @@ class NotificationMediaManagerTest : SysuiTestCase() {
                 mediaDataManager,
                 dumpManager,
                 backgroundExecutor,
+                handler,
             )
+        val mediaSession = MediaSession(context, "TEST")
+        notificationMediaManager.mMediaController =
+            MediaController(context, mediaSession.sessionToken)
 
         verify(mediaDataManager).addListener(listenerCaptor.capture())
     }
@@ -113,5 +122,33 @@ class NotificationMediaManagerTest : SysuiTestCase() {
 
         verify(notifCollection).dismissNotification(notifEntryCaptor.capture(), any())
         assertThat(notifEntryCaptor.lastValue.key).isEqualTo(KEY)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NOTIFICATION_MEDIA_MANAGER_BACKGROUND_EXECUTION)
+    fun clearMediaNotification_flagOn_resetMediaMetadata() {
+        // set up media metadata.
+        notificationMediaManager.mMediaListener.onMetadataChanged(MediaMetadata.Builder().build())
+        backgroundExecutor.runAllReady()
+
+        // clear media notification.
+        notificationMediaManager.clearCurrentMediaNotification()
+        backgroundExecutor.runAllReady()
+
+        assertThat(notificationMediaManager.mediaMetadata).isNull()
+        assertThat(notificationMediaManager.mMediaController).isNull()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_NOTIFICATION_MEDIA_MANAGER_BACKGROUND_EXECUTION)
+    fun clearMediaNotification_flagOff_resetMediaMetadata() {
+        // set up media metadata.
+        notificationMediaManager.mMediaListener.onMetadataChanged(MediaMetadata.Builder().build())
+
+        // clear media notification.
+        notificationMediaManager.clearCurrentMediaNotification()
+
+        assertThat(notificationMediaManager.mediaMetadata).isNull()
+        assertThat(notificationMediaManager.mMediaController).isNull()
     }
 }

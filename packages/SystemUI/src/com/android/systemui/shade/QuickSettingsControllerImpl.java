@@ -65,6 +65,7 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.classifier.Classifier;
+import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.dump.DumpManager;
@@ -157,6 +158,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private final ShadeRepository mShadeRepository;
     private final ShadeInteractor mShadeInteractor;
     private final ActiveNotificationsInteractor mActiveNotificationsInteractor;
+    private final Lazy<CommunalTransitionViewModel> mCommunalTransitionViewModelLazy;
     private final JavaAdapter mJavaAdapter;
     private final FalsingManager mFalsingManager;
     private final AccessibilityManager mAccessibilityManager;
@@ -334,6 +336,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             JavaAdapter javaAdapter,
             CastController castController,
             SplitShadeStateController splitShadeStateController,
+            Lazy<CommunalTransitionViewModel> communalTransitionViewModelLazy,
             Lazy<LargeScreenHeaderHelper> largeScreenHeaderHelperLazy
     ) {
         SceneContainerFlag.assertInLegacyMode();
@@ -379,6 +382,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mShadeRepository = shadeRepository;
         mShadeInteractor = shadeInteractor;
         mActiveNotificationsInteractor = activeNotificationsInteractor;
+        mCommunalTransitionViewModelLazy = communalTransitionViewModelLazy;
         mJavaAdapter = javaAdapter;
 
         mLockscreenShadeTransitionController.addCallback(new LockscreenShadeTransitionCallback());
@@ -458,6 +462,9 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         initNotificationStackScrollLayoutController();
         mJavaAdapter.alwaysCollectFlow(
                 mShadeInteractor.isExpandToQsEnabled(), this::setExpansionEnabledPolicy);
+        mJavaAdapter.alwaysCollectFlow(
+                mCommunalTransitionViewModelLazy.get().isUmoOnCommunal(),
+                this::setShouldUpdateSquishinessOnMedia);
     }
 
     private void initNotificationStackScrollLayoutController() {
@@ -889,6 +896,12 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mExpansionEnabledPolicy = expansionEnabledPolicy;
         if (mQs != null) {
             mQs.setHeaderClickable(isExpansionEnabled());
+        }
+    }
+
+    private void setShouldUpdateSquishinessOnMedia(boolean shouldUpdate) {
+        if (mQs != null) {
+            mQs.setShouldUpdateSquishinessOnMedia(shouldUpdate);
         }
     }
 

@@ -14,10 +14,3 @@ flag {
   description: "This flag controls whether virtual HAL is used for testing instead of TestHal "
   bug: "294254230"
 }
-
-flag {
-  name: "mandatory_biometrics"
-  namespace: "biometrics_framework"
-  description: "This flag controls whether LSKF fallback is removed from biometric prompt when the phone is outside trusted locations"
-  bug: "322081563"
-}

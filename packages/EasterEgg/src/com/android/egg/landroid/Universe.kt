@@ -155,10 +155,7 @@ open class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) 
                     speed = speed,
                     color = Colors.Eigengrau4
                 )
-            android.util.Log.v(
-                "Landroid",
-                "created planet $p with period $period and vel $speed"
-            )
+            android.util.Log.v("Landroid", "created planet $p with period $period and vel $speed")
             val num = it + 1
             p.description = "TEST PLANET #$num"
             p.atmosphere = "radius=$radius"
@@ -215,10 +212,7 @@ open class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) 
                     speed = speed,
                     color = Colors.Eigengrau4
                 )
-            android.util.Log.v(
-                "Landroid",
-                "created planet $p with period $period and vel $speed"
-            )
+            android.util.Log.v("Landroid", "created planet $p with period $period and vel $speed")
             p.description = namer.describePlanet(rng)
             p.atmosphere = namer.describeAtmo(rng)
             p.flora = namer.describeLife(rng)
@@ -302,7 +296,7 @@ open class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) 
                     //                        &&
                     //                        vDiff < 100f
                     ) {
-                        val landing = Landing(ship, planet, a)
+                        val landing = Landing(ship, planet, a, namer.describeActivity(rng, planet))
                         ship.landing = landing
                         ship.velocity = planet.velocity
                         add(landing)
@@ -370,12 +364,15 @@ open class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) 
     }
 }
 
-class Landing(val ship: Spacecraft, val planet: Planet, val angle: Float) : Constraint {
-    private val landingVector = Vec2.makeWithAngleMag(angle, ship.radius + planet.radius)
+class Landing(var ship: Spacecraft?, val planet: Planet, val angle: Float, val text: String = "") :
+    Constraint {
     override fun solve(sim: Simulator, dt: Float) {
-        val desiredPos = planet.pos + landingVector
-        ship.pos = (ship.pos * 0.5f) + (desiredPos * 0.5f) // @@@ FIXME
-        ship.angle = angle
+        ship?.let { ship ->
+            val landingVector = Vec2.makeWithAngleMag(angle, ship.radius + planet.radius)
+            val desiredPos = planet.pos + landingVector
+            ship.pos = (ship.pos * 0.5f) + (desiredPos * 0.5f) // @@@ FIXME
+            ship.angle = angle
+        }
     }
 }
 
@@ -435,6 +432,7 @@ class Spacecraft : Body() {
     val track = Track()
 
     var landing: Landing? = null
+    var autopilot: Autopilot? = null
 
     init {
         mass = SPACECRAFT_MASS
@@ -448,23 +446,19 @@ class Spacecraft : Body() {
             var deltaV = MAIN_ENGINE_ACCEL * dt
             if (SCALED_THRUST) deltaV *= thrustMag.coerceIn(0f, 1f)
 
-            if (landing == null) {
-                // we are free in space, so we attempt to pivot toward the desired direction
-                // NOTE: no longer required thanks to FlightStick
-                // angle = thrust.angle()
-            } else
-                landing?.let { landing ->
-                    if (launchClock == 0f) launchClock = sim.now + 1f /* @@@ TODO extract */
+            // check if we are currently attached to a landing
+            landing?.let { landing ->
+                // launch clock is 1 second long
+                if (launchClock == 0f) launchClock = sim.now + 1f /* @@@ TODO extract */
 
-                    if (sim.now > launchClock) {
-                        // first-stage to orbit has 1000x power
-                        //                    deltaV *= 1000f
-                        sim.remove(landing)
-                        this.landing = null
-                    } else {
-                        deltaV = 0f
-                    }
+                if (sim.now > launchClock) {
+                    // detach from landing site
+                    landing.ship = null
+                    this.landing = null
+                } else {
+                    deltaV = 0f
                 }
+            }
 
             // this is it. impart thrust to the ship.
             // note that we always thrust in the forward direction

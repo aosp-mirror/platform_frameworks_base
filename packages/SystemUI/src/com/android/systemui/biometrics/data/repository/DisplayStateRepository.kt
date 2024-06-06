@@ -29,11 +29,10 @@ import com.android.systemui.display.data.repository.DeviceStateRepository
 import com.android.systemui.display.data.repository.DeviceStateRepository.DeviceState.REAR_DISPLAY
 import com.android.systemui.display.data.repository.DisplayRepository
 import javax.inject.Inject
+import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -58,7 +57,7 @@ interface DisplayStateRepository {
     val currentDisplaySize: StateFlow<Size>
 
     /** Provides whether the current display is large screen */
-    val isLargeScreen: Flow<Boolean>
+    val isLargeScreen: StateFlow<Boolean>
 }
 
 @SysUISingleton
@@ -127,16 +126,29 @@ constructor(
                     ),
             )
 
-    override val isLargeScreen: Flow<Boolean> =
+    override val isLargeScreen: StateFlow<Boolean> =
         currentDisplayInfo
             .map {
-                // TODO: This works, but investigate better way to handle this
-                it.logicalWidth * 160 / it.logicalDensityDpi > DisplayMetrics.DENSITY_XXXHIGH &&
-                    it.logicalHeight * 160 / it.logicalDensityDpi > DisplayMetrics.DENSITY_XXHIGH
+                // copied from systemui/shared/...Utilities.java
+                val smallestWidth =
+                    dpiFromPx(
+                        min(it.logicalWidth, it.logicalHeight).toFloat(),
+                        context.resources.configuration.densityDpi
+                    )
+                smallestWidth >= LARGE_SCREEN_MIN_DPS
             }
-            .distinctUntilChanged()
+            .stateIn(
+                backgroundScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
+    private fun dpiFromPx(size: Float, densityDpi: Int): Float {
+        val densityRatio = densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT
+        return size / densityRatio
+    }
 
     companion object {
         const val TAG = "DisplayStateRepositoryImpl"
+        const val LARGE_SCREEN_MIN_DPS = 600f
     }
 }

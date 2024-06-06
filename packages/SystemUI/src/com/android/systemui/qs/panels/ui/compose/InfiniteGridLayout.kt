@@ -52,15 +52,13 @@ constructor(
             tiles.forEach { it.startListening(token) }
             onDispose { tiles.forEach { it.stopListening(token) } }
         }
-        val iconTilesSpecs by iconTilesViewModel.iconTilesSpecs.collectAsStateWithLifecycle()
         val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
 
         TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
             items(
                 tiles.size,
                 span = { index ->
-                    val iconOnly = iconTilesSpecs.contains(tiles[index].spec)
-                    if (iconOnly) {
+                    if (iconTilesViewModel.isIconTile(tiles[index].spec)) {
                         GridItemSpan(1)
                     } else {
                         GridItemSpan(2)
@@ -69,7 +67,7 @@ constructor(
             ) { index ->
                 Tile(
                     tile = tiles[index],
-                    iconOnly = iconTilesSpecs.contains(tiles[index].spec),
+                    iconOnly = iconTilesViewModel.isIconTile(tiles[index].spec),
                     modifier = Modifier.height(dimensionResource(id = R.dimen.qs_tile_height))
                 )
             }
@@ -83,12 +81,11 @@ constructor(
         onAddTile: (TileSpec, Int) -> Unit,
         onRemoveTile: (TileSpec) -> Unit,
     ) {
-        val iconOnlySpecs by iconTilesViewModel.iconTilesSpecs.collectAsStateWithLifecycle()
         val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
 
         DefaultEditTileGrid(
             tiles = tiles,
-            iconOnlySpecs = iconOnlySpecs,
+            isIconOnly = iconTilesViewModel::isIconTile,
             columns = GridCells.Fixed(columns),
             modifier = modifier,
             onAddTile = onAddTile,

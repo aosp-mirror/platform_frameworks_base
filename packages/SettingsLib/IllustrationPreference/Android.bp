@@ -47,6 +47,7 @@ java_aconfig_library {
     aconfig_declarations: "settingslib_illustrationpreference_flags",
 
     min_sdk_version: "30",
+    sdk_version: "system_current",
 
     apex_available: [
         "//apex_available:platform",

@@ -119,14 +119,6 @@ ZipEntryRO ZipFileRO::findEntryByName(const char* entryName) const
  * appear to be bogus.
  */
 bool ZipFileRO::getEntryInfo(ZipEntryRO entry, uint16_t* pMethod,
- uint32_t* pUncompLen, uint32_t* pCompLen, off64_t* pOffset,
- uint32_t* pModWhen, uint32_t* pCrc32) const
-{
-     return getEntryInfo(entry, pMethod, pUncompLen, pCompLen, pOffset, pModWhen,
-      pCrc32, nullptr);
-}
-
-bool ZipFileRO::getEntryInfo(ZipEntryRO entry, uint16_t* pMethod,
     uint32_t* pUncompLen, uint32_t* pCompLen, off64_t* pOffset,
     uint32_t* pModWhen, uint32_t* pCrc32, uint16_t* pExtraFieldSize) const
 {

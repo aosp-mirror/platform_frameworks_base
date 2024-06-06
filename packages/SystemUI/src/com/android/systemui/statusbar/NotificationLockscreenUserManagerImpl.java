@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar;
 
 import static android.app.Flags.keyguardPrivateNotifications;
+import static android.app.Flags.redactSensitiveContentNotificationsOnLockscreen;
 import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
 import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
@@ -654,10 +655,12 @@ public class NotificationLockscreenUserManagerImpl implements
                 !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
         boolean isNotifForManagedProfile = mCurrentManagedProfiles.contains(userId);
         boolean isNotifUserRedacted = !userAllowsPrivateNotificationsInPublic(userId);
+        boolean isNotifSensitive = redactSensitiveContentNotificationsOnLockscreen()
+                && ent.getRanking() != null && ent.getRanking().hasSensitiveContent();
 
-        // redact notifications if the current user is redacting notifications; however if the
-        // notification is associated with a managed profile, we rely on the managed profile
-        // setting to determine whether to redact it
+        // redact notifications if the current user is redacting notifications or the notification
+        // contains sensitive content. However if the notification is associated with a managed
+        // profile, we rely on the managed profile setting to determine whether to redact it.
         boolean isNotifRedacted = (!isNotifForManagedProfile && isCurrentUserRedactingNotifs)
                 || isNotifUserRedacted;
 
@@ -666,10 +669,11 @@ public class NotificationLockscreenUserManagerImpl implements
         boolean userForcesRedaction = packageHasVisibilityOverride(ent.getSbn().getKey());
 
         if (keyguardPrivateNotifications()) {
-            return !mKeyguardAllowingNotifications
-                    || userForcesRedaction || notificationRequestsRedaction && isNotifRedacted;
+            return !mKeyguardAllowingNotifications || isNotifSensitive
+                    || userForcesRedaction || (notificationRequestsRedaction && isNotifRedacted);
         } else {
-            return userForcesRedaction || notificationRequestsRedaction && isNotifRedacted;
+            return userForcesRedaction || isNotifSensitive
+                    || (notificationRequestsRedaction && isNotifRedacted);
         }
     }
 

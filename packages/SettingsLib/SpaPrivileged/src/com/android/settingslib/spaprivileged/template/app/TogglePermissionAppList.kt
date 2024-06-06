@@ -18,6 +18,7 @@ package com.android.settingslib.spaprivileged.template.app
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.os.Process
 import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -79,8 +80,25 @@ interface TogglePermissionAppListModel<T : AppRecord> {
     fun setAllowed(record: T, newAllowed: Boolean)
 
     @Composable
-    fun InfoPageAdditionalContent(record: T, isAllowed: () -> Boolean?){}
+    fun InfoPageAdditionalContent(record: T, isAllowed: () -> Boolean?) {}
 }
+
+/**
+ * And if the given app has system or root UID.
+ *
+ * If true, the app gets all permissions, so the permission toggle always not changeable.
+ */
+fun AppRecord.isSystemOrRootUid(): Boolean = app.uid in listOf(Process.SYSTEM_UID, Process.ROOT_UID)
+
+/**
+ * Gets whether the permission on / off is changeable for the given app.
+ *
+ * And if the given app has system or root UID, it gets all permissions, so always not changeable.
+ */
+fun <T : AppRecord> TogglePermissionAppListModel<T>.isChangeableWithSystemUidCheck(
+    record: T,
+): Boolean = !record.isSystemOrRootUid() && isChangeable(record)
+
 
 interface TogglePermissionAppListProvider {
     val permissionType: String
