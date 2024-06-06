@@ -19,6 +19,7 @@ import android.content.ContentResolver
 import android.database.ContentObserver
 import android.net.Uri
 import android.provider.Settings.SettingNotFoundException
+import com.android.app.tracing.TraceUtils.trace
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -161,7 +162,10 @@ interface SettingsProxy {
         notifyForDescendants: Boolean,
         settingsObserver: ContentObserver
     ) {
-        getContentResolver().registerContentObserver(uri, notifyForDescendants, settingsObserver)
+        trace({ "SP#registerObserver#[$uri]" }) {
+            getContentResolver()
+                .registerContentObserver(uri, notifyForDescendants, settingsObserver)
+        }
     }
 
     /**
@@ -191,13 +195,15 @@ interface SettingsProxy {
         settingsObserver: ContentObserver
     ) =
         CoroutineScope(getBackgroundDispatcher()).launch {
-            getContentResolver()
-                .registerContentObserver(uri, notifyForDescendants, settingsObserver)
+            registerContentObserverSync(uri, notifyForDescendants, settingsObserver)
         }
 
     /** See [ContentResolver.unregisterContentObserver]. */
-    fun unregisterContentObserverSync(settingsObserver: ContentObserver) =
-        getContentResolver().unregisterContentObserver(settingsObserver)
+    fun unregisterContentObserverSync(settingsObserver: ContentObserver) {
+        trace({ "SP#unregisterObserver" }) {
+            getContentResolver().unregisterContentObserver(settingsObserver)
+        }
+    }
 
     /**
      * Convenience wrapper around [ContentResolver.unregisterContentObserver].'
@@ -217,7 +223,7 @@ interface SettingsProxy {
      */
     fun unregisterContentObserverAsync(settingsObserver: ContentObserver) =
         CoroutineScope(getBackgroundDispatcher()).launch {
-            unregisterContentObserver(settingsObserver)
+            unregisterContentObserverSync(settingsObserver)
         }
 
     /**
