@@ -1690,4 +1690,12 @@ please see styles_device_defaults.xml.
            parent="@style/Theme.DeviceDefault.Resolver">
         <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
+
+    <!--
+        TODO(b/309578419): Make activities go edge-to-edge properly and then remove this.
+    -->
+    <style name="GrantCredentialsPermissionActivity"
+           parent="@style/Theme.DeviceDefault.Light.DialogWhenLarge">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
 </resources>
