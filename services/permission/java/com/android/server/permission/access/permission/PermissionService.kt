@@ -533,8 +533,7 @@ class PermissionService(private val service: AccessCheckingService) :
         val packageState =
             packageManagerLocal.withFilteredSnapshot(Binder.getCallingUid(), userId).use {
                 it.getPackageState(packageName)
-            }
-                ?: return PackageManager.PERMISSION_DENIED
+            } ?: return PackageManager.PERMISSION_DENIED
 
         val isPermissionGranted =
             service.getState { isPermissionGranted(packageState, userId, permissionName, deviceId) }
@@ -1164,8 +1163,7 @@ class PermissionService(private val service: AccessCheckingService) :
         val packageState =
             packageManagerLocal.withFilteredSnapshot(Binder.getCallingUid(), userId).use {
                 it.getPackageState(packageName)
-            }
-                ?: return false
+            } ?: return false
 
         service.getState {
             if (isPermissionGranted(packageState, userId, permissionName, deviceId)) {
@@ -1216,8 +1214,7 @@ class PermissionService(private val service: AccessCheckingService) :
         val packageState =
             packageManagerLocal.withFilteredSnapshot(callingUid, userId).use {
                 it.getPackageState(packageName)
-            }
-                ?: return false
+            } ?: return false
         val appId = packageState.appId
         if (UserHandle.getAppId(callingUid) != appId) {
             return false
@@ -1546,8 +1543,7 @@ class PermissionService(private val service: AccessCheckingService) :
         val packageState =
             packageManagerLocal.withFilteredSnapshot(callingUid, userId).use {
                 it.getPackageState(packageName)
-            }
-                ?: return null
+            } ?: return null
         val androidPackage = packageState.androidPackage ?: return null
 
         val isCallerPrivileged =
@@ -1710,8 +1706,7 @@ class PermissionService(private val service: AccessCheckingService) :
                     PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER,
                     userId
                 )
-                ?.let { ArraySet(permissionNames).apply { this += it }.toList() }
-                ?: permissionNames
+                ?.let { ArraySet(permissionNames).apply { this += it }.toList() } ?: permissionNames
 
         setAllowlistedRestrictedPermissionsUnchecked(
             androidPackage,
@@ -2753,27 +2748,25 @@ class PermissionService(private val service: AccessCheckingService) :
             ) {
                 return false
             }
-            return try {
-                val contentResolver = context.contentResolver
-                val userId = UserHandle.getUserId(uid)
-                val isInSetup =
-                    Settings.Secure.getIntForUser(
-                        contentResolver,
-                        Settings.Secure.USER_SETUP_COMPLETE,
-                        userId
-                    ) == 0
-                val isInDeferredSetup =
-                    Settings.Secure.getIntForUser(
-                        contentResolver,
-                        Settings.Secure.USER_SETUP_PERSONALIZATION_STATE,
-                        userId
-                    ) == Settings.Secure.USER_SETUP_PERSONALIZATION_STARTED
-                isInSetup || isInDeferredSetup
-            } catch (e: Settings.SettingNotFoundException) {
-                Slog.w(LOG_TAG, "Failed to check if the user is in restore: $e")
-                false
-            }
+
+            val userId = UserHandle.getUserId(uid)
+
+            val isInSetup = getSecureInt(Settings.Secure.USER_SETUP_COMPLETE, userId) == 0
+            if (isInSetup) return true
+
+            val isInDeferredSetup =
+                getSecureInt(Settings.Secure.USER_SETUP_PERSONALIZATION_STATE, userId) ==
+                    Settings.Secure.USER_SETUP_PERSONALIZATION_STARTED
+            return isInDeferredSetup
         }
+
+        private fun getSecureInt(settingName: String, userId: Int): Int? =
+            try {
+                Settings.Secure.getIntForUser(context.contentResolver, settingName, userId)
+            } catch (e: Settings.SettingNotFoundException) {
+                Slog.i(LOG_TAG, "Setting $settingName not found", e)
+                null
+            }
     }
 
     private class OnPermissionsChangeListeners(looper: Looper) : Handler(looper) {
