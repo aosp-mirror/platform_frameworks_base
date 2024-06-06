@@ -19,8 +19,12 @@ package android.window;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.FloatProperty;
+import android.util.TimeUtils;
+import android.view.Choreographer;
 
 import com.android.internal.dynamicanimation.animation.DynamicAnimation;
+import com.android.internal.dynamicanimation.animation.FlingAnimation;
+import com.android.internal.dynamicanimation.animation.FloatValueHolder;
 import com.android.internal.dynamicanimation.animation.SpringAnimation;
 import com.android.internal.dynamicanimation.animation.SpringForce;
 
@@ -40,6 +44,7 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
      *  always receive progress values in [0, 1].
      */
     private static final float SCALE_FACTOR = 100f;
+    private static final float FLING_FRICTION = 8f;
     private final SpringAnimation mSpring;
     private ProgressCallback mCallback;
     private float mProgress = 0;
@@ -48,11 +53,17 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
     private boolean mBackAnimationInProgress = false;
     @Nullable
     private Runnable mBackCancelledFinishRunnable;
+    @Nullable
+    private Runnable mBackInvokedFinishRunnable;
+    private FlingAnimation mBackInvokedFlingAnim;
     private final DynamicAnimation.OnAnimationEndListener mOnAnimationEndListener =
             (animation, canceled, value, velocity) -> {
-                invokeBackCancelledRunnable();
+                if (mBackCancelledFinishRunnable != null) invokeBackCancelledRunnable();
+                if (mBackInvokedFinishRunnable != null) invokeBackInvokedRunnable();
                 reset();
             };
+    private final DynamicAnimation.OnAnimationUpdateListener mOnBackInvokedFlingUpdateListener =
+            (animation, progress, velocity) -> updateProgressValue(progress, velocity);
 
 
     private void setProgress(float progress) {
@@ -78,7 +89,7 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
 
     @Override
     public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
-        updateProgressValue(value, velocity);
+        if (mBackInvokedFinishRunnable == null) updateProgressValue(value, velocity);
     }
 
 
@@ -134,6 +145,12 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
             // Ensure that last progress value that apps see is 0
             updateProgressValue(0, 0);
             invokeBackCancelledRunnable();
+        } else if (mBackInvokedFinishRunnable != null) {
+            invokeBackInvokedRunnable();
+        }
+        if (mBackInvokedFlingAnim != null) {
+            mBackInvokedFlingAnim.cancel();
+            mBackInvokedFlingAnim = null;
         }
         mSpring.animateToFinalPosition(0);
         if (mSpring.canSkipToEnd()) {
@@ -146,6 +163,30 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
         mLastBackEvent = null;
         mCallback = null;
         mProgress = 0;
+    }
+
+    /**
+     * Animate the back progress animation a bit further with a high friction considering the
+     * current progress and velocity.
+     *
+     * @param finishCallback the callback to be invoked when the final destination is reached
+     */
+    public void onBackInvoked(@NonNull Runnable finishCallback) {
+        mBackInvokedFinishRunnable = finishCallback;
+        mSpring.animateToFinalPosition(0);
+
+        mBackInvokedFlingAnim = new FlingAnimation(new FloatValueHolder())
+                .setStartValue(mProgress)
+                .setFriction(FLING_FRICTION)
+                .setStartVelocity(mVelocity)
+                .setMinValue(0)
+                .setMaxValue(SCALE_FACTOR);
+        mBackInvokedFlingAnim.addUpdateListener(mOnBackInvokedFlingUpdateListener);
+        mBackInvokedFlingAnim.addEndListener(mOnAnimationEndListener);
+        mBackInvokedFlingAnim.start();
+        // do an animation-frame immediately to prevent idle frame
+        mBackInvokedFlingAnim.doAnimationFrame(
+                Choreographer.getInstance().getLastFrameTimeNanos() / TimeUtils.NANOS_PER_MS);
     }
 
     /**
@@ -194,6 +235,13 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
         mSpring.removeEndListener(mOnAnimationEndListener);
         mBackCancelledFinishRunnable.run();
         mBackCancelledFinishRunnable = null;
+    }
+
+    private void invokeBackInvokedRunnable() {
+        mBackInvokedFlingAnim.removeUpdateListener(mOnBackInvokedFlingUpdateListener);
+        mBackInvokedFlingAnim.removeEndListener(mOnAnimationEndListener);
+        mBackInvokedFinishRunnable.run();
+        mBackInvokedFinishRunnable = null;
     }
 
 }

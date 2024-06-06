@@ -499,12 +499,9 @@ public class ViewFrameRateTest {
                         toolkitFrameRateDefaultNormalReadOnly() ? FRAME_RATE_CATEGORY_NORMAL
                                 : FRAME_RATE_CATEGORY_HIGH;
             } else {
-                // intermittent
-                // Even though this is not a small View, step 3 is triggered by this flag, which
-                // brings intermittent to LOW
-                expectedCategory = toolkitFrameRateBySizeReadOnly()
-                        ? FRAME_RATE_CATEGORY_LOW
-                        : FRAME_RATE_CATEGORY_NORMAL;
+                // intermittent.
+                // The expected category is normal.
+                expectedCategory = FRAME_RATE_CATEGORY_NORMAL;
             }
             mActivityRule.runOnUiThread(() -> {
                 mMovingView.invalidate();

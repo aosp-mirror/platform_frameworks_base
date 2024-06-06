@@ -595,6 +595,7 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.MOBILE_SIGNAL_DETECTOR,
                     Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED_DEV,
                     Settings.Global.Wearable.AMBIENT_TILT_TO_BRIGHT,
+                    Settings.Global.Wearable.BATTERY_SAVER_MODE,
                     Settings.Global.Wearable.DECOMPOSABLE_WATCHFACE,
                     Settings.Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED,
                     Settings.Global.Wearable.AMBIENT_LOW_BIT_ENABLED,

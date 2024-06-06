@@ -37,6 +37,7 @@ import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.ImeBackAnimationController;
 import android.view.MotionEvent;
+import android.view.ViewRootImpl;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -49,6 +50,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -68,6 +70,7 @@ import java.util.function.Supplier;
 public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     private IWindowSession mWindowSession;
     private IWindow mWindow;
+    private ViewRootImpl mViewRoot;
     @VisibleForTesting
     public final BackTouchTracker mTouchTracker = new BackTouchTracker();
     @VisibleForTesting
@@ -134,10 +137,12 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      * is attached a window.
      */
     public void attachToWindow(@NonNull IWindowSession windowSession, @NonNull IWindow window,
+            @Nullable ViewRootImpl viewRoot,
             @Nullable ImeBackAnimationController imeBackAnimationController) {
         synchronized (mLock) {
             mWindowSession = windowSession;
             mWindow = window;
+            mViewRoot = viewRoot;
             mImeBackAnimationController = imeBackAnimationController;
             if (!mAllCallbacks.isEmpty()) {
                 setTopOnBackInvokedCallback(getTopCallback());
@@ -151,6 +156,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             clear();
             mWindow = null;
             mWindowSession = null;
+            mViewRoot = null;
             mImeBackAnimationController = null;
         }
     }
@@ -176,8 +182,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 return;
             }
             if (callback instanceof ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback) {
-                // Fall back to compat back key injection if legacy back behaviour should be used.
-                if (!isOnBackInvokedCallbackEnabled()) return;
                 if (callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback
                         && mImeBackAnimationController != null) {
                     // register ImeBackAnimationController instead to play predictive back animation
@@ -300,6 +304,14 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
     }
 
+    private boolean callOnKeyPreIme() {
+        if (mViewRoot != null && !isOnBackInvokedCallbackEnabled(mViewRoot.mContext)) {
+            return mViewRoot.injectBackKeyEvents(/*preImeOnly*/ true);
+        } else {
+            return false;
+        }
+    }
+
     private void setTopOnBackInvokedCallback(@Nullable OnBackInvokedCallback callback) {
         if (mWindowSession == null || mWindow == null) {
             return;
@@ -308,8 +320,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             OnBackInvokedCallbackInfo callbackInfo = null;
             if (callback != null) {
                 int priority = mAllCallbacks.get(callback);
-                final IOnBackInvokedCallback iCallback = new OnBackInvokedCallbackWrapper(
-                        callback, mTouchTracker, mProgressAnimator, mHandler);
+                final IOnBackInvokedCallback iCallback = new OnBackInvokedCallbackWrapper(callback,
+                        mTouchTracker, mProgressAnimator, mHandler, this::callOnKeyPreIme);
                 callbackInfo = new OnBackInvokedCallbackInfo(
                         iCallback,
                         priority,
@@ -399,16 +411,20 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         private final BackTouchTracker mTouchTracker;
         @NonNull
         private final Handler mHandler;
+        @NonNull
+        private final BooleanSupplier mOnKeyPreIme;
 
         OnBackInvokedCallbackWrapper(
                 @NonNull OnBackInvokedCallback callback,
                 @NonNull BackTouchTracker touchTracker,
                 @NonNull BackProgressAnimator progressAnimator,
-                @NonNull Handler handler) {
+                @NonNull Handler handler,
+                @NonNull BooleanSupplier onKeyPreIme) {
             mCallback = new WeakReference<>(callback);
             mTouchTracker = touchTracker;
             mProgressAnimator = progressAnimator;
             mHandler = handler;
+            mOnKeyPreIme = onKeyPreIme;
         }
 
         @Override
@@ -451,11 +467,11 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         public void onBackInvoked() throws RemoteException {
             mHandler.post(() -> {
                 mTouchTracker.reset();
+                if (consumedByOnKeyPreIme()) return;
                 boolean isInProgress = mProgressAnimator.isBackAnimationInProgress();
-                mProgressAnimator.reset();
-                // TODO(b/333957271): Re-introduce auto fling progress generation.
                 final OnBackInvokedCallback callback = mCallback.get();
                 if (callback == null) {
+                    mProgressAnimator.reset();
                     Log.d(TAG, "Trying to call onBackInvoked() on a null callback reference.");
                     return;
                 }
@@ -463,8 +479,38 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                     Log.w(TAG, "ProgressAnimator was not in progress, skip onBackInvoked().");
                     return;
                 }
-                callback.onBackInvoked();
+                OnBackAnimationCallback animationCallback = getBackAnimationCallback();
+                if (animationCallback != null) {
+                    mProgressAnimator.onBackInvoked(callback::onBackInvoked);
+                } else {
+                    mProgressAnimator.reset();
+                    callback.onBackInvoked();
+                }
             });
+        }
+
+        private boolean consumedByOnKeyPreIme() {
+            final OnBackInvokedCallback callback = mCallback.get();
+            if (callback instanceof ImeBackAnimationController
+                    || callback instanceof ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback) {
+                // call onKeyPreIme API if the current callback is an IME callback and the app has
+                // not set enableOnBackInvokedCallback="false"
+                try {
+                    boolean consumed = mOnKeyPreIme.getAsBoolean();
+                    if (consumed) {
+                        // back event intercepted by app in onKeyPreIme -> cancel the IME animation.
+                        final OnBackAnimationCallback animationCallback =
+                                getBackAnimationCallback();
+                        if (animationCallback != null) {
+                            mProgressAnimator.onBackCancelled(animationCallback::onBackCancelled);
+                        }
+                        return true;
+                    }
+                } catch (Exception e) {
+                    Log.d(TAG, "Failed to call onKeyPreIme", e);
+                }
+            }
+            return false;
         }
 
         @Override

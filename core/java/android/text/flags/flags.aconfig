@@ -191,3 +191,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "disable_handwriting_initiator_for_ime"
+  namespace: "text"
+  description: "Don't initiate handwriting for IME views."
+  bug: "343304685"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

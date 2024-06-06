@@ -8351,7 +8351,7 @@
         <activity android:name="android.accounts.GrantCredentialsPermissionActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@style/Theme.DeviceDefault.Light.DialogWhenLarge"
+                android:theme="@style/GrantCredentialsPermissionActivity"
                 android:process=":ui"
                 android:visibleToInstantApps="true">
         </activity>

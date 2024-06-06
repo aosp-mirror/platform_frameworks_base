@@ -53,7 +53,7 @@ class DozingToGoneTransitionViewModelTest : SysuiTestCase() {
     @Test
     fun lockscreenAlpha() =
         testScope.runTest {
-            val viewState = ViewStateAccessor()
+            val viewState = ViewStateAccessor(alpha = { 0.6f })
             val alpha by collectValues(underTest.lockscreenAlpha(viewState))
 
             keyguardTransitionRepository.sendTransitionSteps(
@@ -62,9 +62,11 @@ class DozingToGoneTransitionViewModelTest : SysuiTestCase() {
                 testScope
             )
 
-            // Remain at zero throughout
-            assertThat(alpha[0]).isEqualTo(0f)
+            assertThat(alpha[0]).isEqualTo(0.6f)
+            // Fades out just prior to halfway
             assertThat(alpha[1]).isEqualTo(0f)
+            // Must finish at 0
+            assertThat(alpha[2]).isEqualTo(0f)
         }
 
     @Test

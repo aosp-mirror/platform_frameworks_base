@@ -6,6 +6,20 @@ Ravenwood explicitly does not support “large” integration tests that expect 
 
 When writing tests under Ravenwood, all Android API symbols associated with your declared `sdk_version` are available to link against using, but unsupported APIs will throw an exception.  This design choice enables mocking of unsupported APIs, and supports sharing of test code to build “bivalent” test suites that run against either Ravenwood or a traditional device.
 
+## Manually running tests
+
+To run all Ravenwood tests, use:
+
+```
+./frameworks/base/ravenwood/scripts/run-ravenwood-tests.sh
+```
+
+To run a specific test, use "atest" as normal, selecting the test from a Ravenwood suite such as:
+
+```
+atest CtsOsTestCasesRavenwood:ParcelTest\#testSetDataCapacityNegative
+```
+
 ## Typical test structure
 
 Below are the typical steps needed to add a straightforward “small” unit test:
