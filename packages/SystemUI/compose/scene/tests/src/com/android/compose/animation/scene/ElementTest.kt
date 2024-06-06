@@ -638,10 +638,7 @@ class ElementTest {
 
         // Change the current transition.
         rule.runOnUiThread {
-            state.startTransition(
-                transition(from = SceneA, to = SceneB, progress = { 0.5f }),
-                transitionKey = null,
-            )
+            state.startTransition(transition(from = SceneA, to = SceneB, progress = { 0.5f }))
         }
 
         // The size of Foo should still be 20dp given that the new state was not composed yet.
@@ -1170,7 +1167,7 @@ class ElementTest {
         val offsetInAToB = lerp(offsetInA, offsetInB, aToBProgress)
         val sizeInAToB = lerp(sizeInA, sizeInB, aToBProgress)
         val valueInAToB = lerp(valueInA, valueInB, aToBProgress)
-        rule.runOnUiThread { state.startTransition(aToB, transitionKey = null) }
+        rule.runOnUiThread { state.startTransition(aToB) }
         rule
             .onNode(isElement(TestElements.Foo, SceneB))
             .assertSizeIsEqualTo(sizeInAToB)
@@ -1190,7 +1187,7 @@ class ElementTest {
                 progress = { bToCProgress },
                 interruptionProgress = { interruptionProgress },
             )
-        rule.runOnUiThread { state.startTransition(bToC, transitionKey = null) }
+        rule.runOnUiThread { state.startTransition(bToC) }
 
         // The interruption deltas, which will be multiplied by the interruption progress then added
         // to the current transition offset and size.
@@ -1332,9 +1329,9 @@ class ElementTest {
                 interruptionProgress = { bToCInterruptionProgress },
                 onFinish = neverFinish(),
             )
-        rule.runOnUiThread { state.startTransition(aToB, transitionKey = null) }
+        rule.runOnUiThread { state.startTransition(aToB) }
         rule.waitForIdle()
-        rule.runOnUiThread { state.startTransition(bToC, transitionKey = null) }
+        rule.runOnUiThread { state.startTransition(bToC) }
 
         // Foo is placed in both B and C given that the shared transition is disabled. In B, its
         // offset is impacted by the interruption but in C it is not.
@@ -1370,7 +1367,7 @@ class ElementTest {
                 progress = { 0.7f },
                 interruptionProgress = { 1f },
             )
-        rule.runOnUiThread { state.startTransition(bToA, transitionKey = null) }
+        rule.runOnUiThread { state.startTransition(bToA) }
 
         // Foo should have the position it had in B right before the interruption.
         rule
@@ -1394,8 +1391,7 @@ class ElementTest {
                                 to = SceneB,
                                 progress = { -1f },
                                 orientation = Orientation.Horizontal
-                            ),
-                            transitionKey = null,
+                            )
                         )
                     }
             }
@@ -1512,8 +1508,7 @@ class ElementTest {
                     to = SceneB,
                     progress = { 0.6f },
                     interruptionProgress = { interruptionProgress },
-                ),
-                transitionKey = null
+                )
             )
         }
         rule.waitForIdle()
