@@ -83,7 +83,7 @@ static uint32_t getAlphaFlags(const SkImageInfo& info) {
     switch (info.alphaType()) {
         case kUnknown_SkAlphaType:
             LOG_ALWAYS_FATAL("Bitmap has no alpha type");
-            break;
+            return 0;
         case kOpaque_SkAlphaType:
             return ANDROID_BITMAP_FLAGS_ALPHA_OPAQUE;
         case kPremul_SkAlphaType:
@@ -296,9 +296,13 @@ int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const 
 
 AHardwareBuffer* ABitmap_getHardwareBuffer(ABitmap* bitmapHandle) {
     Bitmap* bitmap = TypeCast::toBitmap(bitmapHandle);
+#ifdef __ANDROID__
     AHardwareBuffer* buffer = bitmap->hardwareBuffer();
     if (buffer) {
         AHardwareBuffer_acquire(buffer);
     }
     return buffer;
+#else
+    return nullptr;
+#endif
 }

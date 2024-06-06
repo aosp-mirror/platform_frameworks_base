@@ -39,6 +39,7 @@ static bool convert(const ANativeWindow_Buffer* buffer,
         return false;
     }
 
+#ifdef __ANDROID__
     sk_sp<SkColorSpace> cs(uirenderer::DataSpaceToColorSpace((android_dataspace)dataspace));
     SkImageInfo imageInfo = uirenderer::ANativeWindowToImageInfo(*buffer, cs);
     size_t rowBytes = buffer->stride * imageInfo.bytesPerPixel();
@@ -53,6 +54,7 @@ static bool convert(const ANativeWindow_Buffer* buffer,
         }
         return true;
     }
+#endif
     return false;
 }
 

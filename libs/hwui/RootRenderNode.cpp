@@ -48,6 +48,8 @@ private:
     uint32_t mRequestId;
 };
 
+#endif
+
 void RootRenderNode::prepareTree(TreeInfo& info) {
     info.errorHandler = mErrorHandler.get();
 
@@ -236,10 +238,12 @@ void RootRenderNode::detachVectorDrawableAnimator(PropertyValuesAnimatorSet* ani
         // removal is necessary: the end time of animation will not change unless triggered by
         // user events, in which case the already posted listener's id will become stale, and
         // the onFinished callback will then be ignored.
+#ifdef __ANDROID__  // Layoutlib does not support Looper
         sp<FinishAndInvokeListener> message = new FinishAndInvokeListener(anim);
         auto looper = Looper::getForThread();
         LOG_ALWAYS_FATAL_IF(looper == nullptr, "Not on a looper thread?");
         looper->sendMessageDelayed(ms2ns(remainingTimeInMs), message, 0);
+#endif
         anim->clearOneShotListener();
     }
 }
@@ -285,22 +289,5 @@ private:
 AnimationContext* ContextFactoryImpl::createAnimationContext(renderthread::TimeLord& clock) {
     return new AnimationContextBridge(clock, mRootNode);
 }
-#else
-
-void RootRenderNode::prepareTree(TreeInfo& info) {
-    info.errorHandler = mErrorHandler.get();
-    info.updateWindowPositions = true;
-    RenderNode::prepareTree(info);
-    info.updateWindowPositions = false;
-    info.errorHandler = nullptr;
-}
-
-void RootRenderNode::attachAnimatingNode(RenderNode* animatingNode) { }
-
-void RootRenderNode::destroy() { }
-
-void RootRenderNode::addVectorDrawableAnimator(PropertyValuesAnimatorSet* anim) { }
-
-#endif
 
 }  // namespace android::uirenderer

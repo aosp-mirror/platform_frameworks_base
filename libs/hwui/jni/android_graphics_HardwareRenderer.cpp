@@ -190,13 +190,9 @@ static jlong android_view_ThreadedRenderer_createRootRenderNode(JNIEnv* env, job
 static jlong android_view_ThreadedRenderer_createProxy(JNIEnv* env, jobject clazz,
         jboolean translucent, jlong rootRenderNodePtr) {
     RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootRenderNodePtr);
-#ifdef __ANDROID__  // Layoutlib does not support Animation
     ContextFactoryImpl factory(rootRenderNode);
     RenderProxy* proxy = new RenderProxy(translucent, rootRenderNode, &factory);
     return (jlong) proxy;
-#else
-    return (jlong) new RenderProxy(translucent, rootRenderNode, nullptr);
-#endif
 }
 
 static void android_view_ThreadedRenderer_deleteProxy(JNIEnv* env, jobject clazz,
@@ -703,14 +699,12 @@ static jint android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env,
     return result;
 }
 
-#ifdef __ANDROID__  // Layoutlib does not support Animation
 class ContextFactory : public IContextFactory {
 public:
     virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) {
         return new AnimationContext(clock);
     }
 };
-#endif
 
 static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(JNIEnv* env,
         jobject clazz, jlong renderNodePtr, jint jwidth, jint jheight) {
