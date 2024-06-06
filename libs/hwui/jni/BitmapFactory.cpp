@@ -529,11 +529,13 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
 
 // Gets the 'handle' field from a FileDescriptor object. This field is only
 // populated in Windows.
+#ifdef _WIN32
 static jlong jniGetHandleFromFileDescriptor(JNIEnv* env, jobject fileDescriptor) {
     jclass fileDescriptorClass = android::FindClassOrDie(env, "java/io/FileDescriptor");
     jfieldID handleField = android::GetFieldIDOrDie(env, fileDescriptorClass, "handle", "J");
     return env->GetLongField(fileDescriptor, handleField);
 }
+#endif
 
 static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fileDescriptor,
         jobject padding, jobject bitmapFactoryOptions, jlong inBitmapHandle, jlong colorSpaceHandle) {
