@@ -353,7 +353,7 @@ public class DisplayManagerFlags {
     }
 
     /**
-     * @return Whether to ignore preferredRefreshRate app request or not
+     * @return Whether to ignore preferredRefreshRate app request conversion to display mode or not
      */
     public boolean ignoreAppPreferredRefreshRateRequest() {
         return mIgnoreAppPreferredRefreshRate.isEnabled();

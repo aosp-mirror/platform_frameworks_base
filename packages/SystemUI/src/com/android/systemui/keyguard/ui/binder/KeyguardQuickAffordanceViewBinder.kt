@@ -30,7 +30,6 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.app.tracing.coroutines.launch
 import com.android.settingslib.Utils
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.view.LaunchableImageView
@@ -81,8 +80,8 @@ object KeyguardQuickAffordanceViewBinder {
         val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
         val disposableHandle =
             view.repeatWhenAttached {
-                repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    launch("$TAG#viewModel.collect") {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    launch {
                         viewModel.collect { buttonModel ->
                             updateButton(
                                 view = button,
@@ -94,7 +93,7 @@ object KeyguardQuickAffordanceViewBinder {
                         }
                     }
 
-                    launch("$TAG#updateButtonAlpha") {
+                    launch {
                         updateButtonAlpha(
                             view = button,
                             viewModel = viewModel,
@@ -102,7 +101,7 @@ object KeyguardQuickAffordanceViewBinder {
                         )
                     }
 
-                    launch("$TAG#configurationBasedDimensions") {
+                    launch {
                         configurationBasedDimensions.collect { dimensions ->
                             button.updateLayoutParams<ViewGroup.LayoutParams> {
                                 width = dimensions.buttonSizePx.width
@@ -324,6 +323,4 @@ object KeyguardQuickAffordanceViewBinder {
     private data class ConfigurationBasedDimensions(
         val buttonSizePx: Size,
     )
-
-    private const val TAG = "KeyguardQuickAffordanceViewBinder"
 }

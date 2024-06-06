@@ -715,25 +715,51 @@ public class DividerPresenterTest {
                         nonFlingVelocity,
                         displayDensity));
 
-        // Divider position is greater than minPosition and the velocity is enough for fling
+        // Divider position is in the closed to maxPosition bounds and the velocity is enough for
+        // backward fling
         assertEquals(
-                30, // minPosition
+                2000, // maxPosition
                 DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
-                        50 /* dividerPosition */,
-                        30 /* minPosition */,
-                        900 /* maxPosition */,
-                        1200 /* fullyExpandedPosition */,
+                        2200 /* dividerPosition */,
+                        1000 /* minPosition */,
+                        2000 /* maxPosition */,
+                        2500 /* fullyExpandedPosition */,
                         -flingVelocity,
                         displayDensity));
 
-        // Divider position is less than maxPosition and the velocity is enough for fling
+        // Divider position is not in the closed to maxPosition bounds and the velocity is enough
+        // for backward fling
         assertEquals(
-                900, // maxPosition
+                1000, // minPosition
                 DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
-                        800 /* dividerPosition */,
-                        30 /* minPosition */,
-                        900 /* maxPosition */,
-                        1200 /* fullyExpandedPosition */,
+                        1200 /* dividerPosition */,
+                        1000 /* minPosition */,
+                        2000 /* maxPosition */,
+                        2500 /* fullyExpandedPosition */,
+                        -flingVelocity,
+                        displayDensity));
+
+        // Divider position is in the closed to minPosition bounds and the velocity is enough for
+        // forward fling
+        assertEquals(
+                1000, // minPosition
+                DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
+                        500 /* dividerPosition */,
+                        1000 /* minPosition */,
+                        2000 /* maxPosition */,
+                        2500 /* fullyExpandedPosition */,
+                        flingVelocity,
+                        displayDensity));
+
+        // Divider position is not in the closed to minPosition bounds and the velocity is enough
+        // for forward fling
+        assertEquals(
+                2000, // maxPosition
+                DividerPresenter.dividerPositionWithDraggingToFullscreenAllowed(
+                        1200 /* dividerPosition */,
+                        1000 /* minPosition */,
+                        2000 /* maxPosition */,
+                        2500 /* fullyExpandedPosition */,
                         flingVelocity,
                         displayDensity));
     }

@@ -181,6 +181,8 @@ constructor(
     /** Doze transition information. */
     val dozeTransitionModel: Flow<DozeTransitionModel> = repository.dozeTransitionModel
 
+    val isPulsing: Flow<Boolean> = dozeTransitionModel.map { it.to == DozeStateModel.DOZE_PULSING }
+
     /**
      * Whether the system is dreaming. [isDreaming] will be always be true when [isDozing] is true,
      * but not vice-versa.

@@ -17,6 +17,8 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
@@ -28,10 +30,13 @@ import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.res.R
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 /** View-model for the keyguard indication area view */
@@ -46,6 +51,8 @@ constructor(
     private val shortcutsCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
     configurationInteractor: ConfigurationInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    @Background private val backgroundCoroutineContext: CoroutineContext,
+    @Main private val mainDispatcher: CoroutineDispatcher,
 ) {
 
     /** Notifies when a new configuration is set */
@@ -90,11 +97,12 @@ constructor(
                 )
             }
             .distinctUntilChanged()
+            .flowOn(backgroundCoroutineContext)
 
     /** An observable for the x-offset by which the indication area should be translated. */
     val indicationAreaTranslationX: Flow<Float> =
         if (MigrateClocksToBlueprint.isEnabled || KeyguardBottomAreaRefactor.isEnabled) {
-            burnIn.map { it.translationX.toFloat() }
+            burnIn.map { it.translationX.toFloat() }.flowOn(mainDispatcher)
         } else {
             bottomAreaInteractor.clockPosition.map { it.x.toFloat() }.distinctUntilChanged()
         }
@@ -102,7 +110,7 @@ constructor(
     /** Returns an observable for the y-offset by which the indication area should be translated. */
     fun indicationAreaTranslationY(defaultBurnInOffset: Int): Flow<Float> {
         return if (MigrateClocksToBlueprint.isEnabled) {
-            burnIn.map { it.translationY.toFloat() }
+            burnIn.map { it.translationY.toFloat() }.flowOn(mainDispatcher)
         } else {
             keyguardInteractor.dozeAmount
                 .map { dozeAmount ->

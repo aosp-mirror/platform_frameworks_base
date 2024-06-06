@@ -1,9 +1,16 @@
 package com.android.systemui.communal.ui.compose
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,12 +20,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.CommunalSwipeDetector
@@ -36,8 +51,10 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
+import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.Flags
 import com.android.systemui.Flags.glanceableHubFullscreenSwipe
+import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
@@ -102,6 +119,10 @@ fun CommunalContainer(
     val touchesAllowed by viewModel.touchesAllowed.collectAsStateWithLifecycle(initialValue = false)
     val showGestureIndicator by
         viewModel.showGestureIndicator.collectAsStateWithLifecycle(initialValue = false)
+    val backgroundType by
+        viewModel.communalBackground.collectAsStateWithLifecycle(
+            initialValue = CommunalBackgroundType.DEFAULT
+        )
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
             initialScene = currentSceneKey,
@@ -174,7 +195,7 @@ fun CommunalContainer(
             userActions =
                 mapOf(Swipe(SwipeDirection.Right, fromSource = Edge.Left) to CommunalScenes.Blank)
         ) {
-            CommunalScene(colors, content)
+            CommunalScene(backgroundType, colors, content)
         }
     }
 
@@ -186,17 +207,87 @@ fun CommunalContainer(
 /** Scene containing the glanceable hub UI. */
 @Composable
 private fun SceneScope.CommunalScene(
+    backgroundType: CommunalBackgroundType,
     colors: CommunalColors,
     content: CommunalContent,
     modifier: Modifier = Modifier,
 ) {
-    val backgroundColor by colors.backgroundColor.collectAsStateWithLifecycle()
-
-    Box(
-        modifier =
-            Modifier.element(Communal.Elements.Scrim)
-                .fillMaxSize()
-                .background(Color(backgroundColor.toArgb())),
-    )
+    Box(modifier = Modifier.element(Communal.Elements.Scrim).fillMaxSize()) {
+        when (backgroundType) {
+            CommunalBackgroundType.DEFAULT -> DefaultBackground(colors = colors)
+            CommunalBackgroundType.STATIC_GRADIENT -> StaticLinearGradient()
+            CommunalBackgroundType.ANIMATED -> AnimatedLinearGradient()
+        }
+    }
     with(content) { Content(modifier = modifier) }
+}
+
+/** Default background of the hub, a single color */
+@Composable
+private fun BoxScope.DefaultBackground(
+    colors: CommunalColors,
+) {
+    val backgroundColor by colors.backgroundColor.collectAsStateWithLifecycle()
+    Box(
+        modifier = Modifier.matchParentSize().background(Color(backgroundColor.toArgb())),
+    )
+}
+
+/** Experimental hub background, static linear gradient */
+@Composable
+private fun BoxScope.StaticLinearGradient() {
+    val colors = LocalAndroidColorScheme.current
+    Box(
+        Modifier.matchParentSize()
+            .background(
+                Brush.linearGradient(colors = listOf(colors.primary, colors.primaryContainer)),
+            )
+    )
+    BackgroundTopScrim()
+}
+
+/** Experimental hub background, animated linear gradient */
+@Composable
+private fun BoxScope.AnimatedLinearGradient() {
+    val colors = LocalAndroidColorScheme.current
+    Box(
+        Modifier.matchParentSize()
+            .animatedGradientBackground(colors = listOf(colors.primary, colors.primaryContainer))
+    )
+    BackgroundTopScrim()
+}
+
+/** Scrim placed on top of the background in order to dim/bright colors */
+@Composable
+private fun BoxScope.BackgroundTopScrim() {
+    val darkTheme = isSystemInDarkTheme()
+    val scrimOnTopColor = if (darkTheme) Color.Black else Color.White
+    Box(Modifier.matchParentSize().alpha(0.34f).background(scrimOnTopColor))
+}
+
+/** Modifier which sets the background of a composable to an animated gradient */
+@Composable
+private fun Modifier.animatedGradientBackground(colors: List<Color>): Modifier = composed {
+    var size by remember { mutableStateOf(IntSize.Zero) }
+    val transition = rememberInfiniteTransition(label = "scrim background")
+    val startOffsetX by
+        transition.animateFloat(
+            initialValue = -size.width.toFloat(),
+            targetValue = size.width.toFloat(),
+            animationSpec =
+                infiniteRepeatable(
+                    animation = tween(durationMillis = 5_000, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse,
+                ),
+            label = "scrim start offset"
+        )
+    background(
+            brush =
+                Brush.linearGradient(
+                    colors = colors,
+                    start = Offset(startOffsetX, 0f),
+                    end = Offset(startOffsetX + size.width.toFloat(), size.height.toFloat()),
+                )
+        )
+        .onGloballyPositioned { size = it.size }
 }

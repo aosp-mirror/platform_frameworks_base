@@ -83,6 +83,7 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -438,7 +439,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
                 if (!decoration.isHandleMenuActive()) {
                     moveTaskToFront(decoration.mTaskInfo);
-                    decoration.createHandleMenu();
+                    decoration.createHandleMenu(mSplitScreenController);
                 } else {
                     decoration.closeHandleMenu();
                 }
@@ -447,7 +448,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 // App sometimes draws before the insets from WindowDecoration#relayout have
                 // been added, so they must be added here
                 mWindowDecorByTaskId.get(mTaskId).addCaptionInset(wct);
-                mDesktopTasksController.moveToDesktop(mTaskId, wct);
+                mDesktopTasksController.moveToDesktop(mTaskId, wct,
+                        DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON);
                 decoration.closeHandleMenu();
             } else if (id == R.id.fullscreen_button) {
                 decoration.closeHandleMenu();
@@ -455,7 +457,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mSplitScreenController.moveTaskToFullscreen(mTaskId,
                             SplitScreenController.EXIT_REASON_DESKTOP_MODE);
                 } else {
-                    mDesktopTasksController.moveToFullscreen(mTaskId);
+                    mDesktopTasksController.moveToFullscreen(mTaskId,
+                            DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON);
                 }
             } else if (id == R.id.split_screen_button) {
                 decoration.closeHandleMenu();

@@ -49,6 +49,8 @@ import static android.provider.Settings.Secure.RESOLUTION_MODE_FULL;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_HIGH;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_UNKNOWN;
 
+import static com.android.server.display.layout.Layout.Display.POSITION_REAR;
+
 import android.Manifest;
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
@@ -4972,8 +4974,9 @@ public final class DisplayManagerService extends SystemService {
                 }
 
                 final DisplayDevice displayDevice = display.getPrimaryDisplayDeviceLocked();
-                final boolean ownContent = (displayDevice.getDisplayDeviceInfoLocked().flags
-                        & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY) != 0;
+                final boolean isRearDisplay = display.getDevicePositionLocked() == POSITION_REAR;
+                final boolean ownContent = ((displayDevice.getDisplayDeviceInfoLocked().flags
+                        & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY) != 0) || isRearDisplay;
                 // If the display has enabled mirroring, but specified that it will be managed by
                 // WindowManager, return an invalid display id. This is to ensure we don't
                 // accidentally select the display id to mirror based on DM logic and instead allow

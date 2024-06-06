@@ -1110,6 +1110,8 @@ public final class ViewRootImpl implements ViewParent,
             FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
     // time for touch boost period.
     private static final int FRAME_RATE_TOUCH_BOOST_TIME = 3000;
+    // Timeout for the other frame rate boosts other than touch boost.
+    private static final int FRAME_RATE_BOOST_TIME = 3000;
     // time for evaluating the interval between current time and
     // the time when frame rate was set previously.
     private static final int FRAME_RATE_SETTING_REEVALUATE_TIME = 100;
@@ -3288,7 +3290,6 @@ public final class ViewRootImpl implements ViewParent,
                         == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
     }
 
-    @VisibleForTesting(visibility = PACKAGE)
     public InsetsController getInsetsController() {
         return mInsetsController;
     }
@@ -3454,7 +3455,7 @@ public final class ViewRootImpl implements ViewParent,
             if (shouldEnableDvrr() && viewVisibility == View.VISIBLE) {
                 // Boost frame rate when the viewVisibility becomes true.
                 // This is mainly for lanuchers that lanuch new windows.
-                boostFrameRate(FRAME_RATE_TOUCH_BOOST_TIME);
+                boostFrameRate(FRAME_RATE_BOOST_TIME);
             }
         }
 
@@ -4186,7 +4187,7 @@ public final class ViewRootImpl implements ViewParent,
 
             if (shouldEnableDvrr()) {
                 // Boost the frame rate when the ViewRootImpl first becomes available.
-                boostFrameRate(FRAME_RATE_TOUCH_BOOST_TIME);
+                boostFrameRate(FRAME_RATE_BOOST_TIME);
             }
         }
 
@@ -12948,6 +12949,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (frameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE) {
             mIsTouchBoosting = false;
+            mIsFrameRateBoosting = false;
             if (!sToolkitFrameRateVelocityMappingReadOnlyFlagValue) {
                 mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
                 mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;

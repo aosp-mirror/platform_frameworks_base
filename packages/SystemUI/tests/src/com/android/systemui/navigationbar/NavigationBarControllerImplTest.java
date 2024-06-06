@@ -39,9 +39,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import android.testing.AndroidTestingRunner;
 import android.util.SparseArray;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
@@ -72,7 +72,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Optional;
 
 /** atest NavigationBarControllerTest */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class NavigationBarControllerImplTest extends SysuiTestCase {
 

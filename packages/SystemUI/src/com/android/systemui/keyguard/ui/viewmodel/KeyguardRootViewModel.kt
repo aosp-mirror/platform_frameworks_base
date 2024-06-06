@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.ui.StateToValue
@@ -159,12 +160,26 @@ constructor(
                     edge = Edge.create(from = LOCKSCREEN, to = Scenes.Gone),
                     edgeWithoutSceneContainer = Edge.create(from = LOCKSCREEN, to = GONE),
                 ),
+                keyguardTransitionInteractor.isInTransition(
+                    edge = Edge.create(from = PRIMARY_BOUNCER, to = Scenes.Lockscreen),
+                    edgeWithoutSceneContainer =
+                        Edge.create(from = PRIMARY_BOUNCER, to = LOCKSCREEN),
+                ),
                 isOnLockscreen,
                 shadeInteractor.qsExpansion,
                 shadeInteractor.shadeExpansion,
-            ) { lockscreenToGoneTransitionRunning, isOnLockscreen, qsExpansion, shadeExpansion ->
+            ) {
+                lockscreenToGoneTransitionRunning,
+                primaryBouncerToLockscreenTransitionRunning,
+                isOnLockscreen,
+                qsExpansion,
+                shadeExpansion ->
                 // Fade out quickly as the shade expands
-                if (isOnLockscreen && !lockscreenToGoneTransitionRunning) {
+                if (
+                    isOnLockscreen &&
+                        !lockscreenToGoneTransitionRunning &&
+                        !primaryBouncerToLockscreenTransitionRunning
+                ) {
                     val alpha =
                         1f -
                             MathUtils.constrainedMap(

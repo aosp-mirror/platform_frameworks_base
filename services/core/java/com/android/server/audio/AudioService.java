@@ -219,6 +219,7 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
+import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.service.notification.ZenModeConfig;
@@ -256,6 +257,7 @@ import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
 import com.android.server.pm.UserManagerService;
+import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.utils.EventLogger;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -284,6 +286,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
@@ -11950,12 +11954,40 @@ public class AudioService extends IAudioService.Stub
                         .withUnfilteredSnapshot()) {
             packageStates = snapshot.getPackageStates().values();
         }
-        var provider = new AudioServerPermissionProvider(packageStates);
+        var umi = LocalServices.getService(UserManagerInternal.class);
+        var pmsi = LocalServices.getService(PermissionManagerServiceInternal.class);
+        var provider = new AudioServerPermissionProvider(packageStates,
+                (Integer uid, String perm) -> (pmsi.checkUidPermission(uid, perm,
+                        Context.DEVICE_ID_DEFAULT) == PackageManager.PERMISSION_GRANTED),
+                () -> umi.getUserIds()
+                );
         audioPolicy.registerOnStartTask(() -> {
             provider.onServiceStart(audioPolicy.getPermissionController());
         });
 
         // Set up event listeners
+        // Must be kept in sync with PermissionManager
+        Runnable cacheSysPropHandler = new Runnable() {
+            private AtomicReference<SystemProperties.Handle> mHandle = new AtomicReference();
+            private AtomicLong mNonce = new AtomicLong();
+            @Override
+            public void run() {
+                if (mHandle.get() == null) {
+                    // Cache the handle
+                    mHandle.compareAndSet(null, SystemProperties.find(
+                            PermissionManager.CACHE_KEY_PACKAGE_INFO));
+                }
+                long nonce;
+                SystemProperties.Handle ref;
+                if ((ref = mHandle.get()) != null && (nonce = ref.getLong(0)) != 0 &&
+                        mNonce.getAndSet(nonce) != nonce) {
+                    audioserverExecutor.execute(() -> provider.onPermissionStateChanged());
+                }
+            }
+        };
+
+        SystemProperties.addChangeCallback(cacheSysPropHandler);
+
         IntentFilter packageUpdateFilter = new IntentFilter();
         packageUpdateFilter.addAction(ACTION_PACKAGE_ADDED);
         packageUpdateFilter.addAction(ACTION_PACKAGE_REMOVED);

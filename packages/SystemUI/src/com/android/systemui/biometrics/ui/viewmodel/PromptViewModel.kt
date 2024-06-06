@@ -306,10 +306,6 @@ constructor(
         context.resources.getDimensionPixelSize(
             R.dimen.biometric_prompt_two_pane_udfps_horizontal_guideline_padding
         )
-    private val udfpsMidGuidelinePadding =
-        context.resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_two_pane_udfps_mid_guideline_padding
-        )
     private val mediumTopGuidelinePadding =
         context.resources.getDimensionPixelSize(
             R.dimen.biometric_prompt_one_pane_medium_top_guideline_padding
@@ -317,10 +313,6 @@ constructor(
     private val mediumHorizontalGuidelinePadding =
         context.resources.getDimensionPixelSize(
             R.dimen.biometric_prompt_two_pane_medium_horizontal_guideline_padding
-        )
-    private val mediumMidGuidelinePadding =
-        context.resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_two_pane_medium_mid_guideline_padding
         )
 
     /** Rect for positioning biometric icon */
@@ -449,7 +441,7 @@ constructor(
         }
 
     /**
-     * Rect for positioning prompt guidelines (left, top, right, mid)
+     * Rect for positioning prompt guidelines (left, top, right, unused)
      *
      * Negative values are used to signify that guideline measuring should be flipped, measuring
      * from opposite side of the screen
@@ -472,22 +464,17 @@ constructor(
                         if (size.isSmall) {
                             Rect(-smallHorizontalGuidelinePadding, 0, 0, 0)
                         } else if (modalities.hasUdfps) {
-                            Rect(udfpsHorizontalGuidelinePadding, 0, 0, udfpsMidGuidelinePadding)
+                            Rect(udfpsHorizontalGuidelinePadding, 0, 0, 0)
                         } else {
-                            Rect(-mediumHorizontalGuidelinePadding, 0, 0, mediumMidGuidelinePadding)
+                            Rect(-mediumHorizontalGuidelinePadding, 0, 0, 0)
                         }
                     PromptPosition.Left ->
                         if (size.isSmall) {
                             Rect(0, 0, -smallHorizontalGuidelinePadding, 0)
                         } else if (modalities.hasUdfps) {
-                            Rect(0, 0, udfpsHorizontalGuidelinePadding, -udfpsMidGuidelinePadding)
+                            Rect(0, 0, udfpsHorizontalGuidelinePadding, 0)
                         } else {
-                            Rect(
-                                0,
-                                0,
-                                -mediumHorizontalGuidelinePadding,
-                                -mediumMidGuidelinePadding
-                            )
+                            Rect(0, 0, -mediumHorizontalGuidelinePadding, 0)
                         }
                     PromptPosition.Top -> Rect()
                 }

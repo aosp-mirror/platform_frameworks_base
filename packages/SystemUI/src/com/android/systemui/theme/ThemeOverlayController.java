@@ -444,7 +444,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         filter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mMainExecutor,
                 UserHandle.ALL);
-        mSecureSettings.registerContentObserverForUser(
+        mSecureSettings.registerContentObserverForUserSync(
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                 false,
                 new ContentObserver(mBgHandler) {

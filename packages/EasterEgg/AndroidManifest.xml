@@ -36,8 +36,28 @@
         android:icon="@drawable/android14_patch_adaptive"
         android:label="@string/app_name">
 
-        <!-- Android U easter egg -->
+        <!-- Android V easter egg: Daydream version of Landroid
+             (must be enabled by unlocking the egg) -->
+        <service
+            android:name=".landroid.DreamUniverse"
+            android:exported="true"
+            android:icon="@drawable/android14_patch_adaptive"
+            android:label="@string/v_egg_name"
+            android:description="@string/dream_description"
+            android:enabled="false"
+            android:permission="android.permission.BIND_DREAM_SERVICE"
+            >
 
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.dream"
+                android:resource="@xml/landroid_dream"/>
+        </service>
+
+        <!-- Android U easter egg -->
         <activity
             android:name=".landroid.MainActivity"
             android:exported="true"
@@ -51,7 +71,6 @@
                 <category android:name="com.android.internal.category.PLATLOGO" />
             </intent-filter>
         </activity>
-
 
         <!-- Android Q easter egg -->
         <activity

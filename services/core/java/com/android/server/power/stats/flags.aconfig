@@ -37,3 +37,13 @@ flag {
     description: "Feature flag for streamlined misc (excluding CPU, Cell, Wifi, BT) battery stats"
     bug: "333941740"
 }
+
+flag {
+    name: "oneway_battery_stats_service"
+    namespace: "backstage_power"
+    description: "Bugfix flag for locking issues and watchdog kills in BatteryStatsService"
+    bug: "330792526"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

@@ -670,9 +670,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final Transaction mTmpTransaction;
 
     /**
-     * Whether the window was resized by us while it was gone for layout.
+     * Whether the surface position of window is paused to update. Currently it is only used for
+     * {@link Task#setMainWindowSizeChangeTransaction(Transaction)} to synchronize position.
      */
-    boolean mResizedWhileGone = false;
+    boolean mIsSurfacePositionPaused;
 
     /**
      * During seamless rotation we have two phases, first the old window contents
@@ -1813,9 +1814,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mInsetsSourceProviders == null) {
             return false;
         }
+        final @InsetsType int decorInsetsTypes =
+                mWmService.mConfigTypes | mWmService.mOverrideConfigTypes;
         for (int i = mInsetsSourceProviders.size() - 1; i >= 0; i--) {
             final InsetsSource source = mInsetsSourceProviders.valueAt(i).getSource();
-            if ((source.getType() & mWmService.mConfigTypes) != 0) {
+            if ((source.getType() & decorInsetsTypes) != 0) {
                 return true;
             }
         }
@@ -2191,9 +2194,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mHasSurface && !isGoneForLayout() && !resizingWindows.contains(this)) {
             ProtoLog.d(WM_DEBUG_RESIZE, "onResize: Resizing %s", this);
             resizingWindows.add(this);
-        }
-        if (isGoneForLayout()) {
-            mResizedWhileGone = true;
         }
 
         super.onResize();
@@ -4191,6 +4191,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         pw.println(prefix + "mHasSurface=" + mHasSurface
                 + " isReadyForDisplay()=" + isReadyForDisplay()
                 + " mWindowRemovalAllowed=" + mWindowRemovalAllowed);
+        if (mIsSurfacePositionPaused) {
+            pw.println(prefix + "mIsSurfacePositionPaused=true");
+        }
         if (mInvGlobalScale != 1f) {
             pw.println(prefix + "mCompatFrame=" + mWindowFrames.mCompatFrame.toShortString(sTmpSB));
         }
@@ -4934,11 +4937,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Slog.d(TAG, "relayoutVisibleWindow: " + this + " mAnimatingExit=true, mRemoveOnExit="
                     + mRemoveOnExit + ", mDestroying=" + mDestroying);
 
+            mAnimatingExit = false;
             // Cancel the existing exit animation for the next enter animation.
             if (isAnimating()) {
                 cancelAnimation();
             }
-            mAnimatingExit = false;
             ProtoLog.d(WM_DEBUG_ANIM, "Clear animatingExit: reason=relayoutVisibleWindow win=%s",
                     this);
         }
@@ -5283,7 +5286,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     @VisibleForTesting
     void updateSurfacePosition(Transaction t) {
-        if (mSurfaceControl == null) {
+        if (mSurfaceControl == null || mIsSurfacePositionPaused) {
             return;
         }
         if (mActivityRecord != null && mActivityRecord.isConfigurationDispatchPaused()) {

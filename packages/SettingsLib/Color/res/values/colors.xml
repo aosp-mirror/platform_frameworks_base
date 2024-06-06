@@ -17,6 +17,7 @@
 
 <resources>
     <!-- Dynamic colors-->
+    <color name="settingslib_color_blue700">#0B57D0</color>
     <color name="settingslib_color_blue600">#1a73e8</color>
     <color name="settingslib_color_blue400">#669df6</color>
     <color name="settingslib_color_blue300">#8ab4f8</color>

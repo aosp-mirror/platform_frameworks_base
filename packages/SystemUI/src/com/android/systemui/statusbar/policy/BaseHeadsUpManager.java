@@ -138,7 +138,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
                 }
             }
         };
-        globalSettings.registerContentObserver(
+        globalSettings.registerContentObserverSync(
                 globalSettings.getUriFor(SETTING_HEADS_UP_SNOOZE_LENGTH_MS),
                 /* notifyForDescendants = */ false,
                 settingsObserver);
