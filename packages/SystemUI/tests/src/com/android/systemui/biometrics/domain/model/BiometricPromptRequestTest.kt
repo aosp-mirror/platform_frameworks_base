@@ -6,6 +6,7 @@ import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptVerticalListContentView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.Utils.toBitmap
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
 import com.android.systemui.biometrics.promptInfo
 import com.android.systemui.biometrics.shared.model.BiometricModalities
@@ -28,6 +29,7 @@ class BiometricPromptRequestTest : SysuiTestCase() {
     @Test
     fun biometricRequestFromPromptInfo() {
         val logoRes = R.drawable.ic_cake
+        val logoBitmapFromRes = context.getDrawable(logoRes).toBitmap()
         val logoDescription = "test cake"
         val title = "what"
         val subtitle = "a"
@@ -44,6 +46,7 @@ class BiometricPromptRequestTest : SysuiTestCase() {
             BiometricPromptRequest.Biometric(
                 promptInfo(
                     logoRes = logoRes,
+                    logoBitmap = logoBitmapFromRes,
                     logoDescription = logoDescription,
                     title = title,
                     subtitle = subtitle,
@@ -56,7 +59,8 @@ class BiometricPromptRequestTest : SysuiTestCase() {
                 OP_PACKAGE_NAME,
             )
 
-        assertThat(request.logoRes).isEqualTo(logoRes)
+        assertThat(request.logoBitmap).isNotNull()
+        assertThat(request.logoBitmap!!.sameAs(logoBitmapFromRes)).isTrue()
         assertThat(request.logoDescription).isEqualTo(logoDescription)
         assertThat(request.title).isEqualTo(title)
         assertThat(request.subtitle).isEqualTo(subtitle)

@@ -504,7 +504,6 @@ constructor(
             .map {
                 when {
                     !(customBiometricPrompt() && constraintBp()) || it == null -> null
-                    it.logoRes != -1 -> context.resources.getDrawable(it.logoRes, context.theme)
                     it.logoBitmap != null -> BitmapDrawable(context.resources, it.logoBitmap)
                     else -> context.getUserBadgedIcon(it, iconProvider, activityTaskManager)
                 }
