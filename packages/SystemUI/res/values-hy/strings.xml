@@ -563,9 +563,9 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ոչ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Հավելվածն ամրացվեց"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Հավելվածն ապամրացվեց"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Զանգ"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Զանգելը"</string>
     <string name="stream_system" msgid="7663148785370565134">"Համակարգ"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Զանգ"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Զանգ ստանալը"</string>
     <string name="stream_music" msgid="2188224742361847580">"Մեդիա"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Զարթուցիչ"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Ծանուցում"</string>

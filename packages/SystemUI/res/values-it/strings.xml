@@ -549,11 +549,11 @@
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Continua ad ascoltare"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Abbassa il volume"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"L\'app è bloccata sullo schermo"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Indietro e Panoramica."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Indietro e Home."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"La schermata rimane visibile finché non viene sbloccata. Per sbloccarla, tieni premuto Indietro e Panoramica."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"La schermata rimane visibile finché non viene sbloccata. Per sbloccarla, tocca e tieni premuto Indietro e Home."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Rimarrà visibile finché non viene sbloccata. Scorri verso l\'alto e tieni premuto per sbloccarla."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Panoramica."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Home."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La schermata rimane visibile finché non viene sbloccata. Per sbloccarla, tieni premuto Panoramica."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La schermata rimane visibile finché non viene sbloccata. Per sbloccarla, tocca e tieni premuto Home."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"I dati personali potrebbero essere accessibili (ad esempio i contatti e i contenuti delle email)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"L\'app bloccata sullo schermo potrebbe aprire altre app."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Per sbloccare questa app, tocca e tieni premuti i pulsanti Indietro e Panoramica"</string>

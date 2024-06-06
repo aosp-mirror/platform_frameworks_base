@@ -938,7 +938,7 @@
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"మాగ్నిఫికేషన్ సెట్టింగ్‌లను మూసివేయండి"</string>
     <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"సవరణ మోడ్ నుండి ఎగ్జిట్ అవ్వండి"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"సైజ్ మార్చడానికి మూలను లాగండి"</string>
-    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"డయాగనల్ స్క్రోలింగ్‌ను అనుమతించండి"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"డయాగోనల్ స్క్రోలింగ్‌ను అనుమతించండి"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"సైజ్ మార్చండి"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"మ్యాగ్నిఫికేషన్ రకాన్ని మార్చండి"</string>
     <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"సైజ్‌ను మార్చడం ముగించండి"</string>

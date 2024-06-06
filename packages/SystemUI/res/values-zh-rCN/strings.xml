@@ -361,8 +361,8 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"要解锁设备麦克风吗？"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"要解锁设备摄像头吗？"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"要解锁设备摄像头和麦克风吗？"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"这将会为所有获准使用您麦克风的应用和服务启用这项权限。"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"这将会为所有获准使用您摄像头的应用和服务启用这项权限。"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"解锁后，所有具有麦克风使用权的应用和服务都可使用您的麦克风。"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"解锁后，所有具有摄像头使用权的应用和服务都可使用您的摄像头。"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"这将会为所有获准使用您的摄像头或麦克风的应用和服务启用这项权限。"</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"麦克风已被屏蔽"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"摄像头已被屏蔽"</string>
@@ -883,7 +883,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"在后台运行的应用"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"点按即可详细了解电量和流量消耗情况"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"要关闭移动数据网络吗？"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"您将无法通过<xliff:g id="CARRIER">%s</xliff:g>使用移动数据或互联网，只能通过 WLAN 连接到互联网。"</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"关闭后，您将无法通过<xliff:g id="CARRIER">%s</xliff:g>使用移动数据或互联网，只能通过 WLAN 连接到互联网。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"您的运营商"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"是否要切换回 <xliff:g id="CARRIER">%s</xliff:g>？"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"移动流量不会根据网络可用情况自动切换"</string>
@@ -1157,7 +1157,7 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"添加功能块"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不添加功能块"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"选择用户"</string>
-    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# 个应用处于活动状态}other{# 个应用处于活动状态}}"</string>
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# 个应用处于运行状态}other{# 个应用处于运行状态}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新信息"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"已开启的应用"</string>
     <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"这些应用即使在闲置时仍处于活跃运行状态。应用的功能会因此提升，但可能会影响电池续航时间。"</string>

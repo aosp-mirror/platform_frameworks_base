@@ -882,7 +882,7 @@
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Način Ne uznemiravaj uključilo je automatsko pravilo ili aplikacija."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Izvođenje aplikacija u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Dodirnite da biste vidjeli pojedinosti o potrošnji baterije i podatkovnom prometu"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Isključiti mobilne podatke?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Želite li isključiti mobilne podatke?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup mobilnim podacima ili internetu putem operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem Wi-Fija."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"vaš mobilni operater"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Vratiti se na mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>?"</string>

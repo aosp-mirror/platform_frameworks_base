@@ -361,8 +361,8 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Nyahsekat mikrofon peranti?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Nyahsekat kamera peranti?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Nyahsekat kamera dan mikrofon peranti?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Tindakan ini menyahsekat akses bagi semua apl dan perkhidmatan yang dibenarkan untuk menggunakan mikrofon anda."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Tindakan ini menyahsekat akses bagi semua apl dan perkhidmatan yang dibenarkan untuk menggunakan kamera anda."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Tindakan ini menyahsekat akses bagi semua apl dan perkhidmatan yang dibenarkan untuk menggunakan mikrofon."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Tindakan ini menyahsekat akses bagi semua apl dan perkhidmatan yang dibenarkan untuk menggunakan kamera."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Tindakan ini menyahsekat akses bagi semua apl dan perkhidmatan yang dibenarkan untuk menggunakan kamera atau mikrofon anda."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Mikrofon disekat"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Kamera disekat"</string>
@@ -883,7 +883,7 @@
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apl yang berjalan di latar belakang"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Ketik untuk mendapatkan butiran tentang penggunaan kuasa bateri dan data"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Matikan data mudah alih?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Anda tidak akan mempunyai akses kepada data atau Internet melalui <xliff:g id="CARRIER">%s</xliff:g>. Internet hanya tersedia melaui Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Anda tidak akan dapat mengakses data atau Internet melalui <xliff:g id="CARRIER">%s</xliff:g>. Internet hanya akan tersedia melalui Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"pembawa anda"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Tukar kembali kepada <xliff:g id="CARRIER">%s</xliff:g>?"</string>
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Data mudah alih tidak akan ditukar secara automatik berdasarkan ketersediaan"</string>
