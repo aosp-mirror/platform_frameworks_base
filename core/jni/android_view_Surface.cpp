@@ -60,9 +60,7 @@ namespace android {
 
 static const char* const IllegalArgumentException = "java/lang/IllegalArgumentException";
 
-#ifdef __ANDROID__
 static const char* const OutOfResourcesException = "android/view/Surface$OutOfResourcesException";
-#endif
 
 static struct {
     jclass clazz;
@@ -204,7 +202,6 @@ static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jlong n
 
 static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject canvasObj, jobject dirtyRectObj) {
-#ifdef __ANDROID__ // host does not support locking Canvas
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
 
     if (!isSurfaceValid(surface)) {
@@ -256,14 +253,10 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
     sp<Surface> lockedSurface(surface);
     lockedSurface->incStrong(&sRefBaseOwner);
     return (jlong) lockedSurface.get();
-#else
-    return (jlong)nativeObject;
-#endif
 }
 
 static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject canvasObj) {
-#ifdef __ANDROID__ // host does not support locking Canvas
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
     if (!isSurfaceValid(surface)) {
         return;
@@ -278,7 +271,6 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
     if (err < 0) {
         jniThrowException(env, IllegalArgumentException, NULL);
     }
-#endif
 }
 
 static void nativeAllocateBuffers(JNIEnv* /* env */ , jclass /* clazz */,
