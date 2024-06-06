@@ -219,6 +219,13 @@ public class QSFragmentLegacy extends LifecycleFragment implements QS {
     }
 
     @Override
+    public void setShouldUpdateSquishinessOnMedia(boolean shouldUpdate) {
+        if (mQsImpl != null) {
+            mQsImpl.setShouldUpdateSquishinessOnMedia(shouldUpdate);
+        }
+    }
+
+    @Override
     public void setListening(boolean listening) {
         if (mQsImpl != null) {
             mQsImpl.setListening(listening);

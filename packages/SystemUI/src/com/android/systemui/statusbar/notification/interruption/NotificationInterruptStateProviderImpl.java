@@ -171,11 +171,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         };
 
         if (ENABLE_HEADS_UP) {
-            mGlobalSettings.registerContentObserver(
+            mGlobalSettings.registerContentObserverSync(
                     mGlobalSettings.getUriFor(HEADS_UP_NOTIFICATIONS_ENABLED),
                     true,
                     headsUpObserver);
-            mGlobalSettings.registerContentObserver(
+            mGlobalSettings.registerContentObserverSync(
                     mGlobalSettings.getUriFor(SETTING_HEADS_UP_TICKER), true,
                     headsUpObserver);
         }

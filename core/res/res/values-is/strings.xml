@@ -2196,14 +2196,13 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Vinstrihnappur stýriflatar"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Hægrihnappur stýriflatar"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Miðjuhnappur stýriflatar"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Skjátextastika <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> var sett í flokkinn TAKMARKAÐ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"sendi mynd"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Samtal"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Hópsamtal"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
-    <string name="resolver_personal_tab" msgid="2051260504014442073">"Persónulegt"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Einkasnið"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Vinna"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Persónulegt yfirlit"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Vinnuyfirlit"</string>
@@ -2397,7 +2396,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Lyklaskipan er stillt á <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Ýttu til að breyta."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Vélbúnaðarlyklaborð eru stillt"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Ýttu til að sjá lyklaborð"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Lokað"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Leynirými"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Afrit"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Vinna"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Vinna 2"</string>

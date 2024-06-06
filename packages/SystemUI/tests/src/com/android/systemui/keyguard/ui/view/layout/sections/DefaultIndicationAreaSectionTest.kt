@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.ui.view.layout.sections
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
@@ -30,11 +31,10 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class DefaultIndicationAreaSectionTest : SysuiTestCase() {
 

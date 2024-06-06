@@ -19,38 +19,26 @@ package com.android.systemui.qs.panels.data.repository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
-/** Repository for retrieving the list of [TileSpec] to be displayed as icons. */
+/** Repository for checking if a tile should be displayed as an icon. */
 interface IconTilesRepository {
-    val iconTilesSpecs: StateFlow<Set<TileSpec>>
+    fun isIconTile(spec: TileSpec): Boolean
 }
 
 @SysUISingleton
 class IconTilesRepositoryImpl @Inject constructor() : IconTilesRepository {
 
-    private val _iconTilesSpecs =
-        MutableStateFlow(
-            setOf(
-                TileSpec.create("airplane"),
-                TileSpec.create("battery"),
-                TileSpec.create("cameratoggle"),
-                TileSpec.create("cast"),
-                TileSpec.create("color_correction"),
-                TileSpec.create("inversion"),
-                TileSpec.create("saver"),
-                TileSpec.create("dnd"),
-                TileSpec.create("flashlight"),
-                TileSpec.create("location"),
-                TileSpec.create("mictoggle"),
-                TileSpec.create("nfc"),
-                TileSpec.create("night"),
-                TileSpec.create("rotation")
-            )
-        )
+    override fun isIconTile(spec: TileSpec): Boolean {
+        return !LARGE_TILES.contains(spec)
+    }
 
-    /** Set of toggleable tiles that are suitable for being shown as an icon. */
-    override val iconTilesSpecs: StateFlow<Set<TileSpec>> = _iconTilesSpecs.asStateFlow()
+    companion object {
+        private val LARGE_TILES =
+            setOf(
+                TileSpec.create("internet"),
+                TileSpec.create("bt"),
+                TileSpec.create("dnd"),
+                TileSpec.create("cast"),
+            )
+    }
 }

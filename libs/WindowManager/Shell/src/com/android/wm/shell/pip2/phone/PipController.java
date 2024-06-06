@@ -19,7 +19,6 @@ package com.android.wm.shell.pip2.phone;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
 
 import android.app.ActivityManager;
@@ -391,6 +390,7 @@ public class PipController implements ConfigurationChangeListener,
         @Override
         public void invalidate() {
             mController = null;
+            // Unregister the listener to ensure any registered binder death recipients are unlinked
             mListener.unregister();
         }
 

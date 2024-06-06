@@ -21,6 +21,8 @@ import static android.app.servertransaction.TestUtils.mergedConfig;
 import static android.app.servertransaction.TestUtils.referrerIntentList;
 import static android.app.servertransaction.TestUtils.resultInfoList;
 
+import static com.android.window.flags.Flags.FLAG_DISABLE_OBJECT_POOL;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
@@ -39,18 +41,26 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.FlagsParameterization;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.window.ActivityWindowInfo;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.function.Supplier;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
 
 /**
  * Tests for {@link ObjectPool}.
@@ -61,15 +71,27 @@ import java.util.function.Supplier;
  * <p>This test class is a part of Window Manager Service tests and specified in
  * {@link com.android.server.wm.test.filters.FrameworksTestsFilter}.
  */
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @SmallTest
 @Presubmit
 public class ObjectPoolTests {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(FLAG_DISABLE_OBJECT_POOL);
+    }
+
+    @Rule
+    public SetFlagsRule mSetFlagsRule;
 
     @Mock
     private IApplicationThread mApplicationThread;
     @Mock
     private IBinder mActivityToken;
+
+    public ObjectPoolTests(FlagsParameterization flags) {
+        mSetFlagsRule = new SetFlagsRule(flags);
+    }
 
     @Before
     public void setup() {
@@ -199,12 +221,20 @@ public class ObjectPoolTests {
         item.recycle();
         final ObjectPoolItem item2 = obtain.get();
 
-        assertSame(item, item2);
+        if (Flags.disableObjectPool()) {
+            assertNotSame(item, item2);  // Different instance.
+        } else {
+            assertSame(item, item2);
+        }
 
         // Create new object when the pool is empty.
         final ObjectPoolItem item3 = obtain.get();
 
         assertNotSame(item, item3);
+        if (Flags.disableObjectPool()) {
+            // Skip recycle if flag enabled, compare unnecessary.
+            return;
+        }
         assertEquals(item, item3);
 
         // Reset fields after recycle.

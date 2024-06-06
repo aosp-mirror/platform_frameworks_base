@@ -413,6 +413,7 @@ constructor(
         afterKeyguardGone: Boolean,
         customMessage: String?,
     ) {
+        Log.i(TAG, "Invoking dismissKeyguardThenExecute, afterKeyguardGone: $afterKeyguardGone")
         if (
             !action.willRunAnimationOnKeyguard() &&
                 wakefulnessLifecycle.wakefulness == WakefulnessLifecycle.WAKEFULNESS_ASLEEP &&

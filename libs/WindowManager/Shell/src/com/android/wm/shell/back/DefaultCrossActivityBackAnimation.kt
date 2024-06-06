@@ -43,7 +43,7 @@ constructor(
         Choreographer.getInstance()
     ) {
 
-    private val postCommitInterpolator = Interpolators.FAST_OUT_SLOW_IN
+    private val postCommitInterpolator = Interpolators.EMPHASIZED
     private val enteringStartOffset =
         context.resources.getDimension(R.dimen.cross_activity_back_entering_start_offset)
     override val allowEnteringYShift = true
@@ -87,17 +87,27 @@ constructor(
 
     override fun onPostCommitProgress(linearProgress: Float) {
         super.onPostCommitProgress(linearProgress)
-        val closingAlpha = max(1f - linearProgress * 2, 0f)
+        val closingAlpha = max(1f - linearProgress * 5, 0f)
         val progress = postCommitInterpolator.getInterpolation(linearProgress)
         currentClosingRect.setInterpolatedRectF(startClosingRect, targetClosingRect, progress)
-        applyTransform(closingTarget?.leash, currentClosingRect, closingAlpha)
+        applyTransform(
+            closingTarget?.leash,
+            currentClosingRect,
+            closingAlpha,
+            flingMode = FlingMode.FLING_BOUNCE
+        )
         currentEnteringRect.setInterpolatedRectF(startEnteringRect, targetEnteringRect, progress)
-        applyTransform(enteringTarget?.leash, currentEnteringRect, 1f)
+        applyTransform(
+            enteringTarget?.leash,
+            currentEnteringRect,
+            1f,
+            flingMode = FlingMode.FLING_BOUNCE
+        )
         applyTransaction()
     }
 
 
     companion object {
-        private const val POST_COMMIT_DURATION = 300L
+        private const val POST_COMMIT_DURATION = 450L
     }
 }

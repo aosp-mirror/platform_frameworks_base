@@ -19,6 +19,7 @@ package com.android.systemui.recordissue
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
@@ -45,6 +46,8 @@ import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.traceur.MessageConstants.INTENT_EXTRA_TRACE_TYPE
+import com.android.traceur.TraceUtils.PresetTraceType
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -64,8 +67,18 @@ constructor(
     private val userFileManager: UserFileManager,
     private val screenCaptureDisabledDialogDelegate: ScreenCaptureDisabledDialogDelegate,
     private val issueRecordingState: IssueRecordingState,
+    private val traceurMessageSender: TraceurMessageSender,
     @Assisted private val onStarted: Consumer<IssueRecordingConfig>,
 ) : SystemUIDialog.Delegate {
+
+    private val issueTypeOptions: Map<Int, PresetTraceType> =
+        hashMapOf(
+            Pair(R.string.performance, PresetTraceType.PERFORMANCE),
+            Pair(R.string.user_interface, PresetTraceType.UI),
+            Pair(R.string.battery, PresetTraceType.BATTERY),
+            Pair(R.string.thermal, PresetTraceType.THERMAL)
+        )
+    private var selectedIssueType: PresetTraceType? = null
 
     /** To inject dependencies and allow for easier testing */
     @AssistedFactory
@@ -92,7 +105,7 @@ constructor(
                     onStarted.accept(
                         IssueRecordingConfig(
                             screenRecordSwitch.isChecked,
-                            true /* TODO: Base this on issueType selected */
+                            selectedIssueType ?: PresetTraceType.UNSET
                         )
                     )
                     dismiss()
@@ -100,6 +113,7 @@ constructor(
                 false
             )
         }
+        bgExecutor.execute { traceurMessageSender.bindToTraceur(dialog.context) }
     }
 
     override fun createDialog(): SystemUIDialog = factory.create(this)
@@ -166,20 +180,25 @@ constructor(
 
     @MainThread
     private fun onIssueTypeClicked(context: Context, onIssueTypeSelected: Runnable) {
-        val selectedCategory = issueTypeButton.text.toString()
         val popupMenu = PopupMenu(context, issueTypeButton)
 
-        context.resources.getStringArray(R.array.qs_record_issue_types).forEachIndexed { i, cat ->
-            popupMenu.menu.add(0, 0, i, cat).apply {
+        issueTypeOptions.keys.forEach {
+            popupMenu.menu.add(it).apply {
                 setIcon(R.drawable.arrow_pointing_down)
-                if (selectedCategory != cat) {
+                if (issueTypeOptions[it] != selectedIssueType) {
                     iconTintList = ColorStateList.valueOf(Color.TRANSPARENT)
                 }
+                intent = Intent().putExtra(INTENT_EXTRA_TRACE_TYPE, issueTypeOptions[it])
             }
         }
         popupMenu.apply {
             setOnMenuItemClickListener {
                 issueTypeButton.text = it.title
+                selectedIssueType =
+                    it.intent?.getSerializableExtra(
+                        INTENT_EXTRA_TRACE_TYPE,
+                        PresetTraceType::class.java
+                    )
                 onIssueTypeSelected.run()
                 true
             }

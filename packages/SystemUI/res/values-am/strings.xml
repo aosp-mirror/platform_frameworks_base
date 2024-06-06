@@ -76,8 +76,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ምስል ተልኳል"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ቅጽበታዊ ገፅ ዕይታ በማስቀመጥ ላይ..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ቅጽበታዊ ገፅ እይታን ወደ የስራ መገለጫ በማስቀመጥ ላይ…"</string>
-    <!-- no translation found for screenshot_saving_private_profile (8934706048497093297) -->
-    <skip />
+    <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"ቅጽበታዊ ገጽ ዕይታን ወደ ግል በማስቀመጥ ላይ"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ቅጽበታዊ ገፅ ዕይታ ተቀምጧል"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ቅጽበታዊ ገፅ ዕይታን ማስቀመጥ አልተቻለም"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"ውጫዊ ማሳያ"</string>
@@ -373,7 +372,8 @@
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"አዲስ መሣሪያ ያጣምሩ"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"አዲስ መሣሪያ ለማጣመር ጠቅ ያድርጉ"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ቅድመ-ቅምጥን ማዘመን አልተቻለም"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ቅድመ-ቅምጥ"</string>
+    <!-- no translation found for live_caption_title (8916875614623730005) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"የመሣሪያ ማይክሮፎን እገዳ ይነሳ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"የመሣሪያ ካሜራ እገዳ ይነሳ?"</string>
@@ -1319,6 +1319,24 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"በቅርብ ጊዜ በ<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) ጥቅም ላይ ውሏል"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"በ<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ጥቅም ላይ እየዋለ ነው"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"በቅርብ ጊዜ በ<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ጥቅም ላይ ውሏል"</string>
+    <!-- no translation found for shortcut_helper_category_system (462110876978937359) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_multitasking (7413381961404090136) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_input (8674018654124839566) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_app_shortcuts (8010249408308587117) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_category_a11y (6314444792641773464) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_title (8567500639300970049) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_search_placeholder (5488547526269871819) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_collapse_icon (8028015738431664954) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_content_description_expand_icon (1084435697860417390) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"የቁልፍ ሰሌዳ የጀርባ ብርሃን"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"ደረጃ %1$d ከ %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"የቤት ውስጥ ቁጥጥሮች"</string>

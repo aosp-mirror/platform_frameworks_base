@@ -21,6 +21,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.communal.data.model.CommunalEnabledState
 import com.android.systemui.communal.data.model.CommunalWidgetCategories
 import com.android.systemui.communal.data.repository.CommunalSettingsRepository
+import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.dagger.CommunalTableLog
@@ -30,6 +31,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -38,6 +40,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -47,6 +50,7 @@ class CommunalSettingsInteractor
 @Inject
 constructor(
     @Background private val bgScope: CoroutineScope,
+    @Background private val bgDispatcher: CoroutineDispatcher,
     @Background private val bgExecutor: Executor,
     private val repository: CommunalSettingsRepository,
     userInteractor: SelectedUserInteractor,
@@ -77,6 +81,12 @@ constructor(
                 started = SharingStarted.Eagerly,
                 initialValue = CommunalWidgetCategories.defaultCategories
             )
+
+    /** The type of background to use for the hub. Used to experiment with different backgrounds */
+    val communalBackground: Flow<CommunalBackgroundType> =
+        userInteractor.selectedUserInfo
+            .flatMapLatest { user -> repository.getBackground(user) }
+            .flowOn(bgDispatcher)
 
     private val workProfileUserInfoCallbackFlow: Flow<UserInfo?> = conflatedCallbackFlow {
         fun send(profiles: List<UserInfo>) {

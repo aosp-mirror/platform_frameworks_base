@@ -24,7 +24,6 @@ import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
 import static com.android.systemui.Flags.newAodTransition;
 import static com.android.systemui.Flags.notificationOverExpansionClippingFix;
-import static com.android.systemui.flags.Flags.UNCLEARED_TRANSIENT_HUN_FIX;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.util.DumpUtilsKt.println;
@@ -255,7 +254,8 @@ public class NotificationStackScrollLayout
      * The raw amount of the overScroll on the bottom, which is not rubber-banded.
      */
     private float mOverScrolledBottomPixels;
-    private ListenerSet<Runnable> mStackHeightChangedListeners = new ListenerSet<>();
+    private final ListenerSet<Runnable> mStackHeightChangedListeners = new ListenerSet<>();
+    private final ListenerSet<Runnable> mHeadsUpHeightChangedListeners = new ListenerSet<>();
     private NotificationLogger.OnChildLocationsChangedListener mListener;
     private OnNotificationLocationsChangedListener mLocationsChangedListener;
     private OnOverscrollTopChangedListener mOverscrollTopChangedListener;
@@ -1112,6 +1112,28 @@ public class NotificationStackScrollLayout
     @Override
     public void removeStackHeightChangedListener(@NonNull Runnable runnable) {
         mStackHeightChangedListeners.remove(runnable);
+    }
+
+    private void notifyHeadsUpHeightChangedForView(View view) {
+        if (mTopHeadsUpRow == view) {
+            notifyHeadsUpHeightChangedListeners();
+        }
+    }
+
+    private void notifyHeadsUpHeightChangedListeners() {
+        for (Runnable listener : mHeadsUpHeightChangedListeners) {
+            listener.run();
+        }
+    }
+
+    @Override
+    public void addHeadsUpHeightChangedListener(@NonNull Runnable runnable) {
+        mHeadsUpHeightChangedListeners.addIfAbsent(runnable);
+    }
+
+    @Override
+    public void removeHeadsUpHeightChangedListener(@NonNull Runnable runnable) {
+        mHeadsUpHeightChangedListeners.remove(runnable);
     }
 
     @Override
@@ -2444,6 +2466,11 @@ public class NotificationStackScrollLayout
         return mScrollViewFields.getIntrinsicStackHeight();
     }
 
+    @Override
+    public int getTopHeadsUpHeight() {
+        return getTopHeadsUpPinnedHeight();
+    }
+
     /**
      * Calculate the gap height between two different views
      *
@@ -2816,23 +2843,15 @@ public class NotificationStackScrollLayout
             mAddedHeadsUpChildren.remove(child);
             return false;
         }
-        if (mFeatureFlags.isEnabled(UNCLEARED_TRANSIENT_HUN_FIX)) {
-            // Skip adding animation for clicked heads up notifications when the
-            // Shade is closed, because the animation event is generated in
-            // generateHeadsUpAnimationEvents. Only report that an animation was
-            // actually generated (thus requesting the transient view be added)
-            // if a removal animation is in progress.
-            if (!isExpanded() && isClickedHeadsUp(child)) {
-                // An animation is already running, add it transiently
-                mClearTransientViewsWhenFinished.add(child);
-                return child.inRemovalAnimation();
-            }
-        } else {
-            if (isClickedHeadsUp(child)) {
-                // An animation is already running, add it transiently
-                mClearTransientViewsWhenFinished.add(child);
-                return true;
-            }
+        // Skip adding animation for clicked heads up notifications when the
+        // Shade is closed, because the animation event is generated in
+        // generateHeadsUpAnimationEvents. Only report that an animation was
+        // actually generated (thus requesting the transient view be added)
+        // if a removal animation is in progress.
+        if (!isExpanded() && isClickedHeadsUp(child)) {
+            // An animation is already running, add it transiently
+            mClearTransientViewsWhenFinished.add(child);
+            return child.inRemovalAnimation();
         }
         if (mDebugRemoveAnimation) {
             Log.d(TAG, "generateRemove " + key
@@ -4193,12 +4212,14 @@ public class NotificationStackScrollLayout
             requestAnimationOnViewResize(row);
         }
         requestChildrenUpdate();
+        notifyHeadsUpHeightChangedForView(view);
         mAnimateStackYForContentHeightChange = previouslyNeededAnimation;
     }
 
     void onChildHeightReset(ExpandableView view) {
         updateAnimationState(view);
         updateChronometerForChild(view);
+        notifyHeadsUpHeightChangedForView(view);
     }
 
     private void updateScrollPositionOnExpandInBottom(ExpandableView view) {
@@ -5573,6 +5594,7 @@ public class NotificationStackScrollLayout
      */
     public void setTopHeadsUpRow(@Nullable ExpandableNotificationRow topHeadsUpRow) {
         mTopHeadsUpRow = topHeadsUpRow;
+        notifyHeadsUpHeightChangedListeners();
     }
 
     public boolean getIsExpanded() {

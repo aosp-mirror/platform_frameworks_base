@@ -23,7 +23,6 @@ import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,7 +39,7 @@ class FakeDisplayStateRepository @Inject constructor() : DisplayStateRepository 
     override val currentDisplaySize: StateFlow<Size> = _currentDisplaySize.asStateFlow()
 
     private val _isLargeScreen = MutableStateFlow<Boolean>(false)
-    override val isLargeScreen: Flow<Boolean> = _isLargeScreen.asStateFlow()
+    override val isLargeScreen: StateFlow<Boolean> = _isLargeScreen.asStateFlow()
 
     override val isReverseDefaultRotation = false
 
@@ -54,6 +53,10 @@ class FakeDisplayStateRepository @Inject constructor() : DisplayStateRepository 
 
     fun setCurrentDisplaySize(size: Size) {
         _currentDisplaySize.value = size
+    }
+
+    fun setIsLargeScreen(isLargeScreen: Boolean) {
+        _isLargeScreen.value = isLargeScreen
     }
 }
 

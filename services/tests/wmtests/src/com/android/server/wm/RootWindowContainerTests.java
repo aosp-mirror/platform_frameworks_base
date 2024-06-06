@@ -906,6 +906,24 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     /**
+     * Tests whether home can be started if it's not allowed by policy.
+     */
+    @Test
+    public void testCanStartHome_returnsFalse_ifDisallowedByPolicy() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        final WindowProcessController app = mock(WindowProcessController.class);
+        doReturn(app).when(mAtm).getProcessController(any(), anyInt());
+        doReturn(false).when(app).isInstrumenting();
+        final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
+        doReturn(false).when(taskDisplayArea).canHostHomeTask();
+
+        assertFalse(mRootWindowContainer.canStartHomeOnDisplayArea(info, taskDisplayArea,
+                false /* allowInstrumenting*/));
+    }
+
+
+    /**
      * Tests that secondary home activity should not be resolved if device is still locked.
      */
     @Test

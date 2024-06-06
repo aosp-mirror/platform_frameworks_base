@@ -18,6 +18,7 @@ package com.android.systemui.volume.panel.component.mediaoutput.domain.interacto
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.TestStubDrawable
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.media.BluetoothMediaDevice
@@ -29,29 +30,44 @@ import com.android.systemui.util.mockito.whenever
 @SuppressLint("StaticFieldLeak") // These are mocks
 object TestMediaDevicesFactory {
 
-    fun builtInMediaDevice(): MediaDevice = mock {
-        whenever(name).thenReturn("built_in_media")
-        whenever(icon).thenReturn(TestStubDrawable())
+    fun builtInMediaDevice(
+        deviceName: String = "built_in_media",
+        deviceIcon: Drawable? = TestStubDrawable(),
+    ): MediaDevice = mock {
+        whenever(name).thenReturn(deviceName)
+        whenever(icon).thenReturn(deviceIcon)
     }
 
-    fun wiredMediaDevice(): MediaDevice =
+    fun wiredMediaDevice(
+        deviceName: String = "wired_media",
+        deviceIcon: Drawable? = TestStubDrawable(),
+    ): MediaDevice =
         mock<PhoneMediaDevice> {
             whenever(deviceType)
                 .thenReturn(MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE)
-            whenever(name).thenReturn("wired_media")
-            whenever(icon).thenReturn(TestStubDrawable())
+            whenever(name).thenReturn(deviceName)
+            whenever(icon).thenReturn(deviceIcon)
         }
 
-    fun bluetoothMediaDevice(): MediaDevice {
-        val bluetoothDevice = mock<BluetoothDevice>()
+    fun bluetoothMediaDevice(
+        deviceName: String = "bt_media",
+        deviceIcon: Drawable? = TestStubDrawable(),
+        deviceAddress: String = "bt_media_device",
+    ): BluetoothMediaDevice {
+        val bluetoothDevice =
+            mock<BluetoothDevice> {
+                whenever(name).thenReturn(deviceName)
+                whenever(address).thenReturn(deviceAddress)
+            }
         val cachedBluetoothDevice: CachedBluetoothDevice = mock {
             whenever(isHearingAidDevice).thenReturn(true)
-            whenever(address).thenReturn("bt_media_device")
+            whenever(address).thenReturn(deviceAddress)
             whenever(device).thenReturn(bluetoothDevice)
+            whenever(name).thenReturn(deviceName)
         }
         return mock<BluetoothMediaDevice> {
-            whenever(name).thenReturn("bt_media")
-            whenever(icon).thenReturn(TestStubDrawable())
+            whenever(name).thenReturn(deviceName)
+            whenever(icon).thenReturn(deviceIcon)
             whenever(cachedDevice).thenReturn(cachedBluetoothDevice)
         }
     }

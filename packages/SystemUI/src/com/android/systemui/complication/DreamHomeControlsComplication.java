@@ -18,6 +18,7 @@ package com.android.systemui.complication;
 
 import static com.android.systemui.complication.dagger.DreamHomeControlsComplicationComponent.DreamHomeControlsModule.DREAM_HOME_CONTROLS_CHIP_VIEW;
 import static com.android.systemui.complication.dagger.RegisteredComplicationsModule.DREAM_HOME_CONTROLS_CHIP_LAYOUT_PARAMS;
+import static com.android.systemui.complication.dagger.RegisteredComplicationsModule.OPEN_HUB_CHIP_REPLACE_HOME_CONTROLS;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK;
 import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.UNAVAILABLE;
@@ -35,6 +36,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.Utils;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.Flags;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.complication.dagger.DreamHomeControlsComplicationComponent;
 import com.android.systemui.controls.ControlsServiceInfo;
@@ -89,6 +91,7 @@ public class DreamHomeControlsComplication implements Complication {
         private final DreamHomeControlsComplication mComplication;
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final ControlsComponent mControlsComponent;
+        private final boolean mReplacedByOpenHub;
 
         private boolean mOverlayActive = false;
 
@@ -116,11 +119,13 @@ public class DreamHomeControlsComplication implements Complication {
         public Registrant(DreamHomeControlsComplication complication,
                 DreamOverlayStateController dreamOverlayStateController,
                 ControlsComponent controlsComponent,
-                @SystemUser Monitor monitor) {
+                @SystemUser Monitor monitor,
+                @Named(OPEN_HUB_CHIP_REPLACE_HOME_CONTROLS) boolean replacedByOpenHub) {
             super(monitor);
             mComplication = complication;
             mControlsComponent = controlsComponent;
             mDreamOverlayStateController = dreamOverlayStateController;
+            mReplacedByOpenHub = replacedByOpenHub;
         }
 
         @Override
@@ -132,7 +137,9 @@ public class DreamHomeControlsComplication implements Complication {
 
         private void updateHomeControlsComplication() {
             mControlsComponent.getControlsListingController().ifPresent(c -> {
-                if (isHomeControlsAvailable(c.getCurrentServices())) {
+                final boolean replacedWithOpenHub =
+                        Flags.glanceableHubShortcutButton() && mReplacedByOpenHub;
+                if (isHomeControlsAvailable(c.getCurrentServices()) && !replacedWithOpenHub) {
                     mDreamOverlayStateController.addComplication(mComplication);
                 } else {
                     mDreamOverlayStateController.removeComplication(mComplication);

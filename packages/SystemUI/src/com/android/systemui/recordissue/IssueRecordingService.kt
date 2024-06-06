@@ -24,8 +24,6 @@ import android.content.res.Resources
 import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
-import android.util.Log
-import androidx.core.content.FileProvider
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.qualifiers.LongRunning
@@ -37,16 +35,10 @@ import com.android.systemui.screenrecord.RecordingService
 import com.android.systemui.screenrecord.RecordingServiceStrings
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
-import com.android.traceur.FileSender
-import com.android.traceur.TraceUtils
-import java.io.File
-import java.io.FileOutputStream
-import java.nio.file.Files
+import com.android.traceur.MessageConstants.INTENT_EXTRA_TRACE_TYPE
+import com.android.traceur.TraceUtils.PresetTraceType
 import java.util.concurrent.Executor
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 import javax.inject.Inject
-import kotlin.jvm.optionals.getOrElse
 
 class IssueRecordingService
 @Inject
@@ -60,6 +52,7 @@ constructor(
     keyguardDismissUtil: KeyguardDismissUtil,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val panelInteractor: PanelInteractor,
+    private val traceurMessageSender: TraceurMessageSender,
     private val issueRecordingState: IssueRecordingState,
     private val iActivityManager: IActivityManager,
 ) :
@@ -82,17 +75,14 @@ constructor(
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
-                TraceUtils.traceStart(
-                    this,
-                    DEFAULT_TRACE_TAGS,
-                    DEFAULT_BUFFER_SIZE,
-                    DEFAULT_IS_INCLUDING_WINSCOPE,
-                    DEFAULT_IS_INCLUDING_APP_TRACE,
-                    DEFAULT_IS_LONG_TRACE,
-                    DEFAULT_ATTACH_TO_BUGREPORT,
-                    DEFAULT_MAX_TRACE_SIZE,
-                    DEFAULT_MAX_TRACE_DURATION_IN_MINUTES
-                )
+                bgExecutor.execute {
+                    traceurMessageSender.startTracing(
+                        intent.getSerializableExtra(
+                            INTENT_EXTRA_TRACE_TYPE,
+                            PresetTraceType::class.java
+                        )
+                    )
+                }
                 issueRecordingState.isRecording = true
                 if (!intent.getBooleanExtra(EXTRA_SCREEN_RECORD, false)) {
                     // If we don't want to record the screen, the ACTION_SHOW_START_NOTIF action
@@ -102,7 +92,10 @@ constructor(
             }
             ACTION_STOP,
             ACTION_STOP_NOTIF -> {
-                TraceUtils.traceStop(this)
+                // ViewCapture needs to save it's data before it is disabled, or else the data will
+                // be lost. This is expected to change in the near future, and when that happens
+                // this line should be removed.
+                bgExecutor.execute { traceurMessageSender.stopTracing() }
                 issueRecordingState.isRecording = false
             }
             ACTION_SHARE -> {
@@ -117,7 +110,7 @@ constructor(
                     if (issueRecordingState.takeBugReport) {
                         iActivityManager.requestBugReportWithExtraAttachment(screenRecording)
                     } else {
-                        shareRecording(screenRecording)
+                        traceurMessageSender.shareTraces(applicationContext, screenRecording)
                     }
                 }
 
@@ -134,75 +127,10 @@ constructor(
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun shareRecording(screenRecording: Uri?) {
-        val traces =
-            TraceUtils.traceDump(this, TRACE_FILE_NAME).getOrElse {
-                Log.v(
-                    TAG,
-                    "Traces were not present. This can happen if users double" +
-                        "click on share notification. Traces are cleaned up after sharing" +
-                        "so they won't be present for the 2nd share attempt."
-                )
-                return
-            }
-        val perfetto = FileProvider.getUriForFile(this, AUTHORITY, traces.first())
-        val urisToShare = mutableListOf(perfetto)
-        traces.removeFirst()
-
-        getZipWinscopeFileUri(traces)?.let { urisToShare.add(it) }
-        screenRecording?.let { urisToShare.add(it) }
-
-        val sendIntent =
-            FileSender.buildSendIntent(this, urisToShare).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-        // TODO: Debug why the notification shade isn't closing upon starting the BetterBug activity
-        mKeyguardDismissUtil.executeWhenUnlocked(
-            {
-                startActivity(sendIntent)
-                false
-            },
-            false,
-            false
-        )
-    }
-
-    private fun getZipWinscopeFileUri(traceFiles: List<File>): Uri? {
-        try {
-            externalCacheDir?.mkdirs()
-            val outZip: File = File.createTempFile(TEMP_FILE_PREFIX, ZIP_SUFFIX, externalCacheDir)
-            ZipOutputStream(FileOutputStream(outZip)).use { os ->
-                traceFiles.forEach { file ->
-                    os.putNextEntry(ZipEntry(file.name))
-                    Files.copy(file.toPath(), os)
-                    os.closeEntry()
-                }
-            }
-            return FileProvider.getUriForFile(this, AUTHORITY, outZip)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to zip and package Recordings. Cannot share with BetterBug.", e)
-            return null
-        }
-    }
-
     companion object {
         private const val TAG = "IssueRecordingService"
         private const val CHANNEL_ID = "issue_record"
         private const val EXTRA_SCREEN_RECORD = "extra_screenRecord"
-        private const val EXTRA_WINSCOPE_TRACING = "extra_winscopeTracing"
-        private const val ZIP_SUFFIX = ".zip"
-        private const val TEMP_FILE_PREFIX = "winscope_recordings"
-
-        private val DEFAULT_TRACE_TAGS = listOf<String>()
-        private const val DEFAULT_BUFFER_SIZE = 16384
-        private const val DEFAULT_IS_INCLUDING_WINSCOPE = true
-        private const val DEFAULT_IS_LONG_TRACE = false
-        private const val DEFAULT_IS_INCLUDING_APP_TRACE = true
-        private const val DEFAULT_ATTACH_TO_BUGREPORT = true
-        private const val DEFAULT_MAX_TRACE_SIZE = 10240
-        private const val DEFAULT_MAX_TRACE_DURATION_IN_MINUTES = 30
-
-        private val TRACE_FILE_NAME = TraceUtils.getOutputFilename(TraceUtils.RecordingType.TRACE)
-        private const val AUTHORITY = "com.android.systemui.fileprovider"
 
         /**
          * Get an intent to stop the issue recording service.
@@ -223,12 +151,12 @@ constructor(
         fun getStartIntent(
             context: Context,
             screenRecord: Boolean,
-            winscopeTracing: Boolean,
+            traceType: PresetTraceType,
         ): Intent =
             Intent(context, IssueRecordingService::class.java)
                 .setAction(ACTION_START)
                 .putExtra(EXTRA_SCREEN_RECORD, screenRecord)
-                .putExtra(EXTRA_WINSCOPE_TRACING, winscopeTracing)
+                .putExtra(INTENT_EXTRA_TRACE_TYPE, traceType)
     }
 }
 

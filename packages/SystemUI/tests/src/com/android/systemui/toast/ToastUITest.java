@@ -46,7 +46,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -59,6 +58,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.IntPair;
@@ -80,7 +80,7 @@ import org.mockito.stubbing.Answer;
 import java.util.Arrays;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class ToastUITest extends SysuiTestCase {
     private static final int ANDROID_UID = 1000;

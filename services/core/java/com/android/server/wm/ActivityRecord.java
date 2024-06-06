@@ -3964,7 +3964,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (isCurrentVisible) {
-            if (isNextNotYetVisible || delayRemoval) {
+            if (isNextNotYetVisible || delayRemoval || (next != null && isInTransition())) {
                 // Add this activity to the list of stopping activities. It will be processed and
                 // destroyed when the next activity reports idle.
                 addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
@@ -7644,6 +7644,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // This could only happen when the window is removed from hierarchy. So do not keep its
             // reference anymore.
             mStartingWindow = null;
+            mStartingData = null;
+            mStartingSurface = null;
         }
         if (mChildren.size() == 0 && mVisibleSetFromTransferredStartingWindow) {
             // We set the visible state to true for the token from a transferred starting
@@ -8551,7 +8553,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
         // are already calculated in resolveFixedOrientationConfiguration.
         // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
-        if (!isLetterboxedForFixedOrientationAndAspectRatio()
+        if (Flags.immersiveAppRepositioning() && !isLetterboxedForFixedOrientationAndAspectRatio()
                 && !mLetterboxUiController.hasFullscreenOverride()) {
             resolveAspectRatioRestriction(newParentConfiguration);
         }
@@ -8567,6 +8569,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (!matchParentBounds()) {
                 computeConfigByResolveHint(resolvedConfig, newParentConfiguration);
             }
+        }
+        // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
+        // are already calculated in resolveFixedOrientationConfiguration, or if in size compat
+        // mode, it should already be calculated in resolveSizeCompatModeConfiguration.
+        // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
+        if (!Flags.immersiveAppRepositioning() && !isLetterboxedForFixedOrientationAndAspectRatio()
+                && !mInSizeCompatModeForBounds && !mLetterboxUiController.hasFullscreenOverride()) {
+            resolveAspectRatioRestriction(newParentConfiguration);
         }
 
         if (isFixedOrientationLetterboxAllowed || compatDisplayInsets != null
@@ -8903,7 +8913,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean isImmersiveMode(@NonNull Rect parentBounds) {
-        if (!mResolveConfigHint.mUseOverrideInsetsForConfig) {
+        if (!Flags.immersiveAppRepositioning()) {
+            return false;
+        }
+        if (!mResolveConfigHint.mUseOverrideInsetsForConfig
+                && mWmService.mFlags.mInsetsDecoupledConfiguration) {
             return false;
         }
         final Insets navBarInsets = mDisplayContent.getInsetsStateController()
@@ -9247,17 +9261,35 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             @NonNull CompatDisplayInsets compatDisplayInsets) {
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
+        final Insets insets;
+        if (mResolveConfigHint.mUseOverrideInsetsForConfig) {
+            // TODO(b/343197837): Add test to verify SCM behaviour with new bound configuration
+            // Insets are decoupled from configuration by default from V+, use legacy
+            // compatibility behaviour for apps targeting SDK earlier than 35
+            // (see applySizeOverrideIfNeeded).
+            insets = Insets.of(mDisplayContent.getDisplayPolicy()
+                    .getDecorInsetsInfo(mDisplayContent.mDisplayFrames.mRotation,
+                            mDisplayContent.mDisplayFrames.mWidth,
+                            mDisplayContent.mDisplayFrames.mHeight).mOverrideNonDecorInsets);
+        } else {
+            insets = Insets.NONE;
+        }
 
         // When an activity needs to be letterboxed because of fixed orientation, use fixed
         // orientation bounds (stored in resolved bounds) instead of parent bounds since the
         // activity will be displayed within them even if it is in size compat mode. They should be
         // saved here before resolved bounds are overridden below.
-        final Rect containerBounds = isAspectRatioApplied()
+        final boolean useResolvedBounds = Flags.immersiveAppRepositioning()
+                ? isAspectRatioApplied() : isLetterboxedForFixedOrientationAndAspectRatio();
+        final Rect containerBounds = useResolvedBounds
                 ? new Rect(resolvedBounds)
                 : newParentConfiguration.windowConfiguration.getBounds();
-        final Rect containerAppBounds = isAspectRatioApplied()
+        final Rect parentAppBounds =
+                newParentConfiguration.windowConfiguration.getAppBounds();
+        parentAppBounds.inset(insets);
+        final Rect containerAppBounds = useResolvedBounds
                 ? new Rect(resolvedConfig.windowConfiguration.getAppBounds())
-                : newParentConfiguration.windowConfiguration.getAppBounds();
+                : parentAppBounds;
 
         final int requestedOrientation = getRequestedConfigurationOrientation();
         final boolean orientationRequested = requestedOrientation != ORIENTATION_UNDEFINED;

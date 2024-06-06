@@ -308,7 +308,13 @@ public class CarrierTextManager {
             } else {
                 // Don't listen and clear out the text when the device isn't a phone.
                 mMainExecutor.execute(() -> callback.updateCarrierInfo(
-                        new CarrierTextCallbackInfo("", null, false, null)
+                        new CarrierTextCallbackInfo(
+                                /* carrierText= */ "",
+                                /* listOfCarriers= */ null,
+                                /* anySimReady= */ false,
+                                /* isInSatelliteMode= */ false,
+                                /* subscriptionIds= */ null,
+                                /* airplaneMode= */ false)
                 ));
             }
         } else {
@@ -448,10 +454,12 @@ public class CarrierTextManager {
             displayText = currentSatelliteText;
         }
 
+        boolean isInSatelliteMode = mSatelliteCarrierText != null;
         final CarrierTextCallbackInfo info = new CarrierTextCallbackInfo(
                 displayText,
                 carrierNames,
                 !allSimsMissing,
+                isInSatelliteMode,
                 subsIds,
                 airplaneMode);
         mLogger.logCallbackSentFromUpdate(info);
@@ -757,21 +765,35 @@ public class CarrierTextManager {
         public final CharSequence carrierText;
         public final CharSequence[] listOfCarriers;
         public final boolean anySimReady;
+        public final boolean isInSatelliteMode;
         public final int[] subscriptionIds;
         public boolean airplaneMode;
 
         @VisibleForTesting
-        public CarrierTextCallbackInfo(CharSequence carrierText, CharSequence[] listOfCarriers,
-                boolean anySimReady, int[] subscriptionIds) {
-            this(carrierText, listOfCarriers, anySimReady, subscriptionIds, false);
+        public CarrierTextCallbackInfo(
+                CharSequence carrierText,
+                CharSequence[] listOfCarriers,
+                boolean anySimReady,
+                int[] subscriptionIds) {
+            this(carrierText,
+                    listOfCarriers,
+                    anySimReady,
+                    /* isInSatelliteMode= */ false,
+                    subscriptionIds,
+                    /* airplaneMode= */ false);
         }
 
-        @VisibleForTesting
-        public CarrierTextCallbackInfo(CharSequence carrierText, CharSequence[] listOfCarriers,
-                boolean anySimReady, int[] subscriptionIds, boolean airplaneMode) {
+        public CarrierTextCallbackInfo(
+                CharSequence carrierText,
+                CharSequence[] listOfCarriers,
+                boolean anySimReady,
+                boolean isInSatelliteMode,
+                int[] subscriptionIds,
+                boolean airplaneMode) {
             this.carrierText = carrierText;
             this.listOfCarriers = listOfCarriers;
             this.anySimReady = anySimReady;
+            this.isInSatelliteMode = isInSatelliteMode;
             this.subscriptionIds = subscriptionIds;
             this.airplaneMode = airplaneMode;
         }
@@ -782,6 +804,7 @@ public class CarrierTextManager {
                     + "carrierText=" + carrierText
                     + ", listOfCarriers=" + Arrays.toString(listOfCarriers)
                     + ", anySimReady=" + anySimReady
+                    + ", isInSatelliteMode=" + isInSatelliteMode
                     + ", subscriptionIds=" + Arrays.toString(subscriptionIds)
                     + ", airplaneMode=" + airplaneMode
                     + '}';

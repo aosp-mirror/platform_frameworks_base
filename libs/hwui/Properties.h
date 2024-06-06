@@ -229,6 +229,11 @@ enum DebugLevel {
 
 #define PROPERTY_8BIT_HDR_HEADROOM "debug.hwui.8bit_hdr_headroom"
 
+/**
+ * Whether to initialize GL even when HWUI is running Vulkan.
+ */
+#define PROPERTY_INITIALIZE_GL_ALWAYS "debug.hwui.initialize_gl_always"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -367,6 +372,8 @@ public:
     static DrawingEnabled drawingEnabled;
     static bool isDrawingEnabled();
     static void setDrawingEnabled(bool enable);
+
+    static bool initializeGlAlways();
 
 private:
     static StretchEffectBehavior stretchEffectBehavior;

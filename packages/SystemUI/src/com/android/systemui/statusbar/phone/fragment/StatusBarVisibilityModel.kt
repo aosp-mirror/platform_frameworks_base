@@ -26,7 +26,7 @@ import android.app.StatusBarManager.DISABLE_SYSTEM_INFO
 data class StatusBarVisibilityModel(
     val showClock: Boolean,
     val showNotificationIcons: Boolean,
-    val showOngoingCallChip: Boolean,
+    val showOngoingActivityChip: Boolean,
     val showSystemInfo: Boolean,
 ) {
     companion object {
@@ -48,7 +48,7 @@ data class StatusBarVisibilityModel(
                 showNotificationIcons = (disabled1 and DISABLE_NOTIFICATION_ICONS) == 0,
                 // TODO(b/279899176): [CollapsedStatusBarFragment] always overwrites this with the
                 //  value of [OngoingCallController]. Do we need to process the flag here?
-                showOngoingCallChip = (disabled1 and DISABLE_ONGOING_CALL_CHIP) == 0,
+                showOngoingActivityChip = (disabled1 and DISABLE_ONGOING_CALL_CHIP) == 0,
                 showSystemInfo =
                     (disabled1 and DISABLE_SYSTEM_INFO) == 0 &&
                         (disabled2 and DISABLE2_SYSTEM_ICONS) == 0

@@ -33,6 +33,12 @@ abstract class KeyguardSection {
     /** Removes views and does any data binding destruction. */
     abstract fun removeViews(constraintLayout: ConstraintLayout)
 
+    /* Notifies the section is being rebuilt */
+    open fun onRebuildBegin() {}
+
+    /* Notifies the secion that the rebuild is complete */
+    open fun onRebuildEnd() {}
+
     /**
      * Defines equality as same class.
      *

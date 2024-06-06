@@ -369,6 +369,21 @@ class ClockSizeTransition(
             addTarget(R.id.status_view_media_container)
         }
 
+        override fun mutateBounds(
+            view: View,
+            fromIsVis: Boolean,
+            toIsVis: Boolean,
+            fromBounds: Rect,
+            toBounds: Rect,
+            fromSSBounds: Rect?,
+            toSSBounds: Rect?
+        ) {
+            // If view is changing visibility, hold it in place
+            if (fromIsVis == toIsVis) return
+            if (DEBUG) Log.i(TAG, "Holding position of ${view.id}")
+            toBounds.set(fromBounds)
+        }
+
         companion object {
             const val STATUS_AREA_MOVE_UP_MILLIS = 967L
             const val STATUS_AREA_MOVE_DOWN_MILLIS = 467L
