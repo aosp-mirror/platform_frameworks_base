@@ -61,6 +61,11 @@ public:
     status_t setDequeueTimeout(nsecs_t timeout) { return OK; }
 
     nsecs_t getLastDequeueStartTime() const { return 0; }
+
+    int getBuffersDataSpace() {
+         return 0;
+    }
+
 protected:
     virtual ~Surface() {}
 

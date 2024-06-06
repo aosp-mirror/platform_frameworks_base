@@ -19,10 +19,8 @@
 #include <ui/ColorSpace.h>
 #include <utils/Log.h>
 
-#ifdef __ANDROID__ // Layoutlib does not support hardware buffers or native windows
 #include <android/hardware_buffer.h>
 #include <android/native_window.h>
-#endif
 
 #include <algorithm>
 #include <cmath>
@@ -31,7 +29,6 @@
 namespace android {
 namespace uirenderer {
 
-#ifdef __ANDROID__ // Layoutlib does not support hardware buffers or native windows
 static inline SkImageInfo createImageInfo(int32_t width, int32_t height, int32_t format,
                                           sk_sp<SkColorSpace> colorSpace) {
     SkColorType colorType = kUnknown_SkColorType;
@@ -95,7 +92,6 @@ uint32_t ColorTypeToBufferFormat(SkColorType colorType) {
             return AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
     }
 }
-#endif
 
 namespace {
 static constexpr skcms_TransferFunction k2Dot6 = {2.6f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};

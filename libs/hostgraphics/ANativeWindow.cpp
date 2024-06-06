@@ -92,6 +92,10 @@ int32_t ANativeWindow_getHeight(ANativeWindow* window) {
     return query(window, NATIVE_WINDOW_HEIGHT);
 }
 
+int32_t ANativeWindow_getFormat(ANativeWindow* window) {
+    return query(window, NATIVE_WINDOW_FORMAT);
+}
+
 void ANativeWindow_acquire(ANativeWindow* window) {
     // incStrong/decStrong token must be the same, doesn't matter what it is
     window->incStrong((void*)ANativeWindow_acquire);
