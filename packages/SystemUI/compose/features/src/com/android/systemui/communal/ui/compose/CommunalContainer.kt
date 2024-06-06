@@ -55,6 +55,7 @@ import com.android.systemui.Flags.glanceableHubFullscreenSwipe
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
+import com.android.systemui.communal.ui.compose.Dimensions.SlideOffsetY
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
@@ -73,6 +74,15 @@ object Communal {
 
 object AllElements : ElementMatcher {
     override fun matches(key: ElementKey, scene: SceneKey) = true
+}
+
+private object TransitionDuration {
+    const val BETWEEN_HUB_AND_EDIT_MODE_MS = 1000
+    const val EDIT_MODE_TO_HUB_CONTENT_MS = 167
+    const val EDIT_MODE_TO_HUB_GRID_DELAY_MS = 167
+    const val EDIT_MODE_TO_HUB_GRID_END_MS =
+        EDIT_MODE_TO_HUB_GRID_DELAY_MS + EDIT_MODE_TO_HUB_CONTENT_MS
+    const val HUB_TO_EDIT_MODE_CONTENT_MS = 250
 }
 
 val sceneTransitions = transitions {
@@ -94,6 +104,30 @@ val sceneTransitions = transitions {
             fade(Communal.Elements.LockIcon)
         }
         timestampRange(startMillis = 167, endMillis = 334) { fade(Communal.Elements.Scrim) }
+    }
+    to(CommunalScenes.Blank, key = CommunalTransitionKeys.ToEditMode) {
+        spec = tween(durationMillis = TransitionDuration.BETWEEN_HUB_AND_EDIT_MODE_MS)
+        timestampRange(endMillis = TransitionDuration.HUB_TO_EDIT_MODE_CONTENT_MS) {
+            fade(Communal.Elements.Grid)
+            fade(Communal.Elements.IndicationArea)
+            fade(Communal.Elements.LockIcon)
+        }
+        fade(Communal.Elements.Scrim)
+    }
+    to(CommunalScenes.Communal, key = CommunalTransitionKeys.FromEditMode) {
+        spec = tween(durationMillis = TransitionDuration.BETWEEN_HUB_AND_EDIT_MODE_MS)
+        translate(Communal.Elements.Grid, y = SlideOffsetY)
+        timestampRange(endMillis = TransitionDuration.EDIT_MODE_TO_HUB_CONTENT_MS) {
+            fade(Communal.Elements.IndicationArea)
+            fade(Communal.Elements.LockIcon)
+            fade(Communal.Elements.Scrim)
+        }
+        timestampRange(
+            startMillis = TransitionDuration.EDIT_MODE_TO_HUB_GRID_DELAY_MS,
+            endMillis = TransitionDuration.EDIT_MODE_TO_HUB_GRID_END_MS
+        ) {
+            fade(Communal.Elements.Grid)
+        }
     }
 }
 

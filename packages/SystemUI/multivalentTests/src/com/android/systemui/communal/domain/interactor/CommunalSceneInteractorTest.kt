@@ -24,6 +24,7 @@ import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.communal.data.repository.communalSceneRepository
 import com.android.systemui.communal.domain.model.CommunalTransitionProgressModel
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
@@ -79,6 +80,27 @@ class CommunalSceneInteractorTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
             advanceTimeBy(ActivityTransitionAnimator.TIMINGS.totalDuration)
             assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
+        }
+
+    @Test
+    fun snapToSceneForActivity() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
+
+            underTest.snapToSceneForActivityStart(CommunalScenes.Communal)
+            assertThat(currentScene).isEqualTo(CommunalScenes.Communal)
+        }
+
+    @Test
+    fun snapToSceneForActivity_willNotChangeScene_forEditModeActivity() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
+
+            underTest.setEditModeState(EditModeState.STARTING)
+            underTest.snapToSceneForActivityStart(CommunalScenes.Communal)
+            assertThat(currentScene).isEqualTo(CommunalScenes.Blank)
         }
 
     @Test

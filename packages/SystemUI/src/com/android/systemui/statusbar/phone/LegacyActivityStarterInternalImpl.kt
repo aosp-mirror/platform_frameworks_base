@@ -469,7 +469,7 @@ constructor(
                         shadeControllerLazy.get().collapseShadeForActivityStart()
                     }
                     if (communalHub()) {
-                        communalSceneInteractor.snapToScene(CommunalScenes.Blank)
+                        communalSceneInteractor.snapToSceneForActivityStart(CommunalScenes.Blank)
                     }
                     return deferred
                 }
@@ -556,7 +556,7 @@ constructor(
                 override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                     super.onTransitionAnimationStart(isExpandingFullyAbove)
                     if (communalHub()) {
-                        communalSceneInteractor.snapToScene(
+                        communalSceneInteractor.snapToSceneForActivityStart(
                             CommunalScenes.Blank,
                             ActivityTransitionAnimator.TIMINGS.totalDuration
                         )

@@ -114,13 +114,26 @@ constructor(
                     powerInteractor.isAwake,
                     keyguardInteractor.isAodAvailable,
                     communalInteractor.isIdleOnCommunal,
+                    communalInteractor.editModeOpen,
                     keyguardInteractor.isKeyguardOccluded,
                 )
                 .filterRelevantKeyguardStateAnd {
                     (isAlternateBouncerShowing, isPrimaryBouncerShowing, _, _, _) ->
                     !isAlternateBouncerShowing && !isPrimaryBouncerShowing
                 }
-                .collect { (_, _, isAwake, isAodAvailable, isIdleOnCommunal, isOccluded) ->
+                .collect {
+                    (
+                        _,
+                        _,
+                        isAwake,
+                        isAodAvailable,
+                        isIdleOnCommunal,
+                        isCommunalEditMode,
+                        isOccluded) ->
+                    // When unlocking over glanceable hub to enter edit mode, transitioning directly
+                    // to GONE prevents the lockscreen flash. Let listenForAlternateBouncerToGone
+                    // handle it.
+                    if (isCommunalEditMode) return@collect
                     val to =
                         if (!isAwake) {
                             if (isAodAvailable) {
