@@ -84,8 +84,6 @@ cc_defaults {
         host: {
             include_dirs: [
                 "external/vulkan-headers/include",
-                "frameworks/native/libs/nativebase/include",
-                "frameworks/native/libs/nativewindow/include",
             ],
             cflags: [
                 "-Wno-unused-variable",
@@ -380,7 +378,10 @@ cc_defaults {
         "jni/text/TextShaper.cpp",
     ],
 
-    header_libs: ["android_graphics_jni_headers"],
+    header_libs: [
+        "android_graphics_jni_headers",
+        "libnativewindow_headers",
+    ],
 
     include_dirs: [
         "external/skia/include/private",
@@ -437,6 +438,9 @@ cc_defaults {
             ],
         },
         host: {
+            header_libs: [
+                "libnativebase_headers",
+            ],
             cflags: [
                 "-Wno-unused-const-variable",
                 "-Wno-unused-function",
