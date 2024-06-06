@@ -25,6 +25,7 @@ import static android.view.accessibility.Flags.FLAG_SKIP_ACCESSIBILITY_WARNING_D
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
 import static com.android.server.accessibility.AccessibilityManagerService.ACTION_LAUNCH_HEARING_DEVICES_DIALOG;
 import static com.android.window.flags.Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER;
 
@@ -1390,14 +1391,14 @@ public class AccessibilityManagerServiceTest {
 
         mA11yms.enableShortcutsForTargets(
                 /* enable= */ true,
-                UserShortcutType.QUICK_SETTINGS,
+                QUICK_SETTINGS,
                 List.of(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString()),
                 mA11yms.getCurrentUserIdLocked());
         mTestableLooper.processAllMessages();
 
         assertThat(
                 ShortcutUtils.isComponentIdExistingInSettings(
-                        mTestableContext, UserShortcutType.QUICK_SETTINGS,
+                        mTestableContext, QUICK_SETTINGS,
                         TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString())
         ).isTrue();
         verify(mStatusBarManagerInternal)
@@ -1417,14 +1418,14 @@ public class AccessibilityManagerServiceTest {
 
         mA11yms.enableShortcutsForTargets(
                 /* enable= */ false,
-                UserShortcutType.QUICK_SETTINGS,
+                QUICK_SETTINGS,
                 List.of(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString()),
                 mA11yms.getCurrentUserIdLocked());
         mTestableLooper.processAllMessages();
 
         assertThat(
                 ShortcutUtils.isComponentIdExistingInSettings(
-                        mTestableContext, UserShortcutType.QUICK_SETTINGS,
+                        mTestableContext, QUICK_SETTINGS,
                         TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString())
         ).isFalse();
         verify(mStatusBarManagerInternal)
@@ -1621,7 +1622,7 @@ public class AccessibilityManagerServiceTest {
                 AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME.flattenToString();
         final AccessibilityUserState userState = new AccessibilityUserState(
                 UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
-        userState.updateA11yQsTargetLocked(Set.of(daltonizerTile));
+        userState.updateShortcutTargetsLocked(Set.of(daltonizerTile), QUICK_SETTINGS);
         mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
 
         broadcastSettingRestored(
@@ -1642,7 +1643,7 @@ public class AccessibilityManagerServiceTest {
                 AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME.flattenToString();
         final AccessibilityUserState userState = new AccessibilityUserState(
                 UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
-        userState.updateA11yQsTargetLocked(Set.of(daltonizerTile));
+        userState.updateShortcutTargetsLocked(Set.of(daltonizerTile), QUICK_SETTINGS);
         mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
 
         broadcastSettingRestored(
