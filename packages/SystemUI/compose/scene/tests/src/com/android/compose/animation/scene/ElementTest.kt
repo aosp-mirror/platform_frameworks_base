@@ -1418,4 +1418,115 @@ class ElementTest {
         assertThat(bState.targetSize).isNotEqualTo(Element.SizeUnspecified)
         assertThat(bState.targetOffset).isNotEqualTo(Offset.Unspecified)
     }
+
+    @Test
+    fun lastAlphaIsNotSetByOutdatedLayer() = runTest {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions { from(SceneA, to = SceneB) { fade(TestElements.Foo) } }
+                )
+            }
+
+        lateinit var layoutImpl: SceneTransitionLayoutImpl
+        rule.setContent {
+            SceneTransitionLayoutForTesting(state, onLayoutImpl = { layoutImpl = it }) {
+                scene(SceneA) {}
+                scene(SceneB) { Box(Modifier.element(TestElements.Foo)) }
+                scene(SceneC) { Box(Modifier.element(TestElements.Foo)) }
+            }
+        }
+
+        // Start A => B at 0.5f.
+        var aToBProgress by mutableStateOf(0.5f)
+        rule.runOnUiThread {
+            state.startTransition(
+                transition(
+                    from = SceneA,
+                    to = SceneB,
+                    progress = { aToBProgress },
+                    onFinish = neverFinish(),
+                )
+            )
+        }
+        rule.waitForIdle()
+
+        val foo = checkNotNull(layoutImpl.elements[TestElements.Foo])
+        assertThat(foo.sceneStates[SceneA]).isNull()
+
+        val fooInB = foo.sceneStates[SceneB]
+        assertThat(fooInB).isNotNull()
+        assertThat(fooInB!!.lastAlpha).isEqualTo(0.5f)
+
+        // Move the progress of A => B to 0.7f.
+        aToBProgress = 0.7f
+        rule.waitForIdle()
+        assertThat(fooInB.lastAlpha).isEqualTo(0.7f)
+
+        // Start B => C at 0.3f.
+        rule.runOnUiThread {
+            state.startTransition(transition(from = SceneB, to = SceneC, progress = { 0.3f }))
+        }
+        rule.waitForIdle()
+        val fooInC = foo.sceneStates[SceneC]
+        assertThat(fooInC).isNotNull()
+        assertThat(fooInC!!.lastAlpha).isEqualTo(1f)
+        assertThat(fooInB.lastAlpha).isEqualTo(Element.AlphaUnspecified)
+
+        // Move the progress of A => B to 0.9f. This shouldn't change anything given that B => C is
+        // now the transition applied to Foo.
+        aToBProgress = 0.9f
+        rule.waitForIdle()
+        assertThat(fooInC.lastAlpha).isEqualTo(1f)
+        assertThat(fooInB.lastAlpha).isEqualTo(Element.AlphaUnspecified)
+    }
+
+    @Test
+    fun fadingElementsDontAppearInstantly() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateImpl(
+                    SceneA,
+                    transitions { from(SceneA, to = SceneB) { fade(TestElements.Foo) } }
+                )
+            }
+
+        lateinit var layoutImpl: SceneTransitionLayoutImpl
+        rule.setContent {
+            SceneTransitionLayoutForTesting(state, onLayoutImpl = { layoutImpl = it }) {
+                scene(SceneA) {}
+                scene(SceneB) { Box(Modifier.element(TestElements.Foo)) }
+            }
+        }
+
+        // Start A => B at 60%.
+        var interruptionProgress by mutableStateOf(1f)
+        rule.runOnUiThread {
+            state.startTransition(
+                transition(
+                    from = SceneA,
+                    to = SceneB,
+                    progress = { 0.6f },
+                    interruptionProgress = { interruptionProgress },
+                ),
+                transitionKey = null
+            )
+        }
+        rule.waitForIdle()
+
+        // Alpha of Foo should be 0f at interruption progress 100%.
+        val fooInB = layoutImpl.elements.getValue(TestElements.Foo).sceneStates.getValue(SceneB)
+        assertThat(fooInB.lastAlpha).isEqualTo(0f)
+
+        // Alpha of Foo should be 0.6f at interruption progress 0%.
+        interruptionProgress = 0f
+        rule.waitForIdle()
+        assertThat(fooInB.lastAlpha).isEqualTo(0.6f)
+
+        // Alpha of Foo should be 0.3f at interruption progress 50%.
+        interruptionProgress = 0.5f
+        rule.waitForIdle()
+        assertThat(fooInB.lastAlpha).isEqualTo(0.3f)
+    }
 }
