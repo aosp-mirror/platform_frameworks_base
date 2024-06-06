@@ -60,7 +60,6 @@ import android.os.RemoteException;
 import android.os.image.DynamicSystemClient;
 import android.os.image.DynamicSystemManager;
 import android.text.TextUtils;
-import android.util.EventLog;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -104,14 +103,6 @@ public class DynamicSystemInstallationService extends Service
     private static final String NOTIFICATION_CHANNEL_ID = "com.android.dynsystem";
     private static final int NOTIFICATION_ID = 1;
 
-    /*
-     * Event log tags
-     */
-    private static final int EVENT_DSU_PROGRESS_UPDATE = 120000;
-    private static final int EVENT_DSU_INSTALL_COMPLETE = 120001;
-    private static final int EVENT_DSU_INSTALL_FAILED = 120002;
-    private static final int EVENT_DSU_INSTALL_INSUFFICIENT_SPACE = 120003;
-
     protected static void logEventProgressUpdate(
             String partitionName,
             long installedBytes,
@@ -119,8 +110,7 @@ public class DynamicSystemInstallationService extends Service
             int partitionNumber,
             int totalPartitionNumber,
             int totalProgressPercentage) {
-        EventLog.writeEvent(
-                EVENT_DSU_PROGRESS_UPDATE,
+        EventLogTags.writeDsuProgressUpdate(
                 partitionName,
                 installedBytes,
                 totalBytes,
@@ -130,15 +120,15 @@ public class DynamicSystemInstallationService extends Service
     }
 
     protected static void logEventComplete() {
-        EventLog.writeEvent(EVENT_DSU_INSTALL_COMPLETE);
+        EventLogTags.writeDsuInstallComplete();
     }
 
     protected static void logEventFailed(String cause) {
-        EventLog.writeEvent(EVENT_DSU_INSTALL_FAILED, cause);
+        EventLogTags.writeDsuInstallFailed(cause);
     }
 
     protected static void logEventInsufficientSpace() {
-        EventLog.writeEvent(EVENT_DSU_INSTALL_INSUFFICIENT_SPACE);
+        EventLogTags.writeDsuInstallInsufficientSpace();
     }
 
     /*

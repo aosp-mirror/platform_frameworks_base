@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.window.RemoteTransition;
+import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.desktopmode.IDesktopTaskListener;
 
 /**
@@ -47,5 +48,5 @@ interface IDesktopMode {
     oneway void setTaskListener(IDesktopTaskListener listener);
 
     /** Move a task with given `taskId` to desktop */
-    void moveToDesktop(int taskId);
+    void moveToDesktop(int taskId, in DesktopModeTransitionSource transitionSource);
 }

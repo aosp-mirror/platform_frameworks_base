@@ -34,6 +34,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Rect;
 import android.hardware.biometrics.BiometricFingerprintConstants;
+import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -43,7 +44,9 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
 import android.hardware.input.InputManager;
 import android.os.Build;
+import android.os.CancellationSignal;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Trace;
 import android.os.VibrationAttributes;
@@ -381,6 +384,26 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             final long requestId = (mOverlay != null) ? mOverlay.getRequestId() : 0L;
             UdfpsController.this.mFingerprintManager.onUdfpsUiEvent(
                     FingerprintManager.UDFPS_UI_READY, requestId, sensorId);
+        }
+
+        /**
+         * Debug to show biometric prompt
+         */
+        public void debugBiometricPrompt() {
+            final BiometricPrompt.AuthenticationCallback authenticationCallback =
+                    new BiometricPrompt.AuthenticationCallback() {
+                    };
+
+            final BiometricPrompt biometricPrompt = new BiometricPrompt.Builder(mContext)
+                    .setTitle("Test")
+                    .setDeviceCredentialAllowed(true)
+                    .setAllowBackgroundAuthentication(true)
+                    .build();
+            final Handler handler = new Handler(Looper.getMainLooper());
+            biometricPrompt.authenticate(
+                    new CancellationSignal(),
+                    handler::post,
+                    authenticationCallback);
         }
     }
 

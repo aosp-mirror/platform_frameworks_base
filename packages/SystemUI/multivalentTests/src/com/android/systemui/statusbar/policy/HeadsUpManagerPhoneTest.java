@@ -167,7 +167,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
         mContext.getOrCreateTestableResources().addOverride(
                 R.integer.ambient_notification_extension_time, 500);
 
-        mAvalancheController = new AvalancheController(dumpManager);
+        mAvalancheController = new AvalancheController(dumpManager, mUiEventLogger);
     }
 
     @Test

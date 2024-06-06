@@ -28,6 +28,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -296,6 +297,9 @@ public abstract class InstantAppResolver {
         if (needsPhaseTwo) {
             intent.setAction(Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE);
         } else {
+            ActivityOptions options = ActivityOptions.makeBasic()
+                    .setPendingIntentCreatorBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
             // We have all of the data we need; just start the installer without a second phase
             if (failureIntent != null || installFailureActivity != null) {
                 // Intent that is launched if the package couldn't be installed for any reason.
@@ -322,7 +326,7 @@ public abstract class InstantAppResolver {
                                     PendingIntent.FLAG_CANCEL_CURRENT
                                             | PendingIntent.FLAG_ONE_SHOT
                                             | PendingIntent.FLAG_IMMUTABLE,
-                                    null /*bOptions*/, userId);
+                                    options.toBundle(), userId);
                     IntentSender failureSender = new IntentSender(failureIntentTarget);
                     // TODO(b/72700831): remove populating old extra
                     intent.putExtra(Intent.EXTRA_INSTANT_APP_FAILURE, failureSender);
@@ -342,7 +346,7 @@ public abstract class InstantAppResolver {
                                 new String[] { resolvedType },
                                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
                                         | PendingIntent.FLAG_IMMUTABLE,
-                                null /*bOptions*/, userId);
+                                options.toBundle(), userId);
                 IntentSender successSender = new IntentSender(successIntentTarget);
                 intent.putExtra(Intent.EXTRA_INSTANT_APP_SUCCESS, successSender);
             } catch (RemoteException ignore) { /* ignore; same process */ }

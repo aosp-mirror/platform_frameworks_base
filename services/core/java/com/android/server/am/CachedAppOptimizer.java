@@ -83,8 +83,6 @@ import com.android.internal.os.ProcLocksReader;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.ServiceThread;
 
-import dalvik.annotation.optimization.NeverCompile;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -99,6 +97,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 public final class CachedAppOptimizer {
 
@@ -2633,7 +2633,7 @@ public final class CachedAppOptimizer {
     public void binderError(int debugPid, ProcessRecord app, int code, int flags, int err) {
         Slog.w(TAG_AM, "pid " + debugPid + " " + (app == null ? "null" : app.processName)
                 + " sent binder code " + code + " with flags " + flags
-                + " and got error " + err);
+                + " to frozen apps and got error " + err);
 
         // Do nothing if the binder error callback is not enabled.
         // That means the frozen apps in a wrong state will be killed when they are unfrozen later.

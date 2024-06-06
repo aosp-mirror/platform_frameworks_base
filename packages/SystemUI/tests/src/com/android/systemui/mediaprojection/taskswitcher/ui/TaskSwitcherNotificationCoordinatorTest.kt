@@ -18,7 +18,7 @@ package com.android.systemui.mediaprojection.taskswitcher.ui
 
 import android.app.Notification
 import android.app.NotificationManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testScope
@@ -43,7 +43,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
 

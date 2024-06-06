@@ -18,6 +18,8 @@ package com.android.wm.shell.protolog;
 
 import com.android.internal.protolog.common.IProtoLogGroup;
 
+import java.util.UUID;
+
 /**
  * Defines logging groups for ProtoLog.
  *
@@ -116,6 +118,11 @@ public enum ShellProtoLogGroup implements IProtoLogGroup {
         this.mLogToLogcat = logToLogcat;
     }
 
+    @Override
+    public int getId() {
+        return Consts.START_ID + this.ordinal();
+    }
+
     private static class Consts {
         private static final String TAG_WM_SHELL = "WindowManagerShell";
         private static final String TAG_WM_STARTING_WINDOW = "ShellStartingWindow";
@@ -124,5 +131,9 @@ public enum ShellProtoLogGroup implements IProtoLogGroup {
 
         private static final boolean ENABLE_DEBUG = true;
         private static final boolean ENABLE_LOG_TO_PROTO_DEBUG = true;
+
+        private static final int START_ID = (int) (
+                UUID.nameUUIDFromBytes(ShellProtoLogGroup.class.getName().getBytes())
+                        .getMostSignificantBits() % Integer.MAX_VALUE);
     }
 }

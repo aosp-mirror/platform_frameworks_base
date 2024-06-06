@@ -317,11 +317,23 @@ constructor(
                     }
                     trySend(supported)
                 }
-                satelliteManager.registerForSupportedStateChanged(
-                    bgDispatcher.asExecutor(),
-                    callback
-                )
-                awaitClose { satelliteManager.unregisterForSupportedStateChanged(callback) }
+
+                var registered = false
+                try {
+                    satelliteManager.registerForSupportedStateChanged(
+                        bgDispatcher.asExecutor(),
+                        callback
+                    )
+                    registered = true
+                } catch (e: Exception) {
+                    logBuffer.e("error registering for supported state change", e)
+                }
+
+                awaitClose {
+                    if (registered) {
+                        satelliteManager.unregisterForSupportedStateChanged(callback)
+                    }
+                }
             }
         }
 

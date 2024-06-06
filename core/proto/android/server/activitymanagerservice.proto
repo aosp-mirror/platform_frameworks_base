@@ -35,7 +35,7 @@ import "frameworks/base/core/proto/android/server/intentresolver.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/util/common.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
-import "frameworks/proto_logging/stats/enums/app/enums.proto";
+import "frameworks/proto_logging/stats/enums/app/app_enums.proto";
 
 option java_multiple_files = true;
 

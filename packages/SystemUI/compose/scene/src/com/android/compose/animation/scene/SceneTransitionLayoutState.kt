@@ -457,7 +457,7 @@ internal abstract class BaseSceneTransitionLayoutState(
      */
     internal fun startTransition(
         transition: TransitionState.Transition,
-        transitionKey: TransitionKey?,
+        transitionKey: TransitionKey? = null,
         chain: Boolean = true,
     ) {
         checkThread()

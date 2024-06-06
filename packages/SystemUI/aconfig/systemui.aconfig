@@ -33,6 +33,13 @@ flag {
 }
 
 flag {
+   name: "notification_row_content_binder_refactor"
+   namespace: "systemui"
+   description: "Convert the NotificationContentInflater to Kotlin and restructure it to support modern views"
+   bug: "343942780"
+}
+
+flag {
    name: "notification_minimalism_prototype"
    namespace: "systemui"
    description: "Prototype of notification minimalism; the new 'Intermediate' lockscreen customization proposal."
@@ -177,7 +184,7 @@ flag {
 }
 
 flag {
-    name: "notification_throttle_hun"
+    name: "notification_avalanche_throttle_hun"
     namespace: "systemui"
     description: "During notification avalanche, throttle HUNs showing in fast succession."
     bug: "307288824"
@@ -404,6 +411,13 @@ flag {
    description: "Move clock related views from KeyguardStatusView to KeyguardRootView, "
         "and use modern architecture for lockscreen clocks"
    bug: "301502635"
+}
+
+flag {
+   name: "clock_reactive_variants"
+   namespace: "systemui"
+   description: "Add reactive variant fonts to some clocks"
+   bug: "343495953"
 }
 
 flag {
@@ -736,16 +750,6 @@ flag {
 }
 
 flag {
-    name: "trim_resources_with_background_trim_at_lock"
-    namespace: "systemui"
-    description: "Trim fonts and other caches when the device locks to lower memory consumption."
-    bug: "322143614"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "dedicated_notif_inflation_thread"
     namespace: "systemui"
     description: "Create a separate background thread for inflating notifications"
@@ -797,6 +801,13 @@ flag {
     namespace: "systemui"
     description: "enables new focus outline for qs tiles when focused on with physical keyboard"
     bug: "312899524"
+}
+
+flag {
+    name: "brightness_slider_focus_state"
+    namespace: "systemui"
+    description: "enables new focus outline for the brightness slider when focused on with physical keyboard"
+    bug: "329244723"
 }
 
 flag {
@@ -980,6 +991,16 @@ flag {
 }
 
 flag {
+  namespace: "systemui"
+  name: "privacy_dot_unfold_wrong_corner_fix"
+  description: "Fixes an issue where the privacy dot is at the wrong corner after unfolding/folding."
+  bug: "339335643"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "validate_keyboard_shortcut_helper_icon_uri"
   namespace: "systemui"
   description: "Adds a check that the caller can access the content URI of an icon in the shortcut helper."
@@ -990,10 +1011,31 @@ flag {
 }
 
 flag {
+  name: "glanceable_hub_fullscreen_swipe"
+  namespace: "systemui"
+  description: "Increase swipe area for gestures to bring in glanceable hub"
+  bug: "339665673"
+}
+
+flag {
+  name: "glanceable_hub_shortcut_button"
+  namespace: "systemui"
+  description: "Shows a button over the dream and lock screen to open the glanceable hub"
+  bug: "339667383"
+}
+
+flag {
   name: "glanceable_hub_gesture_handle"
   namespace: "systemui"
   description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
   bug: "339667383"
+}
+
+flag {
+  name: "glanceable_hub_allow_keyguard_when_dreaming"
+  namespace: "systemui"
+  description: "Allows users to exit dream to keyguard with glanceable hub enabled"
+  bug: "343505271"
 }
 
 flag {
@@ -1011,4 +1053,34 @@ flag {
    metadata {
      purpose: PURPOSE_BUGFIX
    }
+}
+
+flag {
+  name: "notification_media_manager_background_execution"
+  namespace: "systemui"
+  description: "Decide whether to execute binder calls in background thread"
+  bug: "336612071"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "dozeui_scheduling_alarms_background_execution"
+  namespace: "systemui"
+  description: "Decide whether to execute binder calls to schedule alarms in background thread"
+  bug: "330492575"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "notification_pulsing_fix"
+  namespace: "systemui"
+  description: "Allow showing new pulsing notifications when the device is already pulsing."
+  bug: "335560575"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

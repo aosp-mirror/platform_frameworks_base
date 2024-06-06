@@ -318,10 +318,10 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
             };
 
             // Register to listen for changes in Settings.Secure settings.
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS, mContentObserver,
                     UserHandle.USER_CURRENT);
-            mSecureSettings.registerContentObserverForUser(
+            mSecureSettings.registerContentObserverForUserSync(
                     Settings.Secure.USER_SETUP_COMPLETE, mContentObserver,
                     UserHandle.USER_CURRENT);
         }

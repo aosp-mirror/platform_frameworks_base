@@ -3698,7 +3698,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             return mTotalTimeUs + (mNesting > 0
                     ? (curBatteryRealtimeUs - mUpdateTimeUs)
-                            / (mTimerPool != null ? mTimerPool.size() : 1)
+                            / (mTimerPool != null && mTimerPool.size() > 0 ? mTimerPool.size() : 1)
                     : 0);
         }
 

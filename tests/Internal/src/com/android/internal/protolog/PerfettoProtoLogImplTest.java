@@ -725,5 +725,10 @@ public class PerfettoProtoLogImplTest {
             this.mLogToLogcat = logToLogcat;
         }
 
+        @Override
+        public int getId() {
+            return ordinal();
+        }
+
     }
 }

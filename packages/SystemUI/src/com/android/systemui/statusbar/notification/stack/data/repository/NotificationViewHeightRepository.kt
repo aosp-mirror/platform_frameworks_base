@@ -27,9 +27,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @SysUISingleton
 class NotificationViewHeightRepository @Inject constructor() {
 
-    /** The height in px of the current heads up notification. */
-    val headsUpHeight = MutableStateFlow(0f)
-
     /**
      * The amount in px that the notification stack should scroll due to internal expansion. This
      * should only happen when a notification expansion hits the bottom of the screen, so it is

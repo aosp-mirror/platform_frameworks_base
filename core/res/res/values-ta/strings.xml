@@ -201,10 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"இந்தச் சாதனத்தில் இனி பணிக் கணக்கு கிடைக்காது"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"கடவுச்சொல்லை அதிக முறை தவறாக முயற்சித்துவிட்டீர்கள்"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"நிர்வாகியால் தனிப்பட்ட உபயோகத்திற்காக ஒதுக்கப்பட்ட சாதனம்"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ரகசிய இடம் அகற்றப்பட்டது"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"இந்த நிர்வகிக்கப்படும் சாதனத்தில் ரகசிய இடங்களை உங்கள் நிறுவனம் அனுமதிப்பதில்லை."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"சாதனம் நிர்வகிக்கப்படுகிறது"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"உங்கள் நிறுவனம் இந்தச் சாதனத்தை நிர்வகிக்கும், அத்துடன் அது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம். விவரங்களுக்கு, தட்டவும்."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ஆப்ஸ் உங்கள் இருப்பிடத்தை அணுக முடியும்"</string>
@@ -2198,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"இடது திசை காட்டும் பட்டன்"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"வலது திசை காட்டும் பட்டன்"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"மையப் பகுதியைக் காட்டும் பட்டன்"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸின் தலைப்புப் பட்டி."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> என்பதை வரம்பிடப்பட்ட பக்கெட்திற்குள் சேர்க்கப்பட்டது"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"படம் அனுப்பப்பட்டது"</string>
@@ -2419,10 +2416,8 @@
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"இது செயல்படும் விதம்"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"நிலுவையிலுள்ளது..."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"கைரேகை அன்லாக் அம்சத்தை மீண்டும் அமையுங்கள்"</string>
-    <!-- no translation found for fingerprint_dangling_notification_msg_1 (8517140433796229725) -->
-    <skip />
-    <!-- no translation found for fingerprint_dangling_notification_msg_2 (7578829498452127613) -->
-    <skip />
+    <string name="fingerprint_dangling_notification_msg_1" msgid="8517140433796229725">"<xliff:g id="FINGERPRINT">%s</xliff:g> சரியாகச் செயல்படவில்லை என்பதால் அது நீக்கப்பட்டது"</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7578829498452127613">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> மற்றும் <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> சரியாகச் செயல்படவில்லை என்பதால் அவை நீக்கப்பட்டன"</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="2927018569542316055">"<xliff:g id="FINGERPRINT">%s</xliff:g> சரியாகச் செயல்படவில்லை என்பதால் அது நீக்கபட்டது. கைரேகை மூலம் உங்கள் மொபைலை அன்லாக் செய்ய அதை மீண்டும் அமையுங்கள்."</string>
     <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="6897989352716156176">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> மற்றும் <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> சரியாகச் செயல்படவில்லை என்பதால் அவை நீக்கப்பட்டன. கைரேகை மூலம் உங்கள் மொபைலை அன்லாக் செய்ய அவற்றை மீண்டும் அமையுங்கள்."</string>
     <string name="face_dangling_notification_title" msgid="947852541060975473">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை மீண்டும் அமையுங்கள்"</string>

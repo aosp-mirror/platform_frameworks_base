@@ -17,6 +17,7 @@
 package com.android.systemui.dreams.ui.viewmodel
 
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.Flags.glanceableHubAllowKeyguardWhenDreaming
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -60,7 +61,7 @@ constructor(
         val showGlanceableHub =
             communalInteractor.isCommunalEnabled.value &&
                 !keyguardUpdateMonitor.isEncryptedOrLockdown(userTracker.userId)
-        if (showGlanceableHub) {
+        if (showGlanceableHub && !glanceableHubAllowKeyguardWhenDreaming()) {
             communalInteractor.changeScene(CommunalScenes.Communal)
         } else {
             toLockscreenTransitionViewModel.startTransition()

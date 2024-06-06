@@ -20,14 +20,13 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.domain.interactor.IconTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
 
 interface IconTilesViewModel {
-    val iconTilesSpecs: StateFlow<Set<TileSpec>>
+    fun isIconTile(spec: TileSpec): Boolean
 }
 
 @SysUISingleton
-class IconTilesViewModelImpl @Inject constructor(interactor: IconTilesInteractor) :
+class IconTilesViewModelImpl @Inject constructor(private val interactor: IconTilesInteractor) :
     IconTilesViewModel {
-    override val iconTilesSpecs = interactor.iconTilesSpecs
+    override fun isIconTile(spec: TileSpec): Boolean = interactor.isIconTile(spec)
 }

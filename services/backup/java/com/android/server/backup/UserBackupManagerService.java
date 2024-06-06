@@ -4008,20 +4008,10 @@ public class UserBackupManagerService {
     }
 
     private PackageInfo getPackageInfoForBMMLogging(String packageName) {
-        try {
-            return mPackageManager.getPackageInfoAsUser(packageName, 0, mUserId);
-        } catch (NameNotFoundException e) {
-            Slog.w(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "Asked to get PackageInfo for BMM logging of nonexistent pkg "
-                                    + packageName));
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = packageName;
 
-            PackageInfo packageInfo = new PackageInfo();
-            packageInfo.packageName = packageName;
-
-            return packageInfo;
-        }
+        return packageInfo;
     }
 
     /** Hand off a restore session. */

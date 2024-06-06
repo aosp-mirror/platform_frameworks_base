@@ -19,7 +19,7 @@ package com.android.systemui.brightness.data.repository
 import android.hardware.display.BrightnessInfo
 import android.hardware.display.BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE
 import android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF
-import com.android.systemui.brightness.data.model.LinearBrightness
+import com.android.systemui.brightness.shared.model.LinearBrightness
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map

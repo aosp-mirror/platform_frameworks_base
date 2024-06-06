@@ -39,6 +39,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -1284,14 +1285,37 @@ public final class DisplayPowerControllerTest {
 
     @Test
     public void testDwbcCallsHappenOnHandler() {
+        when(mDisplayManagerFlagsMock.isAdaptiveTone1Enabled()).thenReturn(true);
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
 
-        mHolder.dpc.setAutomaticScreenBrightnessMode(AUTO_BRIGHTNESS_MODE_IDLE);
-        verify(mDisplayWhiteBalanceControllerMock, never()).setStrongModeEnabled(true);
+        // Send a display power request
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        dpr.useProximitySensor = true;
+        mHolder.dpc.requestPowerState(dpr, false /* waitForNegativeProximity */);
+
+        // Run updatePowerState
+        advanceTime(1);
+
+        setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
+                mHolder.config, /* isEnabled= */ true);
 
         // dispatch handler looper
         advanceTime(1);
-        verify(mDisplayWhiteBalanceControllerMock, times(1)).setStrongModeEnabled(true);
+        clearInvocations(mDisplayWhiteBalanceControllerMock, mHolder.automaticBrightnessController,
+                mHolder.animator);
+        mHolder.dpc.setAutomaticScreenBrightnessMode(AUTO_BRIGHTNESS_MODE_IDLE);
+        verifyNoMoreInteractions(mDisplayWhiteBalanceControllerMock,
+                mHolder.automaticBrightnessController,
+                mHolder.animator);
+
+        // dispatch handler looper
+        advanceTime(1);
+        verify(mHolder.automaticBrightnessController).switchMode(AUTO_BRIGHTNESS_MODE_IDLE,
+                /* sendUpdate= */ true);
+        verify(mHolder.animator).setAnimationTimeLimits(BRIGHTNESS_RAMP_INCREASE_MAX_IDLE,
+                BRIGHTNESS_RAMP_DECREASE_MAX_IDLE);
+        verify(mDisplayWhiteBalanceControllerMock).setStrongModeEnabled(true);
     }
 
     @Test
@@ -1506,6 +1530,9 @@ public final class DisplayPowerControllerTest {
         // switch to idle mode
         mHolder.dpc.setAutomaticScreenBrightnessMode(AUTO_BRIGHTNESS_MODE_IDLE);
 
+        // Process the MSG_SWITCH_AUTOBRIGHTNESS_MODE event
+        advanceTime(1);
+
         // A second time when switching to idle mode.
         verify(mHolder.animator, times(2)).setAnimationTimeLimits(BRIGHTNESS_RAMP_INCREASE_MAX,
                 BRIGHTNESS_RAMP_DECREASE_MAX);
@@ -1532,12 +1559,16 @@ public final class DisplayPowerControllerTest {
         // switch to idle mode
         mHolder.dpc.setAutomaticScreenBrightnessMode(AUTO_BRIGHTNESS_MODE_IDLE);
 
+        // Process the MSG_SWITCH_AUTOBRIGHTNESS_MODE event
+        advanceTime(1);
         verify(mHolder.animator).setAnimationTimeLimits(BRIGHTNESS_RAMP_INCREASE_MAX_IDLE,
                 BRIGHTNESS_RAMP_DECREASE_MAX_IDLE);
     }
 
     @Test
     public void testDozeScreenStateOverride_toSupportedOffloadStateFromDoze_DisplayStateChanges() {
+        when(mDisplayManagerFlagsMock.isOffloadDozeOverrideHoldsWakelockEnabled()).thenReturn(true);
+
         // set up.
         int initState = Display.STATE_DOZE;
         int supportedTargetState = Display.STATE_DOZE_SUSPEND;
@@ -1556,9 +1587,14 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
+        reset(mHolder.wakelockController);
         mHolder.dpc.overrideDozeScreenState(
                 supportedTargetState, Display.STATE_REASON_DEFAULT_POLICY);
         advanceTime(1); // Run updatePowerState
+
+        // Should get a wakelock to notify powermanager
+        verify(mHolder.wakelockController, atLeastOnce()).acquireWakelock(
+                eq(WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS));
 
         verify(mHolder.displayPowerState)
                 .setScreenState(supportedTargetState, Display.STATE_REASON_DEFAULT_POLICY);

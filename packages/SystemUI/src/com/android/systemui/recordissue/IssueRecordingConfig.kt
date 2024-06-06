@@ -16,4 +16,6 @@
 
 package com.android.systemui.recordissue
 
-data class IssueRecordingConfig(val screenRecord: Boolean, val winscopeTracing: Boolean)
+import com.android.traceur.TraceUtils.PresetTraceType
+
+data class IssueRecordingConfig(val screenRecord: Boolean, val traceType: PresetTraceType)

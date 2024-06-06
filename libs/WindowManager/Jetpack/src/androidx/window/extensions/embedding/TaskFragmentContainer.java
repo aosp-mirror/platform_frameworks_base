@@ -195,20 +195,6 @@ class TaskFragmentContainer {
     private boolean mLastDimOnTask;
 
     /**
-     * @see #TaskFragmentContainer(Activity, Intent, TaskContainer, SplitController,
-     * TaskFragmentContainer, String, Bundle, Activity)
-     */
-    TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
-                          @Nullable Intent pendingAppearedIntent,
-                          @NonNull TaskContainer taskContainer,
-                          @NonNull SplitController controller,
-                          @Nullable TaskFragmentContainer pairedPrimaryContainer) {
-        this(pendingAppearedActivity, pendingAppearedIntent, taskContainer,
-                controller, pairedPrimaryContainer, null /* overlayTag */,
-                null /* launchOptions */, null /* associatedActivity */);
-    }
-
-    /**
      * Creates a container with an existing activity that will be re-parented to it in a window
      * container transaction.
      * @param pairedPrimaryContainer    when it is set, the new container will be add right above it
@@ -218,7 +204,7 @@ class TaskFragmentContainer {
      * @param associatedActivity        the associated activity of the overlay container. Must be
      *                                  {@code null} for a non-overlay container.
      */
-    TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
+    private TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
             @Nullable Intent pendingAppearedIntent, @NonNull TaskContainer taskContainer,
             @NonNull SplitController controller,
             @Nullable TaskFragmentContainer pairedPrimaryContainer, @Nullable String overlayTag,
@@ -232,12 +218,6 @@ class TaskFragmentContainer {
         mToken = new Binder("TaskFragmentContainer");
         mTaskContainer = taskContainer;
         mOverlayTag = overlayTag;
-        if (overlayTag != null) {
-            Objects.requireNonNull(launchOptions);
-        } else if (associatedActivity != null) {
-            throw new IllegalArgumentException("Associated activity must be null for "
-                    + "non-overlay activity.");
-        }
         mAssociatedActivityToken = associatedActivity != null
                 ? associatedActivity.getActivityToken() : null;
 
@@ -1114,6 +1094,117 @@ class TaskFragmentContainer {
             }
         }
         return sb.append("]").toString();
+    }
+
+    static final class Builder {
+        @NonNull
+        private final SplitController mSplitController;
+
+        // The parent Task id of the new TaskFragment.
+        private final int mTaskId;
+
+        // The activity in the same Task so that we can get the Task bounds if needed.
+        @NonNull
+        private final Activity mActivityInTask;
+
+        // The activity that will be reparented to the TaskFragment.
+        @Nullable
+        private Activity mPendingAppearedActivity;
+
+        // The Intent that will be started in the TaskFragment.
+        @Nullable
+        private Intent mPendingAppearedIntent;
+
+        // The paired primary {@link TaskFragmentContainer}. When it is set, the new container
+        // will be added right above it.
+        @Nullable
+        private TaskFragmentContainer mPairedPrimaryContainer;
+
+        // The launch options bundle to create a container. Must be specified for overlay container.
+        @Nullable
+        private Bundle mLaunchOptions;
+
+        // The tag for the new created overlay container. This is required when creating an
+        // overlay container.
+        @Nullable
+        private String mOverlayTag;
+
+        // The associated activity of the overlay container. Must be {@code null} for a
+        // non-overlay container.
+        @Nullable
+        private Activity mAssociatedActivity;
+
+        Builder(@NonNull SplitController splitController, int taskId,
+                @Nullable Activity activityInTask) {
+            if (taskId <= 0) {
+                throw new IllegalArgumentException("taskId is invalid, " + taskId);
+            }
+
+            mSplitController = splitController;
+            mTaskId = taskId;
+            mActivityInTask = activityInTask;
+        }
+
+        @NonNull
+        Builder setPendingAppearedActivity(@Nullable Activity pendingAppearedActivity) {
+            mPendingAppearedActivity = pendingAppearedActivity;
+            return this;
+        }
+
+        @NonNull
+        Builder setPendingAppearedIntent(@Nullable Intent pendingAppearedIntent) {
+            mPendingAppearedIntent = pendingAppearedIntent;
+            return this;
+        }
+
+        @NonNull
+        Builder setPairedPrimaryContainer(@Nullable TaskFragmentContainer pairedPrimaryContainer) {
+            mPairedPrimaryContainer = pairedPrimaryContainer;
+            return this;
+        }
+
+        @NonNull
+        Builder setLaunchOptions(@Nullable Bundle launchOptions) {
+            mLaunchOptions = launchOptions;
+            return this;
+        }
+
+        @NonNull
+        Builder setOverlayTag(@Nullable String overlayTag) {
+            mOverlayTag = overlayTag;
+            return this;
+        }
+
+        @NonNull
+        Builder setAssociatedActivity(@Nullable Activity associatedActivity) {
+            mAssociatedActivity = associatedActivity;
+            return this;
+        }
+
+        @NonNull
+        TaskFragmentContainer build() {
+            if (mOverlayTag != null) {
+                Objects.requireNonNull(mLaunchOptions);
+            } else if (mAssociatedActivity != null) {
+                throw new IllegalArgumentException("Associated activity must be null for "
+                        + "non-overlay activity.");
+            }
+
+            TaskContainer taskContainer = mSplitController.getTaskContainer(mTaskId);
+            if (taskContainer == null && mActivityInTask == null) {
+                throw new IllegalArgumentException("mActivityInTask must be set.");
+            }
+
+            if (taskContainer == null) {
+                // Adding a TaskContainer if no existed one.
+                taskContainer = new TaskContainer(mTaskId, mActivityInTask);
+                mSplitController.addTaskContainer(mTaskId, taskContainer);
+            }
+
+            return new TaskFragmentContainer(mPendingAppearedActivity, mPendingAppearedIntent,
+                    taskContainer, mSplitController, mPairedPrimaryContainer, mOverlayTag,
+                    mLaunchOptions, mAssociatedActivity);
+        }
     }
 
     static class OverlayContainerRestoreParams {

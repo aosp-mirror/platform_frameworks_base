@@ -372,8 +372,8 @@
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"စက်အသစ်တွဲချိတ်ရန်"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"စက်အသစ် တွဲချိတ်ရန် နှိပ်ပါ"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"အသင့်သုံးကို အပ်ဒိတ်လုပ်၍မရပါ"</string>
-    <!-- no translation found for hearing_devices_preset_label (7878267405046232358) -->
-    <skip />
+    <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ကြိုတင်သတ်မှတ်ချက်"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"တိုက်ရိုက်စာတန်း"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"စက်၏မိုက်ခရိုဖုန်းကို ပြန်ဖွင့်မလား။"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"စက်၏ကင်မရာကို ပြန်ဖွင့်မလား။"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"စက်၏ကင်မရာနှင့် မိုက်ခရိုဖုန်းကို ပြန်ဖွင့်မလား။"</string>
@@ -1318,6 +1318,15 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) က လတ်တလောသုံးထားသည်"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) က သုံးနေသည်"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) က လတ်တလောသုံးထားသည်"</string>
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"စနစ်"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"တစ်ပြိုင်နက် များစွာလုပ်ခြင်း"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ထည့်သွင်းမှု"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"အက်ပ်ဖြတ်လမ်းလင့်ခ်များ"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"အများသုံးနိုင်မှု"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"လက်ကွက်ဖြတ်လမ်းများ"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ရှာဖွေစာလုံး ဖြတ်လမ်း"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"လျှော့ပြရန် သင်္ကေတ"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ပိုပြရန် သင်္ကေတ"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ကီးဘုတ်နောက်မီး"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"အဆင့် %2$d အနက် %1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"အိမ်ထိန်းချုပ်မှုများ"</string>

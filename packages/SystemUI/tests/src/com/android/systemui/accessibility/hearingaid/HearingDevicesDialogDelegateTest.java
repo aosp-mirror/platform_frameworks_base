@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility.hearingaid;
 
+import static com.android.systemui.accessibility.hearingaid.HearingDevicesDialogDelegate.LIVE_CAPTION_INTENT;
 import static com.android.systemui.statusbar.phone.SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -24,16 +25,24 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.test.filters.SmallTest;
 
@@ -44,6 +53,7 @@ import com.android.settingslib.bluetooth.HapClientProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.bluetooth.qsdialog.DeviceItem;
@@ -54,6 +64,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -75,6 +86,10 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     public MockitoRule mockito = MockitoJUnit.rule();
 
     private static final String DEVICE_ADDRESS = "AA:BB:CC:DD:EE:FF";
+    private static final String TEST_PKG = "pkg";
+    private static final String TEST_CLS = "cls";
+    private static final ComponentName TEST_COMPONENT = new ComponentName(TEST_PKG, TEST_CLS);
+    private static final String TEST_LABEL = "label";
 
     @Mock
     private SystemUIDialog.Factory mSystemUIDialogFactory;
@@ -104,6 +119,12 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     private CachedBluetoothDevice mCachedDevice;
     @Mock
     private DeviceItem mHearingDeviceItem;
+    @Mock
+    private PackageManager mPackageManager;
+    @Mock
+    private ActivityInfo mActivityInfo;
+    @Mock
+    private Drawable mDrawable;
     private SystemUIDialog mDialog;
     private HearingDevicesDialogDelegate mDialogDelegate;
     private TestableLooper mTestableLooper;
@@ -122,6 +143,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         when(mSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mSysUiState);
         when(mCachedDevice.getAddress()).thenReturn(DEVICE_ADDRESS);
         when(mHearingDeviceItem.getCachedBluetoothDevice()).thenReturn(mCachedDevice);
+        mContext.setMockPackageManager(mPackageManager);
 
         setUpPairNewDeviceDialog();
 
@@ -168,6 +190,45 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         mDialogDelegate.onDeviceItemOnClicked(mHearingDeviceItem, new View(mContext));
 
         verify(mCachedDevice).disconnect();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HEARING_DEVICES_DIALOG_RELATED_TOOLS)
+    public void showDialog_hasLiveCaption_noRelatedToolsInConfig_showOneRelatedTool() {
+        when(mPackageManager.queryIntentActivities(
+                eq(LIVE_CAPTION_INTENT), anyInt())).thenReturn(
+                List.of(new ResolveInfo()));
+        mContext.getOrCreateTestableResources().addOverride(
+                R.array.config_quickSettingsHearingDevicesRelatedToolName, new String[]{});
+
+        setUpPairNewDeviceDialog();
+        mDialog.show();
+
+        LinearLayout relatedToolsView = (LinearLayout) getRelatedToolsView(mDialog);
+        assertThat(relatedToolsView.getChildCount()).isEqualTo(1);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HEARING_DEVICES_DIALOG_RELATED_TOOLS)
+    public void showDialog_hasLiveCaption_oneRelatedToolInConfig_showTwoRelatedTools()
+            throws PackageManager.NameNotFoundException {
+        when(mPackageManager.queryIntentActivities(
+                eq(LIVE_CAPTION_INTENT), anyInt())).thenReturn(
+                List.of(new ResolveInfo()));
+        mContext.getOrCreateTestableResources().addOverride(
+                R.array.config_quickSettingsHearingDevicesRelatedToolName,
+                new String[]{TEST_PKG + "/" + TEST_CLS});
+        when(mPackageManager.getActivityInfo(eq(TEST_COMPONENT), anyInt())).thenReturn(
+                mActivityInfo);
+        when(mActivityInfo.loadLabel(mPackageManager)).thenReturn(TEST_LABEL);
+        when(mActivityInfo.loadIcon(mPackageManager)).thenReturn(mDrawable);
+        when(mActivityInfo.getComponentName()).thenReturn(TEST_COMPONENT);
+
+        setUpPairNewDeviceDialog();
+        mDialog.show();
+
+        LinearLayout relatedToolsView = (LinearLayout) getRelatedToolsView(mDialog);
+        assertThat(relatedToolsView.getChildCount()).isEqualTo(2);
     }
 
     private void setUpPairNewDeviceDialog() {
@@ -218,5 +279,19 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
 
     private View getPairNewDeviceButton(SystemUIDialog dialog) {
         return dialog.requireViewById(R.id.pair_new_device_button);
+    }
+
+    private View getRelatedToolsView(SystemUIDialog dialog) {
+        return dialog.requireViewById(R.id.related_tools_container);
+    }
+
+    @After
+    public void reset() {
+        if (mDialogDelegate != null) {
+            mDialogDelegate = null;
+        }
+        if (mDialog != null) {
+            mDialog.dismiss();
+        }
     }
 }

@@ -101,3 +101,12 @@ flag {
     description: "Enable nfc state change API"
     bug: "319934052"
 }
+
+flag {
+    name: "nfc_set_default_disc_tech"
+    is_exported: true
+    namespace: "nfc"
+    description: "Flag for NFC set default disc tech API"
+    bug: "321311407"
+}
+

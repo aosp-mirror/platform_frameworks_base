@@ -23,6 +23,9 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.mediaprojection.data.model.MediaProjectionState
+import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
@@ -35,13 +38,20 @@ import org.junit.Test
 class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
     private val kosmos = Kosmos()
+    private val testScope = kosmos.testScope
+
+    private val screenRecordState = kosmos.screenRecordRepository.screenRecordState
+    private val mediaProjectionState = kosmos.fakeMediaProjectionRepository.mediaProjectionState
+    private val callState = kosmos.callChipInteractor.chip
+
     private val underTest = kosmos.ongoingActivityChipsViewModel
 
     @Test
     fun chip_allHidden_hidden() =
-        kosmos.testScope.runTest {
-            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
-            kosmos.callChipInteractor.chip.value = OngoingActivityChipModel.Hidden
+        testScope.runTest {
+            screenRecordState.value = ScreenRecordModel.DoingNothing
+            mediaProjectionState.value = MediaProjectionState.NotProjecting
+            callState.value = OngoingActivityChipModel.Hidden
 
             val latest by collectLastValue(underTest.chip)
 
@@ -50,9 +60,10 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chip_screenRecordShow_restHidden_screenRecordShown() =
-        kosmos.testScope.runTest {
-            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
-            kosmos.callChipInteractor.chip.value = OngoingActivityChipModel.Hidden
+        testScope.runTest {
+            screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionState.value = MediaProjectionState.NotProjecting
+            callState.value = OngoingActivityChipModel.Hidden
 
             val latest by collectLastValue(underTest.chip)
 
@@ -61,15 +72,15 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chip_screenRecordShowAndCallShow_screenRecordShown() =
-        kosmos.testScope.runTest {
-            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
+        testScope.runTest {
+            screenRecordState.value = ScreenRecordModel.Recording
 
             val callChip =
                 OngoingActivityChipModel.Shown(
                     Icon.Resource(R.drawable.ic_call, ContentDescription.Loaded("icon")),
                     startTimeMs = 600L,
                 ) {}
-            kosmos.callChipInteractor.chip.value = callChip
+            callState.value = callChip
 
             val latest by collectLastValue(underTest.chip)
 
@@ -77,16 +88,46 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_screenRecordHideAndCallShown_callShown() =
-        kosmos.testScope.runTest {
-            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
+    fun chip_screenRecordShowAndMediaProjectionShow_screenRecordShown() =
+        testScope.runTest {
+            screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionState.value = MediaProjectionState.EntireScreen
+            callState.value = OngoingActivityChipModel.Hidden
+
+            val latest by collectLastValue(underTest.chip)
+
+            assertIsScreenRecordChip(latest)
+        }
+
+    @Test
+    fun chip_mediaProjectionShowAndCallShow_mediaProjectionShown() =
+        testScope.runTest {
+            screenRecordState.value = ScreenRecordModel.DoingNothing
+            mediaProjectionState.value = MediaProjectionState.EntireScreen
+            val callChip =
+                OngoingActivityChipModel.Shown(
+                    Icon.Resource(R.drawable.ic_call, ContentDescription.Loaded("icon")),
+                    startTimeMs = 600L,
+                ) {}
+            callState.value = callChip
+
+            val latest by collectLastValue(underTest.chip)
+
+            assertIsMediaProjectionChip(latest)
+        }
+
+    @Test
+    fun chip_screenRecordAndMediaProjectionHideAndCallShown_callShown() =
+        testScope.runTest {
+            screenRecordState.value = ScreenRecordModel.DoingNothing
+            mediaProjectionState.value = MediaProjectionState.NotProjecting
 
             val callChip =
                 OngoingActivityChipModel.Shown(
                     Icon.Resource(R.drawable.ic_call, ContentDescription.Loaded("icon")),
                     startTimeMs = 600L,
                 ) {}
-            kosmos.callChipInteractor.chip.value = callChip
+            callState.value = callChip
 
             val latest by collectLastValue(underTest.chip)
 
@@ -95,22 +136,29 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chip_higherPriorityChipAdded_lowerPriorityChipReplaced() =
-        kosmos.testScope.runTest {
+        testScope.runTest {
             // Start with just the lower priority call chip
             val callChip =
                 OngoingActivityChipModel.Shown(
                     Icon.Resource(R.drawable.ic_call, ContentDescription.Loaded("icon")),
                     startTimeMs = 600L,
                 ) {}
-            kosmos.callChipInteractor.chip.value = callChip
-            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
+            callState.value = callChip
+            mediaProjectionState.value = MediaProjectionState.NotProjecting
+            screenRecordState.value = ScreenRecordModel.DoingNothing
 
             val latest by collectLastValue(underTest.chip)
 
             assertThat(latest).isEqualTo(callChip)
 
+            // WHEN the higher priority media projection chip is added
+            mediaProjectionState.value = MediaProjectionState.SingleTask(createTask(taskId = 1))
+
+            // THEN the higher priority media projection chip is used
+            assertIsMediaProjectionChip(latest)
+
             // WHEN the higher priority screen record chip is added
-            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
+            screenRecordState.value = ScreenRecordModel.Recording
 
             // THEN the higher priority screen record chip is used
             assertIsScreenRecordChip(latest)
@@ -118,31 +166,47 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
     @Test
     fun chip_highestPriorityChipRemoved_showsNextPriorityChip() =
-        kosmos.testScope.runTest {
-            // Start with both the higher priority screen record chip and lower priority call chip
-            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.Recording
+        testScope.runTest {
+            // WHEN all chips are active
+            screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionState.value = MediaProjectionState.EntireScreen
 
             val callChip =
                 OngoingActivityChipModel.Shown(
                     Icon.Resource(R.drawable.ic_call, ContentDescription.Loaded("icon")),
                     startTimeMs = 600L,
                 ) {}
-            kosmos.callChipInteractor.chip.value = callChip
+            callState.value = callChip
 
             val latest by collectLastValue(underTest.chip)
 
+            // THEN the highest priority screen record is used
             assertIsScreenRecordChip(latest)
 
             // WHEN the higher priority screen record is removed
-            kosmos.screenRecordRepository.screenRecordState.value = ScreenRecordModel.DoingNothing
+            screenRecordState.value = ScreenRecordModel.DoingNothing
+
+            // THEN the lower priority media projection is used
+            assertIsMediaProjectionChip(latest)
+
+            // WHEN the higher priority media projection is removed
+            mediaProjectionState.value = MediaProjectionState.NotProjecting
 
             // THEN the lower priority call is used
             assertThat(latest).isEqualTo(callChip)
         }
 
-    private fun assertIsScreenRecordChip(latest: OngoingActivityChipModel?) {
-        assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-        val icon = (latest as OngoingActivityChipModel.Shown).icon
-        assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.stat_sys_screen_record)
+    companion object {
+        fun assertIsScreenRecordChip(latest: OngoingActivityChipModel?) {
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            val icon = (latest as OngoingActivityChipModel.Shown).icon
+            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.stat_sys_screen_record)
+        }
+
+        fun assertIsMediaProjectionChip(latest: OngoingActivityChipModel?) {
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+            val icon = (latest as OngoingActivityChipModel.Shown).icon
+            assertThat((icon as Icon.Resource).res).isEqualTo(R.drawable.ic_cast_connected)
+        }
     }
 }

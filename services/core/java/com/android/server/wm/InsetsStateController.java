@@ -221,10 +221,13 @@ class InsetsStateController {
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             changed |= mProviders.valueAt(i).updateClientVisibility(caller);
         }
-        if (changed) {
-            notifyInsetsChanged();
-            mDisplayContent.updateSystemGestureExclusion();
-            mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
+        if (!android.view.inputmethod.Flags.refactorInsetsController()) {
+            if (changed) {
+                notifyInsetsChanged();
+                mDisplayContent.updateSystemGestureExclusion();
+
+                mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
+            }
         }
     }
 
@@ -357,6 +360,13 @@ class InsetsStateController {
     void notifyControlChanged(InsetsControlTarget target) {
         mPendingControlChanged.add(target);
         notifyPendingInsetsControlChanged();
+
+        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            notifyInsetsChanged();
+            mDisplayContent.updateSystemGestureExclusion();
+            mDisplayContent.updateKeepClearAreas();
+            mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
+        }
     }
 
     private void notifyPendingInsetsControlChanged() {

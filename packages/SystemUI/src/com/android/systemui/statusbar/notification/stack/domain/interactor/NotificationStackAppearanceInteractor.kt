@@ -65,9 +65,6 @@ constructor(
             }
             .distinctUntilChanged()
 
-    /** The height in px of the contents of the HUN. */
-    val headsUpHeight: StateFlow<Float> = viewHeightRepository.headsUpHeight.asStateFlow()
-
     /** The alpha of the Notification Stack for the brightness mirror */
     val alphaForBrightnessMirror: StateFlow<Float> =
         placeholderRepository.alphaForBrightnessMirror.asStateFlow()
@@ -81,9 +78,6 @@ constructor(
      * further.
      */
     val scrolledToTop: StateFlow<Boolean> = placeholderRepository.scrolledToTop.asStateFlow()
-
-    /** The y-coordinate in px of bottom of the contents of the HUN. */
-    val headsUpTop: StateFlow<Float> = placeholderRepository.headsUpTop.asStateFlow()
 
     /**
      * The amount in px that the notification stack should scroll due to internal expansion. This
@@ -110,11 +104,6 @@ constructor(
         placeholderRepository.shadeScrimBounds.value = bounds
     }
 
-    /** Sets the height of heads up notification. */
-    fun setHeadsUpHeight(height: Float) {
-        viewHeightRepository.headsUpHeight.value = height
-    }
-
     /** Sets whether the notification stack is scrolled to the top. */
     fun setScrolledToTop(scrolledToTop: Boolean) {
         placeholderRepository.scrolledToTop.value = scrolledToTop
@@ -132,9 +121,5 @@ constructor(
 
     fun setConstrainedAvailableSpace(height: Int) {
         placeholderRepository.constrainedAvailableSpace.value = height
-    }
-
-    fun setHeadsUpTop(headsUpTop: Float) {
-        placeholderRepository.headsUpTop.value = headsUpTop
     }
 }

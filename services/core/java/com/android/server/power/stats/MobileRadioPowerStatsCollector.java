@@ -195,6 +195,9 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
+        Arrays.fill(mPowerStats.stats, 0);
+        mPowerStats.uidStats.clear();
+
         collectModemActivityInfo();
 
         collectNetworkStats();
@@ -239,15 +242,15 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
             activityInfo = null;
         }
 
+        if (activityInfo == null) {
+            return;
+        }
+
         ModemActivityInfo deltaInfo = mLastModemActivityInfo == null
-                ? (activityInfo == null ? null : activityInfo.getDelta(activityInfo))
+                ? activityInfo.getDelta(activityInfo)
                 : mLastModemActivityInfo.getDelta(activityInfo);
 
         mLastModemActivityInfo = activityInfo;
-
-        if (deltaInfo == null) {
-            return;
-        }
 
         setTimestamp(deltaInfo.getTimestampMillis());
         mLayout.setDeviceSleepTime(mDeviceStats, deltaInfo.getSleepTimeMillis());
@@ -293,8 +296,6 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     }
 
     private void collectNetworkStats() {
-        mPowerStats.uidStats.clear();
-
         NetworkStats networkStats = mNetworkStatsSupplier.get();
         if (networkStats == null) {
             return;

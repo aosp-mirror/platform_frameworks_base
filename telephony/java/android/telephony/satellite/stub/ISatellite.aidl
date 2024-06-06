@@ -23,6 +23,7 @@ import android.telephony.satellite.stub.INtnSignalStrengthConsumer;
 import android.telephony.satellite.stub.ISatelliteCapabilitiesConsumer;
 import android.telephony.satellite.stub.ISatelliteListener;
 import android.telephony.satellite.stub.SatelliteDatagram;
+import android.telephony.satellite.stub.SystemSelectionSpecifier;
 
 /**
  * {@hide}
@@ -500,4 +501,21 @@ oneway interface ISatellite {
       *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
       */
      void abortSendingSatelliteDatagrams(in IIntegerConsumer resultCallback);
+
+     /**
+      * Request to update the satellite subscription to be used for Non-Terrestrial network.
+      *
+      * @param iccId The ICCID of the subscription
+      * @param resultCallback The callback to receive the error code result of the operation.
+      */
+     void updateSatelliteSubscription(in String iccId, in IIntegerConsumer resultCallback);
+
+     /**
+      * Request to update system selection channels
+      *
+      * @param systemSelectionSpecifiers list of system selection specifiers
+      * @param resultCallback The callback to receive the error code result of the operation.
+      */
+     void updateSystemSelectionChannels(in List<SystemSelectionSpecifier> systemSelectionSpecifiers,
+            in IIntegerConsumer resultCallback);
 }
