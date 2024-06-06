@@ -361,13 +361,18 @@
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"С какво имахте проблем?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Изберете тип проблем"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Запис на екрана"</string>
-  <string-array name="qs_record_issue_types">
-    <item msgid="2947988124014085798">"Ефективност"</item>
-    <item msgid="1627504621139124393">"Потребителски интерфейс"</item>
-    <item msgid="8309220355268900335">"Батерия"</item>
-  </string-array>
+    <!-- no translation found for performance (6552785217174378320) -->
+    <skip />
+    <!-- no translation found for user_interface (3712869377953950887) -->
+    <skip />
+    <!-- no translation found for thermal (6758074791325414831) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Режим за работа с една ръка"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Слухови апарати"</string>
+    <!-- no translation found for quick_settings_hearing_devices_connected (6519069502397037781) -->
+    <skip />
+    <!-- no translation found for quick_settings_hearing_devices_disconnected (8907061223998176187) -->
+    <skip />
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Слухови апарати"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Сдвояване на ново устройство"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Кликнете за сдвояване на ново устройство"</string>
@@ -727,11 +732,6 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Бутон „<xliff:g id="NAME">%1$s</xliff:g>“"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Начало"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Назад"</string>
-    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Стрелка за нагоре"</string>
-    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Стрелка за надолу"</string>
-    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Стрелка за наляво"</string>
-    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Стрелка за надясно"</string>
-    <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Център"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Интервал"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
@@ -1275,7 +1275,8 @@
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"затворено"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"отворено"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
-    <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Оставаща батерия: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <!-- no translation found for stylus_battery_low_percentage (2564243323894629626) -->
+    <skip />
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Свържете писалката към зарядно устройство"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Батерията на писалката е изтощена"</string>
     <string name="video_camera" msgid="7654002575156149298">"Видеокамера"</string>
@@ -1318,23 +1319,16 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Наскоро използвано от <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Използва се от <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Наскоро използвано от <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
-    <!-- no translation found for shortcut_helper_category_system (462110876978937359) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_multitasking (7413381961404090136) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_input (8674018654124839566) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_app_shortcuts (8010249408308587117) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_category_a11y (6314444792641773464) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_title (8567500639300970049) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_search_placeholder (5488547526269871819) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_collapse_icon (8028015738431664954) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_expand_icon (1084435697860417390) -->
+    <string name="shortcut_helper_category_system" msgid="462110876978937359">"Системни"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Изпълняване на няколко задачи едновременно"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Въвеждане"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Преки пътища към приложения"</string>
+    <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Достъпност"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"Клавишни комбинации"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Търсете клавишни комбинации"</string>
+    <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за свиване"</string>
+    <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Икона за разгъване"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_or_separator (7082902112102125540) -->
     <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Подсветка на клавиатурата"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Ниво %1$d от %2$d"</string>
