@@ -373,18 +373,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     private int mMethodMapUpdateCount = 0;
 
-    /**
-     * The display id for which the latest startInput was called.
-     */
-    @GuardedBy("ImfLock.class")
-    int getDisplayIdToShowImeLocked() {
-        return mDisplayIdToShowIme;
-    }
-
-    @GuardedBy("ImfLock.class")
-    @MultiUserUnawareField
-    private int mDisplayIdToShowIme = INVALID_DISPLAY;
-
     @GuardedBy("ImfLock.class")
     @MultiUserUnawareField
     private int mDeviceIdToShowIme = DEVICE_ID_DEFAULT;
@@ -1951,7 +1939,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final var statsToken = createStatsTokenForFocusedClient(false /* show */,
                     SoftInputShowHideReason.UNBIND_CURRENT_METHOD);
             mVisibilityApplier.applyImeVisibility(mImeBindingState.mFocusedWindow, statsToken,
-                    STATE_HIDE_IME);
+                    STATE_HIDE_IME, mCurrentUserId);
         }
     }
 
@@ -2122,7 +2110,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             return InputBindResult.NOT_IME_TARGET_WINDOW;
         }
         final int csDisplayId = cs.mSelfReportedDisplayId;
-        mDisplayIdToShowIme = mVisibilityStateComputer.computeImeDisplayId(winState, csDisplayId);
+        bindingController.setDisplayIdToShowIme(
+                mVisibilityStateComputer.computeImeDisplayId(winState, csDisplayId));
 
         // Potentially override the selected input method if the new display belongs to a virtual
         // device with a custom IME.
@@ -2193,8 +2182,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // We expect the caller has already verified that the client is allowed to access this
         // display ID.
         final String curId = bindingController.getCurId();
+        final int displayIdToShowIme = bindingController.getDisplayIdToShowIme();
         if (curId != null && curId.equals(bindingController.getSelectedMethodId())
-                && mDisplayIdToShowIme == getCurTokenDisplayIdLocked()) {
+                && displayIdToShowIme == getCurTokenDisplayIdLocked()) {
             if (cs.mCurSession != null) {
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
@@ -2245,7 +2235,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         final int oldDeviceId = mDeviceIdToShowIme;
-        mDeviceIdToShowIme = mVdmInternal.getDeviceIdForDisplayId(mDisplayIdToShowIme);
+        final var bindingController = getInputMethodBindingController(userId);
+        final int displayIdToShowIme = bindingController.getDisplayIdToShowIme();
+        mDeviceIdToShowIme = mVdmInternal.getDeviceIdForDisplayId(displayIdToShowIme);
         if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
             if (oldDeviceId == DEVICE_ID_DEFAULT) {
                 return currentMethodId;
@@ -2279,7 +2271,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (DEBUG) {
             Slog.v(TAG, "Switching current input method from " + currentMethodId
                     + " to device-specific one " + deviceMethodId + " because the current display "
-                    + mDisplayIdToShowIme + " belongs to device with id " + mDeviceIdToShowIme);
+                    + displayIdToShowIme + " belongs to device with id " + mDeviceIdToShowIme);
         }
         return deviceMethodId;
     }
@@ -4653,7 +4645,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                         windowToken);
                 mVisibilityApplier.applyImeVisibility(requestToken, statsToken,
                         setVisible ? ImeVisibilityStateComputer.STATE_SHOW_IME
-                                : ImeVisibilityStateComputer.STATE_HIDE_IME);
+                                : ImeVisibilityStateComputer.STATE_HIDE_IME, mCurrentUserId);
             }
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -5446,7 +5438,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     private void resetSelectedInputMethodAndSubtypeLocked(String newDefaultIme) {
         mDeviceIdToShowIme = DEVICE_ID_DEFAULT;
-        mDisplayIdToShowIme = INVALID_DISPLAY;
+        final var bindingController = getInputMethodBindingController(mCurrentUserId);
+        bindingController.setDisplayIdToShowIme(INVALID_DISPLAY);
 
         final InputMethodSettings settings = InputMethodSettingsRepository.get(mCurrentUserId);
         settings.putSelectedDefaultDeviceInputMethod(null);
