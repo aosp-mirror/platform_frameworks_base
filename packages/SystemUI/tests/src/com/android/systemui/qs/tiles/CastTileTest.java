@@ -32,10 +32,10 @@ import android.media.MediaRouter.RouteInfo;
 import android.media.projection.MediaProjectionInfo;
 import android.os.Handler;
 import android.service.quicksettings.Tile;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.lifecycle.LifecycleOwner;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -73,7 +73,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class CastTileTest extends SysuiTestCase {

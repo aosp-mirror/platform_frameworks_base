@@ -375,7 +375,23 @@ public final class WindowContainerTransaction implements Parcelable {
      */
     @NonNull
     public WindowContainerTransaction reorder(@NonNull WindowContainerToken child, boolean onTop) {
-        mHierarchyOps.add(HierarchyOp.createForReorder(child.asBinder(), onTop));
+        return reorder(child, onTop, false /* includingParents */);
+    }
+
+    /**
+     * Reorders a container within its parent with an option to reorder all the parents in the
+     * hierarchy above among their respective siblings.
+     *
+     * @param onTop When {@code true}, the child goes to the top of parent; otherwise it goes to
+     *              the bottom.
+     * @param includingParents When {@code true}, all the parents in the hierarchy above are also
+     *                         reordered among their respective siblings.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction reorder(@NonNull WindowContainerToken child, boolean onTop,
+            boolean includingParents) {
+        mHierarchyOps.add(HierarchyOp.createForReorder(child.asBinder(), onTop, includingParents));
         return this;
     }
 
@@ -1451,6 +1467,8 @@ public final class WindowContainerTransaction implements Parcelable {
         @Nullable
         private Rect mBounds;
 
+        private boolean mIncludingParents;
+
         private boolean mAlwaysOnTop;
 
         private boolean mReparentLeafTaskIfRelaunch;
@@ -1464,11 +1482,22 @@ public final class WindowContainerTransaction implements Parcelable {
                     .build();
         }
 
-        public static HierarchyOp createForReorder(@NonNull IBinder container, boolean toTop) {
+        /**
+         * Creates the {@link HierarchyOp} for the reorder operation.
+         *
+         * @param container which needs to be reordered
+         * @param toTop if true, the container reorders
+         * @param includingParents if true, all the parents in the hierarchy above are also
+         *                         reoredered among their respective siblings
+         * @return
+         */
+        public static HierarchyOp createForReorder(@NonNull IBinder container, boolean toTop,
+                boolean includingParents) {
             return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_REORDER)
                     .setContainer(container)
                     .setReparentContainer(container)
                     .setToTop(toTop)
+                    .setIncludingParents(includingParents)
                     .build();
         }
 
@@ -1555,6 +1584,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mType = copy.mType;
             mContainer = copy.mContainer;
             mBounds = copy.mBounds;
+            mIncludingParents = copy.mIncludingParents;
             mReparent = copy.mReparent;
             mInsetsFrameProvider = copy.mInsetsFrameProvider;
             mInsetsFrameOwner = copy.mInsetsFrameOwner;
@@ -1575,6 +1605,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mType = in.readInt();
             mContainer = in.readStrongBinder();
             mBounds = in.readTypedObject(Rect.CREATOR);
+            mIncludingParents = in.readBoolean();
             mReparent = in.readStrongBinder();
             mInsetsFrameProvider = in.readTypedObject(InsetsFrameProvider.CREATOR);
             mInsetsFrameOwner = in.readStrongBinder();
@@ -1676,6 +1707,12 @@ public final class WindowContainerTransaction implements Parcelable {
         @NonNull
         public Rect getBounds() {
             return mBounds;
+        }
+
+        /** Denotes whether the parents should also be included in the op. */
+        @NonNull
+        public boolean includingParents() {
+            return mIncludingParents;
         }
 
         /** Gets a string representation of a hierarchy-op type. */
@@ -1789,6 +1826,7 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeInt(mType);
             dest.writeStrongBinder(mContainer);
             dest.writeTypedObject(mBounds, flags);
+            dest.writeBoolean(mIncludingParents);
             dest.writeStrongBinder(mReparent);
             dest.writeTypedObject(mInsetsFrameProvider, flags);
             dest.writeStrongBinder(mInsetsFrameOwner);
@@ -1865,6 +1903,8 @@ public final class WindowContainerTransaction implements Parcelable {
 
             @Nullable
             private Rect mBounds;
+
+            private boolean mIncludingParents;
 
             private boolean mAlwaysOnTop;
 
@@ -1955,6 +1995,11 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
+            Builder setIncludingParents(boolean value) {
+                mIncludingParents = value;
+                return this;
+            }
+
             HierarchyOp build() {
                 final HierarchyOp hierarchyOp = new HierarchyOp(mType);
                 hierarchyOp.mContainer = mContainer;
@@ -1976,6 +2021,7 @@ public final class WindowContainerTransaction implements Parcelable {
                 hierarchyOp.mTaskFragmentOperation = mTaskFragmentOperation;
                 hierarchyOp.mShortcutInfo = mShortcutInfo;
                 hierarchyOp.mBounds = mBounds;
+                hierarchyOp.mIncludingParents = mIncludingParents;
                 hierarchyOp.mReparentLeafTaskIfRelaunch = mReparentLeafTaskIfRelaunch;
 
                 return hierarchyOp;

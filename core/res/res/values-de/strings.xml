@@ -201,10 +201,8 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Dein Arbeitsprofil ist auf diesem Gerät nicht mehr verfügbar"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Zu viele falsche Passworteingaben"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administrator hat das Gerät zur persönlichen Nutzung abgegeben"</string>
-    <!-- no translation found for private_space_deleted_by_admin (1484365588862066939) -->
-    <skip />
-    <!-- no translation found for private_space_deleted_by_admin_details (7007781735201818689) -->
-    <skip />
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Vertrauliches Profil entfernt"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Deine Organisation erlaubt auf diesem verwalteten Gerät keine vertraulichen Profile."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Dies ist ein verwaltetes Gerät"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Deine Organisation verwaltet dieses Gerät und überprüft unter Umständen den Netzwerkverkehr. Tippe hier, um weitere Informationen zu erhalten."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Apps können auf deinen Standort zugreifen"</string>
@@ -2198,7 +2196,6 @@
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Steuerkreuz nach links"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Steuerkreuz nach rechts"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Steuerkreuz Mitte"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Untertitelleiste von <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> wurde in den BESCHRÄNKT-Bucket gelegt"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"hat ein Bild gesendet"</string>

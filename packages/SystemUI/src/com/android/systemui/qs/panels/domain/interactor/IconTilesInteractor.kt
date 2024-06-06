@@ -20,10 +20,9 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.data.repository.IconTilesRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
 
 /** Interactor for retrieving the list of [TileSpec] to be displayed as icons. */
 @SysUISingleton
-class IconTilesInteractor @Inject constructor(repo: IconTilesRepository) {
-    val iconTilesSpecs: StateFlow<Set<TileSpec>> = repo.iconTilesSpecs
+class IconTilesInteractor @Inject constructor(private val repo: IconTilesRepository) {
+    fun isIconTile(spec: TileSpec): Boolean = repo.isIconTile(spec)
 }

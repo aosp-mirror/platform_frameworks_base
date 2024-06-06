@@ -30,7 +30,9 @@ interface IconLabelVisibilityViewModel {
 @SysUISingleton
 class IconLabelVisibilityViewModelImpl
 @Inject
-constructor(private val interactor: IconLabelVisibilityInteractor) : IconLabelVisibilityViewModel {
+constructor(
+    private val interactor: IconLabelVisibilityInteractor,
+) : IconLabelVisibilityViewModel {
     override val showLabels: StateFlow<Boolean> = interactor.showLabels
 
     override fun setShowLabels(showLabels: Boolean) {

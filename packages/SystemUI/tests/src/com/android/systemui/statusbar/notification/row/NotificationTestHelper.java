@@ -192,7 +192,7 @@ public class NotificationTestHelper {
                 mBgCoroutineContext,
                 mMainCoroutineContext);
 
-        NotificationContentInflater contentBinder = new NotificationContentInflater(
+        NotificationRowContentBinder contentBinder = new NotificationContentInflater(
                 mock(NotifRemoteViewCache.class),
                 mock(NotificationRemoteInputManager.class),
                 mock(ConversationNotificationProcessor.class),
@@ -201,7 +201,7 @@ public class NotificationTestHelper {
                 new MockSmartReplyInflater(),
                 mock(NotifLayoutInflaterFactory.Provider.class),
                 mock(HeadsUpStyleProvider.class),
-                mock(NotificationContentInflaterLogger.class));
+                mock(NotificationRowContentBinderLogger.class));
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
                 mock(NotifInflationErrorManager.class),

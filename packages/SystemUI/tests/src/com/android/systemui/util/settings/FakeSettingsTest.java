@@ -83,7 +83,7 @@ public class FakeSettingsTest extends SysuiTestCase {
 
     @Test
     public void testRegisterContentObserver() {
-        mFakeSettings.registerContentObserver("cat", mContentObserver);
+        mFakeSettings.registerContentObserverSync("cat", mContentObserver);
 
         mFakeSettings.putString("cat", "hat");
 
@@ -93,7 +93,7 @@ public class FakeSettingsTest extends SysuiTestCase {
 
     @Test
     public void testRegisterContentObserverAllUsers() {
-        mFakeSettings.registerContentObserverForUser(
+        mFakeSettings.registerContentObserverForUserSync(
                 mFakeSettings.getUriFor("cat"), false, mContentObserver, UserHandle.USER_ALL);
 
         mFakeSettings.putString("cat", "hat");
@@ -104,8 +104,8 @@ public class FakeSettingsTest extends SysuiTestCase {
 
     @Test
     public void testUnregisterContentObserver() {
-        mFakeSettings.registerContentObserver("cat", mContentObserver);
-        mFakeSettings.unregisterContentObserver(mContentObserver);
+        mFakeSettings.registerContentObserverSync("cat", mContentObserver);
+        mFakeSettings.unregisterContentObserverSync(mContentObserver);
 
         mFakeSettings.putString("cat", "hat");
 
@@ -115,9 +115,9 @@ public class FakeSettingsTest extends SysuiTestCase {
 
     @Test
     public void testUnregisterContentObserverAllUsers() {
-        mFakeSettings.registerContentObserverForUser(
+        mFakeSettings.registerContentObserverForUserSync(
                 mFakeSettings.getUriFor("cat"), false, mContentObserver, UserHandle.USER_ALL);
-        mFakeSettings.unregisterContentObserver(mContentObserver);
+        mFakeSettings.unregisterContentObserverSync(mContentObserver);
 
         mFakeSettings.putString("cat", "hat");
 
@@ -128,7 +128,7 @@ public class FakeSettingsTest extends SysuiTestCase {
     @Test
     public void testContentObserverDispatchCorrectUser() {
         int user = 10;
-        mFakeSettings.registerContentObserverForUser(
+        mFakeSettings.registerContentObserverForUserSync(
                 mFakeSettings.getUriFor("cat"), false, mContentObserver, UserHandle.USER_ALL
         );
 

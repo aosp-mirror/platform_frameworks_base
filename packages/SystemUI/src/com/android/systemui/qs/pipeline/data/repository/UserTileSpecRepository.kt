@@ -60,15 +60,21 @@ constructor(
             _tiles =
                 changeEvents
                     .scan(loadTilesFromSettingsAndParse(userId)) { current, change ->
-                        change.apply(current).also {
-                            if (current != it) {
-                                if (change is RestoreTiles) {
-                                    logger.logTilesRestoredAndReconciled(current, it, userId)
-                                } else {
-                                    logger.logProcessTileChange(change, it, userId)
+                        change
+                            .apply(current)
+                            .also {
+                                if (current != it) {
+                                    if (change is RestoreTiles) {
+                                        logger.logTilesRestoredAndReconciled(current, it, userId)
+                                    } else {
+                                        logger.logProcessTileChange(change, it, userId)
+                                    }
                                 }
                             }
-                        }
+                            // Distinct preserves the order of the elements removing later
+                            // duplicates,
+                            // all tiles should be different
+                            .distinct()
                     }
                     .flowOn(backgroundDispatcher)
                     .stateIn(applicationScope)
@@ -92,8 +98,8 @@ constructor(
                                     trySend(Unit)
                                 }
                             }
-                        secureSettings.registerContentObserverForUser(SETTING, observer, userId)
-                        awaitClose { secureSettings.unregisterContentObserver(observer) }
+                        secureSettings.registerContentObserverForUserSync(SETTING, observer, userId)
+                        awaitClose { secureSettings.unregisterContentObserverSync(observer) }
                     }
                     .map { loadTilesFromSettings(userId) }
                     .flowOn(backgroundDispatcher)

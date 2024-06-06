@@ -30,6 +30,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -345,5 +346,70 @@ class MultiPointerDraggableTest {
 
         continueDraggingDown()
         assertThat(stopped).isTrue()
+    }
+
+    @Test
+    fun multiPointerSwipeDetectorInteraction() {
+        val size = 200f
+        val middle = Offset(size / 2f, size / 2f)
+
+        var started = false
+
+        var capturedChange: PointerInputChange? = null
+        var swipeConsume = false
+
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            Box(
+                Modifier.size(with(LocalDensity.current) { Size(size, size).toDpSize() })
+                    .multiPointerDraggable(
+                        orientation = Orientation.Vertical,
+                        enabled = { true },
+                        startDragImmediately = { false },
+                        swipeDetector =
+                            object : SwipeDetector {
+                                override fun detectSwipe(change: PointerInputChange): Boolean {
+                                    capturedChange = change
+                                    return swipeConsume
+                                }
+                            },
+                        onDragStarted = { _, _, _ ->
+                            started = true
+                            object : DragController {
+                                override fun onDrag(delta: Float) {}
+
+                                override fun onStop(velocity: Float, canChangeScene: Boolean) {}
+                            }
+                        },
+                    )
+            ) {}
+        }
+
+        fun startDraggingDown() {
+            rule.onRoot().performTouchInput {
+                down(middle)
+                moveBy(Offset(0f, touchSlop))
+            }
+        }
+
+        fun continueDraggingDown() {
+            rule.onRoot().performTouchInput { moveBy(Offset(0f, touchSlop)) }
+        }
+
+        startDraggingDown()
+        assertThat(capturedChange).isNotNull()
+        capturedChange = null
+        assertThat(started).isFalse()
+
+        swipeConsume = true
+        continueDraggingDown()
+        assertThat(capturedChange).isNotNull()
+        capturedChange = null
+
+        continueDraggingDown()
+        assertThat(capturedChange).isNull()
+
+        assertThat(started).isTrue()
     }
 }

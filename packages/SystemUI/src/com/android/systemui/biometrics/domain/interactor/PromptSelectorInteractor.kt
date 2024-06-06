@@ -91,6 +91,7 @@ interface PromptSelectorInteractor {
         challenge: Long,
         opPackageName: String,
         onSwitchToCredential: Boolean,
+        isLandscape: Boolean,
     )
 
     /** Unset the current authentication request. */
@@ -102,6 +103,7 @@ class PromptSelectorInteractorImpl
 @Inject
 constructor(
     fingerprintPropertyRepository: FingerprintPropertyRepository,
+    private val displayStateInteractor: DisplayStateInteractor,
     private val promptRepository: PromptRepository,
     private val lockPatternUtils: LockPatternUtils,
 ) : PromptSelectorInteractor {
@@ -166,7 +168,9 @@ constructor(
             modalities,
             promptRepository.challenge.value!!,
             promptRepository.opPackageName.value!!,
-            true /*onSwitchToCredential*/
+            onSwitchToCredential = true,
+            // isLandscape value is not important when onSwitchToCredential is true
+            isLandscape = false,
         )
     }
 
@@ -178,6 +182,7 @@ constructor(
         challenge: Long,
         opPackageName: String,
         onSwitchToCredential: Boolean,
+        isLandscape: Boolean,
     ) {
         val hasCredentialViewShown = promptKind.value.isCredential()
         val showBpForCredential =
@@ -189,11 +194,30 @@ constructor(
                 !promptInfo.isContentViewMoreOptionsButtonUsed
         val showBpWithoutIconForCredential = showBpForCredential && !hasCredentialViewShown
         var kind: PromptKind = PromptKind.None
+
         if (onSwitchToCredential) {
             kind = getCredentialType(lockPatternUtils, effectiveUserId)
         } else if (Utils.isBiometricAllowed(promptInfo) || showBpWithoutIconForCredential) {
-            // TODO(b/330908557): check to show one pane or two pane
-            kind = PromptKind.Biometric(modalities)
+            // TODO(b/330908557): Subscribe to
+            // displayStateInteractor.currentRotation.value.isDefaultOrientation() for checking
+            // `isLandscape` after removing AuthContinerView.
+            kind =
+                if (isLandscape) {
+                    val paneType =
+                        when {
+                            displayStateInteractor.isLargeScreen.value ->
+                                PromptKind.Biometric.PaneType.ONE_PANE_LARGE_SCREEN_LANDSCAPE
+                            showBpWithoutIconForCredential ->
+                                PromptKind.Biometric.PaneType.ONE_PANE_NO_SENSOR_LANDSCAPE
+                            else -> PromptKind.Biometric.PaneType.TWO_PANE_LANDSCAPE
+                        }
+                    PromptKind.Biometric(
+                        modalities,
+                        paneType = paneType,
+                    )
+                } else {
+                    PromptKind.Biometric(modalities)
+                }
         } else if (isDeviceCredentialAllowed(promptInfo)) {
             kind = getCredentialType(lockPatternUtils, effectiveUserId)
         }

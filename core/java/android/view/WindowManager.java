@@ -2801,6 +2801,10 @@ public interface WindowManager extends ViewManager {
          * it from appearing in screenshots or from being viewed on non-secure
          * displays.
          *
+         * <p>See {@link android.view.View#setContentSensitivity(int)}, a window hosting
+         * a sensitive view will be marked as secure during media projection, preventing
+         * it from being viewed on non-secure displays and during screen share.
+         *
          * <p>See {@link android.view.Display#FLAG_SECURE} for more details about
          * secure surfaces and secure displays.
          */

@@ -50,7 +50,6 @@ import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.GraphicBuffer;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -68,6 +67,7 @@ import android.view.WindowManager;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.DecorView;
+import com.android.window.flags.Flags;
 
 /**
  * Utils class to help draw a snapshot on a surface.
@@ -75,6 +75,14 @@ import com.android.internal.policy.DecorView;
  */
 public class SnapshotDrawerUtils {
     private static final String TAG = "SnapshotDrawerUtils";
+
+    /**
+     * Used to check if toolkitSetFrameRateReadOnly flag is enabled
+     *
+     * @hide
+     */
+    private static boolean sToolkitSetFrameRateReadOnlyFlagValue =
+            android.view.flags.Flags.toolkitSetFrameRateReadOnly();
 
     /**
      * When creating the starting window, we use the exact same layout flags such that we end up
@@ -181,7 +189,8 @@ public class SnapshotDrawerUtils {
 
             // We consider nearly matched dimensions as there can be rounding errors and the user
             // won't notice very minute differences from scaling one dimension more than the other
-            boolean aspectRatioMismatch = !isAspectRatioMatch(mFrame, mSnapshotW, mSnapshotH);
+            boolean aspectRatioMismatch = !isAspectRatioMatch(mFrame, mSnapshotW, mSnapshotH)
+                    && !Flags.drawSnapshotAspectRatioMatch();
 
             // Keep a reference to it such that it doesn't get destroyed when finalized.
             SurfaceControl childSurfaceControl = new SurfaceControl.Builder(session)
@@ -382,8 +391,8 @@ public class SnapshotDrawerUtils {
         }
         final SnapshotSurface drawSurface = new SnapshotSurface(
                 rootSurface, snapshot, lp.getTitle());
-
-        final WindowManager.LayoutParams attrs = info.topOpaqueWindowLayoutParams;
+        final WindowManager.LayoutParams attrs = Flags.drawSnapshotAspectRatioMatch()
+                ? info.mainWindowLayoutParams : info.topOpaqueWindowLayoutParams;
         final ActivityManager.RunningTaskInfo runningTaskInfo = info.taskInfo;
         final ActivityManager.TaskDescription taskDescription =
                 getOrCreateTaskDescription(runningTaskInfo);
@@ -400,7 +409,8 @@ public class SnapshotDrawerUtils {
     public static WindowManager.LayoutParams createLayoutParameters(StartingWindowInfo info,
             CharSequence title, @WindowManager.LayoutParams.WindowType int windowType,
             int pixelFormat, IBinder token) {
-        final WindowManager.LayoutParams attrs = info.topOpaqueWindowLayoutParams;
+        final WindowManager.LayoutParams attrs = Flags.drawSnapshotAspectRatioMatch()
+                ? info.mainWindowLayoutParams : info.topOpaqueWindowLayoutParams;
         final WindowManager.LayoutParams mainWindowParams = info.mainWindowLayoutParams;
         final InsetsState topWindowInsetsState = info.topOpaqueWindowInsetsState;
         if (attrs == null || mainWindowParams == null || topWindowInsetsState == null) {
@@ -437,6 +447,9 @@ public class SnapshotDrawerUtils {
         layoutParams.setFitInsetsTypes(attrs.getFitInsetsTypes());
         layoutParams.setFitInsetsSides(attrs.getFitInsetsSides());
         layoutParams.setFitInsetsIgnoringVisibility(attrs.isFitInsetsIgnoringVisibility());
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            layoutParams.setFrameRatePowerSavingsBalanced(false);
+        }
 
         layoutParams.setTitle(title);
         layoutParams.inputFeatures |= INPUT_FEATURE_NO_INPUT_CHANNEL;
@@ -527,7 +540,7 @@ public class SnapshotDrawerUtils {
 
         void drawStatusBarBackground(Canvas c, @Nullable Rect alreadyDrawnFrame,
                 int statusBarHeight) {
-            if (statusBarHeight > 0 && Color.alpha(mStatusBarColor) != 0
+            if (statusBarHeight > 0 && alpha(mStatusBarColor) != 0
                     && (alreadyDrawnFrame == null || c.getWidth() > alreadyDrawnFrame.right)) {
                 final int rightInset = (int) (mSystemBarInsets.right * mScale);
                 final int left = alreadyDrawnFrame != null ? alreadyDrawnFrame.right : 0;
@@ -541,7 +554,7 @@ public class SnapshotDrawerUtils {
             getNavigationBarRect(c.getWidth(), c.getHeight(), mSystemBarInsets, navigationBarRect,
                     mScale);
             final boolean visible = isNavigationBarColorViewVisible();
-            if (visible && Color.alpha(mNavigationBarColor) != 0
+            if (visible && alpha(mNavigationBarColor) != 0
                     && !navigationBarRect.isEmpty()) {
                 c.drawRect(navigationBarRect, mNavigationBarPaint);
             }

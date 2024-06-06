@@ -62,6 +62,7 @@ import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_PROVISION
 import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
+import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
 import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
@@ -17624,6 +17625,17 @@ public class DevicePolicyManager {
     @UnsupportedAppUsage
     public boolean isOnboardingBugreportV2FlagEnabled() {
         return onboardingBugreportV2Enabled();
+    }
+
+    // TODO(b/308755220): Remove once the build is finalised.
+    /**
+     * Returns true if the flag for consentless bugreports is enabled.
+     *
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public boolean isOnboardingConsentlessBugreportFlagEnabled() {
+        return onboardingConsentlessBugreports();
     }
 
     /**

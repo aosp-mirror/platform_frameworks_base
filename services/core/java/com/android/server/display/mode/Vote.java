@@ -16,10 +16,13 @@
 
 package com.android.server.display.mode;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 
 import com.android.server.display.config.SupportedModeData;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -132,15 +135,40 @@ interface Vote {
     // to function, so this needs to be the highest priority of all votes.
     int PRIORITY_UDFPS = 20;
 
+    @IntDef(prefix = { "PRIORITY_" }, value = {
+            PRIORITY_DEFAULT_RENDER_FRAME_RATE,
+            PRIORITY_FLICKER_REFRESH_RATE,
+            PRIORITY_HIGH_BRIGHTNESS_MODE,
+            PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
+            PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE,
+            PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE,
+            PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
+            PRIORITY_APP_REQUEST_SIZE,
+            PRIORITY_USER_SETTING_PEAK_REFRESH_RATE,
+            PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE,
+            PRIORITY_SYNCHRONIZED_REFRESH_RATE,
+            PRIORITY_LIMIT_MODE,
+            PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE,
+            PRIORITY_LAYOUT_LIMITED_FRAME_RATE,
+            PRIORITY_SYSTEM_REQUESTED_MODES,
+            PRIORITY_LOW_POWER_MODE_MODES,
+            PRIORITY_LOW_POWER_MODE_RENDER_RATE,
+            PRIORITY_FLICKER_REFRESH_RATE_SWITCH,
+            PRIORITY_SKIN_TEMPERATURE,
+            PRIORITY_PROXIMITY,
+            PRIORITY_UDFPS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Priority {}
+
     // Whenever a new priority is added, remember to update MIN_PRIORITY, MAX_PRIORITY, and
     // APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, as well as priorityToString.
-
-    int MIN_PRIORITY = PRIORITY_DEFAULT_RENDER_FRAME_RATE;
-    int MAX_PRIORITY = PRIORITY_UDFPS;
+    @Priority int MIN_PRIORITY = PRIORITY_DEFAULT_RENDER_FRAME_RATE;
+    @Priority int MAX_PRIORITY = PRIORITY_UDFPS;
 
     // The cutoff for the app request refresh rate range. Votes with priorities lower than this
     // value will not be considered when constructing the app request refresh rate range.
-    int APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF =
+    @Priority int APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF =
             PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE;
 
     /**
@@ -184,6 +212,10 @@ interface Vote {
 
     static Vote forBaseModeRefreshRate(float baseModeRefreshRate) {
         return new BaseModeRefreshRateVote(baseModeRefreshRate);
+    }
+
+    static Vote forRequestedRefreshRate(float refreshRate) {
+        return new RequestedRefreshRateVote(refreshRate);
     }
 
     static Vote forSupportedRefreshRates(List<SupportedModeData> supportedModes) {

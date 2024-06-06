@@ -235,7 +235,7 @@
     <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Veldu snið"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Persónulegt"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Einkasnið"</string>
     <string name="category_work" msgid="4014193632325996115">"Vinna"</string>
     <string name="category_private" msgid="4244892185452788977">"Lokað"</string>
     <string name="category_clone" msgid="1554511758987195974">"Afrit"</string>

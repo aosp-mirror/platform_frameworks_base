@@ -352,7 +352,7 @@ public class SystemConfig {
     @NonNull private final Set<String> mInitialNonStoppedSystemPackages = new ArraySet<>();
 
     // Which packages (key) are allowed to join particular SharedUid (value).
-    @NonNull private final Map<String, String> mPackageToSharedUidAllowList = new ArrayMap<>();
+    @NonNull private final ArrayMap<String, String> mPackageToSharedUidAllowList = new ArrayMap<>();
 
     // A map of preloaded package names and the path to its app metadata file path.
     private final ArrayMap<String, String> mAppMetadataFilePaths = new ArrayMap<>();
@@ -574,7 +574,7 @@ public class SystemConfig {
     }
 
     @NonNull
-    public Map<String, String> getPackageToSharedUidAllowList() {
+    public ArrayMap<String, String> getPackageToSharedUidAllowList() {
         return mPackageToSharedUidAllowList;
     }
 

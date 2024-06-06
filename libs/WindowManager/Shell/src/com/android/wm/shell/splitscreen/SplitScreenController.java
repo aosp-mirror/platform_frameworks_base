@@ -24,7 +24,6 @@ import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
-import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.common.MultiInstanceHelper.getComponent;
 import static com.android.wm.shell.common.MultiInstanceHelper.getShortcutComponent;
 import static com.android.wm.shell.common.MultiInstanceHelper.samePackage;
@@ -1241,8 +1240,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         @Override
         public void invalidate() {
             mController = null;
-            // Unregister the listener to ensure any registered binder death recipients are unlinked
+            // Unregister the listeners to ensure any binder death recipients are unlinked
             mListener.unregister();
+            mSelectListener.unregister();
         }
 
         @Override

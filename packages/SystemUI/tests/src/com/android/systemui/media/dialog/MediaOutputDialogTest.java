@@ -38,12 +38,12 @@ import android.os.UserHandle;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.FeatureFlagUtils;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -75,7 +75,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @MediumTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class MediaOutputDialogTest extends SysuiTestCase {
 

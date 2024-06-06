@@ -426,7 +426,7 @@ public class DozeSensors {
         }
 
         if (!anyListening) {
-            mSecureSettings.unregisterContentObserver(mSettingsObserver);
+            mSecureSettings.unregisterContentObserverSync(mSettingsObserver);
         } else if (!mSettingRegistered) {
             for (TriggerSensor s : mTriggerSensors) {
                 s.registerSettingsObserver(mSettingsObserver);
@@ -750,7 +750,7 @@ public class DozeSensors {
 
         public void registerSettingsObserver(ContentObserver settingsObserver) {
             if (mConfigured && !TextUtils.isEmpty(mSetting)) {
-                mSecureSettings.registerContentObserverForUser(
+                mSecureSettings.registerContentObserverForUserSync(
                         mSetting, mSettingsObserver, UserHandle.USER_ALL);
             }
         }

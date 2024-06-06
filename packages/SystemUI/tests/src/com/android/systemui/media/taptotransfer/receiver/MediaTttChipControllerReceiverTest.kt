@@ -23,13 +23,13 @@ import android.graphics.drawable.Drawable
 import android.media.MediaRoute2Info
 import android.os.Handler
 import android.os.PowerManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.testing.UiEventLoggerFake
@@ -59,7 +59,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     private lateinit var controllerReceiver: MediaTttChipControllerReceiver

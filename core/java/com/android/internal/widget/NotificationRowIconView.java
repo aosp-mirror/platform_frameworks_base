@@ -59,7 +59,7 @@ public class NotificationRowIconView extends CachingIconView {
     @Override
     protected void onFinishInflate() {
         // If showing the app icon, we don't need background or padding.
-        if (Flags.notificationsUseAppIcon()) {
+        if (Flags.notificationsUseAppIcon() || Flags.notificationsUseAppIconInRow()) {
             setPadding(0, 0, 0, 0);
             setBackground(null);
         }

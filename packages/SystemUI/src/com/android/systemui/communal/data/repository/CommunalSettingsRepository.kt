@@ -30,6 +30,7 @@ import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_D
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_FLAG
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_INVALID_USER
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_USER_SETTING
+import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -59,6 +60,9 @@ interface CommunalSettingsRepository {
 
     /** Keyguard widgets enabled state by Device Policy Manager for the specified user. */
     fun getAllowedByDevicePolicy(user: UserInfo): Flow<Boolean>
+
+    /** The type of background to use for the hub. Used to experiment with different backgrounds. */
+    fun getBackground(user: UserInfo): Flow<CommunalBackgroundType>
 }
 
 @SysUISingleton
@@ -126,6 +130,21 @@ constructor(
             .emitOnStart()
             .map { devicePolicyManager.areKeyguardWidgetsAllowed(user.id) }
 
+    override fun getBackground(user: UserInfo): Flow<CommunalBackgroundType> =
+        secureSettings
+            .observerFlow(userId = user.id, names = arrayOf(GLANCEABLE_HUB_BACKGROUND_SETTING))
+            .emitOnStart()
+            .map {
+                val intType =
+                    secureSettings.getIntForUser(
+                        GLANCEABLE_HUB_BACKGROUND_SETTING,
+                        CommunalBackgroundType.DEFAULT.value,
+                        user.id
+                    )
+                CommunalBackgroundType.entries.find { type -> type.value == intType }
+                    ?: CommunalBackgroundType.DEFAULT
+            }
+
     private fun getEnabledByUser(user: UserInfo): Flow<Boolean> =
         secureSettings
             .observerFlow(userId = user.id, names = arrayOf(Settings.Secure.GLANCEABLE_HUB_ENABLED))
@@ -141,6 +160,7 @@ constructor(
 
     companion object {
         const val GLANCEABLE_HUB_CONTENT_SETTING = "glanceable_hub_content_setting"
+        const val GLANCEABLE_HUB_BACKGROUND_SETTING = "glanceable_hub_background"
         private const val ENABLED_SETTING_DEFAULT = 1
     }
 }

@@ -92,7 +92,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     private final NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
     private final HeadsUpStyleProvider mHeadsUpStyleProvider;
 
-    private final NotificationContentInflaterLogger mLogger;
+    private final NotificationRowContentBinderLogger mLogger;
 
     @Inject
     NotificationContentInflater(
@@ -104,7 +104,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             SmartReplyStateInflater smartRepliesInflater,
             NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
             HeadsUpStyleProvider headsUpStyleProvider,
-            NotificationContentInflaterLogger logger) {
+            NotificationRowContentBinderLogger logger) {
         mRemoteViewCache = remoteViewCache;
         mRemoteInputManager = remoteInputManager;
         mConversationProcessor = conversationProcessor;
@@ -345,7 +345,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             Context packageContext,
             InflatedSmartReplyState previousSmartReplyState,
             SmartReplyStateInflater inflater,
-            NotificationContentInflaterLogger logger) {
+            NotificationRowContentBinderLogger logger) {
         boolean inflateContracted = (reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0
                 && result.newContentView != null;
         boolean inflateExpanded = (reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0
@@ -377,7 +377,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             ExpandableNotificationRow row,
             NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
             HeadsUpStyleProvider headsUpStyleProvider,
-            NotificationContentInflaterLogger logger) {
+            NotificationRowContentBinderLogger logger) {
         return TraceUtils.trace("NotificationContentInflater.createRemoteViews", () -> {
             InflationProgress result = new InflationProgress();
             final NotificationEntry entryForLogging = row.getEntry();
@@ -465,7 +465,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             ExpandableNotificationRow row,
             RemoteViews.InteractionHandler remoteViewClickHandler,
             @Nullable InflationCallback callback,
-            NotificationContentInflaterLogger logger) {
+            NotificationRowContentBinderLogger logger) {
         Trace.beginAsyncSection(APPLY_TRACE_METHOD, System.identityHashCode(row));
 
         NotificationContentView privateLayout = row.getPrivateLayout();
@@ -676,7 +676,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             NotificationViewWrapper existingWrapper,
             final HashMap<Integer, CancellationSignal> runningInflations,
             ApplyCallback applyCallback,
-            NotificationContentInflaterLogger logger) {
+            NotificationRowContentBinderLogger logger) {
         RemoteViews newContentView = applyCallback.getRemoteView();
         if (inflateSynchronously) {
             try {
@@ -845,7 +845,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     private static void handleInflationError(
             HashMap<Integer, CancellationSignal> runningInflations, Exception e,
             NotificationEntry notification, @Nullable InflationCallback callback,
-            NotificationContentInflaterLogger logger, String logContext) {
+            NotificationRowContentBinderLogger logger, String logContext) {
         Assert.isMainThread();
         logger.logAsyncTaskException(notification, logContext, e);
         runningInflations.values().forEach(CancellationSignal::cancel);
@@ -864,7 +864,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             @InflationFlag int reInflateFlags, NotifRemoteViewCache remoteViewCache,
             HashMap<Integer, CancellationSignal> runningInflations,
             @Nullable InflationCallback endListener, NotificationEntry entry,
-            ExpandableNotificationRow row, NotificationContentInflaterLogger logger) {
+            ExpandableNotificationRow row, NotificationRowContentBinderLogger logger) {
         Assert.isMainThread();
         if (!runningInflations.isEmpty()) {
             return false;
@@ -1080,7 +1080,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private final SmartReplyStateInflater mSmartRepliesInflater;
         private final NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
         private final HeadsUpStyleProvider mHeadsUpStyleProvider;
-        private final NotificationContentInflaterLogger mLogger;
+        private final NotificationRowContentBinderLogger mLogger;
 
         private AsyncInflationTask(
                 Executor inflationExecutor,
@@ -1099,7 +1099,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 SmartReplyStateInflater smartRepliesInflater,
                 NotifLayoutInflaterFactory.Provider notifLayoutInflaterFactoryProvider,
                 HeadsUpStyleProvider headsUpStyleProvider,
-                NotificationContentInflaterLogger logger) {
+                NotificationRowContentBinderLogger logger) {
             mEntry = entry;
             mRow = row;
             mInflationExecutor = inflationExecutor;

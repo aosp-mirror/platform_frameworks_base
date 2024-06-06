@@ -21,7 +21,9 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -74,6 +76,43 @@ public class DataType implements AslMarshallable {
         public String toString() {
             return this.name().toLowerCase();
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        DataType objAsDataType = (DataType) obj;
+        return Objects.equals(this.mDataTypeName, objAsDataType.mDataTypeName)
+                && Objects.equals(
+                        new HashSet<>(this.mPurposes), new HashSet<>(objAsDataType.mPurposes))
+                && Objects.equals(this.mIsCollectionOptional, objAsDataType.mIsCollectionOptional)
+                && Objects.equals(this.mIsSharingOptional, objAsDataType.mIsSharingOptional)
+                && Objects.equals(this.mEphemeral, objAsDataType.mEphemeral);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 1;
+        int prime = 31;
+        result =
+                (prime * result) + (this.mDataTypeName != null ? this.mDataTypeName.hashCode() : 0);
+        result =
+                (prime * result)
+                        + (this.mPurposes != null ? new HashSet<>(this.mPurposes).hashCode() : 0);
+        result =
+                (prime * result)
+                        + (this.mIsCollectionOptional != null
+                                ? this.mIsCollectionOptional.hashCode()
+                                : 0);
+        result =
+                (prime * result)
+                        + (this.mIsSharingOptional != null
+                                ? this.mIsSharingOptional.hashCode()
+                                : 0);
+        result = (prime * result) + (this.mEphemeral != null ? this.mEphemeral.hashCode() : 0);
+        return result;
     }
 
     private final String mDataTypeName;

@@ -16,8 +16,14 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.os.fakeExecutorHandler
 import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
 import com.android.systemui.kosmos.Kosmos
 
 val Kosmos.keyguardBlueprintViewModel by
-    Kosmos.Fixture { KeyguardBlueprintViewModel(keyguardBlueprintInteractor) }
+    Kosmos.Fixture {
+        KeyguardBlueprintViewModel(
+            fakeExecutorHandler,
+            keyguardBlueprintInteractor,
+        )
+    }
