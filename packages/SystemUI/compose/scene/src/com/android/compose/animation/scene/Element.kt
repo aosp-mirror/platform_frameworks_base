@@ -596,12 +596,9 @@ private fun shouldPlaceElement(
         return false
     }
 
-    // Place the element if it is not shared or if the current scene is the one that is currently
-    // overscrolling with [OverscrollSpec].
+    // Place the element if it is not shared.
     if (
-        transition.fromScene !in element.sceneStates ||
-            transition.toScene !in element.sceneStates ||
-            transition.currentOverscrollSpec?.scene == scene.key
+        transition.fromScene !in element.sceneStates || transition.toScene !in element.sceneStates
     ) {
         return true
     }
@@ -611,7 +608,7 @@ private fun shouldPlaceElement(
         return true
     }
 
-    return shouldDrawOrComposeSharedElement(
+    return shouldPlaceOrComposeSharedElement(
         layoutImpl,
         scene.key,
         element.key,
@@ -619,12 +616,18 @@ private fun shouldPlaceElement(
     )
 }
 
-internal fun shouldDrawOrComposeSharedElement(
+internal fun shouldPlaceOrComposeSharedElement(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: SceneKey,
     element: ElementKey,
     transition: TransitionState.Transition,
 ): Boolean {
+    // If we are overscrolling, only place/compose the element in the overscrolling scene.
+    val overscrollScene = transition.currentOverscrollSpec?.scene
+    if (overscrollScene != null) {
+        return scene == overscrollScene
+    }
+
     val scenePicker = element.scenePicker
     val fromScene = transition.fromScene
     val toScene = transition.toScene
@@ -637,7 +640,7 @@ internal fun shouldDrawOrComposeSharedElement(
             toSceneZIndex = layoutImpl.scenes.getValue(toScene).zIndex,
         ) ?: return false
 
-    return pickedScene == scene || transition.currentOverscrollSpec?.scene == scene
+    return pickedScene == scene
 }
 
 private fun isSharedElementEnabled(
